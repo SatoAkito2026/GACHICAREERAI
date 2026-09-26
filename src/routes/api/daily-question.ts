@@ -211,17 +211,15 @@ export const Route = createFileRoute("/api/daily-question")({
             const candidates = await collectUnansweredCandidates(supabase, userId, dbMode, 5, plan);
             selected = pickRoundRobin(candidates, 5);
             if (selected.length > 0) {
-              await supabase
-                .from("daily_question_assignments")
-                .upsert(
-                  {
-                    user_id: userId,
-                    mode: dbMode,
-                    assignment_date: date,
-                    question_ids: selected.map((q) => q.id),
-                  },
-                  { onConflict: "user_id,mode,assignment_date" },
-                );
+              await supabase.from("daily_question_assignments").upsert(
+                {
+                  user_id: userId,
+                  mode: dbMode,
+                  assignment_date: date,
+                  question_ids: selected.map((q) => q.id),
+                },
+                { onConflict: "user_id,mode,assignment_date" },
+              );
             }
           }
         }

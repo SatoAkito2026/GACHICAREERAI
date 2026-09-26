@@ -891,10 +891,28 @@ function EntrySheetEditor({
     }
   })();
 
+  // フック（useState）の数が描画ごとに変わらないよう、編集フォームは別コンポーネントに分ける
   if (parsedInitial.customFields) {
     return <CustomFieldsEditor doc={doc} initial={parsedInitial} onSaved={onSaved} />;
   }
+  return <StandardFieldsEditor doc={doc} initial={parsedInitial} onSaved={onSaved} />;
+}
 
+/** 志望動機・強み・資格・趣味の4項目を編集するフォーム */
+function StandardFieldsEditor({
+  doc,
+  initial: parsedInitial,
+  onSaved,
+}: {
+  doc: SavedDoc;
+  initial: {
+    motivation?: unknown;
+    strengths?: unknown;
+    qualifications?: unknown;
+    hobbies?: unknown;
+  };
+  onSaved: (updated: SavedDoc) => void;
+}) {
   const [motivation, setMotivation] = useState(toSafeString(parsedInitial.motivation));
   const [strengths, setStrengths] = useState(toSafeString(parsedInitial.strengths));
   const [qualifications, setQualifications] = useState(toSafeString(parsedInitial.qualifications));

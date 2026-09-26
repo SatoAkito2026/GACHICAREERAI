@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -375,14 +375,19 @@ function CandidatesPage() {
                       </div>
                     </div>
                   )}
-                  <Link
-                    to="/business/company/candidate-detail/$interviewId"
-                    params={{ interviewId: c.interviewId }}
+                  {/* 録画の購入ページはまだ無いので、押せない「準備中」表示にしている */}
+                  <span
                     className="mt-2 inline-block rounded-full px-5 py-2 text-[12px]"
-                    style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 700 }}
+                    style={{
+                      background: "#2A2A2A",
+                      color: "#888888",
+                      fontWeight: 700,
+                      cursor: "not-allowed",
+                    }}
+                    aria-disabled="true"
                   >
-                    この人の録画を見る（購入）→
-                  </Link>
+                    この人の録画を見る（購入）は準備中です
+                  </span>
                 </div>
               )}
             </div>
