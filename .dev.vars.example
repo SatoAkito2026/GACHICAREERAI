@@ -1,0 +1,18 @@
+# ローカル開発用のサーバー側シークレット（`cp .dev.vars.example .dev.vars`）。
+# 本番は `npx wrangler secret put <NAME>` で同じ名前を登録する。
+# 公開値（SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY / APP_URL）は wrangler.jsonc の vars にある。
+
+# Supabase（全権限キー。絶対に公開しない）
+SUPABASE_SERVICE_ROLE_KEY=
+
+# AI
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+SIMLI_API_KEY=
+
+# 決済
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# メール送信
+RESEND_API_KEY=

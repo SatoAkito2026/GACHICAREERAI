@@ -1,0 +1,1 @@
+ALTER TABLE public.interview_summaries ADD COLUMN IF NOT EXISTS actor_verification jsonb;
