@@ -4,8 +4,8 @@
  * - 口: 音声から作った口の形（avatar-voice.ts / lipsync.ts）に合わせて網目を動かす。
  *   参考動画から学習した「口を開けたとき・横に広げたときの顔全体の動き方」を使うので、あご・ほっぺ・唇が一緒に動く
  *   開いた唇の間には、口を開けた写真から取った口の中（歯・舌）を貼る
- * - 首の傾き・位置・まばたき・眉: 参考動画の聞いている場面から取り出した動きの数値で動かす
- *   まばたきは写真を重ねず、上まぶたの網目を下まぶたまで下ろして閉じる
+ * - 首の傾き・位置: 参考動画の聞いている場面から取り出した動きの数値で動かす
+ * - まばたき: 目のまわりだけを、同じ構図で目を閉じた写真に 0.1 秒ほどで切り替える（途中の重なりが見えないよう素早く）
  * - 体と背景は動かさない
  */
 import { useEffect, useRef } from "react";
@@ -16,10 +16,16 @@ const ASSETS = {
   rig: "/avatar/rig.json",
   base: "/avatar/base.webp",
   mouth: "/avatar/mouth-inside.webp",
+  blink: "/avatar/eyes-closed.webp",
 } as const;
 
 /** 縦長の画面で中心に残す位置（写真の幅を 1 とした比率） */
 const FOCUS_X = 0.524;
+// まばたきで目を閉じた写真に切り替える範囲（顔の網目の点番号）
+const EYES = [
+  [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7],
+  [263, 466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249],
+];
 
 type Rig = {
   size: [number, number];
@@ -28,15 +34,14 @@ type Rig = {
   weights: number[];
   openField: [number, number][];
   widthField: [number, number][];
-  browField: [number, number][];
-  blinkField: [number, number][];
   triangles: [number, number, number][];
   innerLips: number[];
   mouthUv: [number, number][];
   pivot: [number, number];
+  blinkOffset: [number, number];
   visemes: VisemeShapes;
-  /** [傾き(度), 拡大率, 横ずれ, 縦ずれ, まばたき 0〜1, 眉] */
-  idle: [number, number, number, number, number, number][];
+  /** [傾き(度), 拡大率, 横ずれ, 縦ずれ] */
+  idle: [number, number, number, number][];
 };
 
 type Props = {
@@ -81,14 +86,10 @@ const MESH_VERT = `#version 300 es
 in vec2 aRest;
 in vec2 aOpen;
 in vec2 aWidth;
-in vec2 aBrow;
-in vec2 aBlink;
 in float aWeight;
 in vec2 aTex;
 uniform float uOpen;
 uniform float uWidth;
-uniform float uBrow;
-uniform float uBlink;
 uniform vec2 uPivot;
 uniform float uAng;
 uniform float uScale;
@@ -98,7 +99,7 @@ uniform vec2 uView;    // 画面の左端に来る写真の x、画面に映る�
 out vec2 vUv;
 out vec2 vTex;
 void main() {
-  vec2 p = aRest + aOpen * uOpen + aWidth * uWidth + aBrow * uBrow + aBlink * uBlink;
+  vec2 p = aRest + aOpen * uOpen + aWidth * uWidth;
   // 頭の傾き・拡大・ずれ（網目の点ごとの重みで、首から下はほとんど動かさない）
   vec2 d = (p - uPivot) * vec2(uAspect, 1.0);
   float c = cos(uAng);
@@ -114,9 +115,22 @@ const FACE_FRAG = `#version 300 es
 precision highp float;
 in vec2 vUv;
 uniform sampler2D uBase;
+uniform sampler2D uBlinkTex;
+uniform float uBlink;
+uniform vec2 uBlinkOff;
+uniform vec4 uEye0;
+uniform vec4 uEye1;
 out vec4 outColor;
+float mask(vec2 p, vec4 e) {
+  return 1.0 - smoothstep(0.55, 1.0, length((p - e.xy) / e.zw));
+}
 void main() {
-  outColor = vec4(texture(uBase, vUv).rgb, 1.0);
+  vec3 col = texture(uBase, vUv).rgb;
+  if (uBlink > 0.0) {
+    float m = max(mask(vUv, uEye0), mask(vUv, uEye1));
+    col = mix(col, texture(uBlinkTex, vUv + uBlinkOff).rgb, m * uBlink);
+  }
+  outColor = vec4(col, 1.0);
 }`;
 
 const MOUTH_FRAG = `#version 300 es
@@ -212,11 +226,16 @@ function startRenderer(
     fetch(ASSETS.rig).then((r) => r.json() as Promise<Rig>),
     loadImage(ASSETS.base),
     loadImage(ASSETS.mouth),
+    loadImage(ASSETS.blink),
   ])
-    .then(([rig, baseImg, mouthImg]) => {
+    .then(([rig, baseImg, mouthImg, blinkImg]) => {
       if (!running) return;
       getVoice()?.setVisemeShapes(rig.visemes);
-      const textures = { base: texture(baseImg), mouth: texture(mouthImg) };
+      const textures = {
+        base: texture(baseImg),
+        mouth: texture(mouthImg),
+        blink: texture(blinkImg),
+      };
       const draw = setupScene(gl, rig, faceProg, mouthProg, bgProg, textures, cleanups);
       onReady();
 
@@ -258,7 +277,7 @@ function setupScene(
   faceProg: WebGLProgram,
   mouthProg: WebGLProgram,
   bgProg: WebGLProgram,
-  tex: { base: WebGLTexture; mouth: WebGLTexture },
+  tex: { base: WebGLTexture; mouth: WebGLTexture; blink: WebGLTexture },
   cleanups: (() => void)[],
 ) {
   const [W, H] = rig.size;
@@ -274,8 +293,6 @@ function setupScene(
       ...rig.vertices[i],
       ...rig.openField[i],
       ...rig.widthField[i],
-      ...rig.browField[i],
-      ...rig.blinkField[i],
       rig.weights[i],
       ...texOf(n),
     ]);
@@ -291,7 +308,7 @@ function setupScene(
     const vbo = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    const stride = 13 * 4;
+    const stride = 9 * 4;
     const attr = (name: string, size: number, offset: number) => {
       const loc = gl.getAttribLocation(prog, name);
       if (loc < 0) return;
@@ -301,10 +318,8 @@ function setupScene(
     attr("aRest", 2, 0);
     attr("aOpen", 2, 2);
     attr("aWidth", 2, 4);
-    attr("aBrow", 2, 6);
-    attr("aBlink", 2, 8);
-    attr("aWeight", 1, 10);
-    attr("aTex", 2, 11);
+    attr("aWeight", 1, 6);
+    attr("aTex", 2, 7);
     const ibo = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
@@ -351,8 +366,6 @@ function setupScene(
     return {
       open: u("uOpen"),
       width: u("uWidth"),
-      brow: u("uBrow"),
-      blink: u("uBlink"),
       pivot: u("uPivot"),
       ang: u("uAng"),
       scale: u("uScale"),
@@ -363,8 +376,24 @@ function setupScene(
   };
   const faceU = uniforms(faceProg);
   const mouthU = uniforms(mouthProg);
+  // まばたきで切り替える目の範囲（目の輪郭を少し広げ、まつげが入るよう上にずらす）
+  const eyeRect = (ids: number[]) => {
+    const xs = ids.map((i) => rig.vertices[i][0]);
+    const ys = ids.map((i) => rig.vertices[i][1]);
+    const rx = ((Math.max(...xs) - Math.min(...xs)) / 2) * 1.45;
+    const ry = ((Math.max(...ys) - Math.min(...ys)) / 2) * 2.8;
+    const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
+    const cy = (Math.max(...ys) + Math.min(...ys)) / 2 - ry * 0.15;
+    return [cx, cy, rx, ry] as const;
+  };
+  const [eye0, eye1] = EYES.map(eyeRect);
   gl.useProgram(faceProg);
   gl.uniform1i(gl.getUniformLocation(faceProg, "uBase"), 0);
+  gl.uniform1i(gl.getUniformLocation(faceProg, "uBlinkTex"), 2);
+  gl.uniform2f(gl.getUniformLocation(faceProg, "uBlinkOff"), ...rig.blinkOffset);
+  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye0"), ...eye0);
+  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye1"), ...eye1);
+  const uBlink = gl.getUniformLocation(faceProg, "uBlink");
   gl.useProgram(mouthProg);
   gl.uniform1i(gl.getUniformLocation(mouthProg, "uMouth"), 1);
   gl.useProgram(bgProg);
@@ -381,6 +410,23 @@ function setupScene(
     return a.map((v, n) => v * (1 - k) + b[n] * k);
   };
 
+  // まばたき: 2.5〜6秒おきに、0.14秒で閉じて開く（途中の重なりが目に見えないよう素早く切り替える）
+  const BLINK_TIME = 0.14;
+  let nextBlink = 1.5 + Math.random() * 2;
+  let blinkStart = -1;
+  const blinkAmount = (t: number) => {
+    if (blinkStart < 0 && t > nextBlink) blinkStart = t;
+    if (blinkStart < 0) return 0;
+    const p = (t - blinkStart) / BLINK_TIME;
+    if (p >= 1) {
+      blinkStart = -1;
+      nextBlink = t + 2.5 + Math.random() * 3.5;
+      return 0;
+    }
+    const ease = (v: number) => v * v * (3 - 2 * v);
+    return p < 0.35 ? ease(p / 0.35) : p < 0.6 ? 1 : 1 - ease((p - 0.6) / 0.4);
+  };
+
   return (cw: number, ch: number, t: number, open: number, width: number) => {
     gl.viewport(0, 0, cw, ch);
     const ca = cw / ch;
@@ -393,6 +439,8 @@ function setupScene(
     gl.bindTexture(gl.TEXTURE_2D, tex.base);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, tex.mouth);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, tex.blink);
 
     if (visible > 1) {
       gl.useProgram(bgProg);
@@ -404,14 +452,12 @@ function setupScene(
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
-    const [ang, scale, tx, ty, blink, brow] = sample(t);
+    const [ang, scale, tx, ty] = sample(t);
     // 話している間は、口の開きに合わせてわずかにうなずく
     const nod = open * 0.012;
     const set = (u: ReturnType<typeof uniforms>) => {
       gl.uniform1f(u.open, open);
       gl.uniform1f(u.width, width);
-      gl.uniform1f(u.brow, brow);
-      gl.uniform1f(u.blink, blink);
       gl.uniform2f(u.pivot, ...rig.pivot);
       gl.uniform1f(u.ang, (ang * Math.PI) / 180);
       gl.uniform1f(u.scale, scale);
@@ -428,6 +474,7 @@ function setupScene(
 
     gl.useProgram(faceProg);
     set(faceU);
+    gl.uniform1f(uBlink, blinkAmount(t));
     gl.bindVertexArray(face.vao);
     gl.drawElements(gl.TRIANGLES, face.count, gl.UNSIGNED_SHORT, 0);
     gl.bindVertexArray(null);
