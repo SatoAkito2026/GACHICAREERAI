@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4 + shadcn/ui（`src/components/ui/`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターはAI生成の動画2本（`public/avatar/idle.mp4`＝聞いている、`talk.mp4`＝話している。Kling で生成）を、AIの音声再生中だけ話している動画に切り替えて表示する（`src/components/InterviewerAvatar.tsx`、音声再生は `src/lib/avatar-voice.ts`）。動画を差し替えるときは同じ構図・背景で作り、H.264 の mp4 にする
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。AI生成の面接官動画（Kling）を素材に、聞いている動画（`public/avatar/idle.*`）をループ再生し、AIの音声の大きさ（`src/lib/avatar-voice.ts`）に合わせて同じ動画から切り出した口の画像（`public/avatar/mouths.png`、4段階）を、フレームごとの顔のずれ（`src/components/interviewer-avatar-data.ts`）に追従させて canvas に重ねる。素材は `scripts/avatar/build_avatar.py` で元動画から再生成する（元動画を差し替えたら、同スクリプト内の区間・口のコマ・座標も見直す）
 - **決済**: Stripe / **メール**: Resend
 
 ## コマンド
