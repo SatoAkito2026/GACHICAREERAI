@@ -4,6 +4,8 @@
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  // 試し用の *.workers.dev URL を有効にする（本番ドメインを設定した後も確認用に残す）
+  "workers_dev": true,
   "observability": { "enabled": true },
   // 公開してよい値だけをここに書く。秘密鍵は `wrangler secret put <NAME>` で登録する（.env.example 参照）
   "vars": {

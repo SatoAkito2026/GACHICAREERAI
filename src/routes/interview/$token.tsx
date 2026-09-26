@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { InterviewerAvatar, type AvatarStyle } from "@/components/InterviewerAvatar";
+import { InterviewerAvatar } from "@/components/InterviewerAvatar";
 import { getAvatarVoice } from "@/lib/avatar-voice";
 
 export const Route = createFileRoute("/interview/$token")({
@@ -733,7 +733,6 @@ function LiveScreen({
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [avatarReady, setAvatarReady] = useState(false);
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>("neutral");
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
@@ -851,9 +850,7 @@ function LiveScreen({
         aiText: string;
         audioBase64: string | null;
         isEnded: boolean;
-        avatarStyle?: AvatarStyle;
       };
-      if (data.avatarStyle && data.avatarStyle !== avatarStyle) setAvatarStyle(data.avatarStyle);
 
       const newMessages: Message[] = [...history];
       if (candidateText !== "（面接開始）") {
@@ -1116,11 +1113,7 @@ function LiveScreen({
           >
             AI面接官
           </span>
-          <InterviewerAvatar
-            voice={voice}
-            style={avatarStyle}
-            onReady={() => setAvatarReady(true)}
-          />
+          <InterviewerAvatar voice={voice} onReady={() => setAvatarReady(true)} />
           {!avatarReady && (
             <div
               style={{
