@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4 + shadcn/ui（`src/components/ui/`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは同じ構図の写真4枚（`public/avatar/`：口を閉じた／少し開けた／大きく開けた／目を閉じた、AI生成画像）を WebGL で部分的に重ねて口パク・まばたきさせる自前実装（`src/components/InterviewerAvatar.tsx`、口パク用の音声解析は `src/lib/avatar-voice.ts`）。写真を差し替えるときは同ファイルの `FACE`（目・口の座標、目を閉じた写真のずれ）も合わせる
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターはAI生成の動画2本（`public/avatar/idle.mp4`＝聞いている、`talk.mp4`＝話している。Kling で生成）を、AIの音声再生中だけ話している動画に切り替えて表示する（`src/components/InterviewerAvatar.tsx`、音声再生は `src/lib/avatar-voice.ts`）。動画を差し替えるときは同じ構図・背景で作り、H.264 の mp4 にする
 - **決済**: Stripe / **メール**: Resend
 
 ## コマンド
