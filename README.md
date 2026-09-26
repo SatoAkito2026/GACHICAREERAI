@@ -6,7 +6,6 @@ AI面接練習・面接支援・書類選考の Web アプリ。TanStack Start +
 
 ```bash
 npm install
-cp .env.example .env            # VITE_SUPABASE_PUBLISHABLE_KEY を記入
 cp .dev.vars.example .dev.vars  # サーバー側の秘密鍵を記入
 npm run dev                     # http://localhost:8080
 ```

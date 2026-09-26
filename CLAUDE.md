@@ -38,7 +38,7 @@ npm run deploy     # build + wrangler deploy
 ## 実装ルール
 
 - **秘密鍵はサーバー側だけで使う**。APIルート内で `process.env.XXX` から読む。ブラウザに出るコード（ページ・コンポーネント）に API キーを書かない
-- ブラウザに渡してよい値は `VITE_` プレフィックス付き（`.env`）のみ
+- ブラウザに渡してよい値は `VITE_` プレフィックス付き（`.env.production` / `.env.development`）のみ
 - ログインユーザー向けAPIは `verifyApiUser(request)` でトークン検証してから処理する
 - 招待トークン系API（面接画面から呼ばれるもの）は `interview_invitations` でトークンの有効性・期限を確認する
 - DB 操作はサーバー側で `createClient(getSupabaseUrl(), getServiceRoleKey())`（RLSをバイパスするので、必ずユーザーIDで絞り込む）
@@ -49,7 +49,7 @@ npm run deploy     # build + wrangler deploy
 
 | 名前 | 用途 | 置き場所 |
 |---|---|---|
-| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PROJECT_ID` | ブラウザ用（ビルド時に埋め込み） | `.env` |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PROJECT_ID` | ブラウザ用（ビルド時に埋め込み） | `.env.production` / `.env.development`（コミット済み） |
 | `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `APP_URL` | サーバー用の公開値 | `wrangler.jsonc` の `vars` |
 | `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SIMLI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
 
