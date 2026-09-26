@@ -5,6 +5,7 @@
  *   参考動画から学習した「口を開けたとき・横に広げたときの顔全体の動き方」を使うので、あご・ほっぺ・唇が一緒に動く
  *   開いた唇の間には、口を開けた写真から取った口の中（歯・舌）を貼る
  * - 首の傾き・位置・まばたき・眉: 参考動画の聞いている場面から取り出した動きの数値で動かす
+ *   まばたきは写真を重ねず、上まぶたの網目を下まぶたまで下ろして閉じる
  * - 体と背景は動かさない
  */
 import { useEffect, useRef } from "react";
@@ -14,17 +15,11 @@ import type { VisemeShapes } from "@/lib/lipsync";
 const ASSETS = {
   rig: "/avatar/rig.json",
   base: "/avatar/base.webp",
-  blink: "/avatar/eyes-closed.webp",
   mouth: "/avatar/mouth-inside.webp",
 } as const;
 
 /** 縦長の画面で中心に残す位置（写真の幅を 1 とした比率） */
 const FOCUS_X = 0.524;
-// まばたきで目を閉じた写真に切り替える範囲（顔の網目の点番号）
-const EYES = [
-  [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7],
-  [263, 466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249],
-];
 
 type Rig = {
   size: [number, number];
@@ -34,10 +29,10 @@ type Rig = {
   openField: [number, number][];
   widthField: [number, number][];
   browField: [number, number][];
+  blinkField: [number, number][];
   triangles: [number, number, number][];
   innerLips: number[];
   mouthUv: [number, number][];
-  blinkOffset: [number, number];
   pivot: [number, number];
   visemes: VisemeShapes;
   /** [傾き(度), 拡大率, 横ずれ, 縦ずれ, まばたき 0〜1, 眉] */
@@ -87,11 +82,13 @@ in vec2 aRest;
 in vec2 aOpen;
 in vec2 aWidth;
 in vec2 aBrow;
+in vec2 aBlink;
 in float aWeight;
 in vec2 aTex;
 uniform float uOpen;
 uniform float uWidth;
 uniform float uBrow;
+uniform float uBlink;
 uniform vec2 uPivot;
 uniform float uAng;
 uniform float uScale;
@@ -101,7 +98,7 @@ uniform vec2 uView;    // 画面の左端に来る写真の x、画面に映る�
 out vec2 vUv;
 out vec2 vTex;
 void main() {
-  vec2 p = aRest + aOpen * uOpen + aWidth * uWidth + aBrow * uBrow;
+  vec2 p = aRest + aOpen * uOpen + aWidth * uWidth + aBrow * uBrow + aBlink * uBlink;
   // 頭の傾き・拡大・ずれ（網目の点ごとの重みで、首から下はほとんど動かさない）
   vec2 d = (p - uPivot) * vec2(uAspect, 1.0);
   float c = cos(uAng);
@@ -117,22 +114,9 @@ const FACE_FRAG = `#version 300 es
 precision highp float;
 in vec2 vUv;
 uniform sampler2D uBase;
-uniform sampler2D uBlinkTex;
-uniform float uBlink;
-uniform vec2 uBlinkOff;
-uniform vec4 uEye0;
-uniform vec4 uEye1;
 out vec4 outColor;
-float mask(vec2 p, vec4 e) {
-  return 1.0 - smoothstep(0.55, 1.0, length((p - e.xy) / e.zw));
-}
 void main() {
-  vec3 col = texture(uBase, vUv).rgb;
-  if (uBlink > 0.0) {
-    float m = max(mask(vUv, uEye0), mask(vUv, uEye1));
-    col = mix(col, texture(uBlinkTex, vUv + uBlinkOff).rgb, m * uBlink);
-  }
-  outColor = vec4(col, 1.0);
+  outColor = vec4(texture(uBase, vUv).rgb, 1.0);
 }`;
 
 const MOUTH_FRAG = `#version 300 es
@@ -227,17 +211,12 @@ function startRenderer(
   Promise.all([
     fetch(ASSETS.rig).then((r) => r.json() as Promise<Rig>),
     loadImage(ASSETS.base),
-    loadImage(ASSETS.blink),
     loadImage(ASSETS.mouth),
   ])
-    .then(([rig, baseImg, blinkImg, mouthImg]) => {
+    .then(([rig, baseImg, mouthImg]) => {
       if (!running) return;
       getVoice()?.setVisemeShapes(rig.visemes);
-      const textures = {
-        base: texture(baseImg),
-        blink: texture(blinkImg),
-        mouth: texture(mouthImg),
-      };
+      const textures = { base: texture(baseImg), mouth: texture(mouthImg) };
       const draw = setupScene(gl, rig, faceProg, mouthProg, bgProg, textures, cleanups);
       onReady();
 
@@ -279,7 +258,7 @@ function setupScene(
   faceProg: WebGLProgram,
   mouthProg: WebGLProgram,
   bgProg: WebGLProgram,
-  tex: { base: WebGLTexture; blink: WebGLTexture; mouth: WebGLTexture },
+  tex: { base: WebGLTexture; mouth: WebGLTexture },
   cleanups: (() => void)[],
 ) {
   const [W, H] = rig.size;
@@ -296,6 +275,7 @@ function setupScene(
       ...rig.openField[i],
       ...rig.widthField[i],
       ...rig.browField[i],
+      ...rig.blinkField[i],
       rig.weights[i],
       ...texOf(n),
     ]);
@@ -311,7 +291,7 @@ function setupScene(
     const vbo = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    const stride = 11 * 4;
+    const stride = 13 * 4;
     const attr = (name: string, size: number, offset: number) => {
       const loc = gl.getAttribLocation(prog, name);
       if (loc < 0) return;
@@ -322,8 +302,9 @@ function setupScene(
     attr("aOpen", 2, 2);
     attr("aWidth", 2, 4);
     attr("aBrow", 2, 6);
-    attr("aWeight", 1, 8);
-    attr("aTex", 2, 9);
+    attr("aBlink", 2, 8);
+    attr("aWeight", 1, 10);
+    attr("aTex", 2, 11);
     const ibo = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
@@ -365,24 +346,13 @@ function setupScene(
     gl.deleteBuffer(bgVbo);
   });
 
-  // まばたきで切り替える目の範囲（目の輪郭を少し広げ、まつげが入るよう上にずらす）
-  const eyeRect = (ids: number[]) => {
-    const xs = ids.map((i) => rig.vertices[i][0]);
-    const ys = ids.map((i) => rig.vertices[i][1]);
-    const rx = ((Math.max(...xs) - Math.min(...xs)) / 2) * 1.35;
-    const ry = ((Math.max(...ys) - Math.min(...ys)) / 2) * 2.6;
-    const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
-    const cy = (Math.max(...ys) + Math.min(...ys)) / 2 - ry * 0.2;
-    return [cx, cy, rx, ry] as const;
-  };
-  const eyes = EYES.map(eyeRect);
-
   const uniforms = (prog: WebGLProgram) => {
     const u = (n: string) => gl.getUniformLocation(prog, n);
     return {
       open: u("uOpen"),
       width: u("uWidth"),
       brow: u("uBrow"),
+      blink: u("uBlink"),
       pivot: u("uPivot"),
       ang: u("uAng"),
       scale: u("uScale"),
@@ -395,13 +365,8 @@ function setupScene(
   const mouthU = uniforms(mouthProg);
   gl.useProgram(faceProg);
   gl.uniform1i(gl.getUniformLocation(faceProg, "uBase"), 0);
-  gl.uniform1i(gl.getUniformLocation(faceProg, "uBlinkTex"), 1);
-  gl.uniform2f(gl.getUniformLocation(faceProg, "uBlinkOff"), ...rig.blinkOffset);
-  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye0"), ...eyes[0]);
-  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye1"), ...eyes[1]);
-  const uBlink = gl.getUniformLocation(faceProg, "uBlink");
   gl.useProgram(mouthProg);
-  gl.uniform1i(gl.getUniformLocation(mouthProg, "uMouth"), 2);
+  gl.uniform1i(gl.getUniformLocation(mouthProg, "uMouth"), 1);
   gl.useProgram(bgProg);
   gl.uniform1i(gl.getUniformLocation(bgProg, "uBase"), 0);
   const uCanvasAspect = gl.getUniformLocation(bgProg, "uCanvasAspect");
@@ -427,8 +392,6 @@ function setupScene(
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, tex.base);
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, tex.blink);
-    gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, tex.mouth);
 
     if (visible > 1) {
@@ -448,6 +411,7 @@ function setupScene(
       gl.uniform1f(u.open, open);
       gl.uniform1f(u.width, width);
       gl.uniform1f(u.brow, brow);
+      gl.uniform1f(u.blink, blink);
       gl.uniform2f(u.pivot, ...rig.pivot);
       gl.uniform1f(u.ang, (ang * Math.PI) / 180);
       gl.uniform1f(u.scale, scale);
@@ -464,7 +428,6 @@ function setupScene(
 
     gl.useProgram(faceProg);
     set(faceU);
-    gl.uniform1f(uBlink, blink);
     gl.bindVertexArray(face.vao);
     gl.drawElements(gl.TRIANGLES, face.count, gl.UNSIGNED_SHORT, 0);
     gl.bindVertexArray(null);

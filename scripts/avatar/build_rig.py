@@ -102,12 +102,55 @@ def oval_loop():
     return loop
 
 
+# まぶた（上・下）の点。目頭・目尻は動かさない
+LIDS = [
+    ([246, 161, 160, 159, 158, 157, 173], [7, 163, 144, 145, 153, 154, 155]),
+    ([466, 388, 387, 386, 385, 384, 398], [249, 390, 373, 374, 380, 381, 382]),
+]
+IRIS = [[468, 469, 470, 471, 472], [473, 474, 475, 476, 477]]
+
+
+def blink_field(base):
+    """目を完全に閉じたときの各点の動き。上まぶたを下まぶたまで下ろし、上の皮膚をなめらかに引っ張る"""
+    field = np.zeros_like(base)
+    for (upper, lower), iris in zip(LIDS, IRIS):
+        low = base[lower]
+        order = np.argsort(low[:, 0])
+        lx, ly = low[order, 0], low[order, 1]
+        height = np.ptp(base[upper + lower][:, 1])
+        close_y = lambda x: np.interp(x, lx, ly) - height * 0.08
+        moves = {}
+        for i in upper:
+            moves[i] = close_y(base[i][0]) - base[i][1]
+        # 黒目も下まぶたに寄せて、目の中の三角形ごとつぶす
+        for i in iris:
+            moves[i] = close_y(base[i][0]) - base[i][1]
+        # 下まぶたはわずかに上がる
+        for i in lower:
+            moves[i] = -height * 0.08
+        for i, dy in moves.items():
+            field[i] = [0.0, dy]
+        # 上まぶたより上の皮膚（眉の手前まで）は、近いほど一緒に下りる
+        up = base[upper]
+        cx0, cx1 = base[upper][:, 0].min() - height, base[upper][:, 0].max() + height
+        for v in range(len(base)):
+            if v in moves:
+                continue
+            x, y = base[v]
+            if not (cx0 < x < cx1) or y > up[:, 1].max():
+                continue
+            d = np.linalg.norm(up - base[v], axis=1)
+            j = int(np.argmin(d))
+            w = np.exp(-((d[j] / (height * 1.1)) ** 2)) * 0.75
+            field[v] = [0.0, moves[upper[j]] * w]
+    return field
+
+
 def main():
     video, ffmpeg, open_photo = sys.argv[1], sys.argv[2], sys.argv[3]
     base_img = cv2.imread(str(AVATAR / "base.webp"))
     H, W = base_img.shape[:2]
     base = detect(base_img)
-    closed = detect(cv2.imread(str(AVATAR / "eyes-closed.webp")))
     open_img = cv2.imread(open_photo)
     opened = detect(open_img)
     eyew = np.linalg.norm(base[33] - base[263])
@@ -147,7 +190,7 @@ def main():
     D = (disp - base_g).reshape(len(disp), -1)
     coef, *_ = np.linalg.lstsq(X, D, rcond=None)  # 4 x (478*2)
     fields = coef.reshape(4, -1, 2) * k  # 写真のピクセル単位（特徴量 1 あたり）
-    open_field, width_field, _blink_field, brow_field = fields
+    open_field, width_field, _blink, brow_field = fields
 
     # ---- 網目（顔 + 外側） ----
     loop = oval_loop()
@@ -157,6 +200,8 @@ def main():
     fo = [open_field[i] for i in range(len(base))]
     fw = [width_field[i] for i in range(len(base))]
     fb = [brow_field[i] for i in range(len(base))]
+    closing = blink_field(base)
+    fe = [closing[i] for i in range(len(base))]
     chin_y = base[152][1]
     ring_ids = []
     for factor, wgt, share in [(1.15, 1.0, 0.5), (1.45, 0.75, 0.0), (1.85, 0.35, 0.0)]:
@@ -172,6 +217,7 @@ def main():
             fo.append(open_field[i] * share if lower else np.zeros(2))
             fw.append(width_field[i] * share if lower else np.zeros(2))
             fb.append(np.zeros(2))
+            fe.append(np.zeros(2))
         ring_ids.append(ids)
     n_border = 10
     for s in range(n_border):
@@ -181,10 +227,11 @@ def main():
             fo.append(np.zeros(2))
             fw.append(np.zeros(2))
             fb.append(np.zeros(2))
+            fe.append(np.zeros(2))
     verts = np.array(verts)
 
     tris = face_triangles()
-    # 目の穴を埋める（黒目の中心から扇形に）
+    # 目の穴を埋める（黒目の中心から扇形に。まばたきでは上まぶたが下りて、この扇がつぶれる）
     for eye, c in zip(EYES, IRIS_CENTERS):
         near = min(IRIS_CENTERS, key=lambda j: np.linalg.norm(base[j] - base[eye].mean(0)))
         for a, b in zip(eye, eye[1:] + eye[:1]):
@@ -209,7 +256,6 @@ def main():
 
     # 口の中: 唇の内側の点が、口を開けた写真のどこに当たるか
     mouth_uv = [[opened[i][0] / W, opened[i][1] / H] for i in INNER_LIPS]
-    blink_off = (closed[STABLE] - base[STABLE]).mean(0)
 
     idle = list(range(IDLE_END)) + list(range(IDLE_END - 2, 0, -1))
     b_open = np.median(feats[:IDLE_END, 2])
@@ -229,10 +275,11 @@ def main():
         "openField": [[round(x / W, 5), round(y / H, 5)] for x, y in fo],
         "widthField": [[round(x / W, 5), round(y / H, 5)] for x, y in fw],
         "browField": [[round(x / W, 5), round(y / H, 5)] for x, y in fb],
+        # まばたき: 目を完全に閉じたときの各点の動き（idle の 0〜1 を掛ける）
+        "blinkField": [[round(x / W, 5), round(y / H, 5)] for x, y in fe],
         "triangles": tris,
         "innerLips": INNER_LIPS,
         "mouthUv": [[round(u, 5), round(v, 5)] for u, v in mouth_uv],
-        "blinkOffset": [round(blink_off[0] / W, 5), round(blink_off[1] / H, 5)],
         "pivot": [round(pivot[0] / W, 5), round(pivot[1] / H, 5)],
         "visemes": VISEMES,
         "idle": curves,
