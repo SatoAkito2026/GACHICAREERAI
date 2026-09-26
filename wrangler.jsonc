@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gachicareerai",
+  "compatibility_date": "2025-09-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/server.ts",
+  "observability": { "enabled": true },
+  // 公開してよい値だけをここに書く。秘密鍵は `wrangler secret put <NAME>` で登録する（.env.example 参照）
+  "vars": {
+    "SUPABASE_URL": "https://lcqpihitxmqaygriuhao.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM",
+    "SUPABASE_PROJECT_ID": "lcqpihitxmqaygriuhao",
+    "APP_URL": "https://interview-copilot-ai.akitogroup.jp",
+  },
+  // 毎時: デイリーリマインダー + 俳優データ更新（src/server.ts の scheduled）
+  "triggers": {
+    "crons": ["0 * * * *"],
+  },
+}
