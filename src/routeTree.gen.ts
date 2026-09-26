@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AvatarLabRouteImport } from './routes/avatar-lab'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as LoginRouteImport } from './routes/login'
@@ -107,6 +108,11 @@ import { Route as BusinessSchoolScreeningHistoryRouteImport } from './routes/bus
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvatarLabRoute = AvatarLabRouteImport.update({
+  id: '/avatar-lab',
+  path: '/avatar-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoryRoute = HistoryRouteImport.update({
@@ -598,6 +604,7 @@ const BusinessSchoolScreeningHistoryRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/avatar-lab': typeof AvatarLabRoute
   '/history': typeof HistoryRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -694,6 +701,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/avatar-lab': typeof AvatarLabRoute
   '/history': typeof HistoryRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -791,6 +799,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/avatar-lab': typeof AvatarLabRoute
   '/history': typeof HistoryRoute
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
@@ -889,6 +898,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/avatar-lab'
     | '/history'
     | '/home'
     | '/login'
@@ -985,6 +995,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/avatar-lab'
     | '/history'
     | '/home'
     | '/login'
@@ -1081,6 +1092,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/avatar-lab'
     | '/history'
     | '/home'
     | '/login'
@@ -1178,6 +1190,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AvatarLabRoute: typeof AvatarLabRoute
   HistoryRoute: typeof HistoryRoute
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
@@ -1280,6 +1293,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avatar-lab': {
+      id: '/avatar-lab'
+      path: '/avatar-lab'
+      fullPath: '/avatar-lab'
+      preLoaderRoute: typeof AvatarLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/history': {
@@ -1938,6 +1958,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AvatarLabRoute: AvatarLabRoute,
   HistoryRoute: HistoryRoute,
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,

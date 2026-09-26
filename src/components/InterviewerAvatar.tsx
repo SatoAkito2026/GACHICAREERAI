@@ -1,47 +1,58 @@
 /**
  * AI面接官アバター（自前実装・外部サービスなし・完全無料）。
- * リアルな写真の口だけを動かすと不自然に見えるので、口は動かさず、ビデオ通話のような見せ方にする。
- * - 写真（public/avatar/base.webp）を WebGL で表示し、まばたき・呼吸・首の小さな揺れで自然に見せる
- *   まばたきは、目のまわりだけを目を閉じた写真（eyes-closed.webp）に一瞬切り替える
- * - AIが話している間は、軽いうなずきと、音声の大きさに合わせた光と音の波で「話している」ことを示す
- *
- * 写真を差し替えるときは同じ構図の2枚（目を開けた／閉じた）を用意し、FACE の座標を合わせる。
+ * 写真の顔に「骨組み（網目）」を入れて WebGL で動かす。素材は scripts/avatar/build_rig.py で作る。
+ * - 口: 音声から作った口の形（avatar-voice.ts / lipsync.ts）に合わせて網目を動かす。
+ *   参考動画から学習した「口を開けたとき・横に広げたときの顔全体の動き方」を使うので、あご・ほっぺ・唇が一緒に動く
+ *   開いた唇の間には、口を開けた写真から取った口の中（歯・舌）を貼る
+ * - 首の傾き・位置・まばたき・眉: 参考動画の聞いている場面から取り出した動きの数値で動かす
+ * - 体と背景は動かさない
  */
 import { useEffect, useRef } from "react";
 import type { AvatarVoice } from "@/lib/avatar-voice";
+import type { VisemeShapes } from "@/lib/lipsync";
 
-const PHOTOS = {
+const ASSETS = {
+  rig: "/avatar/rig.json",
   base: "/avatar/base.webp",
   blink: "/avatar/eyes-closed.webp",
+  mouth: "/avatar/mouth-inside.webp",
 } as const;
 
-/** 写真内の位置（写真の幅・高さを 1 とした比率。y は上から） */
-const FACE = {
-  focus: [0.524, 0.45], // 縦長の画面で中心に残す位置
-  eyes: [
-    [0.4466, 0.3517],
-    [0.6077, 0.3517],
-  ],
-  eyeRadius: [0.064, 0.042],
-  // 目を閉じた写真は少し下にずれているので、その分ずらして重ねる
-  blinkOffset: [0, 0.0096],
-  chinY: 0.64,
-} as const;
+/** 縦長の画面で中心に残す位置（写真の幅を 1 とした比率） */
+const FOCUS_X = 0.524;
+// まばたきで目を閉じた写真に切り替える範囲（顔の網目の点番号）
+const EYES = [
+  [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7],
+  [263, 466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249],
+];
 
-/** 音の波のバーの本数 */
-const BARS = 5;
+type Rig = {
+  size: [number, number];
+  fps: number;
+  vertices: [number, number][];
+  weights: number[];
+  openField: [number, number][];
+  widthField: [number, number][];
+  browField: [number, number][];
+  triangles: [number, number, number][];
+  innerLips: number[];
+  mouthUv: [number, number][];
+  blinkOffset: [number, number];
+  pivot: [number, number];
+  visemes: VisemeShapes;
+  /** [傾き(度), 拡大率, 横ずれ, 縦ずれ, まばたき 0〜1, 眉] */
+  idle: [number, number, number, number, number, number][];
+};
 
 type Props = {
   voice: AvatarVoice | null;
-  /** 写真の読み込みが終わったら呼ばれる */
+  /** 準備ができたら呼ばれる */
   onReady?: () => void;
   className?: string;
 };
 
 export function InterviewerAvatar({ voice, onReady, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const barsRef = useRef<HTMLDivElement>(null);
   const voiceRef = useRef(voice);
   voiceRef.current = voice;
   const onReadyRef = useRef(onReady);
@@ -52,8 +63,6 @@ export function InterviewerAvatar({ voice, onReady, className }: Props) {
     if (!canvas) return;
     return startRenderer(
       canvas,
-      glowRef.current!,
-      barsRef.current!,
       () => voiceRef.current,
       () => onReadyRef.current?.(),
     );
@@ -63,299 +72,401 @@ export function InterviewerAvatar({ voice, onReady, className }: Props) {
     <div
       className={className}
       style={{
-        position: "relative",
         width: "100%",
         height: "100%",
-        overflow: "hidden",
-        background: `#e9ebef url(${PHOTOS.base}) center / contain no-repeat`,
+        background: `#e9ebef url(${ASSETS.base}) center / contain no-repeat`,
       }}
     >
       <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
-      {/* 話している間の光（音声が大きいほど強く） */}
-      <div
-        ref={glowRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          opacity: 0,
-          boxShadow: "inset 0 0 60px 12px rgba(200, 255, 0, 0.55)",
-        }}
-      />
-      {/* 話している間の音の波 */}
-      <div
-        ref={barsRef}
-        style={{
-          position: "absolute",
-          left: "50%",
-          bottom: 14,
-          transform: "translateX(-50%)",
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          height: 34,
-          padding: "0 12px",
-          borderRadius: 17,
-          background: "rgba(15, 15, 15, 0.55)",
-          opacity: 0,
-          transition: "opacity 0.25s ease",
-          pointerEvents: "none",
-        }}
-      >
-        {Array.from({ length: BARS }, (_, i) => (
-          <span
-            key={i}
-            style={{
-              width: 4,
-              height: 6,
-              borderRadius: 2,
-              background: "#C8FF00",
-              display: "block",
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 }
 
-const VERT = `#version 300 es
-in vec2 aPos;
-void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
-
-const FRAG = `#version 300 es
-precision highp float;
-uniform sampler2D uBase;
-uniform sampler2D uBlink;
-uniform vec2 uRes;
-uniform vec2 uFocus;
-uniform vec2 uEye0;
-uniform vec2 uEye1;
-uniform vec2 uEyeR;
-uniform vec2 uBlinkOff;
-uniform float uChin;
-uniform float uBlinkAmt;
-uniform float uZoom;
-uniform vec2 uHead;
-out vec4 outColor;
-
-// 楕円の中で 1、外側に向かってなめらかに 0
-float mask(vec2 p, vec2 c, vec2 r) {
-  return 1.0 - smoothstep(0.55, 1.0, length((p - c) / r));
-}
-
-vec3 photo(vec2 s) {
-  vec3 col = texture(uBase, s).rgb;
-  if (uBlinkAmt > 0.0) {
-    vec2 up = vec2(0.0, uEyeR.y * 0.2);
-    float e = max(mask(s, uEye0 - up, uEyeR), mask(s, uEye1 - up, uEyeR));
-    col = mix(col, texture(uBlink, s + uBlinkOff).rgb, e * uBlinkAmt);
-  }
-  return col;
-}
-
+const MESH_VERT = `#version 300 es
+in vec2 aRest;
+in vec2 aOpen;
+in vec2 aWidth;
+in vec2 aBrow;
+in float aWeight;
+in vec2 aTex;
+uniform float uOpen;
+uniform float uWidth;
+uniform float uBrow;
+uniform vec2 uPivot;
+uniform float uAng;
+uniform float uScale;
+uniform vec2 uTrans;
+uniform float uAspect; // 写真の幅 / 高さ
+uniform vec2 uView;    // 画面の左端に来る写真の x、画面に映る写真の幅
+out vec2 vUv;
+out vec2 vTex;
 void main() {
-  vec2 frag = gl_FragCoord.xy / uRes;
-  frag.y = 1.0 - frag.y;
-  float ca = uRes.x / uRes.y;
+  vec2 p = aRest + aOpen * uOpen + aWidth * uWidth + aBrow * uBrow;
+  // 頭の傾き・拡大・ずれ（網目の点ごとの重みで、首から下はほとんど動かさない）
+  vec2 d = (p - uPivot) * vec2(uAspect, 1.0);
+  float c = cos(uAng);
+  float s = sin(uAng);
+  vec2 r = vec2(c * d.x - s * d.y, s * d.x + c * d.y) * uScale / vec2(uAspect, 1.0);
+  p = mix(p, uPivot + r + uTrans, aWeight);
+  vUv = aRest;
+  vTex = aTex;
+  gl_Position = vec4((p.x - uView.x) / uView.y * 2.0 - 1.0, 1.0 - p.y * 2.0, 0.0, 1.0);
+}`;
 
-  // 横長: 写真全体を高さに合わせて表示し、左右の余白はぼかした写真で埋める
-  // 縦長: 顔を中心に画面いっぱいに表示する
-  vec2 p;
-  vec2 bg;
-  if (ca >= 1.0) {
-    p = vec2(0.5 + (frag.x - 0.5) * ca, frag.y);
-    bg = vec2(0.5 + (frag.x - 0.5), 0.5 + (frag.y - 0.5) / ca);
-  } else {
-    vec2 view = vec2(ca, 1.0);
-    vec2 origin = clamp(uFocus - view * 0.5, vec2(0.0), vec2(1.0) - view);
-    p = origin + frag * view;
-    bg = p;
-  }
-  p = uFocus + (p - uFocus) / uZoom;
-
-  // 頭だけ動かす（あごより下の体は動かさない）
-  float headW = 1.0 - smoothstep(uChin, uChin + 0.12, p.y);
-  vec2 s = p - uHead * headW;
-
-  vec3 col = photo(clamp(s, 0.0, 1.0));
-  float inside = smoothstep(0.0, 0.015, p.x) * smoothstep(0.0, 0.015, 1.0 - p.x);
-  if (inside < 1.0) {
-    vec3 blurred = textureLod(uBase, clamp(bg, 0.0, 1.0), 6.5).rgb * 0.92;
-    col = mix(blurred, col, inside);
+const FACE_FRAG = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uBase;
+uniform sampler2D uBlinkTex;
+uniform float uBlink;
+uniform vec2 uBlinkOff;
+uniform vec4 uEye0;
+uniform vec4 uEye1;
+out vec4 outColor;
+float mask(vec2 p, vec4 e) {
+  return 1.0 - smoothstep(0.55, 1.0, length((p - e.xy) / e.zw));
+}
+void main() {
+  vec3 col = texture(uBase, vUv).rgb;
+  if (uBlink > 0.0) {
+    float m = max(mask(vUv, uEye0), mask(vUv, uEye1));
+    col = mix(col, texture(uBlinkTex, vUv + uBlinkOff).rgb, m * uBlink);
   }
   outColor = vec4(col, 1.0);
 }`;
 
+const MOUTH_FRAG = `#version 300 es
+precision highp float;
+in vec2 vTex;
+uniform sampler2D uMouth;
+out vec4 outColor;
+void main() {
+  outColor = vec4(texture(uMouth, vTex).rgb * 0.92, 1.0);
+}`;
+
+// 写真の左右の余白を、ぼかした写真で埋める
+const BG_VERT = `#version 300 es
+in vec2 aPos;
+out vec2 vPos;
+void main() { vPos = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`;
+const BG_FRAG = `#version 300 es
+precision highp float;
+in vec2 vPos;
+uniform sampler2D uBase;
+uniform float uCanvasAspect;
+out vec4 outColor;
+void main() {
+  vec2 uv = vec2(vPos.x, 0.5 + (0.5 - vPos.y) / uCanvasAspect);
+  outColor = vec4(textureLod(uBase, clamp(uv, 0.0, 1.0), 6.5).rgb * 0.92, 1.0);
+}`;
+
 function startRenderer(
   canvas: HTMLCanvasElement,
-  glow: HTMLDivElement,
-  barsBox: HTMLDivElement,
   getVoice: () => AvatarVoice | null,
   onReady: () => void,
 ): () => void {
-  const bars = Array.from(barsBox.children) as HTMLElement[];
-  let running = true;
-  let frame = 0;
-
-  // 話している演出（WebGL が使えなくても動かす）
-  let level = 0;
-  let speakEnergy = 0;
-  let lastFx = performance.now();
-  const updateSpeakingFx = (now: number) => {
-    const dt = Math.min((now - lastFx) / 1000, 0.05);
-    lastFx = now;
-    const v = getVoice()?.getLevel() ?? { level: 0, brightness: 0.5 };
-    const target = Math.min(1, v.level * 3);
-    level += (target - level) * Math.min(1, dt * (target > level ? 20 : 8));
-    speakEnergy += ((v.level > 0.02 ? 1 : 0) - speakEnergy) * Math.min(1, dt * 4);
-    glow.style.opacity = String(speakEnergy * (0.35 + 0.65 * level));
-    barsBox.style.opacity = speakEnergy > 0.05 ? "1" : "0";
-    const t = now / 1000;
-    bars.forEach((bar, i) => {
-      const wobble = 0.55 + 0.45 * Math.sin(t * (7 + i * 1.7) + i * 1.3);
-      const center = 1 - Math.abs(i - (BARS - 1) / 2) / BARS;
-      bar.style.height = `${Math.round(6 + 22 * level * wobble * center)}px`;
-    });
-    return speakEnergy;
-  };
-
-  const gl = canvas.getContext("webgl2", { antialias: false, premultipliedAlpha: false });
-  // WebGL2 が使えない端末では背景の静止画 + 話している演出だけにする
+  const gl = canvas.getContext("webgl2", { antialias: true, premultipliedAlpha: false });
+  // WebGL2 が使えない端末では背景の静止画だけを表示する
   if (!gl) {
     onReady();
-    const loop = (now: number) => {
-      if (!running) return;
-      frame = requestAnimationFrame(loop);
-      updateSpeakingFx(now);
-    };
-    frame = requestAnimationFrame(loop);
-    return () => {
-      running = false;
-      cancelAnimationFrame(frame);
-    };
+    return () => {};
   }
 
-  const compile = (type: number, src: string) => {
-    const sh = gl.createShader(type)!;
-    gl.shaderSource(sh, src);
-    gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(sh));
-    return sh;
+  let running = true;
+  let frame = 0;
+  const cleanups: (() => void)[] = [];
+
+  const program = (vs: string, fs: string) => {
+    const p = gl.createProgram()!;
+    for (const [type, src] of [
+      [gl.VERTEX_SHADER, vs],
+      [gl.FRAGMENT_SHADER, fs],
+    ] as const) {
+      const sh = gl.createShader(type)!;
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(sh));
+      gl.attachShader(p, sh);
+    }
+    gl.linkProgram(p);
+    cleanups.push(() => gl.deleteProgram(p));
+    return p;
   };
-  const prog = gl.createProgram()!;
-  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
-  gl.linkProgram(prog);
-  gl.useProgram(prog);
+  const faceProg = program(MESH_VERT, FACE_FRAG);
+  const mouthProg = program(MESH_VERT, MOUTH_FRAG);
+  const bgProg = program(BG_VERT, BG_FRAG);
 
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, "aPos");
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const u = (name: string) => gl.getUniformLocation(prog, name);
-  gl.uniform2f(u("uFocus"), ...FACE.focus);
-  gl.uniform2f(u("uEye0"), ...FACE.eyes[0]);
-  gl.uniform2f(u("uEye1"), ...FACE.eyes[1]);
-  gl.uniform2f(u("uEyeR"), ...FACE.eyeRadius);
-  gl.uniform2f(u("uBlinkOff"), ...FACE.blinkOffset);
-  gl.uniform1f(u("uChin"), FACE.chinY);
-  const uRes = u("uRes");
-  const uBlinkAmt = u("uBlinkAmt");
-  const uZoom = u("uZoom");
-  const uHead = u("uHead");
-
-  let loaded = false;
-  const textures: WebGLTexture[] = [];
-  const names = ["uBase", "uBlink"] as const;
-
-  Promise.all(
-    [PHOTOS.base, PHOTOS.blink].map(async (url) => {
-      const img = new Image();
-      img.src = url;
-      await img.decode();
-      return img;
-    }),
-  )
-    .then((imgs) => {
-      if (!running) return;
-      imgs.forEach((img, i) => {
-        const tex = gl.createTexture()!;
-        textures.push(tex);
-        gl.activeTexture(gl.TEXTURE0 + i);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.uniform1i(u(names[i]), i);
-      });
-      loaded = true;
-      onReady();
-    })
-    .catch((e) => {
-      console.error("Avatar photos failed to load:", e);
-      onReady();
-    });
+  const loadImage = async (url: string) => {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    return img;
+  };
+  const texture = (img: HTMLImageElement) => {
+    const tex = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    cleanups.push(() => gl.deleteTexture(tex));
+    return tex;
+  };
 
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-    gl.viewport(0, 0, canvas.width, canvas.height);
   };
   resize();
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
 
-  let nextBlink = 1.5 + Math.random() * 3;
-  let blinkStart = -1;
-  const start = performance.now();
+  Promise.all([
+    fetch(ASSETS.rig).then((r) => r.json() as Promise<Rig>),
+    loadImage(ASSETS.base),
+    loadImage(ASSETS.blink),
+    loadImage(ASSETS.mouth),
+  ])
+    .then(([rig, baseImg, blinkImg, mouthImg]) => {
+      if (!running) return;
+      getVoice()?.setVisemeShapes(rig.visemes);
+      const textures = {
+        base: texture(baseImg),
+        blink: texture(blinkImg),
+        mouth: texture(mouthImg),
+      };
+      const draw = setupScene(gl, rig, faceProg, mouthProg, bgProg, textures, cleanups);
+      onReady();
 
-  const tick = (now: number) => {
-    if (!running) return;
-    frame = requestAnimationFrame(tick);
-    const energy = updateSpeakingFx(now);
-    const t = (now - start) / 1000;
-    if (!loaded) return;
-
-    // まばたき（0.15秒で閉じて開く）
-    if (blinkStart < 0 && t > nextBlink) blinkStart = t;
-    let blink = 0;
-    if (blinkStart >= 0) {
-      const p = (t - blinkStart) / 0.15;
-      if (p >= 1) {
-        blinkStart = -1;
-        nextBlink = t + 2.5 + Math.random() * 3.5;
-      } else {
-        blink = Math.min(1, (1 - Math.abs(1 - p * 2)) * 1.6);
-      }
-    }
-
-    // 呼吸・首の揺れ・話している間のうなずき（単位は写真サイズ比）
-    const nod = energy * 0.0028 * (0.5 + 0.5 * Math.sin(t * 2.6));
-    const headX = Math.sin(t * 0.45) * 0.0015 + Math.sin(t * 1.1) * 0.0008 * energy;
-    const headY = Math.sin(t * 0.6) * 0.001 + nod;
-
-    gl.uniform2f(uRes, canvas.width, canvas.height);
-    gl.uniform1f(uBlinkAmt, blink);
-    gl.uniform1f(uZoom, 1.0 + Math.sin(t * 1.5) * 0.002);
-    gl.uniform2f(uHead, headX, headY);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  };
-  frame = requestAnimationFrame(tick);
+      let mouthOpen = 0;
+      let mouthWidth = 0;
+      let last = performance.now();
+      const start = last;
+      const tick = (now: number) => {
+        if (!running) return;
+        frame = requestAnimationFrame(tick);
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        const t = (now - start) / 1000;
+        const voice = getVoice();
+        const mouth = voice?.getMouth() ?? { open: 0, width: 0 };
+        const k = Math.min(1, dt * 30);
+        mouthOpen += (mouth.open - mouthOpen) * k;
+        mouthWidth += (mouth.width - mouthWidth) * k;
+        draw(canvas.width, canvas.height, t, mouthOpen, mouthWidth);
+      };
+      frame = requestAnimationFrame(tick);
+    })
+    .catch((e) => {
+      console.error("Avatar failed to load:", e);
+      onReady();
+    });
 
   return () => {
     running = false;
     cancelAnimationFrame(frame);
     ro.disconnect();
-    textures.forEach((tex) => gl.deleteTexture(tex));
-    gl.deleteBuffer(buf);
-    gl.deleteProgram(prog);
+    cleanups.forEach((c) => c());
+  };
+}
+
+function setupScene(
+  gl: WebGL2RenderingContext,
+  rig: Rig,
+  faceProg: WebGLProgram,
+  mouthProg: WebGLProgram,
+  bgProg: WebGLProgram,
+  tex: { base: WebGLTexture; blink: WebGLTexture; mouth: WebGLTexture },
+  cleanups: (() => void)[],
+) {
+  const [W, H] = rig.size;
+  const aspect = W / H;
+
+  // 網目の頂点データ（顔・外側）と、口の中（唇の内側の点 + 中心点）の頂点データ
+  const vertexData = (
+    ids: number[],
+    extraCenter: boolean,
+    texOf: (n: number) => [number, number],
+  ) => {
+    const rows = ids.map((i, n) => [
+      ...rig.vertices[i],
+      ...rig.openField[i],
+      ...rig.widthField[i],
+      ...rig.browField[i],
+      rig.weights[i],
+      ...texOf(n),
+    ]);
+    if (extraCenter) {
+      const avg = rows[0].map((_, c) => rows.reduce((s, r) => s + r[c], 0) / rows.length);
+      rows.push(avg);
+    }
+    return new Float32Array(rows.flat());
+  };
+  const makeVao = (prog: WebGLProgram, data: Float32Array, indices: Uint16Array) => {
+    const vao = gl.createVertexArray()!;
+    gl.bindVertexArray(vao);
+    const vbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    const stride = 11 * 4;
+    const attr = (name: string, size: number, offset: number) => {
+      const loc = gl.getAttribLocation(prog, name);
+      if (loc < 0) return;
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, stride, offset * 4);
+    };
+    attr("aRest", 2, 0);
+    attr("aOpen", 2, 2);
+    attr("aWidth", 2, 4);
+    attr("aBrow", 2, 6);
+    attr("aWeight", 1, 8);
+    attr("aTex", 2, 9);
+    const ibo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    gl.bindVertexArray(null);
+    cleanups.push(() => {
+      gl.deleteVertexArray(vao);
+      gl.deleteBuffer(vbo);
+      gl.deleteBuffer(ibo);
+    });
+    return { vao, count: indices.length };
+  };
+
+  const all = rig.vertices.map((_, i) => i);
+  const face = makeVao(
+    faceProg,
+    vertexData(all, false, (n) => rig.vertices[n]),
+    new Uint16Array(rig.triangles.flat()),
+  );
+  const lips = rig.innerLips;
+  const fan: number[] = [];
+  for (let n = 0; n < lips.length; n++) fan.push(lips.length, n, (n + 1) % lips.length);
+  const mouth = makeVao(
+    mouthProg,
+    vertexData(lips, true, (n) => rig.mouthUv[n]),
+    new Uint16Array(fan),
+  );
+
+  const bgVao = gl.createVertexArray()!;
+  gl.bindVertexArray(bgVao);
+  const bgVbo = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, bgVbo);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const bgLoc = gl.getAttribLocation(bgProg, "aPos");
+  gl.enableVertexAttribArray(bgLoc);
+  gl.vertexAttribPointer(bgLoc, 2, gl.FLOAT, false, 0, 0);
+  gl.bindVertexArray(null);
+  cleanups.push(() => {
+    gl.deleteVertexArray(bgVao);
+    gl.deleteBuffer(bgVbo);
+  });
+
+  // まばたきで切り替える目の範囲（目の輪郭を少し広げ、まつげが入るよう上にずらす）
+  const eyeRect = (ids: number[]) => {
+    const xs = ids.map((i) => rig.vertices[i][0]);
+    const ys = ids.map((i) => rig.vertices[i][1]);
+    const rx = ((Math.max(...xs) - Math.min(...xs)) / 2) * 1.35;
+    const ry = ((Math.max(...ys) - Math.min(...ys)) / 2) * 2.6;
+    const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
+    const cy = (Math.max(...ys) + Math.min(...ys)) / 2 - ry * 0.2;
+    return [cx, cy, rx, ry] as const;
+  };
+  const eyes = EYES.map(eyeRect);
+
+  const uniforms = (prog: WebGLProgram) => {
+    const u = (n: string) => gl.getUniformLocation(prog, n);
+    return {
+      open: u("uOpen"),
+      width: u("uWidth"),
+      brow: u("uBrow"),
+      pivot: u("uPivot"),
+      ang: u("uAng"),
+      scale: u("uScale"),
+      trans: u("uTrans"),
+      aspect: u("uAspect"),
+      view: u("uView"),
+    };
+  };
+  const faceU = uniforms(faceProg);
+  const mouthU = uniforms(mouthProg);
+  gl.useProgram(faceProg);
+  gl.uniform1i(gl.getUniformLocation(faceProg, "uBase"), 0);
+  gl.uniform1i(gl.getUniformLocation(faceProg, "uBlinkTex"), 1);
+  gl.uniform2f(gl.getUniformLocation(faceProg, "uBlinkOff"), ...rig.blinkOffset);
+  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye0"), ...eyes[0]);
+  gl.uniform4f(gl.getUniformLocation(faceProg, "uEye1"), ...eyes[1]);
+  const uBlink = gl.getUniformLocation(faceProg, "uBlink");
+  gl.useProgram(mouthProg);
+  gl.uniform1i(gl.getUniformLocation(mouthProg, "uMouth"), 2);
+  gl.useProgram(bgProg);
+  gl.uniform1i(gl.getUniformLocation(bgProg, "uBase"), 0);
+  const uCanvasAspect = gl.getUniformLocation(bgProg, "uCanvasAspect");
+
+  const idle = rig.idle;
+  const sample = (t: number) => {
+    const f = (((Math.max(0, t) * rig.fps) % idle.length) + idle.length) % idle.length;
+    const i = Math.floor(f);
+    const k = f - i;
+    const a = idle[i];
+    const b = idle[(i + 1) % idle.length];
+    return a.map((v, n) => v * (1 - k) + b[n] * k);
+  };
+
+  return (cw: number, ch: number, t: number, open: number, width: number) => {
+    gl.viewport(0, 0, cw, ch);
+    const ca = cw / ch;
+    // 写真の高さを画面に合わせる。横長なら左右に余白、縦長なら顔を中心に左右を切る
+    const visible = ca / aspect;
+    const left =
+      visible >= 1 ? 0.5 - visible / 2 : Math.min(Math.max(FOCUS_X - visible / 2, 0), 1 - visible);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex.base);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, tex.blink);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, tex.mouth);
+
+    if (visible > 1) {
+      gl.useProgram(bgProg);
+      gl.uniform1f(uCanvasAspect, ca);
+      gl.bindVertexArray(bgVao);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    } else {
+      gl.clearColor(0.91, 0.92, 0.94, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+
+    const [ang, scale, tx, ty, blink, brow] = sample(t);
+    // 話している間は、口の開きに合わせてわずかにうなずく
+    const nod = open * 0.012;
+    const set = (u: ReturnType<typeof uniforms>) => {
+      gl.uniform1f(u.open, open);
+      gl.uniform1f(u.width, width);
+      gl.uniform1f(u.brow, brow);
+      gl.uniform2f(u.pivot, ...rig.pivot);
+      gl.uniform1f(u.ang, (ang * Math.PI) / 180);
+      gl.uniform1f(u.scale, scale);
+      gl.uniform2f(u.trans, tx, ty + nod);
+      gl.uniform1f(u.aspect, aspect);
+      gl.uniform2f(u.view, left, visible);
+    };
+
+    // 口の中 → 顔の網目（顔の網目は唇の間が穴になっているので、開くと口の中が見える）
+    gl.useProgram(mouthProg);
+    set(mouthU);
+    gl.bindVertexArray(mouth.vao);
+    gl.drawElements(gl.TRIANGLES, mouth.count, gl.UNSIGNED_SHORT, 0);
+
+    gl.useProgram(faceProg);
+    set(faceU);
+    gl.uniform1f(uBlink, blink);
+    gl.bindVertexArray(face.vao);
+    gl.drawElements(gl.TRIANGLES, face.count, gl.UNSIGNED_SHORT, 0);
+    gl.bindVertexArray(null);
   };
 }

@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4 + shadcn/ui（`src/components/ui/`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。AI生成の写真（`public/avatar/base.webp`）を WebGL で表示し、目を閉じた写真（`eyes-closed.webp`）で目のまわりだけ切り替えてまばたきさせる。リアルな顔の口だけを動かすと不自然なので口は動かさず、AIの音声再生中（`src/lib/avatar-voice.ts` の音量）はうなずき・光・音の波で「話している」ことを示す。写真を差し替えるときは同ファイルの `FACE`（目の座標、目を閉じた写真のずれ）も合わせる
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。写真（`public/avatar/base.webp`）の顔に478点の網目（リグ `public/avatar/rig.json`）を入れて WebGL で変形させる。口は音声から母音（あいうえお）を判定した口の形（`src/lib/lipsync.ts`、再生は `src/lib/avatar-voice.ts`）に合わせ、参考動画から学習した「口を開けた・横に広げたときの顔全体の動き」で網目を動かす。首・まばたき・眉は参考動画の動きの数値。口の中は `mouth-inside.webp`、まばたきは `eyes-closed.webp`。リグは `scripts/avatar/build_rig.py` で作る。`/avatar-lab` は録音した声で口の動きを確かめる試作ページ
 - **決済**: Stripe / **メール**: Resend
 
 ## コマンド
