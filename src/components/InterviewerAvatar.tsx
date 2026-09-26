@@ -27,8 +27,9 @@ const FACE = {
   eyeRadius: [0.064, 0.042],
   // 目を閉じた写真は他の3枚より少し下にずれているので、その分ずらして重ねる
   blinkOffset: [0, 0.0096],
-  mouth: [0.5239, 0.5423],
-  mouthRadius: [0.0957, 0.0758],
+  // 唇だけを切り替える範囲（ほっぺ・あごは口を閉じた写真のまま）
+  mouth: [0.52, 0.528],
+  mouthRadius: [0.076, 0.05],
   chinY: 0.64,
 } as const;
 
@@ -95,15 +96,15 @@ uniform float uZoom;
 uniform vec2 uHead;
 out vec4 outColor;
 
-// 楕円の中で 1、外側に向かってなめらかに 0
-float mask(vec2 p, vec2 c, vec2 r) {
-  return 1.0 - smoothstep(0.55, 1.0, length((p - c) / r));
+// 楕円の中で 1、外側に向かってなめらかに 0（inner より内側は完全に 1）
+float mask(vec2 p, vec2 c, vec2 r, float inner) {
+  return 1.0 - smoothstep(inner, 1.0, length((p - c) / r));
 }
 
 vec3 photo(vec2 s) {
   vec3 col = texture(uBase, s).rgb;
   // 口まわり: 閉じ → 少し開け → 大きく開け
-  float m = mask(s, uMouth, uMouthR);
+  float m = mask(s, uMouth, uMouthR, 0.72);
   if (m > 0.0 && uOpenAmt > 0.0) {
     vec3 half_ = texture(uHalf, s).rgb;
     vec3 mouth = uOpenAmt < 0.5
@@ -113,7 +114,7 @@ vec3 photo(vec2 s) {
   }
   // 目まわり: まばたき
   if (uBlinkAmt > 0.0) {
-    float e = max(mask(s, uEye0 - vec2(0.0, uEyeR.y * 0.2), uEyeR), mask(s, uEye1 - vec2(0.0, uEyeR.y * 0.2), uEyeR));
+    float e = max(mask(s, uEye0 - vec2(0.0, uEyeR.y * 0.2), uEyeR, 0.55), mask(s, uEye1 - vec2(0.0, uEyeR.y * 0.2), uEyeR, 0.55));
     col = mix(col, texture(uBlink, s + uBlinkOff).rgb, e * uBlinkAmt);
   }
   return col;
@@ -246,7 +247,12 @@ function startRenderer(
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
 
+  // 口の写真: 0=閉じ, 1=少し開け, 2=大きく開け。半透明で重ねると唇が二重に見えるので、
+  // 表示する写真はパッと切り替え（0.07秒だけ重ねる）、短時間で行ったり来たりしないようにする
   let open = 0;
+  let frameTarget = 0;
+  let frameShown = 0;
+  let frameSince = 0;
   let speakEnergy = 0;
   let nextBlink = 1.5 + Math.random() * 3;
   let blinkStart = -1;
@@ -265,6 +271,16 @@ function startRenderer(
     const v = getVoice()?.getLevel() ?? { level: 0, brightness: 0.5 };
     const target = Math.min(1, Math.max(0, (v.level - 0.03) * 3));
     open += (target - open) * Math.min(1, dt * (target > open ? 22 : 12));
+    const wanted = open > 0.62 ? 2 : open > 0.2 ? 1 : 0;
+    if (wanted !== frameTarget && t - frameSince > 0.09) {
+      frameTarget = wanted;
+      frameSince = t;
+    }
+    const step = dt / 0.07;
+    frameShown =
+      frameShown < frameTarget
+        ? Math.min(frameTarget, frameShown + step)
+        : Math.max(frameTarget, frameShown - step);
     speakEnergy += ((v.level > 0.03 ? 1 : 0) - speakEnergy) * Math.min(1, dt * 3);
 
     // まばたき（0.15秒で閉じて開く）
@@ -286,7 +302,7 @@ function startRenderer(
     const headY = Math.sin(t * 0.6) * 0.001 + nod;
 
     gl.uniform2f(uRes, canvas.width, canvas.height);
-    gl.uniform1f(uOpenAmt, open);
+    gl.uniform1f(uOpenAmt, frameShown / 2);
     gl.uniform1f(uBlinkAmt, blink);
     gl.uniform1f(uZoom, 1.0 + Math.sin(t * 1.5) * 0.002);
     gl.uniform2f(uHead, headX, headY);
