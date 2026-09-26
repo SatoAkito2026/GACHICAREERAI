@@ -94,6 +94,19 @@ function ActorScreeningPage() {
   const [screening, setScreening] = useState(false);
   const [results, setResults] = useState<any[]>([]);
 
+  // フックは早期 return より前で呼ぶ（読み込み中→表示で呼ぶ数が変わるとページが落ちるため）
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("actor_screening_presets")
+        .select("id, name")
+        .eq("company_user_id", user.id)
+        .order("updated_at", { ascending: false });
+      setPresets((data ?? []) as { id: string; name: string }[]);
+    })();
+  }, [user]);
+
   if (loading) {
     return (
       <div
@@ -121,18 +134,6 @@ function ActorScreeningPage() {
     );
     setFiles((prev) => [...prev, ...pdfs].slice(0, 20));
   };
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("actor_screening_presets")
-        .select("id, name")
-        .eq("company_user_id", user.id)
-        .order("updated_at", { ascending: false });
-      setPresets((data ?? []) as { id: string; name: string }[]);
-    })();
-  }, [user]);
 
   const handleSavePreset = async () => {
     if (!user) return;

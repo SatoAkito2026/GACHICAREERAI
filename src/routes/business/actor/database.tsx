@@ -107,6 +107,23 @@ function ActorsPage() {
   const [noteActual, setNoteActual] = useState("");
   const [savingNote, setSavingNote] = useState(false);
 
+  const loadRanking = async () => {
+    const { data } = await supabase
+      .from("actors")
+      .select("id, name, agency_name, search_count")
+      .gt("search_count", 0)
+      .order("search_count", { ascending: false })
+      .limit(10);
+    setRanking((data ?? []) as RankRow[]);
+  };
+
+  // フックは早期 return より前で呼ぶ（読み込み中→表示で呼ぶ数が変わるとページが落ちるため）
+  useEffect(() => {
+    if (!session || !isPaid) return;
+    void loadRanking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, isPaid]);
+
   if (loading) {
     return (
       <div
@@ -127,20 +144,6 @@ function ActorsPage() {
         <ActorPaywallScreen />
       </BusinessShell>
     );
-
-  const loadRanking = async () => {
-    const { data } = await supabase
-      .from("actors")
-      .select("id, name, agency_name, search_count")
-      .gt("search_count", 0)
-      .order("search_count", { ascending: false })
-      .limit(10);
-    setRanking((data ?? []) as RankRow[]);
-  };
-
-  useEffect(() => {
-    void loadRanking();
-  }, []);
 
   const loadActorDetail = async (actorId: string) => {
     const [{ data: preds }, { data: n }, { data: sh }, { data: ah }] = await Promise.all([

@@ -57,5 +57,5 @@ npm run deploy     # build + wrangler deploy
 
 ## 既知の課題
 
-- `src/routes/business/company/candidates.tsx` の「録画を見る（購入）」リンク先 `/business/company/candidate-detail/$interviewId` のページが存在しない（typecheck エラーになる）
-- ESLint に既存の警告・エラーが残っている（`no-explicit-any` が大半。`react-hooks/rules-of-hooks` 違反も数件あり）
+- 企業向け候補者一覧の「録画を見る（購入）」は、購入ページが未実装のため「準備中」表示にしている（`src/routes/business/company/candidates.tsx`）
+- ESLint に既存の指摘が残っている（`no-explicit-any` が大半。全角スペースの `no-irregular-whitespace` と `react-hooks/exhaustive-deps` の警告は意図的なものが多い）

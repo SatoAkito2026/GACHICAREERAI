@@ -80,17 +80,15 @@ function IndividualOnboardingPage() {
 
       await setMode("private_individual");
 
-      const { error: onboardingError } = await (supabase
-        .from("onboarding_answers")
-        .upsert(
-          {
-            user_id: userId,
-            mode: "individual",
-            answers,
-            completed_at: new Date().toISOString(),
-          } as any,
-          { onConflict: "user_id,mode" },
-        ) as any);
+      const { error: onboardingError } = await (supabase.from("onboarding_answers").upsert(
+        {
+          user_id: userId,
+          mode: "individual",
+          answers,
+          completed_at: new Date().toISOString(),
+        } as any,
+        { onConflict: "user_id,mode" },
+      ) as any);
       if (onboardingError) throw onboardingError;
 
       const { error: profileError } = await (supabase.from("user_career_profiles").upsert(
