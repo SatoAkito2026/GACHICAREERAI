@@ -1,97 +1,63 @@
 /**
- * AI面接官アバター。AIで生成した面接官の動画を2種類使い分ける。外部サービスは使わない。
- * - 聞いている動画（public/avatar/idle.mp4）: 口を閉じて、まばたき・小さなうなずき
- * - 話している動画（public/avatar/talk.mp4）: AIの音声を再生している間だけ重ねて表示
- * どちらも最後まで行ったら、もう1本の同じ動画に 0.35 秒かけて重ねながら頭に戻し、つなぎ目を目立たなくする。
+ * AI面接官アバター（自前実装・外部サービスなし・完全無料）。
+ * リアルな写真の口だけを動かすと不自然に見えるので、口は動かさず、ビデオ通話のような見せ方にする。
+ * - 写真（public/avatar/base.webp）を WebGL で表示し、まばたき・呼吸・首の小さな揺れで自然に見せる
+ *   まばたきは、目のまわりだけを目を閉じた写真（eyes-closed.webp）に一瞬切り替える
+ * - AIが話している間は、軽いうなずきと、音声の大きさに合わせた光と音の波で「話している」ことを示す
  *
- * 動画を差し替えるときは、同じ構図・同じ背景で作り、public/avatar/ の同名ファイルを置き換える。
+ * 写真を差し替えるときは同じ構図の2枚（目を開けた／閉じた）を用意し、FACE の座標を合わせる。
  */
 import { useEffect, useRef } from "react";
 import type { AvatarVoice } from "@/lib/avatar-voice";
 
-// mp4(H.264) を優先し、再生できないブラウザ向けに webm(VP9) も置く
-const CLIPS = {
-  idle: "/avatar/idle",
-  talk: "/avatar/talk",
-  poster: "/avatar/poster.jpg",
+const PHOTOS = {
+  base: "/avatar/base.webp",
+  blink: "/avatar/eyes-closed.webp",
 } as const;
 
-function Sources({ base }: { base: string }) {
-  return (
-    <>
-      <source src={`${base}.mp4`} type="video/mp4" />
-      <source src={`${base}.webm`} type="video/webm" />
-    </>
-  );
-}
+/** 写真内の位置（写真の幅・高さを 1 とした比率。y は上から） */
+const FACE = {
+  focus: [0.524, 0.45], // 縦長の画面で中心に残す位置
+  eyes: [
+    [0.4466, 0.3517],
+    [0.6077, 0.3517],
+  ],
+  eyeRadius: [0.064, 0.042],
+  // 目を閉じた写真は少し下にずれているので、その分ずらして重ねる
+  blinkOffset: [0, 0.0096],
+  chinY: 0.64,
+} as const;
 
-/** ループのつなぎ目で重ねる秒数 */
-const LOOP_FADE = 0.35;
-/** 聞いている ↔ 話している の切り替えにかける秒数 */
-const SWITCH_FADE = 0.25;
+/** 音の波のバーの本数 */
+const BARS = 5;
 
 type Props = {
   voice: AvatarVoice | null;
-  /** 動画の再生準備ができたら呼ばれる */
+  /** 写真の読み込みが終わったら呼ばれる */
   onReady?: () => void;
   className?: string;
 };
 
 export function InterviewerAvatar({ voice, onReady, className }: Props) {
-  const idleRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
-  const talkRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
-  const talkLayerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const barsRef = useRef<HTMLDivElement>(null);
   const voiceRef = useRef(voice);
   voiceRef.current = voice;
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
 
   useEffect(() => {
-    const idle = idleRefs.map((r) => r.current!);
-    const talk = talkRefs.map((r) => r.current!);
-    const talkLayer = talkLayerRef.current!;
-    const loops = [createLoop(idle), createLoop(talk)];
-
-    let ready = false;
-    const markReady = () => {
-      if (ready) return;
-      ready = true;
-      onReadyRef.current?.();
-    };
-    idle[0].addEventListener("canplay", markReady, { once: true });
-    idle[0].addEventListener("error", markReady, { once: true });
-    loops.forEach((l) => l.start());
-
-    let talking = false;
-    let frame = 0;
-    const tick = () => {
-      frame = requestAnimationFrame(tick);
-      loops.forEach((l) => l.update());
-      const now = voiceRef.current?.isPlaying() ?? false;
-      if (now !== talking) {
-        talking = now;
-        talkLayer.style.opacity = talking ? "1" : "0";
-      }
-    };
-    frame = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      [...idle, ...talk].forEach((v) => v.pause());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    return startRenderer(
+      canvas,
+      glowRef.current!,
+      barsRef.current!,
+      () => voiceRef.current,
+      () => onReadyRef.current?.(),
+    );
   }, []);
-
-  const videoStyle: React.CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    objectPosition: "50% 30%",
-    transition: `opacity ${LOOP_FADE}s linear`,
-  };
-  const layerStyle: React.CSSProperties = { position: "absolute", inset: 0 };
 
   return (
     <div
@@ -101,77 +67,295 @@ export function InterviewerAvatar({ voice, onReady, className }: Props) {
         width: "100%",
         height: "100%",
         overflow: "hidden",
-        background: `#c9ccd1 url(${CLIPS.poster}) 50% 30% / cover no-repeat`,
+        background: `#e9ebef url(${PHOTOS.base}) center / contain no-repeat`,
       }}
     >
-      <div style={layerStyle}>
-        {idleRefs.map((ref, i) => (
-          <video
-            key={i}
-            ref={ref}
-            poster={CLIPS.poster}
-            muted
-            playsInline
-            preload="auto"
-            style={videoStyle}
-          >
-            <Sources base={CLIPS.idle} />
-          </video>
-        ))}
-      </div>
+      <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
+      {/* 話している間の光（音声が大きいほど強く） */}
       <div
-        ref={talkLayerRef}
-        style={{ ...layerStyle, opacity: 0, transition: `opacity ${SWITCH_FADE}s ease` }}
+        ref={glowRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          opacity: 0,
+          boxShadow: "inset 0 0 60px 12px rgba(200, 255, 0, 0.55)",
+        }}
+      />
+      {/* 話している間の音の波 */}
+      <div
+        ref={barsRef}
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 14,
+          transform: "translateX(-50%)",
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          height: 34,
+          padding: "0 12px",
+          borderRadius: 17,
+          background: "rgba(15, 15, 15, 0.55)",
+          opacity: 0,
+          transition: "opacity 0.25s ease",
+          pointerEvents: "none",
+        }}
       >
-        {talkRefs.map((ref, i) => (
-          <video key={i} ref={ref} muted playsInline preload="auto" style={videoStyle}>
-            <Sources base={CLIPS.talk} />
-          </video>
+        {Array.from({ length: BARS }, (_, i) => (
+          <span
+            key={i}
+            style={{
+              width: 4,
+              height: 6,
+              borderRadius: 2,
+              background: "#C8FF00",
+              display: "block",
+            }}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-/**
- * 同じ動画を2つの <video> で交互に再生して、つなぎ目で重ねながらループさせる。
- * （loop 属性だと最後のコマから最初のコマへ一瞬で飛ぶので、顔がカクッと動いて見える）
- * 下の動画 a は常に表示したままにして、上の動画 b の透明度だけを切り替える。
- */
-function createLoop([a, b]: HTMLVideoElement[]) {
-  let active = a;
-  let switching = false;
+const VERT = `#version 300 es
+in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 
-  const play = (v: HTMLVideoElement) => {
-    v.muted = true; // iOS Safari は muted をプロパティで指定しないと自動再生しない
-    void v.play().catch(() => {
-      // 自動再生がブロックされた場合はポスター画像のまま
+const FRAG = `#version 300 es
+precision highp float;
+uniform sampler2D uBase;
+uniform sampler2D uBlink;
+uniform vec2 uRes;
+uniform vec2 uFocus;
+uniform vec2 uEye0;
+uniform vec2 uEye1;
+uniform vec2 uEyeR;
+uniform vec2 uBlinkOff;
+uniform float uChin;
+uniform float uBlinkAmt;
+uniform float uZoom;
+uniform vec2 uHead;
+out vec4 outColor;
+
+// 楕円の中で 1、外側に向かってなめらかに 0
+float mask(vec2 p, vec2 c, vec2 r) {
+  return 1.0 - smoothstep(0.55, 1.0, length((p - c) / r));
+}
+
+vec3 photo(vec2 s) {
+  vec3 col = texture(uBase, s).rgb;
+  if (uBlinkAmt > 0.0) {
+    vec2 up = vec2(0.0, uEyeR.y * 0.2);
+    float e = max(mask(s, uEye0 - up, uEyeR), mask(s, uEye1 - up, uEyeR));
+    col = mix(col, texture(uBlink, s + uBlinkOff).rgb, e * uBlinkAmt);
+  }
+  return col;
+}
+
+void main() {
+  vec2 frag = gl_FragCoord.xy / uRes;
+  frag.y = 1.0 - frag.y;
+  float ca = uRes.x / uRes.y;
+
+  // 横長: 写真全体を高さに合わせて表示し、左右の余白はぼかした写真で埋める
+  // 縦長: 顔を中心に画面いっぱいに表示する
+  vec2 p;
+  vec2 bg;
+  if (ca >= 1.0) {
+    p = vec2(0.5 + (frag.x - 0.5) * ca, frag.y);
+    bg = vec2(0.5 + (frag.x - 0.5), 0.5 + (frag.y - 0.5) / ca);
+  } else {
+    vec2 view = vec2(ca, 1.0);
+    vec2 origin = clamp(uFocus - view * 0.5, vec2(0.0), vec2(1.0) - view);
+    p = origin + frag * view;
+    bg = p;
+  }
+  p = uFocus + (p - uFocus) / uZoom;
+
+  // 頭だけ動かす（あごより下の体は動かさない）
+  float headW = 1.0 - smoothstep(uChin, uChin + 0.12, p.y);
+  vec2 s = p - uHead * headW;
+
+  vec3 col = photo(clamp(s, 0.0, 1.0));
+  float inside = smoothstep(0.0, 0.015, p.x) * smoothstep(0.0, 0.015, 1.0 - p.x);
+  if (inside < 1.0) {
+    vec3 blurred = textureLod(uBase, clamp(bg, 0.0, 1.0), 6.5).rgb * 0.92;
+    col = mix(blurred, col, inside);
+  }
+  outColor = vec4(col, 1.0);
+}`;
+
+function startRenderer(
+  canvas: HTMLCanvasElement,
+  glow: HTMLDivElement,
+  barsBox: HTMLDivElement,
+  getVoice: () => AvatarVoice | null,
+  onReady: () => void,
+): () => void {
+  const bars = Array.from(barsBox.children) as HTMLElement[];
+  let running = true;
+  let frame = 0;
+
+  // 話している演出（WebGL が使えなくても動かす）
+  let level = 0;
+  let speakEnergy = 0;
+  let lastFx = performance.now();
+  const updateSpeakingFx = (now: number) => {
+    const dt = Math.min((now - lastFx) / 1000, 0.05);
+    lastFx = now;
+    const v = getVoice()?.getLevel() ?? { level: 0, brightness: 0.5 };
+    const target = Math.min(1, v.level * 3);
+    level += (target - level) * Math.min(1, dt * (target > level ? 20 : 8));
+    speakEnergy += ((v.level > 0.02 ? 1 : 0) - speakEnergy) * Math.min(1, dt * 4);
+    glow.style.opacity = String(speakEnergy * (0.35 + 0.65 * level));
+    barsBox.style.opacity = speakEnergy > 0.05 ? "1" : "0";
+    const t = now / 1000;
+    bars.forEach((bar, i) => {
+      const wobble = 0.55 + 0.45 * Math.sin(t * (7 + i * 1.7) + i * 1.3);
+      const center = 1 - Math.abs(i - (BARS - 1) / 2) / BARS;
+      bar.style.height = `${Math.round(6 + 22 * level * wobble * center)}px`;
     });
+    return speakEnergy;
   };
 
-  return {
-    start() {
-      b.style.opacity = "0";
-      play(a);
-    },
-    update() {
-      const d = active.duration;
-      if (!d || switching || active.currentTime < d - LOOP_FADE) return;
-      switching = true;
-      const next = active === a ? b : a;
-      next.currentTime = 0;
-      play(next);
-      // a → b は上の b をフェードイン、b → a は上の b をフェードアウト
-      b.style.opacity = next === b ? "1" : "0";
-      const prev = active;
-      active = next;
-      window.setTimeout(
-        () => {
-          prev.pause();
-          switching = false;
-        },
-        LOOP_FADE * 1000 + 50,
-      );
-    },
+  const gl = canvas.getContext("webgl2", { antialias: false, premultipliedAlpha: false });
+  // WebGL2 が使えない端末では背景の静止画 + 話している演出だけにする
+  if (!gl) {
+    onReady();
+    const loop = (now: number) => {
+      if (!running) return;
+      frame = requestAnimationFrame(loop);
+      updateSpeakingFx(now);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => {
+      running = false;
+      cancelAnimationFrame(frame);
+    };
+  }
+
+  const compile = (type: number, src: string) => {
+    const sh = gl.createShader(type)!;
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(sh));
+    return sh;
+  };
+  const prog = gl.createProgram()!;
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, "aPos");
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const u = (name: string) => gl.getUniformLocation(prog, name);
+  gl.uniform2f(u("uFocus"), ...FACE.focus);
+  gl.uniform2f(u("uEye0"), ...FACE.eyes[0]);
+  gl.uniform2f(u("uEye1"), ...FACE.eyes[1]);
+  gl.uniform2f(u("uEyeR"), ...FACE.eyeRadius);
+  gl.uniform2f(u("uBlinkOff"), ...FACE.blinkOffset);
+  gl.uniform1f(u("uChin"), FACE.chinY);
+  const uRes = u("uRes");
+  const uBlinkAmt = u("uBlinkAmt");
+  const uZoom = u("uZoom");
+  const uHead = u("uHead");
+
+  let loaded = false;
+  const textures: WebGLTexture[] = [];
+  const names = ["uBase", "uBlink"] as const;
+
+  Promise.all(
+    [PHOTOS.base, PHOTOS.blink].map(async (url) => {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      return img;
+    }),
+  )
+    .then((imgs) => {
+      if (!running) return;
+      imgs.forEach((img, i) => {
+        const tex = gl.createTexture()!;
+        textures.push(tex);
+        gl.activeTexture(gl.TEXTURE0 + i);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.uniform1i(u(names[i]), i);
+      });
+      loaded = true;
+      onReady();
+    })
+    .catch((e) => {
+      console.error("Avatar photos failed to load:", e);
+      onReady();
+    });
+
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+    canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  };
+  resize();
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+
+  let nextBlink = 1.5 + Math.random() * 3;
+  let blinkStart = -1;
+  const start = performance.now();
+
+  const tick = (now: number) => {
+    if (!running) return;
+    frame = requestAnimationFrame(tick);
+    const energy = updateSpeakingFx(now);
+    const t = (now - start) / 1000;
+    if (!loaded) return;
+
+    // まばたき（0.15秒で閉じて開く）
+    if (blinkStart < 0 && t > nextBlink) blinkStart = t;
+    let blink = 0;
+    if (blinkStart >= 0) {
+      const p = (t - blinkStart) / 0.15;
+      if (p >= 1) {
+        blinkStart = -1;
+        nextBlink = t + 2.5 + Math.random() * 3.5;
+      } else {
+        blink = Math.min(1, (1 - Math.abs(1 - p * 2)) * 1.6);
+      }
+    }
+
+    // 呼吸・首の揺れ・話している間のうなずき（単位は写真サイズ比）
+    const nod = energy * 0.0028 * (0.5 + 0.5 * Math.sin(t * 2.6));
+    const headX = Math.sin(t * 0.45) * 0.0015 + Math.sin(t * 1.1) * 0.0008 * energy;
+    const headY = Math.sin(t * 0.6) * 0.001 + nod;
+
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uBlinkAmt, blink);
+    gl.uniform1f(uZoom, 1.0 + Math.sin(t * 1.5) * 0.002);
+    gl.uniform2f(uHead, headX, headY);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  };
+  frame = requestAnimationFrame(tick);
+
+  return () => {
+    running = false;
+    cancelAnimationFrame(frame);
+    ro.disconnect();
+    textures.forEach((tex) => gl.deleteTexture(tex));
+    gl.deleteBuffer(buf);
+    gl.deleteProgram(prog);
   };
 }

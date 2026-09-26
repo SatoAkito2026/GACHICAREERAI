@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4 + shadcn/ui（`src/components/ui/`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターはAI生成の動画2本（`public/avatar/idle.mp4`＝聞いている、`talk.mp4`＝話している。Kling で生成）を、AIの音声再生中だけ話している動画に切り替えて表示する（`src/components/InterviewerAvatar.tsx`、音声再生は `src/lib/avatar-voice.ts`）。動画を差し替えるときは同じ構図・背景で作り、H.264 の mp4 にする
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。AI生成の写真（`public/avatar/base.webp`）を WebGL で表示し、目を閉じた写真（`eyes-closed.webp`）で目のまわりだけ切り替えてまばたきさせる。リアルな顔の口だけを動かすと不自然なので口は動かさず、AIの音声再生中（`src/lib/avatar-voice.ts` の音量）はうなずき・光・音の波で「話している」ことを示す。写真を差し替えるときは同ファイルの `FACE`（目の座標、目を閉じた写真のずれ）も合わせる
 - **決済**: Stripe / **メール**: Resend
 
 ## コマンド
