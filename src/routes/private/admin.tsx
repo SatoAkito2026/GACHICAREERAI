@@ -331,7 +331,7 @@ function OverviewTab({ data }: { data: DashboardData }) {
         <p style={{ color: "#999999", fontSize: 12, marginTop: 4, lineHeight: 1.7 }}>
           Claude(Anthropic)：console.anthropic.com の Plans & Billing
           <br />
-          Simli：app.simli.com のプラン画面
+          OpenAI（Whisper・音声合成）：platform.openai.com の Billing
           <br />
           上記のコスト表示は、あくまでDB上の利用実績から計算した概算です。
         </p>

@@ -54,7 +54,6 @@ import { Route as ApiSaveInterviewRouteImport } from './routes/api/save-intervie
 import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save-interview-recording'
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
-import { Route as ApiSimliSessionRouteImport } from './routes/api/simli-session'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
 import { Route as ApiToggleCandidateBookmarkRouteImport } from './routes/api/toggle-candidate-bookmark'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
@@ -332,11 +331,6 @@ const ApiScreenActorsBatchRoute = ApiScreenActorsBatchRouteImport.update({
 const ApiSendInterviewEmailRoute = ApiSendInterviewEmailRouteImport.update({
   id: '/api/send-interview-email',
   path: '/api/send-interview-email',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSimliSessionRoute = ApiSimliSessionRouteImport.update({
-  id: '/api/simli-session',
-  path: '/api/simli-session',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
@@ -648,7 +642,6 @@ export interface FileRoutesByFullPath {
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
-  '/api/simli-session': typeof ApiSimliSessionRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
@@ -745,7 +738,6 @@ export interface FileRoutesByTo {
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
-  '/api/simli-session': typeof ApiSimliSessionRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
@@ -843,7 +835,6 @@ export interface FileRoutesById {
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
-  '/api/simli-session': typeof ApiSimliSessionRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
@@ -942,7 +933,6 @@ export interface FileRouteTypes {
     | '/api/save-interview-recording'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
-    | '/api/simli-session'
     | '/api/stripe-webhook'
     | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
@@ -1039,7 +1029,6 @@ export interface FileRouteTypes {
     | '/api/save-interview-recording'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
-    | '/api/simli-session'
     | '/api/stripe-webhook'
     | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
@@ -1136,7 +1125,6 @@ export interface FileRouteTypes {
     | '/api/save-interview-recording'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
-    | '/api/simli-session'
     | '/api/stripe-webhook'
     | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
@@ -1234,7 +1222,6 @@ export interface RootRouteChildren {
   ApiSaveInterviewRecordingRoute: typeof ApiSaveInterviewRecordingRoute
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
-  ApiSimliSessionRoute: typeof ApiSimliSessionRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiToggleCandidateBookmarkRoute: typeof ApiToggleCandidateBookmarkRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
@@ -1601,13 +1588,6 @@ declare module '@tanstack/react-router' {
       path: '/api/send-interview-email'
       fullPath: '/api/send-interview-email'
       preLoaderRoute: typeof ApiSendInterviewEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/simli-session': {
-      id: '/api/simli-session'
-      path: '/api/simli-session'
-      fullPath: '/api/simli-session'
-      preLoaderRoute: typeof ApiSimliSessionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/stripe-webhook': {
@@ -2002,7 +1982,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSaveInterviewRecordingRoute: ApiSaveInterviewRecordingRoute,
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
-  ApiSimliSessionRoute: ApiSimliSessionRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiToggleCandidateBookmarkRoute: ApiToggleCandidateBookmarkRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,

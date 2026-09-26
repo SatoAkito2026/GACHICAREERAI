@@ -5,7 +5,7 @@
  *   body: { avatarStyle: 'friendly' | 'neutral' | 'strict' }
  *
  * 認証済みユーザー自身を宛先にした interview_invitations を作成し、
- * 既存の /interview/$token ページ(Simliアバター・音声認識・音声合成)に
+ * 既存の /interview/$token ページ(3Dアバター・音声認識・音声合成)に
  * そのまま案内する。screening_data にはプロフィール情報を注入し、
  * practice_mode を設定することで interview-turn.ts / save-interview.ts が
  * 企業面接とは別の質問方針・総評フォーマットで動作する。

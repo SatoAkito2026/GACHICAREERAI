@@ -8,7 +8,7 @@
  * - プラン別会員数・推定月間売上
  * - 直近30日の新規登録推移
  * - 今月の機能利用状況(feature_usage_counters・interviews集計)
- * - 今月の推定AI利用コスト(Claude/Whisper/TTS/Simliの概算)
+ * - 今月の推定AI利用コスト(Claude/Whisper/TTSの概算)
  *   ※実際の残クレジットはAPIで取得できないため、利用実績からの概算のみ。
  *     正確な残高は各サービスの管理画面で確認する必要がある。
  */
@@ -42,7 +42,6 @@ const CLAUDE_IN = 3 / 1e6;
 const CLAUDE_OUT = 15 / 1e6;
 const WHISPER_PER_MIN = 0.006;
 const TTS_PER_CHAR = 15 / 1e6;
-const SIMLI_PER_MIN_HOBBY = 0.01; // Hobbyプラン想定の概算単価
 
 export const Route = createFileRoute("/api/admin-dashboard-data")({
   server: {
@@ -126,28 +125,15 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
           .select("*", { count: "exact", head: true })
           .gte("created_at", monthStart);
 
-        const { data: practiceInvitations } = await supabase
-          .from("interview_invitations")
-          .select("practice_max_minutes")
-          .not("practice_mode", "is", null)
-          .gte("created_at", monthStart);
-        const estimatedPracticeMinutes = (practiceInvitations ?? []).reduce(
-          (sum, r) => sum + ((r as any).practice_max_minutes ?? 15),
-          0,
-        );
-
-        // ⑤ 今月の推定AI利用コスト(概算。実際の残高はAnthropic/Simliの管理画面で確認する必要あり)
+        // ⑤ 今月の推定AI利用コスト(概算。実際の残高はAnthropic/OpenAIの管理画面で確認する必要あり)
         const totalInterviewsForCost = interviewsThisMonth ?? 0;
         const claudeCostUsd =
           totalInterviewsForCost * 15 * (2000 * CLAUDE_IN + 150 * CLAUDE_OUT) + // 面接ターン分
           totalInterviewsForCost * (3000 * CLAUDE_IN + 800 * CLAUDE_OUT); // 総評生成分
         const whisperCostUsd = totalInterviewsForCost * 15 * WHISPER_PER_MIN;
         const ttsCostUsd = totalInterviewsForCost * 15 * 150 * TTS_PER_CHAR;
-        const simliCostUsd =
-          (estimatedPracticeMinutes + totalInterviewsForCost * 15) * SIMLI_PER_MIN_HOBBY;
 
-        const estimatedMonthlyCostJpy =
-          (claudeCostUsd + whisperCostUsd + ttsCostUsd + simliCostUsd) * USD_JPY;
+        const estimatedMonthlyCostJpy = (claudeCostUsd + whisperCostUsd + ttsCostUsd) * USD_JPY;
 
         // ⑥ 売上の内訳(個人/受験生 と 企業/学校を分けて見る)
         const individualRevenue =
@@ -400,7 +386,7 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
           featureAdoption,
           retentionRate7d,
           retentionRate30d,
-          note: "AI利用コストは実績ベースの概算です。正確な残高・請求額はAnthropic/Simli/OpenAIそれぞれの管理画面で確認してください。ランキング・分布は個人を特定しない集計値のみです。",
+          note: "AI利用コストは実績ベースの概算です。正確な残高・請求額はAnthropic/OpenAIそれぞれの管理画面で確認してください。ランキング・分布は個人を特定しない集計値のみです。",
         });
       },
     },

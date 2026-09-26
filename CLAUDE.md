@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4 + shadcn/ui（`src/components/ui/`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）、Simli（アバター映像）
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは three.js で自前描画（`src/components/InterviewerAvatar.tsx`、口パクは `src/lib/avatar-voice.ts`）
 - **決済**: Stripe / **メール**: Resend
 
 ## コマンド
@@ -51,7 +51,7 @@ npm run deploy     # build + wrangler deploy
 |---|---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PROJECT_ID` | ブラウザ用（ビルド時に埋め込み） | `.env.production` / `.env.development`（コミット済み） |
 | `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `APP_URL` | サーバー用の公開値 | `wrangler.jsonc` の `vars` |
-| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SIMLI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
+| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
 
 テンプレート: `.env.example`, `.dev.vars.example`
 

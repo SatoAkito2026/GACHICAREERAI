@@ -382,7 +382,7 @@ ${companyContext || "（企業情報未設定）"}
             const errText = await ttsRes.text();
             console.error("OpenAI TTS status:", ttsRes.status);
             console.error("OpenAI TTS error:", errText);
-            return json({ aiText, audioBase64: null, isEnded }, 200);
+            return json({ aiText, audioBase64: null, isEnded, avatarStyle }, 200);
           }
 
           const audioBuffer = await ttsRes.arrayBuffer();
@@ -398,7 +398,7 @@ ${companyContext || "（企業情報未設定）"}
               .eq("token", body.token);
           }
 
-          return json({ aiText, audioBase64, isEnded });
+          return json({ aiText, audioBase64, isEnded, avatarStyle });
         } catch (e) {
           console.error(e);
           return json({ error: "Internal server error" }, 500);

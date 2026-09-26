@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { InterviewerAvatar, type AvatarStyle } from "@/components/InterviewerAvatar";
+import { getAvatarVoice } from "@/lib/avatar-voice";
 
 export const Route = createFileRoute("/interview/$token")({
   component: InterviewTokenPage,
-  // このページはカメラ/マイク/AudioContext/Simli 等、ブラウザ専用APIに全面的に
+  // このページはカメラ/マイク/AudioContext/WebGL 等、ブラウザ専用APIに全面的に
   // 依存しており、サーバーサイドレンダリングする意味がない。SSRを無効化して
   // スマートフォン等での "This page didn't load" (SSR時のブラウザAPI参照) を防ぐ。
   ssr: false,
@@ -300,6 +302,8 @@ function InterviewTokenPage() {
         invitation={invitation}
         token={token}
         onEnter={async () => {
+          // クリック直後に音声再生を許可しておく（iOS Safari の自動再生制限対策）
+          void getAvatarVoice().unlock();
           // 入室時にstatusをstartedに更新（二重開封防止）
           await supabase
             .from("interview_invitations")
@@ -716,9 +720,8 @@ function LiveScreen({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordingRef = useRef<MediaRecorder | null>(null);
   const screenChunksRef = useRef<Blob[]>([]);
-  const simliVideoRef = useRef<HTMLVideoElement>(null);
-  const simliAudioRef = useRef<HTMLAudioElement>(null);
-  const simliClientRef = useRef<any>(null);
+  const voice = getAvatarVoice();
+  const greetedRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -729,7 +732,8 @@ function LiveScreen({
   const [isSavingResult, setIsSavingResult] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const [simliReady, setSimliReady] = useState(false);
+  const [avatarReady, setAvatarReady] = useState(false);
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>("neutral");
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
@@ -822,39 +826,16 @@ function LiveScreen({
         // 画面録画許可なしでも続行
       });
 
-    // Simli初期化
-    (async () => {
-      try {
-        const { SimliClient } = await import("simli-client/dist/client.js");
-        const videoEl = simliVideoRef.current;
-        const audioEl = simliAudioRef.current;
-        if (!videoEl || !audioEl) return;
-        // Simli の API キーはサーバー側で保持し、ここではセッショントークンだけ受け取る
-        const sessionRes = await fetch("/api/simli-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-        if (!sessionRes.ok) throw new Error(`Simli session failed: ${sessionRes.status}`);
-        const { session_token, iceServers } = await sessionRes.json();
-        const client = new SimliClient(session_token, videoEl, audioEl, iceServers);
-        client.on("start", () => {
-          setSimliReady(true);
-          // Simli接続完了後に最初の挨拶を送信
-          sendTurn("（面接開始）", []);
-        });
-        client.start();
-        simliClientRef.current = client;
-      } catch (e) {
-        console.error("Simli init failed:", e);
-        alert(e instanceof Error ? e.message : String(e));
-      }
-    })();
+    // 最初の挨拶（アバターはブラウザ内で描画するので接続待ちは不要）。二重送信しないよう一度だけ
+    if (!greetedRef.current) {
+      greetedRef.current = true;
+      sendTurn("（面接開始）", []);
+    }
 
     return () => {
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
       recordingRef.current?.stop();
-      simliClientRef.current?.stop();
+      voice.stop();
     };
   }, []);
 
@@ -870,7 +851,9 @@ function LiveScreen({
         aiText: string;
         audioBase64: string | null;
         isEnded: boolean;
+        avatarStyle?: AvatarStyle;
       };
+      if (data.avatarStyle && data.avatarStyle !== avatarStyle) setAvatarStyle(data.avatarStyle);
 
       const newMessages: Message[] = [...history];
       if (candidateText !== "（面接開始）") {
@@ -881,43 +864,13 @@ function LiveScreen({
 
       if (data.audioBase64) {
         const pcmData = Uint8Array.from(atob(data.audioBase64), (c) => c.charCodeAt(0));
-
-        // 24000Hz PCM → float32に変換してSimliに送信
-        // SimliがPCMを受け取って音声再生とリップシンクを同期して行う
-        const view = new DataView(pcmData.buffer);
-        const samples24k = pcmData.length / 2;
-        const float32_24k = new Float32Array(samples24k);
-        for (let i = 0; i < samples24k; i++) {
-          float32_24k[i] = view.getInt16(i * 2, true) / 32768;
-        }
-
-        if (simliClientRef.current) {
-          const ratio = 24000 / 14700;
-          const samples16k = Math.floor(samples24k / ratio);
-          const int16_16k = new Int16Array(samples16k);
-          for (let i = 0; i < samples16k; i++) {
-            // 線形補間で高品質ダウンサンプリング
-            const srcIdxF = i * ratio;
-            const srcIdx0 = Math.floor(srcIdxF);
-            const srcIdx1 = Math.min(srcIdx0 + 1, samples24k - 1);
-            const frac = srcIdxF - srcIdx0;
-            int16_16k[i] = Math.round(
-              (float32_24k[srcIdx0] * (1 - frac) + float32_24k[srcIdx1] * frac) * 32767,
-            );
-          }
-          simliClientRef.current.sendAudioData(new Uint8Array(int16_16k.buffer));
-        }
-
-        // SimliのaudioRefが再生を開始したらisAiSpeakingをtrueにする
+        // 再生が終わるまで「AI発話中」にしてマイクの自動検出を止める
         setIsAiSpeaking(true);
         isAiSpeakingRef.current = true;
-
-        // 音声長さから再生時間を計算してisAiSpeakingを解除
-        const durationMs = (samples24k / 24000) * 1000;
-        setTimeout(() => {
+        void voice.playPcm16(pcmData).finally(() => {
           setIsAiSpeaking(false);
           isAiSpeakingRef.current = false;
-        }, durationMs);
+        });
       }
 
       if (data.isEnded) {
@@ -1163,19 +1116,12 @@ function LiveScreen({
           >
             AI面接官
           </span>
-          <video
-            ref={simliVideoRef}
-            autoPlay
-            playsInline
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: simliReady ? "block" : "none",
-            }}
+          <InterviewerAvatar
+            voice={voice}
+            style={avatarStyle}
+            onReady={() => setAvatarReady(true)}
           />
-          <audio ref={simliAudioRef} autoPlay style={{ display: "none" }} />
-          {!simliReady && (
+          {!avatarReady && (
             <div
               style={{
                 position: "absolute",
@@ -1188,7 +1134,7 @@ function LiveScreen({
               }}
             >
               <span style={{ fontSize: "clamp(40px,8vmin,80px)", lineHeight: 1 }}>🤖</span>
-              <span style={{ fontSize: 12, color: "#555" }}>接続中...</span>
+              <span style={{ fontSize: 12, color: "#555" }}>準備中...</span>
             </div>
           )}
           {isAiSpeaking && (

@@ -18,7 +18,6 @@ npx wrangler login
 npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 npx wrangler secret put ANTHROPIC_API_KEY
 npx wrangler secret put OPENAI_API_KEY
-npx wrangler secret put SIMLI_API_KEY
 npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 npx wrangler secret put RESEND_API_KEY
