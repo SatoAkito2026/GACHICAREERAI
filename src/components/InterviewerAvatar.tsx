@@ -241,6 +241,7 @@ function startRenderer(
 
       let mouthOpen = 0;
       let mouthWidth = 0;
+      let speaking = 0; // 話している度合い（ゆっくり 0〜1 に近づける）
       let last = performance.now();
       const start = last;
       const tick = (now: number) => {
@@ -253,8 +254,9 @@ function startRenderer(
         const mouth = voice?.getMouth() ?? { open: 0, width: 0 };
         const k = Math.min(1, dt * 30);
         mouthOpen += (mouth.open - mouthOpen) * k;
+        speaking += ((voice?.isPlaying() ? 1 : 0) - speaking) * Math.min(1, dt * 2.5);
         mouthWidth += (mouth.width - mouthWidth) * k;
-        draw(canvas.width, canvas.height, t, mouthOpen, mouthWidth);
+        draw(canvas.width, canvas.height, t, mouthOpen, mouthWidth, speaking);
       };
       frame = requestAnimationFrame(tick);
     })
@@ -427,7 +429,7 @@ function setupScene(
     return p < 0.35 ? ease(p / 0.35) : p < 0.6 ? 1 : 1 - ease((p - 0.6) / 0.4);
   };
 
-  return (cw: number, ch: number, t: number, open: number, width: number) => {
+  return (cw: number, ch: number, t: number, open: number, width: number, speaking: number) => {
     gl.viewport(0, 0, cw, ch);
     const ca = cw / ch;
     // 写真の高さを画面に合わせる。横長なら左右に余白、縦長なら顔を中心に左右を切る
@@ -453,8 +455,8 @@ function setupScene(
     }
 
     const [ang, scale, tx, ty] = sample(t);
-    // 話している間は、口の開きに合わせてわずかにうなずく
-    const nod = open * 0.012;
+    // 話している間は、ゆっくり小さくうなずく（音節ごとに動かすと顔が小刻みに揺れて見えるため）
+    const nod = speaking * 0.0016 * (0.5 + 0.5 * Math.sin(t * 2.4));
     const set = (u: ReturnType<typeof uniforms>) => {
       gl.uniform1f(u.open, open);
       gl.uniform1f(u.width, width);

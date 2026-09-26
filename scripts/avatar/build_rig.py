@@ -30,6 +30,8 @@ IDLE_END = 70  # 参考動画の 0〜2.9 秒（聞いている区間）
 
 # 頭の動きを測るときに使う、表情で動かない点（鼻筋・おでこ・頬骨・目尻・こめかみ）
 STABLE = [6, 168, 197, 195, 10, 151, 9, 234, 454, 93, 323, 33, 263, 127, 356, 8]
+# 首の動きを測る点（目尻はまばたきで動いて首が動いたように見えるので除く）
+POSE_POINTS = [6, 168, 197, 195, 10, 151, 9, 234, 454, 93, 323, 127, 356, 8]
 INNER_LIPS = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
 EYES = [
     [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7],
@@ -135,9 +137,10 @@ def main():
         brow = (np.linalg.norm(g[105] - g[159]) + np.linalg.norm(g[334] - g[386])) / 2 / v_eyew
         feats.append([open_, width, blink, brow])
         disp.append(g)
-        ang = -np.degrees(np.arctan2(r[1, 0], r[0, 0]))
-        center = f[STABLE].mean(0) - ref[STABLE].mean(0)
-        pose.append([ang, 1 / sc, center[0] * k / W, center[1] * k / H])
+        psc, pr, _ = similarity(f[POSE_POINTS], ref[POSE_POINTS])
+        ang = -np.degrees(np.arctan2(pr[1, 0], pr[0, 0]))
+        center = f[POSE_POINTS].mean(0) - ref[POSE_POINTS].mean(0)
+        pose.append([ang, 1 / psc, center[0] * k / W, center[1] * k / H])
     feats = np.array(feats)
     disp = np.array(disp)
     neutral = (feats[:, 0] < 0.01) & (feats[:, 2] > 0.3)
@@ -210,10 +213,26 @@ def main():
 
     idle = list(range(IDLE_END)) + list(range(IDLE_END - 2, 0, -1))
     # 首の傾き・拡大・ずれだけを使う。まばたきは参考動画のものだと遅く、眉はまばたきと混ざって顔が崩れるため使わない
-    curves = []
-    for i in idle:
-        ang, sc, tx, ty = pose[i]
-        curves.append([round(ang, 3), round(sc, 4), round(tx, 5), round(ty, 5)])
+    # まばたき中のコマは顔の点がずれて首が動いたように測れてしまうので、前後のコマから補間する。
+    # さらに、なめらかにして急な変化をなくし、平均が 0 になるようにする（顔の大きさ・位置がぐにゃっと変わらないように）
+    poses = np.array([pose[i] for i in idle], float)
+    blinking = np.array([feats[i, 2] < 0.3 for i in idle])
+    blinking = np.convolve(blinking.astype(float), np.ones(7), mode="same") > 0  # 前後 3 コマも含める
+    x = np.arange(len(idle))
+    for c in range(4):
+        poses[~blinking, c] = poses[~blinking, c]
+        poses[blinking, c] = np.interp(x[blinking], x[~blinking], poses[~blinking, c], period=len(idle))
+    sigma = 4.0
+    kern = np.exp(-0.5 * (np.arange(-12, 13) / sigma) ** 2)
+    kern /= kern.sum()
+    for c in range(4):
+        padded = np.concatenate([poses[-12:, c], poses[:, c], poses[:12, c]])  # ループなので端をつなげる
+        poses[:, c] = np.convolve(padded, kern, mode="same")[12:-12]
+    poses[:, 0] -= poses[:, 0].mean()
+    poses[:, 1] = 1 + np.clip(poses[:, 1] - poses[:, 1].mean(), -0.004, 0.004)
+    poses[:, 2] -= poses[:, 2].mean()
+    poses[:, 3] -= poses[:, 3].mean()
+    curves = [[round(a, 3), round(sc, 4), round(tx, 5), round(ty, 5)] for a, sc, tx, ty in poses]
 
     pivot = base[152] + np.array([0, 0.35 * eyew])  # あごの少し下（首）を中心に頭を傾ける
     rig = {
