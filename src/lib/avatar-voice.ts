@@ -82,6 +82,11 @@ export class AvatarVoice {
     }
   }
 
+  /** 音声を再生中かどうか */
+  isPlaying(): boolean {
+    return this.current !== null;
+  }
+
   getLevel(): VoiceLevel {
     const analyser = this.analyser;
     if (!analyser || !this.current) return { level: 0, brightness: 0.5 };
