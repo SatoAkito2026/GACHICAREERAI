@@ -66,6 +66,13 @@ import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateAgencyRouteImport } from './routes/private/agency'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
+import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
+import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
+import { Route as ApiTalentMessagesRouteImport } from './routes/api/talent/messages'
+import { Route as ApiTalentMyProfileRouteImport } from './routes/api/talent/my-profile'
+import { Route as ApiTalentRecordingRouteImport } from './routes/api/talent/recording'
+import { Route as ApiTalentSearchRouteImport } from './routes/api/talent/search'
+import { Route as ApiTalentUnlockRouteImport } from './routes/api/talent/unlock'
 import { Route as BusinessActorIndexRouteImport } from './routes/business/actor/index'
 import { Route as BusinessActorDatabaseRouteImport } from './routes/business/actor/database'
 import { Route as BusinessActorHistoryRouteImport } from './routes/business/actor/history'
@@ -395,6 +402,41 @@ const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   path: '/screening/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTalentContactsRoute = ApiTalentContactsRouteImport.update({
+  id: '/api/talent/contacts',
+  path: '/api/talent/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentDetailRoute = ApiTalentDetailRouteImport.update({
+  id: '/api/talent/detail',
+  path: '/api/talent/detail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentMessagesRoute = ApiTalentMessagesRouteImport.update({
+  id: '/api/talent/messages',
+  path: '/api/talent/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentMyProfileRoute = ApiTalentMyProfileRouteImport.update({
+  id: '/api/talent/my-profile',
+  path: '/api/talent/my-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentRecordingRoute = ApiTalentRecordingRouteImport.update({
+  id: '/api/talent/recording',
+  path: '/api/talent/recording',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentSearchRoute = ApiTalentSearchRouteImport.update({
+  id: '/api/talent/search',
+  path: '/api/talent/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentUnlockRoute = ApiTalentUnlockRouteImport.update({
+  id: '/api/talent/unlock',
+  path: '/api/talent/unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessActorIndexRoute = BusinessActorIndexRouteImport.update({
   id: '/business/actor/',
   path: '/business/actor/',
@@ -660,6 +702,13 @@ export interface FileRoutesByFullPath {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/talent/contacts': typeof ApiTalentContactsRoute
+  '/api/talent/detail': typeof ApiTalentDetailRoute
+  '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/recording': typeof ApiTalentRecordingRoute
+  '/api/talent/search': typeof ApiTalentSearchRoute
+  '/api/talent/unlock': typeof ApiTalentUnlockRoute
   '/business/actor/database': typeof BusinessActorDatabaseRoute
   '/business/actor/history': typeof BusinessActorHistoryRoute
   '/business/actor/screening': typeof BusinessActorScreeningRoute
@@ -757,6 +806,13 @@ export interface FileRoutesByTo {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business': typeof BusinessIndexRoute
   '/private': typeof PrivateIndexRoute
+  '/api/talent/contacts': typeof ApiTalentContactsRoute
+  '/api/talent/detail': typeof ApiTalentDetailRoute
+  '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/recording': typeof ApiTalentRecordingRoute
+  '/api/talent/search': typeof ApiTalentSearchRoute
+  '/api/talent/unlock': typeof ApiTalentUnlockRoute
   '/business/actor/database': typeof BusinessActorDatabaseRoute
   '/business/actor/history': typeof BusinessActorHistoryRoute
   '/business/actor/screening': typeof BusinessActorScreeningRoute
@@ -855,6 +911,13 @@ export interface FileRoutesById {
   '/screening_/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/talent/contacts': typeof ApiTalentContactsRoute
+  '/api/talent/detail': typeof ApiTalentDetailRoute
+  '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/recording': typeof ApiTalentRecordingRoute
+  '/api/talent/search': typeof ApiTalentSearchRoute
+  '/api/talent/unlock': typeof ApiTalentUnlockRoute
   '/business/actor/database': typeof BusinessActorDatabaseRoute
   '/business/actor/history': typeof BusinessActorHistoryRoute
   '/business/actor/screening': typeof BusinessActorScreeningRoute
@@ -954,6 +1017,13 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business/'
     | '/private/'
+    | '/api/talent/contacts'
+    | '/api/talent/detail'
+    | '/api/talent/messages'
+    | '/api/talent/my-profile'
+    | '/api/talent/recording'
+    | '/api/talent/search'
+    | '/api/talent/unlock'
     | '/business/actor/database'
     | '/business/actor/history'
     | '/business/actor/screening'
@@ -1051,6 +1121,13 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business'
     | '/private'
+    | '/api/talent/contacts'
+    | '/api/talent/detail'
+    | '/api/talent/messages'
+    | '/api/talent/my-profile'
+    | '/api/talent/recording'
+    | '/api/talent/search'
+    | '/api/talent/unlock'
     | '/business/actor/database'
     | '/business/actor/history'
     | '/business/actor/screening'
@@ -1148,6 +1225,13 @@ export interface FileRouteTypes {
     | '/screening_/history'
     | '/business/'
     | '/private/'
+    | '/api/talent/contacts'
+    | '/api/talent/detail'
+    | '/api/talent/messages'
+    | '/api/talent/my-profile'
+    | '/api/talent/recording'
+    | '/api/talent/search'
+    | '/api/talent/unlock'
     | '/business/actor/database'
     | '/business/actor/history'
     | '/business/actor/screening'
@@ -1246,6 +1330,13 @@ export interface RootRouteChildren {
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
+  ApiTalentContactsRoute: typeof ApiTalentContactsRoute
+  ApiTalentDetailRoute: typeof ApiTalentDetailRoute
+  ApiTalentMessagesRoute: typeof ApiTalentMessagesRoute
+  ApiTalentMyProfileRoute: typeof ApiTalentMyProfileRoute
+  ApiTalentRecordingRoute: typeof ApiTalentRecordingRoute
+  ApiTalentSearchRoute: typeof ApiTalentSearchRoute
+  ApiTalentUnlockRoute: typeof ApiTalentUnlockRoute
   BusinessActorDatabaseRoute: typeof BusinessActorDatabaseRoute
   BusinessActorHistoryRoute: typeof BusinessActorHistoryRoute
   BusinessActorScreeningRoute: typeof BusinessActorScreeningRoute
@@ -1687,6 +1778,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScreeningHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/talent/contacts': {
+      id: '/api/talent/contacts'
+      path: '/api/talent/contacts'
+      fullPath: '/api/talent/contacts'
+      preLoaderRoute: typeof ApiTalentContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/detail': {
+      id: '/api/talent/detail'
+      path: '/api/talent/detail'
+      fullPath: '/api/talent/detail'
+      preLoaderRoute: typeof ApiTalentDetailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/messages': {
+      id: '/api/talent/messages'
+      path: '/api/talent/messages'
+      fullPath: '/api/talent/messages'
+      preLoaderRoute: typeof ApiTalentMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/my-profile': {
+      id: '/api/talent/my-profile'
+      path: '/api/talent/my-profile'
+      fullPath: '/api/talent/my-profile'
+      preLoaderRoute: typeof ApiTalentMyProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/recording': {
+      id: '/api/talent/recording'
+      path: '/api/talent/recording'
+      fullPath: '/api/talent/recording'
+      preLoaderRoute: typeof ApiTalentRecordingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/search': {
+      id: '/api/talent/search'
+      path: '/api/talent/search'
+      fullPath: '/api/talent/search'
+      preLoaderRoute: typeof ApiTalentSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/unlock': {
+      id: '/api/talent/unlock'
+      path: '/api/talent/unlock'
+      fullPath: '/api/talent/unlock'
+      preLoaderRoute: typeof ApiTalentUnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/actor/': {
       id: '/business/actor/'
       path: '/business/actor'
@@ -2014,6 +2154,13 @@ const rootRouteChildren: RootRouteChildren = {
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   PrivateIndexRoute: PrivateIndexRoute,
+  ApiTalentContactsRoute: ApiTalentContactsRoute,
+  ApiTalentDetailRoute: ApiTalentDetailRoute,
+  ApiTalentMessagesRoute: ApiTalentMessagesRoute,
+  ApiTalentMyProfileRoute: ApiTalentMyProfileRoute,
+  ApiTalentRecordingRoute: ApiTalentRecordingRoute,
+  ApiTalentSearchRoute: ApiTalentSearchRoute,
+  ApiTalentUnlockRoute: ApiTalentUnlockRoute,
   BusinessActorDatabaseRoute: BusinessActorDatabaseRoute,
   BusinessActorHistoryRoute: BusinessActorHistoryRoute,
   BusinessActorScreeningRoute: BusinessActorScreeningRoute,

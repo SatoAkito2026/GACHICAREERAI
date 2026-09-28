@@ -8,6 +8,164 @@ export type Database = {
   };
   public: {
     Tables: {
+      candidate_profiles: {
+        Row: {
+          average_score: number | null;
+          career_stage: string | null;
+          consented_at: string | null;
+          created_at: string;
+          desired_jobs: string | null;
+          desired_locations: string | null;
+          display_name: string | null;
+          headline: string | null;
+          interview_count: number;
+          is_public: boolean;
+          public_code: string;
+          record_practice: boolean;
+          self_pr: string | null;
+          show_recording: boolean;
+          summary: Json | null;
+          summary_stale: boolean;
+          summary_updated_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          average_score?: number | null;
+          career_stage?: string | null;
+          consented_at?: string | null;
+          created_at?: string;
+          desired_jobs?: string | null;
+          desired_locations?: string | null;
+          display_name?: string | null;
+          headline?: string | null;
+          interview_count?: number;
+          is_public?: boolean;
+          public_code?: string;
+          record_practice?: boolean;
+          self_pr?: string | null;
+          show_recording?: boolean;
+          summary?: Json | null;
+          summary_stale?: boolean;
+          summary_updated_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          average_score?: number | null;
+          career_stage?: string | null;
+          consented_at?: string | null;
+          created_at?: string;
+          desired_jobs?: string | null;
+          desired_locations?: string | null;
+          display_name?: string | null;
+          headline?: string | null;
+          interview_count?: number;
+          is_public?: boolean;
+          public_code?: string;
+          record_practice?: boolean;
+          self_pr?: string | null;
+          show_recording?: boolean;
+          summary?: Json | null;
+          summary_stale?: boolean;
+          summary_updated_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      contact_messages: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          read_at: string | null;
+          request_id: string;
+          sender_user_id: string;
+        };
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          read_at?: string | null;
+          request_id: string;
+          sender_user_id: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          read_at?: string | null;
+          request_id?: string;
+          sender_user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contact_messages_request_id_fkey";
+            columns: ["request_id"];
+            isOneToOne: false;
+            referencedRelation: "contact_requests";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      contact_requests: {
+        Row: {
+          candidate_user_id: string;
+          company_user_id: string;
+          created_at: string;
+          id: string;
+          message: string;
+          responded_at: string | null;
+          status: string;
+        };
+        Insert: {
+          candidate_user_id: string;
+          company_user_id: string;
+          created_at?: string;
+          id?: string;
+          message?: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          candidate_user_id?: string;
+          company_user_id?: string;
+          created_at?: string;
+          id?: string;
+          message?: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Relationships: [];
+      };
+      profile_unlocks: {
+        Row: {
+          amount: number;
+          candidate_user_id: string;
+          company_user_id: string;
+          created_at: string;
+          id: string;
+          stripe_payment_intent_id: string | null;
+        };
+        Insert: {
+          amount?: number;
+          candidate_user_id: string;
+          company_user_id: string;
+          created_at?: string;
+          id?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Update: {
+          amount?: number;
+          candidate_user_id?: string;
+          company_user_id?: string;
+          created_at?: string;
+          id?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Relationships: [];
+      };
       actor_audition_notes: {
         Row: {
           actor_id: string;

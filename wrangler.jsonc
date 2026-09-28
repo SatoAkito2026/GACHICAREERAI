@@ -13,6 +13,8 @@
     "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM",
     "SUPABASE_PROJECT_ID": "lcqpihitxmqaygriuhao",
     "APP_URL": "https://interview-copilot-ai.akitogroup.jp",
+    // 企業が1人分のプロフィール（録画・名前・詳しい評価）を見るチケットの値段（円・税込）
+    "TALENT_TICKET_PRICE_JPY": "10000",
   },
   // 毎時: デイリーリマインダー + 俳優データ更新（src/server.ts の scheduled）
   "triggers": {

@@ -19,6 +19,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { notifyUnlocked, recordUnlockFromPaymentIntent } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 
 function json(body: unknown, status = 200) {
@@ -154,6 +155,16 @@ export const Route = createFileRoute("/api/stripe-webhook")({
                 console.error("[webhook] Failed to clear subscription_id:", updErr);
               } else {
                 console.log("[webhook] Subscription cancelled:", subscription.id);
+              }
+              break;
+            }
+
+            // ─── 人材プロフィールの閲覧チケット（確認APIが呼ばれなかった場合の保険） ───
+            case "payment_intent.succeeded": {
+              const pi = event.data.object as Stripe.PaymentIntent;
+              const result = await recordUnlockFromPaymentIntent(supabase, pi);
+              if (result?.isNew) {
+                await notifyUnlocked(supabase, result.candidateUserId, result.companyUserId);
               }
               break;
             }
