@@ -81,6 +81,7 @@ import { Route as BusinessCompanyIndexRouteImport } from './routes/business/comp
 import { Route as BusinessCompanyCandidatesRouteImport } from './routes/business/company/candidates'
 import { Route as BusinessCompanyHistoryRouteImport } from './routes/business/company/history'
 import { Route as BusinessCompanyJobsRouteImport } from './routes/business/company/jobs'
+import { Route as BusinessCompanyMessagesRouteImport } from './routes/business/company/messages'
 import { Route as BusinessCompanyScreeningRouteImport } from './routes/business/company/screening'
 import { Route as BusinessCompanySettingsRouteImport } from './routes/business/company/settings'
 import { Route as BusinessSchoolIndexRouteImport } from './routes/business/school/index'
@@ -92,12 +93,14 @@ import { Route as PrivateIndividualIndexRouteImport } from './routes/private/ind
 import { Route as PrivateIndividualDailyQuestionsRouteImport } from './routes/private/individual/daily-questions'
 import { Route as PrivateIndividualDocumentsRouteImport } from './routes/private/individual/documents'
 import { Route as PrivateIndividualHistoryRouteImport } from './routes/private/individual/history'
+import { Route as PrivateIndividualOffersRouteImport } from './routes/private/individual/offers'
 import { Route as PrivateIndividualOnboardingRouteImport } from './routes/private/individual/onboarding'
 import { Route as PrivateIndividualPracticeRouteImport } from './routes/private/individual/practice'
 import { Route as PrivateIndividualPrepRouteImport } from './routes/private/individual/prep'
 import { Route as PrivateIndividualProfileRouteImport } from './routes/private/individual/profile'
 import { Route as PrivateIndividualResearchRouteImport } from './routes/private/individual/research'
 import { Route as PrivateIndividualSelfAnalysisRouteImport } from './routes/private/individual/self-analysis'
+import { Route as PrivateIndividualTalentRouteImport } from './routes/private/individual/talent'
 import { Route as PrivateStudentIndexRouteImport } from './routes/private/student/index'
 import { Route as PrivateStudentDailyQuestionsRouteImport } from './routes/private/student/daily-questions'
 import { Route as PrivateStudentDocumentsRouteImport } from './routes/private/student/documents'
@@ -110,6 +113,8 @@ import { Route as PrivateStudentSelfAnalysisRouteImport } from './routes/private
 import { Route as PrivateStudentStatementRouteImport } from './routes/private/student/statement'
 import { Route as BusinessActorScreeningHistoryRouteImport } from './routes/business/actor/screening_/history'
 import { Route as BusinessCompanyScreeningHistoryRouteImport } from './routes/business/company/screening_.history'
+import { Route as BusinessCompanyTalentIndexRouteImport } from './routes/business/company/talent.index'
+import { Route as BusinessCompanyTalentCodeRouteImport } from './routes/business/company/talent.$code'
 import { Route as BusinessSchoolScreeningHistoryRouteImport } from './routes/business/school/screening_.history'
 
 const IndexRoute = IndexRouteImport.update({
@@ -478,6 +483,11 @@ const BusinessCompanyJobsRoute = BusinessCompanyJobsRouteImport.update({
   path: '/business/company/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessCompanyMessagesRoute = BusinessCompanyMessagesRouteImport.update({
+  id: '/business/company/messages',
+  path: '/business/company/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessCompanyScreeningRoute =
   BusinessCompanyScreeningRouteImport.update({
     id: '/business/company/screening',
@@ -537,6 +547,11 @@ const PrivateIndividualHistoryRoute =
     path: '/private/individual/history',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PrivateIndividualOffersRoute = PrivateIndividualOffersRouteImport.update({
+  id: '/private/individual/offers',
+  path: '/private/individual/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateIndividualOnboardingRoute =
   PrivateIndividualOnboardingRouteImport.update({
     id: '/private/individual/onboarding',
@@ -572,6 +587,11 @@ const PrivateIndividualSelfAnalysisRoute =
     path: '/private/individual/self-analysis',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PrivateIndividualTalentRoute = PrivateIndividualTalentRouteImport.update({
+  id: '/private/individual/talent',
+  path: '/private/individual/talent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateStudentIndexRoute = PrivateStudentIndexRouteImport.update({
   id: '/private/student/',
   path: '/private/student/',
@@ -635,6 +655,18 @@ const BusinessCompanyScreeningHistoryRoute =
   BusinessCompanyScreeningHistoryRouteImport.update({
     id: '/business/company/screening_/history',
     path: '/business/company/screening/history',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BusinessCompanyTalentIndexRoute =
+  BusinessCompanyTalentIndexRouteImport.update({
+    id: '/business/company/talent/',
+    path: '/business/company/talent/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BusinessCompanyTalentCodeRoute =
+  BusinessCompanyTalentCodeRouteImport.update({
+    id: '/business/company/talent/$code',
+    path: '/business/company/talent/$code',
     getParentRoute: () => rootRouteImport,
   } as any)
 const BusinessSchoolScreeningHistoryRoute =
@@ -715,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/business/company/candidates': typeof BusinessCompanyCandidatesRoute
   '/business/company/history': typeof BusinessCompanyHistoryRoute
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
+  '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/history': typeof BusinessSchoolHistoryRoute
@@ -724,12 +757,14 @@ export interface FileRoutesByFullPath {
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
+  '/private/individual/offers': typeof PrivateIndividualOffersRoute
   '/private/individual/onboarding': typeof PrivateIndividualOnboardingRoute
   '/private/individual/practice': typeof PrivateIndividualPracticeRoute
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
+  '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
@@ -746,7 +781,9 @@ export interface FileRoutesByFullPath {
   '/private/student/': typeof PrivateStudentIndexRoute
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
+  '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -819,6 +856,7 @@ export interface FileRoutesByTo {
   '/business/company/candidates': typeof BusinessCompanyCandidatesRoute
   '/business/company/history': typeof BusinessCompanyHistoryRoute
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
+  '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/history': typeof BusinessSchoolHistoryRoute
@@ -828,12 +866,14 @@ export interface FileRoutesByTo {
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
+  '/private/individual/offers': typeof PrivateIndividualOffersRoute
   '/private/individual/onboarding': typeof PrivateIndividualOnboardingRoute
   '/private/individual/practice': typeof PrivateIndividualPracticeRoute
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
+  '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
@@ -850,7 +890,9 @@ export interface FileRoutesByTo {
   '/private/student': typeof PrivateStudentIndexRoute
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
+  '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/company/talent': typeof BusinessCompanyTalentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -924,6 +966,7 @@ export interface FileRoutesById {
   '/business/company/candidates': typeof BusinessCompanyCandidatesRoute
   '/business/company/history': typeof BusinessCompanyHistoryRoute
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
+  '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/history': typeof BusinessSchoolHistoryRoute
@@ -933,12 +976,14 @@ export interface FileRoutesById {
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
+  '/private/individual/offers': typeof PrivateIndividualOffersRoute
   '/private/individual/onboarding': typeof PrivateIndividualOnboardingRoute
   '/private/individual/practice': typeof PrivateIndividualPracticeRoute
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
+  '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
@@ -955,7 +1000,9 @@ export interface FileRoutesById {
   '/private/student/': typeof PrivateStudentIndexRoute
   '/business/actor/screening_/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening_/history': typeof BusinessCompanyScreeningHistoryRoute
+  '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening_/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1030,6 +1077,7 @@ export interface FileRouteTypes {
     | '/business/company/candidates'
     | '/business/company/history'
     | '/business/company/jobs'
+    | '/business/company/messages'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/history'
@@ -1039,12 +1087,14 @@ export interface FileRouteTypes {
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
+    | '/private/individual/offers'
     | '/private/individual/onboarding'
     | '/private/individual/practice'
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
     | '/private/individual/self-analysis'
+    | '/private/individual/talent'
     | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
@@ -1061,7 +1111,9 @@ export interface FileRouteTypes {
     | '/private/student/'
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
+    | '/business/company/talent/$code'
     | '/business/school/screening/history'
+    | '/business/company/talent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1134,6 +1186,7 @@ export interface FileRouteTypes {
     | '/business/company/candidates'
     | '/business/company/history'
     | '/business/company/jobs'
+    | '/business/company/messages'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/history'
@@ -1143,12 +1196,14 @@ export interface FileRouteTypes {
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
+    | '/private/individual/offers'
     | '/private/individual/onboarding'
     | '/private/individual/practice'
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
     | '/private/individual/self-analysis'
+    | '/private/individual/talent'
     | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
@@ -1165,7 +1220,9 @@ export interface FileRouteTypes {
     | '/private/student'
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
+    | '/business/company/talent/$code'
     | '/business/school/screening/history'
+    | '/business/company/talent'
   id:
     | '__root__'
     | '/'
@@ -1238,6 +1295,7 @@ export interface FileRouteTypes {
     | '/business/company/candidates'
     | '/business/company/history'
     | '/business/company/jobs'
+    | '/business/company/messages'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/history'
@@ -1247,12 +1305,14 @@ export interface FileRouteTypes {
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
+    | '/private/individual/offers'
     | '/private/individual/onboarding'
     | '/private/individual/practice'
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
     | '/private/individual/self-analysis'
+    | '/private/individual/talent'
     | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
@@ -1269,7 +1329,9 @@ export interface FileRouteTypes {
     | '/private/student/'
     | '/business/actor/screening_/history'
     | '/business/company/screening_/history'
+    | '/business/company/talent/$code'
     | '/business/school/screening_/history'
+    | '/business/company/talent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1343,6 +1405,7 @@ export interface RootRouteChildren {
   BusinessCompanyCandidatesRoute: typeof BusinessCompanyCandidatesRoute
   BusinessCompanyHistoryRoute: typeof BusinessCompanyHistoryRoute
   BusinessCompanyJobsRoute: typeof BusinessCompanyJobsRoute
+  BusinessCompanyMessagesRoute: typeof BusinessCompanyMessagesRoute
   BusinessCompanyScreeningRoute: typeof BusinessCompanyScreeningRoute
   BusinessCompanySettingsRoute: typeof BusinessCompanySettingsRoute
   BusinessSchoolHistoryRoute: typeof BusinessSchoolHistoryRoute
@@ -1352,12 +1415,14 @@ export interface RootRouteChildren {
   PrivateIndividualDailyQuestionsRoute: typeof PrivateIndividualDailyQuestionsRoute
   PrivateIndividualDocumentsRoute: typeof PrivateIndividualDocumentsRoute
   PrivateIndividualHistoryRoute: typeof PrivateIndividualHistoryRoute
+  PrivateIndividualOffersRoute: typeof PrivateIndividualOffersRoute
   PrivateIndividualOnboardingRoute: typeof PrivateIndividualOnboardingRoute
   PrivateIndividualPracticeRoute: typeof PrivateIndividualPracticeRoute
   PrivateIndividualPrepRoute: typeof PrivateIndividualPrepRoute
   PrivateIndividualProfileRoute: typeof PrivateIndividualProfileRoute
   PrivateIndividualResearchRoute: typeof PrivateIndividualResearchRoute
   PrivateIndividualSelfAnalysisRoute: typeof PrivateIndividualSelfAnalysisRoute
+  PrivateIndividualTalentRoute: typeof PrivateIndividualTalentRoute
   PrivateStudentDailyQuestionsRoute: typeof PrivateStudentDailyQuestionsRoute
   PrivateStudentDocumentsRoute: typeof PrivateStudentDocumentsRoute
   PrivateStudentHistoryRoute: typeof PrivateStudentHistoryRoute
@@ -1374,7 +1439,9 @@ export interface RootRouteChildren {
   PrivateStudentIndexRoute: typeof PrivateStudentIndexRoute
   BusinessActorScreeningHistoryRoute: typeof BusinessActorScreeningHistoryRoute
   BusinessCompanyScreeningHistoryRoute: typeof BusinessCompanyScreeningHistoryRoute
+  BusinessCompanyTalentCodeRoute: typeof BusinessCompanyTalentCodeRoute
   BusinessSchoolScreeningHistoryRoute: typeof BusinessSchoolScreeningHistoryRoute
+  BusinessCompanyTalentIndexRoute: typeof BusinessCompanyTalentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1883,6 +1950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessCompanyJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/company/messages': {
+      id: '/business/company/messages'
+      path: '/business/company/messages'
+      fullPath: '/business/company/messages'
+      preLoaderRoute: typeof BusinessCompanyMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/company/screening': {
       id: '/business/company/screening'
       path: '/business/company/screening'
@@ -1960,6 +2034,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateIndividualHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/private/individual/offers': {
+      id: '/private/individual/offers'
+      path: '/private/individual/offers'
+      fullPath: '/private/individual/offers'
+      preLoaderRoute: typeof PrivateIndividualOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/private/individual/onboarding': {
       id: '/private/individual/onboarding'
       path: '/private/individual/onboarding'
@@ -2000,6 +2081,13 @@ declare module '@tanstack/react-router' {
       path: '/private/individual/self-analysis'
       fullPath: '/private/individual/self-analysis'
       preLoaderRoute: typeof PrivateIndividualSelfAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private/individual/talent': {
+      id: '/private/individual/talent'
+      path: '/private/individual/talent'
+      fullPath: '/private/individual/talent'
+      preLoaderRoute: typeof PrivateIndividualTalentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/student/': {
@@ -2086,6 +2174,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessCompanyScreeningHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/company/talent/': {
+      id: '/business/company/talent/'
+      path: '/business/company/talent'
+      fullPath: '/business/company/talent/'
+      preLoaderRoute: typeof BusinessCompanyTalentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/company/talent/$code': {
+      id: '/business/company/talent/$code'
+      path: '/business/company/talent/$code'
+      fullPath: '/business/company/talent/$code'
+      preLoaderRoute: typeof BusinessCompanyTalentCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/school/screening_/history': {
       id: '/business/school/screening_/history'
       path: '/business/school/screening/history'
@@ -2167,6 +2269,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyCandidatesRoute: BusinessCompanyCandidatesRoute,
   BusinessCompanyHistoryRoute: BusinessCompanyHistoryRoute,
   BusinessCompanyJobsRoute: BusinessCompanyJobsRoute,
+  BusinessCompanyMessagesRoute: BusinessCompanyMessagesRoute,
   BusinessCompanyScreeningRoute: BusinessCompanyScreeningRoute,
   BusinessCompanySettingsRoute: BusinessCompanySettingsRoute,
   BusinessSchoolHistoryRoute: BusinessSchoolHistoryRoute,
@@ -2176,12 +2279,14 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateIndividualDailyQuestionsRoute: PrivateIndividualDailyQuestionsRoute,
   PrivateIndividualDocumentsRoute: PrivateIndividualDocumentsRoute,
   PrivateIndividualHistoryRoute: PrivateIndividualHistoryRoute,
+  PrivateIndividualOffersRoute: PrivateIndividualOffersRoute,
   PrivateIndividualOnboardingRoute: PrivateIndividualOnboardingRoute,
   PrivateIndividualPracticeRoute: PrivateIndividualPracticeRoute,
   PrivateIndividualPrepRoute: PrivateIndividualPrepRoute,
   PrivateIndividualProfileRoute: PrivateIndividualProfileRoute,
   PrivateIndividualResearchRoute: PrivateIndividualResearchRoute,
   PrivateIndividualSelfAnalysisRoute: PrivateIndividualSelfAnalysisRoute,
+  PrivateIndividualTalentRoute: PrivateIndividualTalentRoute,
   PrivateStudentDailyQuestionsRoute: PrivateStudentDailyQuestionsRoute,
   PrivateStudentDocumentsRoute: PrivateStudentDocumentsRoute,
   PrivateStudentHistoryRoute: PrivateStudentHistoryRoute,
@@ -2198,7 +2303,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateStudentIndexRoute: PrivateStudentIndexRoute,
   BusinessActorScreeningHistoryRoute: BusinessActorScreeningHistoryRoute,
   BusinessCompanyScreeningHistoryRoute: BusinessCompanyScreeningHistoryRoute,
+  BusinessCompanyTalentCodeRoute: BusinessCompanyTalentCodeRoute,
   BusinessSchoolScreeningHistoryRoute: BusinessSchoolScreeningHistoryRoute,
+  BusinessCompanyTalentIndexRoute: BusinessCompanyTalentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -8,9 +8,10 @@
  * 容量を守るため、1人あたり新しいものから RECORDINGS_PER_USER 本だけ残す。
  */
 import { createFileRoute } from "@tanstack/react-router";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { RECORDING_BUCKET, RECORDINGS_PER_USER, jsonResponse, serviceClient } from "@/lib/talent";
 
-async function loadInvitation(supabase: any, token: string) {
+async function loadInvitation(supabase: SupabaseClient, token: string) {
   if (!token) return null;
   const { data } = await supabase
     .from("interview_invitations")

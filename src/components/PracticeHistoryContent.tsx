@@ -21,6 +21,13 @@ type PracticeFeedback = {
   readiness_score?: number;
   personality_traits?: { trait: string; description: string }[] | null;
   detailed_analysis?: string | null;
+  competencies?: {
+    key: string;
+    label: string;
+    score: number | null;
+    reason: string;
+    evidence: string[];
+  }[];
 };
 
 type HistoryRow = {
@@ -220,6 +227,52 @@ export function PracticeHistoryContent({
                             <p style={{ color: "#999999", fontSize: 11, marginTop: 3 }}>
                               {s.comment}
                             </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {r.feedback.competencies && r.feedback.competencies.length > 0 && (
+                    <div>
+                      <p
+                        style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700, marginBottom: 4 }}
+                      >
+                        能力の評価（あなたの発言が根拠）
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {r.feedback.competencies.map((c) => (
+                          <div
+                            key={c.key}
+                            className="rounded-lg p-3"
+                            style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span style={{ color: "#F0F0F0", fontSize: 12, fontWeight: 700 }}>
+                                {c.label}
+                              </span>
+                              <span style={{ color: c.score ? "#C8FF00" : "#666", fontSize: 12 }}>
+                                {c.score ? `${c.score} / 5` : "今回は根拠となる発言なし"}
+                              </span>
+                            </div>
+                            {c.reason && (
+                              <p style={{ color: "#999999", fontSize: 11, marginTop: 3 }}>
+                                {c.reason}
+                              </p>
+                            )}
+                            {c.evidence.map((q, i) => (
+                              <p
+                                key={i}
+                                style={{
+                                  color: "#CCCCCC",
+                                  fontSize: 11,
+                                  marginTop: 4,
+                                  paddingLeft: 8,
+                                  borderLeft: "2px solid #C8FF00",
+                                }}
+                              >
+                                「{q}」
+                              </p>
+                            ))}
                           </div>
                         ))}
                       </div>

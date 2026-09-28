@@ -83,6 +83,11 @@ export const Route = createFileRoute("/api/talent/contacts")({
           )
           .in("id", companyIds.length ? companyIds : ["00000000-0000-0000-0000-000000000000"]);
         const cby = new Map((companies ?? []).map((c) => [c.id, c]));
+        for (const c of companies ?? []) {
+          if (!c.company_name) {
+            c.company_name = (await getCompanyProfile(supabase, c.id))?.company_name ?? null;
+          }
+        }
         return jsonResponse({
           requests: list
             .filter((r) => r.status !== "withdrawn")

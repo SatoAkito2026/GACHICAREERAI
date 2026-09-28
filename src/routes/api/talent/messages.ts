@@ -5,6 +5,7 @@
  * POST /api/talent/messages { requestId, body } → 送信（相手にメールで知らせる）
  */
 import { createFileRoute } from "@tanstack/react-router";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
   getCompanyProfile,
@@ -17,7 +18,7 @@ import {
 // 同じ相手へのメール通知は、この間隔より短いときは送らない（連投でメールが大量に届かないように）
 const NOTIFY_INTERVAL_MS = 10 * 60 * 1000;
 
-async function loadRequest(supabase: any, requestId: string, userId: string) {
+async function loadRequest(supabase: SupabaseClient, requestId: string, userId: string) {
   const { data: r } = await supabase
     .from("contact_requests")
     .select("*")

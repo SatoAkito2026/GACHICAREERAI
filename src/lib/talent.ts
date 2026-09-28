@@ -62,7 +62,7 @@ export const SUMMARY_MODEL = "claude-sonnet-4-6";
 // ---- 引用の確認 --------------------------------------------------------------
 
 function normalize(s: string): string {
-  return s.replace(/[\s　、。，．,.!！?？「」『』（）()・…ー〜~"'“”]/g, "");
+  return s.replace(/[\s\u3000、。，．,.!！?？「」『』（）()・…ー〜~"'“”]/g, "");
 }
 
 /**
@@ -417,15 +417,25 @@ export async function getCompanyProfile(
 ): Promise<{ company_name: string } | null> {
   const { data } = await supabase
     .from("profiles")
-    .select("company_name")
+    .select("company_name, company_id, user_mode")
     .eq("id", userId)
     .maybeSingle();
-  const name = data?.company_name?.trim();
+  if (!data || !String(data.user_mode ?? "").startsWith("business")) return null;
+  let name = data.company_name?.trim();
+  // 登録時の会社名は companies テーブルに入っている
+  if (!name && data.company_id) {
+    const { data: c } = await supabase
+      .from("companies")
+      .select("name")
+      .eq("id", data.company_id)
+      .maybeSingle();
+    name = c?.name?.trim();
+  }
   return name ? { company_name: name } : null;
 }
 
 export const COMPANY_REQUIRED_MESSAGE =
-  "企業としてご利用いただくには、設定画面で会社名を登録してください";
+  "企業アカウントでログインし、設定画面で会社名を登録してください";
 
 /**
  * 支払い済みの PaymentIntent から閲覧権を記録する（確認APIと Stripe Webhook の両方から呼ぶ。二重に呼ばれても1件）

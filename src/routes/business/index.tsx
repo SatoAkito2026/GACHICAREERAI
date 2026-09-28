@@ -1,38 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { BusinessShell } from "@/components/ModeShell";
-import { DashGrid } from "@/components/DashCard";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// 今は企業向けだけを受け付けている（学校・塾／芸能・キャスティングは入口を隠している）
 export const Route = createFileRoute("/business/")({
-  head: () => ({ meta: [{ title: "Business｜インタビアAI" }] }),
-  component: BusinessTop,
+  beforeLoad: () => {
+    throw redirect({ to: "/business/company" });
+  },
 });
-
-function BusinessTop() {
-  return (
-    <BusinessShell>
-      <DashGrid
-        title="どちらで利用しますか？"
-        cards={[
-          {
-            emoji: "🏢",
-            title: "企業",
-            desc: "採用担当向け。書類選考・採用面接をAIで効率化",
-            to: "/business/company",
-          },
-          {
-            emoji: "🏫",
-            title: "学校・塾",
-            desc: "学校・予備校・塾向け。志願者面接・生徒の入試対策をAIでサポート",
-            to: "/business/school",
-          },
-          {
-            emoji: "🎭",
-            title: "芸能・キャスティング",
-            desc: "制作・キャスティング会社向け。役者データベース・経歴確認面接",
-            to: "/business/actor",
-          },
-        ]}
-      />
-    </BusinessShell>
-  );
-}

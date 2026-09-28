@@ -6,6 +6,7 @@
  * POST /api/talent/my-profile { action: "refresh" } → 人物まとめを今すぐ作り直す
  */
 import { createFileRoute } from "@tanstack/react-router";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { verifyApiUser } from "@/lib/api-auth";
 import { CAREER_STAGES, jsonResponse, refreshCandidateSummary, serviceClient } from "@/lib/talent";
 
@@ -17,7 +18,7 @@ const TEXT_LIMITS = {
   self_pr: 1500,
 } as const;
 
-async function countPractice(supabase: any, userId: string): Promise<number> {
+async function countPractice(supabase: SupabaseClient, userId: string): Promise<number> {
   const { count } = await supabase
     .from("interviews")
     .select("id", { count: "exact", head: true })

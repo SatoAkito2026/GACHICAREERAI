@@ -10,7 +10,7 @@ import { usePlan, type Plan, PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 const STRIPE_PUBLISHABLE_KEY =
   "pk_live_51Tdk13J1Nq1hx5wCgIw06UH1GBp6higghN4FnL4cobvKt5kGvfIm80fkia6OjJrWRgPybVkB7LrjEuJJDng7i8wY00539luPFI";
 
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 const CARD_OPTIONS = {
   hidePostalCode: true,

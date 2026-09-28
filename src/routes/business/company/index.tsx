@@ -15,6 +15,18 @@ function CompanyDashboard() {
         subtitle="採用担当向け"
         cards={[
           {
+            emoji: "🔎",
+            title: "人材を探す",
+            desc: "模擬面接の評価で人材を探す。気になる人はチケットで録画・名前・詳しい評価を閲覧",
+            to: "/business/company/talent",
+          },
+          {
+            emoji: "✉️",
+            title: "面談・メッセージ",
+            desc: "面談の申し込み状況と、承諾した人とのメッセージ",
+            to: "/business/company/messages",
+          },
+          {
             emoji: "📄",
             title: "書類選考AI",
             desc: "PDF一括AI判定",
@@ -32,12 +44,7 @@ function CompanyDashboard() {
             desc: "面接結果・AIレポート",
             to: "/business/company/history",
           },
-          {
-            emoji: "🗂️",
-            title: "ガチキャリダッシュボード",
-            desc: "模擬面接の総評を閲覧・録画を購入",
-            to: "/business/company/candidates",
-          },
+
           {
             emoji: "📢",
             title: "求人掲載",
