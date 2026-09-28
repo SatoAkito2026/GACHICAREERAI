@@ -12,6 +12,18 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。写真（`public/avatar/base.webp`）の顔に478点の網目（リグ `public/avatar/rig.json`）を入れて WebGL で変形させる。口は音声から母音（あいうえお）を判定した口の形（`src/lib/lipsync.ts`、再生は `src/lib/avatar-voice.ts`）に合わせ、参考動画から学習した「口を開けた・横に広げたときの顔全体の動き」で網目を動かす。首の傾き・位置は参考動画の動きの数値。口の中は `mouth-inside.webp`。まばたきは目のまわりだけを `eyes-closed.webp` に0.14秒で切り替える。リグは `scripts/avatar/build_rig.py` で作る。`/avatar-lab` は録音した声で口の動きを確かめる試作ページ
 - **決済**: Stripe / **メール**: Resend
 
+## 人材プロフィール（求人メディア型）
+
+練習 → 評価 → プロフィール公開 → オファー の流れ。職業紹介にならないよう、運営は推薦・仲介をせず、料金は閲覧チケットだけ（成功報酬なし）。法務の下書きは `docs/legal/`。
+
+- 評価：`save-interview.ts` が面接ごとに7つの力を1〜5で評価し、根拠として本人の発言を引用する。引用が実際の発言にないものは `src/lib/talent.ts` の `sanitizeCompetencies` で捨てる（根拠なしは評価しない）
+- 人物まとめ：`refreshCandidateSummary`（点数は計算、文章だけAI）。練習後に `summary_stale` を立て、毎時の Cron で作り直す
+- DB：`candidate_profiles`（初期値は非公開）/ `profile_unlocks`（チケット）/ `contact_requests` / `contact_messages`
+- API：`src/routes/api/talent/*`。チケットは Stripe PaymentIntent を作り、支払い後にサーバーで確認して記録（Webhook の `payment_intent.succeeded` は保険）。値段は `wrangler.jsonc` の `TALENT_TICKET_PRICE_JPY`
+- 画面：ユーザー `/private/individual/talent`・`/offers`、企業 `/business/company/talent`・`/messages`
+- 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
+- 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）
+
 ## コマンド
 
 ```bash
@@ -57,5 +69,4 @@ npm run deploy     # build + wrangler deploy
 
 ## 既知の課題
 
-- 企業向け候補者一覧の「録画を見る（購入）」は、購入ページが未実装のため「準備中」表示にしている（`src/routes/business/company/candidates.tsx`）
 - ESLint に既存の指摘が残っている（`no-explicit-any` が大半。全角スペースの `no-irregular-whitespace` と `react-hooks/exhaustive-deps` の警告は意図的なものが多い）

@@ -66,6 +66,7 @@ import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateAgencyRouteImport } from './routes/private/agency'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
+import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
 import { Route as ApiTalentMessagesRouteImport } from './routes/api/talent/messages'
@@ -407,6 +408,11 @@ const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   path: '/screening/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
+  id: '/api/talent/admin-stats',
+  path: '/api/talent/admin-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTalentContactsRoute = ApiTalentContactsRouteImport.update({
   id: '/api/talent/contacts',
   path: '/api/talent/contacts',
@@ -734,6 +740,7 @@ export interface FileRoutesByFullPath {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -843,6 +850,7 @@ export interface FileRoutesByTo {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business': typeof BusinessIndexRoute
   '/private': typeof PrivateIndexRoute
+  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -953,6 +961,7 @@ export interface FileRoutesById {
   '/screening_/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -1064,6 +1073,7 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business/'
     | '/private/'
+    | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1173,6 +1183,7 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business'
     | '/private'
+    | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1282,6 +1293,7 @@ export interface FileRouteTypes {
     | '/screening_/history'
     | '/business/'
     | '/private/'
+    | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1392,6 +1404,7 @@ export interface RootRouteChildren {
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
+  ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
   ApiTalentMessagesRoute: typeof ApiTalentMessagesRoute
@@ -1845,6 +1858,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScreeningHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/talent/admin-stats': {
+      id: '/api/talent/admin-stats'
+      path: '/api/talent/admin-stats'
+      fullPath: '/api/talent/admin-stats'
+      preLoaderRoute: typeof ApiTalentAdminStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/talent/contacts': {
       id: '/api/talent/contacts'
       path: '/api/talent/contacts'
@@ -2256,6 +2276,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   PrivateIndexRoute: PrivateIndexRoute,
+  ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
   ApiTalentMessagesRoute: ApiTalentMessagesRoute,
