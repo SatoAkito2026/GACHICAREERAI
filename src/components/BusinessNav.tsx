@@ -2,11 +2,12 @@ import { Link, useRouterState } from "@tanstack/react-router";
 
 const MODE_TABS = [
   { label: "🏢 企業", to: "/business/company" },
-  { label: "🏫 学校・塾", to: "/business/school" },
-  { label: "🎭 芸能・キャスティング", to: "/business/actor" },
+  // 学校・塾／芸能・キャスティングは今は入口を隠している（機能は残っている）
 ] as const;
 
 const COMPANY_SUBTABS = [
+  { label: "人材を探す", to: "/business/company/talent" },
+  { label: "面談・メッセージ", to: "/business/company/messages" },
   { label: "書類選考", to: "/business/company/screening" },
   { label: "書類選考履歴", to: "/business/company/screening/history" },
   { label: "面接履歴", to: "/business/company/history" },
@@ -76,7 +77,7 @@ export default function BusinessNav() {
         style={{ borderTop: "1px solid #1F1F1F" }}
       >
         {subTabs.map((tab) => {
-          const active = pathname === tab.to;
+          const active = pathname === tab.to || pathname.startsWith(tab.to + "/");
           return (
             <Link
               key={tab.to}

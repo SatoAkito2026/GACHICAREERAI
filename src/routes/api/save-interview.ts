@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { COMPETENCY_PROMPT, sanitizeCompetencies } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
 
@@ -176,7 +177,8 @@ score_breakdownの各scoreは0-100。readiness_scoreはscore_breakdownの平均�
               isPro
                 ? "personality_traitsは3〜4個、その人の会話の端々から読み取れる性格的特徴を具体的根拠とともに示すこと。"
                 : ""
-            }`
+            }
+${COMPETENCY_PROMPT}`
           : `以下は採用面接の会話記録です。候補者を詳細に評価してJSONで返してください。
 
 【面接会話】
@@ -233,7 +235,7 @@ ${conversationText}
         try {
           const aiResponse = await anthropic.messages.create({
             model: "claude-sonnet-4-6",
-            max_tokens: 3000,
+            max_tokens: practiceMode ? 5000 : 3000,
             messages: [{ role: "user", content: summaryPrompt }],
           });
 
@@ -289,6 +291,14 @@ ${conversationText}
                   readiness_score: summaryData.readiness_score ?? null,
                   personality_traits: summaryData.personality_traits ?? null,
                   detailed_analysis: summaryData.detailed_analysis ?? null,
+                  // 根拠の引用が本人の発言に実際にあるものだけを残す
+                  competencies: sanitizeCompetencies(
+                    summaryData.competencies,
+                    body.messages
+                      .filter((m) => m.role === "user")
+                      .map((m) => m.content)
+                      .join("\n"),
+                  ),
                 },
               }
             : {
@@ -323,6 +333,14 @@ ${conversationText}
           console.error("interview_summaries insert error:", JSON.stringify(summaryInsertError));
         } else {
           console.log("interview_summaries saved successfully for:", interviewId);
+        }
+
+        // 個人モードの練習なら、公開プロフィールの人物まとめを作り直す印をつける（毎時の処理で更新）
+        if (practiceMode === "individual") {
+          await supabase
+            .from("candidate_profiles")
+            .update({ summary_stale: true })
+            .eq("user_id", invitation.user_id);
         }
 
         // 面接タイプが指定されている個人モードの練習面接なら、会話内容から書類を自動生成する

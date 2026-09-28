@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 const TABS = [
   { label: "個人", to: "/private/individual" },
   { label: "受験生", to: "/private/student" },
+  { label: "オファー", to: "/private/individual/offers" },
   { label: "マイページ", to: "/mypage" },
 ] as const;
 

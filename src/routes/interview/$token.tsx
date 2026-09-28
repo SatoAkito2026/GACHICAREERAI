@@ -54,6 +54,45 @@ function extForMimeType(mime: string): string {
   return "webm";
 }
 
+// 練習の録画は無料枠（Supabase Storage の1ファイル50MBまで）に収まるよう、画質を抑えて撮る
+const MAX_PRACTICE_RECORDING_BYTES = 48 * 1024 * 1024;
+
+function startPracticeRecorder(stream: MediaStream, chunks: Blob[]): MediaRecorder | null {
+  if (typeof MediaRecorder === "undefined") return null;
+  const types = ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"];
+  const mimeType = types.find((t) => {
+    try {
+      return MediaRecorder.isTypeSupported(t);
+    } catch {
+      return false;
+    }
+  });
+  try {
+    const recorder = new MediaRecorder(stream, {
+      ...(mimeType ? { mimeType } : {}),
+      videoBitsPerSecond: 180_000,
+      audioBitsPerSecond: 32_000,
+    });
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+    recorder.start(2000);
+    return recorder;
+  } catch {
+    return null;
+  }
+}
+
+function stopPracticeRecorder(recorder: MediaRecorder, chunks: Blob[]): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const done = () =>
+      resolve(chunks.length ? new Blob(chunks, { type: recorder.mimeType || "video/webm" }) : null);
+    if (recorder.state === "inactive") return done();
+    recorder.onstop = done;
+    recorder.stop();
+  });
+}
+
 // iOS Safari 等の webkitAudioContext フォールバック
 function createAudioContext(options?: AudioContextOptions): AudioContext {
   const Ctor: typeof AudioContext =
@@ -720,6 +759,8 @@ function LiveScreen({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordingRef = useRef<MediaRecorder | null>(null);
   const screenChunksRef = useRef<Blob[]>([]);
+  const practiceRecorderRef = useRef<MediaRecorder | null>(null);
+  const practiceChunksRef = useRef<Blob[]>([]);
   const voice = getAvatarVoice();
   const greetedRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -812,18 +853,36 @@ function LiveScreen({
       })
       .catch(console.error);
 
-    // 画面録画
-    navigator.mediaDevices
-      .getDisplayMedia({ video: true, audio: true })
-      .then((screenStream) => {
-        const recorder = new MediaRecorder(screenStream);
-        recorder.ondataavailable = (e) => screenChunksRef.current.push(e.data);
-        recorder.start(1000);
-        recordingRef.current = recorder;
-      })
-      .catch(() => {
-        // 画面録画許可なしでも続行
-      });
+    if (!invitation.practice_mode) {
+      // 企業の本番面接：画面録画
+      navigator.mediaDevices
+        .getDisplayMedia({ video: true, audio: true })
+        .then((screenStream) => {
+          const recorder = new MediaRecorder(screenStream);
+          recorder.ondataavailable = (e) => screenChunksRef.current.push(e.data);
+          recorder.start(1000);
+          recordingRef.current = recorder;
+        })
+        .catch(() => {
+          // 画面録画許可なしでも続行
+        });
+    } else if (invitation.practice_mode === "individual") {
+      // 個人の練習：本人がプロフィールで「録画を残す」を選んでいるときだけ、カメラの映像を録画する
+      fetch(`/api/talent/recording?token=${encodeURIComponent(token)}`)
+        .then((r) => r.json())
+        .then(async (d: { record?: boolean }) => {
+          if (!d.record) return;
+          const waitStart = Date.now();
+          while (!mediaStreamRef.current && Date.now() - waitStart < 15000) {
+            await new Promise((r) => setTimeout(r, 300));
+          }
+          const stream = mediaStreamRef.current;
+          if (!stream) return;
+          const recorder = startPracticeRecorder(stream, practiceChunksRef.current);
+          if (recorder) practiceRecorderRef.current = recorder;
+        })
+        .catch(() => {});
+    }
 
     // 最初の挨拶（アバターはブラウザ内で描画するので接続待ちは不要）。二重送信しないよう一度だけ
     if (!greetedRef.current) {
@@ -834,6 +893,7 @@ function LiveScreen({
     return () => {
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
       recordingRef.current?.stop();
+      if (practiceRecorderRef.current?.state === "recording") practiceRecorderRef.current.stop();
       voice.stop();
     };
   }, []);
@@ -873,7 +933,7 @@ function LiveScreen({
       if (data.isEnded) {
         // 総評生成・保存を待ってから画面遷移（確実に保存させる）
         setIsSavingResult(true);
-        await saveInterview(false);
+        await saveInterview(false, withAi);
         // AIが話し終わるまで待ってから終了画面へ
         await new Promise<void>((resolve) => {
           const checkSpeaking = () => {
@@ -960,7 +1020,7 @@ function LiveScreen({
   };
 
   // 面接履歴を保存する関数
-  const saveInterview = async (isAbandoned: boolean) => {
+  const saveInterview = async (isAbandoned: boolean, finalMessages: Message[] = messages) => {
     try {
       let authHeaders: Record<string, string> = {};
       try {
@@ -969,7 +1029,7 @@ function LiveScreen({
       } catch {
         // 候補者はログインしていないので認証ヘッダーなしで続行
       }
-      await fetch("/api/save-interview", {
+      const saveRes = await fetch("/api/save-interview", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -977,7 +1037,7 @@ function LiveScreen({
         },
         body: JSON.stringify({
           token,
-          messages,
+          messages: finalMessages,
           elapsed,
           candidateName: invitation.candidate_name,
           jobType: invitation.job_type,
@@ -985,6 +1045,40 @@ function LiveScreen({
           isAbandoned,
         }),
       });
+
+      // 個人の練習で録画していれば、Storage へ直接アップロードする
+      if (practiceRecorderRef.current && !isAbandoned) {
+        try {
+          const saved = (await saveRes.json().catch(() => ({}))) as { interviewId?: string };
+          const blob = await stopPracticeRecorder(
+            practiceRecorderRef.current,
+            practiceChunksRef.current,
+          );
+          practiceRecorderRef.current = null;
+          if (
+            saved.interviewId &&
+            blob &&
+            blob.size > 0 &&
+            blob.size < MAX_PRACTICE_RECORDING_BYTES
+          ) {
+            const urlRes = await fetch("/api/talent/recording", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token, interviewId: saved.interviewId }),
+            });
+            const up = (await urlRes.json()) as { path?: string; uploadToken?: string };
+            if (up.path && up.uploadToken) {
+              await supabase.storage
+                .from("interview-recordings")
+                .uploadToSignedUrl(up.path, up.uploadToken, blob, {
+                  contentType: blob.type || "video/webm",
+                });
+            }
+          }
+        } catch (e) {
+          console.error("練習の録画のアップロードに失敗:", e);
+        }
+      }
 
       // 企業の本番面接の場合のみ、録画をアップロードする(個人/受験生の練習は対象外)
       if (!invitation.practice_mode && screenChunksRef.current.length > 0) {

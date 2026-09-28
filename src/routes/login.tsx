@@ -6,6 +6,9 @@ import type { AuthResponse } from "@supabase/supabase-js";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 
+// 学校・塾／芸能・キャスティング向けは今は受け付けない（機能は残して入口だけ隠す）
+const SHOW_SCHOOL_AND_ACTOR = false;
+
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>): { next?: string; ref?: string } => ({
     ...(typeof s.next === "string" && s.next.startsWith("/") ? { next: s.next } : {}),
@@ -258,7 +261,9 @@ function LoginPage() {
           <h1 style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>
             どちらで利用しますか？
           </h1>
-          <div className="mt-6 grid grid-cols-3 gap-4">
+          <div
+            className={`mt-6 grid gap-4 ${SHOW_SCHOOL_AND_ACTOR ? "grid-cols-3" : "grid-cols-1"}`}
+          >
             <button
               onClick={() => {
                 setBizType("company");
@@ -271,30 +276,34 @@ function LoginPage() {
               <span style={{ fontWeight: 600, fontSize: 16 }}>企業</span>
               <span style={{ color: "#888", fontSize: 12 }}>採用担当向け</span>
             </button>
-            <button
-              onClick={() => {
-                setBizType("school");
-                setStep("school-setup");
-              }}
-              className="flex flex-col items-center gap-2 rounded-xl py-8 transition-all hover:border-[#C8FF00]"
-              style={{ background: "#222", border: "1px solid #333", color: "#F0F0F0" }}
-            >
-              <span style={{ fontSize: 40 }}>🏫</span>
-              <span style={{ fontWeight: 600, fontSize: 16 }}>学校・塾</span>
-              <span style={{ color: "#888", fontSize: 12 }}>学校・予備校・塾向け</span>
-            </button>
-            <button
-              onClick={() => {
-                setBizType("actor");
-                setStep("actor-setup");
-              }}
-              className="flex flex-col items-center gap-2 rounded-xl py-8 transition-all hover:border-[#C8FF00]"
-              style={{ background: "#222", border: "1px solid #333", color: "#F0F0F0" }}
-            >
-              <span style={{ fontSize: 40 }}>🎭</span>
-              <span style={{ fontWeight: 600, fontSize: 16 }}>芸能・キャスティング</span>
-              <span style={{ color: "#888", fontSize: 12 }}>制作・キャスティング会社向け</span>
-            </button>
+            {SHOW_SCHOOL_AND_ACTOR && (
+              <>
+                <button
+                  onClick={() => {
+                    setBizType("school");
+                    setStep("school-setup");
+                  }}
+                  className="flex flex-col items-center gap-2 rounded-xl py-8 transition-all hover:border-[#C8FF00]"
+                  style={{ background: "#222", border: "1px solid #333", color: "#F0F0F0" }}
+                >
+                  <span style={{ fontSize: 40 }}>🏫</span>
+                  <span style={{ fontWeight: 600, fontSize: 16 }}>学校・塾</span>
+                  <span style={{ color: "#888", fontSize: 12 }}>学校・予備校・塾向け</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setBizType("actor");
+                    setStep("actor-setup");
+                  }}
+                  className="flex flex-col items-center gap-2 rounded-xl py-8 transition-all hover:border-[#C8FF00]"
+                  style={{ background: "#222", border: "1px solid #333", color: "#F0F0F0" }}
+                >
+                  <span style={{ fontSize: 40 }}>🎭</span>
+                  <span style={{ fontWeight: 600, fontSize: 16 }}>芸能・キャスティング</span>
+                  <span style={{ color: "#888", fontSize: 12 }}>制作・キャスティング会社向け</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -349,6 +358,7 @@ function LoginPage() {
                   .update({
                     user_mode: "business_company",
                     company_id: company.id,
+                    company_name: companyName.trim(),
                     company_role: "admin",
                     plan: "company_metered",
                   } as any)

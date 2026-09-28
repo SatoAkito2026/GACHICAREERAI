@@ -111,6 +111,7 @@ const NAV_ITEMS = [
   { key: "individual", label: "個人・受験生分析" },
   { key: "company", label: "企業分析" },
   { key: "engagement", label: "エンゲージメント" },
+  { key: "talent", label: "人材・チケット" },
 ] as const;
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
 
@@ -227,6 +228,7 @@ function AdminDashboard() {
             {activeTab === "individual" && <IndividualTab data={data} />}
             {activeTab === "company" && <CompanyTab data={data} />}
             {activeTab === "engagement" && <EngagementTab data={data} />}
+            {activeTab === "talent" && <TalentTab token={session.access_token} />}
           </div>
         </div>
       </div>
@@ -502,5 +504,100 @@ function EngagementTab({ data }: { data: DashboardData }) {
         </div>
       </div>
     </>
+  );
+}
+
+type TalentStats = {
+  profiles: { total: number; public: number; withRecording: number };
+  tickets: {
+    total: number;
+    revenue: number;
+    monthCount: number;
+    monthRevenue: number;
+    buyingCompanies: number;
+  };
+  contacts: { total: number; accepted: number; declined: number; pending: number };
+  messages: number;
+  topCompanies: { name: string; count: number; amount: number }[];
+};
+
+function TalentTab({ token }: { token: string }) {
+  const [stats, setStats] = useState<TalentStats | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    fetch("/api/talent/admin-stats", {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        setStats((await r.json()) as TalentStats);
+      })
+      .catch(() =>
+        setError("読み込みに失敗しました（データベースの準備ができていない可能性があります）"),
+      );
+  }, [token]);
+
+  if (error) return <p style={{ color: "#FF5C5C", fontSize: 13 }}>{error}</p>;
+  if (!stats) return <p style={{ color: "#888888", fontSize: 13 }}>読み込み中...</p>;
+  const box = (label: string, value: string) => (
+    <div
+      key={label}
+      className="rounded-xl p-4"
+      style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
+    >
+      <p style={{ color: "#888888", fontSize: 12 }}>{label}</p>
+      <p className="mt-1" style={{ color: "#F0F0F0", fontSize: 22, fontWeight: 700 }}>
+        {value}
+      </p>
+    </div>
+  );
+  const acceptRate =
+    stats.contacts.accepted + stats.contacts.declined
+      ? Math.round(
+          (stats.contacts.accepted / (stats.contacts.accepted + stats.contacts.declined)) * 100,
+        )
+      : null;
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {box("今月のチケット売上", fmtYen(stats.tickets.monthRevenue))}
+        {box("今月のチケット枚数", `${stats.tickets.monthCount}枚`)}
+        {box("累計のチケット売上", fmtYen(stats.tickets.revenue))}
+        {box("購入した企業", `${stats.tickets.buyingCompanies}社`)}
+        {box("公開中のユーザー", `${stats.profiles.public}人`)}
+        {box("録画も公開", `${stats.profiles.withRecording}人`)}
+        {box("面談の申し込み", `${stats.contacts.total}件`)}
+        {box("承諾率", acceptRate === null ? "-" : `${acceptRate}%`)}
+      </div>
+      <div
+        className="rounded-xl p-4"
+        style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
+      >
+        <p className="mb-3" style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700 }}>
+          チケットをよく買っている企業
+        </p>
+        {stats.topCompanies.length === 0 ? (
+          <p style={{ color: "#888888", fontSize: 13 }}>まだ購入はありません</p>
+        ) : (
+          stats.topCompanies.map((c) => (
+            <div
+              key={c.name}
+              className="flex justify-between py-1.5 text-[13px]"
+              style={{ color: "#CCCCCC" }}
+            >
+              <span>{c.name}</span>
+              <span>
+                {c.count}枚 ・ {fmtYen(c.amount)}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+      <p style={{ color: "#666666", fontSize: 12 }}>
+        返事待ち {stats.contacts.pending}件 ・ メッセージ累計 {stats.messages}通 ・ プロフィール作成{" "}
+        {stats.profiles.total}人
+      </p>
+    </div>
   );
 }

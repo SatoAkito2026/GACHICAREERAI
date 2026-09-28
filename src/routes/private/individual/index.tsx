@@ -31,17 +31,40 @@ function IndividualDashboard() {
       <GrowthBadge />
       <DashGrid
         title="個人"
-        subtitle="就活・転職向け"
+        subtitle="練習 → 評価 → プロフィール公開 → オファー の順に進めます"
         cards={[
           {
             emoji: "🤖",
-            title: "模擬面接AI",
-            desc: "AIアバターが面接官役を務めます",
+            title: "① 模擬面接を受ける",
+            desc: "AIの面接官と練習。何回でも受けられます",
             to: "/private/individual/practice",
           },
           {
+            emoji: "📊",
+            title: "② 評価を見る",
+            desc: "発言を根拠にした評価と、点数の推移",
+            to: "/private/individual/history",
+          },
+          {
+            emoji: "🌐",
+            title: "③ プロフィールを公開",
+            desc: "人物まとめを企業に公開（名前は伏せて表示）",
+            to: "/private/individual/talent",
+          },
+          {
+            emoji: "✉️",
+            title: "④ オファー",
+            desc: "企業からの面談の申し込み・メッセージ",
+            to: "/private/individual/offers",
+          },
+        ]}
+      />
+      <DashGrid
+        title="そのほかのツール"
+        cards={[
+          {
             emoji: "🪪",
-            title: "プロフィール",
+            title: "経歴・希望条件",
             desc: "学歴・資格・希望条件などを編集",
             to: "/private/individual/profile",
           },
@@ -62,12 +85,6 @@ function IndividualDashboard() {
             title: "自己分析レポート",
             desc: "強み・弱み・向いている職業を分析",
             to: "/private/individual/self-analysis",
-          },
-          {
-            emoji: "📊",
-            title: "練習履歴",
-            desc: "スコア推移を確認",
-            to: "/private/individual/history",
           },
         ]}
       />

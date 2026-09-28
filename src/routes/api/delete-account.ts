@@ -25,6 +25,22 @@ export const Route = createFileRoute("/api/delete-account")({
         }
 
         const adminClient = createClient(getSupabaseUrl(), serviceKey);
+
+        // 練習面接の録画を消す（DBの行はアカウント削除で消えるが、ファイルは残るため）
+        try {
+          const folder = `practice/${auth.userId}`;
+          const { data: files } = await adminClient.storage
+            .from("interview-recordings")
+            .list(folder, { limit: 100 });
+          if (files?.length) {
+            await adminClient.storage
+              .from("interview-recordings")
+              .remove(files.map((f) => `${folder}/${f.name}`));
+          }
+        } catch (e) {
+          console.error("[delete-account] recording cleanup failed:", e);
+        }
+
         const { error } = await adminClient.auth.admin.deleteUser(auth.userId);
 
         if (error) {
