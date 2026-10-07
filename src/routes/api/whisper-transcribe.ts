@@ -11,6 +11,24 @@ const corsHeaders = {
 // 25MB — OpenAI Whisper's hard limit; reject anything larger before forwarding.
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
 
+// 無音や雑音のとき、Whisper は動画の締めの言葉などを勝手に書き起こすことがある。
+// 本人が言っていない言葉で評価されないよう、よく出るものを取り除く
+const HALLUCINATIONS = [
+  /(最後まで)?ご(視聴|覧(いただき)?)(いただき)?(、)?(本当に)?ありがとうございま(した|す)[。！!]*/g,
+  /チャンネル登録(と高評価)?(を)?(よろしく(お願いします)?|お願いします)[。！!]*/g,
+  /高評価(と|、)?チャンネル登録(を)?(よろしく(お願いします)?|お願いします)[。！!]*/g,
+  /(字幕|翻訳)(作成|提供|制作)(者)?[：:]?.*$/g,
+  /次回もお楽しみに[。！!]*/g,
+];
+
+function removeHallucinations(text: string): string {
+  let t = text;
+  for (const re of HALLUCINATIONS) t = t.replace(re, "");
+  t = t.trim();
+  // 句読点だけが残ったら、何も言っていない扱いにする
+  return /^[\s、。,.!！?？]*$/.test(t) ? "" : t;
+}
+
 export const Route = createFileRoute("/api/whisper-transcribe")({
   server: {
     handlers: {
@@ -86,6 +104,8 @@ export const Route = createFileRoute("/api/whisper-transcribe")({
           whisperForm.append("file", audioFile, uploadedName);
           whisperForm.append("model", "whisper-1");
           whisperForm.append("language", "ja");
+          // 句読点つきの自然な日本語で書き起こしてもらうためのヒント
+          whisperForm.append("prompt", "就職・転職の面接での受け答えです。");
 
           const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
             method: "POST",
@@ -102,7 +122,8 @@ export const Route = createFileRoute("/api/whisper-transcribe")({
             });
           }
 
-          const { text } = (await whisperRes.json()) as { text: string };
+          const { text: raw } = (await whisperRes.json()) as { text: string };
+          const text = removeHallucinations(raw ?? "");
           return new Response(JSON.stringify({ text }), {
             status: 200,
             headers: { "Content-Type": "application/json", ...corsHeaders },
