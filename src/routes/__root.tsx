@@ -147,7 +147,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
-  const isInterviewPage = location.pathname.startsWith("/interview/");
+  // 面接画面は画面いっぱいに使うので、下のフッターを出さない
+  const isInterviewPage = /^\/(interview|chat-interview|actor-interview)\//.test(location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>

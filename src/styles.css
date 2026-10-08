@@ -209,3 +209,33 @@
   background: #222222 !important;
   transform: scale(1.02);
 }
+
+/* スマホ下部メニュー（PrivateNav）がある画面では、その高さ分だけ下を空け、浮いているボタン類も上にずらす */
+:root {
+  --bottom-nav-h: 0px;
+  /* 案内バナーは、スマホではチャットボタンの上に出す */
+  --float-gap: 16px;
+}
+@media (max-width: 639px) {
+  :root {
+    --float-gap: 84px;
+  }
+}
+@media (max-width: 767px) {
+  :root:has(.bottom-nav) {
+    --bottom-nav-h: calc(60px + env(safe-area-inset-bottom));
+  }
+  :root:has(.bottom-nav) body {
+    padding-bottom: var(--bottom-nav-h);
+  }
+}
+
+/* 横にスクロールできるメニュー（スクロールバーは隠す） */
+.scroll-x-hidden {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-x-hidden::-webkit-scrollbar {
+  display: none;
+}

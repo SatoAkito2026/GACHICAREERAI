@@ -130,8 +130,14 @@ function ChatPanel({ mode, onClose }: { mode: "individual" | "student"; onClose:
 
   return (
     <div
-      className="fixed bottom-24 right-5 z-50 flex flex-col overflow-hidden rounded-2xl shadow-2xl"
-      style={{ width: 340, height: 480, background: "#151515", border: "1px solid #2A2A2A" }}
+      className="fixed right-3 z-50 flex flex-col overflow-hidden rounded-2xl shadow-2xl sm:right-5"
+      style={{
+        bottom: "calc(var(--bottom-nav-h) + 88px)",
+        width: "min(340px, calc(100vw - 24px))",
+        height: "min(480px, calc(100svh - var(--bottom-nav-h) - 120px))",
+        background: "#151515",
+        border: "1px solid #2A2A2A",
+      }}
     >
       <div
         className="flex items-center justify-between px-4 py-3"
@@ -281,8 +287,12 @@ export function PersistentChatBubble() {
       {isOpen && <ChatPanel mode={mode} onClose={() => setIsOpen(false)} />}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full text-[24px] shadow-2xl transition-transform hover:scale-105"
-        style={{ background: "#C8FF00", color: "#0F0F0F" }}
+        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full text-[24px] shadow-2xl transition-transform hover:scale-105 sm:right-5"
+        style={{
+          bottom: "calc(var(--bottom-nav-h) + 16px)",
+          background: "#C8FF00",
+          color: "#0F0F0F",
+        }}
         aria-label="AIチャットを開く"
       >
         {isOpen ? "×" : "💬"}

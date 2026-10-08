@@ -32,8 +32,12 @@ export function PlanUpgradeBanner() {
 
   return (
     <div
-      className="fixed bottom-6 left-1/2 z-50 flex w-full max-w-lg -translate-x-1/2 items-center justify-between gap-4 rounded-xl px-5 py-3 shadow-lg"
-      style={{ background: "#1A1A1A", border: "1px solid #C8FF00" }}
+      className="fixed left-1/2 z-50 flex w-[calc(100%-24px)] max-w-lg -translate-x-1/2 items-center justify-between gap-3 rounded-xl px-4 py-3 shadow-lg sm:gap-4 sm:px-5"
+      style={{
+        bottom: "calc(var(--bottom-nav-h) + var(--float-gap))",
+        background: "#1A1A1A",
+        border: "1px solid #C8FF00",
+      }}
     >
       <div className="flex items-center gap-3">
         <span style={{ color: "#C8FF00", fontSize: 20 }}>⚡</span>
@@ -53,7 +57,7 @@ export function PlanUpgradeBanner() {
       <div className="flex items-center gap-2">
         <Link
           to="/pricing"
-          className="rounded-lg px-3 py-1.5 text-[12px]"
+          className="whitespace-nowrap rounded-lg px-3 py-1.5 text-[12px]"
           style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }}
         >
           プランを見る
