@@ -214,7 +214,9 @@ function startRenderer(
   };
 
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // スマホは画面が細かい（3倍など）ぶん描く量が増えて重くなるので、1.5倍までにする
+    const maxDpr = window.matchMedia("(max-width: 1100px)").matches ? 1.5 : 2;
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
   };
@@ -244,9 +246,12 @@ function startRenderer(
       let speaking = 0; // 話している度合い（ゆっくり 0〜1 に近づける）
       let last = performance.now();
       const start = last;
+      // スマホでは、話していない間（まばたき・首の動きだけ）は 30 コマ/秒に落として電池と処理を節約する
+      const isSmall = window.matchMedia("(max-width: 1100px)").matches;
       const tick = (now: number) => {
         if (!running) return;
         frame = requestAnimationFrame(tick);
+        if (isSmall && speaking < 0.02 && !getVoice()?.isPlaying() && now - last < 30) return;
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
         const t = (now - start) / 1000;

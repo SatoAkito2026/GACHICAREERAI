@@ -13,13 +13,18 @@ import { useMode } from "@/hooks/use-mode";
  * mode が未確定(null)の場合は individual をデフォルトとして扱う
  * (ModeShellのリダイレクト先デフォルトと合わせている)。
  */
+// 完了済みと分かったユーザーは覚えておき、ページを移るたびに問い合わせて「読み込み中」を出さないようにする
+// （完了済みから未完了に戻ることはない）
+const completedCache = new Set<string>();
+
 export function useOnboardingStatus() {
   const { user, loading: authLoading } = useAuth();
   const { mode, loading: modeLoading } = useMode();
-  const [completed, setCompleted] = useState(false);
-  const [loading, setLoading] = useState(true);
-
   const dbMode = mode === "private_student" ? "student" : "individual";
+  const cacheKey = user ? `${user.id}:${dbMode}` : "";
+  const cached = !!cacheKey && completedCache.has(cacheKey);
+  const [completed, setCompleted] = useState(cached);
+  const [loading, setLoading] = useState(!cached);
 
   const refresh = useCallback(async () => {
     // 認証状態・モード判定がまだ確定していない間は判定しない(loadingのままにする)。
@@ -30,6 +35,11 @@ export function useOnboardingStatus() {
 
     if (!user) {
       setCompleted(false);
+      setLoading(false);
+      return;
+    }
+    if (completedCache.has(`${user.id}:${dbMode}`)) {
+      setCompleted(true);
       setLoading(false);
       return;
     }
@@ -46,6 +56,7 @@ export function useOnboardingStatus() {
         setCompleted(false);
       } else {
         setCompleted(!!data?.completed_at);
+        if (data?.completed_at) completedCache.add(`${user.id}:${dbMode}`);
       }
     } catch (e) {
       console.error(e);

@@ -15,6 +15,7 @@ import { PlanProvider } from "@/hooks/use-plan";
 import { ModeProvider } from "@/hooks/use-mode";
 import { Toaster } from "@/components/ui/sonner";
 import { PersistentChatBubble } from "@/components/PersistentChatBubble";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { ReferralFlushListener } from "@/components/ReferralFlushListener";
 
 function NotFoundComponent() {
@@ -78,7 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // viewport-fit=cover：iPhone の画面の端（ノッチ・下のバー）まで使い、余白は safe-area で調整する
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      // ホーム画面に追加したとき、アプリとして開く
+      { name: "theme-color", content: "#0F0F0F" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "ガチキャリAI" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
       { title: "ガチキャリAI｜AIで自分を磨く。企業と出会う。" },
       {
         name: "description",
@@ -122,6 +130,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -177,6 +187,7 @@ function RootComponent() {
             )}
             <Toaster theme="dark" position="top-center" />
             <PersistentChatBubble />
+            <InstallAppPrompt />
             <ReferralFlushListener />
           </ModeProvider>
         </PlanProvider>
