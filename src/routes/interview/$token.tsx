@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { InterviewerAvatar } from "@/components/InterviewerAvatar";
 import { getAvatarVoice } from "@/lib/avatar-voice";
+import { useCompactLayout } from "@/hooks/use-compact-layout";
 
 export const Route = createFileRoute("/interview/$token")({
   component: InterviewTokenPage,
@@ -91,14 +92,6 @@ function stopPracticeRecorder(recorder: MediaRecorder, chunks: Blob[]): Promise<
     recorder.onstop = done;
     recorder.stop();
   });
-}
-
-// iOS Safari 等の webkitAudioContext フォールバック
-function createAudioContext(options?: AudioContextOptions): AudioContext {
-  const Ctor: typeof AudioContext =
-    (typeof AudioContext !== "undefined" && AudioContext) ||
-    (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  return new Ctor(options);
 }
 
 type Step = "prep" | "live" | "ended";
@@ -378,15 +371,19 @@ function PrepScreen({
   const [cameraOk, setCameraOk] = useState(false);
   const [micOk, setMicOk] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
+  const compact = useCompactLayout();
 
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+    const media = navigator.mediaDevices;
+    if (!media?.getUserMedia) return;
+    media
+      .getUserMedia({ video: { facingMode: "user" }, audio: true })
+      .catch(() => media.getUserMedia({ audio: true }))
       .then((stream) => {
         streamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
-        setCameraOk(true);
-        setMicOk(true);
+        setCameraOk(stream.getVideoTracks().length > 0);
+        setMicOk(stream.getAudioTracks().length > 0);
       })
       .catch(() => {
         setCameraOk(false);
@@ -405,14 +402,18 @@ function PrepScreen({
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100svh",
+        width: "100%",
+        // スマホ・縦向きタブレットは縦に積んでスクロールできるようにする
+        height: compact ? "auto" : "100svh",
+        minHeight: "100svh",
         background: "#0F0F0F",
         display: "flex",
         flexDirection: "column",
-        padding: "clamp(15px,2vh,16px) clamp(18px,2vw,20px)",
+        padding: compact
+          ? "max(14px, env(safe-area-inset-top)) 14px 0"
+          : "clamp(15px,2vh,16px) clamp(18px,2vw,20px)",
         gap: "clamp(6px,1.2vh,10px)",
-        overflow: "hidden",
+        overflow: compact ? "visible" : "hidden",
         fontFamily: "'Inter',sans-serif",
         boxSizing: "border-box",
       }}
@@ -421,8 +422,10 @@ function PrepScreen({
         style={{
           flexShrink: 0,
           display: "flex",
+          flexDirection: compact ? "column" : "row",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: compact ? "flex-start" : "center",
+          gap: compact ? 2 : 0,
           paddingBottom: "clamp(6px,1vh,10px)",
           borderBottom: "1px solid #222",
         }}
@@ -436,12 +439,12 @@ function PrepScreen({
       </div>
       <div
         style={{
-          flex: 1,
+          flex: compact ? "none" : 1,
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: compact ? "1fr" : "1fr 1fr",
           gap: "clamp(8px,1.5vw,14px)",
           minHeight: 0,
-          overflow: "hidden",
+          overflow: compact ? "visible" : "hidden",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -472,7 +475,16 @@ function PrepScreen({
                 ● {cameraOk ? "ライブ" : "未接続"}
               </span>
             </div>
-            <div style={{ flex: 1, position: "relative", minHeight: 0, overflow: "hidden" }}>
+            <div
+              style={{
+                flex: 1,
+                position: "relative",
+                minHeight: 0,
+                overflow: "hidden",
+                aspectRatio: compact ? "4 / 3" : undefined,
+                maxHeight: compact ? "42svh" : undefined,
+              }}
+            >
               <video
                 ref={videoRef}
                 autoPlay
@@ -502,21 +514,23 @@ function PrepScreen({
                   </p>
                 </div>
               )}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 8,
-                  left: 8,
-                  background: "#C8FF00",
-                  color: "#0F0F0F",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  padding: "2px 7px",
-                  borderRadius: 4,
-                }}
-              >
-                録画されます
-              </div>
+              {!invitation.practice_mode && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 8,
+                    left: 8,
+                    background: "#C8FF00",
+                    color: "#0F0F0F",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    padding: "2px 7px",
+                    borderRadius: 4,
+                  }}
+                >
+                  録画されます
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -673,16 +687,29 @@ function PrepScreen({
             <div style={{ fontSize: 15, color: "#FFB800", fontWeight: 500, marginBottom: 5 }}>
               ⚠️ 注意事項
             </div>
-            <ul style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            <ul
+              style={{
+                display: "grid",
+                gridTemplateColumns: compact ? "1fr" : "1fr 1fr",
+                gap: 2,
+              }}
+            >
               {[
-                "面接中は画面全体が録画されます",
+                invitation.practice_mode
+                  ? "練習の録画は、公開プロフィールで「録画を残す」にしている場合だけ残ります"
+                  : "面接中は画面全体が録画されます（パソコンの場合）",
                 "静かな場所でご参加ください",
                 "途中退出は面接無効となる場合があります",
                 "面接はAIが担当します",
               ].map((t) => (
                 <li
                   key={t}
-                  style={{ fontSize: 15, color: "#888", lineHeight: 1.8, marginLeft: 12 }}
+                  style={{
+                    fontSize: compact ? 13 : 15,
+                    color: "#888",
+                    lineHeight: compact ? 1.6 : 1.8,
+                    marginLeft: 12,
+                  }}
                 >
                   {t}
                 </li>
@@ -699,14 +726,25 @@ function PrepScreen({
           display: "flex",
           flexDirection: "column",
           gap: 12,
+          // スマホでは入室ボタンを画面の下に固定して、いつでも押せるようにする
+          ...(compact
+            ? {
+                position: "sticky" as const,
+                bottom: 0,
+                background: "#0F0F0F",
+                paddingBottom: "max(14px, env(safe-area-inset-bottom))",
+                marginTop: 4,
+              }
+            : {}),
         }}
       >
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: compact ? "column-reverse" : "row",
+            alignItems: compact ? "stretch" : "center",
             justifyContent: "space-between",
-            gap: 24,
+            gap: compact ? 10 : 24,
           }}
         >
           <p style={{ fontSize: 13, color: "#555", lineHeight: 1.6, margin: 0 }}>
@@ -723,13 +761,14 @@ function PrepScreen({
               color: "#0F0F0F",
               border: "none",
               borderRadius: 9,
-              padding: "12px 32px",
+              padding: compact ? "14px 16px" : "12px 32px",
               fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",
               whiteSpace: "nowrap",
               flexShrink: 0,
-              width: "45%",
+              width: compact ? "100%" : "45%",
+              touchAction: "manipulation",
             }}
           >
             面接ルームに入室する →
@@ -774,6 +813,10 @@ function LiveScreen({
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [avatarReady, setAvatarReady] = useState(false);
+  const [streamReady, setStreamReady] = useState(false);
+  const [mediaError, setMediaError] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const compact = useCompactLayout();
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   useEffect(() => {
@@ -802,9 +845,11 @@ function LiveScreen({
   }, [token, messages, elapsed, invitation]);
 
   // 音声自動検出
+  // スマホ（特に iPhone）では、ボタン操作の外で作った AudioContext は止まったままでマイクの音量が取れない。
+  // 入室ボタンのクリックで再生を許可済みの、アバター音声の AudioContext を使う
   useEffect(() => {
-    if (!mediaStreamRef.current || isProcessing || isAiSpeaking) return;
-    const audioCtx = createAudioContext();
+    if (!streamReady || !mediaStreamRef.current || isProcessing || isAiSpeaking) return;
+    const audioCtx = voice.context();
     const source = audioCtx.createMediaStreamSource(mediaStreamRef.current);
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
@@ -838,30 +883,81 @@ function LiveScreen({
     const interval = setInterval(check, 100);
     return () => {
       clearInterval(interval);
-      audioCtx.close();
+      if (silenceTimer) clearTimeout(silenceTimer);
+      source.disconnect();
+      analyser.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isProcessing, isAiSpeaking, isListening]);
+  }, [isProcessing, isAiSpeaking, isListening, streamReady]);
+
+  // 面接中にスマホの画面が消えないようにする（対応ブラウザのみ。タブを戻したら取り直す）
+  useEffect(() => {
+    type WakeLock = { release: () => Promise<void> };
+    const nav = navigator as Navigator & {
+      wakeLock?: { request: (type: "screen") => Promise<WakeLock> };
+    };
+    if (!nav.wakeLock) return;
+    let lock: WakeLock | null = null;
+    const acquire = () => {
+      if (document.visibilityState !== "visible") return;
+      nav.wakeLock
+        ?.request("screen")
+        .then((l) => {
+          lock = l;
+        })
+        .catch(() => {});
+    };
+    acquire();
+    document.addEventListener("visibilitychange", acquire);
+    return () => {
+      document.removeEventListener("visibilitychange", acquire);
+      void lock?.release().catch(() => {});
+    };
+  }, []);
+
+  // 画面の向きを変えるなどでカメラの映像の枠が作り直されたら、映像をつなぎ直す
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v && mediaStreamRef.current && v.srcObject !== mediaStreamRef.current) {
+      v.srcObject = mediaStreamRef.current;
+    }
+  }, [compact, streamReady]);
 
   useEffect(() => {
-    // カメラ・マイク起動
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        mediaStreamRef.current = stream;
-        if (videoRef.current) videoRef.current.srcObject = stream;
-      })
-      .catch(console.error);
+    // カメラ・マイク起動（前面カメラ。カメラが使えなければマイクだけで続ける）
+    const media = typeof navigator !== "undefined" ? navigator.mediaDevices : undefined;
+    if (!media?.getUserMedia) {
+      setMediaError(
+        "このブラウザではマイクが使えません。Safari か Chrome の最新版で開いてください。",
+      );
+    } else {
+      media
+        .getUserMedia({ video: { facingMode: "user" }, audio: true })
+        .catch(() => media.getUserMedia({ audio: true }))
+        .then((stream) => {
+          mediaStreamRef.current = stream;
+          if (videoRef.current) videoRef.current.srcObject = stream;
+          setStreamReady(true);
+        })
+        .catch((e) => {
+          console.error(e);
+          setMediaError(
+            "マイクが使えません。ブラウザの設定でこのサイトのマイク（とカメラ）を「許可」にしてから、ページを開き直してください。",
+          );
+        });
+    }
 
-    if (!invitation.practice_mode) {
+    // 画面録画はパソコンだけ（スマホ・タブレットのブラウザには画面録画の機能がない）
+    if (!invitation.practice_mode && typeof media?.getDisplayMedia === "function") {
       // 企業の本番面接：画面録画
-      navigator.mediaDevices
+      media
         .getDisplayMedia({ video: true, audio: true })
         .then((screenStream) => {
           const recorder = new MediaRecorder(screenStream);
           recorder.ondataavailable = (e) => screenChunksRef.current.push(e.data);
           recorder.start(1000);
           recordingRef.current = recorder;
+          setIsRecording(true);
         })
         .catch(() => {
           // 画面録画許可なしでも続行
@@ -879,7 +975,10 @@ function LiveScreen({
           const stream = mediaStreamRef.current;
           if (!stream) return;
           const recorder = startPracticeRecorder(stream, practiceChunksRef.current);
-          if (recorder) practiceRecorderRef.current = recorder;
+          if (recorder) {
+            practiceRecorderRef.current = recorder;
+            setIsRecording(true);
+          }
         })
         .catch(() => {});
     }
@@ -1126,272 +1225,341 @@ function LiveScreen({
         ? "#C8FF00"
         : "#C8FF00";
 
+  const timerBadge = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: compact ? "row" : "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+      }}
+    >
+      <div
+        style={{
+          fontSize: compact ? 14 : "clamp(16px,2.2vw,22px)",
+          color: "#C8FF00",
+          fontWeight: 700,
+          background: compact ? "rgba(15,15,15,0.75)" : undefined,
+          padding: compact ? "1px 8px" : undefined,
+          borderRadius: 6,
+        }}
+      >
+        {formatTime(elapsed)}
+      </div>
+      {isRecording && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            background: "#FF4444",
+            borderRadius: 4,
+            padding: "2px 6px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />
+          <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>録画中</span>
+        </div>
+      )}
+    </div>
+  );
+
+  const nameTag = (text: string) => (
+    <span
+      style={{
+        position: "absolute",
+        top: 8,
+        left: 8,
+        fontSize: compact ? 11 : 12,
+        color: "#0F0F0F",
+        zIndex: 1,
+        fontWeight: 700,
+        background: "rgba(255,255,255,0.92)",
+        padding: "2px 8px",
+        borderRadius: 6,
+      }}
+    >
+      {text}
+    </span>
+  );
+
+  const badge = (text: string) => (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 8,
+        left: 8,
+        background: "#C8FF00",
+        color: "#0F0F0F",
+        fontSize: 11,
+        fontWeight: 700,
+        padding: "2px 8px",
+        borderRadius: 4,
+        zIndex: 1,
+      }}
+    >
+      {text}
+    </div>
+  );
+
+  const cameraVideo = (
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      playsInline
+      style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
+    />
+  );
+
+  const avatarTile = (
+    <div
+      style={{
+        background: "#0A0A0A",
+        border: `2px solid ${isAiSpeaking ? "#C8FF00" : "#1A1A1A"}`,
+        borderRadius: 10,
+        position: "relative",
+        overflow: "hidden",
+        transition: "border-color 0.3s",
+        minHeight: 0,
+      }}
+    >
+      {nameTag("AI面接官")}
+      <InterviewerAvatar voice={voice} onReady={() => setAvatarReady(true)} />
+      {!avatarReady && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: "clamp(40px,8vmin,80px)", lineHeight: 1 }}>🤖</span>
+          <span style={{ fontSize: 12, color: "#555" }}>準備中...</span>
+        </div>
+      )}
+      {isAiSpeaking && badge("話しています")}
+      {compact && (
+        <>
+          <div style={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}>{timerBadge}</div>
+          {/* スマホ・縦向きタブレット：自分のカメラは右下に小さく重ねる */}
+          <div
+            style={{
+              position: "absolute",
+              right: 8,
+              bottom: 8,
+              width: "28%",
+              maxWidth: 170,
+              aspectRatio: "3 / 4",
+              borderRadius: 8,
+              overflow: "hidden",
+              border: `2px solid ${isListening ? "#C8FF00" : "#2A2A2A"}`,
+              background: "#0A0A0A",
+              zIndex: 2,
+            }}
+          >
+            {cameraVideo}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div
       style={{
-        width: "100vw",
+        width: "100%",
         height: "100svh",
         background: "#0F0F0F",
         display: "grid",
-        gridTemplateRows: "52vh auto auto minmax(80px,1fr) auto",
-        padding: "8px 12px",
+        gridTemplateRows: compact
+          ? "minmax(0,1.15fr) auto minmax(110px,1fr)"
+          : "52vh auto auto minmax(80px,1fr) auto",
+        padding: compact
+          ? "max(8px, env(safe-area-inset-top)) 10px max(8px, env(safe-area-inset-bottom))"
+          : "8px 12px",
         gap: 6,
         overflow: "hidden",
         fontFamily: "'Inter',sans-serif",
         boxSizing: "border-box",
       }}
     >
-      {/* ヘッダー */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "70px 1fr 1fr",
-          gap: 6,
-          borderBottom: "1px solid #1A1A1A",
-          paddingBottom: 6,
-          height: "52vh",
-        }}
-      >
+      {compact ? (
+        avatarTile
+      ) : (
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            display: "grid",
+            gridTemplateColumns: "70px 1fr 1fr",
             gap: 6,
+            borderBottom: "1px solid #1A1A1A",
+            paddingBottom: 6,
+            height: "52vh",
           }}
         >
-          <div style={{ fontSize: "clamp(16px,2.2vw,22px)", color: "#C8FF00", fontWeight: 700 }}>
-            {formatTime(elapsed)}
-          </div>
+          {timerBadge}
+          {avatarTile}
+          {/* 候補者カメラ */}
           <div
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-              background: "#FF4444",
-              borderRadius: 4,
-              padding: "2px 6px",
-              width: "fit-content",
+              background: "#0A0A0A",
+              border: `2px solid ${isListening ? "#C8FF00" : "#1A1A1A"}`,
+              borderRadius: 10,
+              position: "relative",
+              overflow: "hidden",
+              transition: "border-color 0.3s",
             }}
           >
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />
-            <span style={{ fontSize: 9, color: "#fff", fontWeight: 700 }}>録画中</span>
+            {nameTag(invitation.candidate_name ?? "候補者")}
+            {cameraVideo}
+            {isListening && badge("回答中")}
           </div>
         </div>
+      )}
 
-        {/* AIアバター */}
-        <div
-          style={{
-            background: "#0A0A0A",
-            border: `2px solid ${isAiSpeaking ? "#C8FF00" : "#1A1A1A"}`,
-            borderRadius: 10,
-            position: "relative",
-            overflow: "hidden",
-            transition: "border-color 0.3s",
-          }}
-        >
-          <span
+      {/* ステータス・コントロール */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {mediaError && (
+          <div
             style={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              fontSize: 12,
-              color: "#0F0F0F",
-              zIndex: 1,
-              fontWeight: 700,
-              background: "rgba(255,255,255,0.92)",
-              padding: "2px 8px",
-              borderRadius: 6,
+              background: "#2A1010",
+              border: "1px solid #FF4444",
+              borderRadius: 8,
+              padding: "8px 12px",
+              fontSize: 13,
+              color: "#FFB0B0",
+              lineHeight: 1.6,
             }}
           >
-            AI面接官
-          </span>
-          <InterviewerAvatar voice={voice} onReady={() => setAvatarReady(true)} />
-          {!avatarReady && (
+            {mediaError}
+          </div>
+        )}
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "clamp(6px,1vw,10px)" }}
+        >
+          <div
+            style={{
+              background: "#111",
+              border: "1px solid #1A1A1A",
+              borderRadius: 8,
+              padding: "clamp(6px,1vh,8px) clamp(10px,1.5vw,14px)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+            }}
+          >
             <div
               style={{
-                position: "absolute",
-                inset: 0,
+                fontSize: compact ? 14 : "clamp(20px,2.6vw,24px)",
+                fontWeight: compact ? 600 : undefined,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                color: statusColor,
+              }}
+            >
+              <span>{isListening ? "🎤" : isAiSpeaking ? "🔊" : "💬"}</span>
+              {statusText}
+            </div>
+            {isAiSpeaking && (
+              <div style={{ fontSize: "clamp(9px,1.2vw,11px)", color: "#444" }}>
+                ℹ️ AIが話している間は発言をお控えください。
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <button
+              onClick={toggleMute}
+              style={{
+                background: "#1A1A1A",
+                border: `1px solid ${isMuted ? "#FF4444" : "#2A2A2A"}`,
+                borderRadius: 7,
+                padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
+                cursor: "pointer",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
+                gap: 2,
               }}
             >
-              <span style={{ fontSize: "clamp(40px,8vmin,80px)", lineHeight: 1 }}>🤖</span>
-              <span style={{ fontSize: 12, color: "#555" }}>準備中...</span>
-            </div>
-          )}
-          {isAiSpeaking && (
-            <div
+              <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>{isMuted ? "🔇" : "🎤"}</span>
+              <span style={{ fontSize: 9, color: "#666" }}>ミュート</span>
+            </button>
+            <button
+              onClick={toggleCamera}
               style={{
-                position: "absolute",
-                bottom: 8,
-                left: 8,
-                background: "#C8FF00",
-                color: "#0F0F0F",
-                fontSize: 11,
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: 4,
+                background: "#1A1A1A",
+                border: `1px solid ${isCameraOff ? "#FF4444" : "#2A2A2A"}`,
+                borderRadius: 7,
+                padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
               }}
             >
-              話しています
-            </div>
-          )}
-        </div>
-
-        {/* 候補者カメラ */}
-        <div
-          style={{
-            background: "#0A0A0A",
-            border: `2px solid ${isListening ? "#C8FF00" : "#1A1A1A"}`,
-            borderRadius: 10,
-            position: "relative",
-            overflow: "hidden",
-            transition: "border-color 0.3s",
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              fontSize: 12,
-              color: "#0F0F0F",
-              zIndex: 1,
-              fontWeight: 700,
-              background: "rgba(255,255,255,0.92)",
-              padding: "2px 8px",
-              borderRadius: 6,
-            }}
-          >
-            {invitation.candidate_name ?? "候補者"}
-          </span>
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
-          />
-          {isListening && (
-            <div
+              <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>{isCameraOff ? "📵" : "📷"}</span>
+              <span style={{ fontSize: 9, color: "#666" }}>カメラ</span>
+            </button>
+            <button
+              onClick={handleAbandon}
               style={{
-                position: "absolute",
-                bottom: 8,
-                left: 8,
-                background: "#C8FF00",
-                color: "#0F0F0F",
-                fontSize: 11,
-                fontWeight: 700,
-                padding: "2px 8px",
-                borderRadius: 4,
+                background: "#1A1010",
+                border: "1px solid #FF4444",
+                borderRadius: 7,
+                padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
               }}
             >
-              回答中
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ステータス・コントロール */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "clamp(6px,1vw,10px)" }}>
-        <div
-          style={{
-            background: "#111",
-            border: "1px solid #1A1A1A",
-            borderRadius: 8,
-            padding: "clamp(6px,1vh,8px) clamp(10px,1.5vw,14px)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-          }}
-        >
-          <div
-            style={{
-              fontSize: "clamp(20px,2.6vw,24px)",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              color: statusColor,
-            }}
-          >
-            <span>{isListening ? "🎤" : isAiSpeaking ? "🔊" : "💬"}</span>
-            {statusText}
+              <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>🚪</span>
+              <span style={{ fontSize: 9, color: "#FF4444" }}>途中退出</span>
+            </button>
           </div>
-          {isAiSpeaking && (
-            <div style={{ fontSize: "clamp(9px,1.2vw,11px)", color: "#444" }}>
-              ℹ️ AIが話している間は発言をお控えください。
-            </div>
-          )}
         </div>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <button
-            onClick={toggleMute}
-            style={{
-              background: "#1A1A1A",
-              border: `1px solid ${isMuted ? "#FF4444" : "#2A2A2A"}`,
-              borderRadius: 7,
-              padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
-              cursor: "pointer",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>{isMuted ? "🔇" : "🎤"}</span>
-            <span style={{ fontSize: 9, color: "#666" }}>ミュート</span>
-          </button>
-          <button
-            onClick={toggleCamera}
-            style={{
-              background: "#1A1A1A",
-              border: `1px solid ${isCameraOff ? "#FF4444" : "#2A2A2A"}`,
-              borderRadius: 7,
-              padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
-              cursor: "pointer",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>{isCameraOff ? "📵" : "📷"}</span>
-            <span style={{ fontSize: 9, color: "#666" }}>カメラ</span>
-          </button>
-          <button
-            onClick={handleAbandon}
-            style={{
-              background: "#1A1010",
-              border: "1px solid #FF4444",
-              borderRadius: 7,
-              padding: "clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)",
-              cursor: "pointer",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <span style={{ fontSize: "clamp(13px,2vw,16px)" }}>🚪</span>
-            <span style={{ fontSize: 9, color: "#FF4444" }}>途中退出</span>
-          </button>
-        </div>
+
+        {/* 自動で声を拾えないとき（周りがうるさい・スマホのマイクが小さい等）は、ボタンで回答する */}
+        <button
+          type="button"
+          onClick={() => (isListening ? void stopListening() : startListening())}
+          disabled={!streamReady || isAiSpeaking || (isProcessing && !isListening)}
+          style={{
+            width: "100%",
+            padding: compact ? "12px 14px" : "10px 14px",
+            borderRadius: 10,
+            border: "none",
+            fontSize: compact ? 16 : 15,
+            fontWeight: 700,
+            cursor: "pointer",
+            background: isListening ? "#FF4444" : "#C8FF00",
+            color: isListening ? "#FFFFFF" : "#0F0F0F",
+            opacity: !streamReady || isAiSpeaking || (isProcessing && !isListening) ? 0.35 : 1,
+            touchAction: "manipulation",
+          }}
+        >
+          {isListening ? "■ 回答を終える" : "🎤 タップして回答する"}
+        </button>
       </div>
 
-      {/* 面接情報パネル（大きく見やすく） */}
+      {/* 面接情報パネル（大きく見やすく）。スマホ・縦向きタブレットでは省く */}
       <div
         style={{
+          display: compact ? "none" : "flex",
           flexShrink: 0,
           background: "#111",
           border: "1px solid #2A2A2A",
           borderRadius: 8,
           padding: "10px 16px",
-          display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
@@ -1517,10 +1685,10 @@ function LiveScreen({
             </div>
             <div
               style={{
-                fontSize: "clamp(14px,1.8vw,18px)",
+                fontSize: compact ? 15 : "clamp(14px,1.8vw,18px)",
                 lineHeight: 1.5,
                 padding: "7px 10px",
-                maxWidth: "75%",
+                maxWidth: compact ? "88%" : "75%",
                 borderRadius: m.role === "assistant" ? "0 8px 8px 8px" : "8px 0 8px 8px",
                 background: m.role === "assistant" ? "#1A1A1A" : "#1E2A1E",
                 color: "#F0F0F0",

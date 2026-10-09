@@ -203,8 +203,12 @@ function ChatInterviewPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ background: "#0F0F0F" }}>
-      <div className="border-b px-6 py-4" style={{ borderColor: "#2A2A2A" }}>
+    // 画面の高さに固定し、会話だけをスクロールさせる（スマホでも入力欄が常に下に見える）
+    <div className="flex h-[100svh] flex-col" style={{ background: "#0F0F0F" }}>
+      <div
+        className="shrink-0 border-b px-4 py-3 md:px-6 md:py-4"
+        style={{ borderColor: "#2A2A2A" }}
+      >
         <p style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}>{typeLabel}</p>
         <p style={{ color: "#666666", fontSize: 11, marginTop: 2 }}>
           テキストチャット形式です。マイクボタンで音声入力もできます（AIの返答はテキストのみです）
@@ -213,14 +217,14 @@ function ChatInterviewPage() {
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-6 py-6"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6"
         style={{ maxWidth: 720, margin: "0 auto", width: "100%" }}
       >
         <div className="flex flex-col gap-3">
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className="max-w-[80%] rounded-2xl px-4 py-3"
+                className="max-w-[88%] rounded-2xl px-4 py-3 md:max-w-[80%]"
                 style={{
                   background: m.role === "user" ? "#C8FF00" : "#1A1A1A",
                   color: m.role === "user" ? "#0F0F0F" : "#F0F0F0",
@@ -251,7 +255,13 @@ function ChatInterviewPage() {
         </div>
       </div>
 
-      <div className="border-t px-6 py-4" style={{ borderColor: "#2A2A2A" }}>
+      <div
+        className="shrink-0 border-t px-3 pt-3 md:px-6 md:pt-4"
+        style={{
+          borderColor: "#2A2A2A",
+          paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+        }}
+      >
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           {ended ? (
             <button
@@ -667,7 +677,7 @@ function CompletionScreen({
   };
 
   return (
-    <div className="min-h-screen px-6 py-10" style={{ background: "#0F0F0F" }}>
+    <div className="min-h-screen px-4 py-6 md:px-6 md:py-10" style={{ background: "#0F0F0F" }}>
       <div style={{ maxWidth: refineMode ? 1200 : 850, margin: "0 auto" }}>
         <div className="flex items-center justify-between">
           <div>
@@ -690,13 +700,11 @@ function CompletionScreen({
           </button>
         </div>
 
-        <div className="flex gap-5" style={{ alignItems: "flex-start" }}>
+        <div className="flex flex-col gap-5 md:flex-row md:items-start">
           {refineMode && (
             <div
-              className="shrink-0 flex flex-col rounded-2xl"
+              className="flex h-[70svh] w-full shrink-0 flex-col rounded-2xl md:h-[600px] md:w-[340px]"
               style={{
-                width: 340,
-                height: 600,
                 background: "#1A1A1A",
                 border: "1px solid #2A2A2A",
               }}

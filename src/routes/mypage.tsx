@@ -324,20 +324,17 @@ function MyPage() {
                 />
               )}
               <Row label="プランを変更する" onClick={() => navigate({ to: "/pricing" })} arrow />
-              <Row
-                label={
-                  actorAddonActive
-                    ? "キャスティングプラン：加入中"
-                    : "キャスティングプランに加入する"
-                }
-                value={
-                  actorAddonActive && actorAddonExpiresAt
-                    ? `次回更新：${actorAddonExpiresAt.toLocaleDateString("ja-JP")}`
-                    : undefined
-                }
-                onClick={actorAddonActive ? undefined : () => setActorCheckoutOpen(true)}
-                arrow={!actorAddonActive}
-              />
+              {/* 芸能・キャスティング向けは今は受け付けていないので、加入済みの人にだけ表示する */}
+              {actorAddonActive && (
+                <Row
+                  label="キャスティングプラン：加入中"
+                  value={
+                    actorAddonExpiresAt
+                      ? `次回更新：${actorAddonExpiresAt.toLocaleDateString("ja-JP")}`
+                      : undefined
+                  }
+                />
+              )}
               {actorCheckoutOpen && (
                 <CheckoutModal
                   plan="actor_pro"

@@ -36,6 +36,16 @@ export class AvatarVoice {
     return this.ctx;
   }
 
+  /**
+   * 音声の再生に使っている AudioContext。入室ボタンのクリックで unlock() 済みなので、
+   * スマホ（特に iPhone）でもマイクの音量の検出にそのまま使える
+   */
+  context(): AudioContext {
+    const ctx = this.ensure();
+    if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+    return ctx;
+  }
+
   /** アバターの母音ごとの口の形。アバターの準備ができたら設定される */
   setVisemeShapes(shapes: VisemeShapes): void {
     this.shapes = shapes;

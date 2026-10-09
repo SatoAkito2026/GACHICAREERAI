@@ -8,6 +8,7 @@ export interface DashCardData {
   comingSoon?: boolean;
 }
 
+// スマホは2列の小さめのカード、タブレット・パソコンは大きめのカードにする
 export function DashGrid({
   title,
   subtitle,
@@ -18,18 +19,20 @@ export function DashGrid({
   cards: DashCardData[];
 }) {
   return (
-    <main className="px-4 py-12">
+    <main className="px-3 py-6 sm:px-4 md:py-12">
       <div className="text-center">
-        <h1 style={{ color: "#F0F0F0", fontSize: 26, fontWeight: 700 }}>{title}</h1>
+        <h1 className="text-[22px] md:text-[26px]" style={{ color: "#F0F0F0", fontWeight: 700 }}>
+          {title}
+        </h1>
         {subtitle && (
-          <p className="mt-2" style={{ color: "#CCCCCC", fontSize: 14 }}>
+          <p className="mt-2 text-[13px] md:text-[14px]" style={{ color: "#CCCCCC" }}>
             {subtitle}
           </p>
         )}
       </div>
       <div
-        className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2"
-        style={{ maxWidth: 800, margin: "40px auto 0" }}
+        className="mx-auto mt-5 grid grid-cols-2 gap-3 sm:gap-4 md:mt-10 md:gap-6"
+        style={{ maxWidth: 800 }}
       >
         {cards.map((card) => (
           <DashCard key={card.to} {...card} />
@@ -44,8 +47,8 @@ export function DashCard({ emoji, title, desc, to, comingSoon }: DashCardData) {
     <>
       <div className="flex items-center justify-between">
         <div
-          className="flex items-center justify-center"
-          style={{ width: 56, height: 56, background: "#222", borderRadius: 12, fontSize: 32 }}
+          className="flex h-10 w-10 items-center justify-center rounded-[10px] text-[22px] md:h-14 md:w-14 md:rounded-xl md:text-[32px]"
+          style={{ background: "#222" }}
         >
           {emoji}
         </div>
@@ -64,39 +67,47 @@ export function DashCard({ emoji, title, desc, to, comingSoon }: DashCardData) {
           </span>
         )}
       </div>
-      <h2 className="mt-4" style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 700 }}>
+      <h2
+        className="mt-3 text-[15px] leading-snug md:mt-4 md:text-[18px]"
+        style={{ color: "#F0F0F0", fontWeight: 700 }}
+      >
         {title}
       </h2>
-      <p className="mt-2 flex-1" style={{ color: "#CCCCCC", fontSize: 14 }}>
+      <p
+        className="mt-1.5 flex-1 text-[12px] leading-relaxed md:mt-2 md:text-[14px]"
+        style={{ color: "#CCCCCC" }}
+      >
         {desc}
       </p>
       {!comingSoon && (
-        <span className="mt-4" style={{ color: "#C8FF00", fontSize: 14, fontWeight: 500 }}>
+        <span
+          className="mt-3 text-[13px] md:mt-4 md:text-[14px]"
+          style={{ color: "#C8FF00", fontWeight: 500 }}
+        >
           始める →
         </span>
       )}
     </>
   );
 
+  const className =
+    "flex min-h-[150px] flex-col rounded-xl p-4 md:min-h-[180px] md:rounded-2xl md:p-8";
   const cardStyle = {
     background: "#1A1A1A",
     border: "1px solid #C8FF00",
-    borderRadius: 16,
-    padding: 32,
-    minHeight: 180,
     opacity: comingSoon ? 0.6 : 1,
   } as const;
 
   if (comingSoon) {
     return (
-      <div className="flex flex-col" style={cardStyle}>
+      <div className={className} style={cardStyle}>
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={to} className="flex flex-col transition-all hover:opacity-90" style={cardStyle}>
+    <Link to={to} className={`${className} transition-all hover:opacity-90`} style={cardStyle}>
       {content}
     </Link>
   );
