@@ -97,10 +97,9 @@ export default function PrivateNav() {
         className="bottom-nav fixed inset-x-0 bottom-0 z-40 grid border-t md:hidden"
         style={{
           gridTemplateColumns: `repeat(${bottomItems.length}, 1fr)`,
-          background: "rgba(15,15,15,0.97)",
+          background: "#0F0F0F",
           borderColor: "#2A2A2A",
           paddingBottom: "env(safe-area-inset-bottom)",
-          backdropFilter: "blur(8px)",
         }}
         aria-label="メニュー"
       >
