@@ -16,7 +16,6 @@ import { ModeProvider } from "@/hooks/use-mode";
 import { Toaster } from "@/components/ui/sonner";
 import { PersistentChatBubble } from "@/components/PersistentChatBubble";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
-import { ReferralFlushListener } from "@/components/ReferralFlushListener";
 
 function NotFoundComponent() {
   return (
@@ -198,7 +197,6 @@ function RootComponent() {
             <Toaster theme="dark" position="top-center" />
             <PersistentChatBubble />
             <InstallAppPrompt />
-            <ReferralFlushListener />
           </ModeProvider>
         </PlanProvider>
       </AuthProvider>

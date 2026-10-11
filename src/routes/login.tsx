@@ -11,9 +11,8 @@ import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 const SHOW_SCHOOL_AND_ACTOR = false;
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>): { next?: string; ref?: string } => ({
+  validateSearch: (s: Record<string, unknown>): { next?: string } => ({
     ...(typeof s.next === "string" && s.next.startsWith("/") ? { next: s.next } : {}),
-    ...(typeof s.ref === "string" && s.ref.trim() ? { ref: s.ref.trim() } : {}),
   }),
   component: LoginPage,
 });
@@ -44,7 +43,7 @@ const SCHOOL_TYPES = [
 function LoginPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const { next, ref } = Route.useSearch();
+  const { next } = Route.useSearch();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [loginMode, setLoginMode] = useState<LoginMode>("private");
   const loginModeRef = useRef<LoginMode>("private");
@@ -66,51 +65,6 @@ function LoginPage() {
   >(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const handledRef = useRef(false);
-
-  const REFERRAL_STORAGE_KEY = "pending_referral_code";
-
-  // ?ref=コード付きでこのページに来たら、確認メール待ち等でセッションが
-  // すぐ確立しない場合に備えて、一旦localStorageに保持しておく
-  useEffect(() => {
-    if (ref) {
-      try {
-        localStorage.setItem(REFERRAL_STORAGE_KEY, ref);
-      } catch {
-        // ignore
-      }
-    }
-  }, [ref]);
-
-  // セッションが確立したタイミング(サインアップ直後・メール確認後の初回ログインどちらでも)で、
-  // 保留中の紹介コードがあれば記録する
-  const flushPendingReferral = async (accessToken: string) => {
-    let pending: string | null = null;
-    try {
-      pending = localStorage.getItem(REFERRAL_STORAGE_KEY);
-    } catch {
-      pending = null;
-    }
-    if (!pending) return;
-    try {
-      const res = await fetch("/api/record-referral", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ referralCode: pending }),
-      });
-      if (res.ok) {
-        localStorage.removeItem(REFERRAL_STORAGE_KEY);
-      }
-    } catch (e) {
-      console.error("[referral] record failed", e);
-    }
-  };
-
-  useEffect(() => {
-    if (session?.access_token) {
-      void flushPendingReferral(session.access_token);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.access_token]);
 
   const handleModeChange = (newMode: LoginMode) => {
     loginModeRef.current = newMode;
@@ -137,7 +91,6 @@ function LoginPage() {
         handledRef.current = true;
         if (data.session?.access_token) {
           void registerDevice(data.session.access_token);
-          void flushPendingReferral(data.session.access_token);
         }
         if (next) {
           window.location.href = next;
@@ -147,15 +100,11 @@ function LoginPage() {
           // 管理者アカウントは、選択したモードに関わらず問答無用で管理ダッシュボードへ
           const { data: adminCheck } = await (supabase
             .from("profiles")
-            .select("is_admin, is_agency")
+            .select("is_admin")
             .eq("id", data.user.id)
             .maybeSingle() as any);
           if (adminCheck?.is_admin) {
             navigate({ to: "/private/admin" });
-            return;
-          }
-          if (adminCheck?.is_agency) {
-            navigate({ to: "/private/agency" });
             return;
           }
 
@@ -218,11 +167,6 @@ function LoginPage() {
           handledRef.current = true;
           if (data.session.access_token) {
             void registerDevice(data.session.access_token);
-          }
-          // 紹介リンク経由の登録なら、代理店を紐付ける(メール確認が必要な場合は
-          // ログイン成功時にもflushPendingReferralが呼ばれるので、そちらで記録される)
-          if (data.session.access_token) {
-            void flushPendingReferral(data.session.access_token);
           }
           if (currentMode === "business") {
             setStep("biz-type");
