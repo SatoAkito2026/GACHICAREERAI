@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ChevronDown,
@@ -283,7 +284,7 @@ function ActorScreeningHistoryPage({ showHeader = true }: { showHeader?: boolean
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
   if (paywallLoading) return null;
   if (!isPaid) return <ActorPaywallScreen />;
 

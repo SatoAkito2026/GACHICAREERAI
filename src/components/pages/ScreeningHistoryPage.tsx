@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ChevronDown,
@@ -323,7 +324,7 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   const headingFont = { fontFamily: "'Space Grotesk', sans-serif" };
   const inputStyle: React.CSSProperties = {

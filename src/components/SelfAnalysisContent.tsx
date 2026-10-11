@@ -1,4 +1,5 @@
-import { Navigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -60,7 +61,7 @@ export function SelfAnalysisContent({
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   const handleGenerate = async (reportType: "basic" | "detailed") => {
     setGenerating(reportType);

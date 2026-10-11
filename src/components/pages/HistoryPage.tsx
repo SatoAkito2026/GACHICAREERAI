@@ -1,4 +1,5 @@
-import { Link, Navigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -192,7 +193,7 @@ export function HistoryPage({
     );
   }
 
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   return (
     <div

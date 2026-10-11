@@ -1,4 +1,5 @@
-import { Navigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -113,7 +114,7 @@ export function ResearchContent({
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   const targetLabel = mode === "student" ? "志望校" : "志望企業";
 

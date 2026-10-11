@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef } from "react";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
 
@@ -33,7 +34,7 @@ function WelcomePage() {
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   return (
     <div

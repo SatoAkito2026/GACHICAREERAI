@@ -1,5 +1,6 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 
 export const Route = createFileRoute("/")({
-  component: () => <Navigate to="/login" />,
+  component: () => <SafeNavigate to="/login" />,
 });

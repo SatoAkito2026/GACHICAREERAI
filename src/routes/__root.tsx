@@ -138,10 +138,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const LEGACY_POLYFILLS = `(function(){
+var d=function(o,k,v){if(!o[k])Object.defineProperty(o,k,{value:v,writable:true,configurable:true});};
+d(Object,"hasOwn",function(o,k){return Object.prototype.hasOwnProperty.call(o,k);});
+var at=function(i){i=Math.trunc(i)||0;if(i<0)i+=this.length;return i<0||i>=this.length?undefined:this[i];};
+d(Array.prototype,"at",at);d(String.prototype,"at",at);
+d(Array.prototype,"findLast",function(f,t){for(var i=this.length-1;i>=0;i--){if(f.call(t,this[i],i,this))return this[i];}});
+d(Array.prototype,"findLastIndex",function(f,t){for(var i=this.length-1;i>=0;i--){if(f.call(t,this[i],i,this))return i;}return -1;});
+if(typeof structuredClone!=="function"){window.structuredClone=function(v){return v===undefined?v:JSON.parse(JSON.stringify(v));};}
+})();`;
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
+        {/* 古い iPhone（iOS 15.3 以前など）にない機能を補う。これがないとアプリが起動せず「読み込み中」のまま止まる */}
+        <script dangerouslySetInnerHTML={{ __html: LEGACY_POLYFILLS }} />
         <HeadContent />
       </head>
       <body>

@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
@@ -121,7 +122,7 @@ function LoginPage() {
       window.location.href = next;
       return null;
     }
-    return <Navigate to="/private" />;
+    return <SafeNavigate to="/private" />;
   }
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
