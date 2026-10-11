@@ -37,7 +37,8 @@ void METER_ID;
 /**
  * 個人プランの値段は src/lib/plan-rules.ts で決める。
  * Stripe で新しい Price を作ったら wrangler.jsonc の STRIPE_PRICE_INDIVIDUAL_LIGHT / _PRO に入れる。
- * 入っていなければ、今までの Price と同じ商品で、値段だけ新しくして申し込む。
+ * 入っていなければ下の PRICE_IDS を使う。その金額が plan-rules と違う（古い・停止中）ときだけ、
+ * 同じ商品で値段だけ新しくして申し込む。
  */
 async function individualPlanItem(
   stripe: Stripe,
@@ -49,6 +50,10 @@ async function individualPlanItem(
       : process.env.STRIPE_PRICE_INDIVIDUAL_PRO;
   if (envPrice) return { price: envPrice };
   const base = await stripe.prices.retrieve(PRICE_IDS[plan]);
+  // Stripe の画面で金額を新しくしてあれば、その Price をそのまま使う
+  if (base.active && base.unit_amount === PRACTICE_RULES[plan].priceJpy) {
+    return { price: base.id };
+  }
   const product = typeof base.product === "string" ? base.product : base.product.id;
   return {
     price_data: {
