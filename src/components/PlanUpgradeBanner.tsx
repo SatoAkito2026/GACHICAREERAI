@@ -30,9 +30,11 @@ export function PlanUpgradeBanner() {
 
   if (!visible) return null;
 
+  // スマホ・タブレットでは画面に浮かせない（プランはマイページの「プランを変更する」から見られる）
+
   return (
     <div
-      className="fixed left-1/2 z-50 flex w-[calc(100%-24px)] max-w-lg -translate-x-1/2 items-center justify-between gap-3 rounded-xl px-4 py-3 shadow-lg sm:gap-4 sm:px-5"
+      className="fixed left-1/2 z-50 hidden w-[calc(100%-24px)] lg:flex max-w-lg -translate-x-1/2 items-center justify-between gap-3 rounded-xl px-4 py-3 shadow-lg sm:gap-4 sm:px-5"
       style={{
         bottom: "calc(var(--bottom-nav-h) + var(--float-gap))",
         background: "#1A1A1A",

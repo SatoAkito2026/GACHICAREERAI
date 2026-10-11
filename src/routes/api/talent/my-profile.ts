@@ -46,10 +46,35 @@ export const Route = createFileRoute("/api/talent/my-profile")({
           .from("profile_unlocks")
           .select("id", { count: "exact", head: true })
           .eq("candidate_user_id", auth.userId);
+        // スマホのホーム画面に出す「前回の点数」
+        const { data: last } = await supabase
+          .from("interviews")
+          .select("id, created_at, job_type")
+          .eq("user_id", auth.userId)
+          .eq("mode", "individual")
+          .neq("impression", "途中退出")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        let latest: { score: number | null; date: string; jobType: string | null } | null = null;
+        if (last) {
+          const { data: sum } = await supabase
+            .from("interview_summaries")
+            .select("practice_feedback")
+            .eq("interview_id", last.id)
+            .maybeSingle();
+          const fb = (sum?.practice_feedback ?? null) as { readiness_score?: number } | null;
+          latest = {
+            score: typeof fb?.readiness_score === "number" ? fb.readiness_score : null,
+            date: last.created_at,
+            jobType: last.job_type,
+          };
+        }
         return jsonResponse({
           profile,
           practiceCount: await countPractice(supabase, auth.userId),
           unlockCount: unlocks ?? 0,
+          latest,
         });
       },
 

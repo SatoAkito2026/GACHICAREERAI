@@ -1,5 +1,16 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BarChart3, FileText, Globe, Home, Mail, Mic, User } from "lucide-react";
+import {
+  BarChart3,
+  CircleUserRound,
+  FileText,
+  Globe,
+  Home,
+  Mail,
+  MessageCircle,
+  Mic,
+  User,
+} from "lucide-react";
+import { OPEN_AI_CHAT_EVENT } from "@/components/PersistentChatBubble";
 
 const TABS = [
   { label: "個人", to: "/private/individual" },
@@ -40,7 +51,7 @@ export default function PrivateNav() {
   return (
     <>
       <nav
-        className="flex h-[52px] items-center justify-between gap-3 border-b px-4 md:px-6"
+        className="flex h-[52px] items-center justify-between gap-3 border-b px-4 lg:px-6"
         style={{ background: "#0F0F0F", borderColor: "#333333" }}
       >
         <Link
@@ -51,8 +62,8 @@ export default function PrivateNav() {
           ガチキャリAI<span style={{ color: "#C8FF00" }}>｜Private</span>
         </Link>
 
-        {/* タブレット・パソコン：上にタブ */}
-        <div className="hidden items-center gap-1.5 md:flex">
+        {/* パソコン：上にタブ */}
+        <div className="hidden items-center gap-1.5 lg:flex">
           {TABS.map((tab) => {
             const active = activeTab === tab.to;
             return (
@@ -72,29 +83,28 @@ export default function PrivateNav() {
           })}
         </div>
 
-        {/* スマホ：上は切り替えとマイページだけ */}
-        <div className="flex items-center gap-1 md:hidden">
-          <Link
-            to={isStudent ? "/private/individual" : "/private/student"}
-            className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[12px]"
-            style={{ color: "#888888", border: "1px solid #333333" }}
+        {/* スマホ・タブレット：上はAIチャットとマイページのアイコンだけ（ほかは下のメニュー） */}
+        <div className="flex items-center gap-1 lg:hidden">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event(OPEN_AI_CHAT_EVENT))}
+            className="flex h-10 w-10 items-center justify-center rounded-full active:bg-[#222]"
+            aria-label="AIチャットを開く"
           >
-            {isStudent ? "個人へ" : "受験生へ"}
+            <MessageCircle size={21} color="#CCCCCC" />
+          </button>
+          <Link
+            to="/mypage"
+            className="flex h-10 w-10 items-center justify-center rounded-full active:bg-[#222]"
+            aria-label="マイページ"
+          >
+            <CircleUserRound size={22} color="#CCCCCC" />
           </Link>
-          {!isStudent && (
-            <Link
-              to="/mypage"
-              className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[12px]"
-              style={{ color: "#888888" }}
-            >
-              マイページ
-            </Link>
-          )}
         </div>
       </nav>
 
       <nav
-        className="bottom-nav fixed inset-x-0 bottom-0 z-40 grid border-t md:hidden"
+        className="bottom-nav fixed inset-x-0 bottom-0 z-40 grid border-t lg:hidden"
         style={{
           gridTemplateColumns: `repeat(${bottomItems.length}, 1fr)`,
           background: "#0F0F0F",

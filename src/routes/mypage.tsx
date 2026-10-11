@@ -103,7 +103,7 @@ function Row({
 function MyPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { plan, planExpiresAt, isPlanActive, interviewCount, limits, loading } = usePlan();
-  const { isBusiness } = useMode();
+  const { isBusiness, mode } = useMode();
   const navigate = useNavigate();
   const [pwSending, setPwSending] = useState(false);
   const [pwMsg, setPwMsg] = useState("");
@@ -280,6 +280,21 @@ function MyPage() {
                 loading={pwSending}
                 arrow
               />
+              {!isBusiness && (
+                <Row
+                  label={
+                    mode === "private_student"
+                      ? "個人（就活・転職）に切り替える"
+                      : "受験生（入試対策）に切り替える"
+                  }
+                  onClick={() =>
+                    navigate({
+                      to: mode === "private_student" ? "/private/individual" : "/private/student",
+                    })
+                  }
+                  arrow
+                />
+              )}
             </SectionCard>
 
             <SectionCard title="プラン・お支払い">
