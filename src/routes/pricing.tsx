@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { limitText, PRACTICE_RULES, type IndividualPlanKey } from "@/lib/plan-rules";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -25,32 +26,39 @@ type PlanCard = {
   highlight: boolean;
 };
 
+/** 個人プランの説明は src/lib/plan-rules.ts の数字から作る（数字を1か所で管理するため） */
+function individualFeatures(key: IndividualPlanKey): string[] {
+  const r = PRACTICE_RULES[key];
+  const count = r.perMonth == null ? `1日${r.perDay}回` : `1日${r.perDay}回・月${r.perMonth}回まで`;
+  return [
+    `模擬面接：${count}`,
+    `1回の長さ：${limitText(r.maxMinutes, "分")}`,
+    `練習できる職種：${r.jobTypes == null ? "無制限" : `月${r.jobTypes}つまで`}`,
+    `保存できる結果：${r.results == null ? "無制限" : `新しい${r.results}件`}`,
+    "根拠つきの評価・プロフィール公開・オファー：全プラン同じ",
+  ];
+}
+
 const INDIVIDUAL_PLANS: PlanCard[] = [
   {
     key: "free",
     name: "無料プラン",
     price: PLAN_PRICES.free,
-    features: ["AI面接：2回/月", "履歴保存：不可", "PDF出力：不可", "追加購入：¥550/回（税込）"],
+    features: individualFeatures("free"),
     highlight: false,
   },
   {
     key: "individual_light",
     name: "ライトプラン",
     price: PLAN_PRICES.individual_light,
-    features: ["AI面接：15回/月", "履歴保存：可", "PDF出力：可", "追加購入：¥330/回（税込）"],
+    features: individualFeatures("individual_light"),
     highlight: false,
   },
   {
     key: "individual_pro",
     name: "プロプラン",
     price: PLAN_PRICES.individual_pro,
-    features: [
-      "AI面接：25回/月",
-      "履歴保存：可",
-      "PDF出力：可",
-      "履歴書自動生成：可（近日公開）",
-      "追加購入：¥330/回（税込）",
-    ],
+    features: [...individualFeatures("individual_pro"), "書類アップロードして面接：可"],
     highlight: true,
   },
 ];

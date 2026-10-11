@@ -52,7 +52,7 @@ export function PlanUpgradeBanner() {
           <p className="text-[11px]" style={{ color: "#888888" }}>
             {isBusiness
               ? "従量課金¥440/回〜。面接URL発行・AI面接が使えます"
-              : "ライトプラン¥2,200/月〜"}
+              : "ライトプラン¥980/月〜"}
           </p>
         </div>
       </div>

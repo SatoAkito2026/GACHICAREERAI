@@ -24,6 +24,14 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
 - 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）
 
+## 個人プランの上限
+
+- 数字はすべて `src/lib/plan-rules.ts`（`PRACTICE_RULES`）。無料 ¥0（月5回）／ライト ¥980（月15回）／プロ ¥2,980（月30回）。評価の中身・公開・オファーは全プラン同じで、変わるのは回数・時間・職種・結果の数だけ
+- 回数と職種は `create-practice-session.ts` でチェック（AIと話し始めた練習だけ数える。日本時間で日・月を区切る。職種は月ごとに入れ替え可）
+- 時間は `interview-turn.ts` で止める（上限で締めの指示、+3分でAIを呼ばずに終了）。開始時刻は `screening_data.practice_started_at`
+- 結果は新しい順に上限まで表示し、古いものは消さずに隠す（`PracticeHistoryContent`）
+- Stripe は `STRIPE_PRICE_INDIVIDUAL_LIGHT` / `_PRO` があればその Price、なければ旧 Price の商品で値段だけ新しくして申し込む
+
 ## スマホ・アプリ化
 
 - 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）

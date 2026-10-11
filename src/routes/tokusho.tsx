@@ -57,8 +57,8 @@ function TokushoPage() {
         <p style={{ color: "#F0F0F0", fontWeight: 600 }}>【個人・受験生向け】</p>
         <ul className="list-disc space-y-1 pl-5">
           <li>無料プラン：0円</li>
-          <li>ライトプラン：¥3,300/月（税込）</li>
-          <li>プロプラン：¥5,500/月（税込）</li>
+          <li>ライトプラン：¥980/月（税込）</li>
+          <li>プロプラン：¥2,980/月（税込）</li>
         </ul>
         <p className="mt-2" style={{ color: "#F0F0F0", fontWeight: 600 }}>
           【企業・学校向け】

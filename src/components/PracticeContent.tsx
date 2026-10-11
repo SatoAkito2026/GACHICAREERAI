@@ -7,6 +7,12 @@ import { usePlan } from "@/hooks/use-plan";
 import { supabase } from "@/integrations/supabase/client";
 import { PrivateShell } from "@/components/ModeShell";
 import { INDUSTRY_OPTIONS } from "@/lib/career-options";
+import { limitText, type PracticeRule } from "@/lib/plan-rules";
+
+type PracticeUsage = {
+  rule: PracticeRule;
+  usage: { today: number; month: number; jobTypes: string[] };
+};
 
 const STYLE_OPTIONS: { value: "friendly" | "neutral" | "strict"; label: string; desc: string }[] = [
   { value: "friendly", label: "フレンドリー", desc: "リラックスして話せる雰囲気" },
@@ -89,6 +95,18 @@ export function PracticeContent({
   const [resumeText, setResumeText] = useState("");
   const [extracting, setExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [usage, setUsage] = useState<PracticeUsage | null>(null);
+
+  useEffect(() => {
+    if (!session) return;
+    void fetch("/api/create-practice-session", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? (r.json() as Promise<PracticeUsage>) : null))
+      .then((d) => d && setUsage(d))
+      .catch(() => {});
+  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -224,6 +242,8 @@ export function PracticeContent({
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
           AIアバターが面接官役を務めます。プロフィール情報を踏まえて質問してくれます。
         </p>
+
+        {usage && <UsageCard data={usage} mode={mode} />}
 
         <div className="mt-4 rounded-2xl p-5" style={cardStyle}>
           <p style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
@@ -411,5 +431,52 @@ export function PracticeContent({
         </p>
       </div>
     </PrivateShell>
+  );
+}
+
+/** 今日・今月あと何回できるか、今月の職種を出す */
+function UsageCard({ data, mode }: { data: PracticeUsage; mode: "individual" | "student" }) {
+  const { rule, usage } = data;
+  const leftToday = rule.perDay == null ? null : Math.max(0, rule.perDay - usage.today);
+  const leftMonth = rule.perMonth == null ? null : Math.max(0, rule.perMonth - usage.month);
+  const left =
+    leftToday == null ? leftMonth : leftMonth == null ? leftToday : Math.min(leftToday, leftMonth);
+  const label = mode === "student" ? "志望校" : "職種";
+  const items: [string, string][] = [
+    ["今日あと", left == null ? "無制限" : `${left}回`],
+    ["1回の長さ", limitText(rule.maxMinutes, "分")],
+    [
+      `今月の${label}`,
+      rule.jobTypes == null ? "無制限" : `${usage.jobTypes.length} / ${rule.jobTypes}`,
+    ],
+  ];
+  return (
+    <div
+      className="mt-4 rounded-2xl p-4"
+      style={{ background: "#16200A", border: "1px solid #3A4A12" }}
+    >
+      <div className="grid grid-cols-3 gap-2 text-center">
+        {items.map(([k, v]) => (
+          <div key={k}>
+            <p style={{ color: "#9FB86A", fontSize: 11 }}>{k}</p>
+            <p style={{ color: "#E6F7B0", fontSize: 16, fontWeight: 800 }}>{v}</p>
+          </div>
+        ))}
+      </div>
+      {rule.jobTypes != null && usage.jobTypes.length > 0 && (
+        <p className="mt-2 text-center" style={{ color: "#9FB86A", fontSize: 11 }}>
+          今月の{label}：{usage.jobTypes.join("・")}
+        </p>
+      )}
+      {left === 0 && (
+        <p className="mt-2 text-center" style={{ color: "#FFB0B0", fontSize: 12 }}>
+          {leftToday === 0 ? "今日の練習回数を使い切りました" : "今月の練習回数を使い切りました"}
+          {" ・ "}
+          <Link to="/pricing" style={{ color: "#C8FF00", fontWeight: 700 }}>
+            プランを見る
+          </Link>
+        </p>
+      )}
+    </div>
   );
 }

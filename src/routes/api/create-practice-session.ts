@@ -12,11 +12,19 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseUrl, getServiceRoleKey, verifyApiUser } from "@/lib/api-auth";
+import {
+  normalizeJobType,
+  practiceRule,
+  startOfMonthJst,
+  startOfTodayJst,
+  toIndividualPlan,
+} from "@/lib/plan-rules";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Cache-Control": "no-store, no-cache, must-revalidate",
 };
@@ -28,10 +36,59 @@ function json(body: unknown, status = 200) {
   });
 }
 
+/** 有効期限切れを外した、いまのプラン */
+async function getActivePlan(supabase: SupabaseClient, userId: string) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("user_mode, plan, plan_expires_at")
+    .eq("id", userId)
+    .maybeSingle();
+  const isExpired = profile?.plan_expires_at
+    ? new Date(profile.plan_expires_at).getTime() < Date.now()
+    : false;
+  const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
+  return { profile, plan };
+}
+
+/**
+ * 今日・今月に実際に始めた練習（AIと1回でも話したもの）の数と、今月使った職種。
+ * 開いただけで話していないものは数えない。
+ */
+async function getPracticeUsage(supabase: SupabaseClient, userId: string) {
+  const { data } = await supabase
+    .from("interview_invitations")
+    .select("job_type, created_at")
+    .eq("user_id", userId)
+    .not("practice_mode", "is", null)
+    .in("status", ["started", "completed", "abandoned"])
+    .gte("created_at", startOfMonthJst())
+    .limit(1000);
+  const rows = (data ?? []) as { job_type: string | null; created_at: string }[];
+  const todayStart = startOfTodayJst();
+  const jobTypes = [...new Set(rows.map((r) => normalizeJobType(r.job_type)).filter(Boolean))];
+  return {
+    today: rows.filter((r) => r.created_at >= todayStart).length,
+    month: rows.length,
+    jobTypes,
+  };
+}
+
 export const Route = createFileRoute("/api/create-practice-session")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: corsHeaders }),
+
+      // 練習画面に「今日あと何回・今月の職種」を出すための残り回数
+      GET: async ({ request }) => {
+        const auth = await verifyApiUser(request);
+        if ("error" in auth) return auth.error;
+        const serviceKey = getServiceRoleKey();
+        if (!serviceKey) return json({ error: "Supabase config missing" }, 500);
+        const supabase = createClient(getSupabaseUrl(), serviceKey);
+        const { plan } = await getActivePlan(supabase, auth.userId);
+        const usage = await getPracticeUsage(supabase, auth.userId);
+        return json({ plan: toIndividualPlan(plan), rule: practiceRule(plan), usage });
+      },
 
       POST: async ({ request }) => {
         const auth = await verifyApiUser(request);
@@ -69,43 +126,45 @@ export const Route = createFileRoute("/api/create-practice-session")({
           : "general";
         const preferences = body?.preferences ?? {};
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_mode, plan, plan_expires_at")
-          .eq("id", userId)
-          .maybeSingle();
+        const { profile, plan } = await getActivePlan(supabase, userId);
         const dbMode: "individual" | "student" =
           profile?.user_mode === "private_student" ? "student" : "individual";
-
-        const isExpired = profile?.plan_expires_at
-          ? new Date(profile.plan_expires_at).getTime() < Date.now()
-          : false;
-        const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
         const isPro = plan === "individual_pro" || plan === "company_pro" || plan === "pro";
-        const isLight =
-          plan === "individual_light" || plan === "company_light" || plan === "standard";
+        const rule = practiceRule(plan);
 
-        // プランごとの制限(クールダウン・最大時間・深掘り度)は plan_practice_config
-        // テーブルで管理する。行が無ければ、これまでの既定値にフォールバックする。
+        // 深掘り度は plan_practice_config テーブルで調整できる（行が無ければプランの既定値）。
+        // 回数・時間・職種の上限は src/lib/plan-rules.ts で決める。
         const { data: practiceConfig } = await supabase
           .from("plan_practice_config")
-          .select("cooldown_hours, max_minutes, depth")
+          .select("depth")
           .eq("plan", plan)
           .maybeSingle();
-
-        const cooldownHours = practiceConfig?.cooldown_hours ?? (isPro || isLight ? 24 : 24 * 3);
-        const maxMinutes = practiceConfig
-          ? practiceConfig.max_minutes
-          : isPro
-            ? null
-            : isLight
-              ? 15
-              : 5;
+        const tier = toIndividualPlan(plan);
         const depth: "basic" | "standard" | "deep" =
           (practiceConfig?.depth as "basic" | "standard" | "deep" | undefined) ??
-          (isPro ? "deep" : isLight ? "standard" : "basic");
+          (tier === "individual_pro" ? "deep" : tier === "individual_light" ? "standard" : "basic");
+        const maxMinutes = rule.maxMinutes;
 
-        // 個人・受験生プランの回数制限は一時的に撤廃(企業側の制限には一切影響しない)
+        const usage = await getPracticeUsage(supabase, userId);
+        const upgradeHint = tier === "individual_pro" ? "" : "プランを上げると回数が増えます。";
+        if (rule.perDay != null && usage.today >= rule.perDay) {
+          return json(
+            {
+              error: "daily_limit",
+              message: `今日の練習は${rule.perDay}回までです。明日またどうぞ。${upgradeHint}`,
+            },
+            429,
+          );
+        }
+        if (rule.perMonth != null && usage.month >= rule.perMonth) {
+          return json(
+            {
+              error: "monthly_limit",
+              message: `今月の練習は${rule.perMonth}回までです。来月1日にリセットされます。${upgradeHint}`,
+            },
+            429,
+          );
+        }
 
         const { data: careerProfile } = await supabase
           .from("user_career_profiles")
@@ -163,6 +222,32 @@ export const Route = createFileRoute("/api/create-practice-session")({
               : dbMode === "student"
                 ? ((careerProfile?.desired_schools as any[])?.[0]?.school_name ?? "受験")
                 : ((careerProfile?.desired_conditions as any)?.job_type ?? "模擬面接");
+
+        // 職種の数の上限（今月すでに使った職種なら何回でも可。月が変われば入れ替えられる）
+        const jobKey = normalizeJobType(jobType);
+        if (
+          rule.jobTypes != null &&
+          jobKey &&
+          !usage.jobTypes.includes(jobKey) &&
+          usage.jobTypes.length >= rule.jobTypes
+        ) {
+          const label = dbMode === "student" ? "志望校" : "職種";
+          return json(
+            {
+              error: "job_type_limit",
+              message: `今月練習できる${label}は${rule.jobTypes}つまでです（今月：${usage.jobTypes.join("・")}）。来月から別の${label}にできます。${upgradeHint}`,
+            },
+            429,
+          );
+        }
+
+        // まだ始めていない前の練習URLは使えなくする（URLをためて上限を超えないように）
+        await supabase
+          .from("interview_invitations")
+          .update({ expires_at: new Date().toISOString() })
+          .eq("user_id", userId)
+          .eq("status", "pending")
+          .not("practice_mode", "is", null);
 
         // 書類アップロードはプロプラン限定機能(サーバー側でも念のため制限する)
         const uploadedResumeText =

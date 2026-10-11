@@ -77,6 +77,7 @@ export const Route = createFileRoute("/api/interview-turn")({
           let avatarStyle = "neutral";
           let practiceMode: "individual" | "student" | null = null;
           let practiceMaxMinutes: number | null = null;
+          let practiceStartedAt: string | null = null;
           let practiceDepth: "basic" | "standard" | "deep" = "standard";
           let practiceInterviewType: string = "general";
           let uploadedResumeText: string | null = null;
@@ -85,7 +86,7 @@ export const Route = createFileRoute("/api/interview-turn")({
             const { data: inv } = await supabase
               .from("interview_invitations")
               .select(
-                "user_id, screening_data, practice_mode, avatar_style, practice_max_minutes, practice_depth, uploaded_resume_text, expires_at, practice_interview_type",
+                "user_id, screening_data, practice_mode, avatar_style, practice_max_minutes, practice_depth, uploaded_resume_text, expires_at, practice_interview_type, status",
               )
               .eq("token", body.token)
               .maybeSingle();
@@ -100,7 +101,25 @@ export const Route = createFileRoute("/api/interview-turn")({
             }
 
             if (inv?.screening_data) {
-              screeningData = inv.screening_data as Record<string, unknown>;
+              screeningData = { ...(inv.screening_data as Record<string, unknown>) };
+            }
+            // 練習を始めた時刻（screening_data に入れておく。AIへのプロンプトには渡さない）
+            practiceStartedAt =
+              typeof screeningData.practice_started_at === "string"
+                ? screeningData.practice_started_at
+                : null;
+            delete screeningData.practice_started_at;
+            if (!practiceStartedAt && (inv as any)?.practice_mode) {
+              practiceStartedAt = new Date().toISOString();
+              await supabase
+                .from("interview_invitations")
+                .update({
+                  screening_data: {
+                    ...(inv.screening_data as Record<string, unknown>),
+                    practice_started_at: practiceStartedAt,
+                  },
+                })
+                .eq("token", body.token);
             }
             practiceMode = (inv as any)?.practice_mode ?? null;
             practiceAvatarStyleOverride = (inv as any)?.avatar_style ?? null;
@@ -332,6 +351,26 @@ ${Object.keys(screeningData).length > 0 ? JSON.stringify(screeningData, null, 2)
 ${companyContext || "（企業情報未設定）"}
 
 日本語で話してください。`;
+          }
+
+          // 練習の時間上限（プランで決まる）。過ぎたら締めてもらい、さらに過ぎたらAIを呼ばずに終える
+          if (practiceMode && practiceMaxMinutes && practiceStartedAt) {
+            const elapsedMin = (Date.now() - new Date(practiceStartedAt).getTime()) / 60000;
+            if (elapsedMin >= practiceMaxMinutes + 3) {
+              await supabase
+                .from("interview_invitations")
+                .update({ status: "completed" })
+                .eq("token", body.token);
+              return json({
+                aiText:
+                  "お時間になりましたので、面接を終了させていただきます。本日はありがとうございました。",
+                audioBase64: null,
+                isEnded: true,
+              });
+            }
+            if (elapsedMin >= practiceMaxMinutes) {
+              systemPrompt += `\n\n【重要】制限時間（${practiceMaxMinutes}分）になりました。今回の返答で、相手の回答に一言お礼を述べてから「以上で面接を終了させていただきます」と言って締めてください。新しい質問はしないでください。`;
+            }
           }
 
           const messages = [

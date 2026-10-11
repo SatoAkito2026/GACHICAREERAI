@@ -158,8 +158,8 @@ export const PLAN_LABELS: Record<Plan, string> = {
 
 export const PLAN_PRICES: Record<Plan, string> = {
   free: "¥0",
-  individual_light: "¥2,200/月（税込）",
-  individual_pro: "¥5,500/月（税込）",
+  individual_light: "¥980/月（税込）",
+  individual_pro: "¥2,980/月（税込）",
   company_metered: "¥2,200/回（税込）",
   company_light: "¥33,000/月（税込）",
   company_pro: "¥55,000/月（税込）",

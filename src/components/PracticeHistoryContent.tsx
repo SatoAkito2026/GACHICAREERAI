@@ -12,6 +12,8 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { PrivateShell } from "@/components/ModeShell";
+import { usePlan } from "@/hooks/use-plan";
+import { practiceRule } from "@/lib/plan-rules";
 
 type PracticeFeedback = {
   overall_impression?: string;
@@ -47,6 +49,9 @@ export function PracticeHistoryContent({
 }) {
   const { session, loading } = useAuth();
   const [rows, setRows] = useState<HistoryRow[] | null>(null);
+  const { plan, loading: planLoading } = usePlan();
+  // 見られる結果の数はプランで決まる（古いものは消さずに隠すだけ。プランを上げれば見られる）
+  const resultLimit = practiceRule(plan).results;
 
   useEffect(() => {
     if (!session) return;
@@ -101,7 +106,7 @@ export function PracticeHistoryContent({
     setRows((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
   };
 
-  if (loading || rows === null) {
+  if (loading || planLoading || rows === null) {
     return (
       <div
         className="flex min-h-screen items-center justify-center"
@@ -120,6 +125,9 @@ export function PracticeHistoryContent({
     border: "1px solid #2A2A2A",
     borderRadius: 16,
   } as const;
+
+  const visibleRows = resultLimit == null ? rows : rows.slice(0, resultLimit);
+  const hiddenCount = rows.length - visibleRows.length;
 
   return (
     <PrivateShell>
@@ -141,7 +149,7 @@ export function PracticeHistoryContent({
         )}
 
         <div className="mt-6 space-y-3">
-          {rows.map((r) => (
+          {visibleRows.map((r) => (
             <details key={r.id} className="rounded-2xl p-4" style={cardStyle}>
               <summary
                 className="flex cursor-pointer items-center justify-between"
@@ -398,6 +406,26 @@ export function PracticeHistoryContent({
             </details>
           ))}
         </div>
+
+        {hiddenCount > 0 && (
+          <div
+            className="mt-4 rounded-2xl p-4 text-center"
+            style={{ background: "#16200A", border: "1px solid #3A4A12" }}
+          >
+            <p style={{ color: "#E6F7B0", fontSize: 13 }}>
+              いまのプランで見られるのは新しい{resultLimit}件までです。
+              <br />
+              古い結果{hiddenCount}件は消えずに残っていて、プランを上げると見られます。
+            </p>
+            <Link
+              to="/pricing"
+              className="mt-2 inline-block"
+              style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}
+            >
+              プランを見る →
+            </Link>
+          </div>
+        )}
       </div>
     </PrivateShell>
   );
