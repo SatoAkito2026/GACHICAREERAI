@@ -15,6 +15,7 @@ import { PlanProvider } from "@/hooks/use-plan";
 import { ModeProvider } from "@/hooks/use-mode";
 import { Toaster } from "@/components/ui/sonner";
 import { PersistentChatBubble } from "@/components/PersistentChatBubble";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { ReferralFlushListener } from "@/components/ReferralFlushListener";
 
 function NotFoundComponent() {
@@ -78,7 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // viewport-fit=cover：iPhone の画面の端（ノッチ・下のバー）まで使い、余白は safe-area で調整する
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      // ホーム画面に追加したとき、アプリとして開く
+      { name: "theme-color", content: "#0F0F0F" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "ガチキャリAI" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
       { title: "ガチキャリAI｜AIで自分を磨く。企業と出会う。" },
       {
         name: "description",
@@ -92,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "ガチキャリAIは、AIとの対話による応募書類の作成と模擬面接を通じて、学生・求職者の就職・転職活動を支援するキャリアプラットフォームです。企業は候補者のプロフィールや模擬面接を確認し、実際に会いたい人材へ直接スカウト。求職者と企業、それぞれの「選ぶ」と「選ばれる」をAIでつなぎます。",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "ガチキャリAI｜AIで自分を磨く。企業と出会う。" },
       {
         name: "twitter:description",
@@ -101,13 +109,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/NOsOMGMBY8WExHjQZQDpa3doOB03/social-images/social-1783580299259-実際の面接風景.webp",
+        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
       },
       {
         name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/NOsOMGMBY8WExHjQZQDpa3doOB03/social-images/social-1783580299259-実際の面接風景.webp",
+        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
       },
     ],
     links: [
@@ -122,6 +128,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -177,6 +185,7 @@ function RootComponent() {
             )}
             <Toaster theme="dark" position="top-center" />
             <PersistentChatBubble />
+            <InstallAppPrompt />
             <ReferralFlushListener />
           </ModeProvider>
         </PlanProvider>

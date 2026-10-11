@@ -24,6 +24,12 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
 - 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）
 
+## スマホ・アプリ化
+
+- 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）
+- ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`
+- ページは自動で分割して読み込む。ルートファイル（`src/routes/`）から `Route` 以外を export すると分割されなくなるので、共有する画面は `src/components/pages/` に置く
+
 ## コマンド
 
 ```bash

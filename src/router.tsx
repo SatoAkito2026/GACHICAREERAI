@@ -9,6 +9,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // リンクに触れた（スマホではタップし始めた）時点で次のページを読み込み始め、移動を速くする
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
   });
 
