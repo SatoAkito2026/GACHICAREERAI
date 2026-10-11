@@ -100,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "ガチキャリAIは、AIとの対話による応募書類の作成と模擬面接を通じて、学生・求職者の就職・転職活動を支援するキャリアプラットフォームです。企業は候補者のプロフィールや模擬面接を確認し、実際に会いたい人材へ直接スカウト。求職者と企業、それぞれの「選ぶ」と「選ばれる」をAIでつなぎます。",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "ガチキャリAI｜AIで自分を磨く。企業と出会う。" },
       {
         name: "twitter:description",
@@ -109,13 +109,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/NOsOMGMBY8WExHjQZQDpa3doOB03/social-images/social-1783580299259-実際の面接風景.webp",
+        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
       },
       {
         name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/NOsOMGMBY8WExHjQZQDpa3doOB03/social-images/social-1783580299259-実際の面接風景.webp",
+        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
       },
     ],
     links: [
