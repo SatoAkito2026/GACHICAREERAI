@@ -3,7 +3,6 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { runDailyReminderJob } from "./lib/daily-reminders";
-import { runActorRefreshJob } from "./lib/actor-refresh";
 import { runTalentSummaryJob } from "./lib/talent";
 
 type ServerEntry = {
@@ -96,7 +95,6 @@ export default {
       }
     }
     ctx.waitUntil(runDailyReminderJob());
-    ctx.waitUntil(runActorRefreshJob());
     ctx.waitUntil(runTalentSummaryJob());
   },
 };
