@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/private/welcome")({
-  head: () => ({ meta: [{ title: "登録完了｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "登録完了｜ガチキャリAI" }] }),
   component: WelcomePage,
 });
 
@@ -55,7 +55,7 @@ function WelcomePage() {
         🎉 登録完了
       </span>
       <h1 className="mt-5 text-[28px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>
-        ようこそ、インタビアAIへ
+        ようこそ、ガチキャリAIへ
       </h1>
       <p className="mt-3 max-w-md text-[14px] leading-relaxed" style={{ color: "#CCCCCC" }}>
         まずはどちらで使うか選んでください。

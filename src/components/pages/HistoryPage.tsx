@@ -206,7 +206,7 @@ export function HistoryPage({
           style={{ borderColor: "#333333" }}
         >
           <div className="text-[15px]" style={{ fontWeight: 500, color: "#F0F0F0" }}>
-            面接コーチAI
+            ガチキャリAI
           </div>
           <Link
             to="/mypage"

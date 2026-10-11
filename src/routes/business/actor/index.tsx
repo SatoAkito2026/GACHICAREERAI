@@ -4,7 +4,7 @@ import { DashGrid } from "@/components/DashCard";
 import { useActorPaywall, ActorPaywallScreen } from "@/components/ActorPaywall";
 
 export const Route = createFileRoute("/business/actor/")({
-  head: () => ({ meta: [{ title: "芸能・キャスティングダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "芸能・キャスティングダッシュボード｜ガチキャリAI" }] }),
   component: ActorDashboard,
 });
 

@@ -4,7 +4,7 @@ import { LegalPage, LegalSection } from "@/components/LegalPage";
 export const Route = createFileRoute("/tokusho")({
   head: () => ({
     meta: [
-      { title: "特定商取引法に基づく表記 — インタビアAI｜AI面接・採用支援ツール" },
+      { title: "特定商取引法に基づく表記 — ガチキャリAI｜AI面接・採用支援ツール" },
       { name: "description", content: "特定商取引法に基づく表記" },
     ],
   }),
@@ -36,7 +36,7 @@ function TokushoPage() {
       </LegalSection>
 
       <LegalSection heading="サービス名">
-        <p>インタビアAI</p>
+        <p>ガチキャリAI</p>
       </LegalSection>
 
       <LegalSection heading="サービスURL">

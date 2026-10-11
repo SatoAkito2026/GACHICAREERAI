@@ -73,7 +73,7 @@ const inputStyle = {
 } as const;
 
 export const Route = createFileRoute("/business/actor/database")({
-  head: () => ({ meta: [{ title: "役者データベース｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "役者データベース｜ガチキャリAI" }] }),
   component: ActorsPage,
 });
 

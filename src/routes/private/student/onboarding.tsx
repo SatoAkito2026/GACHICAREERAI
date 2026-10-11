@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GRADE_OPTIONS, EXAM_TYPE_OPTIONS, SUBJECT_OPTIONS } from "@/lib/career-options";
 
 export const Route = createFileRoute("/private/student/onboarding")({
-  head: () => ({ meta: [{ title: "プロフィール登録｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "プロフィール登録｜ガチキャリAI" }] }),
   component: StudentOnboardingPage,
 });
 

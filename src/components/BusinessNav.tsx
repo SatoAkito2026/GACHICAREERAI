@@ -62,7 +62,7 @@ export default function BusinessNav() {
             className="shrink-0 whitespace-nowrap text-[14px] md:text-[15px]"
             style={{ fontWeight: 600, color: "#F0F0F0" }}
           >
-            インタビアAI<span style={{ color: "#C8FF00" }}>｜Business</span>
+            ガチキャリAI<span style={{ color: "#C8FF00" }}>｜Business</span>
           </Link>
           {MODE_TABS.length > 1 && (
             <div className="hidden items-center gap-1.5 md:flex">

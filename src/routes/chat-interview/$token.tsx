@@ -11,7 +11,7 @@ import {
 } from "@/components/DocumentTemplates";
 
 export const Route = createFileRoute("/chat-interview/$token")({
-  head: () => ({ meta: [{ title: "面接チャット｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "面接チャット｜ガチキャリAI" }] }),
   component: ChatInterviewPage,
 });
 

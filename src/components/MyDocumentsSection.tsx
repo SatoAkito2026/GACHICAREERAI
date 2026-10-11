@@ -85,7 +85,7 @@ function DocSlot({
       </div>
       <div className="mt-2">
         <p style={{ color: "#666666", fontSize: 11, marginBottom: 4 }}>
-          または、インタビアAIで作成したものを使う：
+          または、ガチキャリAIで作成したものを使う：
         </p>
         <select
           value={state.source === "generated" ? state.generatedDocId : ""}

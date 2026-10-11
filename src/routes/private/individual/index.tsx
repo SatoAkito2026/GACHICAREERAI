@@ -7,7 +7,7 @@ import { useMode } from "@/hooks/use-mode";
 import { MobileHome } from "@/components/mobile/MobileHome";
 
 export const Route = createFileRoute("/private/individual/")({
-  head: () => ({ meta: [{ title: "個人ダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "個人ダッシュボード｜ガチキャリAI" }] }),
   component: IndividualDashboard,
 });
 

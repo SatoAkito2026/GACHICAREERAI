@@ -24,10 +24,7 @@ import { Route as ActorInterviewTokenRouteImport } from './routes/actor-intervie
 import { Route as ApiActorInterviewTurnRouteImport } from './routes/api/actor-interview-turn'
 import { Route as ApiAdminDashboardDataRouteImport } from './routes/api/admin-dashboard-data'
 import { Route as ApiAdminTriggerActorDiscoveryRouteImport } from './routes/api/admin-trigger-actor-discovery'
-import { Route as ApiAgencyDashboardDataRouteImport } from './routes/api/agency-dashboard-data'
 import { Route as ApiBulkResearchActorsRouteImport } from './routes/api/bulk-research-actors'
-import { Route as ApiCancelSubscriptionRouteImport } from './routes/api/cancel-subscription'
-import { Route as ApiCandidateDatabaseRouteImport } from './routes/api/candidate-database'
 import { Route as ApiCareerChatRouteImport } from './routes/api/career-chat'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiChatInterviewInfoRouteImport } from './routes/api/chat-interview-info'
@@ -43,7 +40,6 @@ import { Route as ApiGenerateDocumentRouteImport } from './routes/api/generate-d
 import { Route as ApiGenerateSelfAnalysisRouteImport } from './routes/api/generate-self-analysis'
 import { Route as ApiInterviewTurnRouteImport } from './routes/api/interview-turn'
 import { Route as ApiPredictTicketSalesRouteImport } from './routes/api/predict-ticket-sales'
-import { Route as ApiRecordReferralRouteImport } from './routes/api/record-referral'
 import { Route as ApiRefineDocumentRouteImport } from './routes/api/refine-document'
 import { Route as ApiRegisterDeviceRouteImport } from './routes/api/register-device'
 import { Route as ApiReportUsageRouteImport } from './routes/api/report-usage'
@@ -56,14 +52,12 @@ import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
-import { Route as ApiToggleCandidateBookmarkRouteImport } from './routes/api/toggle-candidate-bookmark'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
 import { Route as InterviewTokenRouteImport } from './routes/interview/$token'
 import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
-import { Route as PrivateAgencyRouteImport } from './routes/private/agency'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
 import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
@@ -194,24 +188,9 @@ const ApiAdminTriggerActorDiscoveryRoute =
     path: '/api/admin-trigger-actor-discovery',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAgencyDashboardDataRoute = ApiAgencyDashboardDataRouteImport.update({
-  id: '/api/agency-dashboard-data',
-  path: '/api/agency-dashboard-data',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiBulkResearchActorsRoute = ApiBulkResearchActorsRouteImport.update({
   id: '/api/bulk-research-actors',
   path: '/api/bulk-research-actors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCancelSubscriptionRoute = ApiCancelSubscriptionRouteImport.update({
-  id: '/api/cancel-subscription',
-  path: '/api/cancel-subscription',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCandidateDatabaseRoute = ApiCandidateDatabaseRouteImport.update({
-  id: '/api/candidate-database',
-  path: '/api/candidate-database',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCareerChatRoute = ApiCareerChatRouteImport.update({
@@ -291,11 +270,6 @@ const ApiPredictTicketSalesRoute = ApiPredictTicketSalesRouteImport.update({
   path: '/api/predict-ticket-sales',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiRecordReferralRoute = ApiRecordReferralRouteImport.update({
-  id: '/api/record-referral',
-  path: '/api/record-referral',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiRefineDocumentRoute = ApiRefineDocumentRouteImport.update({
   id: '/api/refine-document',
   path: '/api/refine-document',
@@ -357,12 +331,6 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiToggleCandidateBookmarkRoute =
-  ApiToggleCandidateBookmarkRouteImport.update({
-    id: '/api/toggle-candidate-bookmark',
-    path: '/api/toggle-candidate-bookmark',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiWhisperTranscribeRoute = ApiWhisperTranscribeRouteImport.update({
   id: '/api/whisper-transcribe',
   path: '/api/whisper-transcribe',
@@ -391,11 +359,6 @@ const PrivateIndexRoute = PrivateIndexRouteImport.update({
 const PrivateAdminRoute = PrivateAdminRouteImport.update({
   id: '/private/admin',
   path: '/private/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivateAgencyRoute = PrivateAgencyRouteImport.update({
-  id: '/private/agency',
-  path: '/private/agency',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
@@ -698,10 +661,7 @@ export interface FileRoutesByFullPath {
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
-  '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -717,7 +677,6 @@ export interface FileRoutesByFullPath {
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
-  '/api/record-referral': typeof ApiRecordReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/report-usage': typeof ApiReportUsageRoute
@@ -730,12 +689,10 @@ export interface FileRoutesByFullPath {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
-  '/private/agency': typeof PrivateAgencyRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
@@ -808,10 +765,7 @@ export interface FileRoutesByTo {
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
-  '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -827,7 +781,6 @@ export interface FileRoutesByTo {
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
-  '/api/record-referral': typeof ApiRecordReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/report-usage': typeof ApiReportUsageRoute
@@ -840,12 +793,10 @@ export interface FileRoutesByTo {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
-  '/private/agency': typeof PrivateAgencyRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/business': typeof BusinessIndexRoute
@@ -919,10 +870,7 @@ export interface FileRoutesById {
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
-  '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -938,7 +886,6 @@ export interface FileRoutesById {
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
-  '/api/record-referral': typeof ApiRecordReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/report-usage': typeof ApiReportUsageRoute
@@ -951,12 +898,10 @@ export interface FileRoutesById {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
-  '/private/agency': typeof PrivateAgencyRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening_/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
@@ -1031,10 +976,7 @@ export interface FileRouteTypes {
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
     | '/api/admin-trigger-actor-discovery'
-    | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1050,7 +992,6 @@ export interface FileRouteTypes {
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
     | '/api/predict-ticket-sales'
-    | '/api/record-referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/report-usage'
@@ -1063,12 +1004,10 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
-    | '/private/agency'
     | '/private/welcome'
     | '/screening/history'
     | '/business/'
@@ -1141,10 +1080,7 @@ export interface FileRouteTypes {
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
     | '/api/admin-trigger-actor-discovery'
-    | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1160,7 +1096,6 @@ export interface FileRouteTypes {
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
     | '/api/predict-ticket-sales'
-    | '/api/record-referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/report-usage'
@@ -1173,12 +1108,10 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
-    | '/private/agency'
     | '/private/welcome'
     | '/screening/history'
     | '/business'
@@ -1251,10 +1184,7 @@ export interface FileRouteTypes {
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
     | '/api/admin-trigger-actor-discovery'
-    | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1270,7 +1200,6 @@ export interface FileRouteTypes {
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
     | '/api/predict-ticket-sales'
-    | '/api/record-referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/report-usage'
@@ -1283,12 +1212,10 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
-    | '/private/agency'
     | '/private/welcome'
     | '/screening_/history'
     | '/business/'
@@ -1362,10 +1289,7 @@ export interface RootRouteChildren {
   ApiActorInterviewTurnRoute: typeof ApiActorInterviewTurnRoute
   ApiAdminDashboardDataRoute: typeof ApiAdminDashboardDataRoute
   ApiAdminTriggerActorDiscoveryRoute: typeof ApiAdminTriggerActorDiscoveryRoute
-  ApiAgencyDashboardDataRoute: typeof ApiAgencyDashboardDataRoute
   ApiBulkResearchActorsRoute: typeof ApiBulkResearchActorsRoute
-  ApiCancelSubscriptionRoute: typeof ApiCancelSubscriptionRoute
-  ApiCandidateDatabaseRoute: typeof ApiCandidateDatabaseRoute
   ApiCareerChatRoute: typeof ApiCareerChatRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiChatInterviewInfoRoute: typeof ApiChatInterviewInfoRoute
@@ -1381,7 +1305,6 @@ export interface RootRouteChildren {
   ApiGenerateSelfAnalysisRoute: typeof ApiGenerateSelfAnalysisRoute
   ApiInterviewTurnRoute: typeof ApiInterviewTurnRoute
   ApiPredictTicketSalesRoute: typeof ApiPredictTicketSalesRoute
-  ApiRecordReferralRoute: typeof ApiRecordReferralRoute
   ApiRefineDocumentRoute: typeof ApiRefineDocumentRoute
   ApiRegisterDeviceRoute: typeof ApiRegisterDeviceRoute
   ApiReportUsageRoute: typeof ApiReportUsageRoute
@@ -1394,12 +1317,10 @@ export interface RootRouteChildren {
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
-  ApiToggleCandidateBookmarkRoute: typeof ApiToggleCandidateBookmarkRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
   PrivateAdminRoute: typeof PrivateAdminRoute
-  PrivateAgencyRoute: typeof PrivateAgencyRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
@@ -1564,32 +1485,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminTriggerActorDiscoveryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/agency-dashboard-data': {
-      id: '/api/agency-dashboard-data'
-      path: '/api/agency-dashboard-data'
-      fullPath: '/api/agency-dashboard-data'
-      preLoaderRoute: typeof ApiAgencyDashboardDataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/bulk-research-actors': {
       id: '/api/bulk-research-actors'
       path: '/api/bulk-research-actors'
       fullPath: '/api/bulk-research-actors'
       preLoaderRoute: typeof ApiBulkResearchActorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/cancel-subscription': {
-      id: '/api/cancel-subscription'
-      path: '/api/cancel-subscription'
-      fullPath: '/api/cancel-subscription'
-      preLoaderRoute: typeof ApiCancelSubscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/candidate-database': {
-      id: '/api/candidate-database'
-      path: '/api/candidate-database'
-      fullPath: '/api/candidate-database'
-      preLoaderRoute: typeof ApiCandidateDatabaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/career-chat': {
@@ -1697,13 +1597,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPredictTicketSalesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/record-referral': {
-      id: '/api/record-referral'
-      path: '/api/record-referral'
-      fullPath: '/api/record-referral'
-      preLoaderRoute: typeof ApiRecordReferralRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/refine-document': {
       id: '/api/refine-document'
       path: '/api/refine-document'
@@ -1788,13 +1681,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/toggle-candidate-bookmark': {
-      id: '/api/toggle-candidate-bookmark'
-      path: '/api/toggle-candidate-bookmark'
-      fullPath: '/api/toggle-candidate-bookmark'
-      preLoaderRoute: typeof ApiToggleCandidateBookmarkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/whisper-transcribe': {
       id: '/api/whisper-transcribe'
       path: '/api/whisper-transcribe'
@@ -1835,13 +1721,6 @@ declare module '@tanstack/react-router' {
       path: '/private/admin'
       fullPath: '/private/admin'
       preLoaderRoute: typeof PrivateAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/private/agency': {
-      id: '/private/agency'
-      path: '/private/agency'
-      fullPath: '/private/agency'
-      preLoaderRoute: typeof PrivateAgencyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/welcome': {
@@ -2234,10 +2113,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiActorInterviewTurnRoute: ApiActorInterviewTurnRoute,
   ApiAdminDashboardDataRoute: ApiAdminDashboardDataRoute,
   ApiAdminTriggerActorDiscoveryRoute: ApiAdminTriggerActorDiscoveryRoute,
-  ApiAgencyDashboardDataRoute: ApiAgencyDashboardDataRoute,
   ApiBulkResearchActorsRoute: ApiBulkResearchActorsRoute,
-  ApiCancelSubscriptionRoute: ApiCancelSubscriptionRoute,
-  ApiCandidateDatabaseRoute: ApiCandidateDatabaseRoute,
   ApiCareerChatRoute: ApiCareerChatRoute,
   ApiChatRoute: ApiChatRoute,
   ApiChatInterviewInfoRoute: ApiChatInterviewInfoRoute,
@@ -2253,7 +2129,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGenerateSelfAnalysisRoute: ApiGenerateSelfAnalysisRoute,
   ApiInterviewTurnRoute: ApiInterviewTurnRoute,
   ApiPredictTicketSalesRoute: ApiPredictTicketSalesRoute,
-  ApiRecordReferralRoute: ApiRecordReferralRoute,
   ApiRefineDocumentRoute: ApiRefineDocumentRoute,
   ApiRegisterDeviceRoute: ApiRegisterDeviceRoute,
   ApiReportUsageRoute: ApiReportUsageRoute,
@@ -2266,12 +2141,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
-  ApiToggleCandidateBookmarkRoute: ApiToggleCandidateBookmarkRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
   InterviewTokenRoute: InterviewTokenRoute,
   PrivateAdminRoute: PrivateAdminRoute,
-  PrivateAgencyRoute: PrivateAgencyRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   BusinessIndexRoute: BusinessIndexRoute,

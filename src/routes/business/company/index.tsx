@@ -3,7 +3,7 @@ import { BusinessShell } from "@/components/ModeShell";
 import { DashGrid } from "@/components/DashCard";
 
 export const Route = createFileRoute("/business/company/")({
-  head: () => ({ meta: [{ title: "企業ダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "企業ダッシュボード｜ガチキャリAI" }] }),
   component: CompanyDashboard,
 });
 
