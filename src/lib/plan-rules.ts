@@ -20,7 +20,7 @@ export interface PracticeRule {
 }
 
 export const PRACTICE_RULES: Record<IndividualPlanKey, PracticeRule> = {
-  free: { priceJpy: 0, perDay: 1, perMonth: null, maxMinutes: 10, jobTypes: 2, results: 5 },
+  free: { priceJpy: 0, perDay: 1, perMonth: 5, maxMinutes: 10, jobTypes: 2, results: 5 },
   individual_light: {
     priceJpy: 980,
     perDay: 2,
