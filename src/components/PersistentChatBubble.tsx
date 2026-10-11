@@ -132,7 +132,7 @@ function ChatPanel({ mode, onClose }: { mode: "individual" | "student"; onClose:
     <div
       className="fixed right-3 z-50 flex flex-col overflow-hidden rounded-2xl shadow-2xl sm:right-5"
       style={{
-        bottom: "calc(var(--bottom-nav-h) + 88px)",
+        bottom: "calc(var(--bottom-nav-h) + var(--chat-gap))",
         width: "min(340px, calc(100vw - 24px))",
         height: "min(480px, calc(100svh - var(--bottom-nav-h) - 120px))",
         background: "#151515",
@@ -270,10 +270,19 @@ function ChatPanel({ mode, onClose }: { mode: "individual" | "student"; onClose:
  * ページ遷移してもチャットが消えたりクリアされたりしない
  * (会話内容はDBに保存されており、開いた時に毎回最新の続きを読み込む)。
  */
+/** 上のメニューのチャットボタン（スマホ・タブレット）から、AIチャットを開くための合図 */
+export const OPEN_AI_CHAT_EVENT = "open-ai-chat";
+
 export function PersistentChatBubble() {
   const { session } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const open = () => setIsOpen((v) => !v);
+    window.addEventListener(OPEN_AI_CHAT_EVENT, open);
+    return () => window.removeEventListener(OPEN_AI_CHAT_EVENT, open);
+  }, []);
 
   const isIndividual = location.pathname.startsWith("/private/individual");
   const isStudent = location.pathname.startsWith("/private/student");
@@ -287,7 +296,7 @@ export function PersistentChatBubble() {
       {isOpen && <ChatPanel mode={mode} onClose={() => setIsOpen(false)} />}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full text-[24px] shadow-2xl transition-transform hover:scale-105 sm:right-5"
+        className="fixed right-4 z-50 hidden h-14 w-14 items-center justify-center rounded-full text-[24px] shadow-2xl transition-transform hover:scale-105 sm:right-5 lg:flex"
         style={{
           bottom: "calc(var(--bottom-nav-h) + 16px)",
           background: "#C8FF00",
