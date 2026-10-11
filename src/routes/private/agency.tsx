@@ -33,7 +33,7 @@ function fmtYen(n: number) {
 }
 
 export const Route = createFileRoute("/private/agency")({
-  head: () => ({ meta: [{ title: "代理店ダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "代理店ダッシュボード｜ガチキャリAI" }] }),
   component: AgencyDashboard,
 });
 

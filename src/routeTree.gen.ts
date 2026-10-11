@@ -26,8 +26,6 @@ import { Route as ApiAdminDashboardDataRouteImport } from './routes/api/admin-da
 import { Route as ApiAdminTriggerActorDiscoveryRouteImport } from './routes/api/admin-trigger-actor-discovery'
 import { Route as ApiAgencyDashboardDataRouteImport } from './routes/api/agency-dashboard-data'
 import { Route as ApiBulkResearchActorsRouteImport } from './routes/api/bulk-research-actors'
-import { Route as ApiCancelSubscriptionRouteImport } from './routes/api/cancel-subscription'
-import { Route as ApiCandidateDatabaseRouteImport } from './routes/api/candidate-database'
 import { Route as ApiCareerChatRouteImport } from './routes/api/career-chat'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiChatInterviewInfoRouteImport } from './routes/api/chat-interview-info'
@@ -56,7 +54,6 @@ import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
-import { Route as ApiToggleCandidateBookmarkRouteImport } from './routes/api/toggle-candidate-bookmark'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
@@ -204,16 +201,6 @@ const ApiBulkResearchActorsRoute = ApiBulkResearchActorsRouteImport.update({
   path: '/api/bulk-research-actors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCancelSubscriptionRoute = ApiCancelSubscriptionRouteImport.update({
-  id: '/api/cancel-subscription',
-  path: '/api/cancel-subscription',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCandidateDatabaseRoute = ApiCandidateDatabaseRouteImport.update({
-  id: '/api/candidate-database',
-  path: '/api/candidate-database',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiCareerChatRoute = ApiCareerChatRouteImport.update({
   id: '/api/career-chat',
   path: '/api/career-chat',
@@ -357,12 +344,6 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiToggleCandidateBookmarkRoute =
-  ApiToggleCandidateBookmarkRouteImport.update({
-    id: '/api/toggle-candidate-bookmark',
-    path: '/api/toggle-candidate-bookmark',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiWhisperTranscribeRoute = ApiWhisperTranscribeRouteImport.update({
   id: '/api/whisper-transcribe',
   path: '/api/whisper-transcribe',
@@ -700,8 +681,6 @@ export interface FileRoutesByFullPath {
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
   '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -730,7 +709,6 @@ export interface FileRoutesByFullPath {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -810,8 +788,6 @@ export interface FileRoutesByTo {
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
   '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -840,7 +816,6 @@ export interface FileRoutesByTo {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -921,8 +896,6 @@ export interface FileRoutesById {
   '/api/admin-trigger-actor-discovery': typeof ApiAdminTriggerActorDiscoveryRoute
   '/api/agency-dashboard-data': typeof ApiAgencyDashboardDataRoute
   '/api/bulk-research-actors': typeof ApiBulkResearchActorsRoute
-  '/api/cancel-subscription': typeof ApiCancelSubscriptionRoute
-  '/api/candidate-database': typeof ApiCandidateDatabaseRoute
   '/api/career-chat': typeof ApiCareerChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/chat-interview-info': typeof ApiChatInterviewInfoRoute
@@ -951,7 +924,6 @@ export interface FileRoutesById {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
-  '/api/toggle-candidate-bookmark': typeof ApiToggleCandidateBookmarkRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -1033,8 +1005,6 @@ export interface FileRouteTypes {
     | '/api/admin-trigger-actor-discovery'
     | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1063,7 +1033,6 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1143,8 +1112,6 @@ export interface FileRouteTypes {
     | '/api/admin-trigger-actor-discovery'
     | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1173,7 +1140,6 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1253,8 +1219,6 @@ export interface FileRouteTypes {
     | '/api/admin-trigger-actor-discovery'
     | '/api/agency-dashboard-data'
     | '/api/bulk-research-actors'
-    | '/api/cancel-subscription'
-    | '/api/candidate-database'
     | '/api/career-chat'
     | '/api/chat'
     | '/api/chat-interview-info'
@@ -1283,7 +1247,6 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
-    | '/api/toggle-candidate-bookmark'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1364,8 +1327,6 @@ export interface RootRouteChildren {
   ApiAdminTriggerActorDiscoveryRoute: typeof ApiAdminTriggerActorDiscoveryRoute
   ApiAgencyDashboardDataRoute: typeof ApiAgencyDashboardDataRoute
   ApiBulkResearchActorsRoute: typeof ApiBulkResearchActorsRoute
-  ApiCancelSubscriptionRoute: typeof ApiCancelSubscriptionRoute
-  ApiCandidateDatabaseRoute: typeof ApiCandidateDatabaseRoute
   ApiCareerChatRoute: typeof ApiCareerChatRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiChatInterviewInfoRoute: typeof ApiChatInterviewInfoRoute
@@ -1394,7 +1355,6 @@ export interface RootRouteChildren {
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
-  ApiToggleCandidateBookmarkRoute: typeof ApiToggleCandidateBookmarkRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
@@ -1576,20 +1536,6 @@ declare module '@tanstack/react-router' {
       path: '/api/bulk-research-actors'
       fullPath: '/api/bulk-research-actors'
       preLoaderRoute: typeof ApiBulkResearchActorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/cancel-subscription': {
-      id: '/api/cancel-subscription'
-      path: '/api/cancel-subscription'
-      fullPath: '/api/cancel-subscription'
-      preLoaderRoute: typeof ApiCancelSubscriptionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/candidate-database': {
-      id: '/api/candidate-database'
-      path: '/api/candidate-database'
-      fullPath: '/api/candidate-database'
-      preLoaderRoute: typeof ApiCandidateDatabaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/career-chat': {
@@ -1786,13 +1732,6 @@ declare module '@tanstack/react-router' {
       path: '/api/stripe-webhook'
       fullPath: '/api/stripe-webhook'
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/toggle-candidate-bookmark': {
-      id: '/api/toggle-candidate-bookmark'
-      path: '/api/toggle-candidate-bookmark'
-      fullPath: '/api/toggle-candidate-bookmark'
-      preLoaderRoute: typeof ApiToggleCandidateBookmarkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/whisper-transcribe': {
@@ -2236,8 +2175,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminTriggerActorDiscoveryRoute: ApiAdminTriggerActorDiscoveryRoute,
   ApiAgencyDashboardDataRoute: ApiAgencyDashboardDataRoute,
   ApiBulkResearchActorsRoute: ApiBulkResearchActorsRoute,
-  ApiCancelSubscriptionRoute: ApiCancelSubscriptionRoute,
-  ApiCandidateDatabaseRoute: ApiCandidateDatabaseRoute,
   ApiCareerChatRoute: ApiCareerChatRoute,
   ApiChatRoute: ApiChatRoute,
   ApiChatInterviewInfoRoute: ApiChatInterviewInfoRoute,
@@ -2266,7 +2203,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
-  ApiToggleCandidateBookmarkRoute: ApiToggleCandidateBookmarkRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
   InterviewTokenRoute: InterviewTokenRoute,

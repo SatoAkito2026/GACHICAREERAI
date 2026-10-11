@@ -34,7 +34,7 @@ async function sendReminderEmail(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "インタビアAI <notify@interview-copilot-ai.akitogroup.jp>",
+        from: "ガチキャリAI <notify@interview-copilot-ai.akitogroup.jp>",
         to: [to],
         subject: "今日の質問、まだ答えていませんか？",
         html: `

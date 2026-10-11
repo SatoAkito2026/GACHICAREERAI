@@ -11,8 +11,8 @@ import { limitText, PRACTICE_RULES, type IndividualPlanKey } from "@/lib/plan-ru
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "料金プラン — インタビアAI｜AI面接・採用支援ツール" },
-      { name: "description", content: "インタビアAI｜AI面接・採用支援ツールの料金プラン" },
+      { title: "料金プラン — ガチキャリAI｜AI面接・採用支援ツール" },
+      { name: "description", content: "ガチキャリAI｜AI面接・採用支援ツールの料金プラン" },
     ],
   }),
   component: PricingPage,
@@ -140,7 +140,7 @@ function PricingPage() {
         style={{ borderColor: "#333333" }}
       >
         <div className="text-[15px]" style={{ fontWeight: 500, color: "#F0F0F0" }}>
-          インタビアAI｜AI面接・採用支援ツール
+          ガチキャリAI｜AI面接・採用支援ツール
         </div>
         <Link
           to={isBusiness ? "/business" : "/private"}

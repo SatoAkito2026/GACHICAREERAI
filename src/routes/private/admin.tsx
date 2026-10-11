@@ -117,7 +117,7 @@ const NAV_ITEMS = [
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
 
 export const Route = createFileRoute("/private/admin")({
-  head: () => ({ meta: [{ title: "管理ダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "管理ダッシュボード｜ガチキャリAI" }] }),
   component: AdminDashboard,
 });
 

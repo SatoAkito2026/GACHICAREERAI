@@ -62,7 +62,7 @@ type Applicant = {
 };
 
 export const Route = createFileRoute("/business/company/jobs")({
-  head: () => ({ meta: [{ title: "求人掲載｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "求人掲載｜ガチキャリAI" }] }),
   component: JobsPage,
 });
 

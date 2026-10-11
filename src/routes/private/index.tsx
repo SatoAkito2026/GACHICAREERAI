@@ -3,7 +3,7 @@ import { PrivateShell } from "@/components/ModeShell";
 import { DashGrid } from "@/components/DashCard";
 
 export const Route = createFileRoute("/private/")({
-  head: () => ({ meta: [{ title: "Private｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "Private｜ガチキャリAI" }] }),
   component: PrivateTop,
 });
 

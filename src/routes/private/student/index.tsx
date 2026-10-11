@@ -6,7 +6,7 @@ import { GrowthBadge } from "@/components/GrowthBadge";
 import { useMode } from "@/hooks/use-mode";
 
 export const Route = createFileRoute("/private/student/")({
-  head: () => ({ meta: [{ title: "受験生ダッシュボード｜インタビアAI" }] }),
+  head: () => ({ meta: [{ title: "受験生ダッシュボード｜ガチキャリAI" }] }),
   component: StudentDashboard,
 });
 

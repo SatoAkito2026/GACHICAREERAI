@@ -4,8 +4,8 @@ import { LegalPage, LegalSection } from "@/components/LegalPage";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "利用規約 — インタビアAI｜AI面接・採用支援ツール" },
-      { name: "description", content: "インタビアAI｜AI面接・採用支援ツールの利用規約" },
+      { title: "利用規約 — ガチキャリAI｜AI面接・採用支援ツール" },
+      { name: "description", content: "ガチキャリAI｜AI面接・採用支援ツールの利用規約" },
     ],
   }),
   component: TermsPage,
@@ -16,7 +16,7 @@ function TermsPage() {
     <LegalPage title="利用規約">
       <p>
         本利用規約（以下「本規約」）は、合同会社AKITOグループ（以下「当社」）が提供する
-        「インタビアAI」（以下「本サービス」）の利用条件を定めるものです。
+        「ガチキャリAI」（以下「本サービス」）の利用条件を定めるものです。
         本サービスをご利用いただく前に、本規約をよくお読みください。
       </p>
 
