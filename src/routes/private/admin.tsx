@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import {
   LineChart,
@@ -162,7 +163,7 @@ function AdminDashboard() {
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
   if (forbidden || !data) {
     return (
       <div

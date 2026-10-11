@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -91,7 +92,7 @@ function ActorHistoryPage() {
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
   if (paywallLoading) return null;
   if (!isPaid) return <ActorPaywallScreen />;
 

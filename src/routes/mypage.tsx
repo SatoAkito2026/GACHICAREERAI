@@ -1,5 +1,6 @@
 import { getAuthHeaders } from "@/lib/chat-api";
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -131,7 +132,7 @@ function MyPage() {
   }, [user]);
 
   if (!authLoading && !user) {
-    return <Navigate to="/login" />;
+    return <SafeNavigate to="/login" />;
   }
 
   const planLabel =

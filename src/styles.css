@@ -239,3 +239,16 @@
 .scroll-x-hidden::-webkit-scrollbar {
   display: none;
 }
+
+/* 読み込みが長引いたときだけ、案内を出す（JSが動かなくても出るように CSS のアニメーションで表示する） */
+.loading-fallback {
+  opacity: 0;
+  visibility: hidden;
+  animation: loading-fallback-show 0.3s ease-out 8s forwards;
+}
+@keyframes loading-fallback-show {
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}

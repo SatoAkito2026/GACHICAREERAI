@@ -1,4 +1,5 @@
-import { Navigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import {
   Radar,
@@ -112,7 +113,7 @@ export function PracticeHistoryContent({
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   const cardStyle = {
     background: "#1A1A1A",

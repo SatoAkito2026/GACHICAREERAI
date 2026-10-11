@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -136,7 +137,7 @@ function ActorsPage() {
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
   if (paywallLoading) return null;
   if (!isPaid)
     return (

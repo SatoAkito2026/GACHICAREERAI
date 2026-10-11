@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { SafeNavigate } from "@/components/SafeNavigate";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { postChatApi } from "@/lib/chat-api";
 import type { Json } from "@/integrations/supabase/types";
 import {
@@ -1359,7 +1360,7 @@ ${c.text.slice(0, 1500)}
       </div>
     );
   }
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <SafeNavigate to="/login" />;
 
   const inputStyle: React.CSSProperties = {
     background: "#1A1A1A",
