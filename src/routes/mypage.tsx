@@ -1,3 +1,4 @@
+import { limitText, practiceRule } from "@/lib/plan-rules";
 import { getAuthHeaders } from "@/lib/chat-api";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -314,14 +315,18 @@ function MyPage() {
                   ⚠ プランの有効期限が切れています。プランを更新してください。
                 </div>
               )}
-              <Row
-                label="今期のURL発行回数"
-                value={
-                  plan === "company_metered"
-                    ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
-                    : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
-                }
-              />
+              {isBusiness ? (
+                <Row
+                  label="今期のURL発行回数"
+                  value={
+                    plan === "company_metered"
+                      ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
+                      : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
+                  }
+                />
+              ) : (
+                <Row label="練習の上限" value={practiceLimitSummary(plan)} />
+              )}
               {/* 請求予定額（企業プランのみ） */}
               {(plan === "company_metered" ||
                 plan === "company_light" ||
@@ -445,4 +450,14 @@ function MyPage() {
       </main>
     </div>
   );
+}
+
+function practiceLimitSummary(plan: string): string {
+  const r = practiceRule(plan);
+  return [
+    r.perMonth == null ? `1日${r.perDay}回` : `1日${r.perDay}回・月${r.perMonth}回`,
+    limitText(r.maxMinutes, "分"),
+    `職種${limitText(r.jobTypes, "つ")}`,
+    `結果${limitText(r.results, "件")}`,
+  ].join("・");
 }

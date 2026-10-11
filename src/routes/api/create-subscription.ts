@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { verifyApiUser, getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
+import { PRACTICE_RULES } from "@/lib/plan-rules";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,6 +33,33 @@ const PRICE_IDS: Record<string, string> = {
 
 const METER_ID = "mtr_61UvA51ZYJpoBBKhh41J1Nq1hx5wCQVk";
 void METER_ID;
+
+/**
+ * 個人プランの値段は src/lib/plan-rules.ts で決める。
+ * Stripe で新しい Price を作ったら wrangler.jsonc の STRIPE_PRICE_INDIVIDUAL_LIGHT / _PRO に入れる。
+ * 入っていなければ、今までの Price と同じ商品で、値段だけ新しくして申し込む。
+ */
+async function individualPlanItem(
+  stripe: Stripe,
+  plan: "individual_light" | "individual_pro",
+): Promise<Stripe.SubscriptionCreateParams.Item> {
+  const envPrice =
+    plan === "individual_light"
+      ? process.env.STRIPE_PRICE_INDIVIDUAL_LIGHT
+      : process.env.STRIPE_PRICE_INDIVIDUAL_PRO;
+  if (envPrice) return { price: envPrice };
+  const base = await stripe.prices.retrieve(PRICE_IDS[plan]);
+  const product = typeof base.product === "string" ? base.product : base.product.id;
+  return {
+    price_data: {
+      currency: "jpy",
+      product,
+      unit_amount: PRACTICE_RULES[plan].priceJpy,
+      recurring: { interval: "month" },
+      tax_behavior: base.tax_behavior === "exclusive" ? "exclusive" : "inclusive",
+    },
+  };
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -123,6 +151,8 @@ export const Route = createFileRoute("/api/create-subscription")({
               { price: PRICE_IDS.company_pro },
               { price: PRICE_IDS.company_pro_overage },
             ];
+          } else if (plan === "individual_light" || plan === "individual_pro") {
+            subscriptionItems = [await individualPlanItem(stripe, plan)];
           } else {
             subscriptionItems = [{ price: PRICE_IDS[plan] }];
           }

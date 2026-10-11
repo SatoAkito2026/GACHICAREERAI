@@ -31,8 +31,8 @@ function json(body: unknown, status = 200) {
 }
 
 const PLAN_PRICES_JPY: Record<string, number> = {
-  individual_light: 2200,
-  individual_pro: 5500,
+  individual_light: 980,
+  individual_pro: 2980,
   company_light: 33000,
   company_pro: 55000,
 };
