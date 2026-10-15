@@ -1,0 +1,309 @@
+<!--
+title: トップ
+description: 合同会社AKITOグループは「愛ある事業で煌めくあなたに届ける未来」を理念に、AI面接システム「インタビアAI」、人材・営業代行「コウムリンク」、無料キャリア・生活相談会の3つの事業を展開しています。
+nav: home
+-->
+<style>
+.hero{position:relative;overflow:hidden;padding-block:clamp(48px,7vw,96px) clamp(56px,8vw,104px)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center;position:relative;z-index:1}
+.hero h1{font-size:clamp(34px,5.4vw,70px);letter-spacing:-.02em;line-height:1.28;margin-top:18px}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.08em;white-space:nowrap}
+.hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
+.hero h1 .ln:nth-child(2)>span{animation-delay:.12s}
+.hero h1 .ln:nth-child(3)>span{animation-delay:.24s}
+.w{position:relative;display:inline-block}
+.w::after{content:"";position:absolute;left:0;right:0;bottom:.02em;height:.14em;border-radius:.07em;transform:scaleX(0);transform-origin:left;animation:underline .7s var(--ease) forwards}
+.w-red{color:var(--red)}.w-red::after{background:var(--red);animation-delay:.9s}
+.w-yellow{color:var(--yellow-text)}.w-yellow::after{background:var(--yellow);animation-delay:1.05s}
+.w-green{color:var(--green-text)}.w-green::after{background:var(--green);animation-delay:1.2s}
+@keyframes underline{to{transform:scaleX(1)}}
+.hero-lead{margin-top:26px;color:var(--ink-2);max-width:32em;animation:fade .9s .5s both}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px;animation:fade .9s .65s both}
+
+.stack{position:relative;aspect-ratio:1/1;max-width:520px;width:100%;justify-self:center}
+.card{position:absolute;background:#fff;border-radius:20px;box-shadow:0 24px 50px -24px rgba(36,17,63,.35);overflow:hidden;text-decoration:none;animation:pop .9s var(--ease) both;transition:rotate .4s var(--ease),scale .4s var(--ease)}
+.card img{width:100%;height:100%;object-fit:cover}
+.card .tag{position:absolute;left:12px;top:12px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(36,17,63,.15)}
+.card .tag::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--dot)}
+.card-ai{--dot:var(--green);width:58%;aspect-ratio:1;left:0;top:4%;rotate:-4deg;animation-delay:.3s}
+.card-koumu{--dot:var(--yellow);width:42%;aspect-ratio:1;right:2%;top:0;rotate:5deg;animation-delay:.45s}
+.card-consult{--dot:var(--red);width:56%;aspect-ratio:4/3;right:0;bottom:2%;rotate:-2deg;animation-delay:.6s}
+.card:hover{rotate:0deg;scale:1.03;z-index:2}
+.hero-ribbon{position:absolute;left:-5%;width:110%;bottom:-40px;height:220px;z-index:0;opacity:.95;pointer-events:none}
+@media (max-width:900px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.stack{max-width:420px}}
+
+.ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:16px;background:var(--paper-2)}
+.ticker-track{display:inline-flex;gap:44px;animation:marquee 40s linear infinite;font-family:var(--ff-display);font-weight:700;font-size:clamp(17px,2vw,22px)}
+.ticker-track span{display:inline-flex;align-items:center;gap:44px}
+.ticker-track span::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--red)}
+.ticker-track span:nth-child(3n+2)::after{background:var(--yellow)}
+.ticker-track span:nth-child(3n)::after{background:var(--green)}
+
+.about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,80px);align-items:center}
+.about-grid h2{font-size:clamp(28px,4.2vw,50px);margin-top:14px;letter-spacing:-.01em}
+.about-grid .body{display:grid;gap:18px;color:var(--ink-2)}
+.about-grid .body strong{color:var(--ink)}
+.shot{border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 60px -36px rgba(36,17,63,.45)}
+.shot figcaption{font-size:12px;color:var(--muted);padding:10px 14px;background:#fff}
+@media (max-width:860px){.about-grid{grid-template-columns:minmax(0,1fr)}}
+
+.biz{display:grid;gap:clamp(48px,7vw,88px)}
+.biz-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(28px,5vw,64px);align-items:center;scroll-margin-top:90px}
+.biz-item:nth-child(even) .biz-media{order:2}
+.biz-media{border-radius:24px;overflow:hidden;position:relative;background:var(--paper-2);aspect-ratio:4/3;display:grid;place-items:center}
+.biz-media img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.biz-item:hover .biz-media img{transform:scale(1.04)}
+.biz-media.contain img{object-fit:contain;width:62%;height:auto}
+.biz-num{font-family:var(--ff-latin);font-weight:800;font-size:14px;color:var(--c);display:flex;align-items:center;gap:10px}
+.biz-num::after{content:"";height:3px;width:40px;border-radius:2px;background:var(--c)}
+.biz-item h3{font-size:clamp(24px,3vw,34px);margin-top:10px}
+.biz-item .sub{font-weight:700;color:var(--c-text);margin-top:6px}
+.biz-item p.desc{margin-top:16px;color:var(--ink-2)}
+.biz-item ul{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.biz-item li{font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;background:var(--paper-2);border:1px solid var(--line)}
+.biz-item .btn{margin-top:26px}
+.biz-ai{--c:var(--green);--c-text:var(--green-text)}
+.biz-koumu{--c:var(--yellow);--c-text:var(--yellow-text)}
+.biz-consult{--c:var(--red);--c-text:var(--red)}
+@media (max-width:860px){.biz-item{grid-template-columns:minmax(0,1fr)}.biz-item:nth-child(even) .biz-media{order:0}}
+
+.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.why article{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;display:grid;gap:12px;align-content:start;transition:transform .35s var(--ease),box-shadow .35s}
+.why article:hover{transform:translateY(-6px);box-shadow:0 24px 40px -28px rgba(36,17,63,.4)}
+.why .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--bg);color:#fff}
+.why .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.why h3{font-size:20px}
+.why p{font-size:15px;color:var(--ink-2)}
+@media (max-width:860px){.why{grid-template-columns:minmax(0,1fr)}}
+
+.consult-band{background:var(--ink);color:#fff;border-radius:28px;padding:clamp(32px,5vw,64px);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:36px;align-items:center;position:relative;overflow:hidden}
+.consult-band .eyebrow{color:rgba(255,255,255,.65)}
+.consult-band h2{font-size:clamp(26px,3.6vw,42px);margin-top:12px}
+.consult-band p{color:rgba(255,255,255,.78);margin-top:14px}
+.themes{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding:0;list-style:none}
+.themes li{font-size:13px;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 12px}
+.next{background:#fff;color:var(--ink);border-radius:20px;padding:24px;display:grid;gap:14px}
+.next h3{font-size:15px;color:var(--muted);font-weight:700}
+.next ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.next li{display:flex;align-items:baseline;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:10px}
+.next li:last-child{border-bottom:0;padding-bottom:0}
+.nc-label{font-size:12px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:1px 8px;flex:none}
+.next li:nth-child(2) .nc-label{background:var(--muted)}
+.next li b{font-family:var(--ff-display);font-size:clamp(20px,2.4vw,26px)}
+.next .note{font-size:12px;color:var(--muted)}
+@media (max-width:860px){.consult-band{grid-template-columns:minmax(0,1fr)}}
+
+.news-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.news-card{text-decoration:none;display:grid;gap:12px;align-content:start}
+.news-card .thumb{border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:var(--paper-2)}
+.news-card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.news-card:hover .thumb img{transform:scale(1.05)}
+.news-card .meta{font-family:var(--ff-mono);font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.news-card .cat{color:var(--ink);font-family:var(--ff-body);font-weight:700}
+.news-card h3{font-size:17px;line-height:1.55}
+.news-card:hover h3{text-decoration:underline;text-underline-offset:4px}
+.news-more{margin-top:32px}
+@media (max-width:860px){.news-list{grid-template-columns:minmax(0,1fr)}}
+
+.recruit{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:24px 40px;align-items:center;border:2px solid var(--ink);border-radius:24px;padding:clamp(24px,4vw,44px)}
+.recruit .big{font-family:var(--ff-display);font-weight:900;font-size:clamp(28px,4vw,46px);line-height:1.2}
+.recruit .big em{font-style:normal;color:var(--red)}
+.recruit ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.recruit li{font-weight:700;padding:8px 16px;border-radius:999px;background:var(--yellow);font-size:15px}
+.recruit li:nth-child(2){background:var(--green);color:#fff}
+@media (max-width:860px){.recruit{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<section class="hero">
+  <svg class="hero-ribbon ribbon" viewBox="0 0 1400 220" preserveAspectRatio="none" aria-hidden="true">
+    <path class="r1" pathLength="100" d="M-20 150 C 240 40, 420 230, 700 120 S 1160 30, 1420 110"/>
+    <path class="r2" pathLength="100" d="M-20 175 C 240 65, 420 255, 700 145 S 1160 55, 1420 135"/>
+    <path class="r3" pathLength="100" d="M-20 200 C 240 90, 420 280, 700 170 S 1160 80, 1420 160"/>
+  </svg>
+  <div class="wrap">
+    <div>
+      <p class="eyebrow" style="animation:fade .8s both">AKITO GROUP LLC.</p>
+      <h1>
+        <span class="ln"><span><span class="w w-red">愛</span>ある事業で、</span></span>
+        <span class="ln"><span><span class="w w-yellow">煌めく</span>あなたに</span></span>
+        <span class="ln"><span><span class="w w-green">届ける</span>未来。</span></span>
+      </h1>
+      <p class="hero-lead">AKITOグループは、AI・人材・人と人とのつながりを通じて、企業と個人の成長を支えています。AI面接システム「インタビアAI」、人材・営業代行「コウムリンク」、そして無料の相談会。3つの事業で、新しい一歩を後押しします。</p>
+      <div class="hero-actions">
+        <a class="btn btn-ink" href="#services">事業を見る <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-line" href="contact.html">お問い合わせ</a>
+      </div>
+    </div>
+    <div class="stack" aria-label="3つの事業">
+      <a class="card card-ai" href="intervia.html"><img src="assets/img/intervia.webp" alt="インタビアAI　AIで進化する、次世代の面接プラットフォーム" width="1000" height="1000"><span class="tag">インタビアAI</span></a>
+      <a class="card card-koumu" href="#koumu-link"><img src="assets/img/koumu-link.webp" alt="コウムリンク" width="300" height="300" style="object-fit:contain;padding:10%"></a>
+      <a class="card card-consult" href="consultation.html"><img src="assets/img/consult.webp" alt="山頂へ手を取り合って登る人たちのシルエット" width="1400" height="1050"><span class="tag">無料相談会</span></a>
+    </div>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>AI面接</span><span>書類選考AI</span><span>評価レポート</span><span>人材紹介</span><span>営業代行</span><span>BPO</span><span>転職・セカンドキャリア</span><span>キャリア・生活相談</span><span>交流会</span>
+    <span>AI面接</span><span>書類選考AI</span><span>評価レポート</span><span>人材紹介</span><span>営業代行</span><span>BPO</span><span>転職・セカンドキャリア</span><span>キャリア・生活相談</span><span>交流会</span>
+  </div>
+</div>
+
+<section class="block">
+  <div class="wrap about-grid">
+    <div class="rv">
+      <p class="eyebrow">About us</p>
+      <h2>人を見る力を、<br>AIで拡張する。</h2>
+      <div class="body" style="margin-top:24px">
+        <p>AKITOグループは、人材領域で培った採用ノウハウとAI技術を組み合わせ、次世代の採用支援サービス<strong>「インタビアAI」</strong>を提供しています。書類選考、AI面接、評価分析までをひとつのプラットフォームで支え、企業と人のより良い出会いをつくります。</p>
+        <p>人材不足、採用コスト、選考の負担。いまの採用の課題をAIの力で解決し、企業の成長を支えます。</p>
+      </div>
+      <a class="btn btn-line" href="about.html" style="margin-top:28px">会社概要を見る <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+    <figure class="shot rv" style="margin:0">
+      <img src="assets/img/interview-screen.webp" alt="インタビアAIの面接画面。左にAI面接官、右に候補者が映っている" width="1600" height="914" loading="lazy">
+      <figcaption>インタビアAIの面接画面。候補者はURLひとつで、AIの面接官とオンライン面接ができます。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="block tint" id="services">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <p class="eyebrow">Our services</p>
+        <h2>事業内容</h2>
+      </div>
+      <p>AIと人材の力で、採用の未来をつくる。働きたい人と、人を必要としている企業。その両方をつなぐために、3つの事業を展開しています。</p>
+    </div>
+
+    <div class="biz">
+      <article class="biz-item biz-ai" id="intervia">
+        <div class="biz-media rv"><img src="assets/img/screening.webp" alt="大量の書類をAIが読み取って分析するイメージ" width="1000" height="1000" loading="lazy"></div>
+        <div class="rv">
+          <span class="biz-num">AIソリューション事業</span>
+          <h3>インタビアAI</h3>
+          <p class="sub">AI面接・採用支援</p>
+          <p class="desc">書類分析からAI面接、評価まで。採用業務をひとつの流れで効率化し、企業と人の最適な出会いを支えます。面接はURLを送るだけで、24時間365日、候補者の都合に合わせて受けてもらえます。</p>
+          <ul><li>書類選考AI</li><li>アバター面接AI</li><li>面接後の自動総評</li><li>業務効率化・DX支援</li></ul>
+          <a class="btn btn-ink" href="intervia.html">インタビアAIを詳しく見る <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <article class="biz-item biz-koumu" id="koumu-link">
+        <div class="biz-media contain rv"><img src="assets/img/koumu-link.webp" alt="コウムリンクのロゴ。自衛官・消防士・警察官のシルエット" width="300" height="300" loading="lazy"></div>
+        <div class="rv">
+          <span class="biz-num">人材・営業代行事業</span>
+          <h3>コウムリンク</h3>
+          <p class="sub">人材・営業代行・BPO</p>
+          <p class="desc">必要な人材を、必要なタイミングで。人材の紹介や営業代行を通じて企業の成長を支えるとともに、働く人に新しい活躍の場を届けます。</p>
+          <ul><li>人材紹介</li><li>採用支援</li><li>各種営業代行</li><li>BPO</li></ul>
+          <a class="btn btn-line" href="contact.html#koumu">コウムリンクについて相談する <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <article class="biz-item biz-consult" id="consult">
+        <div class="biz-media rv"><img src="assets/img/consult.webp" alt="山頂へ手を取り合って登る人たちのシルエット" width="1400" height="1050" loading="lazy"></div>
+        <div class="rv">
+          <span class="biz-num">相談・イベント事業</span>
+          <h3>無料相談会・イベント</h3>
+          <p class="sub">毎月第2・第4火曜日に開催</p>
+          <p class="desc">転職やセカンドキャリア、ニート・フリーターの就労、借金や家計、生活の不安まで。毎回テーマを変えて、誰でも気軽に参加できる無料の相談会を開いています。勧誘は一切ありません。</p>
+          <ul><li>キャリア・生活相談会</li><li>キャリアイベント・交流会</li><li>セミナー・勉強会</li></ul>
+          <a class="btn btn-red" href="consultation.html">相談会の詳細を見る <span class="arr" aria-hidden="true">→</span></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <p class="eyebrow">Why AKITO</p>
+        <h2>人と企業の出会いを、<br>AIで最適化する。</h2>
+      </div>
+      <p>採用でいちばん難しいのは「人を理解すること」です。インタビアAIは、書類分析・面接・評価をAIで行い、企業が候補者の可能性を正しく理解できる仕組みを提供します。</p>
+    </div>
+    <div class="why">
+      <article class="rv">
+        <span class="ic" style="--bg:var(--red)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+        <h3>候補者を理解する</h3>
+        <p>AIが履歴書・職務経歴書を読み込み、候補者の理解を助けます。</p>
+      </article>
+      <article class="rv">
+        <span class="ic" style="--bg:var(--yellow-text)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
+        <h3>面接を進化させる</h3>
+        <p>AI面接で、質問・回答・評価をデータとして残します。</p>
+      </article>
+      <article class="rv">
+        <span class="ic" style="--bg:var(--green)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+        <h3>採用の判断を支える</h3>
+        <p>面接の結果を分析し、より納得できる採用につなげます。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" style="padding-top:0">
+  <div class="wrap">
+    <div class="consult-band rv">
+      <div>
+        <p class="eyebrow">Free consultation</p>
+        <h2>一人で悩まず、<br>まずは相談してみませんか。</h2>
+        <p>転職、キャリア、生活、お金のこと。一人では解決が難しい悩みも、まずは現状を整理することから。参加費は無料です。</p>
+        <ul class="themes"><li>借金・家計</li><li>転職</li><li>セカンドキャリア</li><li>ニート・フリーター</li><li>生活相談</li><li>交流会</li></ul>
+        <a class="btn btn-red" href="consultation.html" style="margin-top:26px">相談会について見る <span class="arr" aria-hidden="true">→</span></a>
+      </div>
+      <div class="next">
+        <h3>相談会の開催日</h3>
+        <ul data-next-consult="2"><li><span class="nc-label">毎月</span><b>第2・第4火曜日</b></li></ul>
+        <p class="note">毎回テーマが変わります。法律相談・法的な手続きは行わず、必要に応じて専門家をご案内します。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block tint">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <p class="eyebrow">Blog &amp; News</p>
+        <h2>お知らせ</h2>
+      </div>
+    </div>
+    <div class="news-list">
+      <a class="news-card rv" href="news-barracks.html">
+        <span class="thumb"><img src="assets/img/barracks.webp" alt="窓から光が差し込む個室" width="640" height="480" loading="lazy"></span>
+        <span class="meta"><time datetime="2025-10-06">2025.10.06</time><span class="cat">公務員ニュース・自衛隊</span></span>
+        <h3>防衛省が動く、隊舎改革の波。相部屋から個室へ</h3>
+      </a>
+      <a class="news-card rv" href="news-volunteer.html">
+        <span class="thumb"><img src="assets/img/volunteer-1.webp" alt="体育館で絵を描く子どもたち" width="1024" height="577" loading="lazy"></span>
+        <span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">活動報告</span></span>
+        <h3>椎名町小学校でボランティア活動をしてまいりました！</h3>
+      </a>
+      <a class="news-card rv" href="news-open.html">
+        <span class="thumb" style="display:grid;place-items:center"><img src="assets/img/logo-full.webp" alt="AKITOグループのロゴ" width="900" height="352" loading="lazy" style="object-fit:contain;width:70%;height:auto"></span>
+        <span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">お知らせ</span></span>
+        <h3>AKITOグループのホームページを開設しました！</h3>
+      </a>
+    </div>
+    <a class="btn btn-line news-more" href="news.html">お知らせ一覧へ <span class="arr" aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="recruit rv" id="recruit">
+      <p class="big">共に<em>汗</em>を<br>流そう！</p>
+      <div>
+        <p class="eyebrow">Recruit</p>
+        <p style="font-weight:700;font-size:20px;margin:8px 0 14px">積極採用中です</p>
+        <ul><li>キャリア不問</li><li>学歴不問</li></ul>
+      </div>
+      <a class="btn btn-ink" href="contact.html#recruit">応募・問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>

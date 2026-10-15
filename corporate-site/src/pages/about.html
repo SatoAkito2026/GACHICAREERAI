@@ -1,0 +1,132 @@
+<!--
+title: 会社概要
+description: 合同会社AKITOグループの代表挨拶・会社概要・代表経歴・事業内容。
+nav: about
+-->
+<style>
+.greet{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:clamp(32px,6vw,80px);align-items:start}
+.portrait{position:sticky;top:110px;margin:0}
+.portrait .frame{border-radius:24px;overflow:hidden;position:relative}
+.portrait .frame::after{content:"";position:absolute;inset:auto 0 0 0;height:8px;background:linear-gradient(90deg,var(--red) 0 33.3%,var(--yellow) 33.3% 66.6%,var(--green) 66.6%)}
+.portrait figcaption{margin-top:16px;display:grid;gap:2px}
+.portrait figcaption b{font-family:var(--ff-display);font-size:22px}
+.portrait figcaption span{font-size:13px;color:var(--muted)}
+.greet h2{font-size:clamp(24px,3.2vw,36px);margin:12px 0 28px}
+.greet .prose p{color:var(--ink-2)}
+.pillars{display:grid;gap:14px;margin:28px 0;padding:0;list-style:none}
+.pillars li{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff;border-left:5px solid var(--c)}
+.pillars b{display:block;font-family:var(--ff-display);font-size:17px}
+.pillars span{font-size:14.5px;color:var(--ink-2)}
+.sign{margin-top:32px;text-align:right;font-weight:700;line-height:1.8}
+@media (max-width:860px){.greet{grid-template-columns:minmax(0,1fr)}.portrait{position:static;max-width:360px}}
+
+.facts{display:grid;grid-template-columns:11em minmax(0,1fr);margin:0;border-top:2px solid var(--ink)}
+.facts dt,.facts dd{padding:22px 0;border-bottom:1px solid var(--line);margin:0}
+.facts dt{font-weight:700;font-size:14px}
+.facts dd{min-width:0;overflow-wrap:anywhere}
+.facts dd ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.facts .grp{font-weight:700;margin-top:10px;display:flex;align-items:center;gap:8px}
+.facts .grp:first-child{margin-top:0}
+.facts .grp::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.facts .grp-note{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.facts{grid-template-columns:minmax(0,1fr)}.facts dt{padding-bottom:0;border-bottom:0}.facts dd{padding-top:6px}}
+
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:0;position:relative}
+.timeline::before{content:"";position:absolute;left:5.6em;top:10px;bottom:10px;width:2px;background:var(--line)}
+.timeline li{display:grid;grid-template-columns:5em minmax(0,1fr);gap:28px;padding-block:14px;position:relative;align-items:baseline}
+.timeline li::before{content:"";position:absolute;left:calc(5.6em - 6px);top:24px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c)}
+.timeline .yr{font-family:var(--ff-latin);font-weight:800;font-size:20px;text-align:right}
+.timeline .ev{padding-left:16px}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / 会社概要</nav>
+    <p class="eyebrow">Company</p>
+    <h1>会社概要</h1>
+    <p class="lead">「愛ある事業で煌めくあなたに届ける未来」を経営理念に、AI・人材・人と人とのつながりを通じて、企業と個人の成長を支えています。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap greet">
+    <figure class="portrait rv">
+      <div class="frame"><img src="assets/img/ceo.webp" alt="代表 佐藤光彪の写真" width="900" height="900"></div>
+      <figcaption><span>合同会社AKITOグループ 代表</span><b>佐藤 光彪</b><span>元陸上自衛官／陸上自衛隊高等工科学校 卒業</span></figcaption>
+    </figure>
+    <div>
+      <p class="eyebrow">Message</p>
+      <h2>人と企業をつなぎ、<br>新しい挑戦が生まれる場所を。</h2>
+      <div class="prose">
+        <p>平素より格別のご高配を賜り、誠にありがとうございます。</p>
+        <p>AKITOグループは、「愛ある事業で、煌めくあなたに届ける未来」を経営理念に掲げ、AI、人材、そして人と人とのつながりを通じて、企業と個人の成長を支える事業を展開しています。</p>
+        <p>私は元陸上自衛官として勤務した後、起業の道を選びました。その中で、多くの企業が人材不足や採用に課題を抱え、一方で働く意欲があっても環境やきっかけに恵まれず、一歩を踏み出せない方が数多くいることを知りました。</p>
+        <p>その両者をつなぐ存在になりたいという想いから、現在は3つの事業を展開しています。</p>
+      </div>
+      <ul class="pillars">
+        <li class="rv" style="--c:var(--green)"><b>AIソリューション事業</b><span>AI面接システム「インタビアAI」をはじめ、企業の採用活動や業務効率化を支援しています。</span></li>
+        <li class="rv" style="--c:var(--yellow)"><b>コウムリンク</b><span>人材紹介・営業代行を通じて企業の成長を支えるとともに、働く人へ新たな活躍の場を提供しています。</span></li>
+        <li class="rv" style="--c:var(--red)"><b>相談・イベント事業</b><span>転職やセカンドキャリア、ニート・フリーターの就労相談、生活に不安を抱える方への相談会などを無料で開いています。相談会は毎月第2・第4火曜日に開催し、必要に応じて各分野の専門家と連携しながら、一人ひとりに合った支援につなげています。</span></li>
+      </ul>
+      <div class="prose">
+        <p>私たちは、サービスを提供するだけではなく、人と企業をつなぎ、新しい挑戦が生まれる環境を創り続けます。これからも、社会に必要とされる企業を目指し、挑戦を続けてまいります。</p>
+        <p>今後とも変わらぬご支援、ご愛顧を賜りますよう、よろしくお願い申し上げます。</p>
+      </div>
+      <p class="sign">合同会社AKITOグループ<br>代表　佐藤 光彪</p>
+    </div>
+  </div>
+</section>
+
+<section class="block tint">
+  <div class="wrap">
+    <div class="sec-head solo rv">
+      <div>
+        <p class="eyebrow">Profile</p>
+        <h2>会社情報</h2>
+      </div>
+    </div>
+    <dl class="facts rv">
+      <dt>会社名</dt><dd>合同会社AKITOグループ</dd>
+      <dt>英文社名</dt><dd>AKITOgroup.llc</dd>
+      <dt>設立</dt><dd>2026年</dd>
+      <dt>代表</dt><dd>佐藤 光彪</dd>
+      <dt>所在地</dt><dd>〒170-0013　東京都豊島区東池袋2丁目62番8号　BIGオフィスプラザ池袋1206</dd>
+      <dt>TEL</dt><dd>080-2420-4900（年中無休　9:00〜21:00）</dd>
+      <dt>E-mail</dt><dd>info@akitogroup.jp</dd>
+      <dt>事業内容</dt>
+      <dd>
+        <p class="grp" style="--c:var(--green)">AIソリューション事業</p>
+        <ul><li>インタビアAIの開発・提供</li><li>AIを活用した採用支援システムの開発</li><li>業務効率化・DX支援</li></ul>
+        <p class="grp" style="--c:var(--yellow)">人材・営業代行事業（コウムリンク）</p>
+        <ul><li>人材紹介</li><li>採用支援</li><li>各種営業代行</li></ul>
+        <p class="grp" style="--c:var(--red)">相談・イベント事業</p>
+        <ul>
+          <li>無料キャリア・生活相談会（毎月第2・第4火曜日開催）</li>
+          <li class="grp-note">テーマ：転職・セカンドキャリア、ニート・フリーターの就労、家計・生活の立て直し（法的な助言は行わず、必要に応じて専門家をご案内します）</li>
+          <li>キャリアイベント・交流会</li>
+          <li>セミナー・勉強会</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <p class="eyebrow">Career</p>
+        <h2>代表経歴</h2>
+      </div>
+      <p>陸上自衛隊高等工科学校から自衛官としての道を歩み、退職後に起業しました。</p>
+    </div>
+    <ol class="timeline">
+      <li class="rv" style="--c:var(--red)"><span class="yr">2020</span><span class="ev">陸上自衛隊高等工科学校 入校</span></li>
+      <li class="rv" style="--c:var(--yellow)"><span class="yr">2023</span><span class="ev">同校 卒業</span></li>
+      <li class="rv" style="--c:var(--yellow)"><span class="yr">2023</span><span class="ev">東部方面総監賞 受賞</span></li>
+      <li class="rv" style="--c:var(--green)"><span class="yr">2025</span><span class="ev">陸上自衛隊 退職・起業</span></li>
+      <li class="rv" style="--c:var(--ink)"><span class="yr">2026</span><span class="ev">合同会社AKITOグループ 設立</span></li>
+    </ol>
+  </div>
+</section>
