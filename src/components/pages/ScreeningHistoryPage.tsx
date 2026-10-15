@@ -73,7 +73,8 @@ function rankMeta(rank: string) {
 const RANK_OPTIONS = ["A", "B", "C", "D"];
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const INTERVIEW_URL_ALLOWED_PLANS = ["company_metered", "company_light", "company_pro"];
+// 企業のAI面接URLは、月額プラン（ライト・プロ）を前から契約している企業だけ（新規受付は終了）
+const INTERVIEW_URL_ALLOWED_PLANS = ["company_light", "company_pro"];
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -115,7 +116,7 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
   const handleIssueUrl = async (row: ScreeningCandidateRow) => {
     if (!INTERVIEW_URL_ALLOWED_PLANS.includes(plan)) {
       toast.error(
-        "面接URLの発行には企業プランへの加入が必要です。マイページからプランをご確認ください。",
+        "AI面接URLの発行は、新規の受付を終了しました（人材を探す・求人掲載をご利用ください）。",
       );
       return;
     }

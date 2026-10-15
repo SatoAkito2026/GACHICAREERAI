@@ -137,10 +137,20 @@ export const Route = createFileRoute("/api/interview-turn")({
               const { data: profile } = await supabase
                 .from("profiles")
                 .select(
-                  "company_name, business_description, hiring_positions, ideal_candidate, company_culture, company_strengths, competitive_advantage, competitors, successful_hire_traits, failed_hire_traits, first_job_description, interview_focus, company_id",
+                  "company_name, business_description, hiring_positions, ideal_candidate, company_culture, company_strengths, competitive_advantage, competitors, successful_hire_traits, failed_hire_traits, first_job_description, interview_focus, company_id, plan, plan_expires_at",
                 )
                 .eq("id", inv.user_id)
                 .maybeSingle();
+
+              // 企業のAI面接は月額プラン（ライト・プロ）を前から契約している企業だけ（新規受付は終了）
+              const companyPlan = (profile as any)?.plan as string | undefined;
+              const expiresAt = (profile as any)?.plan_expires_at as string | null | undefined;
+              const paid =
+                (companyPlan === "company_light" || companyPlan === "company_pro") &&
+                (!expiresAt || new Date(expiresAt).getTime() > Date.now());
+              if (!paid) {
+                return json({ error: "この面接URLは現在ご利用いただけません" }, 403);
+              }
 
               if (profile) {
                 const fields: [string, string][] = [
