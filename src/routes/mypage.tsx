@@ -315,15 +315,18 @@ function MyPage() {
                   ⚠ プランの有効期限が切れています。プランを更新してください。
                 </div>
               )}
+              {/* 企業の月額プランは新規受付をやめた。前から契約している企業にだけ表示する */}
               {isBusiness ? (
-                <Row
-                  label="今期のURL発行回数"
-                  value={
-                    plan === "company_metered"
-                      ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
-                      : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
-                  }
-                />
+                plan.startsWith("company_") && (
+                  <Row
+                    label="今期のURL発行回数"
+                    value={
+                      plan === "company_metered"
+                        ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
+                        : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
+                    }
+                  />
+                )
               ) : (
                 <Row label="練習の上限" value={practiceLimitSummary(plan)} />
               )}
@@ -344,7 +347,11 @@ function MyPage() {
                   })()}
                 />
               )}
-              <Row label="プランを変更する" onClick={() => navigate({ to: "/pricing" })} arrow />
+              <Row
+                label={isBusiness ? "料金を見る" : "プランを変更する"}
+                onClick={() => navigate({ to: "/pricing" })}
+                arrow
+              />
               {/* 芸能・キャスティング向けは今は受け付けていないので、加入済みの人にだけ表示する */}
               {actorAddonActive && (
                 <Row

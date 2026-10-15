@@ -3,7 +3,6 @@ import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-import { usePlan } from "@/hooks/use-plan";
 import { supabase } from "@/integrations/supabase/client";
 import { BusinessShell } from "@/components/ModeShell";
 
@@ -172,8 +171,6 @@ function CultureMeter({
 
 function JobsPage() {
   const { user, session, loading } = useAuth();
-  const { plan } = usePlan();
-  const canPostJobs = plan === "company_light" || plan === "company_pro";
 
   const [postings, setPostings] = useState<JobPosting[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -372,26 +369,6 @@ function JobsPage() {
     setExpandedApplicants((prev) => ({ ...prev, [jobId]: (data ?? []) as Applicant[] }));
     setLoadingApplicants(null);
   };
-
-  if (!canPostJobs) {
-    return (
-      <BusinessShell>
-        <div className="mx-auto max-w-2xl px-6 py-10">
-          <h1 className="text-[22px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>
-            求人掲載
-          </h1>
-          <div className="mt-6 rounded-2xl p-6 text-center" style={cardStyle}>
-            <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 600 }}>
-              ライト/プロプラン限定機能です
-            </p>
-            <p className="mt-2" style={{ color: "#888888", fontSize: 13 }}>
-              求人掲載機能は、ライトプラン・プロプランでご利用いただけます。
-            </p>
-          </div>
-        </div>
-      </BusinessShell>
-    );
-  }
 
   return (
     <BusinessShell>

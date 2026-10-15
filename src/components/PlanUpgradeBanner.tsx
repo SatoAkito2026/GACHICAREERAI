@@ -12,7 +12,8 @@ export function PlanUpgradeBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (plan !== "free") return;
+    // 企業は月額プランがないので出さない
+    if (plan !== "free" || isBusiness) return;
 
     const dismissedAt = localStorage.getItem(DISMISSED_KEY);
     if (dismissedAt) {
@@ -21,7 +22,7 @@ export function PlanUpgradeBanner() {
     }
 
     setVisible(true);
-  }, [plan]);
+  }, [plan, isBusiness]);
 
   const handleDismiss = () => {
     localStorage.setItem(DISMISSED_KEY, String(Date.now()));

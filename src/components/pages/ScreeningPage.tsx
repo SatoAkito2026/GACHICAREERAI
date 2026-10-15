@@ -283,6 +283,17 @@ export function ScreeningPage() {
   const navigate = useNavigate();
   const [screeningCount, setScreeningCount] = useState(0);
   const [countLoading, setCountLoading] = useState(true);
+  // 書類選考AIは求人を掲載中の企業だけ（サーバーの /api/chat でも確認している）
+  const [hasOpenJob, setHasOpenJob] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    void supabase
+      .from("job_postings")
+      .select("id", { count: "exact", head: true })
+      .eq("company_user_id", user.id)
+      .eq("status", "open")
+      .then(({ count }) => setHasOpenJob(!!count));
+  }, [user]);
 
   const [jobType, setJobType] = useState("");
   const [requiredConditions, setRequiredConditions] = useState("");
@@ -1391,6 +1402,22 @@ ${c.text.slice(0, 1500)}
             </p>
           </div>
         </div>
+
+        {hasOpenJob === false && (
+          <div
+            className="mb-6 rounded-xl p-4 text-[13px]"
+            style={{ background: "#2A2200", border: "1px solid #5A4A00", color: "#E8C84A" }}
+          >
+            書類選考AIは、求人を掲載中の企業だけが使えます（求人掲載は今は無料です）。
+            <Link
+              to="/business/company/jobs"
+              className="ml-2 underline"
+              style={{ color: "#C8FF00", fontWeight: 700 }}
+            >
+              求人を掲載する →
+            </Link>
+          </div>
+        )}
 
         {/* 会社名入力欄 */}
         <div
