@@ -63,6 +63,9 @@ import { Route as ScreeningHistoryRouteImport } from './routes/screening_.histor
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
 import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
 import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
+import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
+import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
+import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
 import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
@@ -85,9 +88,6 @@ import { Route as BusinessCompanyPurchasedRouteImport } from './routes/business/
 import { Route as BusinessCompanyScreeningRouteImport } from './routes/business/company/screening'
 import { Route as BusinessCompanySettingsRouteImport } from './routes/business/company/settings'
 import { Route as BusinessSchoolIndexRouteImport } from './routes/business/school/index'
-import { Route as BusinessSchoolHistoryRouteImport } from './routes/business/school/history'
-import { Route as BusinessSchoolScreeningRouteImport } from './routes/business/school/screening'
-import { Route as BusinessSchoolSettingsRouteImport } from './routes/business/school/settings'
 import { Route as BusinessSchoolStudentsRouteImport } from './routes/business/school/students'
 import { Route as PrivateIndividualIndexRouteImport } from './routes/private/individual/index'
 import { Route as PrivateIndividualDailyQuestionsRouteImport } from './routes/private/individual/daily-questions'
@@ -115,7 +115,7 @@ import { Route as BusinessActorScreeningHistoryRouteImport } from './routes/busi
 import { Route as BusinessCompanyScreeningHistoryRouteImport } from './routes/business/company/screening_.history'
 import { Route as BusinessCompanyTalentIndexRouteImport } from './routes/business/company/talent.index'
 import { Route as BusinessCompanyTalentCodeRouteImport } from './routes/business/company/talent.$code'
-import { Route as BusinessSchoolScreeningHistoryRouteImport } from './routes/business/school/screening_.history'
+import { Route as BusinessSchoolStudentsIdRouteImport } from './routes/business/school/students_.$id'
 import { Route as PrivateIndividualJobsIndexRouteImport } from './routes/private/individual/jobs.index'
 import { Route as PrivateIndividualJobsIdRouteImport } from './routes/private/individual/jobs.$id'
 
@@ -393,6 +393,21 @@ const ApiJobsPublicRoute = ApiJobsPublicRouteImport.update({
   path: '/api/jobs/public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSchoolJoinRoute = ApiSchoolJoinRouteImport.update({
+  id: '/api/school/join',
+  path: '/api/school/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSchoolStudentRoute = ApiSchoolStudentRouteImport.update({
+  id: '/api/school/student',
+  path: '/api/school/student',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSchoolStudentsRoute = ApiSchoolStudentsRouteImport.update({
+  id: '/api/school/students',
+  path: '/api/school/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
   id: '/api/talent/admin-stats',
   path: '/api/talent/admin-stats',
@@ -504,21 +519,6 @@ const BusinessCompanySettingsRoute = BusinessCompanySettingsRouteImport.update({
 const BusinessSchoolIndexRoute = BusinessSchoolIndexRouteImport.update({
   id: '/business/school/',
   path: '/business/school/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessSchoolHistoryRoute = BusinessSchoolHistoryRouteImport.update({
-  id: '/business/school/history',
-  path: '/business/school/history',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessSchoolScreeningRoute = BusinessSchoolScreeningRouteImport.update({
-  id: '/business/school/screening',
-  path: '/business/school/screening',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessSchoolSettingsRoute = BusinessSchoolSettingsRouteImport.update({
-  id: '/business/school/settings',
-  path: '/business/school/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessSchoolStudentsRoute = BusinessSchoolStudentsRouteImport.update({
@@ -671,10 +671,10 @@ const BusinessCompanyTalentCodeRoute =
     path: '/business/company/talent/$code',
     getParentRoute: () => rootRouteImport,
   } as any)
-const BusinessSchoolScreeningHistoryRoute =
-  BusinessSchoolScreeningHistoryRouteImport.update({
-    id: '/business/school/screening_/history',
-    path: '/business/school/screening/history',
+const BusinessSchoolStudentsIdRoute =
+  BusinessSchoolStudentsIdRouteImport.update({
+    id: '/business/school/students_/$id',
+    path: '/business/school/students/$id',
     getParentRoute: () => rootRouteImport,
   } as any)
 const PrivateIndividualJobsIndexRoute =
@@ -744,6 +744,9 @@ export interface FileRoutesByFullPath {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/school/join': typeof ApiSchoolJoinRoute
+  '/api/school/student': typeof ApiSchoolStudentRoute
+  '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -763,9 +766,6 @@ export interface FileRoutesByFullPath {
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
-  '/business/school/history': typeof BusinessSchoolHistoryRoute
-  '/business/school/screening': typeof BusinessSchoolScreeningRoute
-  '/business/school/settings': typeof BusinessSchoolSettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
@@ -795,7 +795,7 @@ export interface FileRoutesByFullPath {
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
-  '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/school/students/$id': typeof BusinessSchoolStudentsIdRoute
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
@@ -855,6 +855,9 @@ export interface FileRoutesByTo {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/school/join': typeof ApiSchoolJoinRoute
+  '/api/school/student': typeof ApiSchoolStudentRoute
+  '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -874,9 +877,6 @@ export interface FileRoutesByTo {
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
-  '/business/school/history': typeof BusinessSchoolHistoryRoute
-  '/business/school/screening': typeof BusinessSchoolScreeningRoute
-  '/business/school/settings': typeof BusinessSchoolSettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
@@ -906,7 +906,7 @@ export interface FileRoutesByTo {
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
-  '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/school/students/$id': typeof BusinessSchoolStudentsIdRoute
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs': typeof PrivateIndividualJobsIndexRoute
@@ -967,6 +967,9 @@ export interface FileRoutesById {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/school/join': typeof ApiSchoolJoinRoute
+  '/api/school/student': typeof ApiSchoolStudentRoute
+  '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -986,9 +989,6 @@ export interface FileRoutesById {
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
-  '/business/school/history': typeof BusinessSchoolHistoryRoute
-  '/business/school/screening': typeof BusinessSchoolScreeningRoute
-  '/business/school/settings': typeof BusinessSchoolSettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
   '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
@@ -1018,7 +1018,7 @@ export interface FileRoutesById {
   '/business/actor/screening_/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening_/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
-  '/business/school/screening_/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/business/school/students_/$id': typeof BusinessSchoolStudentsIdRoute
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
@@ -1080,6 +1080,9 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/school/join'
+    | '/api/school/student'
+    | '/api/school/students'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1099,9 +1102,6 @@ export interface FileRouteTypes {
     | '/business/company/purchased'
     | '/business/company/screening'
     | '/business/company/settings'
-    | '/business/school/history'
-    | '/business/school/screening'
-    | '/business/school/settings'
     | '/business/school/students'
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
@@ -1131,7 +1131,7 @@ export interface FileRouteTypes {
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
-    | '/business/school/screening/history'
+    | '/business/school/students/$id'
     | '/private/individual/jobs/$id'
     | '/business/company/talent/'
     | '/private/individual/jobs/'
@@ -1191,6 +1191,9 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/school/join'
+    | '/api/school/student'
+    | '/api/school/students'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1210,9 +1213,6 @@ export interface FileRouteTypes {
     | '/business/company/purchased'
     | '/business/company/screening'
     | '/business/company/settings'
-    | '/business/school/history'
-    | '/business/school/screening'
-    | '/business/school/settings'
     | '/business/school/students'
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
@@ -1242,7 +1242,7 @@ export interface FileRouteTypes {
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
-    | '/business/school/screening/history'
+    | '/business/school/students/$id'
     | '/private/individual/jobs/$id'
     | '/business/company/talent'
     | '/private/individual/jobs'
@@ -1302,6 +1302,9 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/school/join'
+    | '/api/school/student'
+    | '/api/school/students'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1321,9 +1324,6 @@ export interface FileRouteTypes {
     | '/business/company/purchased'
     | '/business/company/screening'
     | '/business/company/settings'
-    | '/business/school/history'
-    | '/business/school/screening'
-    | '/business/school/settings'
     | '/business/school/students'
     | '/private/individual/daily-questions'
     | '/private/individual/documents'
@@ -1353,7 +1353,7 @@ export interface FileRouteTypes {
     | '/business/actor/screening_/history'
     | '/business/company/screening_/history'
     | '/business/company/talent/$code'
-    | '/business/school/screening_/history'
+    | '/business/school/students_/$id'
     | '/private/individual/jobs/$id'
     | '/business/company/talent/'
     | '/private/individual/jobs/'
@@ -1414,6 +1414,9 @@ export interface RootRouteChildren {
   ApiJobsApplicantsRoute: typeof ApiJobsApplicantsRoute
   ApiJobsApplyRoute: typeof ApiJobsApplyRoute
   ApiJobsPublicRoute: typeof ApiJobsPublicRoute
+  ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
+  ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
+  ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
   ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
@@ -1433,9 +1436,6 @@ export interface RootRouteChildren {
   BusinessCompanyPurchasedRoute: typeof BusinessCompanyPurchasedRoute
   BusinessCompanyScreeningRoute: typeof BusinessCompanyScreeningRoute
   BusinessCompanySettingsRoute: typeof BusinessCompanySettingsRoute
-  BusinessSchoolHistoryRoute: typeof BusinessSchoolHistoryRoute
-  BusinessSchoolScreeningRoute: typeof BusinessSchoolScreeningRoute
-  BusinessSchoolSettingsRoute: typeof BusinessSchoolSettingsRoute
   BusinessSchoolStudentsRoute: typeof BusinessSchoolStudentsRoute
   PrivateIndividualDailyQuestionsRoute: typeof PrivateIndividualDailyQuestionsRoute
   PrivateIndividualDocumentsRoute: typeof PrivateIndividualDocumentsRoute
@@ -1465,7 +1465,7 @@ export interface RootRouteChildren {
   BusinessActorScreeningHistoryRoute: typeof BusinessActorScreeningHistoryRoute
   BusinessCompanyScreeningHistoryRoute: typeof BusinessCompanyScreeningHistoryRoute
   BusinessCompanyTalentCodeRoute: typeof BusinessCompanyTalentCodeRoute
-  BusinessSchoolScreeningHistoryRoute: typeof BusinessSchoolScreeningHistoryRoute
+  BusinessSchoolStudentsIdRoute: typeof BusinessSchoolStudentsIdRoute
   PrivateIndividualJobsIdRoute: typeof PrivateIndividualJobsIdRoute
   BusinessCompanyTalentIndexRoute: typeof BusinessCompanyTalentIndexRoute
   PrivateIndividualJobsIndexRoute: typeof PrivateIndividualJobsIndexRoute
@@ -1851,6 +1851,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiJobsPublicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/school/join': {
+      id: '/api/school/join'
+      path: '/api/school/join'
+      fullPath: '/api/school/join'
+      preLoaderRoute: typeof ApiSchoolJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/school/student': {
+      id: '/api/school/student'
+      path: '/api/school/student'
+      fullPath: '/api/school/student'
+      preLoaderRoute: typeof ApiSchoolStudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/school/students': {
+      id: '/api/school/students'
+      path: '/api/school/students'
+      fullPath: '/api/school/students'
+      preLoaderRoute: typeof ApiSchoolStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/talent/admin-stats': {
       id: '/api/talent/admin-stats'
       path: '/api/talent/admin-stats'
@@ -2003,27 +2024,6 @@ declare module '@tanstack/react-router' {
       path: '/business/school'
       fullPath: '/business/school/'
       preLoaderRoute: typeof BusinessSchoolIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/school/history': {
-      id: '/business/school/history'
-      path: '/business/school/history'
-      fullPath: '/business/school/history'
-      preLoaderRoute: typeof BusinessSchoolHistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/school/screening': {
-      id: '/business/school/screening'
-      path: '/business/school/screening'
-      fullPath: '/business/school/screening'
-      preLoaderRoute: typeof BusinessSchoolScreeningRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business/school/settings': {
-      id: '/business/school/settings'
-      path: '/business/school/settings'
-      fullPath: '/business/school/settings'
-      preLoaderRoute: typeof BusinessSchoolSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/business/school/students': {
@@ -2215,11 +2215,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessCompanyTalentCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/business/school/screening_/history': {
-      id: '/business/school/screening_/history'
-      path: '/business/school/screening/history'
-      fullPath: '/business/school/screening/history'
-      preLoaderRoute: typeof BusinessSchoolScreeningHistoryRouteImport
+    '/business/school/students_/$id': {
+      id: '/business/school/students_/$id'
+      path: '/business/school/students/$id'
+      fullPath: '/business/school/students/$id'
+      preLoaderRoute: typeof BusinessSchoolStudentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/individual/jobs/': {
@@ -2294,6 +2294,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiJobsApplicantsRoute: ApiJobsApplicantsRoute,
   ApiJobsApplyRoute: ApiJobsApplyRoute,
   ApiJobsPublicRoute: ApiJobsPublicRoute,
+  ApiSchoolJoinRoute: ApiSchoolJoinRoute,
+  ApiSchoolStudentRoute: ApiSchoolStudentRoute,
+  ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
   ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
@@ -2313,9 +2316,6 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyPurchasedRoute: BusinessCompanyPurchasedRoute,
   BusinessCompanyScreeningRoute: BusinessCompanyScreeningRoute,
   BusinessCompanySettingsRoute: BusinessCompanySettingsRoute,
-  BusinessSchoolHistoryRoute: BusinessSchoolHistoryRoute,
-  BusinessSchoolScreeningRoute: BusinessSchoolScreeningRoute,
-  BusinessSchoolSettingsRoute: BusinessSchoolSettingsRoute,
   BusinessSchoolStudentsRoute: BusinessSchoolStudentsRoute,
   PrivateIndividualDailyQuestionsRoute: PrivateIndividualDailyQuestionsRoute,
   PrivateIndividualDocumentsRoute: PrivateIndividualDocumentsRoute,
@@ -2345,7 +2345,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessActorScreeningHistoryRoute: BusinessActorScreeningHistoryRoute,
   BusinessCompanyScreeningHistoryRoute: BusinessCompanyScreeningHistoryRoute,
   BusinessCompanyTalentCodeRoute: BusinessCompanyTalentCodeRoute,
-  BusinessSchoolScreeningHistoryRoute: BusinessSchoolScreeningHistoryRoute,
+  BusinessSchoolStudentsIdRoute: BusinessSchoolStudentsIdRoute,
   PrivateIndividualJobsIdRoute: PrivateIndividualJobsIdRoute,
   BusinessCompanyTalentIndexRoute: BusinessCompanyTalentIndexRoute,
   PrivateIndividualJobsIndexRoute: PrivateIndividualJobsIndexRoute,

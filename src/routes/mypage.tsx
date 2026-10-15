@@ -1,4 +1,5 @@
 import { limitText, practiceRule } from "@/lib/plan-rules";
+import { SchoolLinkCard } from "@/components/SchoolLinkCard";
 import { getAuthHeaders } from "@/lib/chat-api";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -404,6 +405,12 @@ function MyPage() {
                 />
               )}
             </SectionCard>
+
+            {!isBusiness && (
+              <SectionCard title="学校・塾とつながる">
+                <SchoolLinkCard />
+              </SectionCard>
+            )}
 
             <SectionCard title="サポート">
               <Row label="利用規約" href="/terms" arrow />
