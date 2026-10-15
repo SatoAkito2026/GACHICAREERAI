@@ -119,6 +119,120 @@ ${COMPETENCIES.map((c) => `- ${c.key}: ${c.label}`).join("\n")}
 - 年齢・性別・国籍・出身地・家族・健康・容姿など、本人の能力と関係ないことは評価に使わない
 形式: "competencies": [{"key": "communication", "score": 4, "reason": "評価の理由（1文）", "evidence": ["発言の引用"]}]`;
 
+/**
+ * 企業（採用担当）向けの見立て。本人向けの練習アドバイス（改善点・模範回答・点数）とは分けて作り、
+ * 企業にはこちらだけを見せる。合否や推薦はしない（運営が推薦・仲介しないため）。
+ */
+export type RecruiterView = {
+  summary: string;
+  strengths: { point: string; evidence: string[] }[];
+  workStyle: string;
+  confirmPoints: string[];
+  suggestedQuestions: string[];
+};
+
+export const RECRUITER_PROMPT = `
+【採用担当者向けの見立て】
+上の練習アドバイスとは別に、企業の採用担当者が読む前提の見立てを "recruiter_view" に入れてください。
+本人へのアドバイス口調ではなく、第三者が人物を説明する書き方にすること。合否・採用の推薦・点数はつけない。
+- summary: 仕事で活きそうな特徴の要約（120文字以内）
+- strengths: 仕事で活きそうな強み（1〜3個）。evidence には根拠になった受験者の発言を会話記録からそのまま抜き出す（各60文字以内、固有名詞は「○○」）
+- work_style: 仕事の進め方・コミュニケーションの傾向（1〜2文）
+- confirm_points: 会話だけでは分からず、面談で確かめるとよい点（1〜3個）
+- suggested_questions: 面談で聞くとよい質問（2〜3個）
+- 年齢・性別・国籍・出身地・家族・健康・容姿など、仕事の力と関係ないことには触れない
+形式: "recruiter_view": {"summary": "", "strengths": [{"point": "", "evidence": ["発言の引用"]}], "work_style": "", "confirm_points": [""], "suggested_questions": [""]}`;
+
+function cleanStrings(raw: unknown, max: number, limit: number): string[] {
+  return (Array.isArray(raw) ? raw : [])
+    .filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+    .map((v) => v.trim().slice(0, limit))
+    .slice(0, max);
+}
+
+/** 採用担当向けの見立てを整える。強みの根拠は本人の発言にあるものだけ残し、根拠のない強みは捨てる */
+export function sanitizeRecruiterView(raw: unknown, spoken: string): RecruiterView | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const strengths = (Array.isArray(r.strengths) ? r.strengths : [])
+    .map((s: any) => ({
+      point: String(s?.point ?? "")
+        .trim()
+        .slice(0, 120),
+      evidence: cleanStrings(s?.evidence, 3, 200).filter((q) => quoteAppearsIn(q, spoken)),
+    }))
+    .filter((s) => s.point && s.evidence.length > 0)
+    .slice(0, 3);
+  const view: RecruiterView = {
+    summary: String(r.summary ?? "")
+      .trim()
+      .slice(0, 300),
+    strengths,
+    workStyle: String(r.work_style ?? "")
+      .trim()
+      .slice(0, 300),
+    confirmPoints: cleanStrings(r.confirm_points, 3, 150),
+    suggestedQuestions: cleanStrings(r.suggested_questions, 3, 150),
+  };
+  return view.summary || strengths.length ? view : null;
+}
+
+/**
+ * 企業向け：購入済みの人の模擬面接（新しい順に最大10回）。
+ * 本人向けのアドバイス（点数・改善点・模範回答）は返さず、7つの力・採用担当向けの見立て・会話・録画だけ返す。
+ */
+export async function loadCompanyInterviews(
+  supabase: SupabaseClient,
+  candidateUserId: string,
+  showRecording: boolean,
+) {
+  const { data: interviews } = await supabase
+    .from("interviews")
+    .select("id, created_at, job_type, recording_path")
+    .eq("user_id", candidateUserId)
+    .eq("mode", "individual")
+    .neq("impression", "途中退出")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const ids = (interviews ?? []).map((i) => i.id);
+  if (ids.length === 0) return [];
+  const [{ data: summaries }, { data: turns }] = await Promise.all([
+    supabase
+      .from("interview_summaries")
+      .select("interview_id, practice_feedback")
+      .in("interview_id", ids),
+    supabase
+      .from("interview_turns")
+      .select("interview_id, turn_number, question, memo")
+      .in("interview_id", ids)
+      .order("turn_number", { ascending: true }),
+  ]);
+  const fb = new Map((summaries ?? []).map((s: any) => [s.interview_id, s.practice_feedback]));
+  const details = [];
+  for (const iv of interviews ?? []) {
+    let recordingUrl: string | null = null;
+    if (showRecording && iv.recording_path) {
+      const { data: signed } = await supabase.storage
+        .from(RECORDING_BUCKET)
+        .createSignedUrl(iv.recording_path, 60 * 60);
+      recordingUrl = signed?.signedUrl ?? null;
+    }
+    const f = (fb.get(iv.id) ?? {}) as any;
+    details.push({
+      id: iv.id,
+      date: iv.created_at,
+      jobType: iv.job_type,
+      recordingUrl,
+      competencies: (f.competencies ?? []) as InterviewCompetency[],
+      recruiterView: (f.recruiter_view ?? null) as RecruiterView | null,
+      transcript: (turns ?? [])
+        .filter((t) => t.interview_id === iv.id)
+        .map((t) => ({ q: t.question, a: t.memo })),
+    });
+  }
+  return details;
+}
+
 // ---- 人物まとめの作成 --------------------------------------------------------
 
 type FeedbackRow = {

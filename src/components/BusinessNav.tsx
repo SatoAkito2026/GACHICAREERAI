@@ -11,7 +11,7 @@ const COMPANY_SUBTABS = [
   { label: "面談・メッセージ", to: "/business/company/messages" },
   { label: "書類選考", to: "/business/company/screening" },
   { label: "書類選考履歴", to: "/business/company/screening/history" },
-  { label: "面接履歴", to: "/business/company/history" },
+  { label: "購入した人材", to: "/business/company/purchased" },
   { label: "求人掲載", to: "/business/company/jobs" },
   { label: "設定", to: "/business/company/settings" },
 ] as const;

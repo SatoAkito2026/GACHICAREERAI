@@ -29,7 +29,7 @@ function CompanyDashboard() {
           {
             emoji: "📄",
             title: "書類選考AI",
-            desc: "PDF一括AI判定",
+            desc: "履歴書PDFをAIで一括判定（求人を掲載中の企業）",
             to: "/business/company/screening",
           },
           {
@@ -39,22 +39,22 @@ function CompanyDashboard() {
             to: "/business/company/screening/history",
           },
           {
-            emoji: "🎙️",
-            title: "面接履歴",
-            desc: "面接結果・AIレポート",
-            to: "/business/company/history",
+            emoji: "🧾",
+            title: "購入した人材",
+            desc: "チケットを買った人の面接履歴と、採用担当者向けの評価",
+            to: "/business/company/purchased",
           },
 
           {
             emoji: "📢",
             title: "求人掲載",
-            desc: "求人を掲載・応募者を確認（ライト/プロ限定）",
+            desc: "求人を掲載・応募者を確認（今は無料）",
             to: "/business/company/jobs",
           },
           {
             emoji: "⚙️",
             title: "企業設定",
-            desc: "採用基準・AIアバター設定",
+            desc: "会社情報・採用基準",
             to: "/business/company/settings",
           },
         ]}
