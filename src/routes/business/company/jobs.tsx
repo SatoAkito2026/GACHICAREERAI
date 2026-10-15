@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -50,14 +50,13 @@ type JobPosting = {
 };
 type Applicant = {
   id: string;
-  applicant_user_id: string;
-  status: string;
-  rank: string | null;
-  score: number | null;
-  summary: string | null;
-  strengths: string[];
-  concerns: string[];
-  created_at: string;
+  code: string | null;
+  name: string;
+  headline: string | null;
+  message: string;
+  createdAt: string;
+  interviewCount: number;
+  competencyAverage: number | null;
 };
 
 export const Route = createFileRoute("/business/company/jobs")({
@@ -65,12 +64,6 @@ export const Route = createFileRoute("/business/company/jobs")({
   component: JobsPage,
 });
 
-const RANK_COLORS: Record<string, string> = {
-  A: "#C8FF00",
-  B: "#00CC88",
-  C: "#CCAA00",
-  D: "#CC4444",
-};
 const inputStyle = {
   background: "#0F0F0F",
   border: "1px solid #333333",
@@ -359,14 +352,13 @@ function JobsPage() {
       return;
     }
     setLoadingApplicants(jobId);
-    const { data } = await supabase
-      .from("job_applications")
-      .select(
-        "id, applicant_user_id, status, rank, score, summary, strengths, concerns, created_at",
-      )
-      .eq("job_posting_id", jobId)
-      .order("score", { ascending: false, nullsFirst: false });
-    setExpandedApplicants((prev) => ({ ...prev, [jobId]: (data ?? []) as Applicant[] }));
+    const { data: sess } = await supabase.auth.getSession();
+    const res = await fetch(`/api/jobs/applicants?jobId=${encodeURIComponent(jobId)}`, {
+      headers: { Authorization: `Bearer ${sess.session?.access_token ?? ""}` },
+    });
+    const body = (await res.json().catch(() => ({}))) as { applicants?: Applicant[] };
+    const data = body.applicants ?? [];
+    setExpandedApplicants((prev) => ({ ...prev, [jobId]: data }));
     setLoadingApplicants(null);
   };
 
@@ -966,38 +958,48 @@ function JobsPage() {
                         className="rounded-lg p-3"
                         style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {a.rank && (
-                              <span
-                                className="flex h-6 w-6 items-center justify-center rounded-full text-[11px]"
-                                style={{
-                                  background: RANK_COLORS[a.rank] ?? "#888888",
-                                  color: "#0F0F0F",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {a.rank}
+                        <div className="flex items-center justify-between gap-2">
+                          <span style={{ color: "#F0F0F0", fontSize: 13, fontWeight: 700 }}>
+                            {a.name}
+                            {a.headline && (
+                              <span style={{ color: "#888888", fontWeight: 400, marginLeft: 6 }}>
+                                {a.headline}
                               </span>
                             )}
-                            {a.score != null && (
-                              <span style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700 }}>
-                                {a.score}点
-                              </span>
-                            )}
-                          </div>
+                          </span>
                           <span style={{ color: "#666666", fontSize: 11 }}>
-                            {new Date(a.created_at).toLocaleDateString("ja-JP")}
+                            {new Date(a.createdAt).toLocaleDateString("ja-JP")}
                           </span>
                         </div>
-                        {a.summary && (
+                        {a.message && (
                           <p
-                            className="mt-2"
+                            className="mt-2 whitespace-pre-wrap"
                             style={{ color: "#CCCCCC", fontSize: 12, lineHeight: 1.6 }}
                           >
-                            {a.summary}
+                            {a.message}
                           </p>
                         )}
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px]">
+                          <span style={{ color: "#888888" }}>
+                            模擬面接 {a.interviewCount}回 ・ 力の平均{" "}
+                            {a.competencyAverage?.toFixed(1) ?? "-"}
+                          </span>
+                          {a.code && (
+                            <Link
+                              to="/business/company/talent/$code"
+                              params={{ code: a.code }}
+                              style={{ color: "#C8FF00", fontWeight: 700 }}
+                            >
+                              評価を見る →
+                            </Link>
+                          )}
+                          <Link
+                            to="/business/company/messages"
+                            style={{ color: "#C8FF00", fontWeight: 700 }}
+                          >
+                            メッセージ →
+                          </Link>
+                        </div>
                       </div>
                     ))
                   )}

@@ -946,6 +946,7 @@ export type Database = {
           created_at: string;
           id: string;
           job_posting_id: string;
+          message: string;
           rank: string | null;
           score: number | null;
           status: string;
@@ -959,6 +960,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           job_posting_id: string;
+          message?: string;
           rank?: string | null;
           score?: number | null;
           status?: string;
@@ -972,6 +974,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           job_posting_id?: string;
+          message?: string;
           rank?: string | null;
           score?: number | null;
           status?: string;

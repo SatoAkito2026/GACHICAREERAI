@@ -24,6 +24,7 @@ type Person = {
   competencyAverage: number | null;
   interviewCount: number;
   purchasedAt: string;
+  viaApplication: boolean;
   lastPracticeAt: string | null;
   contactStatus: string | null;
 };
@@ -54,7 +55,7 @@ function PurchasedPage() {
       <PageFrame
         width={1000}
         title="購入した人材"
-        subtitle="チケットを買った人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
+        subtitle="チケットを買った人と、求人に応募してきた人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
       >
         {!people ? (
           <Loading />
@@ -103,7 +104,8 @@ function PurchasedPage() {
                   )}
                   <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
                     {p.desiredJobs ? `希望：${p.desiredJobs} ・ ` : ""}面接 {p.interviewCount}回 ・
-                    最後の練習 {date(p.lastPracticeAt)} ・ 購入 {date(p.purchasedAt)}
+                    最後の練習 {date(p.lastPracticeAt)} ・ {p.viaApplication ? "応募" : "購入"}{" "}
+                    {date(p.purchasedAt)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">

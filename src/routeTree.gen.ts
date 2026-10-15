@@ -60,6 +60,9 @@ import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
+import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
+import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
+import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
 import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
@@ -113,6 +116,8 @@ import { Route as BusinessCompanyScreeningHistoryRouteImport } from './routes/bu
 import { Route as BusinessCompanyTalentIndexRouteImport } from './routes/business/company/talent.index'
 import { Route as BusinessCompanyTalentCodeRouteImport } from './routes/business/company/talent.$code'
 import { Route as BusinessSchoolScreeningHistoryRouteImport } from './routes/business/school/screening_.history'
+import { Route as PrivateIndividualJobsIndexRouteImport } from './routes/private/individual/jobs.index'
+import { Route as PrivateIndividualJobsIdRouteImport } from './routes/private/individual/jobs.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -371,6 +376,21 @@ const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
 const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   id: '/screening_/history',
   path: '/screening/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJobsApplicantsRoute = ApiJobsApplicantsRouteImport.update({
+  id: '/api/jobs/applicants',
+  path: '/api/jobs/applicants',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJobsApplyRoute = ApiJobsApplyRouteImport.update({
+  id: '/api/jobs/apply',
+  path: '/api/jobs/apply',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiJobsPublicRoute = ApiJobsPublicRouteImport.update({
+  id: '/api/jobs/public',
+  path: '/api/jobs/public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
@@ -657,6 +677,17 @@ const BusinessSchoolScreeningHistoryRoute =
     path: '/business/school/screening/history',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PrivateIndividualJobsIndexRoute =
+  PrivateIndividualJobsIndexRouteImport.update({
+    id: '/private/individual/jobs/',
+    path: '/private/individual/jobs/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PrivateIndividualJobsIdRoute = PrivateIndividualJobsIdRouteImport.update({
+  id: '/private/individual/jobs/$id',
+  path: '/private/individual/jobs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -710,6 +741,9 @@ export interface FileRoutesByFullPath {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
+  '/api/jobs/apply': typeof ApiJobsApplyRoute
+  '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -762,7 +796,9 @@ export interface FileRoutesByFullPath {
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
+  '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -816,6 +852,9 @@ export interface FileRoutesByTo {
   '/screening/history': typeof ScreeningHistoryRoute
   '/business': typeof BusinessIndexRoute
   '/private': typeof PrivateIndexRoute
+  '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
+  '/api/jobs/apply': typeof ApiJobsApplyRoute
+  '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -868,7 +907,9 @@ export interface FileRoutesByTo {
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent': typeof BusinessCompanyTalentIndexRoute
+  '/private/individual/jobs': typeof PrivateIndividualJobsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -923,6 +964,9 @@ export interface FileRoutesById {
   '/screening_/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
+  '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
+  '/api/jobs/apply': typeof ApiJobsApplyRoute
+  '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -975,7 +1019,9 @@ export interface FileRoutesById {
   '/business/company/screening_/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
   '/business/school/screening_/history': typeof BusinessSchoolScreeningHistoryRoute
+  '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
+  '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1031,6 +1077,9 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business/'
     | '/private/'
+    | '/api/jobs/applicants'
+    | '/api/jobs/apply'
+    | '/api/jobs/public'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1083,7 +1132,9 @@ export interface FileRouteTypes {
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
     | '/business/school/screening/history'
+    | '/private/individual/jobs/$id'
     | '/business/company/talent/'
+    | '/private/individual/jobs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1137,6 +1188,9 @@ export interface FileRouteTypes {
     | '/screening/history'
     | '/business'
     | '/private'
+    | '/api/jobs/applicants'
+    | '/api/jobs/apply'
+    | '/api/jobs/public'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1189,7 +1243,9 @@ export interface FileRouteTypes {
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
     | '/business/school/screening/history'
+    | '/private/individual/jobs/$id'
     | '/business/company/talent'
+    | '/private/individual/jobs'
   id:
     | '__root__'
     | '/'
@@ -1243,6 +1299,9 @@ export interface FileRouteTypes {
     | '/screening_/history'
     | '/business/'
     | '/private/'
+    | '/api/jobs/applicants'
+    | '/api/jobs/apply'
+    | '/api/jobs/public'
     | '/api/talent/admin-stats'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1295,7 +1354,9 @@ export interface FileRouteTypes {
     | '/business/company/screening_/history'
     | '/business/company/talent/$code'
     | '/business/school/screening_/history'
+    | '/private/individual/jobs/$id'
     | '/business/company/talent/'
+    | '/private/individual/jobs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1350,6 +1411,9 @@ export interface RootRouteChildren {
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
+  ApiJobsApplicantsRoute: typeof ApiJobsApplicantsRoute
+  ApiJobsApplyRoute: typeof ApiJobsApplyRoute
+  ApiJobsPublicRoute: typeof ApiJobsPublicRoute
   ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
@@ -1402,7 +1466,9 @@ export interface RootRouteChildren {
   BusinessCompanyScreeningHistoryRoute: typeof BusinessCompanyScreeningHistoryRoute
   BusinessCompanyTalentCodeRoute: typeof BusinessCompanyTalentCodeRoute
   BusinessSchoolScreeningHistoryRoute: typeof BusinessSchoolScreeningHistoryRoute
+  PrivateIndividualJobsIdRoute: typeof PrivateIndividualJobsIdRoute
   BusinessCompanyTalentIndexRoute: typeof BusinessCompanyTalentIndexRoute
+  PrivateIndividualJobsIndexRoute: typeof PrivateIndividualJobsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1762,6 +1828,27 @@ declare module '@tanstack/react-router' {
       path: '/screening/history'
       fullPath: '/screening/history'
       preLoaderRoute: typeof ScreeningHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jobs/applicants': {
+      id: '/api/jobs/applicants'
+      path: '/api/jobs/applicants'
+      fullPath: '/api/jobs/applicants'
+      preLoaderRoute: typeof ApiJobsApplicantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jobs/apply': {
+      id: '/api/jobs/apply'
+      path: '/api/jobs/apply'
+      fullPath: '/api/jobs/apply'
+      preLoaderRoute: typeof ApiJobsApplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/jobs/public': {
+      id: '/api/jobs/public'
+      path: '/api/jobs/public'
+      fullPath: '/api/jobs/public'
+      preLoaderRoute: typeof ApiJobsPublicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/talent/admin-stats': {
@@ -2135,6 +2222,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessSchoolScreeningHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/private/individual/jobs/': {
+      id: '/private/individual/jobs/'
+      path: '/private/individual/jobs'
+      fullPath: '/private/individual/jobs/'
+      preLoaderRoute: typeof PrivateIndividualJobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private/individual/jobs/$id': {
+      id: '/private/individual/jobs/$id'
+      path: '/private/individual/jobs/$id'
+      fullPath: '/private/individual/jobs/$id'
+      preLoaderRoute: typeof PrivateIndividualJobsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -2190,6 +2291,9 @@ const rootRouteChildren: RootRouteChildren = {
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   PrivateIndexRoute: PrivateIndexRoute,
+  ApiJobsApplicantsRoute: ApiJobsApplicantsRoute,
+  ApiJobsApplyRoute: ApiJobsApplyRoute,
+  ApiJobsPublicRoute: ApiJobsPublicRoute,
   ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
@@ -2242,7 +2346,9 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyScreeningHistoryRoute: BusinessCompanyScreeningHistoryRoute,
   BusinessCompanyTalentCodeRoute: BusinessCompanyTalentCodeRoute,
   BusinessSchoolScreeningHistoryRoute: BusinessSchoolScreeningHistoryRoute,
+  PrivateIndividualJobsIdRoute: PrivateIndividualJobsIdRoute,
   BusinessCompanyTalentIndexRoute: BusinessCompanyTalentIndexRoute,
+  PrivateIndividualJobsIndexRoute: PrivateIndividualJobsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

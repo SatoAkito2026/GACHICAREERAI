@@ -7,6 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
+  Briefcase,
   ChevronRight,
   Compass,
   FileText,
@@ -145,6 +146,12 @@ export function MobileHome() {
           className="overflow-hidden rounded-2xl"
           style={{ background: "#1A1A1A", border: "1px solid #262626" }}
         >
+          <ToolRow
+            to="/private/individual/jobs"
+            icon={<Briefcase size={19} />}
+            title="求人を探す"
+            desc="掲載中の求人を見て、そのまま応募"
+          />
           <ToolRow
             to="/private/individual/daily-questions"
             icon={<MessageCircleQuestion size={19} />}
@@ -286,6 +293,7 @@ function ToolRow({
   last,
 }: {
   to:
+    | "/private/individual/jobs"
     | "/private/individual/daily-questions"
     | "/private/individual/documents"
     | "/private/individual/research"

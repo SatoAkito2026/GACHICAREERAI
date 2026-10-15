@@ -1,5 +1,5 @@
 /**
- * 企業向け：チケットを買った人の一覧
+ * 企業向け：チケットを買った人（と、自社の求人に応募してきた人）の一覧
  *
  * GET /api/talent/purchased
  *
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/api/talent/purchased")({
 
         const { data: unlocks } = await supabase
           .from("profile_unlocks")
-          .select("candidate_user_id, created_at")
+          .select("candidate_user_id, created_at, amount")
           .eq("company_user_id", auth.userId)
           .order("created_at", { ascending: false })
           .limit(500);
@@ -83,6 +83,7 @@ export const Route = createFileRoute("/api/talent/purchased")({
                 : null,
               interviewCount: p.interview_count,
               purchasedAt: u.created_at,
+              viaApplication: u.amount === 0,
               lastPracticeAt: lastPracticeBy.get(u.candidate_user_id) ?? null,
               contactStatus: statusBy.get(u.candidate_user_id) ?? null,
             };
