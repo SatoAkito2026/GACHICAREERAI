@@ -182,47 +182,6 @@ function AvatarConfigSection() {
 }
 
 export default function BusinessSettings({ title }: { title: string }) {
-  const { plan } = usePlan();
-  const allowedPlans = ["company_light", "company_pro"];
-
-  if (!allowedPlans.includes(plan)) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "60vh",
-          gap: 16,
-          fontFamily: "'Inter',sans-serif",
-        }}
-      >
-        <div style={{ fontSize: 40 }}>🔒</div>
-        <p style={{ fontSize: 18, fontWeight: 600, color: "#F0F0F0" }}>
-          企業設定はライトプラン以上でご利用いただけます
-        </p>
-        <p style={{ fontSize: 14, color: "#888" }}>
-          プランをアップグレードして企業情報を設定しましょう
-        </p>
-        <Link
-          to="/pricing"
-          style={{
-            background: "#C8FF00",
-            color: "#0F0F0F",
-            borderRadius: 9,
-            padding: "12px 24px",
-            fontSize: 14,
-            fontWeight: 700,
-            textDecoration: "none",
-          }}
-        >
-          プランをアップグレード →
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <main className="mx-auto max-w-5xl px-6 pb-20 pt-8">
       <h1 className="mb-6 text-[24px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>

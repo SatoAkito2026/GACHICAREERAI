@@ -98,6 +98,8 @@ export const Route = createFileRoute("/api/stripe-webhook")({
                 console.error("[webhook] Profile not found for subscription:", subscriptionId);
                 break;
               }
+              // 企業のAI面接（従量課金）は期限なし。解約されたら stripe_subscription_id が消える
+              if (profile.plan === "company_metered") break;
 
               const base = profile.plan_expires_at ? new Date(profile.plan_expires_at) : new Date();
               // 有効期限が過去になっている場合はnowから計算

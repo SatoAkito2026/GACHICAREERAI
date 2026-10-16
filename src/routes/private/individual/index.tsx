@@ -70,6 +70,12 @@ function IndividualDashboard() {
           title="そのほかのツール"
           cards={[
             {
+              emoji: "💼",
+              title: "求人を探す",
+              desc: "掲載中の求人を見て、そのまま応募",
+              to: "/private/individual/jobs",
+            },
+            {
               emoji: "🪪",
               title: "経歴・希望条件",
               desc: "学歴・資格・希望条件などを編集",

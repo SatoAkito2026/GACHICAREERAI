@@ -9,43 +9,24 @@ import {
   C,
   CAREER_STAGE_LABELS,
   Card,
-  CompetencyBars,
   ErrorText,
-  EvidenceQuote,
   Loading,
   PageFrame,
   StatusBadge,
   SummaryView,
-  Tag,
   inputStyle,
   talentApi,
   type TalentSummary,
 } from "@/components/talent/TalentUI";
+import {
+  CompanyInterviewBlock,
+  type CompanyInterview,
+} from "@/components/talent/CompanyInterviewBlock";
 
 export const Route = createFileRoute("/business/company/talent/$code")({
   head: () => ({ meta: [{ title: "人材の詳細｜ガチキャリAI Business" }] }),
   component: TalentDetailPage,
 });
-
-type InterviewDetail = {
-  id: string;
-  date: string;
-  jobType: string | null;
-  recordingUrl: string | null;
-  score: number | null;
-  overall: string;
-  scoreBreakdown: { category: string; score: number; comment: string }[];
-  competencies: {
-    key: string;
-    label: string;
-    score: number | null;
-    reason: string;
-    evidence: string[];
-  }[];
-  goodPoints: string[];
-  improvementPoints: string[];
-  transcript: { q: string; a: string }[];
-};
 
 type Detail = {
   code: string;
@@ -56,14 +37,13 @@ type Detail = {
   selfPr: string | null;
   summary: TalentSummary | null;
   interviewCount: number;
-  averageScore: number | null;
   hasRecording: boolean;
   ticketPrice: number;
   unlocked: boolean;
   contact: { id: string; status: string; created_at: string } | null;
   displayName?: string;
   unlockedAt?: string;
-  interviews?: InterviewDetail[];
+  interviews?: CompanyInterview[];
 };
 
 function TalentDetailPage() {
@@ -116,10 +96,10 @@ function TalentDetailPage() {
                 </div>
                 <div className="text-right">
                   <p style={{ color: C.accent, fontSize: 34, fontWeight: 800, lineHeight: 1 }}>
-                    {d.averageScore ?? "-"}
+                    {competencyAverage(d.summary)?.toFixed(1) ?? "-"}
                   </p>
                   <p className="text-[11px]" style={{ color: C.muted }}>
-                    総合点（直近5回の平均）
+                    力の平均（5点満点）
                   </p>
                 </div>
               </div>
@@ -181,7 +161,7 @@ function TalentDetailPage() {
                 ) : (
                   <div className="flex flex-col gap-4">
                     {d.interviews.map((iv, i) => (
-                      <InterviewBlock key={iv.id} iv={iv} defaultOpen={i === 0} />
+                      <CompanyInterviewBlock key={iv.id} iv={iv} defaultOpen={i === 0} />
                     ))}
                   </div>
                 )}
@@ -202,117 +182,6 @@ function TalentDetailPage() {
         />
       )}
     </BusinessShell>
-  );
-}
-
-function InterviewBlock({ iv, defaultOpen }: { iv: InterviewDetail; defaultOpen: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const [showTranscript, setShowTranscript] = useState(false);
-  return (
-    <div className="rounded-xl" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
-      >
-        <span style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>
-          {new Date(iv.date).toLocaleDateString("ja-JP")} ・ {iv.jobType || "職種指定なし"}
-          {iv.recordingUrl && <Tag color={C.accent}>録画</Tag>}
-        </span>
-        <span style={{ color: C.accent, fontWeight: 700 }}>{iv.score ?? "-"}点</span>
-      </button>
-      {open && (
-        <div className="flex flex-col gap-4 px-4 pb-4">
-          {iv.recordingUrl && (
-            <video
-              src={iv.recordingUrl}
-              controls
-              preload="metadata"
-              className="w-full rounded-lg"
-              style={{ background: "#000", maxHeight: 420 }}
-            />
-          )}
-          {iv.overall && (
-            <p style={{ color: C.sub, fontSize: 13, lineHeight: 1.8 }}>{iv.overall}</p>
-          )}
-          {iv.competencies.some((c) => c.score !== null) && (
-            <div className="flex flex-col gap-3">
-              <CompetencyBars
-                competencies={iv.competencies.map((c) => ({
-                  key: c.key,
-                  label: c.label,
-                  score: c.score,
-                  evidence_count: c.evidence.length,
-                  interviews: 1,
-                }))}
-              />
-              {iv.competencies
-                .filter((c) => c.score !== null)
-                .map((c) => (
-                  <div key={c.key}>
-                    <p className="text-[12px]" style={{ color: C.text, fontWeight: 600 }}>
-                      {c.label}：<span style={{ color: C.sub, fontWeight: 400 }}>{c.reason}</span>
-                    </p>
-                    <div className="mt-1 flex flex-col gap-1">
-                      {c.evidence.map((q, j) => (
-                        <EvidenceQuote key={j} quote={q} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-          <div className="grid gap-3 md:grid-cols-2">
-            <ListBox title="良かった点" items={iv.goodPoints} color={C.accent} />
-            <ListBox title="伸びしろ" items={iv.improvementPoints} color="#FFB84D" />
-          </div>
-          {iv.transcript.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowTranscript(!showTranscript)}
-                className="text-[13px]"
-                style={{ color: C.accent }}
-              >
-                {showTranscript ? "会話を閉じる" : `面接の会話を見る（${iv.transcript.length}問）`}
-              </button>
-              {showTranscript && (
-                <div className="mt-2 flex flex-col gap-2">
-                  {iv.transcript.map((t, j) => (
-                    <div
-                      key={j}
-                      className="rounded-lg p-3 text-[13px]"
-                      style={{ background: C.card2, lineHeight: 1.7 }}
-                    >
-                      <p style={{ color: C.muted }}>面接官：{t.q}</p>
-                      <p className="mt-1" style={{ color: C.text }}>
-                        回答：{t.a || "（回答なし）"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ListBox({ title, items, color }: { title: string; items: string[]; color: string }) {
-  if (!items?.length) return null;
-  return (
-    <div>
-      <p className="mb-1 text-[12px]" style={{ color, fontWeight: 700 }}>
-        {title}
-      </p>
-      <ul className="list-disc pl-5 text-[12px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-        {items.map((x, i) => (
-          <li key={i}>{x}</li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -534,4 +403,13 @@ function PurchaseModal({
       </div>
     </div>
   );
+}
+
+/** 企業向けの点数は「7つの力」の平均（本人向けの練習の点数は使わない） */
+function competencyAverage(summary: TalentSummary | null): number | null {
+  const scores = (summary?.competencies ?? [])
+    .map((c) => c.score)
+    .filter((n): n is number => typeof n === "number");
+  if (scores.length === 0) return null;
+  return scores.reduce((a, b) => a + b, 0) / scores.length;
 }

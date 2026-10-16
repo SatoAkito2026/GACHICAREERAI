@@ -429,6 +429,7 @@ export type Database = {
           avatar_config: Json | null;
           created_at: string | null;
           id: string;
+          join_code: string | null;
           name: string;
           owner_id: string | null;
           plan: string;
@@ -440,6 +441,7 @@ export type Database = {
           avatar_config?: Json | null;
           created_at?: string | null;
           id?: string;
+          join_code?: string | null;
           name: string;
           owner_id?: string | null;
           plan?: string;
@@ -451,6 +453,7 @@ export type Database = {
           avatar_config?: Json | null;
           created_at?: string | null;
           id?: string;
+          join_code?: string | null;
           name?: string;
           owner_id?: string | null;
           plan?: string;
@@ -946,6 +949,7 @@ export type Database = {
           created_at: string;
           id: string;
           job_posting_id: string;
+          message: string;
           rank: string | null;
           score: number | null;
           status: string;
@@ -959,6 +963,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           job_posting_id: string;
+          message?: string;
           rank?: string | null;
           score?: number | null;
           status?: string;
@@ -972,6 +977,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           job_posting_id?: string;
+          message?: string;
           rank?: string | null;
           score?: number | null;
           status?: string;
@@ -1215,6 +1221,38 @@ export type Database = {
           {
             foreignKeyName: "profiles_company_id_fkey";
             columns: ["company_id"];
+            isOneToOne: false;
+            referencedRelation: "companies";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      school_memberships: {
+        Row: {
+          created_at: string;
+          display_name: string;
+          id: string;
+          school_id: string;
+          student_user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          display_name?: string;
+          id?: string;
+          school_id: string;
+          student_user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          display_name?: string;
+          id?: string;
+          school_id?: string;
+          student_user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "school_memberships_school_id_fkey";
+            columns: ["school_id"];
             isOneToOne: false;
             referencedRelation: "companies";
             referencedColumns: ["id"];

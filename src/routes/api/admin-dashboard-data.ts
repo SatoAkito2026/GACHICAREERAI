@@ -12,6 +12,7 @@
  *   ※実際の残クレジットはAPIで取得できないため、利用実績からの概算のみ。
  *     正確な残高は各サービスの管理画面で確認する必要がある。
  */
+import { COMPANY_INTERVIEW_PRICE_JPY } from "@/lib/plan-rules";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseUrl, getServiceRoleKey, verifyApiUser } from "@/lib/api-auth";
@@ -88,8 +89,10 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
           .from("interview_invitations")
           .select("*", { count: "exact", head: true })
           .is("practice_mode", null)
+          // 請求されるのは候補者が面接を始めた回だけ
+          .in("status", ["started", "completed", "abandoned"])
           .gte("created_at", monthStart);
-        monthlyRevenue += (meteredInterviewsThisMonth ?? 0) * 2200;
+        monthlyRevenue += (meteredInterviewsThisMonth ?? 0) * COMPANY_INTERVIEW_PRICE_JPY;
 
         // ③ 直近30日の新規登録推移
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -142,7 +145,7 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
         const companyRevenue =
           (planCounts.company_light ?? 0) * PLAN_PRICES_JPY.company_light +
           (planCounts.company_pro ?? 0) * PLAN_PRICES_JPY.company_pro +
-          (meteredInterviewsThisMonth ?? 0) * 2200;
+          (meteredInterviewsThisMonth ?? 0) * COMPANY_INTERVIEW_PRICE_JPY;
 
         // ⑦ 希望職種ランキング(個人)
         const { data: individualProfiles } = await supabase

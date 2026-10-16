@@ -17,14 +17,7 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-type Step =
-  | "auth"
-  | "biz-type"
-  | "company-setup"
-  | "company-plan"
-  | "school-setup"
-  | "actor-setup"
-  | "actor-plan";
+type Step = "auth" | "biz-type" | "company-setup" | "school-setup" | "actor-setup" | "actor-plan";
 type LoginMode = "private" | "business";
 
 const SCHOOL_TYPES = [
@@ -305,10 +298,10 @@ function LoginPage() {
                     company_id: company.id,
                     company_name: companyName.trim(),
                     company_role: "admin",
-                    plan: "company_metered",
                   } as any)
                   .eq("id", signupData.session!.user.id) as any);
-                setStep("company-plan");
+                // 企業は月額プランなし（人材の閲覧はチケット、求人掲載は今は無料）
+                navigate({ to: "/business/company" });
               } catch (e) {
                 setError(e instanceof Error ? e.message : "エラーが発生しました");
               } finally {
@@ -330,110 +323,6 @@ function LoginPage() {
             ← 戻る
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // 企業プラン選択
-  if (step === "company-plan") {
-    const planCards: {
-      key: "company_metered" | "company_light" | "company_pro";
-      name: string;
-      price: string;
-      desc: string;
-      highlight: boolean;
-    }[] = [
-      {
-        key: "company_metered",
-        name: "従量課金プラン",
-        price: PLAN_PRICES.company_metered,
-        desc: "月額なし・書類選考は無料無制限・AI面接は使った分だけ。まずお試しに最適。",
-        highlight: false,
-      },
-      {
-        key: "company_light",
-        name: "ライトプラン",
-        price: PLAN_PRICES.company_light,
-        desc: "AI面接20回/月込み・PDF出力可。超過は¥330/回（税込）。",
-        highlight: false,
-      },
-      {
-        key: "company_pro",
-        name: "プロプラン",
-        price: PLAN_PRICES.company_pro,
-        desc: "AI面接50回/月込み・書類選考ランキング・独自アバター・優先サポート。",
-        highlight: true,
-      },
-    ];
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center px-4 py-10"
-        style={{ background: "#0F0F0F" }}
-      >
-        <div className="w-full max-w-3xl" style={cardStyle}>
-          <h1 style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>
-            プランをお選びください
-          </h1>
-          <p className="mt-1" style={{ color: "#888888", fontSize: 13 }}>
-            あとから変更できます
-          </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {planCards.map((p) => (
-              <div
-                key={p.key}
-                className="flex flex-col rounded-xl p-5"
-                style={{
-                  background: "#222",
-                  border: p.highlight ? "2px solid #C8FF00" : "1px solid #333",
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <span style={{ color: "#F0F0F0", fontWeight: 600, fontSize: 15 }}>{p.name}</span>
-                  {p.highlight && (
-                    <span
-                      className="rounded-md px-2 py-0.5 text-[11px]"
-                      style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }}
-                    >
-                      おすすめ
-                    </span>
-                  )}
-                </div>
-                <div className="mt-2" style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>
-                  {p.price}
-                </div>
-                <p
-                  className="mt-3 flex-1 text-[12px]"
-                  style={{ color: "#888888", lineHeight: 1.6 }}
-                >
-                  {p.desc}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (p.key === "company_metered") {
-                      navigate({ to: "/business/company" });
-                    } else {
-                      setCheckoutPlan(p.key);
-                    }
-                  }}
-                  className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold"
-                  style={{ background: "#C8FF00", color: "#0F0F0F" }}
-                >
-                  {p.key === "company_metered" ? "このプランで始める" : "申し込む"}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-        {checkoutPlan && (
-          <CheckoutModal
-            plan={checkoutPlan}
-            onClose={() => {
-              setCheckoutPlan(null);
-              navigate({ to: "/business/company" });
-            }}
-          />
-        )}
       </div>
     );
   }

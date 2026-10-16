@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
-import { COMPETENCY_PROMPT, sanitizeCompetencies } from "@/lib/talent";
+import {
+  COMPETENCY_PROMPT,
+  RECRUITER_PROMPT,
+  sanitizeCompetencies,
+  sanitizeRecruiterView,
+} from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
 
@@ -178,7 +183,7 @@ score_breakdownの各scoreは0-100。readiness_scoreはscore_breakdownの平均�
                 ? "personality_traitsは3〜4個、その人の会話の端々から読み取れる性格的特徴を具体的根拠とともに示すこと。"
                 : ""
             }
-${COMPETENCY_PROMPT}`
+${COMPETENCY_PROMPT}${practiceMode === "individual" ? RECRUITER_PROMPT : ""}`
           : `以下は採用面接の会話記録です。候補者を詳細に評価してJSONで返してください。
 
 【面接会話】
@@ -235,7 +240,7 @@ ${conversationText}
         try {
           const aiResponse = await anthropic.messages.create({
             model: "claude-sonnet-4-6",
-            max_tokens: practiceMode ? 5000 : 3000,
+            max_tokens: practiceMode ? 6000 : 3000,
             messages: [{ role: "user", content: summaryPrompt }],
           });
 
@@ -278,6 +283,10 @@ ${conversationText}
         // 5. interview_summariesに詳細を保存
         //    練習モードは practice_feedback にのみ保存し、採用可否関連の列は
         //    一切埋めない(NULL/空のまま)。企業面接の場合は従来通り。
+        const spokenText = body.messages
+          .filter((m) => m.role === "user")
+          .map((m) => m.content)
+          .join("\n");
         const { error: summaryInsertError } = await supabase.from("interview_summaries").insert(
           practiceMode
             ? {
@@ -292,13 +301,12 @@ ${conversationText}
                   personality_traits: summaryData.personality_traits ?? null,
                   detailed_analysis: summaryData.detailed_analysis ?? null,
                   // 根拠の引用が本人の発言に実際にあるものだけを残す
-                  competencies: sanitizeCompetencies(
-                    summaryData.competencies,
-                    body.messages
-                      .filter((m) => m.role === "user")
-                      .map((m) => m.content)
-                      .join("\n"),
-                  ),
+                  competencies: sanitizeCompetencies(summaryData.competencies, spokenText),
+                  // 企業に見せるのはこちら（本人向けの改善点などは企業には出さない）
+                  recruiter_view:
+                    practiceMode === "individual"
+                      ? sanitizeRecruiterView(summaryData.recruiter_view, spokenText)
+                      : null,
                 },
               }
             : {

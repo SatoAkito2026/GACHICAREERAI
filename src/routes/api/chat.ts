@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyApiUser, getVerifiedPlan, checkInterviewQuota } from "@/lib/api-auth";
+import { createClient } from "@supabase/supabase-js";
+import { verifyApiUser, getServiceRoleKey, getSupabaseUrl } from "@/lib/api-auth";
 import Anthropic from "@anthropic-ai/sdk";
 
 const corsHeaders = {
@@ -17,9 +18,29 @@ export const Route = createFileRoute("/api/chat")({
       POST: async ({ request }) => {
         const auth = await verifyApiUser(request);
         if ("error" in auth) return auth.error;
-        // サーバー側で月間クォータを検証（直接 API 呼び出しによる超過を防ぐ）
-        const quota = await checkInterviewQuota(auth.token, auth.userId);
-        if ("error" in quota) return quota.error;
+        // 書類選考AI（このAPIの唯一の利用元）は、求人を掲載中の企業だけが使える
+        const serviceKey = getServiceRoleKey();
+        if (!serviceKey) {
+          return new Response(JSON.stringify({ error: "Server config missing" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          });
+        }
+        const { count: openJobs } = await createClient(getSupabaseUrl(), serviceKey)
+          .from("job_postings")
+          .select("id", { count: "exact", head: true })
+          .eq("company_user_id", auth.userId)
+          .eq("status", "open");
+        if (!openJobs) {
+          return new Response(
+            JSON.stringify({
+              error:
+                "書類選考AIは、求人を掲載中の企業だけが使えます。先に「求人掲載」から求人を公開してください。",
+              needsJobPosting: true,
+            }),
+            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } },
+          );
+        }
         const anthropicKey = process.env.ANTHROPIC_API_KEY;
         if (!anthropicKey) {
           return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }), {
@@ -54,10 +75,7 @@ export const Route = createFileRoute("/api/chat")({
             { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
           );
         }
-        // プランはクライアント入力を信用せず、検証済みトークンで DB から取得する
-        const plan = await getVerifiedPlan(auth.token, auth.userId);
-        // プランに応じてモデルを切り替え（有料プランは pro に正規化済み）
-        const model = plan === "pro" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
+        const model = "claude-haiku-4-5-20251001";
         const anthropic = new Anthropic({ apiKey: anthropicKey });
         let text = "";
         try {
