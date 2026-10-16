@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>お問い合わせ｜AKITOグループ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="AKITOグループへのお問い合わせ。インタビアAIの資料請求、コウムリンクのご相談、無料相談会のお申し込み、採用へのご応募はこちらから。">
+<meta name="description" content="AKITOグループへのお問い合わせ。ガチキャリAIの資料請求、ガチキャリ・POSシステムのご相談、採用へのご応募はこちらから。">
 <link rel="canonical" href="https://akitogroup.jp/contact">
 <meta property="og:title" content="お問い合わせ｜AKITOグループ">
-<meta property="og:description" content="AKITOグループへのお問い合わせ。インタビアAIの資料請求、コウムリンクのご相談、無料相談会のお申し込み、採用へのご応募はこちらから。">
+<meta property="og:description" content="AKITOグループへのお問い合わせ。ガチキャリAIの資料請求、ガチキャリ・POSシステムのご相談、採用へのご応募はこちらから。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://akitogroup.jp/contact">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/logo-full.webp">
@@ -27,11 +27,11 @@
     <nav class="nav" id="nav" aria-label="メインメニュー">
       <a href="about.html">会社概要</a>
       <a href="./#services">事業内容</a>
-      <a href="consultation.html">無料相談会</a>
+      <a href="gachicareer-ai.html">ガチキャリAI</a>
       <a href="news.html">お知らせ</a>
       <a class="nav-cta" href="contact.html">お問い合わせ</a>
     </nav>
-    <a class="head-tel" href="tel:08024204900"><small>年中無休 9:00〜21:00</small>080-2420-4900</a>
+    <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">メニュー</button>
   </div>
 </header>
@@ -74,7 +74,7 @@
     <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / お問い合わせ</nav>
     <p class="eyebrow">Contact</p>
     <h1>お問い合わせ</h1>
-    <p class="lead">インタビアAIの資料請求、コウムリンクのご相談、無料相談会のお申し込み、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
+    <p class="lead">ガチキャリAIの資料請求、ガチキャリやPOSシステムのご相談、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
   </div>
 </section>
 
@@ -84,7 +84,7 @@
       <div class="box">
         <span class="lbl">お電話</span>
         <a class="val" href="tel:08024204900">080-2420-4900</a>
-        <span class="sub">年中無休　9:00〜21:00</span>
+        <span class="sub">年中無休・24時間受付</span>
       </div>
       <div class="box">
         <span class="lbl">メール</span>
@@ -100,11 +100,10 @@
       <div class="field">
         <span style="font-weight:700;font-size:14px">ご用件</span>
         <ul class="topics" id="topics">
-          <li><button type="button" data-topic="intervia" aria-pressed="false">インタビアAIの資料請求・導入</button></li>
-          <li><button type="button" data-topic="koumu" aria-pressed="false">コウムリンク（人材・営業代行）</button></li>
-          <li><button type="button" data-topic="consult" aria-pressed="false">無料相談会の申し込み</button></li>
+          <li><button type="button" data-topic="gachicareer-ai" aria-pressed="false">ガチキャリAIの資料請求・導入</button></li>
+          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（採用支援・営業代行）</button></li>
+          <li><button type="button" data-topic="pos" aria-pressed="false">夜のお店向けPOSシステム</button></li>
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
-          <li><button type="button" data-topic="casting" aria-pressed="false">芸能・キャスティングプラン</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
         </ul>
       </div>
@@ -147,7 +146,7 @@
   var subject=document.getElementById('f-subject');
   var status=document.getElementById('form-status');
   var submit=document.getElementById('f-submit');
-  var LABELS={intervia:'インタビアAIの資料請求・導入について',koumu:'コウムリンク（人材・営業代行）について',consult:'無料相談会の申し込み',recruit:'採用への応募',casting:'芸能・キャスティングプランについて',other:''};
+  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（採用支援・営業代行）について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
   var topic='';
   var pick=function(key,fill){
     topic=LABELS.hasOwnProperty(key)?key:'';
@@ -196,7 +195,7 @@
       <div class="foot-grid">
         <div class="foot-brand">
           <span class="logo-chip"><img src="assets/img/logo-full.webp" alt="AKITOグループ　愛ある事業で煌めくあなたに届ける未来" width="900" height="352"></span>
-          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休 9:00〜21:00）<br>info@akitogroup.jp</p>
+          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休・24時間受付）<br>info@akitogroup.jp</p>
         </div>
         <div class="foot-col">
           <h4>COMPANY</h4>
@@ -210,9 +209,9 @@
         <div class="foot-col">
           <h4>SERVICES</h4>
           <ul>
-            <li><a href="intervia.html">インタビアAI</a></li>
-            <li><a href="./#koumu-link">コウムリンク</a></li>
-            <li><a href="consultation.html">無料相談会・イベント</a></li>
+            <li><a href="gachicareer-ai.html">ガチキャリAI</a></li>
+            <li><a href="./#gachicareer">ガチキャリ</a></li>
+            <li><a href="./#pos">夜のお店向けPOSシステム</a></li>
             <li><a href="contact.html#recruit">採用情報</a></li>
           </ul>
         </div>

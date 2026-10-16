@@ -1,6 +1,6 @@
 <!--
 title: お問い合わせ
-description: AKITOグループへのお問い合わせ。インタビアAIの資料請求、コウムリンクのご相談、無料相談会のお申し込み、採用へのご応募はこちらから。
+description: AKITOグループへのお問い合わせ。ガチキャリAIの資料請求、ガチキャリ・POSシステムのご相談、採用へのご応募はこちらから。
 nav: contact
 cta: no
 -->
@@ -41,7 +41,7 @@ cta: no
     <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / お問い合わせ</nav>
     <p class="eyebrow">Contact</p>
     <h1>お問い合わせ</h1>
-    <p class="lead">インタビアAIの資料請求、コウムリンクのご相談、無料相談会のお申し込み、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
+    <p class="lead">ガチキャリAIの資料請求、ガチキャリやPOSシステムのご相談、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
   </div>
 </section>
 
@@ -51,7 +51,7 @@ cta: no
       <div class="box">
         <span class="lbl">お電話</span>
         <a class="val" href="tel:08024204900">080-2420-4900</a>
-        <span class="sub">年中無休　9:00〜21:00</span>
+        <span class="sub">年中無休・24時間受付</span>
       </div>
       <div class="box">
         <span class="lbl">メール</span>
@@ -67,11 +67,10 @@ cta: no
       <div class="field">
         <span style="font-weight:700;font-size:14px">ご用件</span>
         <ul class="topics" id="topics">
-          <li><button type="button" data-topic="intervia" aria-pressed="false">インタビアAIの資料請求・導入</button></li>
-          <li><button type="button" data-topic="koumu" aria-pressed="false">コウムリンク（人材・営業代行）</button></li>
-          <li><button type="button" data-topic="consult" aria-pressed="false">無料相談会の申し込み</button></li>
+          <li><button type="button" data-topic="gachicareer-ai" aria-pressed="false">ガチキャリAIの資料請求・導入</button></li>
+          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（採用支援・営業代行）</button></li>
+          <li><button type="button" data-topic="pos" aria-pressed="false">夜のお店向けPOSシステム</button></li>
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
-          <li><button type="button" data-topic="casting" aria-pressed="false">芸能・キャスティングプラン</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
         </ul>
       </div>
@@ -114,7 +113,7 @@ cta: no
   var subject=document.getElementById('f-subject');
   var status=document.getElementById('form-status');
   var submit=document.getElementById('f-submit');
-  var LABELS={intervia:'インタビアAIの資料請求・導入について',koumu:'コウムリンク（人材・営業代行）について',consult:'無料相談会の申し込み',recruit:'採用への応募',casting:'芸能・キャスティングプランについて',other:''};
+  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（採用支援・営業代行）について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
   var topic='';
   var pick=function(key,fill){
     topic=LABELS.hasOwnProperty(key)?key:'';

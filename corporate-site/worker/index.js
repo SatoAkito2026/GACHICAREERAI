@@ -6,11 +6,10 @@ const TO = "info@akitogroup.jp";
 const FROM = "AKITOグループ ホームページ <info@akitogroup.jp>";
 
 const TOPICS = {
-  intervia: "インタビアAI",
-  koumu: "コウムリンク",
-  consult: "無料相談会",
+  "gachicareer-ai": "ガチキャリAI",
+  gachicareer: "ガチキャリ",
+  pos: "POSシステム",
   recruit: "採用応募",
-  casting: "キャスティング",
   other: "その他",
 };
 
@@ -60,7 +59,7 @@ async function handleContact(request, env) {
   if (!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(f.email)) {
     return json({ error: "メールアドレスの形をご確認ください（例：name@example.com）。" }, 400);
   }
-  const topic = TOPICS[data.topic] ?? "未選択";
+  const topic = Object.hasOwn(TOPICS, data.topic) ? TOPICS[data.topic] : "未選択";
 
   if (!env.RESEND_API_KEY) return json({ error: "ただいま送信できません。info@akitogroup.jp へメールでご連絡ください。" }, 500);
 
@@ -103,8 +102,8 @@ const OLD_URLS = {
   "/contact": "/contact",
   "/blog-2": "/news",
   "/blog": "/news",
-  "/interview-copilot-ai": "/intervia",
-  "/無料相談・イベント": "/consultation",
+  "/interview-copilot-ai": "/gachicareer-ai",
+  "/無料相談・イベント": "/",
   "/2025/10/06/blog-3": "/news-barracks",
   "/2025/09/25/椎名町小学校でボランティア活動をしてまいりました！": "/news-volunteer",
   "/2025/09/25/akitoグループのホームページを開設しました！": "/news-open",

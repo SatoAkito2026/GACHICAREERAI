@@ -24,7 +24,7 @@ SITE = "https://akitogroup.jp"
 NAV = [
     ("about", "about.html", "会社概要"),
     ("services", "./#services", "事業内容"),
-    ("consultation", "consultation.html", "無料相談会"),
+    ("gachicareer-ai", "gachicareer-ai.html", "ガチキャリAI"),
     ("news", "news.html", "お知らせ"),
 ]
 
