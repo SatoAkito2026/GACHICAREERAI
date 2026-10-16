@@ -457,7 +457,7 @@ export function getTicketPrice(): number {
 }
 
 export function appUrl(): string {
-  return process.env.APP_URL || "https://interview-copilot-ai.akitogroup.jp";
+  return process.env.APP_URL || "https://gachicareer.akitogroup.jp";
 }
 
 export async function getUserEmail(

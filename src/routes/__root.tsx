@@ -108,11 +108,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
+        content: "https://gachicareer.akitogroup.jp/og.jpg",
       },
       {
         name: "twitter:image",
-        content: "https://interview-copilot-ai.akitogroup.jp/og.jpg",
+        content: "https://gachicareer.akitogroup.jp/og.jpg",
       },
     ],
     links: [
