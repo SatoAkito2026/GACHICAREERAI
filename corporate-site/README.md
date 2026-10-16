@@ -8,8 +8,8 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 |---|---|---|
 | `index` | トップ | `/` |
 | `about` | 会社概要・代表挨拶・代表経歴 | `/about-company/` |
-| `intervia` | インタビアAI | `/interview-copilot-ai/` |
-| `consultation` | 無料相談会・イベント | `/無料相談・イベント/` |
+| `gachicareer-ai` | ガチキャリAI（個人の面接練習・企業向け） | `/interview-copilot-ai/` |
+| （トップへ転送） | 無料相談会（終了） | `/無料相談・イベント/` |
 | `news` / `news-*` | お知らせ・ブログ | `/blog-2/`、`/2025/...` |
 | `contact` | お問い合わせフォーム | `/contact/` |
 
@@ -20,7 +20,7 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 - 文章・配置：`src/pages/<ページ名>.html` を直して `python3 build.py`（`public/` に書き出される）
 - ヘッダー・フッター：`src/layout.html`、各ページ下のお問い合わせ帯：`src/cta.html`
 - 色・文字・共通の動き：`public/assets/site.css` の先頭（ロゴの赤・黄・緑・紫）
-- 相談会の次回開催日（毎月第2・第4火曜日）は `public/assets/site.js` が自動で計算する
+- ガチキャリ・POSシステムはトップの「事業内容」に書いている（POSのサービス名が決まったら `src/pages/index.html` と `about.html` を直す）
 - 画像：`public/assets/img/`（webp）
 - 新しいお知らせ：`src/pages/news-xxx.html` を作り、`news.html` とトップの一覧にカードを足す
 
