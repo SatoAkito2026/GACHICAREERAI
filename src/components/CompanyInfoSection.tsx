@@ -177,7 +177,8 @@ function GroupTitle({ children }: { children: React.ReactNode }) {
 export default function CompanyInfoSection() {
   const { user } = useAuth();
   const { plan } = usePlan();
-  const isPro = plan === "company_pro" || plan === "individual_pro";
+  // 企業アカウントはどのプランでも使える（月額プランはなくなった）
+  const isPro = plan.startsWith("company_") || plan === "individual_pro";
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [tab, setTab] = useState<"manual" | "ai">("manual");

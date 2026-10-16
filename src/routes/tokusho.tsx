@@ -64,17 +64,17 @@ function TokushoPage() {
           【企業・学校向け】
         </p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>従量課金プラン：¥2,200/回（税込）</li>
-          <li>ライトプラン：¥33,000/月（税込）・AI面接20回/月込み・超過¥330/回（税込）</li>
-          <li>プロプラン：¥55,000/月（税込）・超過¥330/回（税込）</li>
+          <li>月額料金・成功報酬：なし</li>
+          <li>閲覧チケット：1人¥10,000（税込・買い切り）</li>
+          <li>AI面接（URL発行）：¥5,500/回（税込・従量課金。候補者が面接を始めた回のみ）</li>
+          <li>求人掲載：現在は無料</li>
+          <li>書類選考AI：求人を掲載中の企業は無料</li>
         </ul>
         <p className="mt-2" style={{ color: "#F0F0F0", fontWeight: 600 }}>
           独自AIアバター初期費用
         </p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>従量課金：¥110,000（税込）</li>
-          <li>ライト：¥77,000（税込）</li>
-          <li>プロ：¥55,000（税込）</li>
+          <li>¥110,000（税込）</li>
         </ul>
         <p className="mt-2 text-[13px]" style={{ color: "#888888" }}>
           ※表示価格はすべて税込です。
@@ -88,7 +88,8 @@ function TokushoPage() {
 
       <LegalSection heading="支払時期">
         <p>月額プラン：ご登録時に初回請求。以降毎月同日に自動更新。</p>
-        <p>従量課金プラン：月末締め・翌月初旬に請求。</p>
+        <p>AI面接（企業向けの従量課金）：月末締め・翌月初旬に請求。</p>
+        <p>閲覧チケット：購入時に請求。</p>
       </LegalSection>
 
       <LegalSection heading="サービス提供時期">

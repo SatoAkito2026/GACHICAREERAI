@@ -63,53 +63,25 @@ const INDIVIDUAL_PLANS: PlanCard[] = [
   },
 ];
 
-const COMPANY_PLANS: PlanCard[] = [
+// 企業は月額プランなし。使った分だけ（LP・会社ホームページと同じ内容）
+const COMPANY_PRICES: { name: string; price: string; desc: string }[] = [
+  { name: "人材一覧・人物まとめ", price: "無料", desc: "匿名の一覧とまとめを見られます" },
   {
-    key: "company_metered",
-    name: "従量課金プラン",
-    price: PLAN_PRICES.company_metered,
-    features: [
-      "書類選考AI：無料・無制限",
-      "書類選考履歴：無料・無制限",
-      "AI面接：¥2,200/回（税込・使った分だけ）",
-      "月額なし",
-      "PDF出力：不可",
-      "書類選考ランキング：不可",
-      "独自アバター：可（別途初期費用¥110,000・税込）",
-    ],
-    highlight: false,
+    name: "閲覧チケット",
+    price: "¥10,000／1人（税込・買い切り）",
+    desc: "名前・面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）が見られ、そのまま面談を申し込めます。採用が決まっても成功報酬はゼロ",
   },
   {
-    key: "company_light",
-    name: "ライトプラン",
-    price: PLAN_PRICES.company_light,
-    features: [
-      "書類選考AI：無料・無制限",
-      "書類選考履歴：無料・無制限",
-      "AI面接：20回/月込み・超過¥330/回（税込）",
-      "PDF出力：可",
-      "書類選考ランキング：不可",
-      "独自アバター：可（別途初期費用¥77,000・税込）",
-    ],
-    highlight: false,
+    name: "AI面接（URL発行）",
+    price: `${PLAN_PRICES.company_metered}・従量課金`,
+    desc: "書類選考した候補者に面接URLを送ると、AI面接官が一次面接をします。候補者が面接を始めた回だけ請求。月額はなし",
   },
   {
-    key: "company_pro",
-    name: "プロプラン",
-    price: PLAN_PRICES.company_pro,
-    features: [
-      "書類選考AI：無料・無制限",
-      "書類選考履歴：無料・無制限",
-      "書類選考ランキング：可",
-      "AI面接：50回/月込み・超過¥330/回（税込）",
-      "PDF出力：可",
-      "独自アバター：可（別途初期費用¥55,000・税込）",
-      "複数担当者：無制限",
-      "面接履歴ランキング：可",
-      "優先サポート：可",
-    ],
-    highlight: true,
+    name: "求人掲載",
+    price: "今は無料",
+    desc: "応募があると、応募者の練習の評価を見てメッセージできます",
   },
+  { name: "書類選考AI", price: "掲載中は無料", desc: "履歴書PDFをAIが一括で判定します" },
 ];
 
 function PricingPage() {
@@ -127,7 +99,7 @@ function PricingPage() {
     setCheckoutPlan(key);
   };
 
-  const plans = isBusiness ? COMPANY_PLANS : INDIVIDUAL_PLANS;
+  const plans = INDIVIDUAL_PLANS;
   const extraCredit = "¥330/回（税込）";
 
   return (
@@ -158,98 +130,127 @@ function PricingPage() {
             料金プラン
           </h1>
           <p className="mt-2 text-[14px]" style={{ color: "#888888" }}>
-            ニーズに合わせてプランをお選びいただけます。
+            {isBusiness
+              ? "月額料金はなく、使った分だけのお支払いです。"
+              : "ニーズに合わせてプランをお選びいただけます。"}
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {plans.map((p) => {
-            const isCurrent = plan === p.key;
-            return (
+        {isBusiness ? (
+          <div className="flex flex-col gap-3">
+            {COMPANY_PRICES.map((r) => (
               <div
-                key={p.key}
-                className="flex flex-col rounded-2xl bg-[#222222] p-6"
-                style={{
-                  border: `${p.highlight ? "2px solid #C8FF00" : "1.5px solid #333333"}`,
-                }}
+                key={r.name}
+                className="rounded-2xl bg-[#222222] p-5"
+                style={{ border: "1.5px solid #333333" }}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-[16px]" style={{ fontWeight: 600, color: "#F0F0F0" }}>
-                    {p.name}
+                    {r.name}
                   </h2>
-                  {p.highlight && (
-                    <span
-                      className="rounded-md px-2 py-0.5 text-[11px]"
-                      style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }}
-                    >
-                      おすすめ
-                    </span>
-                  )}
-                  {isCurrent && (
-                    <span
-                      className="rounded-md border px-2 py-0.5 text-[11px]"
+                  <span className="text-[16px]" style={{ fontWeight: 700, color: "#C8FF00" }}>
+                    {r.price}
+                  </span>
+                </div>
+                <p className="mt-2 text-[13px]" style={{ color: "#888888", lineHeight: 1.7 }}>
+                  {r.desc}
+                </p>
+              </div>
+            ))}
+            <p className="mt-2 text-center text-[13px]" style={{ color: "#888888" }}>
+              月額料金・成功報酬はありません。表示はすべて税込です。
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-3">
+            {plans.map((p) => {
+              const isCurrent = plan === p.key;
+              return (
+                <div
+                  key={p.key}
+                  className="flex flex-col rounded-2xl bg-[#222222] p-6"
+                  style={{
+                    border: `${p.highlight ? "2px solid #C8FF00" : "1.5px solid #333333"}`,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-[16px]" style={{ fontWeight: 600, color: "#F0F0F0" }}>
+                      {p.name}
+                    </h2>
+                    {p.highlight && (
+                      <span
+                        className="rounded-md px-2 py-0.5 text-[11px]"
+                        style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }}
+                      >
+                        おすすめ
+                      </span>
+                    )}
+                    {isCurrent && (
+                      <span
+                        className="rounded-md border px-2 py-0.5 text-[11px]"
+                        style={{
+                          background: "#C8FF00",
+                          color: "#0F0F0F",
+                          borderColor: "#C8FF00",
+                          fontWeight: 600,
+                        }}
+                      >
+                        現在のプラン
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 text-[24px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>
+                    {p.price}
+                  </div>
+
+                  <ul className="mt-5 flex flex-1 flex-col gap-2.5">
+                    {p.features.map((f, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-[13px]"
+                        style={{ color: "#888888" }}
+                      >
+                        <Check size={15} color="#00CC88" className="mt-0.5 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {p.key === "free" ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="mt-6 w-full rounded-lg px-4 py-3 text-[14px]"
                       style={{
-                        background: "#C8FF00",
-                        color: "#0F0F0F",
-                        borderColor: "#C8FF00",
-                        fontWeight: 600,
+                        background: "#333333",
+                        color: "#888888",
+                        fontWeight: 500,
+                        cursor: "not-allowed",
                       }}
                     >
-                      現在のプラン
-                    </span>
+                      {isCurrent ? "ご利用中" : "無料プラン"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isCurrent}
+                      onClick={() => handleSelect(p.key as Exclude<Plan, "free">)}
+                      className="mt-6 w-full rounded-lg px-4 py-3 text-[14px] transition-colors"
+                      style={{
+                        background: isCurrent ? "#333333" : "#C8FF00",
+                        color: isCurrent ? "#888888" : "#0F0F0F",
+                        fontWeight: 600,
+                        cursor: isCurrent ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {isCurrent ? "ご利用中" : "申し込む"}
+                    </button>
                   )}
                 </div>
-                <div className="mt-3 text-[24px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>
-                  {p.price}
-                </div>
-
-                <ul className="mt-5 flex flex-1 flex-col gap-2.5">
-                  {p.features.map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-[13px]"
-                      style={{ color: "#888888" }}
-                    >
-                      <Check size={15} color="#00CC88" className="mt-0.5 shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {p.key === "free" ? (
-                  <button
-                    type="button"
-                    disabled
-                    className="mt-6 w-full rounded-lg px-4 py-3 text-[14px]"
-                    style={{
-                      background: "#333333",
-                      color: "#888888",
-                      fontWeight: 500,
-                      cursor: "not-allowed",
-                    }}
-                  >
-                    {isCurrent ? "ご利用中" : "無料プラン"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={isCurrent}
-                    onClick={() => handleSelect(p.key as Exclude<Plan, "free">)}
-                    className="mt-6 w-full rounded-lg px-4 py-3 text-[14px] transition-colors"
-                    style={{
-                      background: isCurrent ? "#333333" : "#C8FF00",
-                      color: isCurrent ? "#888888" : "#0F0F0F",
-                      fontWeight: 600,
-                      cursor: isCurrent ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {isCurrent ? "ご利用中" : "申し込む"}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {isBusiness && (
           <div
@@ -263,9 +264,7 @@ function PricingPage() {
               企業専用のAIアバターを作成します。
             </p>
             <div className="mt-4 flex flex-col gap-1 text-[14px]" style={{ color: "#F0F0F0" }}>
-              <span>従量課金：¥110,000（税込）</span>
-              <span>ライト：¥77,000（税込）</span>
-              <span>プロ：¥55,000（税込）</span>
+              <span>¥110,000（税込）</span>
             </div>
             <div className="mt-3 text-[13px]" style={{ color: "#888888" }}>
               お問い合わせ：
@@ -276,24 +275,26 @@ function PricingPage() {
           </div>
         )}
 
-        {/* 追加クレジット購入セクション */}
-        <div
-          className="mt-12 rounded-2xl bg-[#222222] p-6 text-center"
-          style={{ border: "1.5px solid #333333" }}
-        >
-          <h2 className="text-[18px]" style={{ fontWeight: 600, color: "#F0F0F0" }}>
-            追加クレジット購入
-          </h2>
-          <p className="mt-2 text-[14px]" style={{ color: "#888888" }}>
-            月の回数を使い切った場合は追加購入できます
-          </p>
-          <div className="mt-4 text-[22px]" style={{ fontWeight: 700, color: "#C8FF00" }}>
-            {extraCredit}
+        {/* 追加クレジット購入セクション（個人向け） */}
+        {!isBusiness && (
+          <div
+            className="mt-12 rounded-2xl bg-[#222222] p-6 text-center"
+            style={{ border: "1.5px solid #333333" }}
+          >
+            <h2 className="text-[18px]" style={{ fontWeight: 600, color: "#F0F0F0" }}>
+              追加クレジット購入
+            </h2>
+            <p className="mt-2 text-[14px]" style={{ color: "#888888" }}>
+              月の回数を使い切った場合は追加購入できます
+            </p>
+            <div className="mt-4 text-[22px]" style={{ fontWeight: 700, color: "#C8FF00" }}>
+              {extraCredit}
+            </div>
+            <div className="mt-2 text-[12px]" style={{ color: "#888888" }}>
+              （近日公開）
+            </div>
           </div>
-          <div className="mt-2 text-[12px]" style={{ color: "#888888" }}>
-            （近日公開）
-          </div>
-        </div>
+        )}
       </main>
 
       {checkoutPlan && <CheckoutModal plan={checkoutPlan} onClose={() => setCheckoutPlan(null)} />}

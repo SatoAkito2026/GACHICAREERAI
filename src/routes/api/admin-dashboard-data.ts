@@ -89,7 +89,7 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
           .select("*", { count: "exact", head: true })
           .is("practice_mode", null)
           .gte("created_at", monthStart);
-        monthlyRevenue += (meteredInterviewsThisMonth ?? 0) * 2200;
+        monthlyRevenue += (meteredInterviewsThisMonth ?? 0) * 5500;
 
         // ③ 直近30日の新規登録推移
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -142,7 +142,7 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
         const companyRevenue =
           (planCounts.company_light ?? 0) * PLAN_PRICES_JPY.company_light +
           (planCounts.company_pro ?? 0) * PLAN_PRICES_JPY.company_pro +
-          (meteredInterviewsThisMonth ?? 0) * 2200;
+          (meteredInterviewsThisMonth ?? 0) * 5500;
 
         // ⑦ 希望職種ランキング(個人)
         const { data: individualProfiles } = await supabase
