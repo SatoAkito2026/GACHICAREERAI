@@ -6,7 +6,12 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckoutModal } from "@/components/CheckoutModal";
-import { limitText, PRACTICE_RULES, type IndividualPlanKey } from "@/lib/plan-rules";
+import {
+  COMPANY_INTERVIEW_PRICE_JPY,
+  limitText,
+  PRACTICE_RULES,
+  type IndividualPlanKey,
+} from "@/lib/plan-rules";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -216,12 +221,21 @@ function CompanyPricing() {
   const items: { name: string; price: string; features: string[] }[] = [
     {
       name: "人材の閲覧チケット",
-      price: "1人ごと",
+      price: "¥10,000／1人（税込）",
       features: [
         "人材を探す・匿名の人物まとめを見る：無料",
         "チケットで名前・面接ごとの採用担当者向け評価・会話・録画（本人が許可した場合）を閲覧",
         "チケットを買った人に面談を申し込み、承諾されたらメッセージ",
         "採用が決まっても成功報酬はかかりません",
+      ],
+    },
+    {
+      name: "AI面接（URL発行）",
+      price: `¥${COMPANY_INTERVIEW_PRICE_JPY.toLocaleString()}／回（税込）`,
+      features: [
+        "書類選考した候補者に面接URLを送り、AI面接官が面接",
+        "従量課金：候補者が面接を始めた回だけ請求（月額なし）",
+        "総評・面接ログを面接履歴で確認",
       ],
     },
     {
@@ -236,7 +250,7 @@ function CompanyPricing() {
     },
   ];
   return (
-    <div className="grid gap-5 md:grid-cols-3">
+    <div className="grid gap-5 md:grid-cols-2">
       {items.map((p) => (
         <div
           key={p.name}

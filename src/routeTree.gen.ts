@@ -42,7 +42,6 @@ import { Route as ApiInterviewTurnRouteImport } from './routes/api/interview-tur
 import { Route as ApiPredictTicketSalesRouteImport } from './routes/api/predict-ticket-sales'
 import { Route as ApiRefineDocumentRouteImport } from './routes/api/refine-document'
 import { Route as ApiRegisterDeviceRouteImport } from './routes/api/register-device'
-import { Route as ApiReportUsageRouteImport } from './routes/api/report-usage'
 import { Route as ApiResearchActorRouteImport } from './routes/api/research-actor'
 import { Route as ApiResearchCompanyRouteImport } from './routes/api/research-company'
 import { Route as ApiResearchTargetRouteImport } from './routes/api/research-target'
@@ -285,11 +284,6 @@ const ApiRefineDocumentRoute = ApiRefineDocumentRouteImport.update({
 const ApiRegisterDeviceRoute = ApiRegisterDeviceRouteImport.update({
   id: '/api/register-device',
   path: '/api/register-device',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiReportUsageRoute = ApiReportUsageRouteImport.update({
-  id: '/api/report-usage',
-  path: '/api/report-usage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiResearchActorRoute = ApiResearchActorRouteImport.update({
@@ -723,7 +717,6 @@ export interface FileRoutesByFullPath {
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
-  '/api/report-usage': typeof ApiReportUsageRoute
   '/api/research-actor': typeof ApiResearchActorRoute
   '/api/research-company': typeof ApiResearchCompanyRoute
   '/api/research-target': typeof ApiResearchTargetRoute
@@ -834,7 +827,6 @@ export interface FileRoutesByTo {
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
-  '/api/report-usage': typeof ApiReportUsageRoute
   '/api/research-actor': typeof ApiResearchActorRoute
   '/api/research-company': typeof ApiResearchCompanyRoute
   '/api/research-target': typeof ApiResearchTargetRoute
@@ -946,7 +938,6 @@ export interface FileRoutesById {
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
-  '/api/report-usage': typeof ApiReportUsageRoute
   '/api/research-actor': typeof ApiResearchActorRoute
   '/api/research-company': typeof ApiResearchCompanyRoute
   '/api/research-target': typeof ApiResearchTargetRoute
@@ -1059,7 +1050,6 @@ export interface FileRouteTypes {
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
-    | '/api/report-usage'
     | '/api/research-actor'
     | '/api/research-company'
     | '/api/research-target'
@@ -1170,7 +1160,6 @@ export interface FileRouteTypes {
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
-    | '/api/report-usage'
     | '/api/research-actor'
     | '/api/research-company'
     | '/api/research-target'
@@ -1281,7 +1270,6 @@ export interface FileRouteTypes {
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
-    | '/api/report-usage'
     | '/api/research-actor'
     | '/api/research-company'
     | '/api/research-target'
@@ -1393,7 +1381,6 @@ export interface RootRouteChildren {
   ApiPredictTicketSalesRoute: typeof ApiPredictTicketSalesRoute
   ApiRefineDocumentRoute: typeof ApiRefineDocumentRoute
   ApiRegisterDeviceRoute: typeof ApiRegisterDeviceRoute
-  ApiReportUsageRoute: typeof ApiReportUsageRoute
   ApiResearchActorRoute: typeof ApiResearchActorRoute
   ApiResearchCompanyRoute: typeof ApiResearchCompanyRoute
   ApiResearchTargetRoute: typeof ApiResearchTargetRoute
@@ -1702,13 +1689,6 @@ declare module '@tanstack/react-router' {
       path: '/api/register-device'
       fullPath: '/api/register-device'
       preLoaderRoute: typeof ApiRegisterDeviceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/report-usage': {
-      id: '/api/report-usage'
-      path: '/api/report-usage'
-      fullPath: '/api/report-usage'
-      preLoaderRoute: typeof ApiReportUsageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/research-actor': {
@@ -2273,7 +2253,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPredictTicketSalesRoute: ApiPredictTicketSalesRoute,
   ApiRefineDocumentRoute: ApiRefineDocumentRoute,
   ApiRegisterDeviceRoute: ApiRegisterDeviceRoute,
-  ApiReportUsageRoute: ApiReportUsageRoute,
   ApiResearchActorRoute: ApiResearchActorRoute,
   ApiResearchCompanyRoute: ApiResearchCompanyRoute,
   ApiResearchTargetRoute: ApiResearchTargetRoute,

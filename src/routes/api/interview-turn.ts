@@ -2,6 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { createClient } from "@supabase/supabase-js";
+import Stripe from "stripe";
+
+/** 企業のAI面接（従量課金）を1回分、Stripe のメーターに記録する。失敗しても面接は止めない */
+async function reportCompanyInterviewUsage(customerId: string | null): Promise<void> {
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret || !customerId) {
+    console.error("[interview-turn] usage not reported (missing stripe config or customer)");
+    return;
+  }
+  try {
+    const stripe = new Stripe(secret, { httpClient: Stripe.createFetchHttpClient() });
+    await stripe.billing.meterEvents.create({
+      event_name: "interview_usage",
+      payload: { stripe_customer_id: customerId, value: "1" },
+    });
+  } catch (e) {
+    console.error("[interview-turn] usage report failed", e);
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,19 +156,29 @@ export const Route = createFileRoute("/api/interview-turn")({
               const { data: profile } = await supabase
                 .from("profiles")
                 .select(
-                  "company_name, business_description, hiring_positions, ideal_candidate, company_culture, company_strengths, competitive_advantage, competitors, successful_hire_traits, failed_hire_traits, first_job_description, interview_focus, company_id, plan, plan_expires_at",
+                  "company_name, business_description, hiring_positions, ideal_candidate, company_culture, company_strengths, competitive_advantage, competitors, successful_hire_traits, failed_hire_traits, first_job_description, interview_focus, company_id, plan, stripe_subscription_id, stripe_customer_id",
                 )
                 .eq("id", inv.user_id)
                 .maybeSingle();
 
-              // 企業のAI面接は月額プラン（ライト・プロ）を前から契約している企業だけ（新規受付は終了）
-              const companyPlan = (profile as any)?.plan as string | undefined;
-              const expiresAt = (profile as any)?.plan_expires_at as string | null | undefined;
-              const paid =
-                (companyPlan === "company_light" || companyPlan === "company_pro") &&
-                (!expiresAt || new Date(expiresAt).getTime() > Date.now());
-              if (!paid) {
+              // 企業のAI面接は従量課金。カードを登録した（従量課金の契約がある）企業だけ使える
+              if (
+                (profile as any)?.plan !== "company_metered" ||
+                !(profile as any)?.stripe_subscription_id
+              ) {
                 return json({ error: "この面接URLは現在ご利用いただけません" }, 403);
+              }
+              // 候補者が面接を始めた最初の1回だけ課金する（同時に来ても1回になるよう、状態の切り替えで判定）
+              if ((inv as any)?.status === "pending") {
+                const { data: claimed } = await supabase
+                  .from("interview_invitations")
+                  .update({ status: "started" })
+                  .eq("token", body.token)
+                  .eq("status", "pending")
+                  .select("id");
+                if (claimed && claimed.length > 0) {
+                  await reportCompanyInterviewUsage((profile as any)?.stripe_customer_id ?? null);
+                }
               }
 
               if (profile) {

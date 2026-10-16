@@ -1,4 +1,4 @@
-import { limitText, practiceRule } from "@/lib/plan-rules";
+import { COMPANY_INTERVIEW_PRICE_JPY, limitText, practiceRule } from "@/lib/plan-rules";
 import { SchoolLinkCard } from "@/components/SchoolLinkCard";
 import { getAuthHeaders } from "@/lib/chat-api";
 import { SafeNavigate } from "@/components/SafeNavigate";
@@ -20,10 +20,6 @@ export const Route = createFileRoute("/mypage")({
   }),
   component: MyPage,
 });
-
-function formatLimit(value: number) {
-  return Number.isFinite(value) ? `${value}回` : "無制限";
-}
 
 const CARD_STYLE = { border: "1px solid #2A2A2A", background: "#1A1A1A" } as const;
 const ROW_BORDER = "1px solid #2A2A2A";
@@ -104,7 +100,7 @@ function Row({
 
 function MyPage() {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { plan, planExpiresAt, isPlanActive, interviewCount, limits, loading } = usePlan();
+  const { plan, planExpiresAt, isPlanActive, loading } = usePlan();
   const { isBusiness, mode } = useMode();
   const navigate = useNavigate();
   const [pwSending, setPwSending] = useState(false);
@@ -154,24 +150,6 @@ function MyPage() {
             free: "無料プラン",
           } as Record<string, string>
         )[plan]) ?? PLAN_LABELS[plan];
-
-  const interviewLimit =
-    (isBusiness
-      ? (
-          {
-            free: 0,
-            company_metered: Infinity,
-            company_light: 20,
-            company_pro: 50,
-          } as Record<string, number>
-        )[plan]
-      : (
-          {
-            free: 2,
-            individual_light: 15,
-            individual_pro: 25,
-          } as Record<string, number>
-        )[plan]) ?? limits.interviews;
 
   const handlePasswordReset = async () => {
     if (!user?.email) return;
@@ -316,37 +294,17 @@ function MyPage() {
                   ⚠ プランの有効期限が切れています。プランを更新してください。
                 </div>
               )}
-              {/* 企業の月額プランは新規受付をやめた。前から契約している企業にだけ表示する */}
               {isBusiness ? (
-                plan.startsWith("company_") && (
-                  <Row
-                    label="今期のURL発行回数"
-                    value={
-                      plan === "company_metered"
-                        ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
-                        : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
-                    }
-                  />
-                )
+                <Row
+                  label="AI面接（従量課金）"
+                  value={
+                    plan === "company_metered"
+                      ? `カード登録済み ・ 面接を受けた分だけ ¥${COMPANY_INTERVIEW_PRICE_JPY.toLocaleString()}/回`
+                      : "未登録（書類選考履歴から登録できます）"
+                  }
+                />
               ) : (
                 <Row label="練習の上限" value={practiceLimitSummary(plan)} />
-              )}
-              {/* 請求予定額（企業プランのみ） */}
-              {(plan === "company_metered" ||
-                plan === "company_light" ||
-                plan === "company_pro") && (
-                <Row
-                  label="今月の請求予定額（超過分）"
-                  value={(() => {
-                    if (plan === "company_metered") {
-                      return `¥${(interviewCount * 2200).toLocaleString()}（税込）`;
-                    }
-                    const limit = interviewLimit;
-                    const overage = Math.max(0, interviewCount - limit);
-                    if (overage === 0) return "¥0（上限内）";
-                    return `¥${(overage * 330).toLocaleString()}（${overage}回超過 × ¥330・税込）`;
-                  })()}
-                />
               )}
               <Row
                 label={isBusiness ? "料金を見る" : "プランを変更する"}
