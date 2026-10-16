@@ -20,27 +20,27 @@ nav: home
 .hero-lead{margin-top:26px;color:var(--ink-2);max-width:32em;animation:fade .9s .5s both}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px;animation:fade .9s .65s both}
 
-/* 3つの事業のカード */
-.stack{position:relative;aspect-ratio:1/1;max-width:520px;width:100%;justify-self:center}
-.card{position:absolute;background:#fff;border-radius:20px;box-shadow:0 24px 50px -24px rgba(36,17,63,.35);overflow:hidden;text-decoration:none;color:var(--ink);animation:pop .9s var(--ease) both;transition:rotate .4s var(--ease),scale .4s var(--ease)}
-.card:hover{rotate:0deg;scale:1.03;z-index:2}
-.card .tag{position:absolute;left:12px;top:12px;background:#fff;color:var(--ink);font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(36,17,63,.15);z-index:1}
-.card .tag::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--dot)}
-.card-ai{--dot:var(--green);width:66%;aspect-ratio:16/10;left:0;top:6%;rotate:-4deg;animation-delay:.3s;background:#0E0A1A}
-.card-ai img{width:100%;height:100%;object-fit:cover}
-.card-gc{--dot:var(--yellow);width:46%;aspect-ratio:4/5;right:0;top:0;rotate:5deg;animation-delay:.45s;background:#07080F;color:#F2F2F2}
-.card-gc img{width:100%;height:58%;object-fit:cover}
-.card-gc .gc-body{padding:12px 14px;display:grid;gap:2px}
-.card-gc .gc-body b{font-family:var(--ff-display);font-size:clamp(16px,1.8vw,20px)}
-.card-gc .gc-body span{font-size:12px;color:#E3B341;line-height:1.6}
-.card-pos{--dot:var(--red);width:50%;left:8%;bottom:0;rotate:-2deg;animation-delay:.6s;padding:46px 18px 18px;display:grid;gap:8px;font-variant-numeric:tabular-nums}
-.receipt-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-bottom:1px dashed var(--line);padding-bottom:6px}
-.receipt-row span:last-child{font-family:var(--ff-latin);font-weight:600}
-.receipt-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:2px}
-.receipt-total b{font-family:var(--ff-latin);font-weight:800;font-size:clamp(22px,2.6vw,28px)}
-.receipt-total small{font-size:12px;color:var(--muted)}
+/* 3つの事業のアイコン */
+.stack{display:grid;gap:14px;max-width:460px;width:100%;justify-self:center}
+.svc{display:grid;grid-template-columns:88px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px 20px 14px 14px;text-decoration:none;color:var(--ink);box-shadow:0 20px 40px -28px rgba(36,17,63,.45);animation:slide-in .8s var(--ease) both;transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;position:relative}
+.svc:nth-child(1){animation-delay:.3s}.svc:nth-child(2){animation-delay:.42s;margin-left:clamp(0px,4vw,36px)}.svc:nth-child(3){animation-delay:.54s}
+.svc:hover{transform:translateX(6px);border-color:var(--c);box-shadow:0 24px 44px -26px rgba(36,17,63,.55)}
+.svc::after{content:"→";position:absolute;right:18px;top:50%;transform:translateY(-50%);color:var(--muted);transition:transform .3s var(--ease),color .3s}
+.svc:hover::after{transform:translate(4px,-50%);color:var(--ink)}
+.svc-ic{width:88px;height:88px;border-radius:20px;overflow:hidden;display:grid;place-items:center;background:var(--ic-bg)}
+.svc-ic img{width:100%;height:100%;object-fit:cover}
+.svc-ic svg{width:52px;height:52px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.svc-ic svg circle{fill:#fff;stroke:none}
+.svc-tx{display:grid;gap:2px;padding-right:22px}
+.svc-tx b{font-family:var(--ff-display);font-size:clamp(18px,2vw,21px)}
+.svc-tx small{font-size:12.5px;color:var(--muted);line-height:1.6}
+.svc-ai{--c:var(--green);--ic-bg:#151A1E}
+.svc-gc{--c:#E3B341;--ic-bg:#07080F}
+.svc-gc .svc-ic img{width:92%;height:92%;object-fit:contain}
+.svc-pos{--c:var(--red);--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)}
+@keyframes slide-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 .hero-ribbon{position:absolute;left:-5%;width:110%;bottom:-40px;height:220px;z-index:0;opacity:.95;pointer-events:none}
-@media (max-width:900px){.hero .wrap{grid-template-columns:minmax(0,1fr)}.stack{max-width:440px}}
+@media (max-width:900px){.hero .wrap{grid-template-columns:minmax(0,1fr)}}
 
 .ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:16px;background:var(--paper-2)}
 .ticker-track{display:inline-flex;gap:44px;animation:marquee 40s linear infinite;font-family:var(--ff-display);font-weight:700;font-size:clamp(17px,2vw,22px)}
@@ -62,6 +62,11 @@ nav: home
 .biz-item:nth-child(even) .biz-media{order:2}
 .biz-media{border-radius:24px;overflow:hidden;position:relative;background:var(--paper-2);aspect-ratio:4/3;display:grid;place-items:center}
 .biz-media img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.biz-media.icon{aspect-ratio:auto;height:clamp(220px,28vw,300px);background:var(--ic-bg)}
+.biz-media.icon img{width:min(68%,220px);height:auto;aspect-ratio:1;object-fit:contain;border-radius:20px}
+.pos-icon{width:42%;max-width:150px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:transform .8s var(--ease)}
+.pos-icon circle{fill:#fff;stroke:none}
+.biz-item:hover .pos-icon{transform:scale(1.06) rotate(-3deg)}
 .biz-item:hover .biz-media img{transform:scale(1.04)}
 .biz-num{font-weight:700;font-size:14px;color:var(--c-text);display:flex;align-items:center;gap:10px}
 .biz-num::after{content:"";height:3px;width:40px;border-radius:2px;background:var(--c)}
@@ -75,18 +80,6 @@ nav: home
 .biz-gc{--c:var(--yellow);--c-text:var(--yellow-text)}
 .biz-pos{--c:var(--red);--c-text:var(--red)}
 .soon{display:inline-block;margin-left:10px;vertical-align:middle;font-family:var(--ff-body);font-size:12px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:2px 10px}
-/* POS の画面イメージ（写真がないので図で見せる） */
-.pos-art{width:100%;height:100%;background:var(--ink);display:grid;place-items:center;padding:8%}
-.pos-screen{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:18px;display:grid;gap:10px;box-shadow:0 20px 40px -20px rgba(0,0,0,.6)}
-.pos-head{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:var(--ff-mono)}
-.pos-tables{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.pos-tables span{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800;font-size:14px;background:var(--paper-2);border:1.5px solid var(--line)}
-.pos-tables span.on{background:var(--red);border-color:var(--red);color:#fff;animation:blink 2.4s ease-in-out infinite}
-.pos-tables span.on:nth-child(6){animation-delay:.8s}
-.pos-tables span.on:nth-child(3){animation-delay:1.6s}
-@keyframes blink{50%{opacity:.55}}
-.pos-sum{display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--line);padding-top:10px;font-variant-numeric:tabular-nums}
-.pos-sum b{font-family:var(--ff-latin);font-weight:800;font-size:24px}
 @media (max-width:860px){.biz-item{grid-template-columns:minmax(0,1fr)}.biz-item:nth-child(even) .biz-media{order:0}}
 
 .why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
@@ -140,15 +133,9 @@ nav: home
       </div>
     </div>
     <div class="stack" aria-label="3つの事業">
-      <a class="card card-ai" href="gachicareer-ai.html"><img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映っている" width="1578" height="996"><span class="tag">ガチキャリAI</span></a>
-      <a class="card card-gc" href="gachicareer.html"><span class="tag">ガチキャリ</span><img src="assets/img/gc-poster.webp" alt="ガチキャリのポスター" width="1000" height="1500" style="object-position:center 18%"><span class="gc-body"><b>ガチキャリ</b><span>ガチで、キャリア最強になる部隊。</span></span></a>
-      <a class="card card-pos" href="#pos" aria-label="夜のお店向けPOSシステム">
-        <span class="tag">POSシステム</span>
-        <span class="receipt-row"><span>セット 60分</span><span>¥8,000</span></span>
-        <span class="receipt-row"><span>指名</span><span>¥3,000</span></span>
-        <span class="receipt-row"><span>ドリンク ×4</span><span>¥6,000</span></span>
-        <span class="receipt-total"><small>合計（例）</small><b>¥17,000</b></span>
-      </a>
+      <a class="svc svc-ai" href="gachicareer-ai.html"><span class="svc-ic"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"></span><span class="svc-tx"><b>ガチキャリAI</b><small>AIで自分を磨く。企業と出会う。</small></span></a>
+      <a class="svc svc-gc" href="gachicareer.html"><span class="svc-ic"><img src="assets/img/gc-logo.webp" alt="" width="600" height="600"></span><span class="svc-tx"><b>ガチキャリ</b><small>ガチで、キャリア最強になる部隊。</small></span></a>
+      <a class="svc svc-pos" href="#pos"><span class="svc-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg></span><span class="svc-tx"><b>POSシステム</b><small>夜のお店向け（名称は近日公開）</small></span></a>
     </div>
   </div>
 </section>
@@ -190,7 +177,7 @@ nav: home
 
     <div class="biz">
       <article class="biz-item biz-ai" id="gachicareer-ai">
-        <div class="biz-media rv"><img src="assets/img/screening.webp" alt="大量の書類をAIが読み取って分析するイメージ" width="1000" height="1000" loading="lazy"></div>
+        <div class="biz-media icon rv" style="--ic-bg:#151A1E"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></div>
         <div class="rv">
           <span class="biz-num">AIソリューション事業</span>
           <h3>ガチキャリAI</h3>
@@ -202,7 +189,7 @@ nav: home
       </article>
 
       <article class="biz-item biz-gc" id="gachicareer">
-        <div class="biz-media rv" style="background:#07080F"><img src="assets/img/gc-banner.webp" alt="ガチキャリのバナー。ガチで、キャリア最強になる部隊。" width="1536" height="1024" loading="lazy"></div>
+        <div class="biz-media icon rv" style="--ic-bg:#07080F"><img src="assets/img/gc-logo.webp" alt="ガチキャリのロゴ" width="600" height="600" loading="lazy"></div>
         <div class="rv">
           <span class="biz-num">キャリアコミュニティ事業</span>
           <h3>ガチキャリ</h3>
@@ -214,14 +201,8 @@ nav: home
       </article>
 
       <article class="biz-item biz-pos" id="pos">
-        <div class="biz-media rv" aria-hidden="true">
-          <div class="pos-art">
-            <div class="pos-screen">
-              <div class="pos-head"><span>テーブル</span><span>営業中</span></div>
-              <div class="pos-tables"><span>1</span><span>2</span><span class="on">3</span><span>4</span><span>5</span><span class="on">6</span><span>7</span><span class="on">8</span></div>
-              <div class="pos-sum"><span>本日の売上（例）</span><b>¥486,000</b></div>
-            </div>
-          </div>
+        <div class="biz-media icon rv" style="--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)" aria-hidden="true">
+          <svg class="pos-icon" viewBox="0 0 64 64"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg>
         </div>
         <div class="rv">
           <span class="biz-num">店舗DX事業</span>

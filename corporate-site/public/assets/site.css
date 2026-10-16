@@ -24,6 +24,10 @@
 
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth}
+[id]{scroll-margin-top:88px}
+/* ページが切り替わったことが分かるように、本文をふわっと出す */
+main{animation:page-in .55s var(--ease) both}
+@keyframes page-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-size:16px;line-height:1.9;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit}
@@ -62,6 +66,9 @@ h1,h2,h3,h4{font-family:var(--ff-display);text-wrap:balance;margin:0;line-height
   .menu-btn{display:block}
   .site-head.open .nav{display:flex;position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:6px max(20px, env(safe-area-inset-right, 0px)) 18px max(20px, env(safe-area-inset-left, 0px))}
   .site-head.open .nav a{padding-block:13px;border-bottom:1px solid var(--line);font-size:16px}
+  .site-head.open .nav a[aria-current="page"]{color:var(--red)}
+  .site-head.open .nav a[aria-current="page"]::before{content:"● ";font-size:10px;vertical-align:2px}
+  .site-head.open .nav a::after{display:none}
   .site-head.open .nav .nav-cta{margin-top:14px;text-align:center;border:0}
 }
 

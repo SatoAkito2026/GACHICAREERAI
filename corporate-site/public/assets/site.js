@@ -1,5 +1,18 @@
 // AKITOグループ 共通スクリプト（ヘッダー・メニュー・スクロールで出てくる動き）
 (function () {
+  // 別のページに移ったら、必ず一番上から見せる（前のページのスクロール位置を引き継がない）。
+  // #付きのリンクで来たときだけ、その場所まで移動する
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  var goToStart = function () {
+    var id = decodeURIComponent((location.hash || '').slice(1));
+    var target = id && document.getElementById(id);
+    if (target) target.scrollIntoView({ block: 'start' });
+    else window.scrollTo(0, 0);
+  };
+  goToStart();
+  window.addEventListener('load', function () { setTimeout(goToStart, 0); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) goToStart(); });
+
   var head = document.querySelector('.site-head');
   var btn = document.getElementById('menu-btn');
 

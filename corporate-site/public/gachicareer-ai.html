@@ -36,6 +36,8 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[id]{scroll-margin-top:72px}
+main{animation:fade .55s both}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ff-jp);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit}
@@ -732,6 +734,15 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
 
 <script>
 (function(){
+  // 別のページから来たら、必ず一番上から見せる（#付きのときだけその場所へ）
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
+  var goToStart=function(){
+    var id=decodeURIComponent((location.hash||'').slice(1));
+    var t=id&&document.getElementById(id);
+    if(t)t.scrollIntoView({block:'start'});else scrollTo(0,0);
+  };
+  goToStart();
+  addEventListener('load',function(){setTimeout(goToStart,0)});
   var body=document.body;
   document.getElementById('year').textContent=new Date().getFullYear();
 
