@@ -43,4 +43,4 @@ python3 build.py
 npx wrangler deploy
 ```
 
-初回は Cloudflare の管理画面で Worker `akitogroup-site` にカスタムドメイン `akitogroup.jp`（と `www.akitogroup.jp`）を付ける。今の WordPress を向いている DNS の A / CNAME レコードは、そのとき置き換わる。アプリ（`interview-copilot-ai.akitogroup.jp`）と、メール（MX・SPF・DKIM）のレコードには触らないこと。
+初回は Cloudflare の管理画面で Worker `akitogroup-site` にカスタムドメイン `akitogroup.jp`（と `www.akitogroup.jp`）を付ける。今の WordPress を向いている DNS の A / CNAME レコードは、そのとき置き換わる。アプリ（`gachicareer-ai.akitogroup.jp`、旧 `interview-copilot-ai.akitogroup.jp`）と、メール（MX・SPF・DKIM）のレコードには触らないこと。
