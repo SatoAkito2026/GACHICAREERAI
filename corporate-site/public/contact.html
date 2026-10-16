@@ -28,6 +28,7 @@
       <a href="about.html">会社概要</a>
       <a href="./#services">事業内容</a>
       <a href="gachicareer-ai.html">ガチキャリAI</a>
+      <a href="gachicareer.html">ガチキャリ</a>
       <a href="news.html">お知らせ</a>
       <a class="nav-cta" href="contact.html">お問い合わせ</a>
     </nav>
@@ -101,7 +102,7 @@
         <span style="font-weight:700;font-size:14px">ご用件</span>
         <ul class="topics" id="topics">
           <li><button type="button" data-topic="gachicareer-ai" aria-pressed="false">ガチキャリAIの資料請求・導入</button></li>
-          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（採用支援・営業代行）</button></li>
+          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（キャリアコミュニティ）</button></li>
           <li><button type="button" data-topic="pos" aria-pressed="false">夜のお店向けPOSシステム</button></li>
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
@@ -146,7 +147,7 @@
   var subject=document.getElementById('f-subject');
   var status=document.getElementById('form-status');
   var submit=document.getElementById('f-submit');
-  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（採用支援・営業代行）について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
+  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（キャリアコミュニティ）への参加について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
   var topic='';
   var pick=function(key,fill){
     topic=LABELS.hasOwnProperty(key)?key:'';
@@ -210,7 +211,7 @@
           <h4>SERVICES</h4>
           <ul>
             <li><a href="gachicareer-ai.html">ガチキャリAI</a></li>
-            <li><a href="./#gachicareer">ガチキャリ</a></li>
+            <li><a href="gachicareer.html">ガチキャリ</a></li>
             <li><a href="./#pos">夜のお店向けPOSシステム</a></li>
             <li><a href="contact.html#recruit">採用情報</a></li>
           </ul>

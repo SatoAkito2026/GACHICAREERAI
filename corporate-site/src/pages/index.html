@@ -1,6 +1,6 @@
 <!--
 title: トップ
-description: 合同会社AKITOグループは「愛ある事業で煌めくあなたに届ける未来」を理念に、AI面接サービス「ガチキャリAI」、人材・採用支援「ガチキャリ」、夜のお店向けPOSシステムの3つの事業を展開しています。
+description: 合同会社AKITOグループは「愛ある事業で煌めくあなたに届ける未来」を理念に、AI面接練習サービス「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、夜のお店向けPOSシステムの3つの事業を展開しています。
 nav: home
 -->
 <style>
@@ -28,11 +28,11 @@ nav: home
 .card .tag::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--dot)}
 .card-ai{--dot:var(--green);width:66%;aspect-ratio:16/10;left:0;top:6%;rotate:-4deg;animation-delay:.3s;background:#0E0A1A}
 .card-ai img{width:100%;height:100%;object-fit:cover}
-.card-gc{--dot:var(--yellow);width:46%;aspect-ratio:4/5;right:0;top:0;rotate:5deg;animation-delay:.45s}
+.card-gc{--dot:var(--yellow);width:46%;aspect-ratio:4/5;right:0;top:0;rotate:5deg;animation-delay:.45s;background:#07080F;color:#F2F2F2}
 .card-gc img{width:100%;height:58%;object-fit:cover}
 .card-gc .gc-body{padding:12px 14px;display:grid;gap:2px}
 .card-gc .gc-body b{font-family:var(--ff-display);font-size:clamp(16px,1.8vw,20px)}
-.card-gc .gc-body span{font-size:12px;color:var(--muted);line-height:1.6}
+.card-gc .gc-body span{font-size:12px;color:#E3B341;line-height:1.6}
 .card-pos{--dot:var(--red);width:50%;left:8%;bottom:0;rotate:-2deg;animation-delay:.6s;padding:46px 18px 18px;display:grid;gap:8px;font-variant-numeric:tabular-nums}
 .receipt-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-bottom:1px dashed var(--line);padding-bottom:6px}
 .receipt-row span:last-child{font-family:var(--ff-latin);font-weight:600}
@@ -133,15 +133,15 @@ nav: home
         <span class="ln"><span><span class="w w-yellow">煌めく</span>あなたに</span></span>
         <span class="ln"><span><span class="w w-green">届ける</span>未来。</span></span>
       </h1>
-      <p class="hero-lead">AKITOグループは、AIと人の力で、働く人と企業の未来を支えています。AI面接サービス「ガチキャリAI」、人材・採用支援の「ガチキャリ」、そして夜のお店向けのPOSシステム。3つの事業で、新しい一歩を後押しします。</p>
+      <p class="hero-lead">AKITOグループは、AIと人の力で、働く人と企業の未来を支えています。AI面接練習の「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、そして夜のお店向けのPOSシステム。3つの事業で、新しい一歩を後押しします。</p>
       <div class="hero-actions">
         <a class="btn btn-ink" href="#services">事業を見る <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-line" href="contact.html">お問い合わせ</a>
       </div>
     </div>
     <div class="stack" aria-label="3つの事業">
-      <a class="card card-ai" href="gachicareer-ai.html"><img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に候補者が映っている" width="1600" height="914"><span class="tag">ガチキャリAI</span></a>
-      <a class="card card-gc" href="#gachicareer"><span class="tag">ガチキャリ</span><img src="assets/img/climb.webp" alt="山頂へ手を取り合って登る人たちのシルエット" width="1400" height="1050"><span class="gc-body"><b>ガチキャリ</b><span>必要な人材を、必要なタイミングで。</span></span></a>
+      <a class="card card-ai" href="gachicareer-ai.html"><img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映っている" width="1578" height="996"><span class="tag">ガチキャリAI</span></a>
+      <a class="card card-gc" href="gachicareer.html"><span class="tag">ガチキャリ</span><img src="assets/img/gc-poster.webp" alt="ガチキャリのポスター" width="1000" height="1500" style="object-position:center 18%"><span class="gc-body"><b>ガチキャリ</b><span>ガチで、キャリア最強になる部隊。</span></span></a>
       <a class="card card-pos" href="#pos" aria-label="夜のお店向けPOSシステム">
         <span class="tag">POSシステム</span>
         <span class="receipt-row"><span>セット 60分</span><span>¥8,000</span></span>
@@ -155,8 +155,8 @@ nav: home
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>採用支援</span><span>営業代行</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
-    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>採用支援</span><span>営業代行</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
+    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
+    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
   </div>
 </div>
 
@@ -166,14 +166,14 @@ nav: home
       <p class="eyebrow">About us</p>
       <h2>人を見る力を、<br>AIで拡張する。</h2>
       <div class="body" style="margin-top:24px">
-        <p>AKITOグループは、人材の領域で培った採用のノウハウとAI技術を組み合わせ、AI面接サービス<strong>「ガチキャリAI」</strong>を提供しています。働く人には本番さながらの面接練習を、企業には書類選考からAI面接・評価までをひとつのサービスで届け、企業と人のより良い出会いをつくります。</p>
+        <p>AKITOグループは、採用のノウハウとAI技術を組み合わせ、<strong>「ガチキャリAI」</strong>を提供しています。AIで自分を磨き、企業と出会う。働く人には本番さながらの面接練習と発言を根拠にした評価を、企業には練習を重ねた人材との出会いと、書類選考からAI面接までの仕組みを届けます。</p>
         <p>人材不足、採用コスト、選考の負担。いまの採用の課題をAIの力で解決し、企業の成長を支えます。</p>
       </div>
       <a class="btn btn-line" href="about.html" style="margin-top:28px">会社概要を見る <span class="arr" aria-hidden="true">→</span></a>
     </div>
     <figure class="shot rv" style="margin:0">
-      <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に候補者が映っている" width="1600" height="914" loading="lazy">
-      <figcaption>ガチキャリAIの面接画面。候補者はURLひとつで、AIの面接官とオンライン面接ができます。</figcaption>
+      <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映っている" width="1578" height="996" loading="lazy">
+      <figcaption>ガチキャリAIの面接画面。AIの面接官と、声で会話しながら面接を練習できます。</figcaption>
     </figure>
   </div>
 </section>
@@ -185,7 +185,7 @@ nav: home
         <p class="eyebrow">Our services</p>
         <h2>事業内容</h2>
       </div>
-      <p>働きたい人と、人を必要としている企業。そして、夜のお店で働く人たち。AIと人の力で、それぞれの現場を支える3つの事業を展開しています。</p>
+      <p>本気でキャリアに向き合う人と、その人を求める企業。そして、夜のお店で働く人たち。AIと人の力で、それぞれの挑戦を支える3つの事業を展開しています。</p>
     </div>
 
     <div class="biz">
@@ -194,22 +194,22 @@ nav: home
         <div class="rv">
           <span class="biz-num">AIソリューション事業</span>
           <h3>ガチキャリAI</h3>
-          <p class="sub">AI面接・面接練習・採用支援</p>
-          <p class="desc">働く人は、AIの面接官と本番さながらに面接を練習でき、話した内容にもとづく評価をすぐに受け取れます。企業は、書類選考からAI面接、面接後の評価までをひとつの流れで進められます。面接はURLを送るだけで、24時間365日、候補者の都合に合わせて受けてもらえます。</p>
-          <ul><li>AI面接練習</li><li>書類選考AI</li><li>アバター面接AI</li><li>面接後の自動総評</li></ul>
+          <p class="sub">AIで自分を磨く。企業と出会う。</p>
+          <p class="desc">AIの面接官と本番さながらに面接を練習でき、話した言葉を根拠にした評価がすぐに返ってきます。練習の成果は名前を伏せたプロフィールにまとまり、それを見た企業から面談の申し込みが届きます。企業向けには、人材探しのほか、書類選考・AIアバター面接の機能もあります。</p>
+          <ul><li>AI面接練習</li><li>発言を根拠にした評価</li><li>企業との出会い</li><li>書類選考AI</li></ul>
           <a class="btn btn-ink" href="gachicareer-ai.html">ガチキャリAIを詳しく見る <span class="arr" aria-hidden="true">→</span></a>
         </div>
       </article>
 
       <article class="biz-item biz-gc" id="gachicareer">
-        <div class="biz-media rv"><img src="assets/img/climb.webp" alt="山頂へ手を取り合って登る人たちのシルエット" width="1400" height="1050" loading="lazy"></div>
+        <div class="biz-media rv" style="background:#07080F"><img src="assets/img/gc-banner.webp" alt="ガチキャリのバナー。ガチで、キャリア最強になる部隊。" width="1536" height="1024" loading="lazy"></div>
         <div class="rv">
-          <span class="biz-num">人材・営業支援事業</span>
+          <span class="biz-num">キャリアコミュニティ事業</span>
           <h3>ガチキャリ</h3>
-          <p class="sub">採用支援・営業代行・BPO</p>
-          <p class="desc">必要な人材を、必要なタイミングで。採用の支援や営業の代行を通じて企業の成長を支えるとともに、働く人に新しい活躍の場を届けます。</p>
-          <ul><li>採用支援</li><li>各種営業代行</li><li>BPO（業務の代行）</li></ul>
-          <a class="btn btn-line" href="contact.html#gachicareer">ガチキャリについて相談する <span class="arr" aria-hidden="true">→</span></a>
+          <p class="sub">ガチで、キャリア最強になる部隊。</p>
+          <p class="desc">学生・若手社会人のためのキャリアコミュニティです。本気の仲間とつながり、スキル・知識・マインドを磨き、企業やイベントとの接点からチャンスを掴む。本気の一歩で、理想のキャリアを切り拓いていきます。</p>
+          <ul><li>仲間とつながる</li><li>キャリアを強くする</li><li>チャンスを掴む</li><li>未来を切り拓く</li></ul>
+          <a class="btn btn-line" href="gachicareer.html">ガチキャリを詳しく見る <span class="arr" aria-hidden="true">→</span></a>
         </div>
       </article>
 

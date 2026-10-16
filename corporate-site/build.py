@@ -25,6 +25,7 @@ NAV = [
     ("about", "about.html", "会社概要"),
     ("services", "./#services", "事業内容"),
     ("gachicareer-ai", "gachicareer-ai.html", "ガチキャリAI"),
+    ("gachicareer", "gachicareer.html", "ガチキャリ"),
     ("news", "news.html", "お知らせ"),
 ]
 

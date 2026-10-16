@@ -68,7 +68,7 @@ cta: no
         <span style="font-weight:700;font-size:14px">ご用件</span>
         <ul class="topics" id="topics">
           <li><button type="button" data-topic="gachicareer-ai" aria-pressed="false">ガチキャリAIの資料請求・導入</button></li>
-          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（採用支援・営業代行）</button></li>
+          <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（キャリアコミュニティ）</button></li>
           <li><button type="button" data-topic="pos" aria-pressed="false">夜のお店向けPOSシステム</button></li>
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
@@ -113,7 +113,7 @@ cta: no
   var subject=document.getElementById('f-subject');
   var status=document.getElementById('form-status');
   var submit=document.getElementById('f-submit');
-  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（採用支援・営業代行）について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
+  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（キャリアコミュニティ）への参加について',pos:'夜のお店向けPOSシステムについて',recruit:'採用への応募',other:''};
   var topic='';
   var pick=function(key,fill){
     topic=LABELS.hasOwnProperty(key)?key:'';

@@ -1,28 +1,34 @@
 <!--
-title: ガチキャリAI｜AI面接・面接練習・採用支援
-description: ガチキャリAIは、働く人のための本番さながらのAI面接練習と、企業のための書類選考・AIアバター面接・面接後の自動総評をひとつにしたサービスです。
+title: ガチキャリAI｜AIで自分を磨く。企業と出会う。
+description: ガチキャリAIは、AIの面接官と本番さながらに練習できる面接練習サービスです。発言を根拠にした評価で自分を磨き、公開したプロフィールを見た企業と出会えます。企業は書類選考・AIアバター面接・人材探しまでひとつで。
 nav: gachicareer-ai
 -->
 <style>
-.ia-hero{background:#0E0A1A;color:#fff;position:relative;overflow:hidden}
-.ia-hero .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center;padding-block:clamp(48px,7vw,96px)}
-.ia-hero .crumbs{color:rgba(255,255,255,.6)}
-.ia-hero .eyebrow{color:rgba(255,255,255,.65)}
-.ia-hero h1{font-size:clamp(32px,5vw,62px);line-height:1.3;margin-top:14px;letter-spacing:-.01em}
+/* アプリと同じ、黒地に黄緑 */
+.gx{--x-bg:#0F0F0F;--x-card:#1A1A1A;--x-card2:#222;--x-line:#2C2C2C;--x-text:#F0F0F0;--x-sub:#9A9A9A;--x-lime:#C8FF00;--x-purple:#C9A4FF}
+
+.ia-hero{background:#0F0F0F;color:#fff;position:relative;overflow:hidden}
+.ia-hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(32px,5vw,64px);align-items:center;padding-block:clamp(48px,7vw,96px)}
+.ia-hero .crumbs{color:rgba(255,255,255,.55)}
+.brand{display:flex;align-items:center;gap:16px;animation:fade .8s both}
+.brand img{width:76px;height:76px;border-radius:16px}
+.brand b{font-family:var(--ff-display);font-size:24px;display:block;line-height:1.2}
+.brand small{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.08em}
+.ia-hero h1{font-size:clamp(34px,5.2vw,64px);line-height:1.28;margin-top:26px;letter-spacing:-.01em}
 .ia-hero h1 .ln{display:block;overflow:hidden;white-space:nowrap;padding-bottom:.06em}
 .ia-hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
 .ia-hero h1 .ln:nth-child(2)>span{animation-delay:.14s}
 .ia-hero h1 .hl{color:#C8FF00}
-.ia-hero .lead{margin-top:22px;color:rgba(255,255,255,.78);max-width:34em;animation:fade .9s .4s both}
+.ia-hero .lead{margin-top:22px;color:rgba(255,255,255,.75);max-width:32em;animation:fade .9s .4s both}
 .ia-hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;animation:fade .9s .55s both}
-.btn-lime{background:#C8FF00;color:#0E0A1A}
+.btn-lime{background:#C8FF00;color:#0F0F0F}
 .btn-lime:hover{transform:translateY(-2px)}
-.ia-hero .btn-line{border-color:rgba(255,255,255,.6);color:#fff}
-.ia-hero .btn-line:hover{background:#fff;color:var(--ink)}
-.ia-screen{margin:0;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.15);box-shadow:0 40px 80px -30px rgba(0,0,0,.7);animation:pop 1s .35s var(--ease) both}
-.ia-screen figcaption{font-size:12px;color:rgba(255,255,255,.65);padding:10px 14px;background:#17112A}
-.scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 0,rgba(200,255,0,.06) 50%,transparent 100%);height:40%;animation:scan 6s linear infinite}
-@keyframes scan{from{transform:translateY(-100%)}to{transform:translateY(260%)}}
+.ia-hero .btn-line{border-color:rgba(255,255,255,.5);color:#fff}
+.ia-hero .btn-line:hover{background:#fff;color:#0F0F0F}
+.ia-screen{margin:0;border-radius:16px;overflow:hidden;border:1px solid #2C2C2C;box-shadow:0 40px 80px -30px rgba(0,0,0,.8);animation:pop 1s .35s var(--ease) both}
+.ia-screen figcaption{font-size:12px;color:rgba(255,255,255,.6);padding:10px 14px;background:#171717}
+.glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,255,0,.12),transparent 65%);right:-120px;top:-160px;pointer-events:none;animation:drift 12s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-80px,60px)}}
 @media (max-width:900px){.ia-hero .wrap{grid-template-columns:minmax(0,1fr)}}
 
 .split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -33,29 +39,78 @@ nav: gachicareer-ai
 .split span:last-child{font-size:14px;color:var(--ink-2)}
 @media (max-width:700px){.split{grid-template-columns:minmax(0,1fr)}}
 
-.part-title{display:flex;align-items:center;gap:14px;margin-bottom:clamp(28px,4vw,44px)}
+.part-title{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;margin-bottom:clamp(28px,4vw,44px)}
 .part-title span{font-family:var(--ff-mono);font-size:12px;letter-spacing:.14em;background:var(--ink);color:#fff;border-radius:999px;padding:4px 14px}
 .part-title h2{font-size:clamp(26px,3.6vw,40px)}
+.sub-h{font-size:clamp(20px,2.4vw,26px);margin:clamp(56px,7vw,80px) 0 24px}
 
-/* 個人向け：評価シートの例 */
-.indiv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center}
+/* 画面の見本（アプリの見た目に合わせる） */
+.mock{background:var(--x-bg);color:var(--x-text);border-radius:22px;padding:clamp(16px,2.6vw,26px);border:1px solid var(--x-line);box-shadow:0 40px 70px -40px rgba(15,15,15,.6);font-size:14px;line-height:1.75;position:relative}
+.mock-tag{position:absolute;top:-12px;right:20px;background:var(--yellow);color:var(--ink);font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;rotate:2deg;z-index:2}
+.m-card{background:var(--x-card);border:1px solid var(--x-line);border-radius:14px;padding:16px 18px}
+.m-card+.m-card{margin-top:10px}
+.m-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.m-h b{font-size:15px}
+.m-h .pt{color:var(--x-lime);font-weight:700;font-family:var(--ff-latin);white-space:nowrap}
+.m-sub{color:var(--x-sub);font-size:13px}
+.m-label{color:var(--x-lime);font-weight:700;font-size:13px;margin:18px 0 6px}
+.m-label.purple{color:var(--x-purple)}
+.m-quote{border-left:3px solid var(--x-lime);padding:2px 0 2px 10px;margin-top:8px;font-size:13px}
+.pro{font-size:11px;font-weight:700;color:var(--x-purple);background:rgba(201,164,255,.14);border-radius:6px;padding:1px 8px;margin-left:8px}
+
+.indiv{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,5vw,64px);align-items:start}
 .indiv .prose p{color:var(--ink-2)}
-.sheet{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;box-shadow:0 30px 60px -30px rgba(36,17,63,.3);position:relative}
-.sheet-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:12px;margin-bottom:14px}
-.sheet-title{font-weight:700;font-size:15px}
-.sheet-meta{font-family:var(--ff-mono);font-size:11px;color:var(--muted)}
-.quote{font-size:13px;line-height:1.7;background:var(--paper-2);border-radius:10px;padding:10px 12px;margin-bottom:14px}
-.quote small{display:block;font-family:var(--ff-mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;margin-bottom:2px}
-.scores{display:grid;gap:9px;margin:0;padding:0;list-style:none}
-.scores li{display:grid;grid-template-columns:7.4em minmax(0,1fr) 2.6em;align-items:center;gap:10px;font-size:13px}
-.track{display:block;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
-.bar{display:block;height:100%;border-radius:4px;background:var(--ink);transform-origin:left;transform:scaleX(1);transition:transform 1.1s var(--ease)}
-.bar.top{background:var(--green)}
-.sheet.pending .bar{transform:scaleX(0)}
-.score-n{font-family:var(--ff-mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
-.sheet-foot{margin-top:14px;font-size:11px;color:var(--muted)}
-.sticker{position:absolute;top:-13px;right:18px;background:var(--yellow);color:var(--ink);font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;rotate:3deg}
-@media (max-width:860px){.indiv{grid-template-columns:minmax(0,1fr)}}
+.indiv .points{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:10px}
+.indiv .points li{display:flex;gap:12px;align-items:baseline;font-weight:700}
+.indiv .points li::before{content:"";flex:none;width:10px;height:10px;border-radius:3px;background:var(--green);transform:translateY(-1px)}
+@media (max-width:900px){.indiv{grid-template-columns:minmax(0,1fr)}}
+
+.radar-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center}
+.radar{width:100%;max-width:240px;justify-self:center}
+.radar text{fill:#9A9A9A;font-size:9px;font-family:var(--ff-body)}
+.radar .grid{fill:none;stroke:#333;stroke-width:1}
+.radar .shape{fill:rgba(200,255,0,.35);stroke:#C8FF00;stroke-width:2;transform-origin:100px 100px;transition:transform 1.2s var(--ease)}
+.mock.pending .radar .shape{transform:scale(0)}
+.bd{display:grid;gap:8px}
+.bd div{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-bottom:1px solid var(--x-line);padding-bottom:6px}
+.bd b{color:var(--x-lime);font-family:var(--ff-latin)}
+@media (max-width:520px){.radar-row{grid-template-columns:minmax(0,1fr)}}
+
+.bars{display:grid;gap:10px}
+.bars li{display:grid;grid-template-columns:7.2em minmax(0,1fr) 3.6em;gap:12px;align-items:center;font-size:13px}
+.bars{list-style:none;margin:0;padding:0}
+.bars .tr{height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden;display:block}
+.bars .fl{display:block;height:100%;border-radius:4px;background:#C8FF00;transform-origin:left;transition:transform 1.2s var(--ease)}
+.mock.pending .bars .fl{transform:scaleX(0)}
+.bars .v{text-align:right;font-family:var(--ff-latin);font-weight:700;font-variant-numeric:tabular-nums}
+.bars .v small{color:var(--x-sub);font-weight:500}
+
+.trend{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:8px}
+.trend span{flex:1;background:#C8FF00;border-radius:4px 4px 0 0;position:relative;transform-origin:bottom;transition:transform 1s var(--ease);opacity:calc(.35 + var(--i) * .08)}
+.trend span::before{content:attr(data-v);position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--x-sub);font-family:var(--ff-latin)}
+.trend span:last-child{opacity:1}
+.mock.pending .trend span{transform:scaleY(0)}
+
+/* 企業向け：人材カードとチケット */
+.talent{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,48px);align-items:start}
+.t-card .top{display:flex;justify-content:space-between;gap:12px}
+.t-card .ttl{font-weight:700;font-size:16px}
+.t-card .avg{text-align:right;line-height:1.1}
+.t-card .avg b{font-family:var(--ff-latin);font-size:30px;color:var(--x-lime)}
+.t-card .avg small{display:block;font-size:11px;color:var(--x-sub);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;padding:0;list-style:none}
+.chips li{font-size:12px;border:1px solid var(--x-line);border-radius:8px;padding:3px 9px;background:#141414}
+.chips li.s{color:var(--x-lime);border-color:rgba(200,255,0,.35)}
+.ticket{border:1px solid rgba(200,255,0,.35)}
+.ticket ul{margin:8px 0 0;padding-left:1.2em;font-size:13px}
+.ticket .btnx{display:inline-block;margin-top:14px;background:#C8FF00;color:#0F0F0F;font-weight:700;border-radius:10px;padding:10px 16px;font-size:14px}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:h}
+.how li{counter-increment:h;display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;align-items:start}
+.how li::before{content:counter(h);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
+.how b{display:block;font-family:var(--ff-display);font-size:17px}
+.how span{font-size:14px;color:var(--ink-2)}
+.fair{margin-top:20px;padding:14px 16px;border-radius:14px;background:var(--paper-2);font-size:13.5px;color:var(--ink-2)}
+@media (max-width:900px){.talent{grid-template-columns:minmax(0,1fr)}}
 
 .steps4{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:st}
 .steps4 li{counter-increment:st;display:grid;gap:8px;align-content:start;padding-top:18px;border-top:3px solid var(--c)}
@@ -73,13 +128,6 @@ nav: gachicareer-ai
 .flow5 b{font-family:var(--ff-display);font-size:17px}
 @media (max-width:900px){.flow5{grid-template-columns:minmax(0,1fr)}.flow5 li:not(:last-child)::after{right:auto;left:28px;top:auto;bottom:-10px;transform:rotate(135deg)}}
 
-.pains{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.pains article{border-radius:18px;padding:24px;background:#fff;border:1px solid var(--line);display:grid;gap:8px;align-content:start}
-.pains h3{font-size:18px;display:flex;gap:10px;align-items:baseline}
-.pains h3::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--red);transform:translateY(-2px)}
-.pains p{font-size:14.5px;color:var(--ink-2)}
-@media (max-width:860px){.pains{grid-template-columns:minmax(0,1fr)}}
-
 .compare-wrap{overflow-x:auto;border-radius:20px;border:1px solid var(--line)}
 .compare{width:100%;border-collapse:collapse;min-width:620px;background:#fff}
 .compare th,.compare td{padding:18px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
@@ -95,21 +143,9 @@ nav: gachicareer-ai
 .feat .no{font-family:var(--ff-latin);font-weight:800;font-size:13px;color:var(--green-text)}
 .feat h3{font-size:21px}
 .feat ul{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:14.5px;color:var(--ink-2)}
-.feat .pro{font-size:11px;font-weight:700;background:var(--ink);color:#fff;border-radius:6px;padding:1px 7px}
 .feat.wide{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center}
 .feat.wide img{border-radius:14px;border:1px solid var(--line)}
 @media (max-width:860px){.features{grid-template-columns:minmax(0,1fr)}.feat.wide{grid-template-columns:minmax(0,1fr)}}
-
-.reasons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
-.reasons article{padding:24px 24px 26px 0;border-bottom:1px solid var(--line);display:grid;gap:6px;align-content:start}
-.reasons article:not(:nth-child(3n+1)){padding-left:24px;border-left:1px solid var(--line)}
-.reasons h3{font-size:18px}
-.reasons p{font-size:14.5px;color:var(--ink-2)}
-@media (max-width:860px){.reasons{grid-template-columns:minmax(0,1fr)}.reasons article,.reasons article:not(:nth-child(3n+1)){padding:22px 0;border-left:0}}
-
-.fit{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-.fit li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px;font-weight:700}
-.fit li span{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800;color:#fff;background:var(--c)}
 
 .plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
 .plan{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 24px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .3s var(--ease),border-color .3s}
@@ -129,21 +165,21 @@ nav: gachicareer-ai
 </style>
 
 <section class="ia-hero">
-  <div class="scan" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
   <div class="wrap">
     <div>
       <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / ガチキャリAI</nav>
-      <p class="eyebrow">Gachi Career AI</p>
-      <h1><span class="ln"><span>練習も、採用も、</span></span><span class="ln"><span><span class="hl">AI面接</span>でガチに。</span></span></h1>
-      <p class="lead">働く人には、AIの面接官と本番さながらに話せる面接練習を。企業には、書類選考からAI面接、面接後の評価までをひとつの流れで。ガチキャリAIは、面接の両側を支えるサービスです。</p>
+      <div class="brand" style="margin-top:18px"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"><span><b>ガチキャリAI</b><small>GACHI CAREER AI</small></span></div>
+      <h1><span class="ln"><span><span class="hl">AI</span>で自分を磨く。</span></span><span class="ln"><span>企業と出会う。</span></span></h1>
+      <p class="lead">AIの面接官と、本番さながらに面接を練習。あなたが話した言葉を根拠に評価が返ってきます。練習の成果はプロフィールにまとまり、見てくれた企業から声がかかります。</p>
       <div class="actions">
         <a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp" target="_blank" rel="noopener">無料で練習を始める <span class="arr" aria-hidden="true">→</span></a>
-        <a class="btn btn-line" href="contact.html#gachicareer-ai">企業の方：資料請求</a>
+        <a class="btn btn-line" href="#for-companies">企業の方はこちら</a>
       </div>
     </div>
     <figure class="ia-screen">
-      <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に候補者が映り、下に質問の文章が表示されている" width="1600" height="914">
-      <figcaption>実際の面接画面：URLひとつで、AIアバターとオンライン面接ができます</figcaption>
+      <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映り、下に会話が表示されている" width="1578" height="996">
+      <figcaption>実際の面接画面：AIの面接官と、声で会話しながら面接を進めます</figcaption>
     </figure>
   </div>
 </section>
@@ -151,46 +187,74 @@ nav: gachicareer-ai
 <section class="block" style="padding-bottom:0">
   <div class="wrap split">
     <a href="#for-you" class="rv"><span class="who">FOR YOU</span><b>面接の練習をしたい方</b><span>就活・転職の面接を、AIとくり返し練習できます。</span></a>
-    <a href="#for-companies" class="rv"><span class="who">FOR COMPANIES</span><b>採用を効率化したい企業の方</b><span>書類選考・AI面接・評価をまとめて任せられます。</span></a>
+    <a href="#for-companies" class="rv"><span class="who">FOR COMPANIES</span><b>人材を探したい・採用を効率化したい企業の方</b><span>練習を重ねた人材との出会いから、書類選考・AI面接まで。</span></a>
   </div>
 </section>
 
 <!-- ===== 個人向け ===== -->
-<section class="block" id="for-you">
+<section class="block gx" id="for-you">
   <div class="wrap">
-    <div class="part-title rv"><span>個人向け</span><h2>面接を、何度でも本番さながらに。</h2></div>
+    <div class="part-title rv"><span>個人向け</span><h2>面接のたびに、何が良くて何が足りないかが分かる。</h2></div>
     <div class="indiv">
-      <div class="prose rv">
-        <p>志望する職種に合わせて、AIの面接官が質問します。声で答えるだけで練習でき、終わるとすぐに評価と改善点が返ってきます。</p>
-        <p>評価は「伝える力」「論理的に考える力」など7つの力を5段階で。点数の根拠として、あなたが実際に話した言葉を引用します。根拠にできる発言がない力は、評価しません。</p>
-      </div>
-      <aside class="sheet rv" aria-label="評価シートの例">
-        <span class="sticker">評価の例</span>
-        <div class="sheet-head"><span class="sheet-title">面接練習の評価</span><span class="sheet-meta">7つの力 / 5段階</span></div>
-        <p class="quote"><small>根拠になった発言</small>「売上が落ちた原因を自分で数字から洗い出して、チームに改善案を出しました」</p>
-        <ul class="scores">
-          <li><span>伝える力</span><span class="track"><span class="bar" style="width:80%"></span></span><span class="score-n">4/5</span></li>
-          <li><span>論理的に考える力</span><span class="track"><span class="bar top" style="width:100%"></span></span><span class="score-n">5/5</span></li>
-          <li><span>主体性</span><span class="track"><span class="bar top" style="width:100%"></span></span><span class="score-n">5/5</span></li>
-          <li><span>協調性</span><span class="track"><span class="bar" style="width:60%"></span></span><span class="score-n">3/5</span></li>
-          <li><span>粘り強さ</span><span class="track"><span class="bar" style="width:80%"></span></span><span class="score-n">4/5</span></li>
-          <li><span>誠実さ</span><span class="track"><span class="bar" style="width:80%"></span></span><span class="score-n">4/5</span></li>
-          <li><span>学ぶ姿勢</span><span class="track"><span class="bar" style="width:60%"></span></span><span class="score-n">3/5</span></li>
+      <div class="rv">
+        <div class="prose">
+          <p>志望する職種や会社に合わせて、AIの面接官が質問します。声で答えるだけで練習でき、終わるとすぐに評価が返ってきます。</p>
+          <p>評価は、総合点と4つの観点の点数、そして「伝える力」「主体性」など7つの力の5段階評価。点数の根拠として、あなたが実際に話した言葉を引用します。根拠にできる発言がない力は、評価しません。</p>
+        </div>
+        <ul class="points">
+          <li>総評と、4つの観点のスコア</li>
+          <li>7つの力と、根拠になった発言</li>
+          <li>良かった点・改善するとよい点</li>
+          <li>同じ質問への「より良い回答例」</li>
+          <li>性格・特性の分析（プロプラン）</li>
         </ul>
-        <p class="sheet-foot">本人の発言を根拠にできない項目は評価しません</p>
-      </aside>
+      </div>
+
+      <div class="mock rv" aria-label="個人向けの評価画面の見本">
+        <span class="mock-tag">画面の見本（例）</span>
+        <div class="m-h"><b>営業職・面接練習　2026/10/12</b><span class="pt">62点</span></div>
+        <p class="m-label">総評</p>
+        <p>接客の現場で身につけた観察力と、お客様の声を数字で振り返る習慣ははっきり伝わった。一方で志望動機は「人と関わる仕事がしたい」にとどまり、この会社を選ぶ理由が浅い。結論から話す型を身につければ、印象は大きく変わる段階にある。</p>
+        <p class="m-label" style="color:var(--x-text)">スコア内訳</p>
+        <div class="radar-row">
+          <svg class="radar" viewBox="0 0 200 200" aria-hidden="true">
+            <polygon class="grid" points="100,20 180,100 100,180 20,100"/>
+            <polygon class="grid" points="100,47 153,100 100,153 47,100"/>
+            <polygon class="grid" points="100,73 127,100 100,127 73,100"/>
+            <line class="grid" x1="100" y1="20" x2="100" y2="180"/><line class="grid" x1="20" y1="100" x2="180" y2="100"/>
+            <polygon class="shape" points="100,44 136,100 100,140 40,100"/>
+            <text x="100" y="12" text-anchor="middle">自己PR</text>
+            <text x="196" y="103" text-anchor="end">志望動機</text>
+            <text x="100" y="196" text-anchor="middle">事前準備</text>
+            <text x="4" y="103">具体性</text>
+          </svg>
+          <div class="bd">
+            <div><span>自己PR・強みの伝え方</span><b>70</b></div>
+            <div><span>志望動機の説得力</span><b>45</b></div>
+            <div><span>事前準備・企業研究度</span><b>50</b></div>
+            <div><span>回答の具体性</span><b>75</b></div>
+          </div>
+        </div>
+        <p class="m-label">能力の評価（あなたの発言が根拠）</p>
+        <div class="m-card"><div class="m-h"><b>主体性</b><span class="pt">4 / 5</span></div><p class="m-sub">指示を待たずに売り場の改善に動いた経験が、具体的に語られている。</p><p class="m-quote">「店長に言われる前に、自分で在庫の並べ方を変えました」</p></div>
+        <div class="m-card"><div class="m-h"><b>伝える力</b><span class="pt">3 / 5</span></div><p class="m-sub">内容は伝わるが、結論が後回しになり話が長くなりがち。</p><p class="m-quote">「えっと、その時はいろいろあったんですけど…」</p></div>
+        <p class="m-label purple">性格・特性分析<span class="pro">PRO</span></p>
+        <div class="m-card"><b>観察してから動くタイプ</b><p class="m-sub">相手の様子をよく見てから行動を決める傾向が、複数の回答に一貫して表れている。</p></div>
+        <p class="m-label" style="color:var(--x-text)">より良い回答例</p>
+        <div class="m-card"><p class="m-sub">Q. なぜ当社を志望したのですか？</p><p>御社の店舗はお客様の声を商品づくりに直接活かしている点に惹かれました。私は販売の現場で、お客様の声を毎週数字にまとめて売り場を変えてきました。その経験を、より大きな規模で活かしたいと考えています。</p></div>
+      </div>
     </div>
 
-    <h3 class="rv" style="font-size:clamp(20px,2.4vw,26px);margin:clamp(56px,7vw,80px) 0 28px">練習が、そのまま次のチャンスになる</h3>
+    <h3 class="sub-h rv">練習が、そのまま次のチャンスになる</h3>
     <ol class="steps4">
       <li class="rv"><b>練習する</b><span>AIの面接官と、声で本番さながらに話します。</span></li>
       <li class="rv"><b>評価を受け取る</b><span>7つの力を5段階で。根拠になった発言も示します。</span></li>
-      <li class="rv"><b>プロフィールを公開</b><span>評価をまとめたプロフィールを、公開したい人だけが公開します。</span></li>
-      <li class="rv"><b>オファーが届く</b><span>プロフィールを見た企業から、直接メッセージが届きます。</span></li>
+      <li class="rv"><b>プロフィールを公開</b><span>評価をまとめたプロフィールを、公開したい人だけが公開します。名前は伏せて表示されます。</span></li>
+      <li class="rv"><b>企業と出会う</b><span>プロフィールを見た企業から、面談の申し込みが届きます。</span></li>
     </ol>
-    <p class="note rv">当社は推薦や仲介を行いません。企業にかかる料金はプロフィールの閲覧チケットだけで、成功報酬はいただいていません。年齢・性別での絞り込みもできない仕組みです。</p>
+    <p class="note rv">当社は推薦や仲介を行いません。公開するかどうかは本人が決め、いつでも非公開に戻せます。</p>
 
-    <h3 class="rv" style="font-size:clamp(20px,2.4vw,26px);margin:clamp(56px,7vw,80px) 0 28px">個人向けの料金</h3>
+    <h3 class="sub-h rv">個人向けの料金</h3>
     <div class="plans">
       <div class="plan rv">
         <span class="name">無料</span><span class="for">まずは試してみたい方に</span>
@@ -208,20 +272,65 @@ nav: gachicareer-ai
         <span class="badge">おすすめ</span>
         <span class="name">プロ</span><span class="for">本番まで毎日練習したい方に</span>
         <span class="price">¥2,980<small>／月（税込）</small></span>
-        <ul><li>月30回まで（1日3回）</li><li>1回30分まで</li><li>書類をアップロードして面接</li></ul>
+        <ul><li>月30回まで（1日3回）</li><li>1回30分まで</li><li>書類をアップロードして面接</li><li>性格・特性の分析</li></ul>
         <a class="btn btn-ink" href="https://interview-copilot-ai.akitogroup.jp/pricing" target="_blank" rel="noopener">申し込む</a>
       </div>
     </div>
-    <p class="plans-note">評価の中身や、プロフィール公開・オファーの機能はどのプランでも同じです。</p>
+    <p class="plans-note">7つの力の評価や、プロフィール公開・企業との出会いの機能はどのプランでも同じです。</p>
   </div>
 </section>
 
 <!-- ===== 企業向け ===== -->
-<section class="block tint" id="for-companies">
+<section class="block tint gx" id="for-companies">
   <div class="wrap">
-    <div class="part-title rv"><span>企業向け</span><h2>面接に人を割かなくても、採用は止まらない。</h2></div>
-    <div class="sec-head rv" style="margin-bottom:32px">
-      <div><p class="eyebrow">Service flow</p><h3 style="font-size:clamp(22px,2.8vw,30px);margin-top:10px">応募から評価・スカウトまで、迷わず一本道</h3></div>
+    <div class="part-title rv"><span>企業向け</span><h2>練習を重ねた人材と、発言を根拠に出会う。</h2></div>
+    <div class="talent">
+      <div class="rv">
+        <ol class="how">
+          <li><span><b>人材を探す</b><span>AI面接の練習を重ね、プロフィールの公開に同意した人を探せます。名前は伏せて表示され、職種・強み・力の平均などで絞り込めます。</span></span></li>
+          <li><span><b>チケットで詳しく見る</b><span>気になる人はチケット（1人 10,000円・税込・買い切り）で、名前・面接ごとの詳しい評価と会話・録画が見られます。</span></span></li>
+          <li><span><b>面談を申し込む</b><span>相手が承諾すると、そのままメッセージでやり取りできます。採用が決まっても、追加の料金はかかりません。</span></span></li>
+        </ol>
+        <p class="fair">公正な採用のため、年齢・性別などでの絞り込みはできません。評価はすべて面接での本人の発言にもとづくもので、根拠がない力は評価しません。</p>
+      </div>
+      <div class="mock rv" aria-label="企業向けの人材ページの見本">
+        <span class="mock-tag">画面の見本（例）</span>
+        <div class="m-card t-card">
+          <div class="top">
+            <div><p class="ttl">販売3年、店舗リーダー</p><p class="m-sub">No.3F82K1 ・ 社会人（転職活動中）</p></div>
+            <div class="avg"><b>3.4</b><small>力の平均（5点満点）</small></div>
+          </div>
+          <p style="margin-top:10px;font-size:13px">アパレル販売で店舗リーダーを務め、お客様の声を数字で振り返って売り場を改善してきた人物。観察してから動く慎重さと、任されたことをやり切る粘り強さが、複数の面接で一貫して確認できる。</p>
+          <ul class="chips"><li class="s">観察力と気配り</li><li class="s">数字で振り返る習慣</li><li>主体性 4.0</li><li>粘り強さ 3.5</li><li>誠実さ 4.0</li></ul>
+          <p class="m-sub">希望：企画・マーケティング ／ 大阪　・　面接 8回　・　録画あり</p>
+        </div>
+        <div class="m-card ticket">
+          <b style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C8FF00" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>チケットで詳しく見る</b>
+          <ul><li>お名前</li><li>面接ごとの詳しい評価と、面接の会話すべて</li><li>面接の録画</li><li>面談の申し込み</li></ul>
+          <span class="btnx">チケットを購入する（10,000円）</span>
+        </div>
+        <div class="m-card">
+          <b>能力の評価（8回の面接から）</b>
+          <ul class="bars" style="margin-top:10px">
+            <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3.0<small> /5</small></span></li>
+            <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4.0<small> /5</small></span></li>
+            <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:70%"></span></span><span class="v">3.5<small> /5</small></span></li>
+            <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4.0<small> /5</small></span></li>
+          </ul>
+          <b style="display:block;margin-top:18px">総合点の推移</b>
+          <div class="trend" aria-label="総合点の推移の例">
+            <span style="height:41%;--i:0" data-v="41"></span><span style="height:45%;--i:1" data-v="45"></span><span style="height:52%;--i:2" data-v="52"></span><span style="height:49%;--i:3" data-v="49"></span><span style="height:58%;--i:4" data-v="58"></span><span style="height:63%;--i:5" data-v="63"></span><span style="height:60%;--i:6" data-v="60"></span><span style="height:66%;--i:7" data-v="66"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div><p class="eyebrow">For companies</p><h2>選考そのものも、AIに任せる。</h2></div>
       <p>書類選考・面接日程の調整・評価のまとめ。ばらばらになりがちな採用の工程を、ひとつの流れでつなぎます。</p>
     </div>
     <ol class="flow5">
@@ -229,25 +338,8 @@ nav: gachicareer-ai
       <li class="rv"><b>書類選考AI</b></li>
       <li class="rv"><b>アバター面接AI</b></li>
       <li class="rv"><b>面接後の自動総評</b></li>
-      <li class="rv"><b>スカウト・母集団形成</b></li>
+      <li class="rv"><b>人材探し・母集団形成</b></li>
     </ol>
-  </div>
-</section>
-
-<section class="block">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">Challenge</p><h2>こんな採用の悩み、<br>ありませんか？</h2></div>
-      <p>現場の採用担当者から、こんな声を数多くいただいています。</p>
-    </div>
-    <div class="pains">
-      <article class="rv"><h3>採用担当の工数が足りない</h3><p>書類選考や一次面接の日程調整・実施だけで、担当者が疲れきってしまう。</p></article>
-      <article class="rv"><h3>評価基準が人によって違う</h3><p>面接官によって評価がばらばらで、合否の判断に一貫性が保てない。</p></article>
-      <article class="rv"><h3>応募が多いほど選考が重い</h3><p>応募が集まるほど、書類選考だけで丸1日つぶれてしまうことも。</p></article>
-      <article class="rv"><h3>遠方の応募者との調整が大変</h3><p>面接のための移動や日程調整が、遠方の候補者ほどネックになる。</p></article>
-      <article class="rv"><h3>「なんとなく良さそう」で採用</h3><p>感覚頼りの採用判断が、早期離職につながってしまうことがある。</p></article>
-      <article class="rv"><h3>そもそも応募が集まらない</h3><p>良い人材がどこにいるか分からず、応募を集める入口の時点で苦労する。</p></article>
-    </div>
   </div>
 </section>
 
@@ -277,7 +369,7 @@ nav: gachicareer-ai
   <div class="wrap">
     <div class="sec-head rv">
       <div><p class="eyebrow">Features</p><h2>企業向けの機能</h2></div>
-      <p>選考・面接・評価・スカウトまで、採用に必要な機能をひとつのサービスに。</p>
+      <p>人材探しから選考・面接・評価まで、採用に必要な機能をひとつのサービスに。</p>
     </div>
     <div class="features">
       <article class="feat rv">
@@ -285,9 +377,8 @@ nav: gachicareer-ai
         <ul>
           <li>複数の履歴書PDFをまとめてアップロードして自動処理</li>
           <li>必須条件・歓迎条件・求める人物像を、チェックと優先順位・配点で細かく設定</li>
-          <li>自社の事業内容・社風・活躍している社員の特徴・採用で失敗した傾向などを評価軸に反映</li>
+          <li>自社の事業内容・社風・活躍している社員の特徴などを評価軸に反映</li>
           <li>候補者をA〜Dランクで自動採点し、根拠になった書類の記述も表示</li>
-          <li>結果はPDFで保存・共有できる</li>
         </ul>
       </article>
       <article class="feat rv">
@@ -306,73 +397,28 @@ nav: gachicareer-ai
             <li>総合スコア・リスクスコア・一貫性スコア・企業とのフィット度を自動で算出</li>
             <li>積極性・誠実さ・定着可能性・即戦力度・コミュ力・成長性・ストレス耐性をレーダーチャートで表示</li>
             <li>離職リスクを、％と要因つきで数値化</li>
-            <li>意思決定のスタイル・組織への適応・成果への向き合い方・マネジメントのスタイルなど、人物像のモデルを提示</li>
             <li>次の面接で確かめるべき点を自動で提案</li>
-            <li>表情から緊張度や誠実さを読み取るAI表情解析、声のトーンや話し方から感情を読み取る音声AI分析にも対応</li>
           </ul>
         </div>
-        <img src="assets/img/report.webp" alt="面接後の評価レポート。総合評価52点、レーダーチャート、離職リスク78％などが表示されている" width="1000" height="1043" loading="lazy">
+        <img src="assets/img/report.webp" alt="面接後の評価レポート。総合評価、レーダーチャート、離職リスクなどが表示されている" width="1000" height="1043" loading="lazy">
       </article>
       <article class="feat rv">
-        <span class="no">04</span><h3>企業情報の自動収集AI</h3>
+        <span class="no">04</span><h3>人材を探す</h3>
+        <ul><li>練習を重ねて公開に同意した人材を、職種・強み・力の平均で探せる</li><li>チケット（1人 10,000円・税込）で詳しい評価・録画を見て、面談を申し込める</li></ul>
+      </article>
+      <article class="feat rv">
+        <span class="no">05</span><h3>企業情報の自動収集AI</h3>
         <ul><li>企業名を入れるだけで、AIがWebを調べて事業内容・社風などの項目を自動で入力</li></ul>
       </article>
       <article class="feat rv">
-        <span class="no">05</span><h3>選考履歴・面接履歴・候補者比較</h3>
+        <span class="no">06</span><h3>選考履歴・候補者比較</h3>
         <ul><li>過去の選考結果・面接結果を一覧で確認、PDF出力もできる</li><li>複数の候補者を横並びで比べられる</li></ul>
-      </article>
-      <article class="feat rv">
-        <span class="no">06</span><h3>採用の完全自動化</h3>
-        <ul>
-          <li>応募 → 書類の自動収集 → AIによる自動選考 → 条件を満たした候補者へ面接URLを自動で発行・送信（企業側で選んで発行することもできる）→ 面接後は総評も自動で発行</li>
-          <li>採用担当者はほとんど手を動かさず、良い候補者にだけ時間を使える</li>
-        </ul>
       </article>
       <article class="feat rv">
         <span class="no">07</span><h3>求人掲載</h3>
         <ul><li>媒体費用なしで、自社の求人をプラットフォームに掲載できる</li></ul>
       </article>
-      <article class="feat rv">
-        <span class="no">08</span><h3>人材プロフィール・スカウト</h3>
-        <ul>
-          <li>面接練習の評価をもとに、本人が公開したプロフィールを閲覧できる</li>
-          <li>気になる人材に直接オファーを送り、メッセージでやりとりできる</li>
-        </ul>
-      </article>
     </div>
-  </div>
-</section>
-
-<section class="block tint">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">Why Gachi Career AI</p><h2>選ばれる理由</h2></div>
-      <p>採用の「入口」から、その先の「定着」まで見据えた設計です。</p>
-    </div>
-    <div class="reasons">
-      <article class="rv"><h3>応募からスカウトまで一気通貫</h3><p>選考・面接・評価・母集団形成まで、採用のすべてをAIがつなぎます。</p></article>
-      <article class="rv"><h3>評価基準が人によらない</h3><p>企業ごとの評価軸をAIが一貫して当てはめ、面接官による判断のブレを抑えます。</p></article>
-      <article class="rv"><h3>離職リスクまで数値化</h3><p>採用のその先、定着まで見据えたスコアで、ミスマッチを未然に防ぎます。</p></article>
-      <article class="rv"><h3>表情・声のトーンまで解析</h3><p>AI表情解析・音声AI分析を備えた、次世代の面接体験を提供します。</p></article>
-      <article class="rv"><h3>スカウトで人材を獲りに行ける</h3><p>良い人材を待つだけでなく、こちらから直接アプローチできます。</p></article>
-      <article class="rv"><h3>候補者の都合に合わせて24時間</h3><p>URLを発行するだけで、365日いつでも候補者の都合に合わせて面接ができます。</p></article>
-      <article class="rv"><h3>採用までの期間を短く</h3><p>日程調整はゼロ。URLを送るだけで、最短で翌日には面接が終わります。</p></article>
-      <article class="rv"><h3>採用コストを削減</h3><p>面接担当者の人件費や調整の手間がかかりません。月額なしの従量課金から始められます。</p></article>
-      <article class="rv"><h3>矛盾・リスクを自動で検出</h3><p>書類の記載と面接での回答の食い違いを、面接全体を通してチェックします。</p></article>
-    </div>
-  </div>
-</section>
-
-<section class="block">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">For these companies</p><h2>こんな企業におすすめです</h2></div>
-    </div>
-    <ul class="fit">
-      <li class="rv"><span style="--c:var(--red)">A</span>採用担当が少人数、または専任者がいない中小企業・スタートアップ</li>
-      <li class="rv"><span style="--c:var(--yellow-text)">B</span>応募者は多いのに、選考にかけられる人手が足りない企業</li>
-      <li class="rv"><span style="--c:var(--green)">C</span>フルコミッション営業や多拠点展開などで、大量かつスピーディーな採用が必要な企業</li>
-    </ul>
   </div>
 </section>
 
@@ -380,7 +426,7 @@ nav: gachicareer-ai
   <div class="wrap">
     <div class="sec-head rv">
       <div><p class="eyebrow">Pricing</p><h2>企業向けの料金</h2></div>
-      <p>書類選考AIは、どのプランでも無料・無制限。まずは月額なしの従量課金で試してから、月の面接件数に合わせてプランを選べます。</p>
+      <p>書類選考AIは、どのプランでも無料・無制限。まずは月額なしの従量課金で試してから、月の面接件数に合わせてプランを選べます。人材のチケットは、どのプランでも1人 10,000円（税込・買い切り）です。</p>
     </div>
     <div class="plans">
       <div class="plan rv">

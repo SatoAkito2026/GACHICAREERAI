@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ガチキャリ｜学生・若手社会人のためのキャリアコミュニティ｜AKITOグループ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="ガチキャリは、学生・若手社会人のためのキャリアコミュニティ。ガチで、キャリア最強になる部隊。本気の仲間とつながり、キャリアを強くし、企業やイベントとの接点からチャンスを掴む。">
+<link rel="canonical" href="https://akitogroup.jp/gachicareer">
+<meta property="og:title" content="ガチキャリ｜学生・若手社会人のためのキャリアコミュニティ｜AKITOグループ">
+<meta property="og:description" content="ガチキャリは、学生・若手社会人のためのキャリアコミュニティ。ガチで、キャリア最強になる部隊。本気の仲間とつながり、キャリアを強くし、企業やイベントとの接点からチャンスを掴む。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://akitogroup.jp/gachicareer">
+<meta property="og:image" content="https://akitogroup.jp/assets/img/logo-full.webp">
+<meta name="theme-color" content="#24113F">
+<link rel="icon" href="assets/img/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="assets/img/logo.webp" alt="AKITOグループ" width="600" height="255"></a>
+    <nav class="nav" id="nav" aria-label="メインメニュー">
+      <a href="about.html">会社概要</a>
+      <a href="./#services">事業内容</a>
+      <a href="gachicareer-ai.html">ガチキャリAI</a>
+      <a href="gachicareer.html" aria-current="page">ガチキャリ</a>
+      <a href="news.html">お知らせ</a>
+      <a class="nav-cta" href="contact.html">お問い合わせ</a>
+    </nav>
+    <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">メニュー</button>
+  </div>
+</header>
+
+<main id="main">
+<style>
+/* ポスターと同じ、黒地に金と青 */
+.gc{--gold:#E3B341;--gold-2:#F6D77A;--blue:#2F6BFF;--night:#07080F;--night-2:#10131F;background:var(--night);color:#F2F2F2}
+.gc a{color:inherit}
+.gc-hero{position:relative;overflow:hidden;background:radial-gradient(60% 80% at 85% 20%,rgba(47,107,255,.28),transparent 70%),radial-gradient(50% 70% at 10% 90%,rgba(227,179,65,.18),transparent 70%),var(--night)}
+.gc-hero .wrap{position:relative;z-index:1;padding-block:clamp(48px,7vw,96px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(28px,5vw,64px);align-items:center}
+.gc-visual{margin:0;border-radius:22px;overflow:hidden;border:1px solid rgba(227,179,65,.35);box-shadow:0 40px 90px -30px rgba(47,107,255,.55);animation:pop 1s .3s var(--ease) both}
+.gc-visual img{width:100%;transform:scale(1.06);animation:zoom 10s ease-out .3s forwards}
+@keyframes zoom{to{transform:scale(1)}}
+@media (max-width:900px){.gc-hero .wrap{grid-template-columns:minmax(0,1fr)}}
+.gc-hero .crumbs{color:rgba(255,255,255,.55)}
+.gc-logo{width:84px;height:84px;border-radius:50%;animation:spin-in 1.1s var(--ease) both}
+@keyframes spin-in{from{transform:rotate(-120deg) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.gc-en{font-family:var(--ff-latin);font-weight:800;letter-spacing:.24em;font-size:13px;margin-top:22px;animation:fade .8s .2s both}
+.gc-en .g{color:var(--gold)}.gc-en .b{color:var(--blue)}
+.gc-hero h1{font-size:clamp(34px,4.6vw,64px);line-height:1.2;margin-top:10px;letter-spacing:-.01em}
+.gc-hero h1 .ln{display:block;overflow:hidden;white-space:nowrap;padding-bottom:.08em}
+.gc-hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
+.gc-hero h1 .ln:nth-child(2)>span{animation-delay:.15s}
+.gold-text{background:linear-gradient(100deg,#B9862A 0%,var(--gold-2) 30%,var(--gold) 50%,#FFF0B8 60%,#B9862A 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{from{background-position:120% 0}to{background-position:-120% 0}}
+.gc-hero .lead{margin-top:18px;max-width:30em;color:rgba(255,255,255,.8);animation:fade .9s .45s both}
+.gc-hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;animation:fade .9s .6s both}
+.btn-gold{background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#1A1203}
+.btn-gold:hover{transform:translateY(-2px)}
+.gc .btn-line{border-color:rgba(255,255,255,.5);color:#fff}
+.gc .btn-line:hover{background:#fff;color:var(--night)}
+
+.gc-block{padding-block:clamp(72px,10vw,120px)}
+.gc .eyebrow{color:rgba(255,255,255,.6)}
+.gc .eyebrow::before{background:linear-gradient(90deg,var(--gold) 0 50%,var(--blue) 50%)}
+.gc h2{font-size:clamp(28px,4vw,46px);margin-top:12px}
+
+.pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:clamp(36px,5vw,56px)}
+.pillar{position:relative;padding:28px 22px 26px;border-radius:20px;background:linear-gradient(180deg,var(--night-2),#0B0D17);border:1px solid rgba(227,179,65,.25);display:grid;gap:10px;align-content:start;overflow:hidden;transition:transform .35s var(--ease),border-color .35s}
+.pillar::before{content:"";position:absolute;inset:-1px;border-radius:20px;background:linear-gradient(135deg,rgba(227,179,65,.25),transparent 40%,transparent 60%,rgba(47,107,255,.35));opacity:0;transition:opacity .35s}
+.pillar:hover{transform:translateY(-6px);border-color:var(--gold)}
+.pillar:hover::before{opacity:1}
+.hex{width:64px;height:64px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(135deg,var(--gold),#8A6420);position:relative}
+.hex::after{content:"";position:absolute;inset:2px;clip-path:inherit;background:var(--night)}
+.hex svg{position:relative;z-index:1;width:28px;height:28px;fill:none;stroke:var(--gold-2);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pillar h3{font-size:19px;color:var(--gold-2);position:relative}
+.pillar p{font-size:14px;color:rgba(255,255,255,.72);position:relative}
+@media (max-width:900px){.pillars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.pillars{grid-template-columns:minmax(0,1fr)}}
+
+.who{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center}
+.who figure{margin:0;border-radius:24px;overflow:hidden;border:1px solid rgba(227,179,65,.3);box-shadow:0 40px 80px -40px rgba(47,107,255,.5)}
+.who p{color:rgba(255,255,255,.78)}
+.who ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px}
+.who li{display:flex;gap:12px;align-items:baseline;font-weight:700}
+.who li::before{content:"";flex:none;width:10px;height:10px;transform:rotate(45deg) translateY(-2px);background:var(--gold)}
+@media (max-width:900px){.who{grid-template-columns:minmax(0,1fr)}.who figure{max-width:420px}}
+
+.link-ai{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px 28px;align-items:center;border-radius:24px;padding:clamp(22px,4vw,36px);background:#0F0F0F;border:1px solid #2C2C2C}
+.link-ai img{width:84px;height:84px;border-radius:18px}
+.link-ai b{font-family:var(--ff-display);font-size:clamp(19px,2.4vw,24px)}
+.link-ai p{color:rgba(255,255,255,.72);font-size:14.5px;margin-top:4px}
+.btn-lime{background:#C8FF00;color:#0F0F0F}
+@media (max-width:760px){.link-ai{grid-template-columns:minmax(0,1fr)}}
+
+.gc-final{text-align:center;padding-block:clamp(72px,10vw,120px);position:relative;overflow:hidden}
+.gc-final h2{font-size:clamp(30px,5vw,58px)}
+.gc-final h2 .blue{color:#6F9BFF}
+.gc-final p{margin-top:14px;color:rgba(255,255,255,.7)}
+.gc-final .btn{margin-top:30px}
+.streak{position:absolute;left:-10%;right:-10%;top:50%;height:120px;transform:translateY(-50%) rotate(-6deg);background:linear-gradient(90deg,transparent,rgba(47,107,255,.35) 30%,rgba(227,179,65,.3) 70%,transparent);filter:blur(30px);pointer-events:none}
+</style>
+
+<div class="gc">
+<section class="gc-hero">
+  <div class="wrap">
+    <div>
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / ガチキャリ</nav>
+    <img class="gc-logo" src="assets/img/gc-logo.webp" alt="ガチキャリのロゴ" width="600" height="600" style="margin-top:20px">
+    <p class="gc-en"><span class="g">GACHI</span> <span class="b">CAREER</span></p>
+    <h1><span class="ln"><span>ガチで、キャリア</span></span><span class="ln"><span><span class="gold-text">最強</span>になる部隊。</span></span></h1>
+    <p class="lead">ガチキャリは、学生・若手社会人のためのキャリアコミュニティです。本気の仲間と出会い、キャリアを強くし、チャンスを掴みにいく。</p>
+    <div class="actions">
+      <a class="btn btn-gold" href="contact.html#gachicareer">参加について問い合わせる <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-line" href="#pillars">ガチキャリでできること</a>
+    </div>
+    </div>
+    <figure class="gc-visual"><img src="assets/img/gc-banner.webp" alt="ガチキャリのバナー。前を見つめる若者たちと「ガチで、キャリア最強になる部隊。」の文字" width="1536" height="1024"></figure>
+  </div>
+</section>
+
+<section class="gc-block" id="pillars">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">What we do</p>
+      <h2>本気の一歩を、4つの力で後押しする。</h2>
+    </div>
+    <div class="pillars">
+      <article class="pillar rv">
+        <span class="hex"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14.5 14.6c.8-.4 1.6-.6 2.5-.6 2.2 0 3.8 1.5 4.3 4"/></svg></span>
+        <h3>仲間とつながる</h3><p>本気の仲間が見つかる。同じ熱量で挑む仲間と、刺激し合える場所です。</p>
+      </article>
+      <article class="pillar rv">
+        <span class="hex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V14M9.5 20v-9M15 20v-6M20.5 20V8M3 10l6-5 5 4 7-6M16 3h5v5"/></svg></span>
+        <h3>キャリアを強くする</h3><p>スキル・知識・マインドを成長させる。面接や仕事で通用する力を、実践で鍛えます。</p>
+      </article>
+      <article class="pillar rv">
+        <span class="hex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 12 4-4 4 2 3-2 4 2 5 2M6 8v6l5 4c.8.6 1.8.6 2.5 0L21 12M9 15l2 2M12 13l2 2"/></svg></span>
+        <h3>チャンスを掴む</h3><p>企業・イベントとの接点をつくる。待つのではなく、自分から機会を取りにいきます。</p>
+      </article>
+      <article class="pillar rv">
+        <span class="hex"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/><path d="m16 8 4-4M18 4h2v2"/></svg></span>
+        <h3>未来を切り拓く</h3><p>理想のキャリアを実現する。なりたい自分に向けて、一歩ずつ形にしていきます。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="gc-block" style="padding-top:0">
+  <div class="wrap who">
+    <div class="rv">
+      <p class="eyebrow">For you</p>
+      <h2>学生・若手社会人の、<br>キャリアの「部隊」。</h2>
+      <p style="margin-top:20px">就活や転職、これからの働き方。一人で考えていると、どうしても迷いが生まれます。ガチキャリは、同じように本気で挑む仲間と一緒に、キャリアを強くしていくためのコミュニティです。</p>
+      <ul>
+        <li>就職活動中の学生</li>
+        <li>キャリアアップや転職を考えている若手社会人</li>
+        <li>本気で挑める仲間がほしい人</li>
+      </ul>
+    </div>
+    <figure class="rv"><img src="assets/img/gc-poster.webp" alt="ガチキャリのポスター。ガチで、キャリア最強になる部隊。本気の一歩が、未来を変える。" width="1000" height="1500" loading="lazy"></figure>
+  </div>
+</section>
+
+<section class="gc-block" style="padding-top:0">
+  <div class="wrap">
+    <div class="link-ai rv">
+      <img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy">
+      <div><b>面接の練習は、ガチキャリAIで。</b><p>AIの面接官と本番さながらに練習して、発言を根拠にした評価で自分を磨けます。</p></div>
+      <a class="btn btn-lime" href="gachicareer-ai.html">ガチキャリAIを見る <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="gc-final">
+  <div class="streak" aria-hidden="true"></div>
+  <div class="wrap rv" style="position:relative">
+    <h2>本気の一歩が、<br><span class="gold-text">未来</span>を<span class="blue">変える。</span></h2>
+    <p>学生・若手社会人のためのキャリアコミュニティ</p>
+    <a class="btn btn-gold" href="contact.html#gachicareer">参加について問い合わせる <span class="arr" aria-hidden="true">→</span></a>
+  </div>
+</section>
+</div>
+</main>
+
+<section class="cta-band" aria-label="お問い合わせ">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Contact</p>
+      <h2 style="margin-top:12px">まずは、お気軽にご連絡ください。</h2>
+      <p>ガチキャリAIの導入・資料請求、ガチキャリへの参加やPOSシステムのご相談、採用へのご応募など、どんなことでも受け付けています。</p>
+    </div>
+    <div class="cta-actions rv">
+      <a class="btn btn-ink" href="contact.html">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+      <a class="cta-tel" href="tel:08024204900"><b>080-2420-4900</b><small>年中無休・24時間受付</small></a>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="foot-stripe"></div>
+  <div class="site-foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <span class="logo-chip"><img src="assets/img/logo-full.webp" alt="AKITOグループ　愛ある事業で煌めくあなたに届ける未来" width="900" height="352"></span>
+          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休・24時間受付）<br>info@akitogroup.jp</p>
+        </div>
+        <div class="foot-col">
+          <h4>COMPANY</h4>
+          <ul>
+            <li><a href="./">トップ</a></li>
+            <li><a href="about.html">会社概要・代表挨拶</a></li>
+            <li><a href="news.html">お知らせ</a></li>
+            <li><a href="contact.html">お問い合わせ</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h4>SERVICES</h4>
+          <ul>
+            <li><a href="gachicareer-ai.html">ガチキャリAI</a></li>
+            <li><a href="gachicareer.html">ガチキャリ</a></li>
+            <li><a href="./#pos">夜のお店向けPOSシステム</a></li>
+            <li><a href="contact.html#recruit">採用情報</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© <span data-year>2026</span> AKITOgroup.llc</span>
+        <span>愛ある事業で煌めくあなたに届ける未来</span>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+</body>
+</html>
