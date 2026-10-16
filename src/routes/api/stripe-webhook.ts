@@ -8,7 +8,7 @@
  *   （plan_expires_atはそのまま→期限到来でフロントがfreeに降格）
  *
  * Stripeダッシュボードで設定するWebhook URL:
- *   https://interview-copilot-ai.akitogroup.jp/api/stripe-webhook
+ *   https://gachicareer.akitogroup.jp/api/stripe-webhook（旧URL interview-copilot-ai.akitogroup.jp でも届く）
  *
  * 設定するイベント:
  *   invoice.payment_succeeded
