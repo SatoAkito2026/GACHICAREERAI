@@ -3,542 +3,783 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ガチキャリAI｜AIで自分を磨く。企業と出会う。｜AKITOグループ</title>
+<title>ガチキャリAI｜AI面接で練習して、評価で選ばれる。</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="ガチキャリAIは、AIの面接官と本番さながらに練習できる面接練習サービスです。発言を根拠にした評価で自分を磨き、公開したプロフィールを見た企業と出会えます。企業は書類選考・AIアバター面接・人材探しまでひとつで。">
+<meta name="description" content="ガチキャリAIは、AI面接官との模擬面接で練習し、本人の発言を根拠にした評価がもらえるサービスです。評価を公開すれば、企業から面談の申し込みが届きます。">
+<meta property="og:title" content="ガチキャリAI｜AI面接で練習して、評価で選ばれる。">
+<meta property="og:description" content="AI面接官と模擬面接。発言を根拠にした評価で自分を磨き、公開したプロフィールを見た企業と出会う。">
+<meta name="theme-color" content="#0F0F0F">
 <link rel="canonical" href="https://akitogroup.jp/gachicareer-ai">
-<meta property="og:title" content="ガチキャリAI｜AIで自分を磨く。企業と出会う。｜AKITOグループ">
-<meta property="og:description" content="ガチキャリAIは、AIの面接官と本番さながらに練習できる面接練習サービスです。発言を根拠にした評価で自分を磨き、公開したプロフィールを見た企業と出会えます。企業は書類選考・AIアバター面接・人材探しまでひとつで。">
-<meta property="og:type" content="website">
 <meta property="og:url" content="https://akitogroup.jp/gachicareer-ai">
-<meta property="og:image" content="https://akitogroup.jp/assets/img/logo-full.webp">
-<meta name="theme-color" content="#24113F">
-<link rel="icon" href="assets/img/logo.webp">
+<link rel="icon" href="assets/img/gcai-logo.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: 黒地に一本の黄緑。スマホの縦1列を基準に組み、広い画面で2列に開く。
+   評価の「根拠になった発言」を引用ブロックとして全体のモチーフにする */
+:root{
+  --bg:#0F0F0F;
+  --card:#1A1A1A;
+  --card-2:#151515;
+  --line:#2A2A2A;
+  --text:#F0F0F0;
+  --sub:#888888;
+  --lime:#C8FF00;
+  --lime-dim:rgba(200,255,0,.14);
+  --ff-jp:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  --ff-num:"Bricolage Grotesque","Zen Kaku Gothic New",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --wrap:1120px;
+  --ease:cubic-bezier(.2,.7,.1,1);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ff-jp);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:900;line-height:1.35;text-wrap:balance}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:6px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px))}
+.lime{color:var(--lime)}
+.sub{color:var(--sub)}
+.num{font-family:var(--ff-num);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--ff-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--lime)}
+.sample-badge{display:inline-block;font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:#0F0F0F;background:var(--lime);border-radius:6px;padding:2px 8px;font-weight:500}
+
+/* ---------- header ---------- */
+.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(15,15,15,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+.head.scrolled{border-bottom-color:var(--line)}
+.head .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;font-size:17px;white-space:nowrap}
+.logo svg{width:30px;height:30px;flex:none}
+.logo b{color:var(--lime);font-family:var(--ff-num);font-weight:800}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;position:relative}
+.seg button{font:inherit;font-size:13px;font-weight:700;color:var(--sub);background:none;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;position:relative;z-index:1;transition:color .25s;white-space:nowrap}
+.seg button[aria-selected="true"]{color:#0F0F0F}
+.seg .pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:var(--lime);transition:transform .35s var(--ease)}
+body[data-mode="biz"] .seg .pill{transform:translateX(100%)}
+.head-cta{display:none;font-size:13px;font-weight:700;text-decoration:none;background:var(--lime);color:#0F0F0F;border-radius:999px;padding:8px 16px;white-space:nowrap}
+@media (min-width:860px){.head-cta{display:inline-block}}
+@media (max-width:420px){.logo span{display:none}.seg button{padding:6px 12px}}
+
+/* 個人・企業の切り替え */
+body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:none!important}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:14px 24px;border-radius:14px;font-weight:700;font-size:16px;text-decoration:none;border:1.5px solid transparent;transition:transform .25s var(--ease),background .25s,border-color .25s,color .25s;line-height:1.3;text-align:center}
+.btn .arr{transition:transform .25s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+.btn-lime{background:var(--lime);color:#0F0F0F;box-shadow:0 10px 30px -10px rgba(200,255,0,.5)}
+.btn-lime:hover{transform:translateY(-2px)}
+.btn-ghost{border-color:var(--line);color:var(--text);background:var(--card)}
+.btn-ghost:hover{border-color:var(--lime)}
+.btns{display:grid;gap:12px}
+@media (min-width:600px){.btns{display:flex;flex-wrap:wrap}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,7vw,96px) clamp(56px,8vw,104px)}
+.hero::before{content:"";position:absolute;width:640px;height:640px;right:-240px;top:-220px;border-radius:50%;background:radial-gradient(circle,rgba(200,255,0,.12),transparent 62%);pointer-events:none;animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-120px,80px)}}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(36px,6vw,64px);position:relative}
+@media (min-width:960px){.hero .wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center}}
+.hero h1{font-size:clamp(30px,7.6vw,54px);letter-spacing:-.02em;line-height:1.22;margin-top:18px}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.06em;white-space:nowrap}
+.hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
+.hero h1 .ln:nth-child(2)>span{animation-delay:.14s}
+.hero h1 em{font-style:normal;color:var(--lime);position:relative}
+.hero .lead{margin-top:20px;color:#BDBDBD;font-size:clamp(15px,2.2vw,17px);max-width:32em;animation:fade .9s .4s both}
+.hero .btns{margin-top:28px;animation:fade .9s .55s both}
+.hero .note{margin-top:14px;font-size:12.5px;color:var(--sub);animation:fade .9s .65s both}
+
+/* ファーストビューの図：面接画面（あとで写真に差し替え）＋評価カード */
+.stage{position:relative;max-width:600px;width:100%;justify-self:center;padding-bottom:64px}
+.screen{border-radius:22px;background:var(--card);border:1px solid var(--line);padding:12px;animation:pop 1s .25s var(--ease) both;box-shadow:0 40px 80px -40px rgba(0,0,0,.9)}
+.screen.shot{margin:0;padding:8px}
+.screen.shot img{border-radius:14px;width:100%}
+.screen.shot figcaption{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--sub);padding:10px 6px 2px}
+.wave{display:flex;align-items:center;gap:3px;height:18px}
+.wave i{width:3px;border-radius:2px;background:var(--lime);height:30%;animation:wave 1.1s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.4s}
+@keyframes wave{50%{height:100%}}
+.float-card{position:absolute;right:-6px;bottom:0;width:min(78%,330px);background:#141414;border:1px solid rgba(200,255,0,.35);border-radius:18px;padding:14px 16px;box-shadow:0 30px 60px -20px rgba(0,0,0,.9);animation:float-in 1s .7s var(--ease) both}
+@keyframes float-in{from{opacity:0;transform:translateY(30px) rotate(2deg)}to{opacity:1;transform:rotate(-1.5deg)}}
+.float-card .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+.float-card .skill{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;font-weight:700}
+.float-card .skill .num{color:var(--lime);font-size:22px}
+.meter{display:block;height:6px;border-radius:3px;background:#2A2A2A;overflow:hidden;margin-top:4px}
+.meter span{display:block;height:100%;background:var(--lime);border-radius:3px;width:80%;transform-origin:left;animation:grow 1.2s 1.3s var(--ease) both}
+.quote{border-left:3px solid var(--lime);padding:2px 0 2px 10px;font-size:13px;margin-top:10px;color:#DADADA}
+.quote small{display:block;color:var(--sub);font-size:11px}
+
+/* ---------- sections ---------- */
+.sec{padding-block:clamp(72px,11vw,128px)}
+.sec.alt{background:var(--card-2);border-block:1px solid var(--line)}
+.sec-head{display:grid;gap:14px;margin-bottom:clamp(32px,5vw,56px);max-width:44em}
+.sec-head h2{font-size:clamp(26px,5.4vw,44px);letter-spacing:-.01em}
+.sec-head p{color:#B8B8B8}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,3vw,28px)}
+/* グリッドの1列目が中身に押し広げられないように（スマホで横にはみ出さない） */
+.btns,.pains,.steps,.feat-main,.feats,.result,.biz-hero,.biz-feats,.plans,.fair{grid-template-columns:minmax(0,1fr)}
+
+/* 悩み */
+.pains{display:grid;gap:16px}
+@media (min-width:860px){.pains{grid-template-columns:1fr 1fr}}
+.pains .who{font-family:var(--ff-mono);font-size:12px;letter-spacing:.12em;color:var(--sub)}
+.pains h3{font-size:20px;margin:8px 0 14px}
+.pains ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.pains li{display:flex;gap:12px;align-items:baseline;color:#D0D0D0}
+.pains li::before{content:"?";flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#0F0F0F;background:#555;transform:translateY(3px)}
+.pains .answer{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);font-weight:700}
+.pains .answer::before{content:"→ ";color:var(--lime)}
+.pains .card.is-on{border-color:rgba(200,255,0,.45)}
+.pains .card.is-on li::before{background:var(--lime)}
+
+/* 4ステップ */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:s}
+@media (min-width:860px){.steps{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}}
+.steps li{counter-increment:s;position:relative;display:grid;gap:10px;align-content:start}
+.steps .ic{width:56px;height:56px;border-radius:16px;background:var(--lime-dim);border:1px solid rgba(200,255,0,.35);display:grid;place-items:center}
+.steps .ic svg{width:26px;height:26px;stroke:var(--lime);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.steps .n{font-family:var(--ff-num);font-weight:800;color:var(--lime);font-size:13px;letter-spacing:.08em}
+.steps .n::before{content:"STEP 0" counter(s)}
+.steps h3{font-size:19px}
+.steps p{font-size:14.5px;color:#B8B8B8}
+.steps li{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}
+@media (min-width:860px){.steps li:not(:last-child)::after{content:"";position:absolute;right:-9px;top:46px;width:8px;height:8px;border-top:2px solid var(--lime);border-right:2px solid var(--lime);transform:rotate(45deg);z-index:1}}
+@media (max-width:859px){.steps li:not(:last-child)::after{content:"";position:absolute;left:46px;bottom:-11px;width:8px;height:8px;border-right:2px solid var(--lime);border-bottom:2px solid var(--lime);transform:rotate(45deg);z-index:1}}
+
+/* 特長 */
+.feat-main{display:grid;gap:clamp(24px,4vw,48px);border-color:rgba(200,255,0,.4);background:linear-gradient(160deg,#1C2108 0%,var(--card) 45%)}
+@media (min-width:960px){.feat-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}}
+.feat-main .tag{font-size:12px;font-weight:700;color:#0F0F0F;background:var(--lime);border-radius:999px;padding:3px 12px;justify-self:start;display:inline-block}
+.feat-main h3{font-size:clamp(24px,4.6vw,36px);margin-top:14px}
+.feat-main ul{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px}
+.feat-main li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;color:#D6D6D6}
+.check{width:24px;height:24px;border-radius:7px;background:var(--lime);display:grid;place-items:center;margin-top:3px}
+.check svg{width:14px;height:14px;stroke:#0F0F0F;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.power-chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.power-chips li{display:block;border:1px solid var(--line);background:#111;border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px;transition:border-color .3s,color .3s}
+.power-chips li:hover{border-color:var(--lime);color:var(--lime)}
+.rule{margin-top:16px;padding:14px 16px;border-radius:14px;background:#111;border:1px dashed #3A3A3A;font-size:14px}
+.rule b{color:var(--lime)}
+.feats{display:grid;gap:16px;margin-top:16px}
+@media (min-width:860px){.feats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.feats .card{display:grid;gap:10px;align-content:start;transition:border-color .3s,transform .3s var(--ease)}
+.feats .card:hover{border-color:#444;transform:translateY(-3px)}
+.feats .no{font-family:var(--ff-num);font-weight:800;color:var(--lime);font-size:14px}
+.feats h3{font-size:19px}
+.feats ul{margin:0;padding-left:1.1em;color:#B8B8B8;font-size:14.5px;display:grid;gap:4px}
+
+/* 評価の見え方 */
+.result{display:grid;gap:16px}
+@media (min-width:960px){.result{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}}
+.result .card{position:relative}
+.result .sample-badge{position:absolute;top:-10px;right:18px}
+.result h3{font-size:17px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.bars{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:12px}
+.bars li{display:grid;grid-template-columns:8.2em minmax(0,1fr) 3.2em;gap:12px;align-items:center;font-size:14px}
+.bars .tr{display:block;height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden}
+.bars .fl{display:block;height:100%;background:var(--lime);border-radius:4px;transform-origin:left;transition:transform 1.2s var(--ease)}
+.bars li:nth-child(2) .fl{transition-delay:.06s}.bars li:nth-child(3) .fl{transition-delay:.12s}.bars li:nth-child(4) .fl{transition-delay:.18s}.bars li:nth-child(5) .fl{transition-delay:.24s}.bars li:nth-child(6) .fl{transition-delay:.3s}.bars li:nth-child(7) .fl{transition-delay:.36s}
+.bars .fl.none{background:repeating-linear-gradient(90deg,#3A3A3A 0 6px,transparent 6px 10px)}
+.bars .v{text-align:right;font-family:var(--ff-num);font-weight:800}
+.bars .v small{color:var(--sub);font-weight:600}
+.bars .na{color:var(--sub);font-size:12px;font-family:var(--ff-jp);font-weight:500;text-align:right}
+.pending .bars .fl{transform:scaleX(0)}
+.foot-note{margin-top:14px;font-size:12.5px;color:var(--sub)}
+.quotes{display:grid;gap:10px;margin-top:14px}
+.quotes .q{background:#111;border-radius:12px;padding:12px 14px;border-left:3px solid var(--lime)}
+.quotes .q b{display:block;font-size:13px;color:var(--lime)}
+.quotes .q p{font-size:14px}
+.quotes .q small{color:var(--sub);font-size:11.5px}
+.trend{width:100%;height:auto;margin-top:12px}
+.trend .axis{stroke:#2A2A2A;stroke-width:1}
+.trend .line{fill:none;stroke:var(--lime);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:600;stroke-dashoffset:0;transition:stroke-dashoffset 1.6s var(--ease)}
+.pending .trend .line{stroke-dashoffset:600}
+.trend .area{fill:url(#g)}
+.trend circle{fill:var(--bg);stroke:var(--lime);stroke-width:2}
+.trend circle.last{fill:var(--lime)}
+.trend text{fill:var(--sub);font-size:10px;font-family:var(--ff-num)}
+.trend text.hl{fill:var(--lime);font-weight:800;font-size:12px}
+.advice{display:grid;gap:10px;margin-top:6px}
+.advice div{background:#111;border-radius:12px;padding:12px 14px;font-size:14px}
+.advice b{display:block;font-size:12.5px;margin-bottom:2px}
+.advice .good b{color:var(--lime)}
+.advice .grow b{color:#FFB347}
+.advice .better b{color:var(--text)}
+
+/* 企業向け */
+.biz-hero{display:grid;gap:clamp(28px,5vw,56px)}
+@media (min-width:960px){.biz-hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}}
+.biz-hero h2{font-size:clamp(26px,5.2vw,44px)}
+.biz-hero h2 .lime{display:inline}
+.biz-hero .lead{margin-top:16px;color:#B8B8B8}
+.talent{position:relative}
+.talent .sample-badge{position:absolute;top:-10px;right:18px}
+.talent .row{display:flex;justify-content:space-between;gap:12px}
+.talent .ttl{font-weight:700}
+.talent .avg{text-align:right;line-height:1.1}
+.talent .avg b{font-family:var(--ff-num);font-weight:800;font-size:30px;color:var(--lime)}
+.talent .avg small{display:block;color:var(--sub);font-size:11px;margin-top:4px}
+.talent .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;padding:0;list-style:none}
+.talent .chips li{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:3px 9px;background:#111}
+.talent .chips li.s{color:var(--lime);border-color:rgba(200,255,0,.35)}
+.lock{display:flex;gap:10px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:12px;background:#111;border:1px dashed #3A3A3A;font-size:13px;color:#BDBDBD}
+.lock svg{width:18px;height:18px;flex:none;stroke:var(--lime);fill:none;stroke-width:2}
+.biz-feats{display:grid;gap:14px;margin-top:clamp(32px,5vw,48px)}
+@media (min-width:700px){.biz-feats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1040px){.biz-feats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.biz-feats .card{display:grid;gap:8px;align-content:start}
+.biz-feats .price{font-family:var(--ff-num);font-weight:800;font-size:clamp(26px,4vw,32px);color:var(--lime);line-height:1.2}
+.biz-feats .price small{font-family:var(--ff-jp);font-size:13px;color:var(--sub);font-weight:500;margin-left:4px}
+.biz-feats h3{font-size:18px}
+.biz-feats ul{margin:0;padding-left:1.1em;color:#B8B8B8;font-size:14.5px;display:grid;gap:4px}
+.biz-feats .card.wide{border-color:rgba(200,255,0,.4)}
+
+/* 料金 */
+.tabs{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:22px}
+.tabs button{font:inherit;font-weight:700;font-size:14px;color:var(--sub);background:none;border:0;border-radius:10px;padding:10px 18px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--lime);color:#0F0F0F}
+.plans{display:grid;gap:14px}
+@media (min-width:860px){.plans{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.plan{display:grid;gap:4px;align-content:start;position:relative}
+.plan.rec{border-color:var(--lime)}
+.plan .badge{position:absolute;top:-11px;left:20px;background:var(--lime);color:#0F0F0F;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px}
+.plan .name{font-weight:900;font-size:20px}
+.plan .price{font-family:var(--ff-num);font-weight:800;font-size:clamp(34px,6vw,42px);line-height:1.15;margin-top:4px}
+.plan .price small{font-family:var(--ff-jp);font-size:13px;color:var(--sub);font-weight:500;margin-left:4px}
+.plan dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:14px 0 0;font-size:14px}
+.plan dt{color:var(--sub)}
+.plan dd{margin:0;text-align:right;font-weight:700}
+.same{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--lime-dim);border:1px solid rgba(200,255,0,.3);font-size:14px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:20px}
+.ptable{width:100%;border-collapse:collapse;min-width:560px;background:var(--card)}
+.ptable th,.ptable td{padding:16px 18px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
+.ptable thead th{font-family:var(--ff-mono);font-size:12px;letter-spacing:.1em;color:var(--sub);font-weight:500;background:#141414}
+.ptable tbody th{font-weight:700;white-space:nowrap}
+.ptable td.p{font-family:var(--ff-num);font-weight:800;color:var(--lime);white-space:nowrap;font-size:17px}
+.ptable td.p small{font-family:var(--ff-jp);color:var(--sub);font-weight:500;font-size:12px;display:block}
+.ptable tr:last-child th,.ptable tr:last-child td{border-bottom:0}
+.ptable td.d{color:#B8B8B8}
+[role="tabpanel"][hidden]{display:none}
+
+/* 安心・公正 */
+.fair{display:grid;gap:14px}
+@media (min-width:700px){.fair{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fair .card{display:grid;grid-template-columns:48px minmax(0,1fr);gap:16px;align-items:start}
+.fair .ic{width:48px;height:48px;border-radius:14px;background:var(--lime-dim);display:grid;place-items:center}
+.fair .ic svg{width:24px;height:24px;stroke:var(--lime);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fair h3{font-size:17px}
+.fair p{font-size:14.5px;color:#B8B8B8;margin-top:4px}
+
+/* FAQ */
+.faq{display:grid;gap:10px;max-width:860px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 20px;transition:border-color .3s}
+.faq details[open]{border-color:#3A3A3A}
+.faq summary{list-style:none;cursor:pointer;display:flex;gap:12px;align-items:center;padding:18px 0;font-weight:700}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::before{content:"Q";font-family:var(--ff-num);font-weight:800;color:var(--lime);font-size:18px;flex:none}
+.faq summary::after{content:"";margin-left:auto;flex:none;width:9px;height:9px;border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);transform:rotate(45deg);transition:transform .3s var(--ease)}
+.faq details[open] summary::after{transform:rotate(-135deg)}
+.faq .a{padding:0 0 18px 26px;color:#B8B8B8;font-size:15px}
+.faq .tag{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:500;flex:none}
+
+/* 最後のCTA */
+.final{text-align:center;position:relative;overflow:hidden}
+.final::before{content:"";position:absolute;left:50%;top:50%;width:900px;height:900px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(200,255,0,.12),transparent 60%);pointer-events:none}
+.final .wrap{position:relative}
+.final h2{font-size:clamp(28px,6vw,52px)}
+.final p{color:#B8B8B8;margin-top:14px}
+.final .btns{justify-content:center;margin-top:30px}
+
+/* footer */
+.foot{border-top:1px solid var(--line);padding-block:40px 48px;font-size:13px;color:var(--sub)}
+.foot .wrap{display:grid;gap:18px}
+@media (min-width:860px){.foot .wrap{grid-template-columns:auto 1fr auto;align-items:center}}
+.foot nav{display:flex;flex-wrap:wrap;gap:8px 20px}
+.foot a{text-decoration:none}
+.foot a:hover{color:var(--text)}
+
+/* スマホ下の固定ボタン */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:linear-gradient(0deg,rgba(15,15,15,.98) 60%,rgba(15,15,15,0));transform:translateY(110%);transition:transform .4s var(--ease)}
+.dock.show{transform:none}
+.dock .btn{width:100%}
+@media (min-width:860px){.dock{display:none}}
+
+/* 動き */
+.rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.pending{opacity:0;transform:translateY(24px)}
+@keyframes rise{from{transform:translateY(110%)}to{transform:none}}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv.pending{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+</style>
 </head>
-<body>
-<a class="skip" href="#main">本文へ移動</a>
-<header class="site-head">
+<body data-mode="person">
+
+<header class="head" id="top">
   <div class="wrap">
-    <a class="logo" href="./"><img src="assets/img/logo.webp" alt="AKITOグループ" width="600" height="255"></a>
-    <nav class="nav" id="nav" aria-label="メインメニュー">
-      <a href="about.html">会社概要</a>
-      <a href="./#services">事業内容</a>
-      <a href="gachicareer-ai.html" aria-current="page">ガチキャリAI</a>
-      <a href="gachicareer.html">ガチキャリ</a>
-      <a href="news.html">お知らせ</a>
-      <a class="nav-cta" href="contact.html">お問い合わせ</a>
-    </nav>
-    <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
-    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">メニュー</button>
+    <a class="logo" href="#top" aria-label="ガチキャリAI">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14l-12 7L4 23V9z" fill="none" stroke="#C8FF00" stroke-width="2"/><path d="M16 7.5 23.5 12v8L16 24.5 8.5 20v-8z" fill="rgba(200,255,0,.18)" stroke="#C8FF00" stroke-width="1.2"/><path d="M16 11v9M13 15.5l3 3 3-3" fill="none" stroke="#C8FF00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>ガチキャリ<b>AI</b></span>
+    </a>
+    <div class="seg" role="tablist" aria-label="表示を切り替える">
+      <span class="pill" aria-hidden="true"></span>
+      <button type="button" role="tab" id="mode-person" aria-selected="true" data-mode="person">個人の方</button>
+      <button type="button" role="tab" id="mode-biz" aria-selected="false" data-mode="biz">企業の方</button>
+    </div>
+    <a class="head-cta only-person" href="https://interview-copilot-ai.akitogroup.jp/login">無料ではじめる</a>
+    <a class="head-cta only-biz" href="https://interview-copilot-ai.akitogroup.jp/login">無料で企業登録</a>
   </div>
 </header>
 
-<main id="main">
-<style>
-/* アプリと同じ、黒地に黄緑 */
-.gx{--x-bg:#0F0F0F;--x-card:#1A1A1A;--x-card2:#222;--x-line:#2C2C2C;--x-text:#F0F0F0;--x-sub:#9A9A9A;--x-lime:#C8FF00;--x-purple:#C9A4FF}
+<main>
+  <!-- 1. ファーストビュー -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow" style="animation:fade .8s both">AI Mock Interview</p>
+        <h1><span class="ln"><span><em>AI面接</em>で練習して、</span></span><span class="ln"><span>評価で選ばれる。</span></span></h1>
+        <p class="lead only-person">人の顔をしたAI面接官と、声で模擬面接。終わるとすぐに、7つの力の評価が<strong class="lime">あなたの実際の発言を根拠に</strong>返ってきます。評価を公開すれば、見てくれた企業から面談の申し込みが届きます。</p>
+        <p class="lead only-biz">書類ではわからない「話す力」を、本人の発言で確かめてから会える。模擬面接を重ねた人材の評価を見て探し、気になる人に面談を申し込めます。成功報酬はゼロです。</p>
+        <div class="btns">
+          <a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login"><span class="only-person">無料で模擬面接をはじめる</span><span class="only-biz">無料で企業登録する</span> <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost only-person" href="#business" data-switch="biz">企業の方はこちら</a>
+          <a class="btn btn-ghost only-biz" href="#top" data-switch="person">個人の方はこちら</a>
+        </div>
+        <p class="note only-person">無料プランでも、1日1回・月5回まで練習できます。</p>
+        <p class="note only-biz">匿名の人材一覧と人物まとめは無料で見られます。</p>
+      </div>
 
-.ia-hero{background:#0F0F0F;color:#fff;position:relative;overflow:hidden}
-.ia-hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(32px,5vw,64px);align-items:center;padding-block:clamp(48px,7vw,96px)}
-.ia-hero .crumbs{color:rgba(255,255,255,.55)}
-.brand{display:flex;align-items:center;gap:16px;animation:fade .8s both}
-.brand img{width:76px;height:76px;border-radius:16px}
-.brand b{font-family:var(--ff-display);font-size:24px;display:block;line-height:1.2}
-.brand small{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.08em}
-.ia-hero h1{font-size:clamp(34px,5.2vw,64px);line-height:1.28;margin-top:26px;letter-spacing:-.01em}
-.ia-hero h1 .ln{display:block;overflow:hidden;white-space:nowrap;padding-bottom:.06em}
-.ia-hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
-.ia-hero h1 .ln:nth-child(2)>span{animation-delay:.14s}
-.ia-hero h1 .hl{color:#C8FF00}
-.ia-hero .lead{margin-top:22px;color:rgba(255,255,255,.75);max-width:32em;animation:fade .9s .4s both}
-.ia-hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;animation:fade .9s .55s both}
-.btn-lime{background:#C8FF00;color:#0F0F0F}
-.btn-lime:hover{transform:translateY(-2px)}
-.ia-hero .btn-line{border-color:rgba(255,255,255,.5);color:#fff}
-.ia-hero .btn-line:hover{background:#fff;color:#0F0F0F}
-.ia-screen{margin:0;border-radius:16px;overflow:hidden;border:1px solid #2C2C2C;box-shadow:0 40px 80px -30px rgba(0,0,0,.8);animation:pop 1s .35s var(--ease) both}
-.ia-screen figcaption{font-size:12px;color:rgba(255,255,255,.6);padding:10px 14px;background:#171717}
-.glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(200,255,0,.12),transparent 65%);right:-120px;top:-160px;pointer-events:none;animation:drift 12s ease-in-out infinite alternate}
-@keyframes drift{to{transform:translate(-80px,60px)}}
-@media (max-width:900px){.ia-hero .wrap{grid-template-columns:minmax(0,1fr)}}
-
-.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.split a{display:grid;gap:6px;padding:24px 26px;border-radius:20px;text-decoration:none;border:1.5px solid var(--line);background:#fff;transition:border-color .25s,transform .25s var(--ease)}
-.split a:hover{border-color:var(--ink);transform:translateY(-3px)}
-.split .who{font-family:var(--ff-mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
-.split b{font-family:var(--ff-display);font-size:clamp(19px,2.2vw,24px)}
-.split span:last-child{font-size:14px;color:var(--ink-2)}
-@media (max-width:700px){.split{grid-template-columns:minmax(0,1fr)}}
-
-.part-title{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;margin-bottom:clamp(28px,4vw,44px)}
-.part-title span{font-family:var(--ff-mono);font-size:12px;letter-spacing:.14em;background:var(--ink);color:#fff;border-radius:999px;padding:4px 14px}
-.part-title h2{font-size:clamp(26px,3.6vw,40px)}
-.sub-h{font-size:clamp(20px,2.4vw,26px);margin:clamp(56px,7vw,80px) 0 24px}
-
-/* 画面の見本（アプリの見た目に合わせる） */
-.mock{background:var(--x-bg);color:var(--x-text);border-radius:22px;padding:clamp(16px,2.6vw,26px);border:1px solid var(--x-line);box-shadow:0 40px 70px -40px rgba(15,15,15,.6);font-size:14px;line-height:1.75;position:relative}
-.mock-tag{position:absolute;top:-12px;right:20px;background:var(--yellow);color:var(--ink);font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;rotate:2deg;z-index:2}
-.m-card{background:var(--x-card);border:1px solid var(--x-line);border-radius:14px;padding:16px 18px}
-.m-card+.m-card{margin-top:10px}
-.m-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-.m-h b{font-size:15px}
-.m-h .pt{color:var(--x-lime);font-weight:700;font-family:var(--ff-latin);white-space:nowrap}
-.m-sub{color:var(--x-sub);font-size:13px}
-.m-label{color:var(--x-lime);font-weight:700;font-size:13px;margin:18px 0 6px}
-.m-label.purple{color:var(--x-purple)}
-.m-quote{border-left:3px solid var(--x-lime);padding:2px 0 2px 10px;margin-top:8px;font-size:13px}
-.pro{font-size:11px;font-weight:700;color:var(--x-purple);background:rgba(201,164,255,.14);border-radius:6px;padding:1px 8px;margin-left:8px}
-
-.indiv{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,5vw,64px);align-items:start}
-.indiv .prose p{color:var(--ink-2)}
-.indiv .points{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:10px}
-.indiv .points li{display:flex;gap:12px;align-items:baseline;font-weight:700}
-.indiv .points li::before{content:"";flex:none;width:10px;height:10px;border-radius:3px;background:var(--green);transform:translateY(-1px)}
-@media (max-width:900px){.indiv{grid-template-columns:minmax(0,1fr)}}
-
-.radar-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center}
-.radar{width:100%;max-width:240px;justify-self:center}
-.radar text{fill:#9A9A9A;font-size:9px;font-family:var(--ff-body)}
-.radar .grid{fill:none;stroke:#333;stroke-width:1}
-.radar .shape{fill:rgba(200,255,0,.35);stroke:#C8FF00;stroke-width:2;transform-origin:100px 100px;transition:transform 1.2s var(--ease)}
-.mock.pending .radar .shape{transform:scale(0)}
-.bd{display:grid;gap:8px}
-.bd div{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-bottom:1px solid var(--x-line);padding-bottom:6px}
-.bd b{color:var(--x-lime);font-family:var(--ff-latin)}
-@media (max-width:520px){.radar-row{grid-template-columns:minmax(0,1fr)}}
-
-.bars{display:grid;gap:10px}
-.bars li{display:grid;grid-template-columns:7.2em minmax(0,1fr) 3.6em;gap:12px;align-items:center;font-size:13px}
-.bars{list-style:none;margin:0;padding:0}
-.bars .tr{height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden;display:block}
-.bars .fl{display:block;height:100%;border-radius:4px;background:#C8FF00;transform-origin:left;transition:transform 1.2s var(--ease)}
-.mock.pending .bars .fl{transform:scaleX(0)}
-.bars .v{text-align:right;font-family:var(--ff-latin);font-weight:700;font-variant-numeric:tabular-nums}
-.bars .v small{color:var(--x-sub);font-weight:500}
-
-.trend{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:8px}
-.trend span{flex:1;background:#C8FF00;border-radius:4px 4px 0 0;position:relative;transform-origin:bottom;transition:transform 1s var(--ease);opacity:calc(.35 + var(--i) * .08)}
-.trend span::before{content:attr(data-v);position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--x-sub);font-family:var(--ff-latin)}
-.trend span:last-child{opacity:1}
-.mock.pending .trend span{transform:scaleY(0)}
-
-/* 企業向け：人材カードとチケット */
-.talent{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,48px);align-items:start}
-.t-card .top{display:flex;justify-content:space-between;gap:12px}
-.t-card .ttl{font-weight:700;font-size:16px}
-.t-card .avg{text-align:right;line-height:1.1}
-.t-card .avg b{font-family:var(--ff-latin);font-size:30px;color:var(--x-lime)}
-.t-card .avg small{display:block;font-size:11px;color:var(--x-sub);margin-top:4px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;padding:0;list-style:none}
-.chips li{font-size:12px;border:1px solid var(--x-line);border-radius:8px;padding:3px 9px;background:#141414}
-.chips li.s{color:var(--x-lime);border-color:rgba(200,255,0,.35)}
-.ticket{border:1px solid rgba(200,255,0,.35)}
-.ticket ul{margin:8px 0 0;padding-left:1.2em;font-size:13px}
-.ticket .btnx{display:inline-block;margin-top:14px;background:#C8FF00;color:#0F0F0F;font-weight:700;border-radius:10px;padding:10px 16px;font-size:14px}
-.how{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:h}
-.how li{counter-increment:h;display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;align-items:start}
-.how li::before{content:counter(h);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
-.how b{display:block;font-family:var(--ff-display);font-size:17px}
-.how span{font-size:14px;color:var(--ink-2)}
-.fair{margin-top:20px;padding:14px 16px;border-radius:14px;background:var(--paper-2);font-size:13.5px;color:var(--ink-2)}
-@media (max-width:900px){.talent{grid-template-columns:minmax(0,1fr)}}
-
-.steps4{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:st}
-.steps4 li{counter-increment:st;display:grid;gap:8px;align-content:start;padding-top:18px;border-top:3px solid var(--c)}
-.steps4 li::before{content:counter(st);font-family:var(--ff-latin);font-weight:800;font-size:32px;line-height:1;color:var(--c)}
-.steps4 li:nth-child(1){--c:var(--red)}.steps4 li:nth-child(2){--c:var(--yellow-text)}.steps4 li:nth-child(3){--c:var(--green)}.steps4 li:nth-child(4){--c:var(--ink)}
-.steps4 b{font-family:var(--ff-display);font-size:18px}
-.steps4 span{font-size:14px;color:var(--ink-2)}
-.note{margin-top:22px;font-size:13px;color:var(--muted);max-width:52em}
-@media (max-width:820px){.steps4{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-.flow5{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;counter-reset:s}
-.flow5 li{counter-increment:s;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 18px;display:grid;gap:6px;position:relative}
-.flow5 li::before{content:"STEP " counter(s);font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:var(--green-text)}
-.flow5 li:not(:last-child)::after{content:"";position:absolute;right:-10px;top:50%;width:8px;height:8px;border-top:2px solid var(--ink);border-right:2px solid var(--ink);transform:translateY(-50%) rotate(45deg);z-index:1}
-.flow5 b{font-family:var(--ff-display);font-size:17px}
-@media (max-width:900px){.flow5{grid-template-columns:minmax(0,1fr)}.flow5 li:not(:last-child)::after{right:auto;left:28px;top:auto;bottom:-10px;transform:rotate(135deg)}}
-
-.compare-wrap{overflow-x:auto;border-radius:20px;border:1px solid var(--line)}
-.compare{width:100%;border-collapse:collapse;min-width:620px;background:#fff}
-.compare th,.compare td{padding:18px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-.compare thead th{font-size:13px;font-family:var(--ff-mono);letter-spacing:.08em;color:var(--muted);background:var(--paper-2)}
-.compare thead th:last-child{color:#fff;background:var(--ink)}
-.compare tbody th{font-weight:700;white-space:nowrap}
-.compare td.before{color:var(--muted)}
-.compare td.after{font-weight:700;background:rgba(63,174,58,.07)}
-.compare tr:last-child th,.compare tr:last-child td{border-bottom:0}
-
-.features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.feat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;display:grid;gap:12px;align-content:start}
-.feat .no{font-family:var(--ff-latin);font-weight:800;font-size:13px;color:var(--green-text)}
-.feat h3{font-size:21px}
-.feat ul{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:14.5px;color:var(--ink-2)}
-.feat.wide{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center}
-.feat.wide img{border-radius:14px;border:1px solid var(--line)}
-@media (max-width:860px){.features{grid-template-columns:minmax(0,1fr)}.feat.wide{grid-template-columns:minmax(0,1fr)}}
-
-.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
-.plan{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 24px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .3s var(--ease),border-color .3s}
-.plan:hover{transform:translateY(-4px);border-color:var(--ink)}
-.plan.hot{border:2px solid var(--ink)}
-.plan .badge{position:absolute;top:-13px;left:22px;background:var(--red);color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:999px}
-.plan .name{font-family:var(--ff-display);font-weight:900;font-size:22px}
-.plan .for{font-size:13px;color:var(--muted)}
-.plan .price{font-family:var(--ff-latin);font-weight:800;font-size:clamp(32px,3.6vw,42px);line-height:1.15;font-variant-numeric:tabular-nums;margin-top:8px}
-.plan .price small{font-family:var(--ff-body);font-size:14px;color:var(--muted);font-weight:500;margin-left:4px}
-.plan ul{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:6px;font-size:13.5px;color:var(--ink-2);flex:1}
-.plan li{display:flex;gap:8px}
-.plan li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--green);margin-top:.65em}
-.plan .btn{margin-top:14px}
-.plans-note{margin-top:18px;font-size:13px;color:var(--muted)}
-@media (max-width:860px){.plans{grid-template-columns:minmax(0,1fr)}}
-</style>
-
-<section class="ia-hero">
-  <div class="glow" aria-hidden="true"></div>
-  <div class="wrap">
-    <div>
-      <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / ガチキャリAI</nav>
-      <div class="brand" style="margin-top:18px"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"><span><b>ガチキャリAI</b><small>GACHI CAREER AI</small></span></div>
-      <h1><span class="ln"><span><span class="hl">AI</span>で自分を磨く。</span></span><span class="ln"><span>企業と出会う。</span></span></h1>
-      <p class="lead">AIの面接官と、本番さながらに面接を練習。あなたが話した言葉を根拠に評価が返ってきます。練習の成果はプロフィールにまとまり、見てくれた企業から声がかかります。</p>
-      <div class="actions">
-        <a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp" target="_blank" rel="noopener">無料で練習を始める <span class="arr" aria-hidden="true">→</span></a>
-        <a class="btn btn-line" href="#for-companies">企業の方はこちら</a>
+      <div class="stage" aria-label="練習の様子と評価の見え方">
+        <figure class="screen shot">
+          <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映り、下に会話が表示されている" width="1578" height="996">
+          <figcaption><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>AI面接官と、声で会話しながら練習</figcaption>
+        </figure>
+        <div class="float-card">
+          <div class="top"><span class="sample-badge">サンプル</span><span class="sub">練習のあとに届く評価</span></div>
+          <div class="skill"><span>主体性</span><span class="num">4<small class="sub" style="font-size:13px"> / 5</small></span></div>
+          <span class="meter"><span></span></span>
+          <p class="quote"><small>根拠になった発言</small>「言われる前に、自分で売り場の並べ方を変えました」</p>
+        </div>
       </div>
     </div>
-    <figure class="ia-screen">
-      <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映り、下に会話が表示されている" width="1578" height="996">
-      <figcaption>実際の面接画面：AIの面接官と、声で会話しながら面接を進めます</figcaption>
-    </figure>
-  </div>
-</section>
+  </section>
 
-<section class="block" style="padding-bottom:0">
-  <div class="wrap split">
-    <a href="#for-you" class="rv"><span class="who">FOR YOU</span><b>面接の練習をしたい方</b><span>就活・転職の面接を、AIとくり返し練習できます。</span></a>
-    <a href="#for-companies" class="rv"><span class="who">FOR COMPANIES</span><b>人材を探したい・採用を効率化したい企業の方</b><span>練習を重ねた人材との出会いから、書類選考・AI面接まで。</span></a>
-  </div>
-</section>
-
-<!-- ===== 個人向け ===== -->
-<section class="block gx" id="for-you">
-  <div class="wrap">
-    <div class="part-title rv"><span>個人向け</span><h2>面接のたびに、何が良くて何が足りないかが分かる。</h2></div>
-    <div class="indiv">
-      <div class="rv">
-        <div class="prose">
-          <p>志望する職種や会社に合わせて、AIの面接官が質問します。声で答えるだけで練習でき、終わるとすぐに評価が返ってきます。</p>
-          <p>評価は、総合点と4つの観点の点数、そして「伝える力」「主体性」など7つの力の5段階評価。点数の根拠として、あなたが実際に話した言葉を引用します。根拠にできる発言がない力は、評価しません。</p>
+  <!-- 2. よくある悩み -->
+  <section class="sec alt" id="pains">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Problems</p>
+        <h2>面接の「わからない」を、なくしたい。</h2>
+      </div>
+      <div class="pains">
+        <div class="card rv" data-on="person">
+          <p class="who">個人の方</p>
+          <h3>面接で何を直せばいいか、わからない</h3>
+          <ul>
+            <li>落ちた理由を教えてもらえず、次に何を直せばいいかわからない</li>
+            <li>一人で練習しても、話し方の良し悪しを判断できない</li>
+            <li>面接官を前にすると緊張して、準備したことが出てこない</li>
+          </ul>
+          <p class="answer">練習のたびに、発言を根拠にした評価と「より良い回答例」が届きます</p>
         </div>
-        <ul class="points">
-          <li>総評と、4つの観点のスコア</li>
-          <li>7つの力と、根拠になった発言</li>
-          <li>良かった点・改善するとよい点</li>
-          <li>同じ質問への「より良い回答例」</li>
-          <li>性格・特性の分析（プロプラン）</li>
-        </ul>
+        <div class="card rv" data-on="biz">
+          <p class="who">企業の方</p>
+          <h3>書類だけでは、人柄がわからない</h3>
+          <ul>
+            <li>履歴書の文章からは、話す力や考え方が見えてこない</li>
+            <li>一次面接に時間を取られ、本当に会いたい人に時間を使えない</li>
+            <li>求人を出しても、応募者のことを知る手がかりが少ない</li>
+          </ul>
+          <p class="answer">模擬面接での本人の発言と評価を見てから、会う人を決められます</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 4ステップ -->
+  <section class="sec" id="steps">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">How it works</p>
+        <h2 class="only-person">使い方は、4ステップ。</h2>
+        <h2 class="only-biz">企業の使い方も、4ステップ。</h2>
+      </div>
+      <ol class="steps only-person">
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span class="n"></span><h3>模擬面接で練習</h3><p>希望の職種・企業を選ぶと、AI面接官が声で質問。あなたも声で答えます。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h4v4H7zM7 15h10M7 19h7"/><path d="M15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9z"/></svg></span><span class="n"></span><h3>根拠つきの評価</h3><p>7つの力を5段階で。点数の根拠になった、あなたの発言も一緒に。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/><path d="M17 3l2 2-2 2"/></svg></span><span class="n"></span><h3>プロフィールを公開</h3><p>公開してもいいと思えたら、名前を伏せたプロフィールを公開します。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="n"></span><h3>企業からオファー</h3><p>評価を見た企業から面談の申し込みが届きます。承諾した相手とだけメッセージできます。</p></li>
+      </ol>
+      <ol class="steps only-biz">
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span><span class="n"></span><h3>無料で企業登録</h3><p>登録するとすぐに、匿名の人材一覧と人物まとめを見られます。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><span class="n"></span><h3>評価で人材を探す</h3><p>7つの力・人物まとめ・根拠になった発言で、気になる人を探します。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span><span class="n"></span><h3>チケットで詳しく見る</h3><p>1人¥10,000（税込）で、名前・面接ごとの評価・会話などが見られます。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="n"></span><h3>面談を申し込む</h3><p>相手が承諾すると、そのままメッセージでやり取りできます。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 4. 特長 -->
+  <section class="sec alt" id="features">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Features</p>
+        <h2>点数だけで終わらない。<br>「なぜその評価か」まで返ってくる。</h2>
       </div>
 
-      <div class="mock rv" aria-label="個人向けの評価画面の見本">
-        <span class="mock-tag">画面の見本（例）</span>
-        <div class="m-h"><b>営業職・面接練習　2026/10/12</b><span class="pt">62点</span></div>
-        <p class="m-label">総評</p>
-        <p>接客の現場で身につけた観察力と、お客様の声を数字で振り返る習慣ははっきり伝わった。一方で志望動機は「人と関わる仕事がしたい」にとどまり、この会社を選ぶ理由が浅い。結論から話す型を身につければ、印象は大きく変わる段階にある。</p>
-        <p class="m-label" style="color:var(--x-text)">スコア内訳</p>
-        <div class="radar-row">
-          <svg class="radar" viewBox="0 0 200 200" aria-hidden="true">
-            <polygon class="grid" points="100,20 180,100 100,180 20,100"/>
-            <polygon class="grid" points="100,47 153,100 100,153 47,100"/>
-            <polygon class="grid" points="100,73 127,100 100,127 73,100"/>
-            <line class="grid" x1="100" y1="20" x2="100" y2="180"/><line class="grid" x1="20" y1="100" x2="180" y2="100"/>
-            <polygon class="shape" points="100,44 136,100 100,140 40,100"/>
-            <text x="100" y="12" text-anchor="middle">自己PR</text>
-            <text x="196" y="103" text-anchor="end">志望動機</text>
-            <text x="100" y="196" text-anchor="middle">事前準備</text>
-            <text x="4" y="103">具体性</text>
-          </svg>
-          <div class="bd">
-            <div><span>自己PR・強みの伝え方</span><b>70</b></div>
-            <div><span>志望動機の説得力</span><b>45</b></div>
-            <div><span>事前準備・企業研究度</span><b>50</b></div>
-            <div><span>回答の具体性</span><b>75</b></div>
+      <article class="card feat-main rv">
+        <div>
+          <span class="tag">いちばん大事にしていること</span>
+          <h3>評価には、必ず<br><span class="lime">あなたの発言</span>という根拠がある。</h3>
+          <ul>
+            <li><span class="check"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span><span>7つの力を、それぞれ5段階で評価します</span></li>
+            <li><span class="check"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span><span>評価には必ず、面接での<strong>本人の実際の発言</strong>を根拠として引用します</span></li>
+            <li><span class="check"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span><span>根拠となる発言がない力は、評価しません</span></li>
+            <li><span class="check"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span><span>良かった点・伸びしろ・より良い回答例も届きます</span></li>
+          </ul>
+        </div>
+        <div>
+          <p class="sub" style="font-size:13px;margin-bottom:10px">評価する7つの力</p>
+          <ul class="power-chips">
+            <li>伝える力</li><li>論理的に考える力</li><li>主体性</li><li>協調性</li><li>粘り強さ</li><li>誠実さ</li><li>学ぶ姿勢</li>
+          </ul>
+          <p class="rule"><b>「なんとなく」の点数はつけません。</b>引用した発言が実際の面接にない場合、その評価は使わない仕組みです。だから、どこを直せばいいかがはっきりします。</p>
+        </div>
+      </article>
+
+      <div class="feats">
+        <article class="card rv">
+          <span class="no">01</span>
+          <h3>本物の面接のような練習</h3>
+          <ul>
+            <li>人の顔をしたAI面接官が声で質問し、あなたも声で答える</li>
+            <li>希望の職種・企業に合わせて質問してくれる</li>
+            <li>スマホでも練習でき、ホーム画面に追加してアプリのように使える</li>
+          </ul>
+        </article>
+        <article class="card rv">
+          <span class="no">02</span>
+          <h3>評価がそのまま武器になる</h3>
+          <ul>
+            <li>公開に同意した人だけ、名前を伏せたプロフィールを企業が見られる</li>
+            <li>企業から面談の申し込みが届き、承諾した相手とだけメッセージできる</li>
+            <li>初期設定は「非公開」。いつでも非公開に戻せる</li>
+          </ul>
+        </article>
+        <article class="card rv">
+          <span class="no">03</span>
+          <h3>求人を探して応募できる</h3>
+          <ul>
+            <li>掲載されている求人を探して応募できる</li>
+            <li>応募すると、練習の評価を企業に見てもらえる</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 評価の見え方 -->
+  <section class="sec" id="result">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Your result</p>
+        <h2>評価は、こんなふうに届きます。</h2>
+        <p>下はすべて説明用のサンプルです。実際の評価は、あなたが面接で話した内容から作られます。</p>
+      </div>
+      <div class="result">
+        <div class="card rv" id="sample-bars">
+          <span class="sample-badge">サンプル</span>
+          <h3><span>能力の評価</span><span class="sub" style="font-size:13px;font-weight:500">営業職の模擬面接</span></h3>
+          <ul class="bars">
+            <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+            <li><span>論理的に考える力</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
+            <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4<small> /5</small></span></li>
+            <li><span>協調性</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+            <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:100%"></span></span><span class="v">5<small> /5</small></span></li>
+            <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+            <li><span>学ぶ姿勢</span><span class="tr"><span class="fl none" style="width:100%"></span></span><span class="na">根拠なし</span></li>
+          </ul>
+          <p class="foot-note">「学ぶ姿勢」は根拠になる発言がなかったため、評価していません。</p>
+          <div class="quotes">
+            <div class="q"><b>粘り強さ　5 / 5</b><p>「目標に届かなかった月も、毎日10件の訪問だけは続けました」</p><small>根拠になった発言（サンプル）</small></div>
+            <div class="q"><b>論理的に考える力　2 / 5</b><p>「なんとなく、いけると思ったので選びました」</p><small>根拠になった発言（サンプル）</small></div>
           </div>
         </div>
-        <p class="m-label">能力の評価（あなたの発言が根拠）</p>
-        <div class="m-card"><div class="m-h"><b>主体性</b><span class="pt">4 / 5</span></div><p class="m-sub">指示を待たずに売り場の改善に動いた経験が、具体的に語られている。</p><p class="m-quote">「店長に言われる前に、自分で在庫の並べ方を変えました」</p></div>
-        <div class="m-card"><div class="m-h"><b>伝える力</b><span class="pt">3 / 5</span></div><p class="m-sub">内容は伝わるが、結論が後回しになり話が長くなりがち。</p><p class="m-quote">「えっと、その時はいろいろあったんですけど…」</p></div>
-        <p class="m-label purple">性格・特性分析<span class="pro">PRO</span></p>
-        <div class="m-card"><b>観察してから動くタイプ</b><p class="m-sub">相手の様子をよく見てから行動を決める傾向が、複数の回答に一貫して表れている。</p></div>
-        <p class="m-label" style="color:var(--x-text)">より良い回答例</p>
-        <div class="m-card"><p class="m-sub">Q. なぜ当社を志望したのですか？</p><p>御社の店舗はお客様の声を商品づくりに直接活かしている点に惹かれました。私は販売の現場で、お客様の声を毎週数字にまとめて売り場を変えてきました。その経験を、より大きな規模で活かしたいと考えています。</p></div>
+
+        <div style="display:grid;gap:16px">
+          <div class="card rv" id="sample-trend">
+            <span class="sample-badge">サンプル</span>
+            <h3><span>総合点の推移</span><span class="sub" style="font-size:13px;font-weight:500">直近8回</span></h3>
+            <svg class="trend" viewBox="0 0 320 150" role="img" aria-label="総合点の推移のサンプル。42点から68点まで上がっている">
+              <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C8FF00" stop-opacity=".28"/><stop offset="1" stop-color="#C8FF00" stop-opacity="0"/></linearGradient></defs>
+              <line class="axis" x1="20" y1="130" x2="310" y2="130"/>
+              <line class="axis" x1="20" y1="80" x2="310" y2="80" stroke-dasharray="3 4"/>
+              <line class="axis" x1="20" y1="30" x2="310" y2="30" stroke-dasharray="3 4"/>
+              <text x="4" y="133">0</text><text x="0" y="83">50</text><text x="-2" y="33">100</text>
+              <path class="area" d="M30 88 L70 85 L110 78 L150 80 L190 70 L230 66 L270 64 L300 62 L300 130 L30 130 Z"/>
+              <path class="line" d="M30 88 L70 85 L110 78 L150 80 L190 70 L230 66 L270 64 L300 62"/>
+              <circle cx="30" cy="88" r="3.5"/><circle cx="70" cy="85" r="3.5"/><circle cx="110" cy="78" r="3.5"/><circle cx="150" cy="80" r="3.5"/><circle cx="190" cy="70" r="3.5"/><circle cx="230" cy="66" r="3.5"/><circle cx="270" cy="64" r="3.5"/><circle class="last" cx="300" cy="62" r="5"/>
+              <text x="22" y="104">42</text><text class="hl" x="288" y="52">68</text>
+            </svg>
+            <p class="foot-note">練習を重ねるたびに、点数の変化を確かめられます。</p>
+          </div>
+          <div class="card rv">
+            <span class="sample-badge" style="position:absolute;top:-10px;right:18px">サンプル</span>
+            <h3><span>アドバイス</span></h3>
+            <div class="advice" style="margin-top:12px">
+              <div class="good"><b>良かった点</b>訪問件数など、行動を数字で語れている。</div>
+              <div class="grow"><b>伸びしろ</b>理由が「なんとなく」で終わっている。結論 → 理由 → 具体例の順で話すと伝わりやすい。</div>
+              <div class="better"><b>より良い回答例</b>「数字で成果が見える仕事に挑戦したいと考え、営業を選びました。前職でも訪問件数を毎日記録し…」</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <h3 class="sub-h rv">練習が、そのまま次のチャンスになる</h3>
-    <ol class="steps4">
-      <li class="rv"><b>練習する</b><span>AIの面接官と、声で本番さながらに話します。</span></li>
-      <li class="rv"><b>評価を受け取る</b><span>7つの力を5段階で。根拠になった発言も示します。</span></li>
-      <li class="rv"><b>プロフィールを公開</b><span>評価をまとめたプロフィールを、公開したい人だけが公開します。名前は伏せて表示されます。</span></li>
-      <li class="rv"><b>企業と出会う</b><span>プロフィールを見た企業から、面談の申し込みが届きます。</span></li>
-    </ol>
-    <p class="note rv">当社は推薦や仲介を行いません。公開するかどうかは本人が決め、いつでも非公開に戻せます。</p>
-
-    <h3 class="sub-h rv">個人向けの料金</h3>
-    <div class="plans">
-      <div class="plan rv">
-        <span class="name">無料</span><span class="for">まずは試してみたい方に</span>
-        <span class="price">¥0<small>／月</small></span>
-        <ul><li>月5回まで（1日1回）</li><li>1回10分まで</li></ul>
-        <a class="btn btn-line" href="https://interview-copilot-ai.akitogroup.jp" target="_blank" rel="noopener">無料で始める</a>
-      </div>
-      <div class="plan rv">
-        <span class="name">ライト</span><span class="for">じっくり練習したい方に</span>
-        <span class="price">¥980<small>／月（税込）</small></span>
-        <ul><li>月15回まで（1日2回）</li><li>1回15分まで</li></ul>
-        <a class="btn btn-line" href="https://interview-copilot-ai.akitogroup.jp/pricing" target="_blank" rel="noopener">申し込む</a>
-      </div>
-      <div class="plan hot rv">
-        <span class="badge">おすすめ</span>
-        <span class="name">プロ</span><span class="for">本番まで毎日練習したい方に</span>
-        <span class="price">¥2,980<small>／月（税込）</small></span>
-        <ul><li>月30回まで（1日3回）</li><li>1回30分まで</li><li>書類をアップロードして面接</li><li>性格・特性の分析</li></ul>
-        <a class="btn btn-ink" href="https://interview-copilot-ai.akitogroup.jp/pricing" target="_blank" rel="noopener">申し込む</a>
-      </div>
-    </div>
-    <p class="plans-note">7つの力の評価や、プロフィール公開・企業との出会いの機能はどのプランでも同じです。</p>
-  </div>
-</section>
-
-<!-- ===== 企業向け ===== -->
-<section class="block tint gx" id="for-companies">
-  <div class="wrap">
-    <div class="part-title rv"><span>企業向け</span><h2>練習を重ねた人材と、発言を根拠に出会う。</h2></div>
-    <div class="talent">
-      <div class="rv">
-        <ol class="how">
-          <li><span><b>人材を探す</b><span>AI面接の練習を重ね、プロフィールの公開に同意した人を探せます。名前は伏せて表示され、職種・強み・力の平均などで絞り込めます。</span></span></li>
-          <li><span><b>チケットで詳しく見る</b><span>気になる人はチケット（1人 10,000円・税込・買い切り）で、名前・面接ごとの詳しい評価と会話・録画が見られます。</span></span></li>
-          <li><span><b>面談を申し込む</b><span>相手が承諾すると、そのままメッセージでやり取りできます。採用が決まっても、追加の料金はかかりません。</span></span></li>
-        </ol>
-        <p class="fair">公正な採用のため、年齢・性別などでの絞り込みはできません。評価はすべて面接での本人の発言にもとづくもので、根拠がない力は評価しません。</p>
-      </div>
-      <div class="mock rv" aria-label="企業向けの人材ページの見本">
-        <span class="mock-tag">画面の見本（例）</span>
-        <div class="m-card t-card">
-          <div class="top">
-            <div><p class="ttl">販売3年、店舗リーダー</p><p class="m-sub">No.3F82K1 ・ 社会人（転職活動中）</p></div>
+  <!-- 6. 企業向け -->
+  <section class="sec alt" id="business">
+    <div class="wrap">
+      <div class="biz-hero">
+        <div class="rv">
+          <p class="eyebrow">For business</p>
+          <h2 style="margin-top:14px">書類ではわからない<br><span class="lime">“話す力”</span>を、<br>本人の発言で確かめてから会える。</h2>
+          <p class="lead">ガチキャリAIは求人メディアです。運営が人材を推薦・仲介することはありません。企業ご自身が評価を見て、会いたい人に面談を申し込みます。</p>
+          <div class="btns" style="margin-top:24px"><a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login">無料で企業登録する <span class="arr" aria-hidden="true">→</span></a></div>
+        </div>
+        <div class="card talent rv" aria-label="人材一覧のサンプル">
+          <span class="sample-badge">サンプル</span>
+          <div class="row">
+            <div><p class="ttl">販売3年、店舗リーダー</p><p class="sub" style="font-size:12.5px">No.0000 ・ 社会人（転職活動中）</p></div>
             <div class="avg"><b>3.4</b><small>力の平均（5点満点）</small></div>
           </div>
-          <p style="margin-top:10px;font-size:13px">アパレル販売で店舗リーダーを務め、お客様の声を数字で振り返って売り場を改善してきた人物。観察してから動く慎重さと、任されたことをやり切る粘り強さが、複数の面接で一貫して確認できる。</p>
-          <ul class="chips"><li class="s">観察力と気配り</li><li class="s">数字で振り返る習慣</li><li>主体性 4.0</li><li>粘り強さ 3.5</li><li>誠実さ 4.0</li></ul>
-          <p class="m-sub">希望：企画・マーケティング ／ 大阪　・　面接 8回　・　録画あり</p>
+          <p style="margin-top:10px;font-size:13.5px;color:#D0D0D0">お客様の声を数字で振り返り、売り場を改善してきた人物。任されたことをやり切る粘り強さが、複数の面接で一貫して見られる。</p>
+          <ul class="chips"><li class="s">数字で振り返る習慣</li><li class="s">やり切る力</li><li>主体性 4.0</li><li>粘り強さ 3.5</li></ul>
+          <p class="sub" style="font-size:12.5px">希望：企画・マーケティング　・　模擬面接 8回</p>
+          <div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>名前・面接ごとの評価・会話は<strong class="lime">閲覧チケット</strong>で見られます</span></div>
         </div>
-        <div class="m-card ticket">
-          <b style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C8FF00" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>チケットで詳しく見る</b>
-          <ul><li>お名前</li><li>面接ごとの詳しい評価と、面接の会話すべて</li><li>面接の録画</li><li>面談の申し込み</li></ul>
-          <span class="btnx">チケットを購入する（10,000円）</span>
-        </div>
-        <div class="m-card">
-          <b>能力の評価（8回の面接から）</b>
-          <ul class="bars" style="margin-top:10px">
-            <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3.0<small> /5</small></span></li>
-            <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4.0<small> /5</small></span></li>
-            <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:70%"></span></span><span class="v">3.5<small> /5</small></span></li>
-            <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4.0<small> /5</small></span></li>
-          </ul>
-          <b style="display:block;margin-top:18px">総合点の推移</b>
-          <div class="trend" aria-label="総合点の推移の例">
-            <span style="height:41%;--i:0" data-v="41"></span><span style="height:45%;--i:1" data-v="45"></span><span style="height:52%;--i:2" data-v="52"></span><span style="height:49%;--i:3" data-v="49"></span><span style="height:58%;--i:4" data-v="58"></span><span style="height:63%;--i:5" data-v="63"></span><span style="height:60%;--i:6" data-v="60"></span><span style="height:66%;--i:7" data-v="66"></span>
+      </div>
+
+      <div class="biz-feats">
+        <article class="card rv">
+          <h3>人材を探す</h3>
+          <p class="price">無料<small>一覧とまとめの閲覧</small></p>
+          <ul><li>模擬面接の評価（7つの力・人物まとめ・根拠になった発言）で人材を探せる</li><li>匿名の一覧とまとめを見るのは無料</li></ul>
+        </article>
+        <article class="card wide rv">
+          <h3>閲覧チケット</h3>
+          <p class="price">¥10,000<small>／1人（税込・買い切り）</small></p>
+          <ul><li>名前・面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）が見られる</li><li>そのまま面談を申し込める</li><li>採用が決まっても、成功報酬はゼロ</li></ul>
+        </article>
+        <article class="card rv">
+          <h3>AI面接（URL発行）</h3>
+          <p class="price">¥5,500<small>／回（税込・従量課金）</small></p>
+          <ul><li>書類選考した候補者に面接URLを送ると、AI面接官が一次面接をしてくれる</li><li>候補者が面接を始めた回だけ請求。月額はなし</li></ul>
+        </article>
+        <article class="card rv">
+          <h3>求人掲載</h3>
+          <p class="price">今は無料</p>
+          <ul><li>求人を掲載できる</li><li>応募があると、応募者の練習の評価を見てメッセージできる</li></ul>
+        </article>
+        <article class="card rv">
+          <h3>書類選考AI</h3>
+          <p class="price">掲載中は無料</p>
+          <ul><li>履歴書PDFをAIが一括で判定する</li><li>求人を掲載中の企業は無料</li></ul>
+        </article>
+        <article class="card rv" style="border-color:rgba(200,255,0,.4);background:linear-gradient(160deg,#1C2108,var(--card) 60%)">
+          <h3>まずは無料で</h3>
+          <p style="color:#B8B8B8;font-size:14.5px">企業登録は無料です。登録するとすぐに、匿名の人材一覧と人物まとめを見られます。</p>
+          <a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login" style="margin-top:6px">無料で企業登録する <span class="arr" aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 料金 -->
+  <section class="sec" id="pricing">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Pricing</p>
+        <h2>料金</h2>
+        <p>表示はすべて税込です。</p>
+      </div>
+      <div class="tabs rv" role="tablist" aria-label="料金の対象">
+        <button type="button" role="tab" id="tab-person" aria-controls="panel-person" aria-selected="true" data-mode="person">個人の方</button>
+        <button type="button" role="tab" id="tab-biz" aria-controls="panel-biz" aria-selected="false" data-mode="biz">企業の方</button>
+      </div>
+
+      <div id="panel-person" role="tabpanel" aria-labelledby="tab-person">
+        <div class="plans">
+          <div class="card plan rv">
+            <span class="name">無料</span>
+            <span class="price">¥0<small>／月</small></span>
+            <dl><dt>練習回数</dt><dd>1日1回・月5回まで</dd><dt>1回の長さ</dt><dd>10分</dd><dt>練習できる職種</dt><dd>月2つ</dd><dt>保存できる結果</dt><dd>5件</dd></dl>
+          </div>
+          <div class="card plan rv">
+            <span class="name">ライト</span>
+            <span class="price">¥980<small>／月</small></span>
+            <dl><dt>練習回数</dt><dd>1日2回・月15回まで</dd><dt>1回の長さ</dt><dd>15分</dd><dt>練習できる職種</dt><dd>月5つ</dd><dt>保存できる結果</dt><dd>10件</dd></dl>
+          </div>
+          <div class="card plan rec rv">
+            <span class="badge">いちばん練習できる</span>
+            <span class="name">プロ</span>
+            <span class="price">¥2,980<small>／月</small></span>
+            <dl><dt>練習回数</dt><dd>1日3回・月30回まで</dd><dt>1回の長さ</dt><dd>30分</dd><dt>練習できる職種</dt><dd>無制限</dd><dt>保存できる結果</dt><dd>無制限</dd></dl>
           </div>
         </div>
+        <p class="same rv">評価の中身・プロフィール公開・オファーは、<strong>全プラン同じ</strong>です。変わるのは練習できる回数・時間・職種・保存できる結果の数だけです。</p>
+        <div class="btns rv" style="margin-top:20px"><a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login">無料で模擬面接をはじめる <span class="arr" aria-hidden="true">→</span></a></div>
       </div>
-    </div>
-  </div>
-</section>
 
-<section class="block">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">For companies</p><h2>選考そのものも、AIに任せる。</h2></div>
-      <p>書類選考・面接日程の調整・評価のまとめ。ばらばらになりがちな採用の工程を、ひとつの流れでつなぎます。</p>
-    </div>
-    <ol class="flow5">
-      <li class="rv"><b>応募・書類収集</b></li>
-      <li class="rv"><b>書類選考AI</b></li>
-      <li class="rv"><b>アバター面接AI</b></li>
-      <li class="rv"><b>面接後の自動総評</b></li>
-      <li class="rv"><b>人材探し・母集団形成</b></li>
-    </ol>
-  </div>
-</section>
-
-<section class="block tint">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">What changes</p><h2>ガチキャリAIを入れると、<br>何が変わるのか</h2></div>
-      <p>面接と書類選考を、AIが24時間365日代わりに担当します。</p>
-    </div>
-    <div class="compare-wrap rv">
-      <table class="compare">
-        <thead><tr><th scope="col"></th><th scope="col">導入前</th><th scope="col">導入後</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">面接できる日時</th><td class="before">平日の営業時間のみ</td><td class="after">24時間365日、候補者の都合で受けられる</td></tr>
-          <tr><th scope="row">面接官の準備</th><td class="before">調整・日程合わせに数日</td><td class="after">URLを送るだけ。準備はいらない</td></tr>
-          <tr><th scope="row">評価のブレ</th><td class="before">面接官によって差が出る</td><td class="after">AIスコアで全候補者を同じ基準で比較</td></tr>
-          <tr><th scope="row">書類選考の工数</th><td class="before">1件ずつ人の目で確認</td><td class="after">AIが自動で採点・ランク付け</td></tr>
-          <tr><th scope="row">候補者の辞退</th><td class="before">日程が合わずに離脱</td><td class="after">いつでも受けられるので離脱が大きく減る</td></tr>
-          <tr><th scope="row">引き継ぎ</th><td class="before">面接官の記憶やメモ頼み</td><td class="after">録画とAIレポートですぐに共有</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<section class="block" id="features">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">Features</p><h2>企業向けの機能</h2></div>
-      <p>人材探しから選考・面接・評価まで、採用に必要な機能をひとつのサービスに。</p>
-    </div>
-    <div class="features">
-      <article class="feat rv">
-        <span class="no">01</span><h3>書類選考AI</h3>
-        <ul>
-          <li>複数の履歴書PDFをまとめてアップロードして自動処理</li>
-          <li>必須条件・歓迎条件・求める人物像を、チェックと優先順位・配点で細かく設定</li>
-          <li>自社の事業内容・社風・活躍している社員の特徴などを評価軸に反映</li>
-          <li>候補者をA〜Dランクで自動採点し、根拠になった書類の記述も表示</li>
-        </ul>
-      </article>
-      <article class="feat rv">
-        <span class="no">02</span><h3>アバター面接AI</h3>
-        <ul>
-          <li>URLを発行するだけで、候補者はオンラインでAIアバターと面接できる</li>
-          <li>書類選考の結果や気になる点を引き継ぎ、深掘りすべき質問を自動で作る</li>
-          <li>面接官のスタイル（フレンドリー／標準／厳しめ）を企業ごとに設定できる</li>
-          <li>企業独自のオリジナルアバターを設定できる（別途初期費用）</li>
-        </ul>
-      </article>
-      <article class="feat wide rv">
-        <div style="display:grid;gap:12px">
-          <span class="no">03</span><h3>面接後の自動総評</h3>
-          <ul>
-            <li>総合スコア・リスクスコア・一貫性スコア・企業とのフィット度を自動で算出</li>
-            <li>積極性・誠実さ・定着可能性・即戦力度・コミュ力・成長性・ストレス耐性をレーダーチャートで表示</li>
-            <li>離職リスクを、％と要因つきで数値化</li>
-            <li>次の面接で確かめるべき点を自動で提案</li>
-          </ul>
+      <div id="panel-biz" role="tabpanel" aria-labelledby="tab-biz" hidden>
+        <div class="table-wrap">
+          <table class="ptable">
+            <thead><tr><th scope="col">内容</th><th scope="col">料金</th><th scope="col">くわしく</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">人材一覧・人物まとめの閲覧</th><td class="p">無料</td><td class="d">匿名の一覧とまとめを見られます</td></tr>
+              <tr><th scope="row">閲覧チケット</th><td class="p">¥10,000<small>1人・買い切り</small></td><td class="d">名前・面接ごとの評価・会話・録画（本人が許可した場合）。面談の申し込み。成功報酬はゼロ</td></tr>
+              <tr><th scope="row">AI面接（URL発行）</th><td class="p">¥5,500<small>1回・従量課金</small></td><td class="d">候補者が面接を始めた回だけ請求。月額はなし</td></tr>
+              <tr><th scope="row">求人掲載</th><td class="p">今は無料</td><td class="d">応募者の練習の評価を見て、メッセージできます</td></tr>
+              <tr><th scope="row">書類選考AI</th><td class="p">掲載中は無料</td><td class="d">求人を掲載中の企業は、履歴書PDFの一括判定が無料</td></tr>
+            </tbody>
+          </table>
         </div>
-        <img src="assets/img/report.webp" alt="面接後の評価レポート。総合評価、レーダーチャート、離職リスクなどが表示されている" width="1000" height="1043" loading="lazy">
-      </article>
-      <article class="feat rv">
-        <span class="no">04</span><h3>人材を探す</h3>
-        <ul><li>練習を重ねて公開に同意した人材を、職種・強み・力の平均で探せる</li><li>チケット（1人 10,000円・税込）で詳しい評価・録画を見て、面談を申し込める</li></ul>
-      </article>
-      <article class="feat rv">
-        <span class="no">05</span><h3>企業情報の自動収集AI</h3>
-        <ul><li>企業名を入れるだけで、AIがWebを調べて事業内容・社風などの項目を自動で入力</li></ul>
-      </article>
-      <article class="feat rv">
-        <span class="no">06</span><h3>選考履歴・候補者比較</h3>
-        <ul><li>過去の選考結果・面接結果を一覧で確認、PDF出力もできる</li><li>複数の候補者を横並びで比べられる</li></ul>
-      </article>
-      <article class="feat rv">
-        <span class="no">07</span><h3>求人掲載</h3>
-        <ul><li>媒体費用なしで、自社の求人をプラットフォームに掲載できる</li></ul>
-      </article>
+        <div class="btns" style="margin-top:20px"><a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login">無料で企業登録する <span class="arr" aria-hidden="true">→</span></a></div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="block tint" id="pricing">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div><p class="eyebrow">Pricing</p><h2>企業向けの料金</h2></div>
-      <p>書類選考AIは、どのプランでも無料・無制限。まずは月額なしの従量課金で試してから、月の面接件数に合わせてプランを選べます。人材のチケットは、どのプランでも1人 10,000円（税込・買い切り）です。</p>
-    </div>
-    <div class="plans">
-      <div class="plan rv">
-        <span class="name">従量課金</span><span class="for">まずは試したい企業向け</span>
-        <span class="price">¥2,200<small>／回（税込）</small></span>
-        <ul><li>月額なし。AI面接は使った分だけ</li><li>書類選考AI：無料・無制限</li></ul>
-        <a class="btn btn-line" href="contact.html#gachicareer-ai">相談する</a>
+  <!-- 8. 安心・公正 -->
+  <section class="sec alt" id="fair">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Fair &amp; Safe</p>
+        <h2>安心・公正への取り組み</h2>
+        <p>練習する人が安心して使えて、企業が公正に人と出会えるように、仕組みとして決めていることがあります。</p>
       </div>
-      <div class="plan rv">
-        <span class="name">ライト</span><span class="for">継続的に採用活動を行う企業向け</span>
-        <span class="price">¥33,000<small>／月（税込）</small></span>
-        <ul><li>AI面接 月20回込み（超えた分は1回¥330）</li><li>書類選考AI：無料・無制限</li><li>PDF出力</li></ul>
-        <a class="btn btn-line" href="contact.html#gachicareer-ai">相談する</a>
-      </div>
-      <div class="plan hot rv">
-        <span class="badge">おすすめ</span>
-        <span class="name">プロ</span><span class="for">本格的に採用を回したい企業向け</span>
-        <span class="price">¥55,000<small>／月（税込）</small></span>
-        <ul><li>AI面接 月50回込み（超えた分は1回¥330）</li><li>書類選考・面接履歴のランキング</li><li>担当者の人数は無制限</li><li>優先サポート</li></ul>
-        <a class="btn btn-ink" href="contact.html#gachicareer-ai">相談する</a>
+      <div class="fair">
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/><path d="m3 3 18 18"/></svg></span><div><h3>年齢・性別などで絞り込めない</h3><p>企業は、年齢や性別などで人材を絞り込むことはできません。評価は面接での発言にもとづくものだけです。</p></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h3>公開は本人の同意制</h3><p>プロフィールは初期設定で「非公開」です。公開するかは本人が決め、いつでも非公開に戻せます。</p></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20c.8-3 2.6-4.5 5-4.5S11.2 17 12 20M12 20c.8-3 2.6-4.5 5-4.5s4.2 1.5 5 4.5"/></svg></span><div><h3>運営は推薦・仲介をしない</h3><p>ガチキャリAIは求人メディアです。運営が人材を企業に推薦したり、あいだに入って取り次いだりはしません。</p></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5 12 12l3.5-4.5M12 12v5.5M9 13h6M9 15.8h6"/></svg></span><div><h3>成功報酬はなし</h3><p>採用が決まっても、成功報酬はいただきません。企業の料金は上の表の金額だけです。</p></div></article>
       </div>
     </div>
-    <p class="plans-note">独自アバターは、どのプランでも別途初期費用で作れます（従量課金 ¥110,000／ライト ¥77,000／プロ ¥55,000、いずれも税込）。くわしくは <a href="https://interview-copilot-ai.akitogroup.jp/pricing" target="_blank" rel="noopener">ガチキャリAIの料金ページ</a> をご覧ください。</p>
-  </div>
-</section>
+  </section>
+
+  <!-- 9. FAQ -->
+  <section class="sec" id="faq">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">FAQ</p>
+        <h2>よくある質問</h2>
+      </div>
+      <div class="faq">
+        <details class="rv"><summary><span class="tag">個人</span>本当に無料で使えますか？</summary><p class="a">はい。無料プランでは1日1回・月5回まで、1回10分の模擬面接ができます。評価の中身・プロフィール公開・オファーは有料プランと同じです。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>評価はどうやって決まるのですか？</summary><p class="a">模擬面接であなたが話した内容から、7つの力をそれぞれ5段階で評価します。評価には必ずあなたの実際の発言を根拠として引用し、根拠となる発言がない力は評価しません。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>プロフィールは勝手に公開されませんか？</summary><p class="a">されません。初期設定は「非公開」で、公開に同意した場合だけ、名前を伏せたプロフィールを企業が見られるようになります。いつでも非公開に戻せます。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>企業に名前は知られますか？</summary><p class="a">公開したプロフィールでは、名前は伏せて表示されます。企業が閲覧チケットを使った場合は、その企業にお名前と面接ごとの評価・会話が表示されます。録画は、本人が許可した場合だけ見られます。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>スマホでも使えますか？</summary><p class="a">使えます。スマホのブラウザで模擬面接ができ、ホーム画面に追加すればアプリのように開けます。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>使えば内定がもらえますか？</summary><p class="a">内定や採用をお約束するサービスではありません。練習と評価で面接の準備を進め、評価を公開すれば企業から面談の申し込みが届くことがある、という仕組みです。</p></details>
+        <details class="rv"><summary><span class="tag">企業</span>運営が人材を紹介してくれるのですか？</summary><p class="a">いいえ。ガチキャリAIは求人メディアで、運営が人材を推薦・仲介することはありません。企業ご自身が評価を見て、面談を申し込む相手を決めます。</p></details>
+        <details class="rv"><summary><span class="tag">企業</span>料金はいつ、いくらかかりますか？</summary><p class="a">人材一覧と人物まとめの閲覧は無料です。詳しく見たい人ごとに閲覧チケット（1人¥10,000・税込・買い切り）、AI面接は候補者が面接を始めた回だけ1回¥5,500（税込）です。月額料金や成功報酬はありません。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. 最後のCTA -->
+  <section class="sec final alt">
+    <div class="wrap rv">
+      <p class="eyebrow">Get started</p>
+      <h2 style="margin-top:14px">次の面接は、<br><span class="lime">根拠のある自信</span>で。</h2>
+      <p>まずは無料で、1回練習してみてください。</p>
+      <div class="btns">
+        <a class="btn btn-lime" href="https://interview-copilot-ai.akitogroup.jp/login">無料で模擬面接をはじめる <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href="https://interview-copilot-ai.akitogroup.jp/login">無料で企業登録する</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<section class="cta-band" aria-label="お問い合わせ">
+<footer class="foot">
   <div class="wrap">
-    <div class="rv">
-      <p class="eyebrow">Contact</p>
-      <h2 style="margin-top:12px">まずは、お気軽にご連絡ください。</h2>
-      <p>ガチキャリAIの導入・資料請求、ガチキャリへの参加やPOSシステムのご相談、採用へのご応募など、どんなことでも受け付けています。</p>
-    </div>
-    <div class="cta-actions rv">
-      <a class="btn btn-ink" href="contact.html">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
-      <a class="cta-tel" href="tel:08024204900"><b>080-2420-4900</b><small>年中無休・24時間受付</small></a>
-    </div>
-  </div>
-</section>
-
-
-<footer>
-  <div class="foot-stripe"></div>
-  <div class="site-foot">
-    <div class="wrap">
-      <div class="foot-grid">
-        <div class="foot-brand">
-          <span class="logo-chip"><img src="assets/img/logo-full.webp" alt="AKITOグループ　愛ある事業で煌めくあなたに届ける未来" width="900" height="352"></span>
-          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休・24時間受付）<br>info@akitogroup.jp</p>
-        </div>
-        <div class="foot-col">
-          <h4>COMPANY</h4>
-          <ul>
-            <li><a href="./">トップ</a></li>
-            <li><a href="about.html">会社概要・代表挨拶</a></li>
-            <li><a href="news.html">お知らせ</a></li>
-            <li><a href="contact.html">お問い合わせ</a></li>
-          </ul>
-        </div>
-        <div class="foot-col">
-          <h4>SERVICES</h4>
-          <ul>
-            <li><a href="gachicareer-ai.html">ガチキャリAI</a></li>
-            <li><a href="gachicareer.html">ガチキャリ</a></li>
-            <li><a href="./#pos">夜のお店向けPOSシステム</a></li>
-            <li><a href="contact.html#recruit">採用情報</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="foot-bottom">
-        <span>© <span data-year>2026</span> AKITOgroup.llc</span>
-        <span>愛ある事業で煌めくあなたに届ける未来</span>
-      </div>
-    </div>
+    <a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14l-12 7L4 23V9z" fill="none" stroke="#C8FF00" stroke-width="2"/><path d="M16 7.5 23.5 12v8L16 24.5 8.5 20v-8z" fill="rgba(200,255,0,.18)" stroke="#C8FF00" stroke-width="1.2"/></svg><span style="display:inline">ガチキャリ<b>AI</b></span></a>
+    <nav aria-label="規約など">
+      <a href="https://interview-copilot-ai.akitogroup.jp/terms">利用規約</a>
+      <a href="https://interview-copilot-ai.akitogroup.jp/privacy">プライバシーポリシー</a>
+      <a href="https://interview-copilot-ai.akitogroup.jp/tokusho">特定商取引法に基づく表記</a>
+      <a href="contact.html#gachicareer-ai">お問い合わせ</a>
+      <a href="./">運営会社（AKITOグループ）</a>
+    </nav>
+    <span>© <span id="year">2026</span> 合同会社AKITOグループ</span>
   </div>
 </footer>
-<script src="assets/site.js"></script>
+
+<div class="dock" id="dock">
+  <a class="btn btn-lime only-person" href="https://interview-copilot-ai.akitogroup.jp/login">無料で模擬面接をはじめる <span class="arr" aria-hidden="true">→</span></a>
+  <a class="btn btn-lime only-biz" href="https://interview-copilot-ai.akitogroup.jp/login">無料で企業登録する <span class="arr" aria-hidden="true">→</span></a>
+</div>
+
+<script>
+(function(){
+  var body=document.body;
+  document.getElementById('year').textContent=new Date().getFullYear();
+
+  // 個人・企業の切り替え（ヘッダーと料金のタブを連動させる）
+  var setMode=function(mode,save){
+    body.setAttribute('data-mode',mode);
+    document.querySelectorAll('[role="tab"][data-mode]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-mode')===mode?'true':'false')});
+    document.getElementById('panel-person').hidden=mode!=='person';
+    document.getElementById('panel-biz').hidden=mode!=='biz';
+    document.querySelectorAll('.pains .card').forEach(function(c){c.classList.toggle('is-on',c.getAttribute('data-on')===mode)});
+    if(save){try{localStorage.setItem('gcai-lp-mode',mode)}catch(e){}}
+  };
+  var initial='person';
+  if(location.hash==='#business')initial='biz';
+  else{try{var m=localStorage.getItem('gcai-lp-mode');if(m==='biz'||m==='person')initial=m}catch(e){}}
+  setMode(initial,false);
+  document.querySelectorAll('[role="tab"][data-mode]').forEach(function(b){
+    b.addEventListener('click',function(){setMode(b.getAttribute('data-mode'),true)});
+  });
+  document.querySelectorAll('[data-switch]').forEach(function(a){
+    a.addEventListener('click',function(){setMode(a.getAttribute('data-switch'),true)});
+  });
+
+  // ヘッダーの線と、スマホ下の固定ボタン
+  var head=document.querySelector('.head'),dock=document.getElementById('dock');
+  var hero=document.querySelector('.hero'),final=document.querySelector('.final');
+  var onScroll=function(){
+    head.classList.toggle('scrolled',scrollY>8);
+    var past=hero.getBoundingClientRect().bottom<0;
+    var atEnd=final.getBoundingClientRect().top<innerHeight;
+    dock.classList.toggle('show',past&&!atEnd);
+  };
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  // スクロールで出てくる動き（最初の画面に見えているものは隠さない）
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!('IntersectionObserver' in window)||reduce)return;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      e.target.classList.remove('pending');
+      io.unobserve(e.target);
+    });
+  },{rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){
+    if(el.getBoundingClientRect().top>innerHeight){el.classList.add('pending');io.observe(el)}
+  });
+})();
+</script>
 </body>
 </html>

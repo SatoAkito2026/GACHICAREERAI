@@ -1,6 +1,7 @@
 """会社ホームページを組み立てる。
 
 src/pages/*.html（各ページの中身）に、src/layout.html（ヘッダー・フッターなど共通部分）をかぶせて public/ に書き出す。
+src/standalone/*.html は独自デザインの1枚完結ページなので、そのまま public/ にコピーする。
 ページの先頭のコメントに title / description / nav / cta を書く:
 
     <!--
@@ -70,6 +71,10 @@ def main():
         )
         (OUT / f"{name}.html").write_text(html, encoding="utf-8")
         print("wrote", f"public/{name}.html")
+    # 独自のデザインで1枚完結のページ（ガチキャリAIのLPなど）は、そのままコピーする
+    for page in sorted((SRC / "standalone").glob("*.html")):
+        (OUT / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
+        print("copied", f"public/{page.name}")
 
 
 if __name__ == "__main__":
