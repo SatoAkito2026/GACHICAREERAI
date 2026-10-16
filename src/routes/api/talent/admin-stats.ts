@@ -38,6 +38,8 @@ export const Route = createFileRoute("/api/talent/admin-stats")({
         const { data: unlocks } = await supabase
           .from("profile_unlocks")
           .select("company_user_id, amount, created_at")
+          // 求人への応募で見られるようになった分（0円）は売上に数えない
+          .gt("amount", 0)
           .order("created_at", { ascending: false })
           .limit(5000);
         const all = unlocks ?? [];

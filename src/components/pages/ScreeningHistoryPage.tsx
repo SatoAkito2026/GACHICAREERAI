@@ -17,6 +17,8 @@ import { usePlan } from "@/hooks/use-plan";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getAuthHeaders } from "@/lib/chat-api";
+import { CheckoutModal } from "@/components/CheckoutModal";
+import { COMPANY_INTERVIEW_PRICE_JPY } from "@/lib/plan-rules";
 
 // ---- 型定義（screening.tsx の保存形式に対応） ----
 
@@ -73,7 +75,7 @@ function rankMeta(rank: string) {
 const RANK_OPTIONS = ["A", "B", "C", "D"];
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const INTERVIEW_URL_ALLOWED_PLANS = ["company_metered", "company_light", "company_pro"];
+const INTERVIEW_PRICE = `¥${COMPANY_INTERVIEW_PRICE_JPY.toLocaleString()}`;
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -82,7 +84,11 @@ function formatDateTime(iso: string): string {
 
 export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boolean } = {}) {
   const { session, user, loading: authLoading } = useAuth();
-  const { plan, limits, interviewCount, incrementInterviewCount, loading: planLoading } = usePlan();
+  const { plan, refresh: refreshPlan, loading: planLoading } = usePlan();
+  // 企業のAI面接は従量課金。カード登録（従量課金の契約）が済んでいればURLを発行できる
+  const [hasMeteredSub, setHasMeteredSub] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const canIssue = plan === "company_metered" && hasMeteredSub;
 
   const [issuedUrl, setIssuedUrl] = useState<string | null>(null);
   const [issuedEmail, setIssuedEmail] = useState<string>("");
@@ -96,9 +102,10 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
     (async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("company_id, company_name")
+        .select("company_id, company_name, stripe_subscription_id")
         .eq("id", user.id)
         .maybeSingle();
+      setHasMeteredSub(!!(profile as any)?.stripe_subscription_id);
       if ((profile as any)?.company_name) {
         setCompanyName((profile as any).company_name);
       } else if ((profile as any)?.company_id) {
@@ -110,25 +117,19 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
         if ((company as any)?.name) setCompanyName((company as any).name);
       }
     })();
-  }, [user]);
+  }, [user, plan]);
 
   const handleIssueUrl = async (row: ScreeningCandidateRow) => {
-    if (!INTERVIEW_URL_ALLOWED_PLANS.includes(plan)) {
-      toast.error(
-        "面接URLの発行には企業プランへの加入が必要です。マイページからプランをご確認ください。",
-      );
+    if (!canIssue) {
+      setCheckoutOpen(true);
       return;
     }
-
-    // URL発行回数チェック（ライト：20回、プロ：50回、超過時は330円/回）
-    const limit = limits.interviews;
-    const isOver = limit !== Infinity && interviewCount >= limit;
-    if (isOver && plan !== "company_metered") {
-      const ok = window.confirm(
-        `今月のURL発行上限（${limit}回）を超えています。\n超過分は¥330/回の追加料金が発生します。\n発行しますか？`,
-      );
-      if (!ok) return;
-    }
+    if (
+      !window.confirm(
+        `面接URLを発行します。\n候補者が面接を始めた時点で ${INTERVIEW_PRICE}（税込）が請求されます（受けなければ請求されません）。`,
+      )
+    )
+      return;
 
     const screeningData = {
       candidateName: row.candidate_name || "",
@@ -176,28 +177,7 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
     setIssuedRowId(row.id);
     setEmailSent(false);
 
-    // 発行回数をインクリメント
-    await incrementInterviewCount();
-
-    // Stripeで課金記録（従量課金・超過分）
-    if (plan === "company_metered" || isOver) {
-      try {
-        await fetch("/api/report-usage", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(await getAuthHeaders()),
-          },
-        });
-      } catch {
-        // 記録失敗してもURL発行は継続
-      }
-      if (plan === "company_metered") {
-        toast.info("面接URL発行に伴い¥400の課金が発生します");
-      } else if (isOver) {
-        toast.info("超過分として¥330の追加料金が発生します");
-      }
-    }
+    toast.info(`候補者が面接を始めると ${INTERVIEW_PRICE}（税込）が請求されます`);
   };
 
   const handleCopyUrl = async () => {
@@ -370,20 +350,32 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
         <p className="mb-2 text-[14px]" style={{ color: "#888888" }}>
           過去に実行した書類選考の結果を確認できます。
         </p>
-        {/* URL発行残数表示 */}
-        {INTERVIEW_URL_ALLOWED_PLANS.includes(plan) && limits.interviews !== Infinity && (
-          <div
-            className="mb-6 rounded-lg px-4 py-3 text-[13px]"
-            style={{
-              background: interviewCount >= limits.interviews ? "#2A1010" : "#1A1A1A",
-              border: `1px solid ${interviewCount >= limits.interviews ? "#AA3333" : "#333333"}`,
-              color: interviewCount >= limits.interviews ? "#FF6B6B" : "#888888",
+        {/* AI面接（従量課金）の案内 */}
+        <div
+          className="mb-6 rounded-lg px-4 py-3 text-[13px]"
+          style={{ background: "#1A1A1A", border: "1px solid #333333", color: "#AAAAAA" }}
+        >
+          AI面接は従量課金です。面接URLを候補者に送り、候補者が面接を始めた回だけ {INTERVIEW_PRICE}
+          （税込）が請求されます。
+          {!canIssue && (
+            <button
+              type="button"
+              onClick={() => setCheckoutOpen(true)}
+              className="ml-2 underline"
+              style={{ color: "#C8FF00", fontWeight: 700 }}
+            >
+              カードを登録する →
+            </button>
+          )}
+        </div>
+        {checkoutOpen && (
+          <CheckoutModal
+            plan="company_metered"
+            onClose={() => {
+              setCheckoutOpen(false);
+              void refreshPlan();
             }}
-          >
-            {interviewCount >= limits.interviews
-              ? `⚠️ 今月のURL発行上限（${limits.interviews}回）に達しました。超過分は¥330/回の追加料金が発生します。`
-              : `✅ 今月のURL発行：${interviewCount} / ${limits.interviews} 回（残り${limits.interviews - interviewCount}回）`}
-          </div>
+          />
         )}
 
         <>
@@ -549,7 +541,7 @@ export function ScreeningHistoryPage({ showHeader = true }: { showHeader?: boole
                   open={openId === row.id}
                   onToggle={() => setOpenId(openId === row.id ? null : row.id)}
                   onIssueUrl={handleIssueUrl}
-                  canIssueUrl={INTERVIEW_URL_ALLOWED_PLANS.includes(plan)}
+                  canIssueUrl
                   issuedUrl={issuedUrl}
                   issuedEmail={issuedEmail}
                   issuedRowId={issuedRowId}

@@ -105,6 +105,10 @@ export const Route = createFileRoute("/api/create-subscription")({
         if (!paymentMethodId || !PRICE_IDS[plan]) {
           return json({ error: "Invalid paymentMethodId or plan" }, 400);
         }
+        // 企業の月額プラン（ライト・プロ）と総評閲覧プランは廃止。企業はチケットとAI面接の従量課金だけ
+        if (["company_light", "company_pro", "candidate_view"].includes(plan)) {
+          return json({ error: "このプランは受付を終了しました" }, 400);
+        }
 
         const stripe = new Stripe(stripeSecret, {
           httpClient: Stripe.createFetchHttpClient(),
@@ -212,7 +216,8 @@ export const Route = createFileRoute("/api/create-subscription")({
                   }
                 : {
                     plan,
-                    plan_expires_at: expiresAt.toISOString(),
+                    // 従量課金は期限なし（解約されると webhook が stripe_subscription_id を消す）
+                    plan_expires_at: plan === "company_metered" ? null : expiresAt.toISOString(),
                     stripe_subscription_id: subscription.id,
                     stripe_customer_id: customer.id,
                     // 新規プラン開始時に利用回数をリセット

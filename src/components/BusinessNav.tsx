@@ -11,18 +11,12 @@ const COMPANY_SUBTABS = [
   { label: "面談・メッセージ", to: "/business/company/messages" },
   { label: "書類選考", to: "/business/company/screening" },
   { label: "書類選考履歴", to: "/business/company/screening/history" },
-  { label: "面接履歴", to: "/business/company/history" },
+  { label: "購入した人材", to: "/business/company/purchased" },
   { label: "求人掲載", to: "/business/company/jobs" },
   { label: "設定", to: "/business/company/settings" },
 ] as const;
 
-const SCHOOL_SUBTABS = [
-  { label: "書類選考", to: "/business/school/screening" },
-  { label: "書類選考履歴", to: "/business/school/screening/history" },
-  { label: "面接履歴", to: "/business/school/history" },
-  { label: "生徒管理", to: "/business/school/students" },
-  { label: "設定", to: "/business/school/settings" },
-] as const;
+const SCHOOL_SUBTABS = [{ label: "生徒の練習状況", to: "/business/school/students" }] as const;
 
 const ACTOR_SUBTABS = [
   { label: "ダッシュボード", to: "/business/actor" },

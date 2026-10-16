@@ -31,6 +31,14 @@ type PracticeFeedback = {
     reason: string;
     evidence: string[];
   }[];
+  /** 企業（採用担当）向けの見立て。プロフィールを公開して、チケットを買った企業にだけ見える */
+  recruiter_view?: {
+    summary: string;
+    strengths: { point: string; evidence: string[] }[];
+    workStyle: string;
+    confirmPoints: string[];
+    suggestedQuestions: string[];
+  } | null;
 };
 
 type HistoryRow = {
@@ -241,6 +249,9 @@ export function PracticeHistoryContent({
                       </div>
                     </div>
                   )}
+                  {mode === "individual" && r.feedback.recruiter_view && (
+                    <RecruiterViewPreview view={r.feedback.recruiter_view} />
+                  )}
                   {r.feedback.competencies && r.feedback.competencies.length > 0 && (
                     <div>
                       <p
@@ -428,5 +439,30 @@ export function PracticeHistoryContent({
         )}
       </div>
     </PrivateShell>
+  );
+}
+
+/** 企業に見える見立てを、本人も同じ内容で確認できるようにする */
+function RecruiterViewPreview({ view }: { view: NonNullable<PracticeFeedback["recruiter_view"]> }) {
+  return (
+    <details
+      className="rounded-xl p-3"
+      style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
+    >
+      <summary style={{ color: "#AAAAAA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+        企業に表示される内容（プロフィール公開中に、チケットを買った企業だけが見られます）
+      </summary>
+      <div
+        className="mt-2 flex flex-col gap-2 text-[12px]"
+        style={{ color: "#CCCCCC", lineHeight: 1.7 }}
+      >
+        {view.summary && <p>{view.summary}</p>}
+        {view.strengths.map((s, i) => (
+          <p key={i}>・{s.point}</p>
+        ))}
+        {view.workStyle && <p>傾向：{view.workStyle}</p>}
+        {view.confirmPoints.length > 0 && <p>面談で確かめる点：{view.confirmPoints.join("／")}</p>}
+      </div>
+    </details>
   );
 }

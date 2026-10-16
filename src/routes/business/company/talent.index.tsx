@@ -31,7 +31,7 @@ type Candidate = {
   strengths: string[];
   competencies: SummaryCompetency[];
   interviewCount: number;
-  averageScore: number | null;
+  competencyAverage: number | null;
   hasRecording: boolean;
   updatedAt: string | null;
   unlocked: boolean;
@@ -115,7 +115,7 @@ function TalentSearchPage() {
             style={inputStyle}
           >
             <option value="recent">新しい順</option>
-            <option value="score">総合点が高い順</option>
+            <option value="score">力の平均が高い順</option>
             {Object.entries(COMPETENCY_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
                 「{v}」が高い順
@@ -128,10 +128,10 @@ function TalentSearchPage() {
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
             style={inputStyle}
           >
-            <option value="">総合点：指定なし</option>
-            {[50, 60, 70, 80].map((n) => (
+            <option value="">力の平均：指定なし</option>
+            {[3, 3.5, 4].map((n) => (
               <option key={n} value={n}>
-                総合点 {n}点以上
+                力の平均 {n.toFixed(1)}以上
               </option>
             ))}
           </select>
@@ -191,10 +191,10 @@ function CandidateCard({ c }: { c: Candidate }) {
         </div>
         <div className="text-right">
           <p style={{ color: C.accent, fontSize: 22, fontWeight: 800, lineHeight: 1 }}>
-            {c.averageScore ?? "-"}
+            {c.competencyAverage?.toFixed(1) ?? "-"}
           </p>
           <p className="text-[10px]" style={{ color: C.muted }}>
-            総合点（直近）
+            力の平均（5点満点）
           </p>
         </div>
       </div>

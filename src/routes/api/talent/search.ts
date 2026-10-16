@@ -32,13 +32,14 @@ export const Route = createFileRoute("/api/talent/search")({
         const url = new URL(request.url);
         const keyword = (url.searchParams.get("keyword") ?? "").trim().toLowerCase().slice(0, 50);
         const stage = url.searchParams.get("stage") ?? "";
+        // 企業向けの点数は「7つの力」の平均（1〜5）。本人向けの練習の点数（100点満点）は使わない
         const minScore = Number(url.searchParams.get("minScore") ?? "") || 0;
         const sort = url.searchParams.get("sort") ?? "recent";
 
         const { data: rows, error } = await supabase
           .from("candidate_profiles")
           .select(
-            "user_id, public_code, headline, career_stage, desired_jobs, desired_locations, summary, summary_updated_at, interview_count, average_score, show_recording",
+            "user_id, public_code, headline, career_stage, desired_jobs, desired_locations, summary, summary_updated_at, interview_count, show_recording",
           )
           .eq("is_public", true)
           .gt("interview_count", 0)
@@ -67,6 +68,12 @@ export const Route = createFileRoute("/api/talent/search")({
 
         let list = (rows ?? []).map((r) => {
           const s = (r.summary ?? null) as TalentSummary | null;
+          const scored = (s?.competencies ?? [])
+            .map((x) => x.score)
+            .filter((n): n is number => typeof n === "number");
+          const competencyAverage = scored.length
+            ? Math.round((scored.reduce((a, b) => a + b, 0) / scored.length) * 10) / 10
+            : null;
           return {
             code: r.public_code,
             headline: r.headline,
@@ -77,7 +84,7 @@ export const Route = createFileRoute("/api/talent/search")({
             strengths: (s?.strengths ?? []).map((x) => x.title),
             competencies: s?.competencies ?? [],
             interviewCount: r.interview_count,
-            averageScore: r.average_score,
+            competencyAverage,
             hasRecording: r.show_recording,
             updatedAt: r.summary_updated_at,
             unlocked: unlocked.has(r.user_id),
@@ -86,7 +93,7 @@ export const Route = createFileRoute("/api/talent/search")({
         });
 
         if (stage) list = list.filter((c) => c.careerStage === stage);
-        if (minScore) list = list.filter((c) => (c.averageScore ?? 0) >= minScore);
+        if (minScore) list = list.filter((c) => (c.competencyAverage ?? 0) >= minScore);
         if (keyword) {
           list = list.filter((c) =>
             [c.headline, c.desiredJobs, c.desiredLocations, c.overview, ...c.strengths]
@@ -97,7 +104,7 @@ export const Route = createFileRoute("/api/talent/search")({
           );
         }
         if (sort === "score") {
-          list.sort((a, b) => (b.averageScore ?? 0) - (a.averageScore ?? 0));
+          list.sort((a, b) => (b.competencyAverage ?? 0) - (a.competencyAverage ?? 0));
         } else if (COMPETENCIES.some((c) => c.key === sort)) {
           const val = (c: (typeof list)[number]) =>
             c.competencies.find((x) => x.key === sort)?.score ?? 0;

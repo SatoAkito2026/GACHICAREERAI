@@ -77,3 +77,9 @@ export function startOfMonthJst(now = new Date()): string {
 export function normalizeJobType(s: string | null | undefined): string {
   return (s ?? "").trim();
 }
+
+/**
+ * 企業のAI面接（URLを発行して候補者に受けてもらう）の料金。従量課金で、候補者が面接を始めた回だけ数える。
+ * 実際の請求額は Stripe の従量課金の Price（create-subscription.ts の PRICE_IDS.company_metered）で決まる。ここは表示用。
+ */
+export const COMPANY_INTERVIEW_PRICE_JPY = 5500;
