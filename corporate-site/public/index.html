@@ -33,17 +33,43 @@
       <a class="nav-cta" href="contact.html">お問い合わせ</a>
     </nav>
     <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
-    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">メニュー</button>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="メニューを開く"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
   </div>
 </header>
+<div class="drawer" id="drawer" aria-label="メニュー">
+  <nav>
+    <a href="about.html">会社概要<small>Company</small></a>
+    <a href="./#services">事業内容<small>Services</small></a>
+    <a href="gachicareer-ai.html">ガチキャリAI<small>Gachi Career AI</small></a>
+    <a href="gachicareer.html">ガチキャリ<small>Gachi Career</small></a>
+    <a href="news.html">お知らせ<small>News</small></a>
+    <a href="contact.html">お問い合わせ<small>Contact</small></a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="btn btn-ink" href="contact.html">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+    <a class="tel" href="tel:08024204900">080-2420-4900</a>
+    <small>年中無休・24時間受付　info@akitogroup.jp</small>
+  </div>
+</div>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
 <main id="main">
 <style>
-.hero{position:relative;overflow:hidden;padding-block:clamp(48px,7vw,96px) clamp(56px,8vw,104px)}
-.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,64px);align-items:center;position:relative;z-index:1}
-.hero h1{font-size:clamp(34px,5.4vw,70px);letter-spacing:-.02em;line-height:1.28;margin-top:18px}
+/* ===== ヒーロー ===== */
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,7vw,96px) clamp(120px,14vw,170px);isolation:isolate}
+/* 背景で、ロゴの3色の光がゆっくり動く */
+.blobs{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.blobs i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:blob 18s ease-in-out infinite alternate}
+.blobs i:nth-child(1){width:42vw;height:42vw;max-width:520px;max-height:520px;background:rgba(238,22,80,.28);left:-12vw;top:-8vw}
+.blobs i:nth-child(2){width:38vw;height:38vw;max-width:480px;max-height:480px;background:rgba(214,221,46,.45);right:-8vw;top:10%;animation-delay:-6s}
+.blobs i:nth-child(3){width:34vw;height:34vw;max-width:420px;max-height:420px;background:rgba(63,174,58,.28);left:30%;bottom:-14vw;animation-delay:-11s}
+@keyframes blob{33%{transform:translate(6vw,4vw) scale(1.08)}66%{transform:translate(-4vw,6vw) scale(.94)}100%{transform:translate(3vw,-3vw) scale(1.04)}}
+.hero .wrap{display:grid;gap:clamp(32px,5vw,64px);grid-template-columns:minmax(0,1fr)}
+@media (min-width:1024px){.hero .wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center}}
+.hero h1{font-size:clamp(34px,8.6vw,76px);letter-spacing:-.02em;line-height:1.24;margin-top:16px}
+@media (min-width:640px) and (max-width:1023px){.hero h1{font-size:clamp(48px,8vw,68px)}}
 .hero h1 .ln{display:block;overflow:hidden;padding-bottom:.08em;white-space:nowrap}
-.hero h1 .ln>span{display:inline-block;animation:rise 1s var(--ease) both}
+.hero h1 .ln>span{display:inline-block;animation:rise 1.1s var(--ease-out) both}
 .hero h1 .ln:nth-child(2)>span{animation-delay:.12s}
 .hero h1 .ln:nth-child(3)>span{animation-delay:.24s}
 .w{position:relative;display:inline-block}
@@ -52,102 +78,132 @@
 .w-yellow{color:var(--yellow-text)}.w-yellow::after{background:var(--yellow);animation-delay:1.05s}
 .w-green{color:var(--green-text)}.w-green::after{background:var(--green);animation-delay:1.2s}
 @keyframes underline{to{transform:scaleX(1)}}
-.hero-lead{margin-top:26px;color:var(--ink-2);max-width:32em;animation:fade .9s .5s both}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px;animation:fade .9s .65s both}
+.hero-lead{margin-top:22px;color:var(--ink-2);max-width:34em;animation:fade .9s .5s both}
+.hero .btns{margin-top:30px;animation:fade .9s .65s both}
 
-/* 3つの事業のアイコン */
-.stack{display:grid;gap:14px;max-width:460px;width:100%;justify-self:center}
-.svc{display:grid;grid-template-columns:88px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px 20px 14px 14px;text-decoration:none;color:var(--ink);box-shadow:0 20px 40px -28px rgba(36,17,63,.45);animation:slide-in .8s var(--ease) both;transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;position:relative}
-.svc:nth-child(1){animation-delay:.3s}.svc:nth-child(2){animation-delay:.42s;margin-left:clamp(0px,4vw,36px)}.svc:nth-child(3){animation-delay:.54s}
-.svc:hover{transform:translateX(6px);border-color:var(--c);box-shadow:0 24px 44px -26px rgba(36,17,63,.55)}
+/* 3つのサービス（アイコン） */
+.stack{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px) and (max-width:1023px){.stack{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
+@media (min-width:1024px){.stack{max-width:470px;width:100%;justify-self:end;gap:14px}}
+.svc{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:center;background:rgba(255,255,255,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:22px;padding:12px 44px 12px 12px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);animation:slide-in .9s var(--ease-out) backwards;transition:border-color .3s,box-shadow .3s}
+.svc:nth-child(1){animation-delay:.3s}.svc:nth-child(2){animation-delay:.42s}.svc:nth-child(3){animation-delay:.54s}
+@media (min-width:1024px){.svc{grid-template-columns:88px minmax(0,1fr);gap:18px;padding:14px 48px 14px 14px}.svc:nth-child(2){margin-left:36px;margin-right:-36px}}
+@media (min-width:640px) and (max-width:1023px){.svc{grid-template-columns:minmax(0,1fr);justify-items:start;padding:16px 16px 18px;gap:12px}}
+.svc:hover{border-color:var(--c);box-shadow:0 30px 50px -26px rgba(36,17,63,.55)}
 .svc::after{content:"→";position:absolute;right:18px;top:50%;transform:translateY(-50%);color:var(--muted);transition:transform .3s var(--ease),color .3s}
+@media (min-width:640px) and (max-width:1023px){.svc::after{display:none}}
 .svc:hover::after{transform:translate(4px,-50%);color:var(--ink)}
-.svc-ic{width:88px;height:88px;border-radius:20px;overflow:hidden;display:grid;place-items:center;background:var(--ic-bg)}
-.svc-ic img{width:100%;height:100%;object-fit:cover}
-.svc-ic svg{width:52px;height:52px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.svc-ic{width:72px;height:72px;border-radius:18px;overflow:hidden;display:grid;place-items:center;background:var(--ic-bg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+@media (min-width:1024px){.svc-ic{width:88px;height:88px;border-radius:20px}}
+.svc-ic img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.svc:hover .svc-ic img{transform:scale(1.08)}
+.svc-ic svg{width:58%;height:58%;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .svc-ic svg circle{fill:#fff;stroke:none}
-.svc-tx{display:grid;gap:2px;padding-right:22px}
-.svc-tx b{font-family:var(--ff-display);font-size:clamp(18px,2vw,21px)}
+.svc-tx{display:grid;gap:2px;min-width:0}
+.svc-tx b{font-family:var(--ff-display);font-size:clamp(17px,2vw,21px)}
 .svc-tx small{font-size:12.5px;color:var(--muted);line-height:1.6}
 .svc-ai{--c:var(--green);--ic-bg:#151A1E}
 .svc-gc{--c:#E3B341;--ic-bg:#07080F}
 .svc-gc .svc-ic img{width:92%;height:92%;object-fit:contain}
 .svc-pos{--c:var(--red);--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)}
-@keyframes slide-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-.hero-ribbon{position:absolute;left:-5%;width:110%;bottom:-40px;height:220px;z-index:0;opacity:.95;pointer-events:none}
-@media (max-width:900px){.hero .wrap{grid-template-columns:minmax(0,1fr)}}
+@keyframes slide-in{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
-.ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:16px;background:var(--paper-2)}
-.ticker-track{display:inline-flex;gap:44px;animation:marquee 40s linear infinite;font-family:var(--ff-display);font-weight:700;font-size:clamp(17px,2vw,22px)}
-.ticker-track span{display:inline-flex;align-items:center;gap:44px}
-.ticker-track span::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--red)}
+.hero-ribbon{position:absolute;left:-5%;width:110%;bottom:-30px;height:clamp(140px,18vw,220px);z-index:-1;opacity:.95;pointer-events:none}
+.scroll-cue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:6px;font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;color:var(--muted);z-index:1}
+.scroll-cue i{width:1px;height:36px;background:linear-gradient(var(--ink),transparent);animation:cue 1.8s ease-in-out infinite;transform-origin:top}
+@keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+@media (min-width:1024px){.scroll-cue{display:flex}}
+
+/* ===== 流れる帯 ===== */
+.ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding-block:14px;background:var(--paper-2)}
+.ticker-track{display:inline-flex;gap:40px;animation:marquee 42s linear infinite;font-family:var(--ff-display);font-weight:700;font-size:clamp(15px,2vw,22px)}
+.ticker-track span{display:inline-flex;align-items:center;gap:40px}
+.ticker-track span::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--red)}
 .ticker-track span:nth-child(3n+2)::after{background:var(--yellow)}
 .ticker-track span:nth-child(3n)::after{background:var(--green)}
+.ticker:hover .ticker-track{animation-play-state:paused}
 
-.about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,6vw,80px);align-items:center}
-.about-grid h2{font-size:clamp(28px,4.2vw,50px);margin-top:14px;letter-spacing:-.01em}
-.about-grid .body{display:grid;gap:18px;color:var(--ink-2)}
+/* ===== 私たちについて ===== */
+.about-grid{display:grid;gap:clamp(28px,5vw,72px);grid-template-columns:minmax(0,1fr)}
+@media (min-width:768px){.about-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}}
+.about-grid h2{font-size:clamp(28px,5vw,54px);margin-top:12px;letter-spacing:-.01em}
+.about-grid .body{display:grid;gap:16px;color:var(--ink-2);margin-top:22px}
 .about-grid .body strong{color:var(--ink)}
-.shot{border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 60px -36px rgba(36,17,63,.45)}
-.shot figcaption{font-size:12px;color:var(--muted);padding:10px 14px;background:#fff}
-@media (max-width:860px){.about-grid{grid-template-columns:minmax(0,1fr)}}
+.shot{margin:0;border-radius:22px;overflow:hidden;background:#0F0F0F;box-shadow:0 40px 70px -40px rgba(36,17,63,.6);position:relative}
+.shot img{transition:transform 1.2s var(--ease)}
+.shot:hover img{transform:scale(1.03)}
+.shot figcaption{font-size:12px;color:rgba(255,255,255,.7);padding:10px 14px;background:#151515}
 
-.biz{display:grid;gap:clamp(48px,7vw,88px)}
-.biz-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(28px,5vw,64px);align-items:center;scroll-margin-top:90px}
-.biz-item:nth-child(even) .biz-media{order:2}
-.biz-media{border-radius:24px;overflow:hidden;position:relative;background:var(--paper-2);aspect-ratio:4/3;display:grid;place-items:center}
-.biz-media img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
-.biz-media.icon{aspect-ratio:auto;height:clamp(220px,28vw,300px);background:var(--ic-bg)}
-.biz-media.icon img{width:min(68%,220px);height:auto;aspect-ratio:1;object-fit:contain;border-radius:20px}
-.pos-icon{width:42%;max-width:150px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:transform .8s var(--ease)}
+/* ===== 事業内容 ===== */
+.biz{display:grid;gap:clamp(40px,6vw,96px)}
+.biz-item{display:grid;gap:22px;align-items:center;grid-template-columns:minmax(0,1fr);scroll-margin-top:calc(var(--head-h) + 20px)}
+@media (min-width:640px){.biz-item{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:32px}}
+@media (min-width:1024px){.biz-item{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:64px}.biz-item:nth-child(even) .biz-media{order:2}}
+.biz-media{border-radius:26px;overflow:hidden;position:relative;background:var(--ic-bg);display:grid;place-items:center;aspect-ratio:16/10}
+@media (min-width:640px){.biz-media{aspect-ratio:1}}
+@media (min-width:1024px){.biz-media{aspect-ratio:4/3}}
+.biz-media::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,40%),rgba(255,255,255,.16),transparent 55%);pointer-events:none}
+.biz-media img{width:min(56%,230px);height:auto;aspect-ratio:1;object-fit:contain;border-radius:22px;position:relative;transition:transform .8s var(--ease)}
+.biz-item:hover .biz-media img{transform:scale(1.05)}
+.pos-icon{width:38%;max-width:150px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:transform .8s var(--ease);position:relative}
 .pos-icon circle{fill:#fff;stroke:none}
 .biz-item:hover .pos-icon{transform:scale(1.06) rotate(-3deg)}
-.biz-item:hover .biz-media img{transform:scale(1.04)}
-.biz-num{font-weight:700;font-size:14px;color:var(--c-text);display:flex;align-items:center;gap:10px}
-.biz-num::after{content:"";height:3px;width:40px;border-radius:2px;background:var(--c)}
-.biz-item h3{font-size:clamp(24px,3vw,34px);margin-top:10px}
-.biz-item .sub{font-weight:700;color:var(--c-text);margin-top:6px}
-.biz-item p.desc{margin-top:16px;color:var(--ink-2)}
-.biz-item ul{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-wrap:wrap;gap:8px}
-.biz-item li{font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;background:#fff;border:1px solid var(--line)}
-.biz-item .btn{margin-top:26px}
-.biz-ai{--c:var(--green);--c-text:var(--green-text)}
-.biz-gc{--c:var(--yellow);--c-text:var(--yellow-text)}
-.biz-pos{--c:var(--red);--c-text:var(--red)}
-.soon{display:inline-block;margin-left:10px;vertical-align:middle;font-family:var(--ff-body);font-size:12px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:2px 10px}
-@media (max-width:860px){.biz-item{grid-template-columns:minmax(0,1fr)}.biz-item:nth-child(even) .biz-media{order:0}}
+.biz-tag{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:13px;color:var(--c-text)}
+.biz-tag::after{content:"";height:3px;width:36px;border-radius:2px;background:var(--c)}
+.biz-item h3{font-size:clamp(24px,3.6vw,36px);margin-top:8px}
+.biz-item .sub{font-weight:700;color:var(--c-text);margin-top:4px;font-size:15px}
+.biz-item p.desc{margin-top:14px;color:var(--ink-2)}
+.biz-item ul{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.biz-item li{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.biz-item .btn{margin-top:22px}
+@media (max-width:639px){.biz-item .btn{width:100%}}
+.biz-ai{--c:var(--green);--c-text:var(--green-text);--ic-bg:#151A1E}
+.biz-gc{--c:#E3B341;--c-text:#8A6420;--ic-bg:#07080F}
+.biz-pos{--c:var(--red);--c-text:var(--red);--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)}
+.soon{display:inline-block;margin-left:8px;vertical-align:middle;font-family:var(--ff-body);font-size:11.5px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:2px 9px}
 
-.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-.why article{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;display:grid;gap:12px;align-content:start;transition:transform .35s var(--ease),box-shadow .35s}
-.why article:hover{transform:translateY(-6px);box-shadow:0 24px 40px -28px rgba(36,17,63,.4)}
+/* ===== 強み ===== */
+.why{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.why{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.why article{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;display:grid;gap:10px;align-content:start;position:relative;overflow:hidden}
+.why article::after{content:"";position:absolute;left:0;top:0;height:4px;width:100%;background:var(--bg);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+.why article:hover::after{transform:scaleX(1)}
 .why .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--bg);color:#fff}
 .why .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.why h3{font-size:20px}
-.why p{font-size:15px;color:var(--ink-2)}
-@media (max-width:860px){.why{grid-template-columns:minmax(0,1fr)}}
+.why h3{font-size:19px}
+.why p{font-size:14.5px;color:var(--ink-2)}
 
-.news-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+/* ===== お知らせ ===== */
+.news-list{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.news-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
 .news-card{text-decoration:none;display:grid;gap:12px;align-content:start}
-.news-card .thumb{border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#fff}
-.news-card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
-.news-card:hover .thumb img{transform:scale(1.05)}
-.news-card .meta{font-family:var(--ff-mono);font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:639px){.news-card{grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}}
+.news-card .thumb{border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#fff;display:grid;place-items:center}
+@media (max-width:639px){.news-card .thumb{aspect-ratio:4/3;border-radius:12px}}
+.news-card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
+.news-card .thumb img.logo-thumb{object-fit:contain;width:72%;height:auto}
+.news-card:hover .thumb img{transform:scale(1.06)}
+.news-card .meta{font-family:var(--ff-mono);font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .news-card .cat{color:var(--ink);font-family:var(--ff-body);font-weight:700}
-.news-card h3{font-size:17px;line-height:1.55}
+.news-card h3{font-size:16px;line-height:1.6;margin-top:4px}
 .news-card:hover h3{text-decoration:underline;text-underline-offset:4px}
-.news-more{margin-top:32px}
-@media (max-width:860px){.news-list{grid-template-columns:minmax(0,1fr)}}
+.news-more{margin-top:28px}
 
-.recruit{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:24px 40px;align-items:center;border:2px solid var(--ink);border-radius:24px;padding:clamp(24px,4vw,44px)}
-.recruit .big{font-family:var(--ff-display);font-weight:900;font-size:clamp(28px,4vw,46px);line-height:1.2}
-.recruit .big em{font-style:normal;color:var(--red)}
+/* ===== 採用 ===== */
+.recruit{display:grid;gap:20px;align-items:center;border-radius:28px;padding:clamp(24px,4vw,48px);background:var(--ink);color:#fff;position:relative;overflow:hidden}
+@media (min-width:768px){.recruit{grid-template-columns:auto minmax(0,1fr) auto;gap:24px 48px}}
+.recruit::before{content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(214,221,46,.35),transparent 65%);animation:float 7s ease-in-out infinite}
+.recruit .big{font-family:var(--ff-display);font-weight:900;font-size:clamp(30px,5vw,52px);line-height:1.15;position:relative}
+.recruit .big em{font-style:normal;color:var(--yellow)}
+.recruit .eyebrow{color:rgba(255,255,255,.6)}
 .recruit ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
-.recruit li{font-weight:700;padding:8px 16px;border-radius:999px;background:var(--yellow);font-size:15px}
+.recruit li{font-weight:700;padding:8px 16px;border-radius:999px;background:var(--yellow);color:var(--ink);font-size:14px}
 .recruit li:nth-child(2){background:var(--green);color:#fff}
-@media (max-width:860px){.recruit{grid-template-columns:minmax(0,1fr)}}
+.recruit .btn{background:#fff;color:var(--ink);position:relative}
 </style>
 
 <section class="hero">
+  <div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
   <svg class="hero-ribbon ribbon" viewBox="0 0 1400 220" preserveAspectRatio="none" aria-hidden="true">
     <path class="r1" pathLength="100" d="M-20 150 C 240 40, 420 230, 700 120 S 1160 30, 1420 110"/>
     <path class="r2" pathLength="100" d="M-20 175 C 240 65, 420 255, 700 145 S 1160 55, 1420 135"/>
@@ -162,17 +218,18 @@
         <span class="ln"><span><span class="w w-green">届ける</span>未来。</span></span>
       </h1>
       <p class="hero-lead">AKITOグループは、AIと人の力で、働く人と企業の未来を支えています。AI面接練習の「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、そして夜のお店向けのPOSシステム。3つの事業で、新しい一歩を後押しします。</p>
-      <div class="hero-actions">
+      <div class="btns">
         <a class="btn btn-ink" href="#services">事業を見る <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-line" href="contact.html">お問い合わせ</a>
       </div>
     </div>
     <div class="stack" aria-label="3つの事業">
-      <a class="svc svc-ai" href="gachicareer-ai.html"><span class="svc-ic"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"></span><span class="svc-tx"><b>ガチキャリAI</b><small>AIで自分を磨く。企業と出会う。</small></span></a>
-      <a class="svc svc-gc" href="gachicareer.html"><span class="svc-ic"><img src="assets/img/gc-logo.webp" alt="" width="600" height="600"></span><span class="svc-tx"><b>ガチキャリ</b><small>ガチで、キャリア最強になる部隊。</small></span></a>
-      <a class="svc svc-pos" href="#pos"><span class="svc-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg></span><span class="svc-tx"><b>POSシステム</b><small>夜のお店向け（名称は近日公開）</small></span></a>
+      <a class="svc svc-ai tilt" href="gachicareer-ai.html"><span class="svc-ic"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"></span><span class="svc-tx"><b>ガチキャリAI</b><small>AIで自分を磨く。企業と出会う。</small></span></a>
+      <a class="svc svc-gc tilt" href="gachicareer.html"><span class="svc-ic"><img src="assets/img/gc-logo.webp" alt="" width="600" height="600"></span><span class="svc-tx"><b>ガチキャリ</b><small>ガチで、キャリア最強になる部隊。</small></span></a>
+      <a class="svc svc-pos tilt" href="#pos"><span class="svc-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg></span><span class="svc-tx"><b>POSシステム</b><small>夜のお店向け（名称は近日公開）</small></span></a>
     </div>
   </div>
+  <div class="scroll-cue" aria-hidden="true">SCROLL<i></i></div>
 </section>
 
 <div class="ticker" aria-hidden="true">
@@ -186,16 +243,16 @@
   <div class="wrap about-grid">
     <div class="rv">
       <p class="eyebrow">About us</p>
-      <h2>人を見る力を、<br>AIで拡張する。</h2>
-      <div class="body" style="margin-top:24px">
+      <h2><span class="reveal-line"><span>人を見る力を、</span></span><span class="reveal-line"><span>AIで拡張する。</span></span></h2>
+      <div class="body">
         <p>AKITOグループは、採用のノウハウとAI技術を組み合わせ、<strong>「ガチキャリAI」</strong>を提供しています。AIで自分を磨き、企業と出会う。働く人には本番さながらの面接練習と発言を根拠にした評価を、企業には練習を重ねた人材との出会いと、書類選考からAI面接までの仕組みを届けます。</p>
         <p>人材不足、採用コスト、選考の負担。いまの採用の課題をAIの力で解決し、企業の成長を支えます。</p>
       </div>
-      <a class="btn btn-line" href="about.html" style="margin-top:28px">会社概要を見る <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn btn-line" href="about.html" style="margin-top:26px">会社概要を見る <span class="arr" aria-hidden="true">→</span></a>
     </div>
-    <figure class="shot rv" style="margin:0">
+    <figure class="shot rv zoom">
       <img src="assets/img/interview-screen.webp" alt="ガチキャリAIの面接画面。左にAI面接官、右に受ける人が映っている" width="1578" height="996" loading="lazy">
-      <figcaption>ガチキャリAIの面接画面。AIの面接官と、声で会話しながら面接を練習できます。</figcaption>
+      <figcaption>ガチキャリAIの面接画面。AIの面接官と、声で会話しながら練習できます。</figcaption>
     </figure>
   </div>
 </section>
@@ -212,21 +269,21 @@
 
     <div class="biz">
       <article class="biz-item biz-ai" id="gachicareer-ai">
-        <div class="biz-media icon rv" style="--ic-bg:#151A1E"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></div>
+        <div class="biz-media tilt rv from-left"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></div>
         <div class="rv">
-          <span class="biz-num">AIソリューション事業</span>
+          <span class="biz-tag">AIソリューション事業</span>
           <h3>ガチキャリAI</h3>
           <p class="sub">AIで自分を磨く。企業と出会う。</p>
-          <p class="desc">AIの面接官と本番さながらに面接を練習でき、話した言葉を根拠にした評価がすぐに返ってきます。練習の成果は名前を伏せたプロフィールにまとまり、それを見た企業から面談の申し込みが届きます。企業向けには、人材探しのほか、書類選考・AIアバター面接の機能もあります。</p>
+          <p class="desc">AIの面接官と本番さながらに面接を練習でき、話した言葉を根拠にした評価がすぐに返ってきます。練習の成果は名前を伏せたプロフィールにまとまり、それを見た企業から面談の申し込みが届きます。企業向けには、人材探しのほか、書類選考・AI面接の機能もあります。</p>
           <ul><li>AI面接練習</li><li>発言を根拠にした評価</li><li>企業との出会い</li><li>書類選考AI</li></ul>
           <a class="btn btn-ink" href="gachicareer-ai.html">ガチキャリAIを詳しく見る <span class="arr" aria-hidden="true">→</span></a>
         </div>
       </article>
 
       <article class="biz-item biz-gc" id="gachicareer">
-        <div class="biz-media icon rv" style="--ic-bg:#07080F"><img src="assets/img/gc-logo.webp" alt="ガチキャリのロゴ" width="600" height="600" loading="lazy"></div>
+        <div class="biz-media tilt rv from-right"><img src="assets/img/gc-logo.webp" alt="ガチキャリのロゴ" width="600" height="600" loading="lazy"></div>
         <div class="rv">
-          <span class="biz-num">キャリアコミュニティ事業</span>
+          <span class="biz-tag">キャリアコミュニティ事業</span>
           <h3>ガチキャリ</h3>
           <p class="sub">ガチで、キャリア最強になる部隊。</p>
           <p class="desc">学生・若手社会人のためのキャリアコミュニティです。本気の仲間とつながり、スキル・知識・マインドを磨き、企業やイベントとの接点からチャンスを掴む。本気の一歩で、理想のキャリアを切り拓いていきます。</p>
@@ -236,12 +293,12 @@
       </article>
 
       <article class="biz-item biz-pos" id="pos">
-        <div class="biz-media icon rv" style="--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)" aria-hidden="true">
+        <div class="biz-media tilt rv from-left" aria-hidden="true">
           <svg class="pos-icon" viewBox="0 0 64 64"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg>
         </div>
         <div class="rv">
-          <span class="biz-num">店舗DX事業</span>
-          <h3>夜のお店向けPOSシステム<span class="soon">名称は近日公開</span></h3>
+          <span class="biz-tag">店舗DX事業</span>
+          <h3>夜のお店向け<br class="sp-only">POSシステム<span class="soon">名称は近日公開</span></h3>
           <p class="sub">お会計・売上の管理を、夜のお店のかたちに合わせて</p>
           <p class="desc">キャバクラやホストクラブなど、夜のお店の営業に合わせたPOSシステムです。お会計や売上の管理をひとつにまとめ、お店の運営を支えます。サービス名や詳しい内容は、決まりしだいこのページでお知らせします。</p>
           <ul><li>お会計</li><li>売上管理</li><li>夜のお店向け</li></ul>
@@ -262,18 +319,18 @@
       <p>採用でいちばん難しいのは「人を理解すること」です。ガチキャリAIは、書類分析・面接・評価をAIで行い、企業が候補者の可能性を正しく理解できる仕組みを提供します。</p>
     </div>
     <div class="why">
-      <article class="rv">
-        <span class="ic" style="--bg:var(--red)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+      <article class="rv" style="--bg:var(--red)">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
         <h3>候補者を理解する</h3>
         <p>AIが履歴書・職務経歴書を読み込み、候補者の理解を助けます。</p>
       </article>
-      <article class="rv">
-        <span class="ic" style="--bg:var(--yellow-text)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
+      <article class="rv" style="--bg:var(--yellow-text)">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
         <h3>面接を進化させる</h3>
         <p>AI面接で、質問・回答・評価をデータとして残します。</p>
       </article>
-      <article class="rv">
-        <span class="ic" style="--bg:var(--green)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+      <article class="rv" style="--bg:var(--green)">
+        <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
         <h3>採用の判断を支える</h3>
         <p>面接の結果を分析し、より納得できる採用につなげます。</p>
       </article>
@@ -292,18 +349,18 @@
     <div class="news-list">
       <a class="news-card rv" href="news-barracks.html">
         <span class="thumb"><img src="assets/img/barracks.webp" alt="窓から光が差し込む個室" width="640" height="480" loading="lazy"></span>
-        <span class="meta"><time datetime="2025-10-06">2025.10.06</time><span class="cat">公務員ニュース・自衛隊</span></span>
-        <h3>防衛省が動く、隊舎改革の波。相部屋から個室へ</h3>
+        <span><span class="meta"><time datetime="2025-10-06">2025.10.06</time><span class="cat">公務員ニュース</span></span>
+        <h3>防衛省が動く、隊舎改革の波。相部屋から個室へ</h3></span>
       </a>
       <a class="news-card rv" href="news-volunteer.html">
         <span class="thumb"><img src="assets/img/volunteer-1.webp" alt="体育館で絵を描く子どもたち" width="1024" height="577" loading="lazy"></span>
-        <span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">活動報告</span></span>
-        <h3>椎名町小学校でボランティア活動をしてまいりました！</h3>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">活動報告</span></span>
+        <h3>椎名町小学校でボランティア活動をしてまいりました！</h3></span>
       </a>
       <a class="news-card rv" href="news-open.html">
-        <span class="thumb" style="display:grid;place-items:center"><img src="assets/img/logo-full.webp" alt="AKITOグループのロゴ" width="900" height="352" loading="lazy" style="object-fit:contain;width:70%;height:auto"></span>
-        <span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">お知らせ</span></span>
-        <h3>AKITOグループのホームページを開設しました！</h3>
+        <span class="thumb"><img class="logo-thumb" src="assets/img/logo-full.webp" alt="AKITOグループのロゴ" width="900" height="352" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">お知らせ</span></span>
+        <h3>AKITOグループのホームページを開設しました！</h3></span>
       </a>
     </div>
     <a class="btn btn-line news-more" href="news.html">お知らせ一覧へ <span class="arr" aria-hidden="true">→</span></a>
@@ -312,14 +369,14 @@
 
 <section class="block">
   <div class="wrap">
-    <div class="recruit rv" id="recruit">
+    <div class="recruit rv zoom" id="recruit">
       <p class="big">共に<em>汗</em>を<br>流そう！</p>
-      <div>
+      <div style="position:relative">
         <p class="eyebrow">Recruit</p>
-        <p style="font-weight:700;font-size:20px;margin:8px 0 14px">積極採用中です</p>
+        <p style="font-weight:700;font-size:19px;margin:8px 0 14px">積極採用中です</p>
         <ul><li>キャリア不問</li><li>学歴不問</li></ul>
       </div>
-      <a class="btn btn-ink" href="contact.html#recruit">応募・問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn" href="contact.html#recruit">応募・問い合わせ <span class="arr" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -375,6 +432,7 @@
     </div>
   </div>
 </footer>
+<button class="to-top" id="to-top" type="button" aria-label="ページの先頭へ戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 <script src="assets/site.js"></script>
 </body>
 </html>

@@ -28,9 +28,20 @@
       {{nav}}
     </nav>
     <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
-    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">メニュー</button>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="メニューを開く"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
   </div>
 </header>
+<div class="drawer" id="drawer" aria-label="メニュー">
+  <nav>
+    {{drawer}}
+  </nav>
+  <div class="drawer-foot">
+    <a class="btn btn-ink" href="contact.html">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+    <a class="tel" href="tel:08024204900">080-2420-4900</a>
+    <small>年中無休・24時間受付　info@akitogroup.jp</small>
+  </div>
+</div>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
 <main id="main">
 {{content}}
@@ -73,6 +84,7 @@
     </div>
   </div>
 </footer>
+<button class="to-top" id="to-top" type="button" aria-label="ページの先頭へ戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 <script src="assets/site.js"></script>
 </body>
 </html>

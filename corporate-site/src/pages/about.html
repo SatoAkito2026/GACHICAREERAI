@@ -18,7 +18,8 @@ nav: about
 .pillars b{display:block;font-family:var(--ff-display);font-size:17px}
 .pillars span{font-size:14.5px;color:var(--ink-2)}
 .sign{margin-top:32px;text-align:right;font-weight:700;line-height:1.8}
-@media (max-width:860px){.greet{grid-template-columns:minmax(0,1fr)}.portrait{position:static;max-width:360px}}
+@media (max-width:1023px){.greet{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:32px}.portrait{position:static}}
+@media (max-width:639px){.greet{grid-template-columns:minmax(0,1fr)}.portrait{position:static;max-width:300px}}
 
 .facts{display:grid;grid-template-columns:11em minmax(0,1fr);margin:0;border-top:2px solid var(--ink)}
 .facts dt,.facts dd{padding:22px 0;border-bottom:1px solid var(--line);margin:0}
