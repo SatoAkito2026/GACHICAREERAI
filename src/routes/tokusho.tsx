@@ -65,7 +65,7 @@ function TokushoPage() {
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>人材の閲覧チケット：1人 ¥10,000（税込）</li>
-          <li>AI面接（URL発行）：¥2,200/回（税込・従量課金）</li>
+          <li>AI面接（URL発行）：¥5,500/回（税込・従量課金）</li>
           <li>求人掲載：当面無料</li>
         </ul>
         <p className="mt-2 text-[13px]" style={{ color: "#888888" }}>

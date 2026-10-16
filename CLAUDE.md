@@ -23,7 +23,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 画面：ユーザー `/private/individual/talent`・`/offers`、企業 `/business/company/talent`・`/messages`
 - 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
 - 企業に見せる評価は本人向けと分ける：`save-interview.ts` が同じAI呼び出しで採用担当者向けの見立て（`recruiter_view`、`sanitizeRecruiterView`）も作る。企業側（`loadCompanyInterviews`・`CompanyInterviewBlock`）は本人向けの点数・改善点・模範回答を返さず、7つの力と見立て・会話・録画だけ。企業側の点数は「7つの力の平均（5点満点）」
-- 企業メニュー：人材を探す・面談メッセージ・書類選考・書類選考履歴・購入した人材（`/business/company/purchased`）・求人掲載・設定。企業の料金は閲覧チケット（1人¥10,000）と、AI面接の従量課金（¥2,200/回、`COMPANY_INTERVIEW_PRICE_JPY`）だけ。月額プラン（ライト・プロ）は廃止。AI面接はカード登録（Stripe の従量課金の契約＝`plan: company_metered` と `stripe_subscription_id`）が済んだ企業だけURLを発行でき、候補者が面接を始めた最初の1回に `interview-turn.ts` が Stripe のメーター（`interview_usage`）に記録する。求人掲載は当面無料。書類選考AI（`/api/chat`）は求人を掲載中の企業だけ
+- 企業メニュー：人材を探す・面談メッセージ・書類選考・書類選考履歴・購入した人材（`/business/company/purchased`）・求人掲載・設定。企業の料金は閲覧チケット（1人¥10,000）と、AI面接の従量課金（¥5,500/回、`COMPANY_INTERVIEW_PRICE_JPY`）だけ。月額プラン（ライト・プロ）は廃止。AI面接はカード登録（Stripe の従量課金の契約＝`plan: company_metered` と `stripe_subscription_id`）が済んだ企業だけURLを発行でき、候補者が面接を始めた最初の1回に `interview-turn.ts` が Stripe のメーター（`interview_usage`）に記録する。求人掲載は当面無料。書類選考AI（`/api/chat`）は求人を掲載中の企業だけ
 - 求人：個人は `/private/individual/jobs` で見て応募（`/api/jobs/apply`）。応募すると0円の `profile_unlocks` と承諾済みの `contact_requests` を作り、企業が評価を見てメッセージできる（売上の集計は `amount > 0` だけ）
 - 学校・塾：生徒の練習管理だけ（`/business/school/students`）。生徒がマイページで招待コード（`companies.join_code`）を入力すると `school_memberships` に入り、先生が練習結果を見られる
 - 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）

@@ -160,7 +160,7 @@ export const PLAN_PRICES: Record<Plan, string> = {
   free: "¥0",
   individual_light: "¥980/月（税込）",
   individual_pro: "¥2,980/月（税込）",
-  company_metered: "¥2,200/回（税込・面接を受けた分だけ）",
+  company_metered: "¥5,500/回（税込・面接を受けた分だけ）",
   company_light: "¥33,000/月（税込）",
   company_pro: "¥55,000/月（税込）",
   actor_pro: "¥50,000/月（税込）",

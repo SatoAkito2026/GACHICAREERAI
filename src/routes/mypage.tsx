@@ -137,7 +137,7 @@ function MyPage() {
     (isBusiness
       ? (
           {
-            company_metered: "従量課金プラン（¥2,200/回・税込）",
+            company_metered: "AI面接（従量課金 ¥5,500/回・税込）",
             company_light: "ライトプラン（企業）",
             company_pro: "プロプラン（企業）",
             free: "未加入",
