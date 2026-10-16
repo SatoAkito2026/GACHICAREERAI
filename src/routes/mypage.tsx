@@ -140,7 +140,7 @@ function MyPage() {
     (isBusiness
       ? (
           {
-            company_metered: "従量課金（AI面接 ¥5,500/回・税込）",
+            company_metered: "従量課金プラン（¥2,200/回・税込）",
             company_light: "ライトプラン（企業）",
             company_pro: "プロプラン（企業）",
             free: "未加入",
@@ -320,7 +320,7 @@ function MyPage() {
                   label="今期のURL発行回数"
                   value={
                     plan === "company_metered"
-                      ? `${interviewCount}回（¥5,500/回・税込・従量課金）`
+                      ? `${interviewCount}回（¥2,200/回・税込・従量課金）`
                       : `${interviewCount}回 / ${formatLimit(interviewLimit)}`
                   }
                 />
@@ -335,7 +335,7 @@ function MyPage() {
                   label="今月の請求予定額（超過分）"
                   value={(() => {
                     if (plan === "company_metered") {
-                      return `¥${(interviewCount * 5500).toLocaleString()}（税込）`;
+                      return `¥${(interviewCount * 2200).toLocaleString()}（税込）`;
                     }
                     const limit = interviewLimit;
                     const overage = Math.max(0, interviewCount - limit);

@@ -60,7 +60,9 @@ function LoginPage() {
   const [schoolType, setSchoolType] = useState("");
   const [setupLoading, setSetupLoading] = useState(false);
   const [signupData, setSignupData] = useState<AuthResponse["data"] | null>(null);
-  const [checkoutPlan, setCheckoutPlan] = useState<"actor_pro" | null>(null);
+  const [checkoutPlan, setCheckoutPlan] = useState<
+    "company_light" | "company_pro" | "actor_pro" | null
+  >(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const handledRef = useRef(false);
 
@@ -332,59 +334,106 @@ function LoginPage() {
     );
   }
 
-  // 企業の料金の案内（月額プランはなく、使った分だけ）
+  // 企業プラン選択
   if (step === "company-plan") {
-    const priceRows: { name: string; price: string; desc: string }[] = [
-      { name: "人材一覧・人物まとめ", price: "無料", desc: "匿名の一覧とまとめを見られます" },
+    const planCards: {
+      key: "company_metered" | "company_light" | "company_pro";
+      name: string;
+      price: string;
+      desc: string;
+      highlight: boolean;
+    }[] = [
       {
-        name: "閲覧チケット",
-        price: "¥10,000／1人（税込・買い切り）",
-        desc: "名前・面接ごとの評価・会話・録画（本人が許可した場合）。面談の申し込み。成功報酬はゼロ",
+        key: "company_metered",
+        name: "従量課金プラン",
+        price: PLAN_PRICES.company_metered,
+        desc: "月額なし・書類選考は無料無制限・AI面接は使った分だけ。まずお試しに最適。",
+        highlight: false,
       },
       {
-        name: "AI面接（URL発行）",
-        price: `${PLAN_PRICES.company_metered}・従量課金`,
-        desc: "候補者が面接を始めた回だけ請求。月額はなし",
+        key: "company_light",
+        name: "ライトプラン",
+        price: PLAN_PRICES.company_light,
+        desc: "AI面接20回/月込み・PDF出力可。超過は¥330/回（税込）。",
+        highlight: false,
       },
-      { name: "求人掲載", price: "今は無料", desc: "応募者の練習の評価を見て、メッセージできます" },
-      { name: "書類選考AI", price: "掲載中は無料", desc: "履歴書PDFをAIが一括で判定します" },
+      {
+        key: "company_pro",
+        name: "プロプラン",
+        price: PLAN_PRICES.company_pro,
+        desc: "AI面接50回/月込み・書類選考ランキング・独自アバター・優先サポート。",
+        highlight: true,
+      },
     ];
     return (
       <div
         className="flex min-h-screen items-center justify-center px-4 py-10"
         style={{ background: "#0F0F0F" }}
       >
-        <div className="w-full max-w-xl" style={cardStyle}>
-          <h1 style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>企業の料金</h1>
+        <div className="w-full max-w-3xl" style={cardStyle}>
+          <h1 style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>
+            プランをお選びください
+          </h1>
           <p className="mt-1" style={{ color: "#888888", fontSize: 13 }}>
-            月額料金・成功報酬はありません。使った分だけのお支払いです。
+            あとから変更できます
           </p>
-          <div className="mt-6 flex flex-col gap-3">
-            {priceRows.map((r) => (
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {planCards.map((p) => (
               <div
-                key={r.name}
-                className="rounded-xl p-4"
-                style={{ background: "#222", border: "1px solid #333" }}
+                key={p.key}
+                className="flex flex-col rounded-xl p-5"
+                style={{
+                  background: "#222",
+                  border: p.highlight ? "2px solid #C8FF00" : "1px solid #333",
+                }}
               >
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span style={{ color: "#F0F0F0", fontWeight: 600, fontSize: 14 }}>{r.name}</span>
-                  <span style={{ color: "#C8FF00", fontWeight: 700, fontSize: 14 }}>{r.price}</span>
+                <div className="flex items-center justify-between">
+                  <span style={{ color: "#F0F0F0", fontWeight: 600, fontSize: 15 }}>{p.name}</span>
+                  {p.highlight && (
+                    <span
+                      className="rounded-md px-2 py-0.5 text-[11px]"
+                      style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }}
+                    >
+                      おすすめ
+                    </span>
+                  )}
                 </div>
-                <p className="mt-1 text-[12px]" style={{ color: "#888888", lineHeight: 1.6 }}>
-                  {r.desc}
+                <div className="mt-2" style={{ color: "#F0F0F0", fontSize: 20, fontWeight: 700 }}>
+                  {p.price}
+                </div>
+                <p
+                  className="mt-3 flex-1 text-[12px]"
+                  style={{ color: "#888888", lineHeight: 1.6 }}
+                >
+                  {p.desc}
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (p.key === "company_metered") {
+                      navigate({ to: "/business/company" });
+                    } else {
+                      setCheckoutPlan(p.key);
+                    }
+                  }}
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold"
+                  style={{ background: "#C8FF00", color: "#0F0F0F" }}
+                >
+                  {p.key === "company_metered" ? "このプランで始める" : "申し込む"}
+                </button>
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/business/company" })}
-            className="mt-6 inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold"
-            style={{ background: "#C8FF00", color: "#0F0F0F" }}
-          >
-            はじめる
-          </button>
         </div>
+        {checkoutPlan && (
+          <CheckoutModal
+            plan={checkoutPlan}
+            onClose={() => {
+              setCheckoutPlan(null);
+              navigate({ to: "/business/company" });
+            }}
+          />
+        )}
       </div>
     );
   }

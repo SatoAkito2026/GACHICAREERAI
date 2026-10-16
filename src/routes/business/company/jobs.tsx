@@ -173,8 +173,7 @@ function CultureMeter({
 function JobsPage() {
   const { user, session, loading } = useAuth();
   const { plan } = usePlan();
-  // 求人掲載は今は全企業に無料で開放している
-  const canPostJobs = plan.startsWith("company_");
+  const canPostJobs = plan === "company_light" || plan === "company_pro";
 
   const [postings, setPostings] = useState<JobPosting[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -383,10 +382,10 @@ function JobsPage() {
           </h1>
           <div className="mt-6 rounded-2xl p-6 text-center" style={cardStyle}>
             <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 600 }}>
-              企業アカウントでご利用いただけます
+              ライト/プロプラン限定機能です
             </p>
             <p className="mt-2" style={{ color: "#888888", fontSize: 13 }}>
-              求人掲載は、企業として登録したアカウントで無料でご利用いただけます。
+              求人掲載機能は、ライトプラン・プロプランでご利用いただけます。
             </p>
           </div>
         </div>

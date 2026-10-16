@@ -183,8 +183,9 @@ function AvatarConfigSection() {
 
 export default function BusinessSettings({ title }: { title: string }) {
   const { plan } = usePlan();
-  // 月額プランはなくなったので、企業アカウントならどのプランでも使える
-  if (!plan.startsWith("company_")) {
+  const allowedPlans = ["company_light", "company_pro"];
+
+  if (!allowedPlans.includes(plan)) {
     return (
       <div
         style={{
@@ -199,10 +200,10 @@ export default function BusinessSettings({ title }: { title: string }) {
       >
         <div style={{ fontSize: 40 }}>🔒</div>
         <p style={{ fontSize: 18, fontWeight: 600, color: "#F0F0F0" }}>
-          企業設定は企業アカウントでご利用いただけます
+          企業設定はライトプラン以上でご利用いただけます
         </p>
         <p style={{ fontSize: 14, color: "#888" }}>
-          企業として登録すると、企業情報を設定できます
+          プランをアップグレードして企業情報を設定しましょう
         </p>
         <Link
           to="/pricing"
