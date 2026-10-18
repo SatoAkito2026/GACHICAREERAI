@@ -1,6 +1,6 @@
 <!--
 title: トップ
-description: 合同会社AKITOグループは「愛ある事業で煌めくあなたに届ける未来」を理念に、AI面接練習サービス「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、夜のお店向けPOSシステムの3つの事業を展開しています。
+description: 合同会社AKITOグループは「愛ある事業で煌めくあなたに届ける未来」を理念に、AI面接練習サービス「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、飲食店向けの会計システム「ポスポス」の3つの事業を展開しています。
 nav: home
 -->
 <style>
@@ -73,7 +73,8 @@ nav: home
 .svc-ai{--c:var(--green);--ic-bg:#151A1E}
 .svc-gc{--c:#E3B341;--ic-bg:#07080F}
 .svc-gc .svc-ic img{width:92%;height:92%;object-fit:contain}
-.svc-pos{--c:var(--red);--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)}
+.svc-pos{--c:#1E5BD8;--ic-bg:#fff}
+.svc-pos .svc-ic{box-shadow:inset 0 0 0 1px var(--line)}
 @keyframes slide-in{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
 .hero-ribbon{position:absolute;left:-5%;width:110%;bottom:-30px;height:clamp(140px,18vw,220px);z-index:-1;opacity:.95;pointer-events:none}
@@ -113,9 +114,6 @@ nav: home
 .biz-media::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,40%),rgba(255,255,255,.16),transparent 55%);pointer-events:none}
 .biz-media img{width:min(56%,230px);height:auto;aspect-ratio:1;object-fit:contain;border-radius:22px;position:relative;transition:transform .8s var(--ease)}
 .biz-item:hover .biz-media img{transform:scale(1.05)}
-.pos-icon{width:38%;max-width:150px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transition:transform .8s var(--ease);position:relative}
-.pos-icon circle{fill:#fff;stroke:none}
-.biz-item:hover .pos-icon{transform:scale(1.06) rotate(-3deg)}
 .biz-tag{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:13px;color:var(--c-text)}
 .biz-tag::after{content:"";height:3px;width:36px;border-radius:2px;background:var(--c)}
 .biz-item h3{font-size:clamp(24px,3.6vw,36px);margin-top:8px}
@@ -127,8 +125,11 @@ nav: home
 @media (max-width:639px){.biz-item .btn{width:100%}}
 .biz-ai{--c:var(--green);--c-text:var(--green-text);--ic-bg:#151A1E}
 .biz-gc{--c:#E3B341;--c-text:#8A6420;--ic-bg:#07080F}
-.biz-pos{--c:var(--red);--c-text:var(--red);--ic-bg:linear-gradient(135deg,#EE1650,#9A0D3A)}
-.soon{display:inline-block;margin-left:8px;vertical-align:middle;font-family:var(--ff-body);font-size:11.5px;font-weight:700;color:#fff;background:var(--red);border-radius:6px;padding:2px 9px}
+.biz-pos{--c:#1E5BD8;--c-text:#1748B0;--ic-bg:#fff}
+.biz-pos .biz-media{box-shadow:inset 0 0 0 1px var(--line)}
+.biz-pos .biz-media img{width:min(62%,300px);border-radius:0}
+.btn-blue{background:#1E5BD8;color:#fff}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(30,91,216,.7)}
 
 /* ===== 強み ===== */
 .why{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
@@ -185,7 +186,7 @@ nav: home
         <span class="ln"><span><span class="w w-yellow">煌めく</span>あなたに</span></span>
         <span class="ln"><span><span class="w w-green">届ける</span>未来。</span></span>
       </h1>
-      <p class="hero-lead">AKITOグループは、AIと人の力で、働く人と企業の未来を支えています。AI面接練習の「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、そして夜のお店向けのPOSシステム。3つの事業で、新しい一歩を後押しします。</p>
+      <p class="hero-lead">AKITOグループは、AIと人の力で、働く人と企業の未来を支えています。AI面接練習の「ガチキャリAI」、学生・若手社会人のキャリアコミュニティ「ガチキャリ」、そして飲食店の会計システム「ポスポス」。3つの事業で、新しい一歩を後押しします。</p>
       <div class="btns">
         <a class="btn btn-ink" href="#services">事業を見る <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-line" href="contact.html">お問い合わせ</a>
@@ -198,7 +199,7 @@ nav: home
     <div class="stack" aria-label="3つの事業">
       <a class="svc svc-ai tilt" href="gachicareer-ai.html"><span class="svc-ic"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"></span><span class="svc-tx"><b>ガチキャリAI</b><small>AIで自分を磨く。企業と出会う。</small></span></a>
       <a class="svc svc-gc tilt" href="gachicareer.html"><span class="svc-ic"><img src="assets/img/gc-logo.webp" alt="" width="600" height="600"></span><span class="svc-tx"><b>ガチキャリ</b><small>ガチで、キャリア最強になる部隊。</small></span></a>
-      <a class="svc svc-pos tilt" href="#pos"><span class="svc-ic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg></span><span class="svc-tx"><b>POSシステム</b><small>夜のお店向け（名称は近日公開）</small></span></a>
+      <a class="svc svc-pos tilt" href="#pos"><span class="svc-ic"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600"></span><span class="svc-tx"><b>ポスポス</b><small>お店の会計を、かんたんに。</small></span></a>
     </div>
   </div>
   <div class="scroll-cue" aria-hidden="true">SCROLL<i></i></div>
@@ -206,8 +207,8 @@ nav: home
 
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
-    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>夜のお店のPOS</span><span>お会計</span><span>売上管理</span>
+    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>ポスポス</span><span>お会計</span><span>売上管理</span>
+    <span>AI面接</span><span>面接練習</span><span>書類選考AI</span><span>評価レポート</span><span>キャリアコミュニティ</span><span>本気の仲間</span><span>ポスポス</span><span>お会計</span><span>売上管理</span>
   </div>
 </div>
 
@@ -236,7 +237,7 @@ nav: home
         <p class="eyebrow">Our services</p>
         <h2>事業内容</h2>
       </div>
-      <p>本気でキャリアに向き合う人と、その人を求める企業。そして、夜のお店で働く人たち。AIと人の力で、それぞれの挑戦を支える3つの事業を展開しています。</p>
+      <p>本気でキャリアに向き合う人と、その人を求める企業。そして、お店を営む人たち。AIと人の力で、それぞれの挑戦を支える3つの事業を展開しています。</p>
     </div>
 
     <div class="biz">
@@ -265,16 +266,14 @@ nav: home
       </article>
 
       <article class="biz-item biz-pos" id="pos">
-        <div class="biz-media tilt rv from-left" aria-hidden="true">
-          <svg class="pos-icon" viewBox="0 0 64 64"><rect x="10" y="26" width="44" height="28" rx="5"/><path d="M18 26V14a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12"/><path d="M24 18h16M24 22h10"/><circle cx="20" cy="36" r="2.2"/><circle cx="28" cy="36" r="2.2"/><circle cx="36" cy="36" r="2.2"/><circle cx="20" cy="44" r="2.2"/><circle cx="28" cy="44" r="2.2"/><circle cx="36" cy="44" r="2.2"/><rect x="42" y="33" width="7" height="14" rx="2"/></svg>
-        </div>
+        <div class="biz-media tilt rv from-left"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ。かんたん、つながる、会計ソフト" width="800" height="800" loading="lazy"></div>
         <div class="rv">
           <span class="biz-tag">店舗DX事業</span>
-          <h3>夜のお店向け<br class="sp-only">POSシステム<span class="soon">名称は近日公開</span></h3>
-          <p class="sub">お会計・売上の管理を、夜のお店のかたちに合わせて</p>
-          <p class="desc">キャバクラやホストクラブなど、夜のお店の営業に合わせたPOSシステムです。お会計や売上の管理をひとつにまとめ、お店の運営を支えます。サービス名や詳しい内容は、決まりしだいこのページでお知らせします。</p>
-          <ul><li>お会計</li><li>売上管理</li><li>夜のお店向け</li></ul>
-          <a class="btn btn-red" href="contact.html#pos">導入について相談する <span class="arr" aria-hidden="true">→</span></a>
+          <h3>ポスポス</h3>
+          <p class="sub">かんたん、つながる、会計ソフト。</p>
+          <p class="desc">カフェやレストランなどの昼の飲食店から、居酒屋、キャバクラやホストクラブなどの夜のお店まで、いろいろなお店で使える会計システムです。お会計や売上の管理をひとつにまとめ、お店の運営を支えます。</p>
+          <ul><li>お会計</li><li>売上管理</li><li>昼の飲食店</li><li>居酒屋</li><li>夜のお店</li></ul>
+          <a class="btn btn-blue" href="contact.html#pos">導入について相談する <span class="arr" aria-hidden="true">→</span></a>
         </div>
       </article>
     </div>

@@ -20,7 +20,7 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 - 文章・配置：`src/pages/<ページ名>.html` を直して `python3 build.py`（`public/` に書き出される）
 - ヘッダー・フッター：`src/layout.html`、各ページ下のお問い合わせ帯：`src/cta.html`
 - 色・文字・共通の動き：`public/assets/site.css` の先頭（ロゴの赤・黄・緑・紫）
-- ガチキャリ・POSシステムはトップの「事業内容」に書いている（POSのサービス名が決まったら `src/pages/index.html` と `about.html` を直す）
+- ガチキャリ・ポスポス（会計システム）はトップの「事業内容」に書いている
 - 画像：`public/assets/img/`（webp）
 - 新しいお知らせ：`src/pages/news-xxx.html` を作り、`news.html` とトップの一覧にカードを足す
 

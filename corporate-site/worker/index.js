@@ -8,7 +8,7 @@ const FROM = "AKITOグループ ホームページ <info@akitogroup.jp>";
 const TOPICS = {
   "gachicareer-ai": "ガチキャリAI",
   gachicareer: "ガチキャリ",
-  pos: "POSシステム",
+  pos: "ポスポス（会計システム）",
   recruit: "採用応募",
   other: "その他",
 };
