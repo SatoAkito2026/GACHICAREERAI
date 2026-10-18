@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyApiUser, checkInterviewQuota } from "@/lib/api-auth";
+import { verifyApiUser } from "@/lib/api-auth";
+import { serviceClient } from "@/lib/talent";
 import Anthropic from "@anthropic-ai/sdk";
 
 const corsHeaders = {
@@ -30,8 +31,17 @@ export const Route = createFileRoute("/api/research-company")({
       POST: async ({ request }) => {
         const auth = await verifyApiUser(request);
         if ("error" in auth) return auth.error;
-        const quota = await checkInterviewQuota(auth.token, auth.userId);
-        if ("error" in quota) return quota.error;
+        // 企業アカウントならプランに関係なく使える（会社情報の入力を手伝うだけ）
+        const supabase = await serviceClient();
+        if (!supabase) return json({ error: "Server config missing" }, 500);
+        const { data: mode } = await supabase
+          .from("profiles")
+          .select("user_mode")
+          .eq("id", auth.userId)
+          .maybeSingle();
+        if (!String(mode?.user_mode ?? "").startsWith("business")) {
+          return json({ error: "企業のアカウントで使ってください" }, 403);
+        }
         const anthropicKey = process.env.ANTHROPIC_API_KEY;
         if (!anthropicKey) return json({ error: "ANTHROPIC_API_KEY is not configured" }, 500);
 

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Lock, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import CompanyInfoSection from "@/components/CompanyInfoSection";
 import { useMode } from "@/hooks/use-mode";
-import { usePlan } from "@/hooks/use-plan";
 import { supabase } from "@/integrations/supabase/client";
 
 const INTERVIEW_STYLES = [
@@ -22,8 +21,6 @@ const LANGUAGES = [
 
 function AvatarConfigSection() {
   const { company, refresh } = useMode();
-  const { limits } = usePlan();
-  const isPro = limits.customAvatar;
 
   const [avatarName, setAvatarName] = useState("");
   const [interviewStyle, setInterviewStyle] = useState("neutral");
@@ -153,14 +150,6 @@ function AvatarConfigSection() {
           <span className="text-[14px]" style={{ color: "#F0F0F0", fontWeight: 600 }}>
             独自アバター
           </span>
-          {!isPro && (
-            <span
-              className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px]"
-              style={{ background: "#2A2A2A", color: "#888888" }}
-            >
-              <Lock size={11} /> プロプランで利用可能
-            </span>
-          )}
         </div>
         <p className="mt-2 text-[12px]" style={{ color: "#888888" }}>
           専用のAIアバターを作成します（別途初期費用が必要です）
@@ -168,11 +157,8 @@ function AvatarConfigSection() {
         <a
           href="mailto:info@akitogroup.jp"
           className="mt-3 inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium"
-          style={
-            isPro
-              ? { background: "#C8FF00", color: "#0F0F0F", pointerEvents: "auto" }
-              : { background: "#2A2A2A", color: "#666666", pointerEvents: "none" }
-          }
+          // 独自アバターはプランに関係なく、お問い合わせで受け付ける
+          style={{ background: "#C8FF00", color: "#0F0F0F" }}
         >
           お問い合わせ
         </a>
