@@ -13,8 +13,28 @@ nav: home
 .blobs i:nth-child(2){width:38vw;height:38vw;max-width:480px;max-height:480px;background:rgba(214,221,46,.45);right:-8vw;top:10%;animation-delay:-6s}
 .blobs i:nth-child(3){width:34vw;height:34vw;max-width:420px;max-height:420px;background:rgba(63,174,58,.28);left:30%;bottom:-14vw;animation-delay:-11s}
 @keyframes blob{33%{transform:translate(6vw,4vw) scale(1.08)}66%{transform:translate(-4vw,6vw) scale(.94)}100%{transform:translate(3vw,-3vw) scale(1.04)}}
-.hero .wrap{display:grid;gap:clamp(32px,5vw,64px);grid-template-columns:minmax(0,1fr)}
-@media (min-width:1024px){.hero .wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center}}
+/* 並び：スマホ＝文字→サービス／タブレット＝文字の右に街→下にサービス／PC＝文字の右にサービス（後ろに街） */
+.hero .wrap{display:grid;gap:clamp(32px,5vw,64px);grid-template-columns:minmax(0,1fr);grid-template-areas:"text" "stack"}
+.hero-text{grid-area:text;min-width:0}
+.stack{grid-area:stack}
+.city{grid-area:city;display:none;min-width:0;pointer-events:none}
+@media (min-width:640px) and (max-width:1023px){.hero .wrap{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);grid-template-areas:"text city" "stack stack";align-items:center}.city{display:block}}
+@media (min-width:1024px){.hero .wrap{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-areas:"text stack";align-items:center}.city{display:block;grid-area:stack;align-self:start;justify-self:center;width:min(118%,600px);margin-top:-36px;z-index:0}.stack{position:relative;z-index:1;align-self:end;margin-top:150px}}
+
+/* 街のイラスト（東池袋のビル街。窓の明かりと航空灯が動く） */
+.city svg{width:100%;height:auto;display:block;overflow:visible}
+.city .sun{animation:sun-pulse 6s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes sun-pulse{50%{transform:scale(1.06)}}
+.city .bld{transform-box:fill-box;transform-origin:50% 100%;animation:build-up 1.3s var(--ease-out) both;animation-delay:var(--d,0s)}
+@keyframes build-up{from{transform:scaleY(0)}to{transform:none}}
+.city .win{opacity:.18}
+.city .win.on{opacity:1;animation:twinkle var(--t,6s) ease-in-out infinite;animation-delay:var(--w,0s)}
+@keyframes twinkle{0%,100%{opacity:1}45%{opacity:1}50%{opacity:.25}55%{opacity:1}}
+.city .beacon{animation:beacon 1.6s ease-in-out infinite}
+@keyframes beacon{0%,100%{opacity:.2}50%{opacity:1}}
+.city .cloud{animation:cloud 26s linear infinite}
+.city .cloud.c2{animation-duration:38s;animation-delay:-14s}
+@keyframes cloud{from{transform:translateX(-120px)}to{transform:translateX(620px)}}
 .hero h1{font-size:clamp(34px,8.6vw,76px);letter-spacing:-.02em;line-height:1.24;margin-top:16px}
 @media (min-width:640px) and (max-width:1023px){.hero h1{font-size:clamp(48px,8vw,68px)}}
 .hero h1 .ln{display:block;overflow:hidden;padding-bottom:.08em;white-space:nowrap}
@@ -159,7 +179,7 @@ nav: home
     <path class="r3" pathLength="100" d="M-20 200 C 240 90, 420 280, 700 170 S 1160 80, 1420 160"/>
   </svg>
   <div class="wrap">
-    <div>
+    <div class="hero-text">
       <p class="eyebrow" style="animation:fade .8s both">AKITO GROUP LLC.</p>
       <h1>
         <span class="ln"><span><span class="w w-red">愛</span>ある事業で、</span></span>
@@ -171,6 +191,40 @@ nav: home
         <a class="btn btn-ink" href="#services">事業を見る <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-line" href="contact.html">お問い合わせ</a>
       </div>
+    </div>
+    <div class="city" aria-hidden="true">
+      <svg viewBox="0 0 520 420" id="city-svg">
+        <defs>
+          <radialGradient id="sun-g" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F3F6A0"/><stop offset=".55" stop-color="#E9EE7A" stop-opacity=".55"/><stop offset="1" stop-color="#E9EE7A" stop-opacity="0"/></radialGradient>
+          <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24113F" stop-opacity=".18"/><stop offset="1" stop-color="#24113F" stop-opacity="0"/></linearGradient>
+        </defs>
+        <circle class="sun" cx="290" cy="150" r="130" fill="url(#sun-g)"/>
+        <g class="cloud" opacity=".9"><ellipse cx="40" cy="70" rx="38" ry="12" fill="#fff"/><ellipse cx="62" cy="62" rx="22" ry="12" fill="#fff"/></g>
+        <g class="cloud c2" opacity=".7"><ellipse cx="0" cy="120" rx="30" ry="9" fill="#fff"/><ellipse cx="16" cy="114" rx="16" ry="9" fill="#fff"/></g>
+        <!-- 奥のビル（薄い） -->
+        <g fill="#B9AECB">
+          <rect class="bld" x="20" y="250" width="54" height="150" style="--d:.05s"/>
+          <rect class="bld" x="120" y="230" width="44" height="170" style="--d:.1s"/>
+          <rect class="bld" x="350" y="215" width="46" height="185" style="--d:.12s"/>
+          <rect class="bld" x="455" y="245" width="52" height="155" style="--d:.08s"/>
+        </g>
+        <!-- 手前のビル（窓あり） -->
+        <g id="front">
+          <g class="bld" style="--d:.2s"><rect class="body" x="44" y="230" width="66" height="170" fill="#4A3C60"/><rect x="44" y="230" width="66" height="6" fill="#EE1650"/></g>
+          <g class="bld" style="--d:.3s"><rect class="body" x="104" y="170" width="70" height="230" fill="#3A2560"/><rect x="104" y="170" width="70" height="230" fill="url(#glass)"/></g>
+          <!-- サンシャイン60のような一番高いビル -->
+          <g class="bld" style="--d:.4s"><line x1="238" y1="34" x2="238" y2="62" stroke="#24113F" stroke-width="3"/><rect x="214" y="58" width="48" height="16" fill="#24113F"/><rect class="body" x="196" y="70" width="84" height="330" fill="#24113F"/><rect x="196" y="70" width="84" height="330" fill="url(#glass)"/><rect x="196" y="120" width="84" height="4" fill="#D6DD2E"/></g>
+          <circle class="beacon" cx="238" cy="32" r="4.5" fill="#EE1650"/>
+          <g class="bld" style="--d:.5s"><rect class="body" x="280" y="150" width="66" height="250" fill="#3A2560"/><rect x="280" y="150" width="66" height="8" fill="#3FAE3A"/></g>
+          <g class="bld" style="--d:.35s"><rect class="body" x="340" y="240" width="60" height="160" fill="#5A4C72"/></g>
+          <g class="bld" style="--d:.45s"><path d="M396 400V190l40-20 40 20v210z" fill="#2E1A4D"/><rect class="body" x="402" y="200" width="68" height="200" fill="none"/></g>
+          <g class="bld" style="--d:.25s"><rect class="body" x="0" y="300" width="50" height="100" fill="#5A4C72"/></g>
+          <g class="bld" style="--d:.55s"><rect class="body" x="470" y="280" width="50" height="120" fill="#4A3C60"/><rect x="470" y="280" width="50" height="5" fill="#D6DD2E"/></g>
+        </g>
+        <g id="windows"></g>
+        <rect x="0" y="398" width="520" height="22" fill="url(#ground)"/>
+      </svg>
     </div>
     <div class="stack" aria-label="3つの事業">
       <a class="svc svc-ai tilt" href="gachicareer-ai.html"><span class="svc-ic"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800"></span><span class="svc-tx"><b>ガチキャリAI</b><small>AIで自分を磨く。企業と出会う。</small></span></a>
@@ -329,3 +383,31 @@ nav: home
     </div>
   </div>
 </section>
+
+<script>
+// 街のイラストの窓を、ビルごとに並べる（明かりのつき方は毎回少し変わる）
+(function(){
+  var svg=document.getElementById('city-svg'); if(!svg)return;
+  var ns='http://www.w3.org/2000/svg', g=document.getElementById('windows');
+  var colors=['#FFE89A','#FFE89A','#FFE89A','#FFF6D6','#FFFFFF','#F7A1B8','#C9EE9A'];
+  svg.querySelectorAll('#front .body').forEach(function(b,i){
+    var x=+b.getAttribute('x'), y=+b.getAttribute('y'), w=+b.getAttribute('width'), h=+b.getAttribute('height');
+    var cw=7, ch=9, gx=6, gy=8, cols=Math.floor((w-10)/(cw+gx)), rows=Math.floor((h-24)/(ch+gy));
+    var ox=x+(w-(cols*(cw+gx)-gx))/2, delay=(+b.parentNode.style.getPropertyValue('--d').replace('s','')||0)+1.1;
+    for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
+      var win=document.createElementNS(ns,'rect');
+      win.setAttribute('x',ox+c*(cw+gx)); win.setAttribute('y',y+16+r*(ch+gy));
+      win.setAttribute('width',cw); win.setAttribute('height',ch); win.setAttribute('rx',1);
+      var lit=Math.random()<.42;
+      win.setAttribute('fill',lit?colors[Math.floor(Math.random()*colors.length)]:'#8C7FA6');
+      win.setAttribute('class','win'+(lit?' on':''));
+      if(lit){win.style.setProperty('--t',(4+Math.random()*8).toFixed(1)+'s');win.style.setProperty('--w',(delay+Math.random()*6).toFixed(1)+'s')}
+      win.style.opacity=lit?'':'.18';
+      g.appendChild(win);
+    }
+  });
+  // 窓はビルが建ち上がったあとに、ふわっと出す
+  g.style.opacity=0; g.style.transition='opacity 1s ease';
+  setTimeout(function(){g.style.opacity=1},1100);
+})();
+</script>
