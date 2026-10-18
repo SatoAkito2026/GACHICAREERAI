@@ -48,13 +48,16 @@ export const Route = createFileRoute("/api/customer-portal")({
         }
 
         const body = await request.json().catch(() => ({}));
-        const ALLOWED_ORIGIN = "https://interview-copilot-ai.akitogroup.jp";
+        const ALLOWED_ORIGINS = [
+          "https://gachicareer-ai.akitogroup.jp",
+          "https://interview-copilot-ai.akitogroup.jp",
+        ];
         const requestedReturnUrl = (body as any).returnUrl;
         const returnUrl =
           typeof requestedReturnUrl === "string" &&
-          requestedReturnUrl.startsWith(`${ALLOWED_ORIGIN}/`)
+          ALLOWED_ORIGINS.some((o) => requestedReturnUrl.startsWith(`${o}/`))
             ? requestedReturnUrl
-            : `${ALLOWED_ORIGIN}/mypage`;
+            : `${ALLOWED_ORIGINS[0]}/mypage`;
 
         const session = await stripe.billingPortal.sessions.create({
           customer: profile.stripe_customer_id,

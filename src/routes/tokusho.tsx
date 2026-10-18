@@ -40,7 +40,7 @@ function TokushoPage() {
       </LegalSection>
 
       <LegalSection heading="サービスURL">
-        <p>https://interview-copilot-ai.akitogroup.jp</p>
+        <p>https://gachicareer-ai.akitogroup.jp</p>
       </LegalSection>
 
       <LegalSection heading="サービス内容">

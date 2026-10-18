@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Lock, Loader2, Sparkles, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
-import { usePlan } from "@/hooks/use-plan";
 import { supabase } from "@/integrations/supabase/client";
 
 const CARD_STYLE = { border: "1px solid #2A2A2A", background: "#1A1A1A" } as const;
@@ -176,8 +175,6 @@ function GroupTitle({ children }: { children: React.ReactNode }) {
 
 export default function CompanyInfoSection() {
   const { user } = useAuth();
-  const { plan } = usePlan();
-  const isPro = plan === "company_pro" || plan === "individual_pro";
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [tab, setTab] = useState<"manual" | "ai">("manual");
@@ -187,7 +184,7 @@ export default function CompanyInfoSection() {
   const [companyUrl, setCompanyUrl] = useState("");
 
   useEffect(() => {
-    if (!user || !isPro) return;
+    if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
@@ -203,7 +200,7 @@ export default function CompanyInfoSection() {
         setForm(next);
       }
     })();
-  }, [user, isPro]);
+  }, [user]);
 
   const setField = (k: FieldKey, v: string) =>
     setForm((p) => ({ ...p, [k]: k === "company_number" ? normalizeCompanyNumber(v) : v }));
@@ -280,30 +277,6 @@ export default function CompanyInfoSection() {
       setResearching(false);
     }
   };
-
-  // Locked state for non-pro users
-  if (!isPro) {
-    return (
-      <section className="relative mt-6 overflow-hidden rounded-2xl" style={CARD_STYLE}>
-        <div
-          className="flex items-center gap-2 px-5 py-4 text-[13px] tracking-wide"
-          style={{ color: "#666666", fontWeight: 700, borderBottom: ROW_BORDER }}
-        >
-          <Lock size={14} />
-          会社情報（プロプラン限定）
-        </div>
-        <div
-          className="flex flex-col items-center gap-3 px-5 py-10 text-center"
-          style={{ opacity: 0.6 }}
-        >
-          <Lock size={28} style={{ color: "#666666" }} />
-          <p className="text-[14px]" style={{ color: "#888888" }}>
-            プロプランにアップグレードすると利用できます
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="mt-6 overflow-hidden rounded-2xl" style={CARD_STYLE}>

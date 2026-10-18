@@ -65,7 +65,7 @@ export async function runDailyReminderJob(): Promise<{
 }> {
   const serviceKey = getServiceRoleKey();
   const resendApiKey = process.env.RESEND_API_KEY;
-  const appUrl = process.env.APP_URL ?? "https://interview-copilot-ai.akitogroup.jp";
+  const appUrl = process.env.APP_URL ?? "https://gachicareer-ai.akitogroup.jp";
 
   if (!serviceKey || !resendApiKey) {
     console.error("[daily-reminders] missing config (service key or Resend key)");
