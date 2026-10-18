@@ -68,10 +68,10 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
-// 旧URLから新しいURL（gachicareer.akitogroup.jp）へ転送する。
+// 旧URLから新しいURL（gachicareer-ai.akitogroup.jp）へ転送する。
 // API（Stripe の通知・送信済みの面接URLから呼ばれるもの）は転送せず、旧URLでもそのまま動かす。
 const OLD_HOST = "interview-copilot-ai.akitogroup.jp";
-const NEW_ORIGIN = "https://gachicareer.akitogroup.jp";
+const NEW_ORIGIN = "https://gachicareer-ai.akitogroup.jp";
 
 function redirectFromOldHost(request: Request): Response | null {
   const url = new URL(request.url);

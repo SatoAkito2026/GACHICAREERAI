@@ -457,7 +457,7 @@ export function getTicketPrice(): number {
 }
 
 export function appUrl(): string {
-  return process.env.APP_URL || "https://gachicareer.akitogroup.jp";
+  return process.env.APP_URL || "https://gachicareer-ai.akitogroup.jp";
 }
 
 export async function getUserEmail(

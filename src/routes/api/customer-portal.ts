@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/customer-portal")({
 
         const body = await request.json().catch(() => ({}));
         const ALLOWED_ORIGINS = [
-          "https://gachicareer.akitogroup.jp",
+          "https://gachicareer-ai.akitogroup.jp",
           "https://interview-copilot-ai.akitogroup.jp",
         ];
         const requestedReturnUrl = (body as any).returnUrl;
