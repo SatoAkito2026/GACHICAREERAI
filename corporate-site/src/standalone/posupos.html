@@ -164,6 +164,45 @@ p{margin:0}
 .card h3{font-size:20px}
 .card p{color:var(--ink-2);font-size:15px}
 
+/* 機能一覧 */
+.draft{display:flex;gap:10px;align-items:center;background:#FFF4DE;color:#6B4A00;border:1px solid #F3D28C;border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:700;margin-bottom:24px}
+.groups{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.groups{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.grp{border:1px solid var(--line);border-radius:20px;padding:22px 22px 18px;background:var(--paper);display:grid;gap:12px;align-content:start}
+.grp h3{font-size:17px;display:flex;align-items:center;gap:10px}
+.grp h3 i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--g,var(--mist));color:var(--gi,var(--blue));flex:none}
+.grp h3 svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.grp ul{list-style:none;margin:0;padding:0;display:grid}
+.grp li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px dashed var(--line);font-size:14.5px}
+.grp li:first-child{border-top:0}
+.only{flex:none;font-size:11px;font-weight:700;color:#fff;background:var(--blue);border-radius:999px;padding:2px 9px;letter-spacing:.04em}
+.grp.night{--g:var(--night);--gi:var(--lamp)}
+
+/* 比較表 */
+.cmp-wrap{overflow-x:auto;border-radius:20px;border:1px solid var(--line);background:var(--paper);-webkit-overflow-scrolling:touch}
+.cmp{width:100%;min-width:620px;border-collapse:separate;border-spacing:0;font-size:14.5px}
+.cmp th,.cmp td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--line);vertical-align:middle}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+.cmp thead th{font-family:var(--ff-display);font-weight:800;font-size:14px;color:var(--ink-2);background:var(--mist)}
+.cmp thead th.us{color:#fff;background:var(--blue);font-size:16px}
+.cmp tbody th{text-align:left;font-weight:700;position:sticky;left:0;background:var(--paper);z-index:1;min-width:190px}
+.cmp tbody th small{display:block;font-weight:400;color:var(--ink-2);font-size:12.5px;margin-top:2px}
+.cmp td.us{background:rgba(30,91,216,.06);font-weight:700}
+.cmp tr.uniq th{box-shadow:inset 4px 0 0 var(--blue)}
+.mk{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;font-family:var(--ff-mono);font-size:15px;font-weight:500}
+.mk.y{background:var(--blue);color:#fff}
+.mk.p{background:var(--mist);color:var(--ink-2)}
+.mk.n{color:#A3AEC6}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:13px;color:var(--ink-2);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .mk{width:22px;height:22px;font-size:12px}
+.cmp-note{margin-top:10px;font-size:12.5px;color:var(--ink-2)}
+.cmp thead th.us{white-space:nowrap}
+@media (max-width:640px){.cmp{font-size:13.5px;min-width:560px}.cmp th,.cmp td{padding:12px 10px}.cmp tbody th{min-width:140px}}
+.scroll-hint{display:none;font-size:12.5px;color:var(--ink-2);margin-bottom:8px}
+@media (max-width:680px){.scroll-hint{display:block}}
+
 /* 昼も夜も */
 .daynight{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:640px){.daynight{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -249,7 +288,6 @@ p{margin:0}
     <nav aria-label="ページ内">
       <a href="#features">できること</a>
       <a href="#shops">使えるお店</a>
-      <a href="#flow">導入の流れ</a>
       <a href="#faq">よくある質問</a>
     </nav>
     <a class="btn btn-blue head-cta" href="contact.html#pos">お問い合わせ</a>
@@ -350,6 +388,40 @@ p{margin:0}
           <p>昼の飲食店、居酒屋、夜のお店。営業のしかたに合わせた使い方を、導入のときにご相談できます。</p>
         </article>
       </div>
+    </div>
+  </section>
+
+  <!-- 機能一覧と比較表は下書き。中身を確認したら hidden を外し、上の nav にもリンクを戻す -->
+  <section class="sec" id="list" hidden>
+    <div class="wrap">
+      <p class="draft">下書き：機能と比較の中身は確認中です（公開前に差し替え）</p>
+      <div class="sec-head rv">
+        <p class="eyebrow">Functions</p>
+        <h2>機能一覧</h2>
+        <p>毎日の注文からお会計、売上の確認まで。昼の飲食店にも、夜のお店にも必要な機能をそろえました。</p>
+      </div>
+      <div class="groups stagger">
+        <div class="grp  rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i>注文</h3><ul><li>テーブルごとの注文入力</li><li>メニューの登録・変更</li><li>席の状況が一目でわかる</li></ul></div><div class="grp  rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6"/></svg></i>お会計</h3><ul><li>合計の自動計算</li><li>割り勘</li><li>現金・キャッシュレスの記録</li><li>レシートの発行</li></ul></div><div class="grp  rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i>売上</h3><ul><li>日別・月別の売上集計</li><li>商品ごとの売上ランキング</li><li>スマホで売上を確認</li></ul></div><div class="grp night rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></i>夜のお店</h3><ul><li>セット料金・延長の自動計算</li><li>指名・同伴の記録</li><li>サービス料・TAXの計算</li><li>キャストごとの成績</li></ul></div><div class="grp  rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></i>昼と夜の切り替え</h3><ul><li>時間帯で料金ルールを自動で切り替え<span class="only">ポスポスだけ</span></li><li>昼の売上・夜の売上を分けて集計<span class="only">ポスポスだけ</span></li></ul></div><div class="grp  rv"><h3><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></i>つながる</h3><ul><li>タブレット・スマホで使える</li><li>複数の端末で注文を共有</li><li>複数店舗の売上をまとめて確認</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec tint" id="compare" hidden>
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Compare</p>
+        <h2>ほかのPOSレジとの違い</h2>
+        <p>飲食店向けのPOSレジと、夜のお店向けのPOSレジ。ポスポスは、その両方の使い方にひとつで対応します。</p>
+      </div>
+      <p class="scroll-hint">表は横にスクロールできます →</p>
+      <div class="cmp-wrap rv">
+        <table class="cmp">
+          <thead><tr><th scope="col">機能</th><th scope="col" class="us">ポスポス</th><th scope="col">一般的な<br>飲食店向けPOS</th><th scope="col">一般的な<br>夜のお店向けPOS</th></tr></thead>
+          <tbody><tr class=""><th scope="row">注文・お会計・売上集計</th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk y" aria-label="できる">○</span></td><td><span class="mk y" aria-label="できる">○</span></td></tr><tr class=""><th scope="row">割り勘・キャッシュレスの記録</th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk y" aria-label="できる">○</span></td><td><span class="mk p" aria-label="一部できる">△</span></td></tr><tr class=""><th scope="row">セット料金・延長の自動計算<small>夜のお店のお会計</small></th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk n" aria-label="できない">×</span></td><td><span class="mk y" aria-label="できる">○</span></td></tr><tr class=""><th scope="row">指名・キャストの成績</th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk n" aria-label="できない">×</span></td><td><span class="mk y" aria-label="できる">○</span></td></tr><tr class="uniq"><th scope="row">時間帯で料金ルールを自動切り替え<small>昼はカフェ、夜はバーのようなお店</small></th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk n" aria-label="できない">×</span></td><td><span class="mk n" aria-label="できない">×</span></td></tr><tr class="uniq"><th scope="row">昼と夜の売上を分けて集計</th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk n" aria-label="できない">×</span></td><td><span class="mk n" aria-label="できない">×</span></td></tr><tr class=""><th scope="row">タブレット・スマホで使える</th><td class="us"><span class="mk y" aria-label="できる">○</span></td><td><span class="mk y" aria-label="できる">○</span></td><td><span class="mk p" aria-label="一部できる">△</span></td></tr></tbody>
+        </table>
+      </div>
+      <div class="legend"><span><span class="mk y" aria-hidden="true">○</span>できる</span><span><span class="mk p" aria-hidden="true">△</span>製品によってはできる</span><span><span class="mk n" aria-hidden="true">×</span>できない製品が多い</span><span style="box-shadow:inset 4px 0 0 var(--blue);padding-left:10px">青い線の行がポスポスだけの機能</span></div>
+      <p class="cmp-note">※ 比較は特定の製品ではなく、一般的な傾向をまとめたものです。製品によって異なります。</p>
     </div>
   </section>
 
