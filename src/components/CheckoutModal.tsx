@@ -1,3 +1,4 @@
+import { toJapaneseError } from "@/lib/error-messages";
 import { getAuthHeaders } from "@/lib/chat-api";
 import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -10,7 +11,8 @@ import { usePlan, type Plan, PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 const STRIPE_PUBLISHABLE_KEY =
   "pk_live_51Tdk13J1Nq1hx5wCgIw06UH1GBp6higghN4FnL4cobvKt5kGvfIm80fkia6OjJrWRgPybVkB7LrjEuJJDng7i8wY00539luPFI";
 
-export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+// カード入力欄・カードのエラーを日本語で出す
+export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY, { locale: "ja" });
 
 const CARD_OPTIONS = {
   hidePostalCode: true,
@@ -91,7 +93,7 @@ function CheckoutForm({ plan, onClose }: Props) {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setError(data.error ?? "決済に失敗しました");
+        setError(toJapaneseError(data.error, "決済に失敗しました"));
         setLoading(false);
         return;
       }

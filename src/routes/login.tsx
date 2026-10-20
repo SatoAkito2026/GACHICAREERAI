@@ -1,3 +1,4 @@
+import { toJapaneseError } from "@/lib/error-messages";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -175,7 +176,7 @@ function LoginPage() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "エラーが発生しました。");
+      setError(toJapaneseError(err));
     } finally {
       setSubmitting(false);
     }
@@ -303,7 +304,7 @@ function LoginPage() {
                 // 企業は月額プランなし（人材の閲覧はコイン、求人掲載は今は無料）
                 navigate({ to: "/business/company" });
               } catch (e) {
-                setError(e instanceof Error ? e.message : "エラーが発生しました");
+                setError(toJapaneseError(e));
               } finally {
                 setSetupLoading(false);
               }
@@ -402,7 +403,7 @@ function LoginPage() {
                   .eq("id", signupData.session!.user.id) as any);
                 navigate({ to: "/business/school" });
               } catch (e) {
-                setError(e instanceof Error ? e.message : "エラーが発生しました");
+                setError(toJapaneseError(e));
               } finally {
                 setSetupLoading(false);
               }
@@ -480,7 +481,7 @@ function LoginPage() {
                   .eq("id", signupData.session!.user.id) as any);
                 setStep("actor-plan");
               } catch (e) {
-                setError(e instanceof Error ? e.message : "エラーが発生しました");
+                setError(toJapaneseError(e));
               } finally {
                 setSetupLoading(false);
               }
