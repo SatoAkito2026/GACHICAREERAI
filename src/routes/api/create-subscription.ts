@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { verifyApiUser, getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { PRACTICE_RULES } from "@/lib/plan-rules";
+import { applyPointsToStripe } from "@/lib/points";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -88,7 +89,12 @@ export const Route = createFileRoute("/api/create-subscription")({
         if (!supabaseUrl || !supabaseServiceKey)
           return json({ error: "Supabase config missing" }, 500);
 
-        let body: { paymentMethodId?: unknown; plan?: unknown; email?: unknown };
+        let body: {
+          paymentMethodId?: unknown;
+          plan?: unknown;
+          email?: unknown;
+          usePoints?: unknown;
+        };
         try {
           body = await request.json();
         } catch {
@@ -141,6 +147,20 @@ export const Route = createFileRoute("/api/create-subscription")({
               invoice_settings: { default_payment_method: paymentMethodId },
               metadata: { supabase_user_id: userId },
             });
+          }
+
+          // ガチキャリポイントを使う場合は、最初の請求の前に Stripe の残高に入れておく（1か月分まで）
+          if (
+            body.usePoints === true &&
+            (plan === "individual_light" || plan === "individual_pro")
+          ) {
+            await applyPointsToStripe(
+              supabase,
+              stripe,
+              userId,
+              customer.id,
+              PRACTICE_RULES[plan].priceJpy,
+            );
           }
 
           // Stripe: Subscription作成

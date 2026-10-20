@@ -143,6 +143,7 @@ export type Database = {
         Row: {
           amount: number;
           candidate_user_id: string;
+          coins: number;
           company_user_id: string;
           created_at: string;
           id: string;
@@ -151,6 +152,7 @@ export type Database = {
         Insert: {
           amount?: number;
           candidate_user_id: string;
+          coins?: number;
           company_user_id: string;
           created_at?: string;
           id?: string;
@@ -159,10 +161,71 @@ export type Database = {
         Update: {
           amount?: number;
           candidate_user_id?: string;
+          coins?: number;
           company_user_id?: string;
           created_at?: string;
           id?: string;
           stripe_payment_intent_id?: string | null;
+        };
+        Relationships: [];
+      };
+      coin_lots: {
+        Row: {
+          amount_jpy: number;
+          coins_remaining: number;
+          coins_total: number;
+          company_user_id: string;
+          expires_at: string;
+          id: string;
+          purchased_at: string;
+          stripe_payment_intent_id: string | null;
+        };
+        Insert: {
+          amount_jpy: number;
+          coins_remaining: number;
+          coins_total: number;
+          company_user_id: string;
+          expires_at: string;
+          id?: string;
+          purchased_at?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Update: {
+          amount_jpy?: number;
+          coins_remaining?: number;
+          coins_total?: number;
+          company_user_id?: string;
+          expires_at?: string;
+          id?: string;
+          purchased_at?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Relationships: [];
+      };
+      point_ledger: {
+        Row: {
+          created_at: string;
+          id: string;
+          points: number;
+          reason: string;
+          ref_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          points: number;
+          reason: string;
+          ref_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          points?: number;
+          reason?: string;
+          ref_id?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -1604,6 +1667,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      spend_coins_for_unlock: {
+        Args: { p_company: string; p_candidate: string; p_coins: number; p_share_rate?: number };
+        Returns: { unlock_id: string; amount_jpy: number; points: number }[];
+      };
+      spend_points: {
+        Args: { p_user: string; p_points: number; p_reason: string; p_ref: string };
+        Returns: number;
+      };
       get_interview_invitation: {
         Args: { _token: string };
         Returns: {

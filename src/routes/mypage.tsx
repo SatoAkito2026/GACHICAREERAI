@@ -1,5 +1,6 @@
 import { COMPANY_INTERVIEW_PRICE_JPY, limitText, practiceRule } from "@/lib/plan-rules";
 import { SchoolLinkCard } from "@/components/SchoolLinkCard";
+import { PointsCard } from "@/components/PointsCard";
 import { getAuthHeaders } from "@/lib/chat-api";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -363,6 +364,12 @@ function MyPage() {
                 />
               )}
             </SectionCard>
+
+            {!isBusiness && (
+              <div className="mt-6">
+                <PointsCard />
+              </div>
+            )}
 
             {!isBusiness && (
               <SectionCard title="学校・塾とつながる">

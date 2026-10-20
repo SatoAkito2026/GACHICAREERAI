@@ -39,6 +39,7 @@ import { Route as ApiExtractTemplateFieldsRouteImport } from './routes/api/extra
 import { Route as ApiGenerateDocumentRouteImport } from './routes/api/generate-document'
 import { Route as ApiGenerateSelfAnalysisRouteImport } from './routes/api/generate-self-analysis'
 import { Route as ApiInterviewTurnRouteImport } from './routes/api/interview-turn'
+import { Route as ApiPointsRouteImport } from './routes/api/points'
 import { Route as ApiPredictTicketSalesRouteImport } from './routes/api/predict-ticket-sales'
 import { Route as ApiRefineDocumentRouteImport } from './routes/api/refine-document'
 import { Route as ApiRegisterDeviceRouteImport } from './routes/api/register-device'
@@ -66,6 +67,7 @@ import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
 import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
+import { Route as ApiTalentCoinsRouteImport } from './routes/api/talent/coins'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
 import { Route as ApiTalentMessagesRouteImport } from './routes/api/talent/messages'
@@ -271,6 +273,11 @@ const ApiInterviewTurnRoute = ApiInterviewTurnRouteImport.update({
   path: '/api/interview-turn',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPointsRoute = ApiPointsRouteImport.update({
+  id: '/api/points',
+  path: '/api/points',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPredictTicketSalesRoute = ApiPredictTicketSalesRouteImport.update({
   id: '/api/predict-ticket-sales',
   path: '/api/predict-ticket-sales',
@@ -405,6 +412,11 @@ const ApiSchoolStudentsRoute = ApiSchoolStudentsRouteImport.update({
 const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
   id: '/api/talent/admin-stats',
   path: '/api/talent/admin-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentCoinsRoute = ApiTalentCoinsRouteImport.update({
+  id: '/api/talent/coins',
+  path: '/api/talent/coins',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTalentContactsRoute = ApiTalentContactsRouteImport.update({
@@ -714,6 +726,7 @@ export interface FileRoutesByFullPath {
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
@@ -741,6 +754,7 @@ export interface FileRoutesByFullPath {
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -824,6 +838,7 @@ export interface FileRoutesByTo {
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
@@ -851,6 +866,7 @@ export interface FileRoutesByTo {
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -935,6 +951,7 @@ export interface FileRoutesById {
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
@@ -962,6 +979,7 @@ export interface FileRoutesById {
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
   '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
@@ -1047,6 +1065,7 @@ export interface FileRouteTypes {
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
@@ -1074,6 +1093,7 @@ export interface FileRouteTypes {
     | '/api/school/student'
     | '/api/school/students'
     | '/api/talent/admin-stats'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1157,6 +1177,7 @@ export interface FileRouteTypes {
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
@@ -1184,6 +1205,7 @@ export interface FileRouteTypes {
     | '/api/school/student'
     | '/api/school/students'
     | '/api/talent/admin-stats'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1267,6 +1289,7 @@ export interface FileRouteTypes {
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
     | '/api/refine-document'
     | '/api/register-device'
@@ -1294,6 +1317,7 @@ export interface FileRouteTypes {
     | '/api/school/student'
     | '/api/school/students'
     | '/api/talent/admin-stats'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
@@ -1378,6 +1402,7 @@ export interface RootRouteChildren {
   ApiGenerateDocumentRoute: typeof ApiGenerateDocumentRoute
   ApiGenerateSelfAnalysisRoute: typeof ApiGenerateSelfAnalysisRoute
   ApiInterviewTurnRoute: typeof ApiInterviewTurnRoute
+  ApiPointsRoute: typeof ApiPointsRoute
   ApiPredictTicketSalesRoute: typeof ApiPredictTicketSalesRoute
   ApiRefineDocumentRoute: typeof ApiRefineDocumentRoute
   ApiRegisterDeviceRoute: typeof ApiRegisterDeviceRoute
@@ -1405,6 +1430,7 @@ export interface RootRouteChildren {
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
   ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
+  ApiTalentCoinsRoute: typeof ApiTalentCoinsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
   ApiTalentMessagesRoute: typeof ApiTalentMessagesRoute
@@ -1670,6 +1696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInterviewTurnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/points': {
+      id: '/api/points'
+      path: '/api/points'
+      fullPath: '/api/points'
+      preLoaderRoute: typeof ApiPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/predict-ticket-sales': {
       id: '/api/predict-ticket-sales'
       path: '/api/predict-ticket-sales'
@@ -1857,6 +1890,13 @@ declare module '@tanstack/react-router' {
       path: '/api/talent/admin-stats'
       fullPath: '/api/talent/admin-stats'
       preLoaderRoute: typeof ApiTalentAdminStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/coins': {
+      id: '/api/talent/coins'
+      path: '/api/talent/coins'
+      fullPath: '/api/talent/coins'
+      preLoaderRoute: typeof ApiTalentCoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/talent/contacts': {
@@ -2250,6 +2290,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGenerateDocumentRoute: ApiGenerateDocumentRoute,
   ApiGenerateSelfAnalysisRoute: ApiGenerateSelfAnalysisRoute,
   ApiInterviewTurnRoute: ApiInterviewTurnRoute,
+  ApiPointsRoute: ApiPointsRoute,
   ApiPredictTicketSalesRoute: ApiPredictTicketSalesRoute,
   ApiRefineDocumentRoute: ApiRefineDocumentRoute,
   ApiRegisterDeviceRoute: ApiRegisterDeviceRoute,
@@ -2277,6 +2318,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
   ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
+  ApiTalentCoinsRoute: ApiTalentCoinsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
   ApiTalentMessagesRoute: ApiTalentMessagesRoute,

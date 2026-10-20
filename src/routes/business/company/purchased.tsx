@@ -55,7 +55,7 @@ function PurchasedPage() {
       <PageFrame
         width={1000}
         title="購入した人材"
-        subtitle="チケットを買った人と、求人に応募してきた人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
+        subtitle="コインで見た人と、求人に応募してきた人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
       >
         {!people ? (
           <Loading />
@@ -71,7 +71,7 @@ function PurchasedPage() {
         ) : people.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10">
             <p className="text-[14px]" style={{ color: C.muted }}>
-              まだチケットを買った人はいません。
+              まだコインで見た人はいません。
             </p>
             <Link to="/business/company/talent" style={{ color: C.accent, fontSize: 14 }}>
               人材を探す →
@@ -115,7 +115,7 @@ function PurchasedPage() {
                       {p.competencyAverage?.toFixed(1) ?? "-"}
                     </p>
                     <p className="text-[10px]" style={{ color: C.muted }}>
-                      力の平均
+                      評価の平均
                     </p>
                   </div>
                 </div>

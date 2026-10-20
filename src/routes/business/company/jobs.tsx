@@ -981,7 +981,7 @@ function JobsPage() {
                         )}
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px]">
                           <span style={{ color: "#888888" }}>
-                            模擬面接 {a.interviewCount}回 ・ 力の平均{" "}
+                            模擬面接 {a.interviewCount}回 ・ 評価の平均{" "}
                             {a.competencyAverage?.toFixed(1) ?? "-"}
                           </span>
                           {a.code && (

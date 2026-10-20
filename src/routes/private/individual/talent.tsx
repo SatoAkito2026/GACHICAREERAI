@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PrivateShell } from "@/components/ModeShell";
+import { PointsCard } from "@/components/PointsCard";
 import {
   Button,
   C,
@@ -131,7 +132,7 @@ function TalentProfilePage() {
         title="公開プロフィール"
         subtitle={
           <>
-            模擬面接の評価をもとにした「人物まとめ」を企業に公開できます。企業は名前を伏せた状態で見て、気になった人だけチケットを購入し、名前・詳しい評価・録画（許可した場合）を見ます。
+            模擬面接の評価をもとにした「人物まとめ」を企業に公開できます。企業は名前を伏せた状態で見て、気になった人だけコインを使って、名前・詳しい評価・録画（許可した場合）を見ます。企業に見られると、その料金の1/4があなたにポイントで入ります。
             <br />
             公開・非公開はいつでも切り替えられます。
           </>
@@ -141,6 +142,7 @@ function TalentProfilePage() {
           <Loading />
         ) : (
           <>
+            <PointsCard />
             <Card
               title="公開の状態"
               right={
@@ -170,7 +172,7 @@ function TalentProfilePage() {
               <div className="flex flex-col gap-4">
                 <Field
                   label="お名前"
-                  hint="チケットを購入した企業と、面談を申し込んだ企業にだけ表示されます"
+                  hint="コインで見た企業と、面談を申し込んだ企業にだけ表示されます"
                 >
                   <input
                     value={form.display_name}
@@ -262,7 +264,7 @@ function TalentProfilePage() {
                     checked={form.show_recording}
                     disabled={!form.record_practice}
                     onChange={(v) => setForm((f) => ({ ...f, show_recording: v }))}
-                    label="録画を、チケットを購入した企業に見せる"
+                    label="録画を、コインで見た企業に見せる"
                     hint="オフにすると企業には録画が見えません"
                   />
                 </div>
@@ -279,7 +281,7 @@ function TalentProfilePage() {
               {profile?.is_public ? (
                 <div className="flex flex-col gap-3">
                   <p className="text-[14px]" style={{ color: C.sub }}>
-                    非公開にすると、企業の検索に表示されなくなり、新しい面談の申し込みも届かなくなります（すでにチケットを購入した企業は、購入時点の内容を引き続き見られます）。
+                    非公開にすると、企業の検索に表示されなくなり、新しい面談の申し込みも届かなくなります（すでにコインで見た企業は、購入時点の内容を引き続き見られます）。
                   </p>
                   <div>
                     <Button
@@ -298,10 +300,10 @@ function TalentProfilePage() {
                     style={{ color: C.sub, lineHeight: 1.9 }}
                   >
                     <li>
-                      名前を伏せた状態で企業に見えるもの：ひとこと・いまの状況・希望職種・希望勤務地・自己PR・人物まとめ（強みと根拠になった発言の一部、能力の評価）
+                      名前を伏せた状態で企業に見えるもの：ひとこと・いまの状況・希望職種・希望勤務地・自己PR・人物まとめ（強みと根拠になった発言の一部、7つの評価）
                     </li>
                     <li>
-                      チケットを購入した企業にだけ見えるもの：お名前・面接ごとの詳しい評価・面接の会話・録画（許可した場合）
+                      コインで見た企業にだけ見えるもの：お名前・面接ごとの詳しい評価・面接の会話・録画（許可した場合）
                     </li>
                     <li>メールアドレス・電話番号・住所・生年月日は企業に見せません</li>
                     <li>企業からの面談の申し込みは、承諾するか辞退するかを自分で選べます</li>

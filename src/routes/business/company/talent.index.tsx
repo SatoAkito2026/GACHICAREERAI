@@ -15,6 +15,7 @@ import {
   talentApi,
   type SummaryCompetency,
 } from "@/components/talent/TalentUI";
+import { CoinBadge, CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 
 export const Route = createFileRoute("/business/company/talent/")({
   head: () => ({ meta: [{ title: "人材を探す｜ガチキャリAI Business" }] }),
@@ -32,6 +33,7 @@ type Candidate = {
   competencies: SummaryCompetency[];
   interviewCount: number;
   competencyAverage: number | null;
+  priceCoins: number;
   hasRecording: boolean;
   updatedAt: string | null;
   unlocked: boolean;
@@ -44,19 +46,20 @@ function TalentSearchPage() {
   const [minScore, setMinScore] = useState("");
   const [sort, setSort] = useState("recent");
   const [list, setList] = useState<Candidate[] | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+  const [coins, setCoins] = useState<CoinBalance | null>(null);
+  const [shopOpen, setShopOpen] = useState(false);
   const [error, setError] = useState("");
   const [needsCompany, setNeedsCompany] = useState(false);
 
   const load = useCallback(async () => {
     setList(null);
     const q = new URLSearchParams({ keyword, stage, minScore, sort });
-    const r = await talentApi<{ candidates: Candidate[]; ticketPrice: number }>(
+    const r = await talentApi<{ candidates: Candidate[]; coins: CoinBalance }>(
       `/api/talent/search?${q}`,
     );
     if (r.ok) {
       setList(r.data.candidates);
-      setPrice(r.data.ticketPrice);
+      setCoins(r.data.coins);
       setError("");
     } else {
       setList([]);
@@ -78,15 +81,22 @@ function TalentSearchPage() {
         subtitle={
           <>
             AI模擬面接を受け、プロフィールの公開に同意した人たちです。名前は伏せて表示しています。
-            {price !== null && (
-              <>
-                気になる人は、チケット（1人 {price.toLocaleString()}
-                円・税込）で名前・面接ごとの詳しい評価・録画を見て、面談を申し込めます。
-              </>
-            )}
+            気になる人は、コインで名前・面接ごとの詳しい評価・録画を見て、面談を申し込めます（評価が高い人・多くの企業に見られている人ほど必要なコインが多くなります）。
           </>
         }
       >
+        <div className="flex justify-end">
+          <CoinBadge coins={coins} onBuy={() => setShopOpen(true)} />
+        </div>
+        {shopOpen && (
+          <CoinShopModal
+            onClose={() => setShopOpen(false)}
+            onDone={(c) => {
+              setCoins(c);
+              setShopOpen(false);
+            }}
+          />
+        )}
         <div className="grid gap-3 md:grid-cols-4">
           <input
             value={keyword}
@@ -115,7 +125,7 @@ function TalentSearchPage() {
             style={inputStyle}
           >
             <option value="recent">新しい順</option>
-            <option value="score">力の平均が高い順</option>
+            <option value="score">評価の平均が高い順</option>
             {Object.entries(COMPETENCY_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
                 「{v}」が高い順
@@ -128,10 +138,10 @@ function TalentSearchPage() {
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
             style={inputStyle}
           >
-            <option value="">力の平均：指定なし</option>
+            <option value="">評価の平均：指定なし</option>
             {[3, 3.5, 4].map((n) => (
               <option key={n} value={n}>
-                力の平均 {n.toFixed(1)}以上
+                評価の平均 {n.toFixed(1)}以上
               </option>
             ))}
           </select>
@@ -194,7 +204,7 @@ function CandidateCard({ c }: { c: Candidate }) {
             {c.competencyAverage?.toFixed(1) ?? "-"}
           </p>
           <p className="text-[10px]" style={{ color: C.muted }}>
-            力の平均（5点満点）
+            評価の平均（5点満点）
           </p>
         </div>
       </div>
@@ -229,7 +239,11 @@ function CandidateCard({ c }: { c: Candidate }) {
           )}
         </span>
         <span className="flex items-center gap-2">
-          {c.unlocked && <Tag color={C.accent}>購入済み</Tag>}
+          {c.unlocked ? (
+            <Tag color={C.accent}>購入済み</Tag>
+          ) : (
+            <Tag color={C.accent}>{c.priceCoins}コイン</Tag>
+          )}
           <StatusBadge status={c.contactStatus} />
         </span>
       </div>

@@ -300,7 +300,7 @@ function LoginPage() {
                     company_role: "admin",
                   } as any)
                   .eq("id", signupData.session!.user.id) as any);
-                // 企業は月額プランなし（人材の閲覧はチケット、求人掲載は今は無料）
+                // 企業は月額プランなし（人材の閲覧はコイン、求人掲載は今は無料）
                 navigate({ to: "/business/company" });
               } catch (e) {
                 setError(e instanceof Error ? e.message : "エラーが発生しました");

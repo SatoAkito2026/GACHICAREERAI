@@ -4,6 +4,7 @@
  * - 評価は面接での本人の発言（引用）を根拠にする。引用は実際の発言に含まれるものだけを残す
  * - 企業に見せる評価に、年齢・性別・出身地など選考に使うべきでない情報は含めない
  */
+import { coinExpiryFrom } from "@/lib/coins";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -448,12 +449,82 @@ export async function runTalentSummaryJob(): Promise<void> {
   }
 }
 
-// ---- チケット・メール -------------------------------------------------------
+// ---- コイン・ポイント・メール -------------------------------------------------
 
-/** 企業が1人分のプロフィール（録画・名前・詳しい評価）を見るためのチケットの値段（円・税込） */
-export function getTicketPrice(): number {
-  const n = Number(process.env.TALENT_TICKET_PRICE_JPY);
-  return Number.isFinite(n) && n >= 100 ? Math.round(n) : 10000;
+/** 企業の使えるコイン（期限内の残り）と、いちばん近い期限 */
+export async function getCoinBalance(
+  supabase: SupabaseClient,
+  companyUserId: string,
+): Promise<{ balance: number; nextExpiry: string | null }> {
+  const { data } = await supabase
+    .from("coin_lots")
+    .select("coins_remaining, expires_at")
+    .eq("company_user_id", companyUserId)
+    .gt("expires_at", new Date().toISOString())
+    .gt("coins_remaining", 0)
+    .order("expires_at", { ascending: true });
+  const rows = data ?? [];
+  return {
+    balance: rows.reduce((n, r) => n + r.coins_remaining, 0),
+    nextExpiry: rows[0]?.expires_at ?? null,
+  };
+}
+
+/** コインで見られた回数（応募で見られた0円の分は数えない）。値段の「人気」の上乗せに使う */
+export async function getPaidViewCounts(
+  supabase: SupabaseClient,
+  candidateUserIds: string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (candidateUserIds.length === 0) return counts;
+  const { data } = await supabase
+    .from("profile_unlocks")
+    .select("candidate_user_id")
+    .in("candidate_user_id", candidateUserIds)
+    .gt("amount", 0)
+    .limit(10000);
+  for (const r of data ?? []) {
+    counts.set(r.candidate_user_id, (counts.get(r.candidate_user_id) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** コインの購入（Stripe の支払い）を記録する。同じ支払いを二度記録しない */
+export async function recordCoinPackFromPaymentIntent(
+  supabase: SupabaseClient,
+  pi: {
+    id: string;
+    status: string;
+    amount_received?: number | null;
+    created?: number;
+    metadata?: Record<string, string> | null;
+  },
+): Promise<{ isNew: boolean } | null> {
+  const m = pi.metadata ?? {};
+  if (pi.status !== "succeeded" || m.kind !== "coin_pack") return null;
+  const coins = Number(m.coins);
+  if (!m.company_user_id || !Number.isFinite(coins) || coins <= 0) return null;
+  const purchasedAt = pi.created ? new Date(pi.created * 1000) : new Date();
+  const { error } = await supabase.from("coin_lots").insert({
+    company_user_id: m.company_user_id,
+    coins_total: coins,
+    coins_remaining: coins,
+    amount_jpy: pi.amount_received ?? 0,
+    stripe_payment_intent_id: pi.id,
+    purchased_at: purchasedAt.toISOString(),
+    expires_at: coinExpiryFrom(purchasedAt).toISOString(),
+  });
+  if (error && error.code !== "23505") {
+    console.error("[talent] coin lot insert failed", error);
+    return null;
+  }
+  return { isNew: !error };
+}
+
+/** 本人のポイント残高（1ポイント＝1円） */
+export async function getPointBalance(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { data } = await supabase.from("point_ledger").select("points").eq("user_id", userId);
+  return (data ?? []).reduce((n, r) => n + r.points, 0);
 }
 
 export function appUrl(): string {

@@ -17,7 +17,7 @@ function CompanyDashboard() {
           {
             emoji: "🔎",
             title: "人材を探す",
-            desc: "模擬面接の評価で人材を探す。気になる人はチケットで録画・名前・詳しい評価を閲覧",
+            desc: "模擬面接の評価で人材を探す。気になる人はコインで録画・名前・詳しい評価を閲覧",
             to: "/business/company/talent",
           },
           {
@@ -41,7 +41,7 @@ function CompanyDashboard() {
           {
             emoji: "🧾",
             title: "購入した人材",
-            desc: "チケットを買った人の面接履歴と、採用担当者向けの評価",
+            desc: "コインで見た人・応募してきた人の面接履歴と、採用担当者向けの評価",
             to: "/business/company/purchased",
           },
 

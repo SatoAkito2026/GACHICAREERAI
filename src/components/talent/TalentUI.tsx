@@ -327,7 +327,7 @@ export function SummaryView({ summary }: { summary: TalentSummary | null }) {
 
       <div>
         <h3 className="mb-3 text-[14px]" style={{ color: C.muted, fontWeight: 600 }}>
-          能力の評価（{summary.interview_count}回の面接から）
+          7つの評価（{summary.interview_count}回の面接から）
         </h3>
         <CompetencyBars competencies={summary.competencies} />
       </div>

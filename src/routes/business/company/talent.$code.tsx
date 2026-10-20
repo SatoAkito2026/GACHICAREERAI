@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { CheckCircle2, Lock, X } from "lucide-react";
 import { BusinessShell } from "@/components/ModeShell";
-import { stripePromise } from "@/components/CheckoutModal";
+import { CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 import {
   Button,
   C,
@@ -38,7 +37,8 @@ type Detail = {
   summary: TalentSummary | null;
   interviewCount: number;
   hasRecording: boolean;
-  ticketPrice: number;
+  priceCoins: number;
+  coins: CoinBalance;
   unlocked: boolean;
   contact: { id: string; status: string; created_at: string } | null;
   displayName?: string;
@@ -51,6 +51,27 @@ function TalentDetailPage() {
   const [d, setD] = useState<Detail | null>(null);
   const [error, setError] = useState("");
   const [buying, setBuying] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState("");
+
+  const unlock = async () => {
+    if (!d) return;
+    if (d.coins.balance < d.priceCoins) return setBuying(true);
+    if (!window.confirm(`${d.priceCoins}コインを使って、この方の詳しい評価を見ますか？`)) return;
+    setUnlocking(true);
+    setUnlockError("");
+    const r = await talentApi<{ priceCoins?: number }>("/api/talent/unlock", {
+      code: d.code,
+      expectedCoins: d.priceCoins,
+    });
+    setUnlocking(false);
+    if (r.status === 402) return setBuying(true);
+    if (r.status === 409 && r.data.priceCoins) {
+      setD((prev) => (prev ? { ...prev, priceCoins: r.data.priceCoins! } : prev));
+    }
+    if (!r.ok) return setUnlockError(r.data.error ?? "失敗しました");
+    void load();
+  };
 
   const load = useCallback(async () => {
     const r = await talentApi<Detail>(`/api/talent/detail?code=${encodeURIComponent(code)}`);
@@ -99,7 +120,7 @@ function TalentDetailPage() {
                     {competencyAverage(d.summary)?.toFixed(1) ?? "-"}
                   </p>
                   <p className="text-[11px]" style={{ color: C.muted }}>
-                    力の平均（5点満点）
+                    評価の平均（5点満点）
                   </p>
                 </div>
               </div>
@@ -114,7 +135,7 @@ function TalentDetailPage() {
                     className="flex items-center gap-2"
                     style={{ color: C.text, fontSize: 15, fontWeight: 700 }}
                   >
-                    <Lock size={16} color={C.accent} /> チケットで詳しく見る
+                    <Lock size={16} color={C.accent} /> コインで詳しく見る
                   </p>
                   <ul
                     className="list-disc pl-5 text-[13px]"
@@ -128,14 +149,20 @@ function TalentDetailPage() {
                     <li>面談の申し込み（承諾されると直接メッセージでやり取りできます）</li>
                   </ul>
                   <p className="text-[12px]" style={{ color: C.muted }}>
-                    1人分 {d.ticketPrice.toLocaleString()}
-                    円（税込）・買い切り。採用の成否にかかわらず追加の料金はかかりません。
+                    この方は <b style={{ color: C.accent }}>{d.priceCoins}コイン</b>
+                    （評価が高い方・多くの企業に見られている方ほど高くなります）。買い切りで、採用の成否にかかわらず追加の料金はかかりません。
                   </p>
-                  <div>
-                    <Button onClick={() => setBuying(true)}>
-                      チケットを購入する（{d.ticketPrice.toLocaleString()}円）
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button onClick={() => void unlock()} loading={unlocking}>
+                      {d.coins.balance >= d.priceCoins
+                        ? `${d.priceCoins}コインで詳しく見る`
+                        : `コインを買って見る（${d.priceCoins}コイン）`}
                     </Button>
+                    <span className="text-[12px]" style={{ color: C.muted }}>
+                      残り {d.coins.balance.toLocaleString()}コイン
+                    </span>
                   </div>
+                  <ErrorText>{unlockError}</ErrorText>
                 </div>
               </Card>
             )}
@@ -171,13 +198,12 @@ function TalentDetailPage() {
         )}
       </PageFrame>
       {buying && d && (
-        <PurchaseModal
-          code={d.code}
-          price={d.ticketPrice}
+        <CoinShopModal
+          needCoins={Math.max(0, d.priceCoins - d.coins.balance) || d.priceCoins}
           onClose={() => setBuying(false)}
-          onDone={() => {
+          onDone={(coins) => {
             setBuying(false);
-            void load();
+            setD((prev) => (prev ? { ...prev, coins } : prev));
           }}
         />
       )}
@@ -249,7 +275,7 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
     <Card title="面談を申し込む">
       <div className="flex flex-col gap-3">
         <p className="flex items-center gap-2 text-[13px]" style={{ color: C.accent }}>
-          <CheckCircle2 size={15} /> チケット購入済み（
+          <CheckCircle2 size={15} /> 閲覧済み（
           {d.unlockedAt ? new Date(d.unlockedAt).toLocaleDateString("ja-JP") : ""}）
         </p>
         <textarea
@@ -279,133 +305,7 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
   );
 }
 
-const CARD_OPTIONS = {
-  hidePostalCode: true,
-  style: {
-    base: { color: "#F0F0F0", fontSize: "15px", "::placeholder": { color: "#888888" } },
-    invalid: { color: "#FF5C5C" },
-  },
-};
-
-function PurchaseForm({
-  code,
-  price,
-  onDone,
-}: {
-  code: string;
-  price: number;
-  onDone: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [agree, setAgree] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const pay = async () => {
-    if (!stripe || !elements) return;
-    const card = elements.getElement(CardElement);
-    if (!card) return;
-    setLoading(true);
-    setError("");
-    const intent = await talentApi<{
-      clientSecret?: string;
-      paymentIntentId?: string;
-      alreadyUnlocked?: boolean;
-    }>("/api/talent/unlock", { action: "intent", code });
-    if (!intent.ok) {
-      setLoading(false);
-      return setError(intent.data.error ?? "決済の準備に失敗しました");
-    }
-    if (intent.data.alreadyUnlocked) return onDone();
-    const result = await stripe.confirmCardPayment(intent.data.clientSecret!, {
-      payment_method: { card },
-    });
-    if (result.error) {
-      setLoading(false);
-      return setError(result.error.message ?? "決済に失敗しました");
-    }
-    const confirm = await talentApi("/api/talent/unlock", {
-      action: "confirm",
-      paymentIntentId: result.paymentIntent?.id ?? intent.data.paymentIntentId,
-    });
-    setLoading(false);
-    if (!confirm.ok) {
-      return setError(
-        (confirm.data.error ?? "確認に失敗しました") +
-          "（決済済みの場合は、数分後にページを開き直すと反映されます）",
-      );
-    }
-    onDone();
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-lg p-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-        <CardElement options={CARD_OPTIONS} />
-      </div>
-      <label className="flex items-start gap-2 text-[12px]" style={{ color: C.sub }}>
-        <input
-          type="checkbox"
-          checked={agree}
-          onChange={(e) => setAgree(e.target.checked)}
-          className="mt-0.5"
-        />
-        <span>
-          閲覧した個人情報は採用の検討・連絡のためだけに使い、第三者に渡さないことに同意します。チケットは購入後のキャンセル・返金はできません。
-        </span>
-      </label>
-      <ErrorText>{error}</ErrorText>
-      <Button onClick={() => void pay()} loading={loading} disabled={!stripe || !agree}>
-        {price.toLocaleString()}円を支払う
-      </Button>
-    </div>
-  );
-}
-
-function PurchaseModal({
-  code,
-  price,
-  onClose,
-  onDone,
-}: {
-  code: string;
-  price: number;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl p-6"
-        style={{ background: C.card2, border: `1.5px solid ${C.border}` }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 style={{ color: C.text, fontSize: 17, fontWeight: 700 }}>チケットを購入</h2>
-          <button type="button" onClick={onClose} aria-label="閉じる">
-            <X size={20} color={C.muted} />
-          </button>
-        </div>
-        <p className="mb-4 text-[13px]" style={{ color: C.sub }}>
-          No.{code.slice(0, 6).toUpperCase()}{" "}
-          の方の名前・詳しい評価・録画の閲覧と、面談の申し込みができるようになります。
-          <br />
-          <b style={{ color: C.accent, fontSize: 18 }}>{price.toLocaleString()}円</b>（税込）
-        </p>
-        <Elements stripe={stripePromise}>
-          <PurchaseForm code={code} price={price} onDone={onDone} />
-        </Elements>
-      </div>
-    </div>
-  );
-}
-
-/** 企業向けの点数は「7つの力」の平均（本人向けの練習の点数は使わない） */
+/** 企業向けの点数は「7つの評価」の平均（本人向けの練習の点数は使わない） */
 function competencyAverage(summary: TalentSummary | null): number | null {
   const scores = (summary?.competencies ?? [])
     .map((c) => c.score)
