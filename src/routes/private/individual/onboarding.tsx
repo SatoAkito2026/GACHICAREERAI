@@ -6,6 +6,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMode } from "@/hooks/use-mode";
 import { supabase } from "@/integrations/supabase/client";
 import { STATUS_OPTIONS, INDUSTRY_OPTIONS } from "@/lib/career-options";
+import { extractPdfText } from "@/lib/pdf-text";
+
+const RESUME_FIELD_LABEL = "職務経歴書（アップロード）";
 
 export const Route = createFileRoute("/private/individual/onboarding")({
   head: () => ({ meta: [{ title: "プロフィール登録｜ガチキャリAI" }] }),
@@ -41,9 +44,10 @@ function IndividualOnboardingPage() {
   const [furigana, setFurigana] = useState("");
   const [currentStatus, setCurrentStatus] = useState("");
   const [desiredTarget, setDesiredTarget] = useState("");
-  const [motivation, setMotivation] = useState("");
-  const [strength, setStrength] = useState("");
-  const [selfPr, setSelfPr] = useState("");
+  // 職務経歴書・履歴書（任意）。PDFから文字だけ取り出してプロフィールに保存し、面接AIが質問に使う
+  const [resumeName, setResumeName] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [extracting, setExtracting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (loading || modeLoading) {
@@ -60,10 +64,33 @@ function IndividualOnboardingPage() {
   }
   if (!session) return <SafeNavigate to="/login" />;
 
+  const handleResume = async (file: File | null) => {
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast.error("PDFファイルを選んでください");
+      return;
+    }
+    setExtracting(true);
+    try {
+      const text = (await extractPdfText(file)).replace(/\s+\n/g, "\n").trim();
+      if (!text) {
+        toast.error("PDFから文字を読み取れませんでした（画像だけのPDFは読み取れません）");
+        return;
+      }
+      setResumeText(text.slice(0, 8000));
+      setResumeName(file.name);
+    } catch (err) {
+      console.error(err);
+      toast.error("PDFの読み込みに失敗しました");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !motivation.trim()) {
-      toast.error("お名前と、転職理由・志望動機は入力してください");
+    if (!name.trim()) {
+      toast.error("お名前を入力してください");
       return;
     }
     setSubmitting(true);
@@ -74,9 +101,7 @@ function IndividualOnboardingPage() {
         furigana,
         current_status: currentStatus,
         desired_target: desiredTarget,
-        motivation,
-        strength,
-        self_pr: selfPr,
+        resume_uploaded: !!resumeText,
       };
 
       await setMode("private_individual");
@@ -97,9 +122,10 @@ function IndividualOnboardingPage() {
           user_id: userId,
           mode: "individual",
           basic_info: { name, furigana, current_status: currentStatus },
-          self_pr: selfPr,
-          skills: strength ? [strength] : [],
           desired_conditions: { job_type: desiredTarget },
+          ...(resumeText
+            ? { custom_fields: [{ label: RESUME_FIELD_LABEL, value: resumeText }] }
+            : {}),
         } as any,
         { onConflict: "user_id,mode" },
       ) as any);
@@ -125,7 +151,7 @@ function IndividualOnboardingPage() {
           プロフィールを作りましょう
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
-          面接練習・自己分析の精度を上げるための質問です。後からいつでも編集できます。
+          1分で終わります。後からいつでも編集できます。
         </p>
 
         <div className="mt-6 flex gap-3">
@@ -204,40 +230,36 @@ function IndividualOnboardingPage() {
             </select>
           </Field>
 
-          <Field label="転職理由・志望動機（ひとこと）">
-            <textarea
-              style={{ ...INPUT_STYLE, minHeight: 80, resize: "vertical" }}
-              value={motivation}
-              onChange={(e) => setMotivation(e.target.value)}
-              placeholder="今思っていることを、率直に書いてください"
-            />
-          </Field>
-
-          <Field label="自分の強み">
-            <input
-              style={INPUT_STYLE}
-              value={strength}
-              onChange={(e) => setStrength(e.target.value)}
-              placeholder="例：粘り強さ、傾聴力"
-            />
-          </Field>
-
-          <Field label="自己PR（ひとこと）">
-            <textarea
-              style={{ ...INPUT_STYLE, minHeight: 80, resize: "vertical" }}
-              value={selfPr}
-              onChange={(e) => setSelfPr(e.target.value)}
-              placeholder="面接で伝えたいことを、思いつく範囲で"
-            />
-          </Field>
+          <div className="mb-5">
+            <span style={LABEL_STYLE}>職務経歴書・履歴書（任意）</span>
+            <p className="mt-1 text-[12px]" style={{ color: "#888888", lineHeight: 1.6 }}>
+              PDFをアップロードすると、AI面接官がその内容をもとに質問します。あとからでも登録できます。
+            </p>
+            <label
+              className="mt-2 flex cursor-pointer items-center justify-center rounded-lg py-3 text-[14px]"
+              style={{ border: "1px dashed #3A3A3A", color: resumeText ? "#C8FF00" : "#CCCCCC" }}
+            >
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={(e) => void handleResume(e.target.files?.[0] ?? null)}
+              />
+              {extracting
+                ? "読み込み中..."
+                : resumeText
+                  ? `✓ ${resumeName}（読み込みました・変更する）`
+                  : "📄 PDFを選ぶ"}
+            </label>
+          </div>
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || extracting}
             className="mt-4 w-full rounded-full py-3 text-[15px] transition-opacity hover:opacity-90 disabled:opacity-50"
             style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 700 }}
           >
-            {submitting ? "保存中..." : "はじめる"}
+            {submitting ? "保存中..." : extracting ? "PDFを読み込み中..." : "はじめる"}
           </button>
         </form>
       </div>
