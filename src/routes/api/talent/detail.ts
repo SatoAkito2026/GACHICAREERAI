@@ -6,12 +6,14 @@
  * チケット購入前：匿名の人物まとめ（根拠の引用つき）だけ
  * チケット購入後：名前・面接ごとの詳しい評価・会話・録画（本人が許可した場合）も返す
  */
+import { evaluationAverage, priceCoins } from "@/lib/coins";
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
   COMPANY_REQUIRED_MESSAGE,
   getCompanyProfile,
-  getTicketPrice,
+  getCoinBalance,
+  getPaidViewCounts,
   jsonResponse,
   loadCompanyInterviews,
   serviceClient,
@@ -68,7 +70,13 @@ export const Route = createFileRoute("/api/talent/detail")({
           summary: p.summary,
           interviewCount: p.interview_count,
           hasRecording: p.show_recording,
-          ticketPrice: getTicketPrice(),
+          priceCoins: priceCoins(
+            evaluationAverage(
+              (p.summary as { competencies?: { score: number | null }[] } | null)?.competencies,
+            ),
+            (await getPaidViewCounts(supabase, [p.user_id])).get(p.user_id) ?? 0,
+          ),
+          coins: await getCoinBalance(supabase, auth.userId),
           unlocked: !!unlock,
           contact,
         };

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { COIN_EXPIRY_MONTHS, COIN_PACKS, priceCoins } from "@/lib/coins";
 import {
   COMPANY_INTERVIEW_PRICE_JPY,
   limitText,
@@ -216,17 +217,17 @@ function PricingPage() {
   );
 }
 
-/** 企業向け：月額プランはなし。人材の閲覧はチケット、求人掲載は今は無料 */
+/** 企業向け：月額プランはなし。人材の閲覧はコイン、求人掲載は今は無料 */
 function CompanyPricing() {
   const items: { name: string; price: string; features: string[] }[] = [
     {
-      name: "人材の閲覧チケット",
-      price: "¥10,000／1人（税込）",
+      name: "ガチキャリコイン",
+      price: COIN_PACKS.map((p) => `${p.coins}コイン ¥${p.priceJpy.toLocaleString()}`).join("／"),
       features: [
         "人材を探す・匿名の人物まとめを見る：無料",
-        "チケットで名前・面接ごとの採用担当者向け評価・会話・録画（本人が許可した場合）を閲覧",
-        "チケットを買った人に面談を申し込み、承諾されたらメッセージ",
-        "採用が決まっても成功報酬はかかりません",
+        `人材の閲覧：1人 ${priceCoins(null, 0)}〜${priceCoins(5, 999)}コイン（評価が高い人・多くの企業に見られている人ほど高くなります）`,
+        "名前・面接ごとの採用担当者向け評価・会話・録画（本人が許可した場合）を閲覧し、面談を申し込めます",
+        `コインの有効期限は購入日から${COIN_EXPIRY_MONTHS}か月。採用が決まっても成功報酬はかかりません`,
       ],
     },
     {

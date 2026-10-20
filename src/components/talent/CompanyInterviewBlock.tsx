@@ -1,7 +1,7 @@
 /**
  * 企業向け：1回分の模擬面接の評価。
  * 本人向けの練習アドバイス（点数・改善点・模範回答）は出さず、
- * 7つの力（根拠つき）と採用担当向けの見立て、会話・録画だけを見せる。
+ * 7つの評価（根拠つき）と採用担当向けの見立て、会話・録画だけを見せる。
  */
 import { useState } from "react";
 import { C, CompetencyBars, EvidenceQuote, Tag } from "@/components/talent/TalentUI";
@@ -57,7 +57,7 @@ export function CompanyInterviewBlock({
           {iv.recordingUrl && <Tag color={C.accent}>録画</Tag>}
         </span>
         <span style={{ color: C.accent, fontWeight: 700, fontSize: 13 }}>
-          {avg ? `力の平均 ${avg} / 5` : "評価なし"}
+          {avg ? `評価の平均 ${avg} / 5` : "評価なし"}
         </span>
       </button>
       {open && (
@@ -105,7 +105,7 @@ export function CompanyInterviewBlock({
             </div>
           ) : (
             <p className="text-[12px]" style={{ color: C.muted }}>
-              この回は、採用担当者向けの見立てを作る前の練習です（下の7つの力と会話をご覧ください）。
+              この回は、採用担当者向けの見立てを作る前の練習です（下の7つの評価と会話をご覧ください）。
             </p>
           )}
 

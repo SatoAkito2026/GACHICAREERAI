@@ -1,5 +1,5 @@
 import { getAuthHeaders } from "@/lib/chat-api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { X, Loader2, CheckCircle2 } from "lucide-react";
@@ -39,6 +39,17 @@ function CheckoutForm({ plan, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [postalCode, setPostalCode] = useState("");
+  // ライト・プロは、ガチキャリポイントを最初の支払いに使える（1pt＝1円）
+  const isIndividualPlan = plan === "individual_light" || plan === "individual_pro";
+  const [points, setPoints] = useState(0);
+  const [usePoints, setUsePoints] = useState(true);
+  useEffect(() => {
+    if (!isIndividualPlan) return;
+    void (async () => {
+      const res = await fetch("/api/points", { headers: await getAuthHeaders() });
+      if (res.ok) setPoints(((await res.json()) as { balance: number }).balance ?? 0);
+    })();
+  }, [isIndividualPlan]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +85,7 @@ function CheckoutForm({ plan, onClose }: Props) {
           paymentMethodId: paymentMethod.id,
           plan,
           email: user?.email,
+          usePoints: isIndividualPlan && points > 0 && usePoints,
         }),
       });
       const data = await res.json();
@@ -124,6 +136,20 @@ function CheckoutForm({ plan, onClose }: Props) {
       >
         <CardElement options={CARD_OPTIONS} />
       </div>
+      {isIndividualPlan && points > 0 && (
+        <label
+          className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px]"
+          style={{ background: "#16200A", border: "1px solid #3A4A12", color: "#E6F7B0" }}
+        >
+          <input
+            type="checkbox"
+            checked={usePoints}
+            onChange={(e) => setUsePoints(e.target.checked)}
+          />
+          ガチキャリポイントを使う（{points.toLocaleString()}pt
+          あります。1pt＝1円で、最初の支払いから差し引きます）
+        </label>
+      )}
       <div className="flex flex-col gap-1.5">
         <label className="text-[12px]" style={{ color: "#888888" }}>
           郵便番号

@@ -112,7 +112,7 @@ const NAV_ITEMS = [
   { key: "individual", label: "個人・受験生分析" },
   { key: "company", label: "企業分析" },
   { key: "engagement", label: "エンゲージメント" },
-  { key: "talent", label: "人材・チケット" },
+  { key: "talent", label: "人材・コイン" },
 ] as const;
 type NavKey = (typeof NAV_ITEMS)[number]["key"];
 
@@ -562,9 +562,9 @@ function TalentTab({ token }: { token: string }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {box("今月のチケット売上", fmtYen(stats.tickets.monthRevenue))}
-        {box("今月のチケット枚数", `${stats.tickets.monthCount}枚`)}
-        {box("累計のチケット売上", fmtYen(stats.tickets.revenue))}
+        {box("今月コインで見られた額（円換算）", fmtYen(stats.tickets.monthRevenue))}
+        {box("今月コインで見られた回数", `${stats.tickets.monthCount}回`)}
+        {box("累計でコインで見られた額（円換算）", fmtYen(stats.tickets.revenue))}
         {box("購入した企業", `${stats.tickets.buyingCompanies}社`)}
         {box("公開中のユーザー", `${stats.profiles.public}人`)}
         {box("録画も公開", `${stats.profiles.withRecording}人`)}
@@ -576,7 +576,7 @@ function TalentTab({ token }: { token: string }) {
         style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
       >
         <p className="mb-3" style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700 }}>
-          チケットをよく買っている企業
+          コインをよく使っている企業
         </p>
         {stats.topCompanies.length === 0 ? (
           <p style={{ color: "#888888", fontSize: 13 }}>まだ購入はありません</p>

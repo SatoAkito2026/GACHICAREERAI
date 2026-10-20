@@ -14,16 +14,18 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 
 ## 人材プロフィール（求人メディア型）
 
-練習 → 評価 → プロフィール公開 → オファー の流れ。職業紹介にならないよう、運営は推薦・仲介をせず、料金は閲覧チケットだけ（成功報酬なし）。法務の下書きは `docs/legal/`。
+練習 → 評価 → プロフィール公開 → オファー の流れ。職業紹介にならないよう、運営は推薦・仲介をせず、料金は閲覧のコインとAI面接の従量課金だけ（成功報酬なし）。法務の下書きは `docs/legal/`。
 
 - 評価：`save-interview.ts` が面接ごとに7つの力を1〜5で評価し、根拠として本人の発言を引用する。引用が実際の発言にないものは `src/lib/talent.ts` の `sanitizeCompetencies` で捨てる（根拠なしは評価しない）
 - 人物まとめ：`refreshCandidateSummary`（点数は計算、文章だけAI）。練習後に `summary_stale` を立て、毎時の Cron で作り直す
-- DB：`candidate_profiles`（初期値は非公開）/ `profile_unlocks`（チケット）/ `contact_requests` / `contact_messages`
-- API：`src/routes/api/talent/*`。チケットは Stripe PaymentIntent を作り、支払い後にサーバーで確認して記録（Webhook の `payment_intent.succeeded` は保険）。値段は `wrangler.jsonc` の `TALENT_TICKET_PRICE_JPY`
+- DB：`candidate_profiles`（初期値は非公開）/ `profile_unlocks`（閲覧権）/ `contact_requests` / `contact_messages` / `coin_lots`（企業のコイン）/ `point_ledger`（本人のポイント）
+- API：`src/routes/api/talent/*`
+- コイン：企業はコインをまとめ買い（`/api/talent/coins`、Stripe PaymentIntent。支払い後にサーバーで確認して `coin_lots` に記録、Webhook は保険）。有効期限6か月（資金決済法の届出の対象外にするため）。パック・人材ごとの値段（評価の平均の段階＋見られた回数で上乗せ）は `src/lib/coins.ts`。人材を見るとき（`/api/talent/unlock`）は SQL 関数 `spend_coins_for_unlock` が、期限の近いコインから減らして閲覧権を記録し、円換算の1/4を本人の `point_ledger` に入れる
+- ポイント：1pt＝1円。今はライト・プロの月額の支払いだけ（`/api/points` の apply、申し込み時は `create-subscription` の `usePoints`）。Stripe の顧客残高（クレジット）に入れて次の請求から差し引く（`src/lib/points.ts`）。現金・ギフトカードとの交換は労働局の確認が取れるまでしない
 - 画面：ユーザー `/private/individual/talent`・`/offers`、企業 `/business/company/talent`・`/messages`
 - 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
 - 企業に見せる評価は本人向けと分ける：`save-interview.ts` が同じAI呼び出しで採用担当者向けの見立て（`recruiter_view`、`sanitizeRecruiterView`）も作る。企業側（`loadCompanyInterviews`・`CompanyInterviewBlock`）は本人向けの点数・改善点・模範回答を返さず、7つの力と見立て・会話・録画だけ。企業側の点数は「7つの力の平均（5点満点）」
-- 企業メニュー：人材を探す・面談メッセージ・書類選考・書類選考履歴・購入した人材（`/business/company/purchased`）・求人掲載・設定。企業の料金は閲覧チケット（1人¥10,000）と、AI面接の従量課金（¥5,500/回、`COMPANY_INTERVIEW_PRICE_JPY`）だけ。月額プラン（ライト・プロ）は廃止。AI面接はカード登録（Stripe の従量課金の契約＝`plan: company_metered` と `stripe_subscription_id`）が済んだ企業だけURLを発行でき、候補者が面接を始めた最初の1回に `interview-turn.ts` が Stripe のメーター（`interview_usage`）に記録する。求人掲載は当面無料。書類選考AI（`/api/chat`）は求人を掲載中の企業だけ
+- 企業メニュー：人材を探す・面談メッセージ・書類選考・書類選考履歴・購入した人材（`/business/company/purchased`）・求人掲載・設定。企業の料金はコイン（人材の閲覧）と、AI面接の従量課金（¥5,500/回、`COMPANY_INTERVIEW_PRICE_JPY`）だけ。月額プラン（ライト・プロ）は廃止。AI面接はカード登録（Stripe の従量課金の契約＝`plan: company_metered` と `stripe_subscription_id`）が済んだ企業だけURLを発行でき、候補者が面接を始めた最初の1回に `interview-turn.ts` が Stripe のメーター（`interview_usage`）に記録する。求人掲載は当面無料。書類選考AI（`/api/chat`）は求人を掲載中の企業だけ
 - 求人：個人は `/private/individual/jobs` で見て応募（`/api/jobs/apply`）。応募すると0円の `profile_unlocks` と承諾済みの `contact_requests` を作り、企業が評価を見てメッセージできる（売上の集計は `amount > 0` だけ）
 - 学校・塾：生徒の練習管理だけ（`/business/school/students`）。生徒がマイページで招待コード（`companies.join_code`）を入力すると `school_memberships` に入り、先生が練習結果を見られる
 - 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）

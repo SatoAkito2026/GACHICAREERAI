@@ -31,7 +31,7 @@ type PracticeFeedback = {
     reason: string;
     evidence: string[];
   }[];
-  /** 企業（採用担当）向けの見立て。プロフィールを公開して、チケットを買った企業にだけ見える */
+  /** 企業（採用担当）向けの見立て。プロフィールを公開して、コインで見た企業にだけ見える */
   recruiter_view?: {
     summary: string;
     strengths: { point: string; evidence: string[] }[];
@@ -257,7 +257,7 @@ export function PracticeHistoryContent({
                       <p
                         style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700, marginBottom: 4 }}
                       >
-                        能力の評価（あなたの発言が根拠）
+                        7つの評価（あなたの発言が根拠）
                       </p>
                       <div className="flex flex-col gap-2">
                         {r.feedback.competencies.map((c) => (
@@ -450,7 +450,7 @@ function RecruiterViewPreview({ view }: { view: NonNullable<PracticeFeedback["re
       style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
     >
       <summary style={{ color: "#AAAAAA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-        企業に表示される内容（プロフィール公開中に、チケットを買った企業だけが見られます）
+        企業に表示される内容（プロフィール公開中に、コインで見た企業だけが見られます）
       </summary>
       <div
         className="mt-2 flex flex-col gap-2 text-[12px]"

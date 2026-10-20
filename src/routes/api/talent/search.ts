@@ -5,13 +5,15 @@
  *
  * 名前・連絡先・録画はここでは返さない。年齢・性別での絞り込みはしない（公正な採用のため）。
  */
+import { priceCoins } from "@/lib/coins";
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
   COMPANY_REQUIRED_MESSAGE,
   COMPETENCIES,
   getCompanyProfile,
-  getTicketPrice,
+  getCoinBalance,
+  getPaidViewCounts,
   jsonResponse,
   serviceClient,
   type TalentSummary,
@@ -63,6 +65,7 @@ export const Route = createFileRoute("/api/talent/search")({
             .eq("company_user_id", auth.userId)
             .in("candidate_user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
         ]);
+        const paidViews = await getPaidViewCounts(supabase, ids);
         const unlocked = new Set((unlocks ?? []).map((u) => u.candidate_user_id));
         const statusBy = new Map((requests ?? []).map((r) => [r.candidate_user_id, r.status]));
 
@@ -85,6 +88,7 @@ export const Route = createFileRoute("/api/talent/search")({
             competencies: s?.competencies ?? [],
             interviewCount: r.interview_count,
             competencyAverage,
+            priceCoins: priceCoins(competencyAverage, paidViews.get(r.user_id) ?? 0),
             hasRecording: r.show_recording,
             updatedAt: r.summary_updated_at,
             unlocked: unlocked.has(r.user_id),
@@ -111,7 +115,10 @@ export const Route = createFileRoute("/api/talent/search")({
           list.sort((a, b) => val(b) - val(a));
         }
 
-        return jsonResponse({ candidates: list.slice(0, 100), ticketPrice: getTicketPrice() });
+        return jsonResponse({
+          candidates: list.slice(0, 100),
+          coins: await getCoinBalance(supabase, auth.userId),
+        });
       },
     },
   },
