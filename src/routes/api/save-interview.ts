@@ -6,6 +6,7 @@ import {
   RECRUITER_PROMPT,
   sanitizeCompetencies,
   sanitizeRecruiterView,
+  autoShowNewInterview,
 } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -369,6 +370,9 @@ ${conversationText}
 
         // 個人モードの練習なら、公開プロフィールの人物まとめを作り直す印をつける（毎時の処理で更新）
         if (practiceMode === "individual") {
+          if (!body.isAbandoned) {
+            await autoShowNewInterview(supabase, invitation.user_id, interviewId);
+          }
           await supabase
             .from("candidate_profiles")
             .update({ summary_stale: true })

@@ -1,8 +1,9 @@
 /**
- * 本人：企業に見える面接の結果をカードで並べる。開くと企業に見える中身、削除もできる
+ * 本人：企業に見せる面接の結果を選ぶ。
+ * 公開中の結果をカードで並べ（右上の×で外す）、枠が空いていれば＋から評価のストックを選んで追加する。
  */
 import { useEffect, useState } from "react";
-import { Trash2, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { C, Card, ErrorText, Loading, Tag, talentApi } from "@/components/talent/TalentUI";
 import {
   CompanyInterviewBlock,
@@ -16,169 +17,239 @@ function average(scores: (number | null)[]): number | null {
   return list.reduce((a, b) => a + b, 0) / list.length;
 }
 
-/** 面接ごとの結果（企業に見える内容）をカードで並べる。開くと詳しく見られ、削除もできる */
-export function MyInterviewCards({
-  interviews,
-  onDeleted,
+/** 企業に見える形の、面接1回分のカード */
+function ResultCard({
+  iv,
+  onOpen,
+  corner,
+  footer,
 }: {
-  interviews: CompanyInterview[] | null;
-  onDeleted: (id: string) => void;
+  iv: CompanyInterview;
+  onOpen: () => void;
+  corner?: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
+  const avg = average(iv.competencies.map((c) => c.score));
+  const style = iv.settings?.avatar_style ? AVATAR_STYLE_LABELS[iv.settings.avatar_style] : null;
+  return (
+    <div
+      className="relative flex flex-col gap-2 rounded-xl p-4"
+      style={{ background: C.bg, border: `1px solid ${C.border}` }}
+    >
+      {corner && <div className="absolute right-2 top-2">{corner}</div>}
+      <button type="button" onClick={onOpen} className="flex flex-col gap-2 pr-6 text-left">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>
+              {iv.jobType || "職種指定なし"}
+            </p>
+            <p className="mt-0.5 text-[12px]" style={{ color: C.muted }}>
+              {new Date(iv.date).toLocaleDateString("ja-JP")}
+              {style && ` ・ 面接官：${style}`}
+            </p>
+          </div>
+          <div className="text-right">
+            <p style={{ color: C.accent, fontSize: 20, fontWeight: 800, lineHeight: 1 }}>
+              {avg?.toFixed(1) ?? "-"}
+            </p>
+            <p className="text-[10px]" style={{ color: C.muted }}>
+              評価の平均
+            </p>
+          </div>
+        </div>
+        {iv.recruiterView?.summary && (
+          <p className="line-clamp-2 text-[12px]" style={{ color: C.sub, lineHeight: 1.7 }}>
+            {iv.recruiterView.summary}
+          </p>
+        )}
+        <span className="flex items-center gap-2 text-[12px]" style={{ color: C.accent }}>
+          {iv.recordingUrl && <Tag color={C.accent}>録画</Tag>}
+          中身を見る →
+        </span>
+      </button>
+      {footer}
+    </div>
+  );
+}
+
+function Modal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4"
+      style={{ background: "rgba(0,0,0,0.7)" }}
+      onClick={onClose}
+    >
+      <div
+        className="my-8 flex w-full max-w-2xl flex-col gap-3 rounded-2xl p-4"
+        style={{ background: C.card, border: `1px solid ${C.border}` }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p style={{ color: C.text, fontSize: 15, fontWeight: 700 }}>{title}</p>
+          <button type="button" onClick={onClose} aria-label="閉じる">
+            <X size={20} color={C.muted} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function MyInterviewCards() {
+  const [interviews, setInterviews] = useState<CompanyInterview[] | null>(null);
+  const [limit, setLimit] = useState<number | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const remove = async (id: string) => {
-    if (
-      !window.confirm(
-        "この面接の結果を削除しますか？\n評価・会話・録画が消え、企業からも見えなくなります。元に戻せません。",
-      )
-    )
+  useEffect(() => {
+    void talentApi<{ interviews: CompanyInterview[]; limit: number | null }>(
+      "/api/talent/my-interviews",
+    ).then((r) => {
+      if (r.ok) {
+        setInterviews(r.data.interviews);
+        setLimit(r.data.limit);
+      } else {
+        setInterviews([]);
+        setError(r.data.error ?? "読み込みに失敗しました");
+      }
+    });
+  }, []);
+
+  const shown = (interviews ?? []).filter((iv) => iv.shown);
+  const stock = (interviews ?? []).filter((iv) => !iv.shown);
+  const hasRoom = limit === null || shown.length < limit;
+
+  const toggle = async (id: string, show: boolean) => {
+    if (!show && !window.confirm("この結果を公開から外しますか？（結果は消えず、あとで戻せます）"))
       return;
-    setDeleting(id);
+    setBusy(id);
     setError("");
-    const r = await talentApi("/api/talent/my-interviews", { action: "delete", id });
-    setDeleting(null);
-    if (!r.ok) return setError(r.data.error ?? "削除に失敗しました");
-    if (openId === id) setOpenId(null);
-    onDeleted(id);
+    const r = await talentApi("/api/talent/my-interviews", {
+      action: show ? "show" : "hide",
+      id,
+    });
+    setBusy(null);
+    if (!r.ok) return setError(r.data.error ?? "保存に失敗しました");
+    setInterviews((prev) =>
+      prev ? prev.map((iv) => (iv.id === id ? { ...iv, shown: show } : iv)) : prev,
+    );
+    if (show && limit !== null && shown.length + 1 >= limit) setPicking(false);
   };
 
   const opened = interviews?.find((iv) => iv.id === openId) ?? null;
 
   return (
-    <Card title="企業に見える面接の結果">
+    <Card
+      title="企業に見える面接結果"
+      right={
+        interviews && (
+          <span className="text-[13px]" style={{ color: C.accent, fontWeight: 700 }}>
+            現在公開中（{shown.length}/{limit ?? "上限なし"}
+            {limit !== null && "件"}）
+          </span>
+        )
+      }
+    >
       <p className="mb-4 text-[12px]" style={{ color: C.muted, lineHeight: 1.7 }}>
-        コインで見た企業には、面接ごとにこの内容が見えます（練習の点数・改善点・模範回答は見えません）。見せたくない面接は削除できます。削除すると人物まとめも1時間以内に作り直されます。
+        コインで見た企業には、ここに並べた結果だけが見えます（練習の点数・改善点・模範回答は見えません）。人物まとめも、この結果から1時間以内に作り直されます。新しい練習は、枠が空いていれば自動で入ります。
       </p>
       {interviews === null ? (
         <Loading />
-      ) : interviews.length === 0 ? (
-        <p className="text-[14px]" style={{ color: C.muted }}>
-          まだ面接の結果がありません。
-        </p>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
-          {interviews.map((iv) => {
-            const avg = average(iv.competencies.map((c) => c.score));
-            const style = iv.settings?.avatar_style
-              ? AVATAR_STYLE_LABELS[iv.settings.avatar_style]
-              : null;
-            return (
-              <div
-                key={iv.id}
-                className="flex flex-col gap-2 rounded-xl p-4"
-                style={{ background: C.bg, border: `1px solid ${C.border}` }}
-              >
+          {shown.map((iv) => (
+            <ResultCard
+              key={iv.id}
+              iv={iv}
+              onOpen={() => setOpenId(iv.id)}
+              corner={
                 <button
                   type="button"
-                  onClick={() => setOpenId(iv.id)}
-                  className="flex flex-col gap-2 text-left"
+                  disabled={busy === iv.id}
+                  onClick={() => void toggle(iv.id, false)}
+                  aria-label="公開から外す"
+                  title="公開から外す"
+                  className="rounded-full p-1 disabled:opacity-50"
+                  style={{ background: C.card2 }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>
-                        {iv.jobType || "職種指定なし"}
-                      </p>
-                      <p className="mt-0.5 text-[12px]" style={{ color: C.muted }}>
-                        {new Date(iv.date).toLocaleDateString("ja-JP")}
-                        {style && ` ・ 面接官：${style}`}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p style={{ color: C.accent, fontSize: 20, fontWeight: 800, lineHeight: 1 }}>
-                        {avg?.toFixed(1) ?? "-"}
-                      </p>
-                      <p className="text-[10px]" style={{ color: C.muted }}>
-                        評価の平均
-                      </p>
-                    </div>
-                  </div>
-                  {iv.recruiterView?.summary && (
-                    <p
-                      className="line-clamp-2 text-[12px]"
-                      style={{ color: C.sub, lineHeight: 1.7 }}
-                    >
-                      {iv.recruiterView.summary}
-                    </p>
-                  )}
+                  <X size={14} color="#FF6B6B" />
                 </button>
-                <div className="flex items-center justify-between">
-                  <span className="flex gap-1.5">
-                    {iv.recordingUrl && <Tag color={C.accent}>録画</Tag>}
-                    <button
-                      type="button"
-                      onClick={() => setOpenId(iv.id)}
-                      className="text-[12px]"
-                      style={{ color: C.accent }}
-                    >
-                      開く →
-                    </button>
-                  </span>
-                  <button
-                    type="button"
-                    disabled={deleting === iv.id}
-                    onClick={() => void remove(iv.id)}
-                    className="flex items-center gap-1 text-[12px] disabled:opacity-50"
-                    style={{ color: "#FF6B6B" }}
-                  >
-                    <Trash2 size={13} /> {deleting === iv.id ? "削除中..." : "削除"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              }
+            />
+          ))}
+          {hasRoom && (
+            <button
+              type="button"
+              onClick={() => setPicking(true)}
+              className="flex min-h-[120px] flex-col items-center justify-center gap-1 rounded-xl text-[13px]"
+              style={{ border: `1px dashed ${C.border}`, color: C.accent }}
+            >
+              <Plus size={22} />
+              結果を追加する
+            </button>
+          )}
         </div>
+      )}
+      {interviews && !hasRoom && (
+        <p className="mt-3 text-[12px]" style={{ color: C.muted }}>
+          公開できるのは{limit}件までです。入れ替えるときは、×で外してから追加してください。
+        </p>
       )}
       <div className="mt-3">
         <ErrorText>{error}</ErrorText>
       </div>
 
+      {picking && (
+        <Modal title="公開する結果を選ぶ" onClose={() => setPicking(false)}>
+          <p className="text-[12px]" style={{ color: C.muted }}>
+            企業にはこのカードの中身が見えます。
+            {limit !== null && `あと${Math.max(0, limit - shown.length)}件追加できます。`}
+          </p>
+          {stock.length === 0 ? (
+            <p className="text-[14px]" style={{ color: C.muted }}>
+              追加できる結果がありません。模擬面接を受けると、ここに増えます。
+            </p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {stock.map((iv) => (
+                <ResultCard
+                  key={iv.id}
+                  iv={iv}
+                  onOpen={() => setOpenId(iv.id)}
+                  footer={
+                    <button
+                      type="button"
+                      disabled={busy === iv.id || !hasRoom}
+                      onClick={() => void toggle(iv.id, true)}
+                      className="flex items-center justify-center gap-1 rounded-lg py-2 text-[13px] disabled:opacity-50"
+                      style={{ background: C.accent, color: "#0F0F0F", fontWeight: 700 }}
+                    >
+                      <Plus size={14} /> {busy === iv.id ? "追加中..." : "追加する"}
+                    </button>
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </Modal>
+      )}
+
       {opened && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4"
-          style={{ background: "rgba(0,0,0,0.7)" }}
-          onClick={() => setOpenId(null)}
-        >
-          <div
-            className="my-8 flex w-full max-w-2xl flex-col gap-3 rounded-2xl p-4"
-            style={{ background: C.card, border: `1px solid ${C.border}` }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <p style={{ color: C.text, fontSize: 15, fontWeight: 700 }}>企業に見える内容</p>
-              <button type="button" onClick={() => setOpenId(null)} aria-label="閉じる">
-                <X size={20} color={C.muted} />
-              </button>
-            </div>
-            <CompanyInterviewBlock key={opened.id} iv={opened} defaultOpen />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={deleting === opened.id}
-                onClick={() => void remove(opened.id)}
-                className="flex items-center gap-1 rounded-lg px-3 py-2 text-[13px] disabled:opacity-50"
-                style={{ color: "#FF6B6B", border: "1px solid #5A2A2A" }}
-              >
-                <Trash2 size={14} /> この面接を削除
-              </button>
-            </div>
-          </div>
-        </div>
+        <Modal title="企業に見える内容" onClose={() => setOpenId(null)}>
+          <CompanyInterviewBlock key={opened.id} iv={opened} defaultOpen />
+        </Modal>
       )}
     </Card>
   );
-}
-
-/** 本人の面接の結果（企業に見える形）を読み込む */
-export function useMyInterviews() {
-  const [interviews, setInterviews] = useState<CompanyInterview[] | null>(null);
-  useEffect(() => {
-    void talentApi<{ interviews: CompanyInterview[] }>("/api/talent/my-interviews").then((r) =>
-      setInterviews(r.ok ? r.data.interviews : []),
-    );
-  }, []);
-  const removeLocal = (id: string) =>
-    setInterviews((prev) => (prev ? prev.filter((iv) => iv.id !== id) : prev));
-  return { interviews, removeLocal };
 }

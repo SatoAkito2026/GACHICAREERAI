@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PrivateShell } from "@/components/ModeShell";
 import { PointsCard } from "@/components/PointsCard";
-import { MyInterviewCards, useMyInterviews } from "@/components/talent/MyPublicPreview";
+import { MyInterviewCards } from "@/components/talent/MyPublicPreview";
 import {
   Button,
   C,
@@ -61,7 +61,6 @@ function TalentProfilePage() {
   const [saving, setSaving] = useState<"" | "save" | "publish">("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const { interviews, removeLocal } = useMyInterviews();
 
   const apply = (p: Profile | null) => {
     setProfile(p);
@@ -320,13 +319,7 @@ function TalentProfilePage() {
               )}
             </Card>
 
-            <MyInterviewCards
-              interviews={interviews}
-              onDeleted={(id) => {
-                removeLocal(id);
-                setPracticeCount((n) => Math.max(0, n - 1));
-              }}
-            />
+            <MyInterviewCards />
 
             <ErrorText>{error}</ErrorText>
             {notice && (

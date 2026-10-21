@@ -23,6 +23,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - コイン：企業はコインをまとめ買い（`/api/talent/coins`、Stripe PaymentIntent。支払い後にサーバーで確認して `coin_lots` に記録、Webhook は保険）。有効期限6か月（資金決済法の届出の対象外にするため）。パック・人材ごとの値段（評価の平均の段階＋見られた回数で上乗せ）は `src/lib/coins.ts`。人材を見るとき（`/api/talent/unlock`）は SQL 関数 `spend_coins_for_unlock` が、期限の近いコインから減らして閲覧権を記録し、円換算の1/4を本人の `point_ledger` に入れる
 - ポイント：1pt＝1円。今はライト・プロの月額の支払いだけ（`/api/points` の apply、申し込み時は `create-subscription` の `usePoints`）。Stripe の顧客残高（クレジット）に入れて次の請求から差し引く（`src/lib/points.ts`）。現金・ギフトカードとの交換は労働局の確認が取れるまでしない
 - 画面：ユーザー `/private/individual/talent`・`/offers`、企業 `/business/company/talent`・`/messages`
+- 企業に見える面接結果は本人が選ぶ（`interviews.shown_to_companies`）。上限はプランの「結果の数」（無料5・ライト10・プロ上限なし）。新しい練習は枠が空いていれば自動で入る（`autoShowNewInterview`）。選ぶ画面は公開ページの `MyInterviewCards`、API は `/api/talent/my-interviews`。人物まとめ・人材検索の「練習した職種」も公開中の面接だけから作る
 - 練習の録画は本人が許可したときだけ、ブラウザから Storage へ直接アップロード（1人3本まで）
 - 企業に見せる評価は本人向けと分ける：`save-interview.ts` が同じAI呼び出しで採用担当者向けの見立て（`recruiter_view`、`sanitizeRecruiterView`）も作る。企業側（`loadCompanyInterviews`・`CompanyInterviewBlock`）は本人向けの点数・改善点・模範回答を返さず、7つの力と見立て・会話・録画だけ。企業側の点数は「7つの力の平均（5点満点）」
 - 企業メニュー：人材を探す・面談メッセージ・書類選考・書類選考履歴・購入した人材（`/business/company/purchased`）・求人掲載・設定。企業の料金はコイン（人材の閲覧）と、AI面接の従量課金（¥5,500/回、`COMPANY_INTERVIEW_PRICE_JPY`）だけ。月額プラン（ライト・プロ）は廃止。AI面接はカード登録（Stripe の従量課金の契約＝`plan: company_metered` と `stripe_subscription_id`）が済んだ企業だけURLを発行でき、候補者が面接を始めた最初の1回に `interview-turn.ts` が Stripe のメーター（`interview_usage`）に記録する。求人掲載は当面無料。書類選考AI（`/api/chat`）は求人を掲載中の企業だけ

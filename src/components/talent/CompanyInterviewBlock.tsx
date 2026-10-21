@@ -11,6 +11,8 @@ export type CompanyInterview = {
   id: string;
   date: string;
   jobType: string | null;
+  /** 本人が企業への公開に選んでいるか（本人の画面だけで使う） */
+  shown?: boolean;
   recordingUrl: string | null;
   competencies: {
     key: string;

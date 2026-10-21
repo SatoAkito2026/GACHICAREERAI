@@ -5,6 +5,7 @@
  * - 企業に見せる評価に、年齢・性別・出身地など選考に使うべきでない情報は含めない
  */
 import { coinExpiryFrom } from "@/lib/coins";
+import { practiceRule } from "@/lib/plan-rules";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -196,16 +197,17 @@ export async function loadCompanyInterviews(
   supabase: SupabaseClient,
   candidateUserId: string,
   showRecording: boolean,
-  limit = 10,
+  { limit = 30, onlyShown = true }: { limit?: number; onlyShown?: boolean } = {},
 ) {
-  const { data: interviews } = await supabase
+  let query = supabase
     .from("interviews")
-    .select("id, created_at, job_type, recording_path, practice_settings")
+    .select("id, created_at, job_type, recording_path, practice_settings, shown_to_companies")
     .eq("user_id", candidateUserId)
     .eq("mode", "individual")
-    .neq("impression", "途中退出")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .neq("impression", "途中退出");
+  // 企業に見えるのは、本人が公開に選んだ面接だけ
+  if (onlyShown) query = query.eq("shown_to_companies", true);
+  const { data: interviews } = await query.order("created_at", { ascending: false }).limit(limit);
   const ids = (interviews ?? []).map((i) => i.id);
   if (ids.length === 0) return [];
   const [{ data: summaries }, { data: turns }] = await Promise.all([
@@ -234,6 +236,7 @@ export async function loadCompanyInterviews(
       id: iv.id,
       date: iv.created_at,
       jobType: iv.job_type,
+      shown: !!iv.shown_to_companies,
       recordingUrl,
       competencies: (f.competencies ?? []) as InterviewCompetency[],
       recruiterView: (f.recruiter_view ?? null) as RecruiterView | null,
@@ -244,6 +247,50 @@ export async function loadCompanyInterviews(
     });
   }
   return details;
+}
+
+/** 企業に公開できる面接の結果の数（プランの「結果の数」と同じ。null は上限なし） */
+export async function shownInterviewLimit(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<number | null> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, plan_expires_at")
+    .eq("id", userId)
+    .maybeSingle();
+  const expired = profile?.plan_expires_at
+    ? new Date(profile.plan_expires_at).getTime() < Date.now()
+    : false;
+  return practiceRule(expired ? "free" : profile?.plan).results;
+}
+
+/** いま企業に公開している面接の数 */
+export async function countShownInterviews(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<number> {
+  const { count } = await supabase
+    .from("interviews")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("mode", "individual")
+    .eq("shown_to_companies", true);
+  return count ?? 0;
+}
+
+/** 新しい面接は、公開の枠が空いていれば自動で公開に入れる（本人があとで外せる） */
+export async function autoShowNewInterview(
+  supabase: SupabaseClient,
+  userId: string,
+  interviewId: string,
+): Promise<void> {
+  const [limit, shown] = await Promise.all([
+    shownInterviewLimit(supabase, userId),
+    countShownInterviews(supabase, userId),
+  ]);
+  if (limit !== null && shown >= limit) return;
+  await supabase.from("interviews").update({ shown_to_companies: true }).eq("id", interviewId);
 }
 
 // ---- 人物まとめの作成 --------------------------------------------------------
@@ -264,6 +311,8 @@ async function loadPracticeFeedback(
     .eq("user_id", userId)
     .eq("mode", "individual")
     .neq("impression", "途中退出")
+    // 人物まとめも、企業に公開している面接だけから作る
+    .eq("shown_to_companies", true)
     .order("created_at", { ascending: false })
     .limit(20);
   const ids = (interviews ?? []).map((i) => i.id);
