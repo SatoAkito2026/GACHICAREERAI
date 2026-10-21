@@ -12,6 +12,7 @@ import {
   DOCUMENT_RULES,
   limitText,
   PRACTICE_RULES,
+  RESEARCH_PER_MONTH_PRO,
   type IndividualPlanKey,
 } from "@/lib/plan-rules";
 
@@ -66,7 +67,11 @@ const INDIVIDUAL_PLANS: PlanCard[] = [
     key: "individual_pro",
     name: "プロプラン",
     price: PLAN_PRICES.individual_pro,
-    features: [...individualFeatures("individual_pro"), "書類アップロードして面接：可"],
+    features: [
+      ...individualFeatures("individual_pro"),
+      "練習の任意設定（応募先の会社・聞いてほしい質問など）・書類アップロード：可",
+      `企業研究AI：月${RESEARCH_PER_MONTH_PRO}回まで`,
+    ],
     highlight: true,
   },
 ];

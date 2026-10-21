@@ -94,3 +94,6 @@ export const DOCUMENT_RULES: Record<IndividualPlanKey, { perDay: number; perMont
 export function documentRule(plan: string | null | undefined) {
   return DOCUMENT_RULES[toIndividualPlan(plan)];
 }
+
+/** 企業研究AI（志望校研究AI）はプロだけ。月の回数 */
+export const RESEARCH_PER_MONTH_PRO = 5;

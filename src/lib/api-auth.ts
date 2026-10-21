@@ -192,24 +192,23 @@ function todayJstDateKey(): string {
 }
 
 /**
- * 書類生成AIの利用回数（日本時間の今日・今月）。
- * 書類を消しても回数は戻らないよう、feature_usage_counters に別に数える。
+ * 機能ごとの利用回数（日本時間の今日・今月）。書類生成AI・企業研究AI など。
+ * 作ったものを消しても回数は戻らないよう、feature_usage_counters に別に数える。
  */
-const DOC_USAGE_KEY = "doc_generation";
-
 function monthJstKey(): string {
   return todayJstDateKey().slice(0, 7);
 }
 
-export async function getDocumentUsage(
+export async function getFeatureUsage(
   serviceSupabase: any,
   userId: string,
+  featureKey: string,
 ): Promise<{ today: number; month: number }> {
   const { data } = await serviceSupabase
     .from("feature_usage_counters")
     .select("window_type, window_key, count")
     .eq("user_id", userId)
-    .eq("feature_key", DOC_USAGE_KEY)
+    .eq("feature_key", featureKey)
     .in("window_key", [todayJstDateKey(), monthJstKey()]);
   const rows = (data ?? []) as { window_type: string; window_key: string; count: number }[];
   return {
@@ -218,7 +217,11 @@ export async function getDocumentUsage(
   };
 }
 
-export async function addDocumentUsage(serviceSupabase: any, userId: string): Promise<void> {
+export async function addFeatureUsage(
+  serviceSupabase: any,
+  userId: string,
+  featureKey: string,
+): Promise<void> {
   for (const [windowType, windowKey] of [
     ["day", todayJstDateKey()],
     ["month", monthJstKey()],
@@ -227,7 +230,7 @@ export async function addDocumentUsage(serviceSupabase: any, userId: string): Pr
       .from("feature_usage_counters")
       .select("id, count")
       .eq("user_id", userId)
-      .eq("feature_key", DOC_USAGE_KEY)
+      .eq("feature_key", featureKey)
       .eq("window_type", windowType)
       .eq("window_key", windowKey)
       .maybeSingle();
@@ -239,7 +242,7 @@ export async function addDocumentUsage(serviceSupabase: any, userId: string): Pr
     } else {
       await serviceSupabase.from("feature_usage_counters").insert({
         user_id: userId,
-        feature_key: DOC_USAGE_KEY,
+        feature_key: featureKey,
         window_type: windowType,
         window_key: windowKey,
         count: 1,
@@ -247,6 +250,11 @@ export async function addDocumentUsage(serviceSupabase: any, userId: string): Pr
     }
   }
 }
+
+export const getDocumentUsage = (serviceSupabase: any, userId: string) =>
+  getFeatureUsage(serviceSupabase, userId, "doc_generation");
+export const addDocumentUsage = (serviceSupabase: any, userId: string) =>
+  addFeatureUsage(serviceSupabase, userId, "doc_generation");
 
 /**
  * plan_feature_limits テーブルから、プラン×機能の上限回数を取得する。

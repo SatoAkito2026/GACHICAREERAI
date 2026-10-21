@@ -3,6 +3,8 @@ import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { usePlan } from "@/hooks/use-plan";
+import { RESEARCH_PER_MONTH_PRO } from "@/lib/plan-rules";
 import { supabase } from "@/integrations/supabase/client";
 import { PrivateShell } from "@/components/ModeShell";
 import { ProseTemplate, exportElementToPdf } from "@/components/DocumentTemplates";
@@ -39,6 +41,8 @@ export function ResearchContent({
   backTo: string;
 }) {
   const { session, loading } = useAuth();
+  const { plan } = usePlan();
+  const isPro = plan === "individual_pro";
   const [targetName, setTargetName] = useState("");
   const [researching, setResearching] = useState(false);
   const [result, setResult] = useState<ResearchResult | null>(null);
@@ -135,7 +139,7 @@ export function ResearchContent({
         cache: "no-store",
         body: JSON.stringify({ targetName: targetName.trim() }),
       });
-      if (res.status === 429) {
+      if (res.status === 429 || res.status === 403) {
         const errBody = (await res.json().catch(() => null)) as { message?: string } | null;
         toast.error(errBody?.message ?? "利用上限に達しました");
         return;
@@ -178,6 +182,21 @@ export function ResearchContent({
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
           {targetLabel}名を入力すると、AIが調べて想定質問と対策をまとめます。
+        </p>
+        <p
+          className="mt-3 inline-block rounded-lg px-3 py-1.5 text-[12px]"
+          style={{ background: "#16200A", border: "1px solid #3A4A12", color: "#E6F7B0" }}
+        >
+          {isPro ? (
+            `プロプラン：月${RESEARCH_PER_MONTH_PRO}回まで`
+          ) : (
+            <>
+              プロプランで使えます（月{RESEARCH_PER_MONTH_PRO}回まで）
+              <Link to="/pricing" className="ml-2 underline" style={{ color: "#C8FF00" }}>
+                プランを見る
+              </Link>
+            </>
+          )}
         </p>
 
         <div className="mt-6 flex gap-2">
