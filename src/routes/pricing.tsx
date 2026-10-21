@@ -13,6 +13,7 @@ import {
   limitText,
   PRACTICE_RULES,
   RESEARCH_PER_MONTH_PRO,
+  SELF_ANALYSIS_PER_MONTH,
   type IndividualPlanKey,
 } from "@/lib/plan-rules";
 
@@ -44,6 +45,7 @@ function individualFeatures(key: IndividualPlanKey): string[] {
     `練習できる職種：${r.jobTypes == null ? "無制限" : `月${r.jobTypes}つまで`}`,
     `保存できる結果：${r.results == null ? "無制限" : `新しい${r.results}件`}`,
     `書類生成AI：1日${DOCUMENT_RULES[key].perDay}回・月${DOCUMENT_RULES[key].perMonth}回まで`,
+    `自己分析レポート：月${SELF_ANALYSIS_PER_MONTH[key]}回まで${key === "individual_pro" ? "（詳細分析も可）" : ""}`,
     "根拠つきの評価・プロフィール公開・オファー：全プラン同じ",
   ];
 }
