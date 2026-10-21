@@ -196,6 +196,7 @@ export async function loadCompanyInterviews(
   supabase: SupabaseClient,
   candidateUserId: string,
   showRecording: boolean,
+  limit = 10,
 ) {
   const { data: interviews } = await supabase
     .from("interviews")
@@ -204,7 +205,7 @@ export async function loadCompanyInterviews(
     .eq("mode", "individual")
     .neq("impression", "途中退出")
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(limit);
   const ids = (interviews ?? []).map((i) => i.id);
   if (ids.length === 0) return [];
   const [{ data: summaries }, { data: turns }] = await Promise.all([

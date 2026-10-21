@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { PrivateShell } from "@/components/ModeShell";
 import { PointsCard } from "@/components/PointsCard";
 import {
+  ListPreviewCard,
+  MyInterviewCards,
+  useMyInterviews,
+} from "@/components/talent/MyPublicPreview";
+import {
   Button,
   C,
   CAREER_STAGE_LABELS,
@@ -61,6 +66,7 @@ function TalentProfilePage() {
   const [saving, setSaving] = useState<"" | "save" | "publish" | "refresh">("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const { interviews, removeLocal } = useMyInterviews();
 
   const apply = (p: Profile | null) => {
     setProfile(p);
@@ -167,6 +173,23 @@ function TalentProfilePage() {
                 </p>
               )}
             </Card>
+
+            {profile && (
+              <Card title="企業の一覧での見え方">
+                <p className="mb-3 text-[12px]" style={{ color: C.muted }}>
+                  企業の「人材を探す」には、名前を伏せたこのカードが並びます。
+                </p>
+                <ListPreviewCard
+                  code={profile.public_code}
+                  headline={profile.headline}
+                  careerStage={profile.career_stage}
+                  desiredJobs={profile.desired_jobs}
+                  desiredLocations={profile.desired_locations}
+                  summary={profile.summary}
+                  interviews={interviews ?? []}
+                />
+              </Card>
+            )}
 
             <Card title="プロフィール">
               <div className="flex flex-col gap-4">
@@ -361,6 +384,14 @@ function TalentProfilePage() {
                 </>
               )}
             </Card>
+
+            <MyInterviewCards
+              interviews={interviews}
+              onDeleted={(id) => {
+                removeLocal(id);
+                setPracticeCount((n) => Math.max(0, n - 1));
+              }}
+            />
 
             <ErrorText>{error}</ErrorText>
             {notice && (

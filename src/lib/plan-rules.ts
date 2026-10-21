@@ -74,8 +74,12 @@ export function startOfMonthJst(now = new Date()): string {
   return new Date(jst.getTime() - JST_OFFSET_MS).toISOString();
 }
 
+/** 職種を選ばなかったときの仮の名前。職種の数には数えない */
+const PLACEHOLDER_JOB_TYPES = ["模擬面接", "受験"];
+
 export function normalizeJobType(s: string | null | undefined): string {
-  return (s ?? "").trim();
+  const v = (s ?? "").trim();
+  return PLACEHOLDER_JOB_TYPES.includes(v) ? "" : v;
 }
 
 /**
@@ -97,3 +101,10 @@ export function documentRule(plan: string | null | undefined) {
 
 /** 企業研究AI（志望校研究AI）はプロだけ。月の回数 */
 export const RESEARCH_PER_MONTH_PRO = 5;
+
+/** 自己分析レポートの月の回数（基本と詳細の合計）。詳細はプロだけ */
+export const SELF_ANALYSIS_PER_MONTH: Record<IndividualPlanKey, number> = {
+  free: 1,
+  individual_light: 3,
+  individual_pro: 10,
+};

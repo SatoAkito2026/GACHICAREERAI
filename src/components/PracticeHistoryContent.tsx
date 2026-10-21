@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Radar,
   RadarChart,
@@ -14,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PrivateShell } from "@/components/ModeShell";
 import { usePlan } from "@/hooks/use-plan";
 import { practiceRule } from "@/lib/plan-rules";
+import { talentApi } from "@/components/talent/TalentUI";
 
 type PracticeFeedback = {
   overall_impression?: string;
@@ -110,8 +112,11 @@ export function PracticeHistoryContent({
   }, [session, mode]);
 
   const handleDelete = async (id: string) => {
-    await supabase.from("interviews").delete().eq("id", id);
-    setRows((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
+    if (!window.confirm("この練習の結果を削除しますか？（録画も消え、元に戻せません）")) return;
+    // 録画の削除・人物まとめの作り直しもサーバーで行う
+    const r = await talentApi("/api/talent/my-interviews", { action: "delete", id });
+    if (!r.ok) return void toast.error(r.data.error ?? "削除に失敗しました");
+    setRows((prev) => (prev ? prev.filter((row) => row.id !== id) : prev));
   };
 
   if (loading || planLoading || rows === null) {
