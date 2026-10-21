@@ -37,6 +37,8 @@ export const Route = createFileRoute("/api/talent/search")({
         // 企業向けの点数は「7つの力」の平均（1〜5）。本人向けの練習の点数（100点満点）は使わない
         const minScore = Number(url.searchParams.get("minScore") ?? "") || 0;
         const sort = url.searchParams.get("sort") ?? "recent";
+        const job = (url.searchParams.get("job") ?? "").trim().slice(0, 50);
+        const area = (url.searchParams.get("area") ?? "").trim().slice(0, 20);
 
         const { data: rows, error } = await supabase
           .from("candidate_profiles")
@@ -66,6 +68,22 @@ export const Route = createFileRoute("/api/talent/search")({
             .in("candidate_user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
         ]);
         const paidViews = await getPaidViewCounts(supabase, ids);
+        // 練習した職種（面接ごとの設定）。職種での絞り込み・キーワード検索・カードの表示に使う
+        const { data: practiced } = await supabase
+          .from("interviews")
+          .select("user_id, job_type")
+          .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
+          .eq("mode", "individual")
+          .neq("impression", "途中退出")
+          .limit(5000);
+        const practicedJobs = new Map<string, string[]>();
+        for (const iv of practiced ?? []) {
+          const jt = (iv.job_type ?? "").trim();
+          if (!jt || jt === "模擬面接") continue;
+          const list = practicedJobs.get(iv.user_id) ?? [];
+          if (!list.includes(jt)) list.push(jt);
+          practicedJobs.set(iv.user_id, list);
+        }
         const unlocked = new Set((unlocks ?? []).map((u) => u.candidate_user_id));
         const statusBy = new Map((requests ?? []).map((r) => [r.candidate_user_id, r.status]));
 
@@ -90,6 +108,7 @@ export const Route = createFileRoute("/api/talent/search")({
             competencyAverage,
             priceCoins: priceCoins(competencyAverage, paidViews.get(r.user_id) ?? 0),
             hasRecording: r.show_recording,
+            practicedJobs: practicedJobs.get(r.user_id) ?? [],
             updatedAt: r.summary_updated_at,
             unlocked: unlocked.has(r.user_id),
             contactStatus: statusBy.get(r.user_id) ?? null,
@@ -97,10 +116,23 @@ export const Route = createFileRoute("/api/talent/search")({
         });
 
         if (stage) list = list.filter((c) => c.careerStage === stage);
+        if (job) {
+          list = list.filter(
+            (c) => c.practicedJobs.includes(job) || (c.desiredJobs ?? "").includes(job),
+          );
+        }
+        if (area) list = list.filter((c) => (c.desiredLocations ?? "").includes(area));
         if (minScore) list = list.filter((c) => (c.competencyAverage ?? 0) >= minScore);
         if (keyword) {
           list = list.filter((c) =>
-            [c.headline, c.desiredJobs, c.desiredLocations, c.overview, ...c.strengths]
+            [
+              c.headline,
+              c.desiredJobs,
+              c.desiredLocations,
+              c.overview,
+              ...c.strengths,
+              ...c.practicedJobs,
+            ]
               .filter(Boolean)
               .join(" ")
               .toLowerCase()

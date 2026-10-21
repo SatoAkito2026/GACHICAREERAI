@@ -349,15 +349,17 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
           },
         ];
 
-        // ⑭ 継続率(直近7日/30日で何らかの活動があったユーザーの割合)
+        // ⑭ 継続率(直近7日/30日で模擬面接をしたユーザーの割合)
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const { data: active7 } = await supabase
-          .from("daily_question_responses")
+          .from("interviews")
           .select("user_id")
+          .in("mode", ["individual", "student"])
           .gte("created_at", sevenDaysAgo);
         const { data: active30 } = await supabase
-          .from("daily_question_responses")
+          .from("interviews")
           .select("user_id")
+          .in("mode", ["individual", "student"])
           .gte("created_at", thirtyDaysAgo);
         const active7Count = new Set((active7 ?? []).map((r: any) => r.user_id)).size;
         const active30Count = new Set((active30 ?? []).map((r: any) => r.user_id)).size;

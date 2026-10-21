@@ -957,6 +957,7 @@ export type Database = {
           interviewer_name: string | null;
           job_type: string | null;
           mode: string | null;
+          practice_settings: Json | null;
           priorities: string[] | null;
           recording_path: string | null;
           screening_candidate_id: string | null;
@@ -973,6 +974,7 @@ export type Database = {
           interviewer_name?: string | null;
           job_type?: string | null;
           mode?: string | null;
+          practice_settings?: Json | null;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;
@@ -989,6 +991,7 @@ export type Database = {
           interviewer_name?: string | null;
           job_type?: string | null;
           mode?: string | null;
+          practice_settings?: Json | null;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;

@@ -81,9 +81,32 @@ export const Route = createFileRoute("/api/save-interview")({
         // screening_candidate_idを取得
         const { data: invFull } = await supabase
           .from("interview_invitations")
-          .select("screening_candidate_id")
+          .select(
+            "screening_candidate_id, avatar_style, practice_interview_type, practice_max_minutes, job_type, company_name, screening_data",
+          )
           .eq("token", body.token)
           .maybeSingle();
+        // 練習の設定（企業の人材検索で、どんな条件の面接だったかを見せる・絞り込むため）
+        const invSd = ((invFull as any)?.screening_data ?? {}) as Record<string, unknown>;
+        const practiceSettings = practiceMode
+          ? {
+              avatar_style: (invFull as any)?.avatar_style ?? null,
+              interview_type: (invFull as any)?.practice_interview_type ?? null,
+              max_minutes: (invFull as any)?.practice_max_minutes ?? null,
+              job_type: (invFull as any)?.job_type ?? body.jobType ?? null,
+              target_company:
+                typeof invSd.practice_desired_company_name === "string"
+                  ? invSd.practice_desired_company_name
+                  : null,
+              custom_questions:
+                typeof invSd.practice_custom_questions === "string"
+                  ? invSd.practice_custom_questions
+                      .split("\n")
+                      .map((q) => q.trim())
+                      .filter(Boolean)
+                  : [],
+            }
+          : null;
 
         // 1. interviewsテーブルに基本情報を保存
         const { data: interview, error: interviewError } = await supabase
@@ -97,7 +120,8 @@ export const Route = createFileRoute("/api/save-interview")({
             interviewer_name: "AI面接官",
             impression: body.isAbandoned ? "途中退出" : "完了",
             screening_candidate_id: (invFull as any)?.screening_candidate_id ?? null,
-          })
+            practice_settings: practiceSettings,
+          } as any)
           .select("id")
           .maybeSingle();
 

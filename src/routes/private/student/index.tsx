@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { PrivateShell } from "@/components/ModeShell";
 import { DashGrid } from "@/components/DashCard";
-import { GrowthBadge } from "@/components/GrowthBadge";
 import { useMode } from "@/hooks/use-mode";
 
 export const Route = createFileRoute("/private/student/")({
@@ -28,7 +27,6 @@ function StudentDashboard() {
 
   return (
     <PrivateShell>
-      <GrowthBadge />
       <DashGrid
         title="受験生"
         subtitle="入試対策向け"
@@ -44,12 +42,6 @@ function StudentDashboard() {
             title: "プロフィール",
             desc: "学歴・資格・志望校などを編集",
             to: "/private/student/profile",
-          },
-          {
-            emoji: "✍️",
-            title: "今日の質問",
-            desc: "5問答えてプロフィールを充実させる",
-            to: "/private/student/daily-questions",
           },
           {
             emoji: "📄",

@@ -6,6 +6,7 @@
  *   指定した企業名/学校名について、Web検索で調べた上で
  *   想定質問・対策ポイントを生成する。
  */
+import { RESEARCH_PER_MONTH_PRO, toIndividualPlan } from "@/lib/plan-rules";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
@@ -14,7 +15,8 @@ import {
   getSupabaseUrl,
   getServiceRoleKey,
   verifyApiUser,
-  checkPlanFeatureAccess,
+  getFeatureUsage,
+  addFeatureUsage,
 } from "@/lib/api-auth";
 
 const corsHeaders = {
@@ -64,7 +66,21 @@ export const Route = createFileRoute("/api/research-target")({
           ? new Date(profile.plan_expires_at).getTime() < Date.now()
           : false;
         const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
-        // 個人・受験生プランの機能制限は一時的に撤廃
+        // プロだけ・月5回（日本時間の今月）
+        const tier = toIndividualPlan(plan);
+        if (tier !== "individual_pro") {
+          return json({ error: "pro_only", message: "企業研究AIはプロプランで使えます。" }, 403);
+        }
+        const researchUsage = await getFeatureUsage(supabase, userId, "company_research");
+        if (researchUsage.month >= RESEARCH_PER_MONTH_PRO) {
+          return json(
+            {
+              error: "monthly_limit",
+              message: `企業研究AIは月${RESEARCH_PER_MONTH_PRO}回までです。来月1日にリセットされます。`,
+            },
+            429,
+          );
+        }
         const { data: careerProfile } = await supabase
           .from("user_career_profiles")
           .select("*")
@@ -139,6 +155,7 @@ ${profileSummary}`;
           .select("id")
           .single();
         if (saveError) console.error("[research-target] save failed", saveError);
+        await addFeatureUsage(supabase, userId, "company_research");
 
         return json({ id: saved?.id, targetName, ...parsed });
       },

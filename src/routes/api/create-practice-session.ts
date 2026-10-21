@@ -176,6 +176,13 @@ export const Route = createFileRoute("/api/create-practice-session")({
         const basicInfo = (careerProfile?.basic_info ?? {}) as Record<string, string>;
         const candidateName = basicInfo.name || "practice_user";
 
+        // 職種（学校）の選択は全プラン。それ以外の任意設定（会社名・学部・聞いてほしい質問・プロフィール優先）はプロだけ
+        if (!isPro) {
+          preferences.desired_company_name = undefined;
+          preferences.desired_faculty = undefined;
+          preferences.custom_questions = undefined;
+          preferences.prioritize_profile = false;
+        }
         const prioritizeProfile = !!preferences.prioritize_profile;
 
         // 面接AIへの文脈として、プロフィール情報を丸ごと渡す

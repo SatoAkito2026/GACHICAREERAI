@@ -9,8 +9,10 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { COIN_EXPIRY_MONTHS, COIN_PACKS, priceCoins } from "@/lib/coins";
 import {
   COMPANY_INTERVIEW_PRICE_JPY,
+  DOCUMENT_RULES,
   limitText,
   PRACTICE_RULES,
+  RESEARCH_PER_MONTH_PRO,
   type IndividualPlanKey,
 } from "@/lib/plan-rules";
 
@@ -41,6 +43,7 @@ function individualFeatures(key: IndividualPlanKey): string[] {
     `1回の長さ：${limitText(r.maxMinutes, "分")}`,
     `練習できる職種：${r.jobTypes == null ? "無制限" : `月${r.jobTypes}つまで`}`,
     `保存できる結果：${r.results == null ? "無制限" : `新しい${r.results}件`}`,
+    `書類生成AI：1日${DOCUMENT_RULES[key].perDay}回・月${DOCUMENT_RULES[key].perMonth}回まで`,
     "根拠つきの評価・プロフィール公開・オファー：全プラン同じ",
   ];
 }
@@ -64,7 +67,11 @@ const INDIVIDUAL_PLANS: PlanCard[] = [
     key: "individual_pro",
     name: "プロプラン",
     price: PLAN_PRICES.individual_pro,
-    features: [...individualFeatures("individual_pro"), "書類アップロードして面接：可"],
+    features: [
+      ...individualFeatures("individual_pro"),
+      "練習の任意設定（応募先の会社・聞いてほしい質問など）・書類アップロード：可",
+      `企業研究AI：月${RESEARCH_PER_MONTH_PRO}回まで`,
+    ],
     highlight: true,
   },
 ];
