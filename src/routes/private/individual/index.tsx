@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { PrivateShell } from "@/components/ModeShell";
 import { DashGrid } from "@/components/DashCard";
-import { GrowthBadge } from "@/components/GrowthBadge";
 import { useMode } from "@/hooks/use-mode";
 import { MobileHome } from "@/components/mobile/MobileHome";
 
@@ -35,7 +34,6 @@ function IndividualDashboard() {
       </div>
       {/* パソコン：カード一覧 */}
       <div className="hidden lg:block">
-        <GrowthBadge />
         <DashGrid
           title="個人"
           subtitle="練習 → 評価 → プロフィール公開 → オファー の順に進めます"

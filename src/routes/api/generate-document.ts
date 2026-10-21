@@ -9,9 +9,10 @@
  *   - extraNotes: 追加で伝えたいこと(任意)
  *   - reviewText: es_review/essay_review の場合、添削対象の原文(必須)
  *
- * プラン別アクセス制御は checkAndConsumeDocumentQuota に集約:
- *   resume/statement_of_purpose = free/light 1日1回、pro無制限
- *   それ以外 = プロ限定機能
+ * 回数の上限は src/lib/plan-rules.ts の DOCUMENT_RULES（種類は全プランで同じ）
+ *   無料 1日1回・月3回／ライト 1日2回・月5回／プロ 1日3回・月15回
+ *
+ * GET /api/generate-document → 今日・今月に使った回数と上限
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
@@ -20,8 +21,10 @@ import {
   getSupabaseUrl,
   getServiceRoleKey,
   verifyApiUser,
-  checkAndConsumeDocumentQuota,
+  getDocumentUsage,
+  addDocumentUsage,
 } from "@/lib/api-auth";
+import { documentRule } from "@/lib/plan-rules";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,6 +56,27 @@ export const Route = createFileRoute("/api/generate-document")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: corsHeaders }),
+
+      GET: async ({ request }) => {
+        const auth = await verifyApiUser(request);
+        if ("error" in auth) return auth.error;
+        const serviceKey = getServiceRoleKey();
+        if (!serviceKey) return json({ error: "Supabase config missing" }, 500);
+        const supabase = createClient(getSupabaseUrl(), serviceKey);
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("plan, plan_expires_at")
+          .eq("id", auth.userId)
+          .maybeSingle();
+        const isExpired = profile?.plan_expires_at
+          ? new Date(profile.plan_expires_at).getTime() < Date.now()
+          : false;
+        const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
+        return json({
+          rule: documentRule(plan),
+          usage: await getDocumentUsage(supabase, auth.userId),
+        });
+      },
 
       POST: async ({ request }) => {
         const auth = await verifyApiUser(request);
@@ -93,7 +117,29 @@ export const Route = createFileRoute("/api/generate-document")({
           : false;
         const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
 
-        // 個人・受験生プランの回数制限は一時的に撤廃
+        // 回数の上限（日本時間の今日・今月）
+        const rule = documentRule(plan);
+        const usage = await getDocumentUsage(supabase, userId);
+        const upgrade = plan === "individual_pro" ? "" : "プランを上げると回数が増えます。";
+        if (usage.today >= rule.perDay) {
+          return json(
+            {
+              error: "daily_limit",
+              message: `書類生成AIは1日${rule.perDay}回までです。明日またどうぞ。${upgrade}`,
+            },
+            429,
+          );
+        }
+        if (usage.month >= rule.perMonth) {
+          return json(
+            {
+              error: "monthly_limit",
+              message: `書類生成AIは月${rule.perMonth}回までです。来月1日にリセットされます。${upgrade}`,
+            },
+            429,
+          );
+        }
+
         // パーソナライズ用の文脈
         const [{ data: careerProfile }, { data: onboarding }] = await Promise.all([
           supabase
@@ -271,6 +317,7 @@ ${targetLine}${notesLine}
           .select("id")
           .single();
         if (saveError) return json({ error: "save_failed" }, 500);
+        await addDocumentUsage(supabase, userId);
 
         return json({ id: saved?.id, title, content: generatedContent, finalDraft });
       },

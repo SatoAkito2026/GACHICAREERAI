@@ -14,7 +14,6 @@ import {
   Globe,
   IdCard,
   Mail,
-  MessageCircleQuestion,
   Mic,
   Search,
   TrendingUp,
@@ -153,12 +152,6 @@ export function MobileHome() {
             desc="掲載中の求人を見て、そのまま応募"
           />
           <ToolRow
-            to="/private/individual/daily-questions"
-            icon={<MessageCircleQuestion size={19} />}
-            title="今日の質問"
-            desc="1日5問。答えるほど練習の精度が上がる"
-          />
-          <ToolRow
             to="/private/individual/documents"
             icon={<FileText size={19} />}
             title="書類生成AI"
@@ -294,7 +287,6 @@ function ToolRow({
 }: {
   to:
     | "/private/individual/jobs"
-    | "/private/individual/daily-questions"
     | "/private/individual/documents"
     | "/private/individual/research"
     | "/private/individual/self-analysis"

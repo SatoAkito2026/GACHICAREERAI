@@ -64,7 +64,6 @@ const FEATURE_LABELS: Record<string, string> = {
   doc_generation_essay_review: "小論文改稿",
   self_analysis_basic: "自己分析(基本)",
   self_analysis_detailed: "自己分析(詳細)",
-  daily_question_ai_generation: "今日の質問AI生成",
 };
 
 const RANK_COLORS: Record<string, string> = {

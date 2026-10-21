@@ -192,6 +192,63 @@ function todayJstDateKey(): string {
 }
 
 /**
+ * 書類生成AIの利用回数（日本時間の今日・今月）。
+ * 書類を消しても回数は戻らないよう、feature_usage_counters に別に数える。
+ */
+const DOC_USAGE_KEY = "doc_generation";
+
+function monthJstKey(): string {
+  return todayJstDateKey().slice(0, 7);
+}
+
+export async function getDocumentUsage(
+  serviceSupabase: any,
+  userId: string,
+): Promise<{ today: number; month: number }> {
+  const { data } = await serviceSupabase
+    .from("feature_usage_counters")
+    .select("window_type, window_key, count")
+    .eq("user_id", userId)
+    .eq("feature_key", DOC_USAGE_KEY)
+    .in("window_key", [todayJstDateKey(), monthJstKey()]);
+  const rows = (data ?? []) as { window_type: string; window_key: string; count: number }[];
+  return {
+    today: rows.find((r) => r.window_type === "day")?.count ?? 0,
+    month: rows.find((r) => r.window_type === "month")?.count ?? 0,
+  };
+}
+
+export async function addDocumentUsage(serviceSupabase: any, userId: string): Promise<void> {
+  for (const [windowType, windowKey] of [
+    ["day", todayJstDateKey()],
+    ["month", monthJstKey()],
+  ] as const) {
+    const { data: existing } = await serviceSupabase
+      .from("feature_usage_counters")
+      .select("id, count")
+      .eq("user_id", userId)
+      .eq("feature_key", DOC_USAGE_KEY)
+      .eq("window_type", windowType)
+      .eq("window_key", windowKey)
+      .maybeSingle();
+    if (existing) {
+      await serviceSupabase
+        .from("feature_usage_counters")
+        .update({ count: existing.count + 1, updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    } else {
+      await serviceSupabase.from("feature_usage_counters").insert({
+        user_id: userId,
+        feature_key: DOC_USAGE_KEY,
+        window_type: windowType,
+        window_key: windowKey,
+        count: 1,
+      });
+    }
+  }
+}
+
+/**
  * plan_feature_limits テーブルから、プラン×機能の上限回数を取得する。
  * limit_count = -1 は無制限として扱う。行が無ければfallbackを使う
  * (運用中にDB側の設定が消えてもアプリが壊れないようにするため)。
@@ -239,61 +296,6 @@ export async function checkAndConsumeImageQuota(
   const currentCount = existing?.count ?? 0;
   if (Number.isFinite(limit) && currentCount >= limit) {
     return { ok: false, message: `本日の画像送信の上限（${limit}回）に達しました` };
-  }
-
-  if (existing) {
-    await serviceSupabase
-      .from("feature_usage_counters")
-      .update({ count: currentCount + 1, updated_at: new Date().toISOString() })
-      .eq("id", existing.id);
-  } else {
-    await serviceSupabase.from("feature_usage_counters").insert({
-      user_id: userId,
-      feature_key: featureKey,
-      window_type: "day",
-      window_key: windowKey,
-      count: 1,
-    });
-  }
-
-  return { ok: true };
-}
-
-/**
- * 書類生成(generate-document)のプラン別アクセス制御。
- * 上限値は plan_feature_limits テーブル(feature_key="doc_generation_<docType>")で管理する。
- * limit_count=0のプランは完全ブロック、-1は無制限、それ以外は日次の回数上限。
- */
-export async function checkAndConsumeDocumentQuota(
-  serviceSupabase: any,
-  userId: string,
-  plan: string,
-  docType: string,
-): Promise<{ ok: true } | { ok: false; message: string }> {
-  const featureKey = `doc_generation_${docType}`;
-  const limit = await getPlanFeatureLimit(serviceSupabase, plan, featureKey, 0);
-
-  if (limit === 0) {
-    return { ok: false, message: "この機能はプロプラン限定です。プランのアップグレードが必要です" };
-  }
-  if (!Number.isFinite(limit)) return { ok: true }; // 無制限
-
-  const windowKey = todayJstDateKey();
-
-  const { data: existing } = await serviceSupabase
-    .from("feature_usage_counters")
-    .select("id, count")
-    .eq("user_id", userId)
-    .eq("feature_key", featureKey)
-    .eq("window_key", windowKey)
-    .maybeSingle();
-
-  const currentCount = existing?.count ?? 0;
-  if (currentCount >= limit) {
-    return {
-      ok: false,
-      message: `本日の生成回数の上限（${limit}回）に達しました。プロプランなら無制限で使えます`,
-    };
   }
 
   if (existing) {
@@ -374,52 +376,6 @@ export async function checkAndConsumeSelfAnalysisQuota(
       user_id: userId,
       feature_key: featureKey,
       window_type: "month",
-      window_key: windowKey,
-      count: 1,
-    });
-  }
-
-  return { ok: true };
-}
-
-/**
- * 「今日の質問」の在庫が尽きた時にAIが新しい質問を生成する回数の
- * 1日あたりの上限。plan_feature_limits(feature_key="daily_question_ai_generation")で管理する。
- * 生成そのものが一番コストの高い処理のため、無料機能ではあるが
- * 連打で青天井にならないよう歯止めをかける。
- */
-export async function checkAndConsumeDailyQuestionGenQuota(
-  serviceSupabase: any,
-  userId: string,
-  plan: string,
-): Promise<{ ok: true } | { ok: false }> {
-  const featureKey = "daily_question_ai_generation";
-  const limit = await getPlanFeatureLimit(serviceSupabase, plan, featureKey, 1);
-  if (!Number.isFinite(limit)) return { ok: true };
-
-  const windowKey = todayJstDateKey();
-
-  const { data: existing } = await serviceSupabase
-    .from("feature_usage_counters")
-    .select("id, count")
-    .eq("user_id", userId)
-    .eq("feature_key", featureKey)
-    .eq("window_key", windowKey)
-    .maybeSingle();
-
-  const currentCount = existing?.count ?? 0;
-  if (currentCount >= limit) return { ok: false };
-
-  if (existing) {
-    await serviceSupabase
-      .from("feature_usage_counters")
-      .update({ count: currentCount + 1, updated_at: new Date().toISOString() })
-      .eq("id", existing.id);
-  } else {
-    await serviceSupabase.from("feature_usage_counters").insert({
-      user_id: userId,
-      feature_key: featureKey,
-      window_type: "day",
       window_key: windowKey,
       count: 1,
     });

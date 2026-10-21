@@ -9,6 +9,7 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { COIN_EXPIRY_MONTHS, COIN_PACKS, priceCoins } from "@/lib/coins";
 import {
   COMPANY_INTERVIEW_PRICE_JPY,
+  DOCUMENT_RULES,
   limitText,
   PRACTICE_RULES,
   type IndividualPlanKey,
@@ -41,6 +42,7 @@ function individualFeatures(key: IndividualPlanKey): string[] {
     `1回の長さ：${limitText(r.maxMinutes, "分")}`,
     `練習できる職種：${r.jobTypes == null ? "無制限" : `月${r.jobTypes}つまで`}`,
     `保存できる結果：${r.results == null ? "無制限" : `新しい${r.results}件`}`,
+    `書類生成AI：1日${DOCUMENT_RULES[key].perDay}回・月${DOCUMENT_RULES[key].perMonth}回まで`,
     "根拠つきの評価・プロフィール公開・オファー：全プラン同じ",
   ];
 }

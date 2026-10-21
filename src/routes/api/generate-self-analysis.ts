@@ -6,7 +6,7 @@
  *   - basic: free/lightは月3回まで、pro無制限
  *   - detailed: プロ限定機能
  *
- * プロフィール・オンボーディング回答・「今日の質問」の回答を全て文脈として
+ * プロフィール・オンボーディング回答を全て文脈として
  * 渡し、強み・弱み・懸念点・アピールポイント・向いている職業/学校傾向を
  * 構造化データとして生成する。
  */
@@ -69,29 +69,21 @@ export const Route = createFileRoute("/api/generate-self-analysis")({
         const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
 
         // 個人・受験生プランの回数制限は一時的に撤廃
-        // 文脈: プロフィール全項目・登録回答・毎日の質問回答(全件)
-        const [{ data: careerProfile }, { data: onboarding }, { data: dailyAnswers }] =
-          await Promise.all([
-            supabase
-              .from("user_career_profiles")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("mode", dbMode)
-              .maybeSingle(),
-            supabase
-              .from("onboarding_answers")
-              .select("answers")
-              .eq("user_id", userId)
-              .eq("mode", dbMode)
-              .maybeSingle(),
-            supabase
-              .from("daily_question_responses")
-              .select("question_text, category, answer_text")
-              .eq("user_id", userId)
-              .eq("mode", dbMode)
-              .order("created_at", { ascending: false })
-              .limit(100),
-          ]);
+        // 文脈: プロフィール全項目・登録回答
+        const [{ data: careerProfile }, { data: onboarding }] = await Promise.all([
+          supabase
+            .from("user_career_profiles")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("mode", dbMode)
+            .maybeSingle(),
+          supabase
+            .from("onboarding_answers")
+            .select("answers")
+            .eq("user_id", userId)
+            .eq("mode", dbMode)
+            .maybeSingle(),
+        ]);
 
         const profileSummary = careerProfile
           ? JSON.stringify({
@@ -108,10 +100,6 @@ export const Route = createFileRoute("/api/generate-self-analysis")({
               custom_fields: careerProfile.custom_fields,
             })
           : "(プロフィール未入力)";
-
-        const qaHistory = (dailyAnswers ?? [])
-          .map((r: any) => `Q(${r.category ?? "未分類"}): ${r.question_text}\nA: ${r.answer_text}`)
-          .join("\n\n");
 
         const modeLabel = dbMode === "student" ? "受験生（入試対策）" : "社会人（就活・転職）";
         const depthHint =
@@ -140,10 +128,7 @@ ${depthHint}
 ${profileSummary}
 
 # 登録時の回答
-${onboarding?.answers ? JSON.stringify(onboarding.answers) : "(なし)"}
-
-# これまでの「今日の質問」への回答(全件)
-${qaHistory || "(まだ回答なし)"}`;
+${onboarding?.answers ? JSON.stringify(onboarding.answers) : "(なし)"}`;
 
         const anthropic = new Anthropic({ apiKey: anthropicKey });
         let parsed: {

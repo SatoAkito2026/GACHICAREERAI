@@ -112,7 +112,7 @@ export function SelfAnalysisContent({
           自己分析レポート
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
-          プロフィールと「今日の質問」の回答をもとに、AIが自己分析をまとめます。
+          プロフィールと模擬面接の内容をもとに、AIが自己分析をまとめます。
         </p>
 
         <div className="mt-6 flex gap-3">

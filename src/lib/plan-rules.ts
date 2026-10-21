@@ -83,3 +83,14 @@ export function normalizeJobType(s: string | null | undefined): string {
  * 実際の請求額は Stripe の従量課金の Price（create-subscription.ts の PRICE_IDS.company_metered）で決まる。ここは表示用。
  */
 export const COMPANY_INTERVIEW_PRICE_JPY = 5500;
+
+/** 書類生成AI（履歴書・職務経歴書・志望理由書など）の回数。種類は全プランで同じ */
+export const DOCUMENT_RULES: Record<IndividualPlanKey, { perDay: number; perMonth: number }> = {
+  free: { perDay: 1, perMonth: 3 },
+  individual_light: { perDay: 2, perMonth: 5 },
+  individual_pro: { perDay: 3, perMonth: 15 },
+};
+
+export function documentRule(plan: string | null | undefined) {
+  return DOCUMENT_RULES[toIndividualPlan(plan)];
+}

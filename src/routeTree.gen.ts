@@ -33,7 +33,6 @@ import { Route as ApiCreateActorInterviewRouteImport } from './routes/api/create
 import { Route as ApiCreatePracticeSessionRouteImport } from './routes/api/create-practice-session'
 import { Route as ApiCreateSubscriptionRouteImport } from './routes/api/create-subscription'
 import { Route as ApiCustomerPortalRouteImport } from './routes/api/customer-portal'
-import { Route as ApiDailyQuestionRouteImport } from './routes/api/daily-question'
 import { Route as ApiDeleteAccountRouteImport } from './routes/api/delete-account'
 import { Route as ApiExtractTemplateFieldsRouteImport } from './routes/api/extract-template-fields'
 import { Route as ApiGenerateDocumentRouteImport } from './routes/api/generate-document'
@@ -91,7 +90,6 @@ import { Route as BusinessCompanySettingsRouteImport } from './routes/business/c
 import { Route as BusinessSchoolIndexRouteImport } from './routes/business/school/index'
 import { Route as BusinessSchoolStudentsRouteImport } from './routes/business/school/students'
 import { Route as PrivateIndividualIndexRouteImport } from './routes/private/individual/index'
-import { Route as PrivateIndividualDailyQuestionsRouteImport } from './routes/private/individual/daily-questions'
 import { Route as PrivateIndividualDocumentsRouteImport } from './routes/private/individual/documents'
 import { Route as PrivateIndividualHistoryRouteImport } from './routes/private/individual/history'
 import { Route as PrivateIndividualOffersRouteImport } from './routes/private/individual/offers'
@@ -103,7 +101,6 @@ import { Route as PrivateIndividualResearchRouteImport } from './routes/private/
 import { Route as PrivateIndividualSelfAnalysisRouteImport } from './routes/private/individual/self-analysis'
 import { Route as PrivateIndividualTalentRouteImport } from './routes/private/individual/talent'
 import { Route as PrivateStudentIndexRouteImport } from './routes/private/student/index'
-import { Route as PrivateStudentDailyQuestionsRouteImport } from './routes/private/student/daily-questions'
 import { Route as PrivateStudentDocumentsRouteImport } from './routes/private/student/documents'
 import { Route as PrivateStudentHistoryRouteImport } from './routes/private/student/history'
 import { Route as PrivateStudentOnboardingRouteImport } from './routes/private/student/onboarding'
@@ -240,11 +237,6 @@ const ApiCreateSubscriptionRoute = ApiCreateSubscriptionRouteImport.update({
 const ApiCustomerPortalRoute = ApiCustomerPortalRouteImport.update({
   id: '/api/customer-portal',
   path: '/api/customer-portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiDailyQuestionRoute = ApiDailyQuestionRouteImport.update({
-  id: '/api/daily-question',
-  path: '/api/daily-question',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDeleteAccountRoute = ApiDeleteAccountRouteImport.update({
@@ -537,12 +529,6 @@ const PrivateIndividualIndexRoute = PrivateIndividualIndexRouteImport.update({
   path: '/private/individual/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateIndividualDailyQuestionsRoute =
-  PrivateIndividualDailyQuestionsRouteImport.update({
-    id: '/private/individual/daily-questions',
-    path: '/private/individual/daily-questions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const PrivateIndividualDocumentsRoute =
   PrivateIndividualDocumentsRouteImport.update({
     id: '/private/individual/documents',
@@ -605,12 +591,6 @@ const PrivateStudentIndexRoute = PrivateStudentIndexRouteImport.update({
   path: '/private/student/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateStudentDailyQuestionsRoute =
-  PrivateStudentDailyQuestionsRouteImport.update({
-    id: '/private/student/daily-questions',
-    path: '/private/student/daily-questions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const PrivateStudentDocumentsRoute = PrivateStudentDocumentsRouteImport.update({
   id: '/private/student/documents',
   path: '/private/student/documents',
@@ -720,7 +700,6 @@ export interface FileRoutesByFullPath {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
@@ -774,7 +753,6 @@ export interface FileRoutesByFullPath {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -785,7 +763,6 @@ export interface FileRoutesByFullPath {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -832,7 +809,6 @@ export interface FileRoutesByTo {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
@@ -886,7 +862,6 @@ export interface FileRoutesByTo {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -897,7 +872,6 @@ export interface FileRoutesByTo {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -945,7 +919,6 @@ export interface FileRoutesById {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
@@ -999,7 +972,6 @@ export interface FileRoutesById {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -1010,7 +982,6 @@ export interface FileRoutesById {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -1059,7 +1030,6 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
@@ -1113,7 +1083,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1124,7 +1093,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1171,7 +1139,6 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
@@ -1225,7 +1192,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1236,7 +1202,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1283,7 +1248,6 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
@@ -1337,7 +1301,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1348,7 +1311,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1396,7 +1358,6 @@ export interface RootRouteChildren {
   ApiCreatePracticeSessionRoute: typeof ApiCreatePracticeSessionRoute
   ApiCreateSubscriptionRoute: typeof ApiCreateSubscriptionRoute
   ApiCustomerPortalRoute: typeof ApiCustomerPortalRoute
-  ApiDailyQuestionRoute: typeof ApiDailyQuestionRoute
   ApiDeleteAccountRoute: typeof ApiDeleteAccountRoute
   ApiExtractTemplateFieldsRoute: typeof ApiExtractTemplateFieldsRoute
   ApiGenerateDocumentRoute: typeof ApiGenerateDocumentRoute
@@ -1450,7 +1411,6 @@ export interface RootRouteChildren {
   BusinessCompanyScreeningRoute: typeof BusinessCompanyScreeningRoute
   BusinessCompanySettingsRoute: typeof BusinessCompanySettingsRoute
   BusinessSchoolStudentsRoute: typeof BusinessSchoolStudentsRoute
-  PrivateIndividualDailyQuestionsRoute: typeof PrivateIndividualDailyQuestionsRoute
   PrivateIndividualDocumentsRoute: typeof PrivateIndividualDocumentsRoute
   PrivateIndividualHistoryRoute: typeof PrivateIndividualHistoryRoute
   PrivateIndividualOffersRoute: typeof PrivateIndividualOffersRoute
@@ -1461,7 +1421,6 @@ export interface RootRouteChildren {
   PrivateIndividualResearchRoute: typeof PrivateIndividualResearchRoute
   PrivateIndividualSelfAnalysisRoute: typeof PrivateIndividualSelfAnalysisRoute
   PrivateIndividualTalentRoute: typeof PrivateIndividualTalentRoute
-  PrivateStudentDailyQuestionsRoute: typeof PrivateStudentDailyQuestionsRoute
   PrivateStudentDocumentsRoute: typeof PrivateStudentDocumentsRoute
   PrivateStudentHistoryRoute: typeof PrivateStudentHistoryRoute
   PrivateStudentOnboardingRoute: typeof PrivateStudentOnboardingRoute
@@ -1652,13 +1611,6 @@ declare module '@tanstack/react-router' {
       path: '/api/customer-portal'
       fullPath: '/api/customer-portal'
       preLoaderRoute: typeof ApiCustomerPortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/daily-question': {
-      id: '/api/daily-question'
-      path: '/api/daily-question'
-      fullPath: '/api/daily-question'
-      preLoaderRoute: typeof ApiDailyQuestionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/delete-account': {
@@ -2060,13 +2012,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateIndividualIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/private/individual/daily-questions': {
-      id: '/private/individual/daily-questions'
-      path: '/private/individual/daily-questions'
-      fullPath: '/private/individual/daily-questions'
-      preLoaderRoute: typeof PrivateIndividualDailyQuestionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/private/individual/documents': {
       id: '/private/individual/documents'
       path: '/private/individual/documents'
@@ -2142,13 +2087,6 @@ declare module '@tanstack/react-router' {
       path: '/private/student'
       fullPath: '/private/student/'
       preLoaderRoute: typeof PrivateStudentIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/private/student/daily-questions': {
-      id: '/private/student/daily-questions'
-      path: '/private/student/daily-questions'
-      fullPath: '/private/student/daily-questions'
-      preLoaderRoute: typeof PrivateStudentDailyQuestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/student/documents': {
@@ -2284,7 +2222,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCreatePracticeSessionRoute: ApiCreatePracticeSessionRoute,
   ApiCreateSubscriptionRoute: ApiCreateSubscriptionRoute,
   ApiCustomerPortalRoute: ApiCustomerPortalRoute,
-  ApiDailyQuestionRoute: ApiDailyQuestionRoute,
   ApiDeleteAccountRoute: ApiDeleteAccountRoute,
   ApiExtractTemplateFieldsRoute: ApiExtractTemplateFieldsRoute,
   ApiGenerateDocumentRoute: ApiGenerateDocumentRoute,
@@ -2338,7 +2275,6 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyScreeningRoute: BusinessCompanyScreeningRoute,
   BusinessCompanySettingsRoute: BusinessCompanySettingsRoute,
   BusinessSchoolStudentsRoute: BusinessSchoolStudentsRoute,
-  PrivateIndividualDailyQuestionsRoute: PrivateIndividualDailyQuestionsRoute,
   PrivateIndividualDocumentsRoute: PrivateIndividualDocumentsRoute,
   PrivateIndividualHistoryRoute: PrivateIndividualHistoryRoute,
   PrivateIndividualOffersRoute: PrivateIndividualOffersRoute,
@@ -2349,7 +2285,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateIndividualResearchRoute: PrivateIndividualResearchRoute,
   PrivateIndividualSelfAnalysisRoute: PrivateIndividualSelfAnalysisRoute,
   PrivateIndividualTalentRoute: PrivateIndividualTalentRoute,
-  PrivateStudentDailyQuestionsRoute: PrivateStudentDailyQuestionsRoute,
   PrivateStudentDocumentsRoute: PrivateStudentDocumentsRoute,
   PrivateStudentHistoryRoute: PrivateStudentHistoryRoute,
   PrivateStudentOnboardingRoute: PrivateStudentOnboardingRoute,

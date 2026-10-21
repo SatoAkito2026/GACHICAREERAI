@@ -79,7 +79,6 @@ export const Route = createFileRoute("/api/career-chat")({
 
         // プランごとにAIへ渡す文脈量を変える(free/lightはコスト削減のため絞り、
         // proは会話履歴を無制限、その他の参照範囲も最大にする)
-        const dailyAnswerLimit = isPro ? 200 : isLight ? 30 : 10;
         const historyLimit = isLight ? 20 : 10; // proは無制限なので別扱い(下記参照)
         const generatedDocsLimit = isPro ? 10 : isLight ? 3 : 0;
         const selfAnalysisLimit = isPro ? 3 : 0;
@@ -128,7 +127,6 @@ export const Route = createFileRoute("/api/career-chat")({
         const [
           { data: careerProfile },
           { data: onboarding },
-          { data: dailyAnswers },
           { data: generatedDocs },
           { data: selfAnalysis },
         ] = await Promise.all([
@@ -144,13 +142,6 @@ export const Route = createFileRoute("/api/career-chat")({
             .eq("user_id", userId)
             .eq("mode", dbMode)
             .maybeSingle(),
-          supabase
-            .from("daily_question_responses")
-            .select("question_text, category, answer_text")
-            .eq("user_id", userId)
-            .eq("mode", dbMode)
-            .order("created_at", { ascending: false })
-            .limit(dailyAnswerLimit),
           generatedDocsLimit > 0
             ? supabase
                 .from("generated_documents")
@@ -189,10 +180,6 @@ export const Route = createFileRoute("/api/career-chat")({
               custom_fields: careerProfile.custom_fields,
             })
           : "(プロフィール未入力)";
-
-        const qaHistory = (dailyAnswers ?? [])
-          .map((r: any) => `Q(${r.category ?? "未分類"}): ${r.question_text}\nA: ${r.answer_text}`)
-          .join("\n\n");
 
         const generatedDocsSummary = (generatedDocs ?? [])
           .map(
@@ -233,9 +220,6 @@ ${profileSummary}
 
 # 登録時の回答
 ${onboarding?.answers ? JSON.stringify(onboarding.answers) : "(なし)"}
-
-# これまでの「今日の質問」への回答(自己分析の材料。全件)
-${qaHistory || "(まだ回答なし)"}
 
 # これまでにAIが生成した書類(履歴書・志望理由書等)
 ${generatedDocsSummary || "(まだなし)"}

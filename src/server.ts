@@ -2,7 +2,6 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { runDailyReminderJob } from "./lib/daily-reminders";
 import { runTalentSummaryJob } from "./lib/talent";
 
 type ServerEntry = {
@@ -109,7 +108,6 @@ export default {
         process.env[key] = value;
       }
     }
-    ctx.waitUntil(runDailyReminderJob());
     ctx.waitUntil(runTalentSummaryJob());
   },
 };

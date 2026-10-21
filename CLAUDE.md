@@ -36,10 +36,12 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 回数と職種は `create-practice-session.ts` でチェック（AIと話し始めた練習だけ数える。日本時間で日・月を区切る。職種は月ごとに入れ替え可）
 - 時間は `interview-turn.ts` で止める（上限で締めの指示、+3分でAIを呼ばずに終了）。開始時刻は `screening_data.practice_started_at`
 - 結果は新しい順に上限まで表示し、古いものは消さずに隠す（`PracticeHistoryContent`）
+- 書類生成AIの回数は `DOCUMENT_RULES`（無料 1日1・月3／ライト 1日2・月5／プロ 1日3・月15、種類は全プラン同じ）。`generate-document.ts` が `feature_usage_counters`（`doc_generation`）で数えるので、書類を消しても回数は戻らない
 - Stripe は `STRIPE_PRICE_INDIVIDUAL_LIGHT` / `_PRO` があればその Price、なければ `PRICE_IDS` の Price（金額が違う・停止中なら同じ商品で値段だけ新しくして申し込む）
 
 ## スマホ・アプリ化
 
+- 「今日の質問」とリマインドメールは廃止（DBのテーブルは残している）
 - 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）
 - ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`
 - ページは自動で分割して読み込む。ルートファイル（`src/routes/`）から `Route` 以外を export すると分割されなくなるので、共有する画面は `src/components/pages/` に置く
