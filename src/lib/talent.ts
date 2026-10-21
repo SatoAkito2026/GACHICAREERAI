@@ -124,6 +124,16 @@ ${COMPETENCIES.map((c) => `- ${c.key}: ${c.label}`).join("\n")}
  * 企業（採用担当）向けの見立て。本人向けの練習アドバイス（改善点・模範回答・点数）とは分けて作り、
  * 企業にはこちらだけを見せる。合否や推薦はしない（運営が推薦・仲介しないため）。
  */
+/** 練習の設定（save-interview.ts が interviews.practice_settings に保存する） */
+export type PracticeSettings = {
+  avatar_style: string | null;
+  interview_type: string | null;
+  max_minutes: number | null;
+  job_type: string | null;
+  target_company: string | null;
+  custom_questions: string[];
+};
+
 export type RecruiterView = {
   summary: string;
   strengths: { point: string; evidence: string[] }[];
@@ -189,7 +199,7 @@ export async function loadCompanyInterviews(
 ) {
   const { data: interviews } = await supabase
     .from("interviews")
-    .select("id, created_at, job_type, recording_path")
+    .select("id, created_at, job_type, recording_path, practice_settings")
     .eq("user_id", candidateUserId)
     .eq("mode", "individual")
     .neq("impression", "途中退出")
@@ -226,6 +236,7 @@ export async function loadCompanyInterviews(
       recordingUrl,
       competencies: (f.competencies ?? []) as InterviewCompetency[],
       recruiterView: (f.recruiter_view ?? null) as RecruiterView | null,
+      settings: (iv.practice_settings ?? null) as PracticeSettings | null,
       transcript: (turns ?? [])
         .filter((t) => t.interview_id === iv.id)
         .map((t) => ({ q: t.question, a: t.memo })),

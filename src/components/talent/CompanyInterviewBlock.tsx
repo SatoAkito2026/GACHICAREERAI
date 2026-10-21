@@ -5,6 +5,7 @@
  */
 import { useState } from "react";
 import { C, CompetencyBars, EvidenceQuote, Tag } from "@/components/talent/TalentUI";
+import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
 
 export type CompanyInterview = {
   id: string;
@@ -26,6 +27,15 @@ export type CompanyInterview = {
     suggestedQuestions: string[];
   } | null;
   transcript: { q: string; a: string }[];
+  /** 練習の設定（古い面接には無い） */
+  settings?: {
+    avatar_style: string | null;
+    interview_type: string | null;
+    max_minutes: number | null;
+    job_type: string | null;
+    target_company: string | null;
+    custom_questions: string[];
+  } | null;
 };
 
 function competencyAverage(iv: CompanyInterview): string | null {
@@ -62,6 +72,7 @@ export function CompanyInterviewBlock({
       </button>
       {open && (
         <div className="flex flex-col gap-4 px-4 pb-4">
+          {iv.settings && <SettingsRow settings={iv.settings} />}
           {iv.recordingUrl && (
             <video
               src={iv.recordingUrl}
@@ -196,6 +207,41 @@ function ListBox({ title, items }: { title: string; items: string[] }) {
           <li key={i}>{x}</li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function SettingsRow({ settings }: { settings: NonNullable<CompanyInterview["settings"]> }) {
+  const tags = [
+    settings.job_type ? `職種：${settings.job_type}` : null,
+    settings.avatar_style
+      ? `面接官：${AVATAR_STYLE_LABELS[settings.avatar_style] ?? settings.avatar_style}`
+      : null,
+    settings.max_minutes ? `${settings.max_minutes}分まで` : null,
+    settings.target_company ? `応募先の想定：${settings.target_company}` : null,
+  ].filter(Boolean) as string[];
+  return (
+    <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: C.card2 }}>
+      <p className="text-[12px]" style={{ color: C.sub, fontWeight: 700 }}>
+        この練習の設定
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map((t) => (
+          <Tag key={t}>{t}</Tag>
+        ))}
+      </div>
+      {settings.custom_questions.length > 0 && (
+        <div>
+          <p className="text-[12px]" style={{ color: C.muted }}>
+            本人が「聞いてほしい」と設定した質問
+          </p>
+          <ul className="list-disc pl-5 text-[12px]" style={{ color: C.text, lineHeight: 1.7 }}>
+            {settings.custom_questions.map((q, i) => (
+              <li key={i}>{q}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

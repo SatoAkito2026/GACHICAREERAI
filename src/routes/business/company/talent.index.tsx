@@ -5,7 +5,6 @@ import { BusinessShell } from "@/components/ModeShell";
 import {
   C,
   CAREER_STAGE_LABELS,
-  COMPETENCY_LABELS,
   ErrorText,
   Loading,
   PageFrame,
@@ -15,6 +14,7 @@ import {
   talentApi,
   type SummaryCompetency,
 } from "@/components/talent/TalentUI";
+import { INDUSTRY_OPTIONS, PREFECTURE_OPTIONS } from "@/lib/career-options";
 import { CoinBadge, CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 
 export const Route = createFileRoute("/business/company/talent/")({
@@ -33,6 +33,7 @@ type Candidate = {
   competencies: SummaryCompetency[];
   interviewCount: number;
   competencyAverage: number | null;
+  practicedJobs: string[];
   priceCoins: number;
   hasRecording: boolean;
   updatedAt: string | null;
@@ -45,6 +46,8 @@ function TalentSearchPage() {
   const [stage, setStage] = useState("");
   const [minScore, setMinScore] = useState("");
   const [sort, setSort] = useState("recent");
+  const [job, setJob] = useState("");
+  const [area, setArea] = useState("");
   const [list, setList] = useState<Candidate[] | null>(null);
   const [coins, setCoins] = useState<CoinBalance | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
@@ -53,7 +56,7 @@ function TalentSearchPage() {
 
   const load = useCallback(async () => {
     setList(null);
-    const q = new URLSearchParams({ keyword, stage, minScore, sort });
+    const q = new URLSearchParams({ keyword, stage, minScore, sort, job, area });
     const r = await talentApi<{ candidates: Candidate[]; coins: CoinBalance }>(
       `/api/talent/search?${q}`,
     );
@@ -66,7 +69,7 @@ function TalentSearchPage() {
       setError(r.data.error ?? "読み込みに失敗しました");
       setNeedsCompany(!!r.data.needsCompany);
     }
-  }, [keyword, stage, minScore, sort]);
+  }, [keyword, stage, minScore, sort, job, area]);
 
   useEffect(() => {
     const t = setTimeout(() => void load(), keyword ? 400 : 0);
@@ -101,7 +104,7 @@ function TalentSearchPage() {
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="キーワード（職種・強みなど）"
+            placeholder="キーワード（職種・強み・希望など）"
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none md:col-span-2"
             style={inputStyle}
           />
@@ -119,6 +122,32 @@ function TalentSearchPage() {
             ))}
           </select>
           <select
+            value={job}
+            onChange={(e) => setJob(e.target.value)}
+            className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+            style={inputStyle}
+          >
+            <option value="">すべての職種</option>
+            {INDUSTRY_OPTIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+            style={inputStyle}
+          >
+            <option value="">すべてのエリア</option>
+            {PREFECTURE_OPTIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
@@ -126,11 +155,6 @@ function TalentSearchPage() {
           >
             <option value="recent">新しい順</option>
             <option value="score">評価の平均が高い順</option>
-            {Object.entries(COMPETENCY_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                「{v}」が高い順
-              </option>
-            ))}
           </select>
           <select
             value={minScore}
@@ -226,7 +250,8 @@ function CandidateCard({ c }: { c: Candidate }) {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2 text-[12px]" style={{ color: C.muted }}>
-        {c.desiredJobs && <span>希望：{c.desiredJobs}</span>}
+        {c.practicedJobs.length > 0 && <span>練習した職種：{c.practicedJobs.join("・")}</span>}
+        {c.desiredJobs && <span>／ 希望：{c.desiredJobs}</span>}
         {c.desiredLocations && <span>／ {c.desiredLocations}</span>}
       </div>
       <div className="flex items-center justify-between">
