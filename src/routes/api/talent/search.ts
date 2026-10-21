@@ -75,6 +75,7 @@ export const Route = createFileRoute("/api/talent/search")({
           .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
           .eq("mode", "individual")
           .neq("impression", "途中退出")
+          .eq("shown_to_companies", true)
           .limit(5000);
         const practicedJobs = new Map<string, string[]>();
         for (const iv of practiced ?? []) {

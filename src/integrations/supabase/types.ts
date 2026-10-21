@@ -958,6 +958,7 @@ export type Database = {
           job_type: string | null;
           mode: string | null;
           practice_settings: Json | null;
+          shown_to_companies: boolean;
           priorities: string[] | null;
           recording_path: string | null;
           screening_candidate_id: string | null;
@@ -975,6 +976,7 @@ export type Database = {
           job_type?: string | null;
           mode?: string | null;
           practice_settings?: Json | null;
+          shown_to_companies?: boolean;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;
@@ -992,6 +994,7 @@ export type Database = {
           job_type?: string | null;
           mode?: string | null;
           practice_settings?: Json | null;
+          shown_to_companies?: boolean;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;
