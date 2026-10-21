@@ -1,20 +1,9 @@
 /**
- * 本人：企業からどう見えるか（企業の「人材を探す」と同じカード表示）
- * - 一覧に出るカードの見本
- * - 面接ごとの結果のカード。開くと企業に見える中身、削除もできる
+ * 本人：企業に見える面接の結果をカードで並べる。開くと企業に見える中身、削除もできる
  */
 import { useEffect, useState } from "react";
-import { Trash2, Video, X } from "lucide-react";
-import {
-  C,
-  CAREER_STAGE_LABELS,
-  Card,
-  ErrorText,
-  Loading,
-  Tag,
-  talentApi,
-  type TalentSummary,
-} from "@/components/talent/TalentUI";
+import { Trash2, X } from "lucide-react";
+import { C, Card, ErrorText, Loading, Tag, talentApi } from "@/components/talent/TalentUI";
 import {
   CompanyInterviewBlock,
   type CompanyInterview,
@@ -25,92 +14,6 @@ function average(scores: (number | null)[]): number | null {
   const list = scores.filter((n): n is number => typeof n === "number");
   if (list.length === 0) return null;
   return list.reduce((a, b) => a + b, 0) / list.length;
-}
-
-/** 企業の人材一覧に出るカードの見本（名前は伏せた状態） */
-export function ListPreviewCard({
-  code,
-  headline,
-  careerStage,
-  desiredJobs,
-  desiredLocations,
-  summary,
-  interviews,
-}: {
-  code: string;
-  headline: string | null;
-  careerStage: string | null;
-  desiredJobs: string | null;
-  desiredLocations: string | null;
-  summary: TalentSummary | null;
-  interviews: CompanyInterview[];
-}) {
-  const competencies = summary?.competencies ?? [];
-  const avg = average(competencies.map((c) => c.score));
-  const top = [...competencies]
-    .filter((x) => x.score !== null)
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    .slice(0, 3);
-  const practicedJobs = [
-    ...new Set(interviews.map((iv) => iv.jobType).filter((j): j is string => !!j)),
-  ];
-  const hasRecording = interviews.some((iv) => iv.recordingUrl);
-  return (
-    <div
-      className="flex flex-col gap-3 rounded-2xl p-5"
-      style={{ background: C.card, border: `1px solid ${C.border}` }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p style={{ color: C.text, fontSize: 15, fontWeight: 700 }}>
-            {headline || "（ひとこと未登録）"}
-          </p>
-          <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
-            No.{code.slice(0, 6).toUpperCase()} ・{" "}
-            {careerStage ? CAREER_STAGE_LABELS[careerStage] : "状況未登録"}
-          </p>
-        </div>
-        <div className="text-right">
-          <p style={{ color: C.accent, fontSize: 22, fontWeight: 800, lineHeight: 1 }}>
-            {avg?.toFixed(1) ?? "-"}
-          </p>
-          <p className="text-[10px]" style={{ color: C.muted }}>
-            評価の平均（5点満点）
-          </p>
-        </div>
-      </div>
-      {summary?.overview && (
-        <p className="line-clamp-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-          {summary.overview}
-        </p>
-      )}
-      <div className="flex flex-wrap gap-1.5">
-        {(summary?.strengths ?? []).map((s) => (
-          <Tag key={s.title} color={C.accent}>
-            {s.title}
-          </Tag>
-        ))}
-        {top.map((x) => (
-          <Tag key={x.key}>
-            {x.label} {x.score?.toFixed(1)}
-          </Tag>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-[12px]" style={{ color: C.muted }}>
-        {practicedJobs.length > 0 && <span>練習した職種：{practicedJobs.join("・")}</span>}
-        {desiredJobs && <span>／ 希望：{desiredJobs}</span>}
-        {desiredLocations && <span>／ {desiredLocations}</span>}
-      </div>
-      <span className="flex items-center gap-2 text-[12px]" style={{ color: C.muted }}>
-        面接 {interviews.length}回
-        {hasRecording && (
-          <span className="flex items-center gap-1">
-            <Video size={12} /> 録画あり
-          </span>
-        )}
-      </span>
-    </div>
-  );
 }
 
 /** 面接ごとの結果（企業に見える内容）をカードで並べる。開くと詳しく見られ、削除もできる */

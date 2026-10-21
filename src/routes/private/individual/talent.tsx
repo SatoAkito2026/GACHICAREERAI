@@ -2,11 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PrivateShell } from "@/components/ModeShell";
 import { PointsCard } from "@/components/PointsCard";
-import {
-  ListPreviewCard,
-  MyInterviewCards,
-  useMyInterviews,
-} from "@/components/talent/MyPublicPreview";
+import { MyInterviewCards, useMyInterviews } from "@/components/talent/MyPublicPreview";
 import {
   Button,
   C,
@@ -16,7 +12,6 @@ import {
   Field,
   Loading,
   PageFrame,
-  SummaryView,
   Tag,
   inputStyle,
   talentApi,
@@ -63,7 +58,7 @@ function TalentProfilePage() {
   const [unlockCount, setUnlockCount] = useState(0);
   const [form, setForm] = useState(EMPTY);
   const [consent, setConsent] = useState(false);
-  const [saving, setSaving] = useState<"" | "save" | "publish" | "refresh">("");
+  const [saving, setSaving] = useState<"" | "save" | "publish">("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const { interviews, removeLocal } = useMyInterviews();
@@ -117,18 +112,6 @@ function TalentProfilePage() {
     );
   };
 
-  const refresh = async () => {
-    setSaving("refresh");
-    setError("");
-    const r = await talentApi<{ summary: TalentSummary | null }>("/api/talent/my-profile", {
-      action: "refresh",
-    });
-    setSaving("");
-    if (!r.ok) return setError(r.data.error ?? "更新に失敗しました");
-    setProfile((p) => (p ? { ...p, summary: r.data.summary } : p));
-    setNotice("人物まとめを更新しました");
-  };
-
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -173,23 +156,6 @@ function TalentProfilePage() {
                 </p>
               )}
             </Card>
-
-            {profile && (
-              <Card title="企業の一覧での見え方">
-                <p className="mb-3 text-[12px]" style={{ color: C.muted }}>
-                  企業の「人材を探す」には、名前を伏せたこのカードが並びます。
-                </p>
-                <ListPreviewCard
-                  code={profile.public_code}
-                  headline={profile.headline}
-                  careerStage={profile.career_stage}
-                  desiredJobs={profile.desired_jobs}
-                  desiredLocations={profile.desired_locations}
-                  summary={profile.summary}
-                  interviews={interviews ?? []}
-                />
-              </Card>
-            )}
 
             <Card title="プロフィール">
               <div className="flex flex-col gap-4">
@@ -351,37 +317,6 @@ function TalentProfilePage() {
                     </Button>
                   </div>
                 </div>
-              )}
-            </Card>
-
-            <Card
-              title="企業に見える人物まとめ"
-              right={
-                profile ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() => void refresh()}
-                    loading={saving === "refresh"}
-                  >
-                    最新の面接で更新
-                  </Button>
-                ) : undefined
-              }
-            >
-              {!profile ? (
-                <p className="text-[14px]" style={{ color: C.muted }}>
-                  プロフィールを保存すると、ここに企業から見える人物まとめが表示されます。
-                </p>
-              ) : (
-                <>
-                  <SummaryView summary={profile.summary} />
-                  {profile.summary_updated_at && (
-                    <p className="mt-4 text-[11px]" style={{ color: C.muted }}>
-                      最終更新：{new Date(profile.summary_updated_at).toLocaleString("ja-JP")}
-                      （模擬面接を受けると、1時間以内に自動で更新されます）
-                    </p>
-                  )}
-                </>
               )}
             </Card>
 
