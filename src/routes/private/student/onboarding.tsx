@@ -40,15 +40,9 @@ function StudentOnboardingPage() {
   const [name, setName] = useState("");
   const [furigana, setFurigana] = useState("");
   const [grade, setGrade] = useState("");
-  const [schoolName, setSchoolName] = useState("");
-  const [desiredSchool, setDesiredSchool] = useState("");
-  const [desiredFaculty, setDesiredFaculty] = useState("");
   const [examType, setExamType] = useState("");
   const [strongSubject, setStrongSubject] = useState("");
   const [weakSubject, setWeakSubject] = useState("");
-  const [activities, setActivities] = useState("");
-  const [motivation, setMotivation] = useState("");
-  const [selfPr, setSelfPr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (loading || modeLoading) {
@@ -67,8 +61,8 @@ function StudentOnboardingPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !desiredSchool.trim() || !motivation.trim()) {
-      toast.error("お名前・志望校・志望理由は入力してください");
+    if (!name.trim()) {
+      toast.error("お名前を入力してください");
       return;
     }
     setSubmitting(true);
@@ -78,15 +72,9 @@ function StudentOnboardingPage() {
         name,
         furigana,
         grade,
-        school_name: schoolName,
-        desired_school: desiredSchool,
-        desired_faculty: desiredFaculty,
         exam_type: examType,
         strong_subject: strongSubject,
         weak_subject: weakSubject,
-        activities,
-        motivation,
-        self_pr: selfPr,
       };
 
       await setMode("private_student");
@@ -110,15 +98,10 @@ function StudentOnboardingPage() {
             name,
             furigana,
             grade,
-            school_name: schoolName,
+            exam_type: examType,
             strong_subject: strongSubject,
             weak_subject: weakSubject,
           },
-          self_pr: selfPr,
-          desired_schools: desiredSchool
-            ? [{ school_name: desiredSchool, faculty: desiredFaculty, priority: 1 }]
-            : [],
-          extracurricular_activities: activities ? [{ text: activities }] : [],
         } as any,
         { onConflict: "user_id,mode" },
       ) as any);
@@ -144,7 +127,7 @@ function StudentOnboardingPage() {
           プロフィールを作りましょう
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
-          入試面接練習・志望理由書の精度を上げるための質問です。後からいつでも編集できます。
+          1分で終わります。志望校などは、練習のときやプロフィールでいつでも登録できます。
         </p>
 
         <div className="mt-6 flex gap-3">
@@ -204,49 +187,22 @@ function StudentOnboardingPage() {
                 ))}
               </select>
             </Field>
-            <Field label="現在の学校名">
-              <input
+
+            <Field label="受験形式">
+              <select
                 style={INPUT_STYLE}
-                value={schoolName}
-                onChange={(e) => setSchoolName(e.target.value)}
-                placeholder="○○高等学校"
-              />
+                value={examType}
+                onChange={(e) => setExamType(e.target.value)}
+              >
+                <option value="">選択してください</option>
+                {EXAM_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             </Field>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="志望校（第一志望）">
-              <input
-                style={INPUT_STYLE}
-                value={desiredSchool}
-                onChange={(e) => setDesiredSchool(e.target.value)}
-                placeholder="○○大学"
-              />
-            </Field>
-            <Field label="志望学部・学科">
-              <input
-                style={INPUT_STYLE}
-                value={desiredFaculty}
-                onChange={(e) => setDesiredFaculty(e.target.value)}
-                placeholder="△△学部"
-              />
-            </Field>
-          </div>
-
-          <Field label="受験形式">
-            <select
-              style={INPUT_STYLE}
-              value={examType}
-              onChange={(e) => setExamType(e.target.value)}
-            >
-              <option value="">選択してください</option>
-              {EXAM_TYPE_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </Field>
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="得意科目">
@@ -278,33 +234,6 @@ function StudentOnboardingPage() {
               </select>
             </Field>
           </div>
-
-          <Field label="部活動・課外活動">
-            <input
-              style={INPUT_STYLE}
-              value={activities}
-              onChange={(e) => setActivities(e.target.value)}
-              placeholder="例：バスケットボール部 部長"
-            />
-          </Field>
-
-          <Field label="志望理由（ひとこと）">
-            <textarea
-              style={{ ...INPUT_STYLE, minHeight: 80, resize: "vertical" }}
-              value={motivation}
-              onChange={(e) => setMotivation(e.target.value)}
-              placeholder="なぜその学校・学部を志望するのか、率直に書いてください"
-            />
-          </Field>
-
-          <Field label="自己PR（ひとこと）">
-            <textarea
-              style={{ ...INPUT_STYLE, minHeight: 80, resize: "vertical" }}
-              value={selfPr}
-              onChange={(e) => setSelfPr(e.target.value)}
-              placeholder="面接で伝えたいことを、思いつく範囲で"
-            />
-          </Field>
 
           <button
             type="submit"
