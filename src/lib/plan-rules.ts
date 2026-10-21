@@ -74,8 +74,12 @@ export function startOfMonthJst(now = new Date()): string {
   return new Date(jst.getTime() - JST_OFFSET_MS).toISOString();
 }
 
+/** 職種を選ばなかったときの仮の名前。職種の数には数えない */
+const PLACEHOLDER_JOB_TYPES = ["模擬面接", "受験"];
+
 export function normalizeJobType(s: string | null | undefined): string {
-  return (s ?? "").trim();
+  const v = (s ?? "").trim();
+  return PLACEHOLDER_JOB_TYPES.includes(v) ? "" : v;
 }
 
 /**

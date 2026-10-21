@@ -305,12 +305,30 @@ export function PracticeContent({
                 onChange={(e) => setPrefs((p) => ({ ...p, desired_job_type: e.target.value }))}
               >
                 <option value="">プロフィールの希望職種で練習する</option>
-                {INDUSTRY_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
+                {INDUSTRY_OPTIONS.map((opt) => {
+                  // 今月の職種の数が上限に達していたら、まだ使っていない職種は選べない
+                  const locked =
+                    !!usage &&
+                    usage.rule.jobTypes != null &&
+                    usage.usage.jobTypes.length >= usage.rule.jobTypes &&
+                    !usage.usage.jobTypes.includes(opt);
+                  return (
+                    <option key={opt} value={opt} disabled={locked}>
+                      {opt}
+                      {locked ? "（今月はこれ以上の職種を選べません）" : ""}
+                    </option>
+                  );
+                })}
               </select>
+              {usage && usage.rule.jobTypes != null && (
+                <p className="mt-2 text-[11px]" style={{ color: "#888888", lineHeight: 1.6 }}>
+                  今月練習できる職種は{usage.rule.jobTypes}つまでです（
+                  {usage.usage.jobTypes.length > 0
+                    ? `今月：${usage.usage.jobTypes.join("・")}`
+                    : "まだ選んでいません"}
+                  ）。来月になると入れ替えられます。
+                </p>
+              )}
             </>
           ) : (
             <>
