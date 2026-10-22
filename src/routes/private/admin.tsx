@@ -108,6 +108,7 @@ const SECTIONS = [
   { id: "market", label: "人材の市場" },
   { id: "company", label: "企業" },
   { id: "points", label: "ポイント" },
+  { id: "tiktok", label: "TikTok" },
 ] as const;
 
 function AdminDashboard() {
@@ -425,7 +426,177 @@ function AdminDashboard() {
             />
           </div>
         </Section>
+
+        {/* ---- TikTok ---- */}
+        <Section id="tiktok" title="TikTok用の動画（毎日17時に自動で1本）">
+          <TiktokVideos token={session?.access_token ?? ""} />
+        </Section>
       </main>
+    </div>
+  );
+}
+
+type TiktokVideo = {
+  id: string;
+  themeLabel: string;
+  title: string;
+  caption: string;
+  status: "rendering" | "ready" | "posted" | "failed";
+  durationSec: number | null;
+  error: string | null;
+  createdAt: string;
+  postedAt: string | null;
+  url: string | null;
+};
+
+const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
+  rendering: "作成中",
+  ready: "投稿待ち",
+  posted: "投稿済み",
+  failed: "失敗",
+};
+
+function TiktokVideos({ token }: { token: string }) {
+  const [videos, setVideos] = useState<TiktokVideo[] | null>(null);
+
+  const call = useCallback(
+    async (body?: unknown) => {
+      const res = await fetch("/api/tiktok-videos", {
+        method: body ? "POST" : "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        cache: "no-store",
+      });
+      return res.ok ? res.json() : null;
+    },
+    [token],
+  );
+  const load = useCallback(async () => {
+    const d = (await call()) as { videos: TiktokVideo[] } | null;
+    setVideos(d?.videos ?? []);
+  }, [call]);
+
+  useEffect(() => {
+    if (token) void load();
+  }, [token, load]);
+
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("投稿の文をコピーしました");
+    } catch {
+      // コピーできない端末では何もしない
+    }
+  };
+
+  if (!videos) return <p style={{ color: T.muted, fontSize: 13 }}>読み込み中...</p>;
+  if (videos.length === 0) {
+    return (
+      <Panel>
+        <p className="text-[13px]" style={{ color: T.muted, lineHeight: 1.8 }}>
+          まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok
+          video」から、今すぐ作ることもできます）。
+        </p>
+      </Panel>
+    );
+  }
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {videos.map((v) => (
+        <div
+          key={v.id}
+          className="flex flex-col gap-3 rounded-2xl p-4"
+          style={{ background: T.card, border: `1px solid ${T.border}` }}
+        >
+          <div className="flex items-center justify-between gap-2 text-[11px]">
+            <span style={{ color: T.muted }}>
+              {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
+            </span>
+            <span
+              className="rounded-md px-2 py-0.5"
+              style={{
+                background: v.status === "ready" ? T.accent : "#262626",
+                color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
+                fontWeight: 700,
+              }}
+            >
+              {VIDEO_STATUS[v.status]}
+            </span>
+          </div>
+          <p className="text-[14px]" style={{ color: T.text, fontWeight: 700 }}>
+            {v.title}
+          </p>
+          {v.url ? (
+            <video
+              src={v.url}
+              controls
+              preload="metadata"
+              playsInline
+              className="w-full rounded-xl"
+              style={{ aspectRatio: "9 / 16", background: "#000" }}
+            />
+          ) : v.status === "failed" ? (
+            <p className="text-[12px]" style={{ color: T.bad }}>
+              作れませんでした：{(v.error ?? "").slice(0, 120)}
+            </p>
+          ) : (
+            <p className="text-[12px]" style={{ color: T.muted }}>
+              作成中です…
+            </p>
+          )}
+          <p
+            className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
+            style={{ background: T.bg, color: T.sub }}
+          >
+            {v.caption}
+          </p>
+          <div className="flex flex-wrap gap-2 text-[12px]">
+            {v.url && (
+              <a
+                href={v.url}
+                download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
+                className="rounded-lg px-3 py-1.5"
+                style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
+              >
+                動画を保存
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => void copy(v.caption)}
+              className="rounded-lg px-3 py-1.5"
+              style={{ border: `1px solid ${T.border}`, color: T.sub }}
+            >
+              投稿の文をコピー
+            </button>
+            {v.status === "ready" && (
+              <button
+                type="button"
+                onClick={() => void call({ action: "posted", id: v.id }).then(load)}
+                className="rounded-lg px-3 py-1.5"
+                style={{ border: `1px solid ${T.border}`, color: T.sub }}
+              >
+                投稿済みにする
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("この動画を消しますか？")) {
+                  void call({ action: "delete", id: v.id }).then(load);
+                }
+              }}
+              className="rounded-lg px-3 py-1.5"
+              style={{ color: T.bad }}
+            >
+              削除
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

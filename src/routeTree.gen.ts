@@ -52,6 +52,7 @@ import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
+import { Route as ApiTiktokVideosRouteImport } from './routes/api/tiktok-videos'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
@@ -61,6 +62,7 @@ import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateInviteRouteImport } from './routes/private/invite'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
+import { Route as StudioTiktokRouteImport } from './routes/studio.tiktok'
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
 import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
 import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
@@ -69,6 +71,8 @@ import { Route as ApiNotificationsPeekRouteImport } from './routes/api/notificat
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
+import { Route as ApiStudioJobRouteImport } from './routes/api/studio/job'
+import { Route as ApiStudioUploadRouteImport } from './routes/api/studio/upload'
 import { Route as ApiTalentCoinsRouteImport } from './routes/api/talent/coins'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
@@ -340,6 +344,11 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTiktokVideosRoute = ApiTiktokVideosRouteImport.update({
+  id: '/api/tiktok-videos',
+  path: '/api/tiktok-videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWhisperTranscribeRoute = ApiWhisperTranscribeRouteImport.update({
   id: '/api/whisper-transcribe',
   path: '/api/whisper-transcribe',
@@ -385,6 +394,11 @@ const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   path: '/screening/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudioTiktokRoute = StudioTiktokRouteImport.update({
+  id: '/studio/tiktok',
+  path: '/studio/tiktok',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiJobsApplicantsRoute = ApiJobsApplicantsRouteImport.update({
   id: '/api/jobs/applicants',
   path: '/api/jobs/applicants',
@@ -423,6 +437,16 @@ const ApiSchoolStudentRoute = ApiSchoolStudentRouteImport.update({
 const ApiSchoolStudentsRoute = ApiSchoolStudentsRouteImport.update({
   id: '/api/school/students',
   path: '/api/school/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioJobRoute = ApiStudioJobRouteImport.update({
+  id: '/api/studio/job',
+  path: '/api/studio/job',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioUploadRoute = ApiStudioUploadRouteImport.update({
+  id: '/api/studio/upload',
+  path: '/api/studio/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTalentCoinsRoute = ApiTalentCoinsRouteImport.update({
@@ -743,6 +767,7 @@ export interface FileRoutesByFullPath {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -750,6 +775,7 @@ export interface FileRoutesByFullPath {
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
@@ -759,6 +785,8 @@ export interface FileRoutesByFullPath {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -856,6 +884,7 @@ export interface FileRoutesByTo {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -863,6 +892,7 @@ export interface FileRoutesByTo {
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business': typeof BusinessIndexRoute
   '/private': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
@@ -872,6 +902,8 @@ export interface FileRoutesByTo {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -970,6 +1002,7 @@ export interface FileRoutesById {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
@@ -977,6 +1010,7 @@ export interface FileRoutesById {
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening_/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
@@ -986,6 +1020,8 @@ export interface FileRoutesById {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -1085,6 +1121,7 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1092,6 +1129,7 @@ export interface FileRouteTypes {
     | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
+    | '/studio/tiktok'
     | '/business/'
     | '/private/'
     | '/api/jobs/applicants'
@@ -1101,6 +1139,8 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
+    | '/api/studio/job'
+    | '/api/studio/upload'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1198,6 +1238,7 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1205,6 +1246,7 @@ export interface FileRouteTypes {
     | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
+    | '/studio/tiktok'
     | '/business'
     | '/private'
     | '/api/jobs/applicants'
@@ -1214,6 +1256,8 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
+    | '/api/studio/job'
+    | '/api/studio/upload'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1311,6 +1355,7 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
     | '/interview/$token'
@@ -1318,6 +1363,7 @@ export interface FileRouteTypes {
     | '/private/invite'
     | '/private/welcome'
     | '/screening_/history'
+    | '/studio/tiktok'
     | '/business/'
     | '/private/'
     | '/api/jobs/applicants'
@@ -1327,6 +1373,8 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
+    | '/api/studio/job'
+    | '/api/studio/upload'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1425,6 +1473,7 @@ export interface RootRouteChildren {
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiTiktokVideosRoute: typeof ApiTiktokVideosRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
@@ -1432,6 +1481,7 @@ export interface RootRouteChildren {
   PrivateInviteRoute: typeof PrivateInviteRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
+  StudioTiktokRoute: typeof StudioTiktokRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
   ApiJobsApplicantsRoute: typeof ApiJobsApplicantsRoute
@@ -1441,6 +1491,8 @@ export interface RootRouteChildren {
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
+  ApiStudioJobRoute: typeof ApiStudioJobRoute
+  ApiStudioUploadRoute: typeof ApiStudioUploadRoute
   ApiTalentCoinsRoute: typeof ApiTalentCoinsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
@@ -1798,6 +1850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tiktok-videos': {
+      id: '/api/tiktok-videos'
+      path: '/api/tiktok-videos'
+      fullPath: '/api/tiktok-videos'
+      preLoaderRoute: typeof ApiTiktokVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/whisper-transcribe': {
       id: '/api/whisper-transcribe'
       path: '/api/whisper-transcribe'
@@ -1861,6 +1920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScreeningHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studio/tiktok': {
+      id: '/studio/tiktok'
+      path: '/studio/tiktok'
+      fullPath: '/studio/tiktok'
+      preLoaderRoute: typeof StudioTiktokRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/jobs/applicants': {
       id: '/api/jobs/applicants'
       path: '/api/jobs/applicants'
@@ -1915,6 +1981,20 @@ declare module '@tanstack/react-router' {
       path: '/api/school/students'
       fullPath: '/api/school/students'
       preLoaderRoute: typeof ApiSchoolStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/job': {
+      id: '/api/studio/job'
+      path: '/api/studio/job'
+      fullPath: '/api/studio/job'
+      preLoaderRoute: typeof ApiStudioJobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/upload': {
+      id: '/api/studio/upload'
+      path: '/api/studio/upload'
+      fullPath: '/api/studio/upload'
+      preLoaderRoute: typeof ApiStudioUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/talent/coins': {
@@ -2321,6 +2401,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiTiktokVideosRoute: ApiTiktokVideosRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
   InterviewTokenRoute: InterviewTokenRoute,
@@ -2328,6 +2409,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateInviteRoute: PrivateInviteRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
   ScreeningHistoryRoute: ScreeningHistoryRoute,
+  StudioTiktokRoute: StudioTiktokRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   PrivateIndexRoute: PrivateIndexRoute,
   ApiJobsApplicantsRoute: ApiJobsApplicantsRoute,
@@ -2337,6 +2419,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
+  ApiStudioJobRoute: ApiStudioJobRoute,
+  ApiStudioUploadRoute: ApiStudioUploadRoute,
   ApiTalentCoinsRoute: ApiTalentCoinsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,

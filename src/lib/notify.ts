@@ -15,7 +15,8 @@ export type NoticeKind =
   | "message"
   | "application"
   | "practice_reminder"
-  | "referral";
+  | "referral"
+  | "studio";
 
 export type Notice = { kind: NoticeKind; title: string; body?: string; link?: string };
 

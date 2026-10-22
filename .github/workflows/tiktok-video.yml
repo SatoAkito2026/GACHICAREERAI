@@ -1,0 +1,42 @@
+# 毎日 TikTok 用の動画を1本作る（日本時間 17:00）。Actions の画面から手動でも動かせる
+# 必要な設定：リポジトリの Settings → Secrets and variables → Actions に STUDIO_SECRET
+#（Cloudflare の STUDIO_SECRET と同じ値）
+name: TikTok video
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 日本語のフォントと ffmpeg を入れる
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk ffmpeg
+      - name: 撮影用のブラウザを入れる
+        working-directory: scripts/tiktok
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: 動画を作る
+        working-directory: scripts/tiktok
+        env:
+          APP_URL: https://gachicareer-ai.akitogroup.jp
+          STUDIO_SECRET: ${{ secrets.STUDIO_SECRET }}
+        run: node render.mjs
+      - name: 失敗したときは、撮ったコマの一部を残す
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-frames
+          path: scripts/tiktok/.tiktok-work/frames/000[0-9]*.jpg
+          if-no-files-found: ignore

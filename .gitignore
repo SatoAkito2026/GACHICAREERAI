@@ -38,3 +38,4 @@ dist-ssr
 !.env.production
 !.env.development
 !.dev.vars.example
+.tiktok-work/
