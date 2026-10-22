@@ -97,6 +97,12 @@ function IndividualDashboard() {
               desc: "強み・弱み・向いている職業を分析",
               to: "/private/individual/self-analysis",
             },
+            {
+              emoji: "🎁",
+              title: "友だちを招待",
+              desc: "友だちと自分に練習のボーナス+3回",
+              to: "/private/invite",
+            },
           ]}
         />
       </div>

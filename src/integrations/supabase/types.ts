@@ -202,6 +202,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      practice_bonus_ledger: {
+        Row: {
+          amount: number;
+          created_at: string;
+          id: string;
+          reason: string;
+          ref_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          id?: string;
+          reason: string;
+          ref_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          reason?: string;
+          ref_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      referral_codes: {
+        Row: {
+          code: string;
+          created_at: string;
+          user_id: string;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          user_id: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          created_at: string;
+          id: string;
+          referred_id: string;
+          referrer_id: string;
+          rewarded_at: string | null;
+          status: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          referred_id: string;
+          referrer_id: string;
+          rewarded_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          referred_id?: string;
+          referrer_id?: string;
+          rewarded_at?: string | null;
+          status?: string;
+        };
+        Relationships: [];
+      };
       profile_unlocks: {
         Row: {
           amount: number;

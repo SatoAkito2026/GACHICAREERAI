@@ -40,6 +40,7 @@ import { Route as ApiGenerateSelfAnalysisRouteImport } from './routes/api/genera
 import { Route as ApiInterviewTurnRouteImport } from './routes/api/interview-turn'
 import { Route as ApiPointsRouteImport } from './routes/api/points'
 import { Route as ApiPredictTicketSalesRouteImport } from './routes/api/predict-ticket-sales'
+import { Route as ApiReferralRouteImport } from './routes/api/referral'
 import { Route as ApiRefineDocumentRouteImport } from './routes/api/refine-document'
 import { Route as ApiRegisterDeviceRouteImport } from './routes/api/register-device'
 import { Route as ApiResearchActorRouteImport } from './routes/api/research-actor'
@@ -57,6 +58,7 @@ import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/
 import { Route as InterviewTokenRouteImport } from './routes/interview/$token'
 import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
+import { Route as PrivateInviteRouteImport } from './routes/private/invite'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
@@ -277,6 +279,11 @@ const ApiPredictTicketSalesRoute = ApiPredictTicketSalesRouteImport.update({
   path: '/api/predict-ticket-sales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReferralRoute = ApiReferralRouteImport.update({
+  id: '/api/referral',
+  path: '/api/referral',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRefineDocumentRoute = ApiRefineDocumentRouteImport.update({
   id: '/api/refine-document',
   path: '/api/refine-document',
@@ -361,6 +368,11 @@ const PrivateIndexRoute = PrivateIndexRouteImport.update({
 const PrivateAdminRoute = PrivateAdminRouteImport.update({
   id: '/private/admin',
   path: '/private/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateInviteRoute = PrivateInviteRouteImport.update({
+  id: '/private/invite',
+  path: '/private/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
@@ -719,6 +731,7 @@ export interface FileRoutesByFullPath {
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -734,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
@@ -830,6 +844,7 @@ export interface FileRoutesByTo {
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -845,6 +860,7 @@ export interface FileRoutesByTo {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/business': typeof BusinessIndexRoute
@@ -942,6 +958,7 @@ export interface FileRoutesById {
   '/api/interview-turn': typeof ApiInterviewTurnRoute
   '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -957,6 +974,7 @@ export interface FileRoutesById {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening_/history': typeof ScreeningHistoryRoute
   '/business/': typeof BusinessIndexRoute
@@ -1055,6 +1073,7 @@ export interface FileRouteTypes {
     | '/api/interview-turn'
     | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1070,6 +1089,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
     | '/business/'
@@ -1166,6 +1186,7 @@ export interface FileRouteTypes {
     | '/api/interview-turn'
     | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1181,6 +1202,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
     | '/business'
@@ -1277,6 +1299,7 @@ export interface FileRouteTypes {
     | '/api/interview-turn'
     | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1292,6 +1315,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening_/history'
     | '/business/'
@@ -1389,6 +1413,7 @@ export interface RootRouteChildren {
   ApiInterviewTurnRoute: typeof ApiInterviewTurnRoute
   ApiPointsRoute: typeof ApiPointsRoute
   ApiPredictTicketSalesRoute: typeof ApiPredictTicketSalesRoute
+  ApiReferralRoute: typeof ApiReferralRoute
   ApiRefineDocumentRoute: typeof ApiRefineDocumentRoute
   ApiRegisterDeviceRoute: typeof ApiRegisterDeviceRoute
   ApiResearchActorRoute: typeof ApiResearchActorRoute
@@ -1404,6 +1429,7 @@ export interface RootRouteChildren {
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
   PrivateAdminRoute: typeof PrivateAdminRoute
+  PrivateInviteRoute: typeof PrivateInviteRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
@@ -1688,6 +1714,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPredictTicketSalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/referral': {
+      id: '/api/referral'
+      path: '/api/referral'
+      fullPath: '/api/referral'
+      preLoaderRoute: typeof ApiReferralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/refine-document': {
       id: '/api/refine-document'
       path: '/api/refine-document'
@@ -1805,6 +1838,13 @@ declare module '@tanstack/react-router' {
       path: '/private/admin'
       fullPath: '/private/admin'
       preLoaderRoute: typeof PrivateAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/private/invite': {
+      id: '/private/invite'
+      path: '/private/invite'
+      fullPath: '/private/invite'
+      preLoaderRoute: typeof PrivateInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/welcome': {
@@ -2269,6 +2309,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiInterviewTurnRoute: ApiInterviewTurnRoute,
   ApiPointsRoute: ApiPointsRoute,
   ApiPredictTicketSalesRoute: ApiPredictTicketSalesRoute,
+  ApiReferralRoute: ApiReferralRoute,
   ApiRefineDocumentRoute: ApiRefineDocumentRoute,
   ApiRegisterDeviceRoute: ApiRegisterDeviceRoute,
   ApiResearchActorRoute: ApiResearchActorRoute,
@@ -2284,6 +2325,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
   InterviewTokenRoute: InterviewTokenRoute,
   PrivateAdminRoute: PrivateAdminRoute,
+  PrivateInviteRoute: PrivateInviteRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   BusinessIndexRoute: BusinessIndexRoute,

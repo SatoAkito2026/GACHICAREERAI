@@ -16,6 +16,7 @@ import { PrivateShell } from "@/components/ModeShell";
 import { usePlan } from "@/hooks/use-plan";
 import { practiceRule } from "@/lib/plan-rules";
 import { talentApi } from "@/components/talent/TalentUI";
+import { ShareResultButton } from "@/components/ShareResultButton";
 
 type PracticeFeedback = {
   overall_impression?: string;
@@ -220,6 +221,19 @@ export function PracticeHistoryContent({
                   className="mt-4 w-full rounded-xl"
                   style={{ background: "#000", maxHeight: 360 }}
                 />
+              )}
+              {r.feedback && (
+                <div className="mt-4 flex justify-end">
+                  <ShareResultButton
+                    jobType={r.job_type}
+                    date={r.created_at}
+                    score={r.feedback.readiness_score ?? null}
+                    competencies={(r.feedback.competencies ?? []).map((c) => ({
+                      label: c.label,
+                      score: c.score,
+                    }))}
+                  />
+                </div>
               )}
               {r.feedback ? (
                 <div className="mt-4 space-y-4">
