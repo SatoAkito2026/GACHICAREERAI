@@ -10,6 +10,7 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
+import { toSpeechText } from "@/lib/speech-text";
 
 export const STUDIO_BUCKET = "tiktok-videos";
 
@@ -225,7 +226,10 @@ ${learnedExamples(history)}
   };
 }
 
-const CANDIDATE_VOICES = ["echo", "onyx", "nova", "alloy", "fable"];
+// 受験者の声。gpt-4o-mini-tts は話し方を指示できるので、就活生らしくスラスラ話させる
+const CANDIDATE_VOICES = ["ash", "coral", "sage", "verse", "ballad"];
+const CANDIDATE_STYLE =
+  "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
 /** せりふごとに音声を作る（PCM 24kHz 16bit mono） */
 export async function speakLines(lines: StudioLine[]): Promise<string[]> {
@@ -234,17 +238,28 @@ export async function speakLines(lines: StudioLine[]): Promise<string[]> {
   const candidateVoice = CANDIDATE_VOICES[Math.floor(Math.random() * CANDIDATE_VOICES.length)];
   return Promise.all(
     lines.map(async (line) => {
+      const interviewer = line.speaker === "interviewer";
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "tts-1",
-          input: line.text,
-          // 面接官はアプリと同じ声・速さ
-          voice: line.speaker === "interviewer" ? "shimmer" : candidateVoice,
-          response_format: "pcm",
-          speed: line.speaker === "interviewer" ? 1.3 : 1.15,
-        }),
+        body: JSON.stringify(
+          interviewer
+            ? {
+                // 面接官はアプリと同じ声・速さ
+                model: "tts-1",
+                input: toSpeechText(line.text),
+                voice: "shimmer",
+                response_format: "pcm",
+                speed: 1.3,
+              }
+            : {
+                model: "gpt-4o-mini-tts",
+                input: toSpeechText(line.text),
+                voice: candidateVoice,
+                instructions: CANDIDATE_STYLE,
+                response_format: "pcm",
+              },
+        ),
       });
       if (!res.ok) throw new Error(`tts ${res.status}: ${await res.text()}`);
       return Buffer.from(await res.arrayBuffer()).toString("base64");

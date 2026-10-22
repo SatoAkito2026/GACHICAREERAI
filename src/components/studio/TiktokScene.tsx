@@ -397,7 +397,11 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
             opacity: ease((t - timeline.outroStart) / 0.3),
           }}
         >
-          <p style={{ fontSize: 44, fontWeight: 900 }}>ガチキャリAI</p>
+          <img
+            src="/brand/logo.webp"
+            alt="ガチキャリAI"
+            style={{ width: 300, height: 300, borderRadius: 24 }}
+          />
           <p style={{ fontSize: 22, fontWeight: 700, textAlign: "center", lineHeight: 1.6 }}>
             AIの面接官と
             <br />
