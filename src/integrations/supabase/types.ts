@@ -139,6 +139,69 @@ export type Database = {
         };
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          link: string | null;
+          read_at: string | null;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          link?: string | null;
+          read_at?: string | null;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          link?: string | null;
+          read_at?: string | null;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string | null;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string | null;
+          user_agent: string | null;
+          user_id: string;
+        };
+        Insert: {
+          auth?: string | null;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh?: string | null;
+          user_agent?: string | null;
+          user_id: string;
+        };
+        Update: {
+          auth?: string | null;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string | null;
+          user_agent?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profile_unlocks: {
         Row: {
           amount: number;

@@ -874,6 +874,13 @@ export async function notifyUnlocked(
   companyUserId: string,
 ): Promise<void> {
   const company = await getCompanyProfile(supabase, companyUserId);
+  const { notify } = await import("@/lib/notify");
+  await notify(supabase, candidateUserId, {
+    kind: "unlocked",
+    title: "企業があなたの面接結果を見ました",
+    body: `${company?.company_name ?? "企業"} が、あなたの面接結果を詳しく見ました。`,
+    link: "/private/individual/offers",
+  });
   await sendNotice(
     await getUserEmail(supabase, candidateUserId),
     "企業があなたのプロフィールを詳しく見ています",

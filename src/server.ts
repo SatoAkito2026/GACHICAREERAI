@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { runTalentSummaryJob } from "./lib/talent";
+import { runPracticeReminderJob } from "./lib/notify";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -109,5 +110,6 @@ export default {
       }
     }
     ctx.waitUntil(runTalentSummaryJob());
+    ctx.waitUntil(runPracticeReminderJob());
   },
 };

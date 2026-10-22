@@ -62,6 +62,8 @@ import { Route as ScreeningHistoryRouteImport } from './routes/screening_.histor
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
 import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
 import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
+import { Route as ApiNotificationsIndexRouteImport } from './routes/api/notifications/index'
+import { Route as ApiNotificationsPeekRouteImport } from './routes/api/notifications/peek'
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
@@ -384,6 +386,16 @@ const ApiJobsApplyRoute = ApiJobsApplyRouteImport.update({
 const ApiJobsPublicRoute = ApiJobsPublicRouteImport.update({
   id: '/api/jobs/public',
   path: '/api/jobs/public',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsIndexRoute = ApiNotificationsIndexRouteImport.update({
+  id: '/api/notifications/',
+  path: '/api/notifications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsPeekRoute = ApiNotificationsPeekRouteImport.update({
+  id: '/api/notifications/peek',
+  path: '/api/notifications/peek',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSchoolJoinRoute = ApiSchoolJoinRouteImport.update({
@@ -729,6 +741,7 @@ export interface FileRoutesByFullPath {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -771,6 +784,7 @@ export interface FileRoutesByFullPath {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
@@ -838,6 +852,7 @@ export interface FileRoutesByTo {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -880,6 +895,7 @@ export interface FileRoutesByTo {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications': typeof ApiNotificationsIndexRoute
   '/business/actor': typeof BusinessActorIndexRoute
   '/business/company': typeof BusinessCompanyIndexRoute
   '/business/school': typeof BusinessSchoolIndexRoute
@@ -948,6 +964,7 @@ export interface FileRoutesById {
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -990,6 +1007,7 @@ export interface FileRoutesById {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
@@ -1059,6 +1077,7 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1101,6 +1120,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
@@ -1168,6 +1188,7 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1210,6 +1231,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications'
     | '/business/actor'
     | '/business/company'
     | '/business/school'
@@ -1277,6 +1299,7 @@ export interface FileRouteTypes {
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1319,6 +1342,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
@@ -1387,6 +1411,7 @@ export interface RootRouteChildren {
   ApiJobsApplicantsRoute: typeof ApiJobsApplicantsRoute
   ApiJobsApplyRoute: typeof ApiJobsApplyRoute
   ApiJobsPublicRoute: typeof ApiJobsPublicRoute
+  ApiNotificationsPeekRoute: typeof ApiNotificationsPeekRoute
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
@@ -1429,6 +1454,7 @@ export interface RootRouteChildren {
   PrivateStudentResearchRoute: typeof PrivateStudentResearchRoute
   PrivateStudentSelfAnalysisRoute: typeof PrivateStudentSelfAnalysisRoute
   PrivateStudentStatementRoute: typeof PrivateStudentStatementRoute
+  ApiNotificationsIndexRoute: typeof ApiNotificationsIndexRoute
   BusinessActorIndexRoute: typeof BusinessActorIndexRoute
   BusinessCompanyIndexRoute: typeof BusinessCompanyIndexRoute
   BusinessSchoolIndexRoute: typeof BusinessSchoolIndexRoute
@@ -1814,6 +1840,20 @@ declare module '@tanstack/react-router' {
       path: '/api/jobs/public'
       fullPath: '/api/jobs/public'
       preLoaderRoute: typeof ApiJobsPublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/': {
+      id: '/api/notifications/'
+      path: '/api/notifications'
+      fullPath: '/api/notifications/'
+      preLoaderRoute: typeof ApiNotificationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/peek': {
+      id: '/api/notifications/peek'
+      path: '/api/notifications/peek'
+      fullPath: '/api/notifications/peek'
+      preLoaderRoute: typeof ApiNotificationsPeekRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/school/join': {
@@ -2251,6 +2291,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiJobsApplicantsRoute: ApiJobsApplicantsRoute,
   ApiJobsApplyRoute: ApiJobsApplyRoute,
   ApiJobsPublicRoute: ApiJobsPublicRoute,
+  ApiNotificationsPeekRoute: ApiNotificationsPeekRoute,
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
@@ -2293,6 +2334,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateStudentResearchRoute: PrivateStudentResearchRoute,
   PrivateStudentSelfAnalysisRoute: PrivateStudentSelfAnalysisRoute,
   PrivateStudentStatementRoute: PrivateStudentStatementRoute,
+  ApiNotificationsIndexRoute: ApiNotificationsIndexRoute,
   BusinessActorIndexRoute: BusinessActorIndexRoute,
   BusinessCompanyIndexRoute: BusinessCompanyIndexRoute,
   BusinessSchoolIndexRoute: BusinessSchoolIndexRoute,

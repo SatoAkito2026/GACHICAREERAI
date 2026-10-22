@@ -7,6 +7,7 @@
  * そのままメッセージでやりとりできる（本人が応募した＝その企業に見せることに同意した、とみなす）。
  * 運営は推薦・仲介をしない。料金はかからない（企業側も、今は求人掲載が無料）。
  */
+import { notify } from "@/lib/notify";
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
@@ -93,13 +94,11 @@ export const Route = createFileRoute("/api/jobs/apply")({
           .is("interview_id", null)
           .maybeSingle();
         if (!allAccess) {
-          await supabase
-            .from("profile_unlocks")
-            .insert({
-              company_user_id: job.company_user_id,
-              candidate_user_id: auth.userId,
-              amount: 0,
-            });
+          await supabase.from("profile_unlocks").insert({
+            company_user_id: job.company_user_id,
+            candidate_user_id: auth.userId,
+            amount: 0,
+          });
         }
 
         // そのままメッセージでやりとりできるようにする
@@ -130,6 +129,12 @@ export const Route = createFileRoute("/api/jobs/apply")({
             .insert({ request_id: contact.id, sender_user_id: auth.userId, body: intro });
         }
 
+        await notify(supabase, job.company_user_id, {
+          kind: "application",
+          title: `求人「${job.title}」に応募がありました`,
+          body: `${name} さんから応募がありました。`,
+          link: "/business/company/jobs",
+        });
         await sendNotice(
           await getUserEmail(supabase, job.company_user_id),
           `求人「${job.title}」に応募がありました`,

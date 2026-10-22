@@ -8,6 +8,7 @@
  *
  * 運営は仲介しない。承諾されたら、企業とユーザーがメッセージで直接やり取りする。
  */
+import { notify } from "@/lib/notify";
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
@@ -178,6 +179,12 @@ export const Route = createFileRoute("/api/talent/contacts")({
                 .maybeSingle();
           if (error || !created) return jsonResponse({ error: "申し込みに失敗しました" }, 500);
 
+          await notify(supabase, p.user_id, {
+            kind: "contact_request",
+            title: `${company.company_name} から面談の申し込み`,
+            body: message.slice(0, 120),
+            link: "/private/individual/offers",
+          });
           await sendNotice(
             await getUserEmail(supabase, p.user_id),
             `${company.company_name} から面談の申し込みが届きました`,
@@ -217,6 +224,12 @@ export const Route = createFileRoute("/api/talent/contacts")({
               .select("display_name, public_code")
               .eq("user_id", r.candidate_user_id)
               .maybeSingle();
+            await notify(supabase, r.company_user_id, {
+              kind: "contact_accepted",
+              title: `${p?.display_name || "候補者"} さんが面談の申し込みを承諾しました`,
+              body: "メッセージで日程などを直接ご相談ください。",
+              link: `/business/company/messages?id=${r.id}`,
+            });
             await sendNotice(
               await getUserEmail(supabase, r.company_user_id),
               `${p?.display_name || "候補者"} さんが面談の申し込みを承諾しました`,
