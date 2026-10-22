@@ -33,6 +33,10 @@ interface ModeContextValue {
   company: Company | null;
   isPrivate: boolean;
   isBusiness: boolean;
+  /** 運営の管理者（profiles.is_admin）。管理ダッシュボードと個人・企業の画面を切り替えられる */
+  isAdmin: boolean;
+  /** 会社を登録済みか（企業モードに切り替えられるか） */
+  hasCompany: boolean;
   loading: boolean;
   setMode: (mode: UserMode, userId?: string) => Promise<void>;
   refresh: () => Promise<void>;
@@ -45,6 +49,8 @@ export function ModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<UserMode | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [hasCompany, setHasCompany] = useState(false);
   // 読み込みの順番。ログイン直後にモードを切り替えたとき、先に始まった古い読み込みの結果で上書きしない
   const seqRef = useRef(0);
   // モードの書き込み中。読み込みはこれを待ってから始める（書く前の古いモードを読まないように）
@@ -56,6 +62,8 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     if (!userId) {
       setModeState(null);
       setCompany(null);
+      setIsAdmin(false);
+      setHasCompany(false);
       setLoading(false);
       return;
     }
@@ -63,13 +71,15 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     try {
       const { data: profile } = await (supabase
         .from("profiles")
-        .select("user_mode, company_id")
+        .select("user_mode, company_id, is_admin")
         .eq("id", userId)
         .maybeSingle() as any);
 
       if (seq !== seqRef.current) return;
       const userMode = (profile?.user_mode ?? "private_individual") as UserMode;
       setModeState(userMode);
+      setIsAdmin(!!profile?.is_admin);
+      setHasCompany(!!profile?.company_id);
 
       if (
         (userMode === "business_company" || userMode === "business_school") &&
@@ -143,6 +153,8 @@ export function ModeProvider({ children }: { children: ReactNode }) {
         company,
         isPrivate,
         isBusiness,
+        isAdmin,
+        hasCompany,
         loading,
         setMode,
         refresh,

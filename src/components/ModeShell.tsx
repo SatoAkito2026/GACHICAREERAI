@@ -1,3 +1,4 @@
+import { AdminModeSwitch } from "@/components/AdminModeSwitch";
 import type { ReactNode } from "react";
 import { SafeNavigate } from "@/components/SafeNavigate";
 
@@ -74,6 +75,7 @@ export function PrivateShell({ children }: { children: ReactNode }) {
       className="min-h-screen"
       style={{ background: "#0F0F0F", fontFamily: "'Inter', sans-serif" }}
     >
+      <AdminModeSwitch />
       <PrivateNav />
       {children}
       <PlanUpgradeBanner />
@@ -94,6 +96,7 @@ export function BusinessShell({ children }: { children: ReactNode }) {
       className="min-h-screen"
       style={{ background: "#0F0F0F", fontFamily: "'Inter', sans-serif" }}
     >
+      <AdminModeSwitch />
       <BusinessNav />
       {children}
       <PlanUpgradeBanner />
