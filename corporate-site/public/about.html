@@ -82,6 +82,14 @@
 .officer span{display:block;font-size:13px;color:var(--muted)}
 .officer b{display:block;font-family:var(--ff-display);font-size:21px;margin:2px 0}
 .officer small{display:block;font-size:12.5px;color:var(--muted);letter-spacing:.08em}
+.officer-msg{margin:18px 0 0;background:#fff;border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,40px);display:grid;gap:20px;position:relative;overflow:hidden}
+.officer-msg::before{content:"“";position:absolute;right:clamp(16px,3vw,36px);top:-18px;font-family:var(--ff-latin);font-size:150px;line-height:1;color:var(--green);opacity:.18}
+.officer-msg .lbl{font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--green-text,var(--green))}
+.officer-msg .by{text-align:right;font-weight:700;font-family:var(--ff-display)}
+.officer-msg .face{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-family:var(--ff-display);font-size:21px;flex:none}
+.officer-msg figcaption small{display:block;font-size:12.5px;color:var(--muted)}
+.officer-msg figcaption b{display:block;font-family:var(--ff-display);font-size:19px}
+.officer-msg blockquote{margin:0;display:grid;gap:14px;color:var(--ink-2);max-width:46em;border-left:4px solid var(--green);padding-left:clamp(16px,2.4vw,24px)}
 @media (max-width:1023px){.greet{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:32px}.portrait{position:static}}
 @media (max-width:639px){.greet{grid-template-columns:minmax(0,1fr)}.portrait{position:static;max-width:300px}}
 
@@ -155,6 +163,14 @@
       <li class="officer rv" style="--c:var(--red)"><span class="face"><img src="assets/img/ceo.webp" alt="" width="900" height="900" loading="lazy"></span><div><span>代表</span><b>佐藤 光彪</b></div></li>
       <li class="officer rv" style="--c:var(--green)"><span class="face" aria-hidden="true">篠</span><div><span>役員兼副代表</span><b>篠原 力太</b></div></li>
     </ul>
+    <figure class="officer-msg rv">
+      <p class="lbl">副代表メッセージ</p>
+      <blockquote>
+        <p>私は自衛隊での経験を通じて、どんな状況でも責任を持って行動し、仲間と目標を達成する大切さを学びました。しかし、決められた道を歩むだけでは、自分の可能性を広げられないと感じ、安定よりも挑戦を選びました。</p>
+        <p>私の目標は、ただ会社を大きくすることではありません。人の挑戦を後押しし、企業が抱える課題を新しい発想と行動力で解決すること。そして、関わるすべての人が「出会えてよかった」と思える価値を生み出し続けることです。</p>
+      </blockquote>
+      <figcaption class="by">役員兼副代表　篠原 力太</figcaption>
+    </figure>
   </div>
 </section>
 
