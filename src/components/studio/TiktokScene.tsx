@@ -98,6 +98,51 @@ class StudioVoice {
   }
 }
 
+/** せりふを、字幕1回分（14文字くらい）ずつに区切る。句読点で切り、長ければさらに分ける */
+function splitCaption(text: string): string[] {
+  const raw = text
+    .split(/(?<=[、。！？!?…])/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  // 「正直、」のような短すぎる区切りは、次とつなげる
+  const parts: string[] = [];
+  for (const p of raw) {
+    const last = parts[parts.length - 1];
+    if (last !== undefined && (last.length < 7 || p.length < 4) && last.length + p.length <= 16) {
+      parts[parts.length - 1] = last + p;
+    } else parts.push(p);
+  }
+  const out: string[] = [];
+  for (const p of parts) {
+    if (p.length <= 16) {
+      out.push(p);
+      continue;
+    }
+    const n = Math.ceil(p.length / 14);
+    const size = Math.ceil(p.length / n);
+    for (let i = 0; i < p.length; i += size) out.push(p.slice(i, i + size));
+  }
+  return out.length ? out : [text];
+}
+
+/** いま出す字幕（せりふの長さを文字数で割り振って、話している部分を選ぶ） */
+function currentCaption(
+  lines: { speaker: "interviewer" | "candidate"; text: string; start: number; dur: number }[],
+  t: number,
+) {
+  const line = lines.find((l) => t >= l.start && t < l.start + l.dur);
+  if (!line) return null;
+  const chunks = splitCaption(line.text);
+  const total = chunks.reduce((a, c) => a + c.length, 0);
+  let at = line.start;
+  for (const c of chunks) {
+    const d = (line.dur * c.length) / total;
+    if (t < at + d) return { text: c, speaker: line.speaker, age: t - at };
+    at += d;
+  }
+  return null;
+}
+
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const ease = (x: number) => 1 - Math.pow(1 - clamp01(x), 3);
 
@@ -118,6 +163,7 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
   }, []);
 
   const spoken = timeline.lines.filter((l) => t >= l.start);
+  const caption = currentCaption(timeline.lines, t);
   const inResult = t >= timeline.resultStart && t < timeline.outroStart;
   const inOutro = t >= timeline.outroStart;
   const elapsed = Math.max(0, Math.min(t, timeline.resultStart) - INTRO);
@@ -187,9 +233,45 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
         </span>
       </div>
 
-      {/* 会話の流れ（新しい4つ。いま話しているせりふを大きく） */}
-      <div style={{ padding: "14px 18px 0", display: "flex", flexDirection: "column", gap: 8 }}>
-        {spoken.slice(-4).map((l, i, arr) => {
+      {/* 字幕（TikTok でよく見る、白い太字に黒いふち。せりふを短く区切って、話している部分だけ出す） */}
+      {caption && (
+        <div
+          style={{
+            position: "absolute",
+            left: 24,
+            right: 24,
+            top: 410,
+            textAlign: "center",
+          }}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              fontSize: 30,
+              fontWeight: 900,
+              lineHeight: 1.35,
+              color: caption.speaker === "candidate" ? ACCENT : "#FFFFFF",
+              WebkitTextStroke: "6px #000",
+              paintOrder: "stroke fill",
+              textShadow: "0 3px 10px rgba(0,0,0,.55)",
+              transform: `scale(${0.92 + 0.08 * ease(caption.age / 0.12)})`,
+            }}
+          >
+            {caption.text}
+          </span>
+        </div>
+      )}
+
+      {/* 会話の流れ（新しい3つ）。TikTok の右のボタンと下の投稿の文に隠れないよう、右と下をあける */}
+      <div
+        style={{
+          padding: "14px 70px 0 18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }}
+      >
+        {spoken.slice(-3).map((l, i, arr) => {
           const mine = l.speaker === "candidate";
           const appear = ease((t - l.start) / 0.25);
           return (
@@ -204,10 +286,10 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
             >
               <div
                 style={{
-                  maxWidth: "82%",
+                  maxWidth: "88%",
                   borderRadius: 18,
-                  padding: "11px 15px",
-                  fontSize: i === arr.length - 1 ? 20 : 16,
+                  padding: "10px 14px",
+                  fontSize: i === arr.length - 1 ? 17 : 14,
                   lineHeight: 1.5,
                   background: mine ? ACCENT : "#222",
                   color: mine ? "#0F0F0F" : "#F0F0F0",
@@ -224,12 +306,13 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
       <p
         style={{
           position: "absolute",
-          bottom: 10,
-          left: 0,
-          right: 0,
-          textAlign: "center",
+          top: 506,
+          right: 26,
           fontSize: 11,
-          color: "#666",
+          color: "rgba(255,255,255,.75)",
+          background: "rgba(0,0,0,.45)",
+          borderRadius: 6,
+          padding: "2px 7px",
         }}
       >
         ※ 受験者もAIの演技です
