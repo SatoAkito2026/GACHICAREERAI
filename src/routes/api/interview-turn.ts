@@ -1,3 +1,4 @@
+import { toSpeechText } from "@/lib/speech-text";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
@@ -449,7 +450,8 @@ ${companyContext || "（企業情報未設定）"}
             },
             body: JSON.stringify({
               model: "tts-1",
-              input: aiText,
+              // 御社・弊社などを読み間違えないよう、声にするときだけひらがなにする
+              input: toSpeechText(aiText),
               voice: "shimmer",
               response_format: "pcm",
               speed: 1.3,

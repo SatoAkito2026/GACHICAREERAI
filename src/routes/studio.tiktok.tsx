@@ -34,9 +34,14 @@ function StudioPage() {
       <TiktokScene
         job={job}
         onReady={() => {
-          void document.fonts.ready.then(() => {
-            (window as StudioWindow).__studioReady = true;
-          });
+          // 締めで出すロゴも読み込み終わってから撮り始める
+          const logo = new Image();
+          logo.src = "/brand/logo.webp";
+          void Promise.all([document.fonts.ready, logo.decode().catch(() => undefined)]).then(
+            () => {
+              (window as StudioWindow).__studioReady = true;
+            },
+          );
         }}
       />
     </div>

@@ -10,6 +10,7 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
+import { toSpeechText } from "@/lib/speech-text";
 
 export const STUDIO_BUCKET = "tiktok-videos";
 
@@ -75,6 +76,16 @@ export type StudioScript = {
   jobType: string;
   lines: StudioLine[];
   result: { score: number; competencies: { label: string; score: number }[]; comment: string };
+  /** 最後の演出：プロフィールを公開すると、企業から面談の申し込みが届く */
+  offer: { companyType: string; count: number; message: string; reaction: string };
+};
+
+/** これまでに作った動画と、管理画面で入れた再生数など（伸びたものを真似し、伸びなかったものを避ける） */
+export type StudioHistory = {
+  theme: string;
+  title: string;
+  views: number | null;
+  likes: number | null;
 };
 
 export type StudioJob = StudioScript & {
@@ -85,22 +96,67 @@ export type StudioJob = StudioScript & {
   audio: string[];
 };
 
-function pickTheme(recent: string[]) {
+/**
+ * テーマを選ぶ。再生数が分かっている動画があれば、7割は伸びたテーマから、3割はほかのテーマを試す。
+ * 直近2本と同じテーマは避ける
+ */
+function pickTheme(history: StudioHistory[]) {
+  const recent = history.slice(0, 2).map((h) => h.theme);
   const fresh = THEMES.filter((t) => !recent.includes(t.key));
-  const pool = fresh.length ? fresh : THEMES;
+  const pool = fresh.length ? fresh : [...THEMES];
+  const measured = history.filter((h) => typeof h.views === "number");
+  if (measured.length >= 3 && Math.random() < 0.7) {
+    const avg = (key: string) => {
+      const v = measured.filter((h) => h.theme === key).map((h) => h.views ?? 0);
+      return v.length ? v.reduce((a, b) => a + b, 0) / v.length : -1;
+    };
+    const best = [...pool].sort((a, b) => avg(b.key) - avg(a.key)).filter((t) => avg(t.key) >= 0);
+    if (best.length) return best[Math.floor(Math.random() * Math.min(2, best.length))];
+  }
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export async function writeScript(recentThemes: string[]): Promise<StudioScript> {
+/** 伸びた動画・伸びなかった動画を、台本づくりの参考として渡す */
+function learnedExamples(history: StudioHistory[]): string {
+  const measured = history
+    .filter((h) => typeof h.views === "number")
+    .sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+  if (measured.length < 2) return "";
+  const fmt = (h: StudioHistory) =>
+    `- 「${h.title}」（${THEMES.find((t) => t.key === h.theme)?.label ?? h.theme}）再生${h.views}・いいね${h.likes ?? "-"}`;
+  const top = measured.slice(0, 3).map(fmt).join("\n");
+  const bottom = measured
+    .slice(-2)
+    .filter((h) => !measured.slice(0, 3).includes(h))
+    .map(fmt)
+    .join("\n");
+  return `
+【これまでの動画の結果（このアカウントで実際に伸びたもの・伸びなかったもの）】
+伸びた：
+${top}${bottom ? `\n伸びなかった：\n${bottom}` : ""}
+→ 伸びたタイトルの言い回し・切り口を参考にし、伸びなかったものに似せない（そのまま同じにはしない）
+`;
+}
+
+export async function writeScript(history: StudioHistory[]): Promise<StudioScript> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY missing");
-  const theme = pickTheme(recentThemes);
+  const theme = pickTheme(history);
   const prompt = `あなたはTikTokのショート動画の構成作家です。
 「ガチキャリAI」というAI模擬面接アプリを、実際に使っている様子の動画（縦・30〜40秒）の台本を作ってください。
-画面にはAIの面接官（女性のアバター）が出て、受験者（AIが演じる架空の人物）と短く会話し、最後にアプリが7つの評価で採点します。
+画面にはAIの面接官（女性のアバター）が出て、受験者（AIが演じる架空の人物）と短く会話し、アプリが7つの評価で採点します。
+最後に、受験者がプロフィールを企業に公開して、企業から面談の申し込み（オファー）が届く演出が入ります。
 
 【今回のテーマ】${theme.label}：${theme.brief}
 
+【伸びるショート動画の型（必ず守る）】
+- 最初の1秒：タイトルで「え、どうなるの？」と思わせる（意外さ・共感・対立。例「〜した結果」「〜はアウト？」「9割が言いがちな〜」）
+- 1行目の質問は、誰もが面接で聞かれる定番（志望動機・長所短所・ガクチカ・逆質問など）にして、見る人が自分ごとにできるようにする
+- 受験者の答えにツッコミどころか「それ分かる！」を入れ、面接官の返しで一段落ちをつける
+- 中だるみさせない：1行は短く、同じ内容をくり返さない
+- オチ（採点とオファー）がテーマに合っていて、最後まで見たくなる
+- 投稿の文は「あなたならどう答える？」のように、コメントしたくなる問いかけで終える
+${learnedExamples(history)}
 【ルール】
 - 会話は面接官→受験者の順で交互に、合計6〜8行。1行は40文字以内の話し言葉
 - 面接官は丁寧で落ち着いた口調。最初の行は面接の質問から始める（あいさつは短く）
@@ -108,6 +164,7 @@ export async function writeScript(recentThemes: string[]): Promise<StudioScript>
 - 最初の1秒で見る人の手が止まる、短いタイトル（20文字以内、例「AI面接官に正直すぎる志望動機を言った結果」）
 - 評価は台本の内容に合った点数にする（おふざけなら低め、神回答なら高め）。7つの評価は1.0〜5.0（0.5刻み）
 - 投稿の文（caption）は100文字以内＋ハッシュタグ4〜6個（#ガチキャリAI を必ず入れる）
+- オファーの演出もテーマに合わせる。おふざけ回なら「なぜかその答えがハマる、ちょっと意外な業界の架空の会社」から笑える申し込み、真面目回なら評価に合った業界の架空の会社から誠実な申し込み。会社名は出さず「IT企業」「老舗の和菓子店」のような種類だけ
 
 次のJSONだけを返してください：
 {
@@ -119,6 +176,12 @@ export async function writeScript(recentThemes: string[]): Promise<StudioScript>
     "score": 0〜100の総合点,
     "competencies": [${LABELS.map((l) => `{"label": "${l}", "score": 数字}`).join(", ")}],
     "comment": "AIの講評（40文字以内）"
+  },
+  "offer": {
+    "companyType": "申し込んできた架空の会社の種類（15文字以内）",
+    "count": 届いた申し込みの数（1〜5）,
+    "message": "企業からの申し込みのメッセージ（40文字以内）",
+    "reaction": "それを見た受験者のひとこと（20文字以内）"
   }
 }`;
   const anthropic = new Anthropic({ apiKey });
@@ -127,7 +190,8 @@ export async function writeScript(recentThemes: string[]): Promise<StudioScript>
     max_tokens: 2000,
     messages: [{ role: "user", content: prompt }],
   });
-  const raw = extractJson(lastTextBlock(res.content)) as Partial<StudioScript> | null;
+  const raw = extractJson(lastTextBlock(res.content)) as
+    (Partial<Omit<StudioScript, "offer">> & { offer?: Partial<StudioScript["offer"]> }) | null;
   if (!raw || !Array.isArray(raw.lines)) throw new Error("script parse failed");
   const lines = raw.lines
     .filter((l) => l && (l.speaker === "interviewer" || l.speaker === "candidate") && l.text)
@@ -153,10 +217,19 @@ export async function writeScript(recentThemes: string[]): Promise<StudioScript>
     jobType: String(raw.jobType ?? "模擬面接").slice(0, 20),
     lines,
     result: { score, competencies: comps, comment: String(raw.result?.comment ?? "").slice(0, 60) },
+    offer: {
+      companyType: String(raw.offer?.companyType ?? "企業").slice(0, 20),
+      count: Math.min(5, Math.max(1, Math.round(Number(raw.offer?.count) || 1))),
+      message: String(raw.offer?.message ?? "ぜひ一度お話ししませんか？").slice(0, 60),
+      reaction: String(raw.offer?.reaction ?? "えっ、ほんとに！？").slice(0, 30),
+    },
   };
 }
 
-const CANDIDATE_VOICES = ["echo", "onyx", "nova", "alloy", "fable"];
+// 受験者の声。gpt-4o-mini-tts は話し方を指示できるので、就活生らしくスラスラ話させる
+const CANDIDATE_VOICES = ["ash", "coral", "sage", "verse", "ballad"];
+const CANDIDATE_STYLE =
+  "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
 /** せりふごとに音声を作る（PCM 24kHz 16bit mono） */
 export async function speakLines(lines: StudioLine[]): Promise<string[]> {
@@ -165,17 +238,28 @@ export async function speakLines(lines: StudioLine[]): Promise<string[]> {
   const candidateVoice = CANDIDATE_VOICES[Math.floor(Math.random() * CANDIDATE_VOICES.length)];
   return Promise.all(
     lines.map(async (line) => {
+      const interviewer = line.speaker === "interviewer";
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "tts-1",
-          input: line.text,
-          // 面接官はアプリと同じ声・速さ
-          voice: line.speaker === "interviewer" ? "shimmer" : candidateVoice,
-          response_format: "pcm",
-          speed: line.speaker === "interviewer" ? 1.3 : 1.15,
-        }),
+        body: JSON.stringify(
+          interviewer
+            ? {
+                // 面接官はアプリと同じ声・速さ
+                model: "tts-1",
+                input: toSpeechText(line.text),
+                voice: "shimmer",
+                response_format: "pcm",
+                speed: 1.3,
+              }
+            : {
+                model: "gpt-4o-mini-tts",
+                input: toSpeechText(line.text),
+                voice: candidateVoice,
+                instructions: CANDIDATE_STYLE,
+                response_format: "pcm",
+              },
+        ),
       });
       if (!res.ok) throw new Error(`tts ${res.status}: ${await res.text()}`);
       return Buffer.from(await res.arrayBuffer()).toString("base64");

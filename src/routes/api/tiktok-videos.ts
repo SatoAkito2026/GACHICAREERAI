@@ -4,6 +4,7 @@
  * GET  /api/tiktok-videos                         → 新しい順に20本（見る・保存する用の期限つきURLつき）
  * POST /api/tiktok-videos { action: "posted", id } → 投稿済みにする
  * POST /api/tiktok-videos { action: "delete", id } → 消す
+ * POST /api/tiktok-videos { action: "metrics", id, views, likes } → 再生数・いいねを入れる（次の台本づくりで参考にする）
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/api/tiktok-videos")({
         const { data } = await r.supabase
           .from("tiktok_videos")
           .select(
-            "id, theme, title, caption, status, storage_path, duration_sec, error, created_at, posted_at, script",
+            "id, theme, title, caption, status, storage_path, duration_sec, error, created_at, posted_at, script, views, likes",
           )
           .order("created_at", { ascending: false })
           .limit(20);
@@ -59,6 +60,8 @@ export const Route = createFileRoute("/api/tiktok-videos")({
             error: v.error,
             createdAt: v.created_at,
             postedAt: v.posted_at,
+            views: v.views,
+            likes: v.likes,
             url,
           });
         }
@@ -68,12 +71,28 @@ export const Route = createFileRoute("/api/tiktok-videos")({
       POST: async ({ request }) => {
         const r = await adminClient(request);
         if ("error" in r) return r.error;
-        const body = (await request.json().catch(() => ({}))) as { action?: unknown; id?: unknown };
+        const body = (await request.json().catch(() => ({}))) as {
+          action?: unknown;
+          id?: unknown;
+          views?: unknown;
+          likes?: unknown;
+        };
         const id = typeof body.id === "string" ? body.id : "";
         if (body.action === "posted") {
           await r.supabase
             .from("tiktok_videos")
             .update({ status: "posted", posted_at: new Date().toISOString() })
+            .eq("id", id);
+          return jsonResponse({ ok: true });
+        }
+        if (body.action === "metrics") {
+          const n = (v: unknown) =>
+            v === "" || v === null || v === undefined
+              ? null
+              : Math.max(0, Math.round(Number(v)) || 0);
+          await r.supabase
+            .from("tiktok_videos")
+            .update({ views: n(body.views), likes: n(body.likes) })
             .eq("id", id);
           return jsonResponse({ ok: true });
         }
