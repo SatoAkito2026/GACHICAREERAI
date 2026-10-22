@@ -21,15 +21,20 @@ export const Route = createFileRoute("/api/studio/job")({
         const supabase = await serviceClient();
         if (!supabase) return jsonResponse({ error: "Server config missing" }, 500);
 
-        // 直近のテーマと続けて同じにならないようにする
-        const { data: recent } = await supabase
+        // これまでの動画（テーマ・タイトル・再生数）から、伸びたものを真似し、続けて同じテーマにしない
+        const { data: history } = await supabase
           .from("tiktok_videos")
-          .select("theme")
+          .select("theme, title, views, likes")
+          .neq("status", "failed")
           .order("created_at", { ascending: false })
-          .limit(3);
+          .limit(40);
         try {
-          const script = await writeScript((recent ?? []).map((r) => r.theme));
-          const audio = await speakLines(script.lines);
+          const script = await writeScript(history ?? []);
+          // 最後の音声は、オファーを見た受験者のひとこと
+          const audio = await speakLines([
+            ...script.lines,
+            { speaker: "candidate", text: script.offer.reaction },
+          ]);
           const { data: row, error } = await supabase
             .from("tiktok_videos")
             .insert({

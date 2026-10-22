@@ -429,6 +429,9 @@ function AdminDashboard() {
 
         {/* ---- TikTok ---- */}
         <Section id="tiktok" title="TikTok用の動画（毎日17時に自動で1本）">
+          <p className="mb-3 text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+            投稿したら「投稿済みにする」を押し、数日後に再生数といいねを入れてください。伸びたテーマやタイトルを、次からの台本づくりで参考にします。
+          </p>
           <TiktokVideos token={session?.access_token ?? ""} />
         </Section>
       </main>
@@ -447,6 +450,8 @@ type TiktokVideo = {
   createdAt: string;
   postedAt: string | null;
   url: string | null;
+  views: number | null;
+  likes: number | null;
 };
 
 const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
@@ -582,6 +587,14 @@ function TiktokVideos({ token }: { token: string }) {
                 投稿済みにする
               </button>
             )}
+            {v.status === "posted" && (
+              <MetricsForm
+                video={v}
+                onSave={(views, likes) =>
+                  void call({ action: "metrics", id: v.id, views, likes }).then(load)
+                }
+              />
+            )}
             <button
               type="button"
               onClick={() => {
@@ -597,6 +610,52 @@ function TiktokVideos({ token }: { token: string }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** 投稿した動画の再生数・いいねを入れる（伸びたテーマ・タイトルを、次の台本づくりで参考にする） */
+function MetricsForm({
+  video,
+  onSave,
+}: {
+  video: TiktokVideo;
+  onSave: (views: string, likes: string) => void;
+}) {
+  const [views, setViews] = useState(video.views?.toString() ?? "");
+  const [likes, setLikes] = useState(video.likes?.toString() ?? "");
+  const input = {
+    background: T.bg,
+    border: `1px solid ${T.border}`,
+    color: T.text,
+    borderRadius: 8,
+    padding: "4px 8px",
+    width: 90,
+  } as const;
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2">
+      <input
+        inputMode="numeric"
+        value={views}
+        onChange={(e) => setViews(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="再生数"
+        style={input}
+      />
+      <input
+        inputMode="numeric"
+        value={likes}
+        onChange={(e) => setLikes(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="いいね"
+        style={input}
+      />
+      <button
+        type="button"
+        onClick={() => onSave(views, likes)}
+        className="rounded-lg px-3 py-1.5"
+        style={{ border: `1px solid ${T.border}`, color: T.sub }}
+      >
+        結果を保存
+      </button>
     </div>
   );
 }

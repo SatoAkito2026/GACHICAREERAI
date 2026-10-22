@@ -16,6 +16,8 @@ export type StudioJobData = {
   jobType: string;
   lines: { speaker: "interviewer" | "candidate"; text: string }[];
   result: { score: number; competencies: { label: string; score: number }[]; comment: string };
+  offer?: { companyType: string; count: number; message: string; reaction: string };
+  /** せりふの音声。最後の1つは、オファーを見た受験者のひとこと（offer があるとき） */
   audio: string[];
   sampleRate: number;
   interviewerRate: number;
@@ -41,19 +43,47 @@ function decodePcm(b64: string): Float32Array {
 }
 
 /** せりふごとの開始・長さ（秒）と、全体の長さ */
+type TimelineLine = {
+  speaker: "interviewer" | "candidate";
+  text: string;
+  start: number;
+  dur: number;
+  rate: number;
+  /** オファーを見た受験者のひとこと（会話の吹き出しには出さない） */
+  reaction: boolean;
+};
+
+/** オファーの通知が出てから、受験者が話し始めるまで（秒） */
+const OFFER_LEAD = 1.6;
+
 export function buildTimeline(job: StudioJobData) {
   let t = INTRO;
   const lines = job.lines.map((line, i) => {
     const samples = ((job.audio[i]?.length ?? 0) * 0.75) / 2; // base64 → バイト → 16bit
     const rate = line.speaker === "interviewer" ? job.interviewerRate : 1;
     const dur = Math.max(0.8, samples / job.sampleRate / rate);
-    const item = { ...line, start: t, dur, rate };
+    const item: TimelineLine = { ...line, start: t, dur, rate, reaction: false };
     t += dur + GAP;
     return item;
   });
   const resultStart = t + 0.2;
-  const outroStart = resultStart + RESULT;
-  return { lines, resultStart, outroStart, total: outroStart + OUTRO };
+  // 採点のあと：企業から面談の申し込みが届き、受験者がひとこと言う
+  const offerStart = resultStart + RESULT;
+  let outroStart = offerStart;
+  if (job.offer && job.audio[job.lines.length]) {
+    const samples = (job.audio[job.lines.length].length * 0.75) / 2;
+    const dur = Math.max(0.8, samples / job.sampleRate);
+    lines.push({
+      speaker: "candidate",
+      text: job.offer.reaction,
+      start: offerStart + OFFER_LEAD,
+      dur,
+      rate: 1,
+      reaction: true,
+    });
+    outroStart = offerStart + OFFER_LEAD + dur + 1.2;
+  }
+  return { lines, resultStart, offerStart, outroStart, total: outroStart + OUTRO };
 }
 
 /** 撮影用の「声」：決まった時刻に面接官のせりふが流れているものとして、口の形を返す */
@@ -126,10 +156,7 @@ function splitCaption(text: string): string[] {
 }
 
 /** いま出す字幕（せりふの長さを文字数で割り振って、話している部分を選ぶ） */
-function currentCaption(
-  lines: { speaker: "interviewer" | "candidate"; text: string; start: number; dur: number }[],
-  t: number,
-) {
+function currentCaption(lines: TimelineLine[], t: number) {
   const line = lines.find((l) => t >= l.start && t < l.start + l.dur);
   if (!line) return null;
   const chunks = splitCaption(line.text);
@@ -137,7 +164,7 @@ function currentCaption(
   let at = line.start;
   for (const c of chunks) {
     const d = (line.dur * c.length) / total;
-    if (t < at + d) return { text: c, speaker: line.speaker, age: t - at };
+    if (t < at + d) return { text: c, speaker: line.speaker, age: t - at, reaction: line.reaction };
     at += d;
   }
   return null;
@@ -162,9 +189,10 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
     return () => cancelAnimationFrame(raf.current);
   }, []);
 
-  const spoken = timeline.lines.filter((l) => t >= l.start);
+  const spoken = timeline.lines.filter((l) => t >= l.start && !l.reaction);
   const caption = currentCaption(timeline.lines, t);
-  const inResult = t >= timeline.resultStart && t < timeline.outroStart;
+  const inResult = t >= timeline.resultStart && t < timeline.offerStart;
+  const inOffer = t >= timeline.offerStart && t < timeline.outroStart;
   const inOutro = t >= timeline.outroStart;
   const elapsed = Math.max(0, Math.min(t, timeline.resultStart) - INTRO);
 
@@ -234,7 +262,7 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
       </div>
 
       {/* 字幕（TikTok でよく見る、白い太字に黒いふち。せりふを短く区切って、話している部分だけ出す） */}
-      {caption && (
+      {caption && !caption.reaction && (
         <div
           style={{
             position: "absolute",
@@ -326,7 +354,7 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
           right: 20,
           top: t < INTRO ? 300 - ease(t / 0.4) * 20 : 70,
           textAlign: "center",
-          opacity: t < INTRO ? ease(t / 0.3) : inResult || inOutro ? 0 : 1,
+          opacity: t < INTRO ? ease(t / 0.3) : inResult || inOffer || inOutro ? 0 : 1,
           transition: "none",
         }}
       >
@@ -348,6 +376,11 @@ export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () 
 
       {/* 採点 */}
       {inResult && <ResultCard job={job} t={t - timeline.resultStart} />}
+
+      {/* 企業からのオファー（テーマに合わせた演出） */}
+      {inOffer && job.offer && (
+        <OfferCard job={job} offer={job.offer} t={t - timeline.offerStart} />
+      )}
 
       {/* 締め */}
       {inOutro && (
@@ -461,6 +494,137 @@ function ResultCard({ job, t }: { job: StudioJobData; t: number }) {
           AIの講評：{r.comment}
         </p>
       )}
+    </div>
+  );
+}
+
+function OfferCard({
+  job,
+  offer,
+  t,
+}: {
+  job: StudioJobData;
+  offer: NonNullable<StudioJobData["offer"]>;
+  t: number;
+}) {
+  const slide = ease(t / 0.45);
+  const reactionOn = t >= OFFER_LEAD;
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "#0F0F0F", padding: "80px 26px 0" }}>
+      <p style={{ fontSize: 16, color: "#888", opacity: ease(t / 0.3) }}>
+        プロフィールを企業に公開すると…
+      </p>
+      {/* スマホの通知のような申し込み */}
+      <div
+        style={{
+          marginTop: 22,
+          transform: `translateY(${(1 - slide) * -60}px)`,
+          opacity: slide,
+          background: "#1E1E1E",
+          border: "1px solid #333",
+          borderRadius: 22,
+          padding: "16px 18px",
+          boxShadow: "0 10px 40px rgba(0,0,0,.5)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 9,
+              background: ACCENT,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+            }}
+          >
+            🔔
+          </span>
+          <span style={{ fontSize: 14, color: "#AAA", flex: 1 }}>ガチキャリAI ・ たった今</span>
+        </div>
+        <p style={{ fontSize: 21, fontWeight: 800, marginTop: 12, lineHeight: 1.45 }}>
+          {offer.companyType}から
+          <br />
+          面談の申し込みが届きました
+          {offer.count > 1 && <span style={{ color: ACCENT }}>（ほか{offer.count - 1}件）</span>}
+        </p>
+        <p
+          style={{
+            marginTop: 10,
+            fontSize: 17,
+            color: "#DDD",
+            lineHeight: 1.6,
+            background: "#151515",
+            borderRadius: 12,
+            padding: "10px 12px",
+          }}
+        >
+          「{offer.message}」
+        </p>
+        <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+          <span
+            style={{
+              flex: 1,
+              textAlign: "center",
+              background: ACCENT,
+              color: "#0F0F0F",
+              borderRadius: 12,
+              padding: "10px 0",
+              fontWeight: 800,
+              fontSize: 16,
+            }}
+          >
+            承諾する
+          </span>
+          <span
+            style={{
+              flex: 1,
+              textAlign: "center",
+              border: "1px solid #444",
+              borderRadius: 12,
+              padding: "10px 0",
+              fontSize: 16,
+              color: "#BBB",
+            }}
+          >
+            あとで
+          </span>
+        </div>
+      </div>
+
+      {/* 受験者のひとこと（字幕） */}
+      {reactionOn && (
+        <p
+          style={{
+            marginTop: 40,
+            textAlign: "center",
+            fontSize: 34,
+            fontWeight: 900,
+            lineHeight: 1.35,
+            color: ACCENT,
+            WebkitTextStroke: "6px #000",
+            paintOrder: "stroke fill",
+            transform: `scale(${0.9 + 0.1 * ease((t - OFFER_LEAD) / 0.15)})`,
+          }}
+        >
+          {offer.reaction}
+        </p>
+      )}
+      <p
+        style={{
+          position: "absolute",
+          bottom: 150,
+          left: 0,
+          right: 70,
+          textAlign: "center",
+          fontSize: 12,
+          color: "#666",
+        }}
+      >
+        ※ 演出です（{job.jobType}の面接・架空の会社）
+      </p>
     </div>
   );
 }

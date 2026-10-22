@@ -289,6 +289,8 @@ export type Database = {
           theme: string;
           tiktok_publish_id: string | null;
           title: string;
+          views: number | null;
+          likes: number | null;
         };
         Insert: {
           caption?: string;
@@ -304,6 +306,8 @@ export type Database = {
           theme: string;
           tiktok_publish_id?: string | null;
           title: string;
+          views?: number | null;
+          likes?: number | null;
         };
         Update: {
           caption?: string;
@@ -319,6 +323,8 @@ export type Database = {
           theme?: string;
           tiktok_publish_id?: string | null;
           title?: string;
+          views?: number | null;
+          likes?: number | null;
         };
         Relationships: [];
       };
