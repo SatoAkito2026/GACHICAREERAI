@@ -147,6 +147,7 @@ export type Database = {
           company_user_id: string;
           created_at: string;
           id: string;
+          interview_id: string | null;
           stripe_payment_intent_id: string | null;
         };
         Insert: {
@@ -156,6 +157,7 @@ export type Database = {
           company_user_id: string;
           created_at?: string;
           id?: string;
+          interview_id?: string | null;
           stripe_payment_intent_id?: string | null;
         };
         Update: {
@@ -165,6 +167,7 @@ export type Database = {
           company_user_id?: string;
           created_at?: string;
           id?: string;
+          interview_id?: string | null;
           stripe_payment_intent_id?: string | null;
         };
         Relationships: [];
@@ -1674,7 +1677,13 @@ export type Database = {
     };
     Functions: {
       spend_coins_for_unlock: {
-        Args: { p_company: string; p_candidate: string; p_coins: number; p_share_rate?: number };
+        Args: {
+          p_company: string;
+          p_candidate: string;
+          p_interview: string;
+          p_coins: number;
+          p_share_rate?: number;
+        };
         Returns: { unlock_id: string; amount_jpy: number; points: number }[];
       };
       spend_points: {

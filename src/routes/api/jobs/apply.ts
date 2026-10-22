@@ -84,12 +84,23 @@ export const Route = createFileRoute("/api/jobs/apply")({
         }
 
         // 企業が評価を見られるようにする（0円。チケットの売上には数えない）
-        await supabase
+        //    応募した企業には、公開中の結果をすべて見せる（interview_id が空＝すべて）
+        const { data: allAccess } = await supabase
           .from("profile_unlocks")
-          .upsert(
-            { company_user_id: job.company_user_id, candidate_user_id: auth.userId, amount: 0 },
-            { onConflict: "company_user_id,candidate_user_id", ignoreDuplicates: true },
-          );
+          .select("id")
+          .eq("company_user_id", job.company_user_id)
+          .eq("candidate_user_id", auth.userId)
+          .is("interview_id", null)
+          .maybeSingle();
+        if (!allAccess) {
+          await supabase
+            .from("profile_unlocks")
+            .insert({
+              company_user_id: job.company_user_id,
+              candidate_user_id: auth.userId,
+              amount: 0,
+            });
+        }
 
         // そのままメッセージでやりとりできるようにする
         const intro = `【求人「${job.title}」への応募】${message ? `\n${message}` : ""}`;

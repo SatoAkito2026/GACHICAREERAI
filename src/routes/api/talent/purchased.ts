@@ -3,7 +3,7 @@
  *
  * GET /api/talent/purchased
  *
- * 名前・ひとこと・購入日・面接回数・最後に練習した日・面談の状況を返す。
+ * 名前・ひとこと・購入日・買った結果の数・最後に練習した日・面談の状況を返す。
  * 面接ごとの詳しい評価は /api/talent/detail で見る。
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -13,9 +13,7 @@ import {
   getCompanyProfile,
   jsonResponse,
   serviceClient,
-  type TalentSummary,
 } from "@/lib/talent";
-import { summaryAverage } from "@/lib/talent-score";
 
 export const Route = createFileRoute("/api/talent/purchased")({
   server: {
@@ -31,19 +29,43 @@ export const Route = createFileRoute("/api/talent/purchased")({
 
         const { data: unlocks } = await supabase
           .from("profile_unlocks")
-          .select("candidate_user_id, created_at, amount")
+          .select("candidate_user_id, interview_id, created_at, amount")
           .eq("company_user_id", auth.userId)
           .order("created_at", { ascending: false })
           .limit(500);
-        const ids = (unlocks ?? []).map((u) => u.candidate_user_id);
+        // 同じ人の結果を複数買っていても、人ごとに1行にまとめる
+        const byPerson = new Map<
+          string,
+          {
+            candidate_user_id: string;
+            created_at: string;
+            viaApplication: boolean;
+            all: boolean;
+            count: number;
+          }
+        >();
+        for (const u of unlocks ?? []) {
+          const row = byPerson.get(u.candidate_user_id) ?? {
+            candidate_user_id: u.candidate_user_id,
+            created_at: u.created_at,
+            viaApplication: false,
+            all: false,
+            count: 0,
+          };
+          if (u.interview_id) row.count += 1;
+          else {
+            row.all = true;
+            if (u.amount === 0) row.viaApplication = true;
+          }
+          byPerson.set(u.candidate_user_id, row);
+        }
+        const ids = [...byPerson.keys()];
         if (ids.length === 0) return jsonResponse({ people: [] });
 
         const [{ data: profiles }, { data: requests }, { data: latest }] = await Promise.all([
           supabase
             .from("candidate_profiles")
-            .select(
-              "user_id, public_code, display_name, headline, desired_jobs, summary, interview_count",
-            )
+            .select("user_id, public_code, display_name, headline, desired_jobs")
             .in("user_id", ids),
           supabase
             .from("contact_requests")
@@ -65,21 +87,19 @@ export const Route = createFileRoute("/api/talent/purchased")({
           if (!lastPracticeBy.has(iv.user_id)) lastPracticeBy.set(iv.user_id, iv.created_at);
         }
 
-        const people = (unlocks ?? [])
+        const people = [...byPerson.values()]
           .map((u) => {
             const p = profileBy.get(u.candidate_user_id);
             if (!p) return null;
-            const s = (p.summary ?? null) as TalentSummary | null;
             return {
               code: p.public_code,
               displayName: p.display_name || "（名前未登録）",
               headline: p.headline,
               desiredJobs: p.desired_jobs,
-              overview: s?.overview ?? "",
-              competencyAverage: summaryAverage(s),
-              interviewCount: p.interview_count,
+              // 見られる結果の数（null＝公開中の結果すべて）
+              boughtResults: u.all ? null : u.count,
               purchasedAt: u.created_at,
-              viaApplication: u.amount === 0,
+              viaApplication: u.viaApplication,
               lastPracticeAt: lastPracticeBy.get(u.candidate_user_id) ?? null,
               contactStatus: statusBy.get(u.candidate_user_id) ?? null,
             };

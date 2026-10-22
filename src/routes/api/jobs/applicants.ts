@@ -7,8 +7,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
-import { jsonResponse, serviceClient, type TalentSummary } from "@/lib/talent";
-import { summaryAverage } from "@/lib/talent-score";
+import { jsonResponse, loadShownResults, serviceClient } from "@/lib/talent";
 
 export const Route = createFileRoute("/api/jobs/applicants")({
   server: {
@@ -38,14 +37,18 @@ export const Route = createFileRoute("/api/jobs/applicants")({
         const { data: profiles } = ids.length
           ? await supabase
               .from("candidate_profiles")
-              .select("user_id, public_code, display_name, headline, summary, interview_count")
+              .select("user_id, public_code, display_name, headline")
               .in("user_id", ids)
           : { data: [] };
         const by = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+        // 公開中の結果の数（結果は1つずつ別物なので、平均はまとめない）
+        const shownCount = new Map<string, number>();
+        for (const r of await loadShownResults(supabase, ids)) {
+          shownCount.set(r.userId, (shownCount.get(r.userId) ?? 0) + 1);
+        }
 
         const applicants = (apps ?? []).map((a) => {
           const p = by.get(a.applicant_user_id);
-          const s = (p?.summary ?? null) as TalentSummary | null;
           return {
             id: a.id,
             code: p?.public_code ?? null,
@@ -53,8 +56,7 @@ export const Route = createFileRoute("/api/jobs/applicants")({
             headline: p?.headline ?? null,
             message: a.message,
             createdAt: a.created_at,
-            interviewCount: p?.interview_count ?? 0,
-            competencyAverage: summaryAverage(s),
+            resultCount: shownCount.get(a.applicant_user_id) ?? 0,
           };
         });
         return jsonResponse({ applicants });

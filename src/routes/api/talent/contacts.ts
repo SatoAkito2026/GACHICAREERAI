@@ -150,8 +150,9 @@ export const Route = createFileRoute("/api/talent/contacts")({
             .select("id")
             .eq("company_user_id", auth.userId)
             .eq("candidate_user_id", p.user_id)
+            .limit(1)
             .maybeSingle();
-          if (!unlock) return jsonResponse({ error: "先にチケットを購入してください" }, 402);
+          if (!unlock) return jsonResponse({ error: "先にコインで結果を1つ以上見てください" }, 402);
 
           const { data: existing } = await supabase
             .from("contact_requests")

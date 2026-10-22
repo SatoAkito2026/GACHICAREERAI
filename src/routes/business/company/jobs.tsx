@@ -55,8 +55,7 @@ type Applicant = {
   headline: string | null;
   message: string;
   createdAt: string;
-  interviewCount: number;
-  competencyAverage: number | null;
+  resultCount: number;
 };
 
 export const Route = createFileRoute("/business/company/jobs")({
@@ -981,8 +980,7 @@ function JobsPage() {
                         )}
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px]">
                           <span style={{ color: "#888888" }}>
-                            模擬面接 {a.interviewCount}回 ・ 評価の平均{" "}
-                            {a.competencyAverage?.toFixed(1) ?? "-"}
+                            公開中の面接結果 {a.resultCount}件
                           </span>
                           {a.code && (
                             <Link

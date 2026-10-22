@@ -124,13 +124,6 @@ export function MyInterviewCards() {
   const shown = (interviews ?? []).filter((iv) => iv.shown);
   const stock = (interviews ?? []).filter((iv) => !iv.shown);
   const hasRoom = limit === null || shown.length < limit;
-  // 企業の一覧に出る「評価の平均」と同じ出し方（面接ごとの平均をさらに平均）
-  const shownAverage = (() => {
-    const avgs = shown
-      .map((iv) => interviewAverage(iv.competencies))
-      .filter((n): n is number => n !== null);
-    return avgs.length ? avgs.reduce((a, b) => a + b, 0) / avgs.length : null;
-  })();
 
   const toggle = async (id: string, show: boolean) => {
     if (!show && !window.confirm("この結果を公開から外しますか？（結果は消えず、あとで戻せます）"))
@@ -159,13 +152,12 @@ export function MyInterviewCards() {
           <span className="text-[13px]" style={{ color: C.accent, fontWeight: 700 }}>
             現在公開中（{shown.length}/{limit ?? "上限なし"}
             {limit !== null && "件"}）
-            {shownAverage !== null && ` ・ 評価の平均 ${shownAverage.toFixed(1)}`}
           </span>
         )
       }
     >
       <p className="mb-4 text-[12px]" style={{ color: C.muted, lineHeight: 1.7 }}>
-        コインで見た企業には、ここに並べた結果だけが見えます（練習の点数・改善点・模範回答は見えません）。人物まとめも、この結果から1時間以内に作り直されます。新しい練習は、枠が空いていれば自動で入ります。
+        企業の一覧には、ここに並べた結果が1つずつ別々に表示されます（評価・値段も結果ごと）。練習の点数・改善点・模範回答は見えません。新しい練習は、枠が空いていれば自動で入ります。
       </p>
       {interviews === null ? (
         <Loading />

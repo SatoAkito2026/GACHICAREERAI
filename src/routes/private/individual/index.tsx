@@ -53,7 +53,7 @@ function IndividualDashboard() {
             {
               emoji: "🌐",
               title: "③ プロフィールを公開",
-              desc: "人物まとめを企業に公開（名前は伏せて表示）",
+              desc: "面接結果を企業に公開（名前は伏せて表示）",
               to: "/private/individual/talent",
             },
             {

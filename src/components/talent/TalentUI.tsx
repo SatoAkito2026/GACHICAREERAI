@@ -53,8 +53,6 @@ export type TalentSummary = {
   competencies: SummaryCompetency[];
   score_trend: { date: string; score: number }[];
   interview_count: number;
-  /** 公開中の面接ごとの評価の平均を、さらに平均したもの（企業に見せる「評価の平均」） */
-  overall_average?: number | null;
   generated_at: string;
 };
 
