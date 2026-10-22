@@ -6,7 +6,7 @@ src/standalone/*.html は独自デザインの1枚完結ページなので、そ
 
     <!--
     title: 会社概要
-    description: 合同会社AKITOグループの会社概要と代表挨拶。
+    description: 合同会社AKITOグループの会社概要と役員挨拶。
     nav: about
     cta: yes
     -->
