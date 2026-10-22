@@ -1,6 +1,6 @@
 <!--
 title: 会社概要
-description: 合同会社AKITOグループの役員挨拶・役員紹介・会社概要・代表経歴・事業内容。
+description: 合同会社AKITOグループの役員挨拶・会社概要・代表経歴・事業内容。
 nav: about
 -->
 <style>
@@ -19,22 +19,9 @@ nav: about
 .pillars span{font-size:14.5px;color:var(--ink-2)}
 .sign{margin-top:32px;text-align:right;font-weight:700;line-height:1.8}
 
-.officers{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);margin:0;padding:0;list-style:none}
-@media (min-width:640px){.officers{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.officer{display:grid;grid-template-columns:72px minmax(0,1fr);gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px}
-.officer .face{width:72px;height:72px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--c);color:#fff;font-family:var(--ff-display);font-size:28px}
-.officer .face img{width:100%;height:100%;object-fit:cover}
-.officer span{display:block;font-size:13px;color:var(--muted)}
-.officer b{display:block;font-family:var(--ff-display);font-size:21px;margin:2px 0}
-.officer small{display:block;font-size:12.5px;color:var(--muted);letter-spacing:.08em}
-.officer-msg{margin:18px 0 0;background:#fff;border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,40px);display:grid;gap:20px;position:relative;overflow:hidden}
-.officer-msg::before{content:"“";position:absolute;right:clamp(16px,3vw,36px);top:-18px;font-family:var(--ff-latin);font-size:150px;line-height:1;color:var(--green);opacity:.18}
-.officer-msg .lbl{font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--green-text,var(--green))}
-.officer-msg .by{text-align:right;font-weight:700;font-family:var(--ff-display)}
-.officer-msg .face{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-family:var(--ff-display);font-size:21px;flex:none}
-.officer-msg figcaption small{display:block;font-size:12.5px;color:var(--muted)}
-.officer-msg figcaption b{display:block;font-family:var(--ff-display);font-size:19px}
-.officer-msg blockquote{margin:0;display:grid;gap:14px;color:var(--ink-2);max-width:46em;border-left:4px solid var(--green);padding-left:clamp(16px,2.4vw,24px)}
+.greet-2{border-top:1px solid var(--line);padding-top:clamp(56px,8vw,96px)}
+.portrait .frame.mono{aspect-ratio:1;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.25),transparent 55%),linear-gradient(140deg,#5BC255,var(--green) 55%,#2C7F28)}
+.portrait .frame.mono span{font-family:var(--ff-display);font-size:clamp(90px,14vw,170px);color:#fff;line-height:1;opacity:.95}
 @media (max-width:1023px){.greet{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:32px}.portrait{position:static}}
 @media (max-width:639px){.greet{grid-template-columns:minmax(0,1fr)}.portrait{position:static;max-width:300px}}
 
@@ -96,26 +83,21 @@ nav: about
   </div>
 </section>
 
-<section class="block">
-  <div class="wrap">
-    <div class="sec-head solo rv">
-      <div>
-        <p class="eyebrow">Officers</p>
-        <h2>役員紹介</h2>
-      </div>
-    </div>
-    <ul class="officers">
-      <li class="officer rv" style="--c:var(--red)"><span class="face"><img src="assets/img/ceo.webp" alt="" width="900" height="900" loading="lazy"></span><div><span>代表</span><b>佐藤 光彪</b></div></li>
-      <li class="officer rv" style="--c:var(--green)"><span class="face" aria-hidden="true">篠</span><div><span>役員兼副代表</span><b>篠原 力太</b></div></li>
-    </ul>
-    <figure class="officer-msg rv">
-      <p class="lbl">副代表メッセージ</p>
-      <blockquote>
+<section class="block" style="padding-top:0">
+  <div class="wrap greet greet-2">
+    <figure class="portrait rv">
+      <div class="frame mono" aria-hidden="true"><span>篠</span></div>
+      <figcaption><span>合同会社AKITOグループ 役員兼副代表</span><b>篠原 力太</b></figcaption>
+    </figure>
+    <div>
+      <p class="eyebrow">Message</p>
+      <h2>安定よりも、<br>挑戦を選んだ。</h2>
+      <div class="prose">
         <p>私は自衛隊での経験を通じて、どんな状況でも責任を持って行動し、仲間と目標を達成する大切さを学びました。しかし、決められた道を歩むだけでは、自分の可能性を広げられないと感じ、安定よりも挑戦を選びました。</p>
         <p>私の目標は、ただ会社を大きくすることではありません。人の挑戦を後押しし、企業が抱える課題を新しい発想と行動力で解決すること。そして、関わるすべての人が「出会えてよかった」と思える価値を生み出し続けることです。</p>
-      </blockquote>
-      <figcaption class="by">役員兼副代表　篠原 力太</figcaption>
-    </figure>
+      </div>
+      <p class="sign">合同会社AKITOグループ<br>役員兼副代表　篠原 力太</p>
+    </div>
   </div>
 </section>
 

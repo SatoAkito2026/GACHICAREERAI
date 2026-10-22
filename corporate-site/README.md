@@ -7,7 +7,7 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 | ファイル | 中身 | WordPress のときのURL |
 |---|---|---|
 | `index` | トップ | `/` |
-| `about` | 会社概要・役員挨拶・役員紹介・代表経歴 | `/about-company/` |
+| `about` | 会社概要・役員挨拶・代表経歴 | `/about-company/` |
 | `gachicareer-ai` | ガチキャリAI（個人の面接練習・企業向け） | `/interview-copilot-ai/` |
 | `posupos` | ポスポス（飲食店向け会計ソフト）のLP。料金は載せず、お問い合わせで案内する | — |
 | （トップへ転送） | 無料相談会（終了） | `/無料相談・イベント/` |
