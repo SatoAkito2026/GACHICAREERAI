@@ -274,6 +274,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      tiktok_videos: {
+        Row: {
+          caption: string;
+          created_at: string;
+          duration_sec: number | null;
+          error: string | null;
+          id: string;
+          posted_at: string | null;
+          script: Json;
+          size_bytes: number | null;
+          status: string;
+          storage_path: string | null;
+          theme: string;
+          tiktok_publish_id: string | null;
+          title: string;
+        };
+        Insert: {
+          caption?: string;
+          created_at?: string;
+          duration_sec?: number | null;
+          error?: string | null;
+          id?: string;
+          posted_at?: string | null;
+          script: Json;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          theme: string;
+          tiktok_publish_id?: string | null;
+          title: string;
+        };
+        Update: {
+          caption?: string;
+          created_at?: string;
+          duration_sec?: number | null;
+          error?: string | null;
+          id?: string;
+          posted_at?: string | null;
+          script?: Json;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          theme?: string;
+          tiktok_publish_id?: string | null;
+          title?: string;
+        };
+        Relationships: [];
+      };
       profile_unlocks: {
         Row: {
           amount: number;

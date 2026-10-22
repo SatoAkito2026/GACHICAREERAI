@@ -50,6 +50,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 友だち紹介：`/login?ref=コード` から登録 → `/private/welcome` で `/api/referral` の claim。紹介された人が最初の練習を終えると（`save-interview.ts` の `rewardReferralOnFirstPractice`）両方に練習のボーナス+3回（`practice_bonus_ledger`、お金・ポイントは渡さない）。ボーナスは1日・1か月の上限を超えたときに `create-practice-session.ts` で1回ずつ使う。画面は `/private/invite`
 - 評価のシェア：練習履歴の「結果を画像でシェア」（`ShareResultButton`、ブラウザで1080×1350の画像を作る。名前は入れず、文に招待リンクをつける）
 - 受験生のスマホのホームは個人と同じ形（`StudentMobileHome`）。Supabase の確認メールの日本語の文面は `docs/supabase-email-templates.md`
+- TikTok 動画：毎日17時（GitHub Actions `.github/workflows/tiktok-video.yml`）に `scripts/tiktok/render.mjs` が、`/api/studio/job`（台本はAI・音声は OpenAI TTS、`src/lib/studio.ts`）→ 撮影用の画面 `/studio/tiktok`（`TiktokScene`、時計を止めて1コマずつ撮る）→ ffmpeg → `/api/studio/upload` で `tiktok_videos` と Storage `tiktok-videos` に置く。合言葉 `STUDIO_SECRET`（Cloudflare と GitHub の両方）。管理画面の「TikTok」で見る・保存・投稿済みにする（`/api/tiktok-videos`）。受験者もAIの演技で、実在の利用者の面接は使わない
 - 「今日の質問」とリマインドメールは廃止（DBのテーブルは残している）
 - 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）
 - ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`
@@ -94,7 +95,7 @@ npm run deploy     # build + wrangler deploy
 |---|---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PROJECT_ID` | ブラウザ用（ビルド時に埋め込み） | `.env.production` / `.env.development`（コミット済み） |
 | `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `APP_URL` | サーバー用の公開値 | `wrangler.jsonc` の `vars` |
-| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `VAPID_PRIVATE_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
+| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `VAPID_PRIVATE_KEY`, `STUDIO_SECRET` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
 
 テンプレート: `.env.example`, `.dev.vars.example`
 
