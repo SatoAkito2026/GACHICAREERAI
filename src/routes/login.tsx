@@ -4,6 +4,7 @@ import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
+import { useMode, type UserMode } from "@/hooks/use-mode";
 import type { AuthResponse } from "@supabase/supabase-js";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
@@ -12,8 +13,10 @@ import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 const SHOW_SCHOOL_AND_ACTOR = false;
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>): { next?: string } => ({
+  validateSearch: (s: Record<string, unknown>): { next?: string; mode?: "business" } => ({
     ...(typeof s.next === "string" && s.next.startsWith("/") ? { next: s.next } : {}),
+    // 企業として新規登録し、確認メールのリンクから戻ってきたとき
+    ...(s.mode === "business" ? { mode: "business" as const } : {}),
   }),
   component: LoginPage,
 });
@@ -37,10 +40,11 @@ const SCHOOL_TYPES = [
 function LoginPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const { next } = Route.useSearch();
+  const { next, mode: searchMode } = Route.useSearch();
+  const { setMode, isBusiness, loading: modeLoading } = useMode();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [loginMode, setLoginMode] = useState<LoginMode>("private");
-  const loginModeRef = useRef<LoginMode>("private");
+  const [loginMode, setLoginMode] = useState<LoginMode>(searchMode ?? "private");
+  const loginModeRef = useRef<LoginMode>(searchMode ?? "private");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -65,12 +69,24 @@ function LoginPage() {
     setLoginMode(newMode);
   };
 
+  // 企業として新規登録 → 確認メールのリンクで戻ってきたら、会社の登録に進む
+  useEffect(() => {
+    if (loading || modeLoading || !session || handledRef.current) return;
+    if (searchMode === "business" && !isBusiness && step === "auth") {
+      handledRef.current = true;
+      setSignupData({ session, user: session.user } as AuthResponse["data"]);
+      setStep("biz-type");
+    }
+  }, [loading, modeLoading, session, searchMode, isBusiness, step]);
+
   if (!loading && session && step === "auth" && !submitting && !handledRef.current) {
     if (next) {
       window.location.href = next;
       return null;
     }
-    return <SafeNavigate to="/private" />;
+    if (modeLoading || (searchMode === "business" && !isBusiness)) return null;
+    // すでにログイン中なら、いまのモードの画面へ
+    return <SafeNavigate to={isBusiness ? "/business" : "/private"} />;
   }
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -102,48 +118,25 @@ function LoginPage() {
             return;
           }
 
-          // ログイン時に選択したモードでuser_modeを更新する
+          // ログイン時に選んだモードで入る（画面側のモードも一緒に切り替える）
+          const { data: profile } = await (supabase
+            .from("profiles")
+            .select("user_mode, company_id")
+            .eq("id", data.user.id)
+            .maybeSingle() as any);
+          const existingMode = (profile?.user_mode ?? "private_individual") as UserMode;
+          const existingIsBusiness = existingMode.startsWith("business_");
           if (currentMode === "business") {
-            // 既存のuser_modeを確認
-            const { data: profile } = await (supabase
-              .from("profiles")
-              .select("user_mode, company_id")
-              .eq("id", data.user.id)
-              .maybeSingle() as any);
-            const existingMode = profile?.user_mode ?? "private_individual";
-
-            // 既にbusiness系なら更新不要、private系ならbusiness_companyに更新
-            if (
-              existingMode !== "business_company" &&
-              existingMode !== "business_school" &&
-              existingMode !== "business_actor"
-            ) {
-              await (supabase
-                .from("profiles")
-                .update({ user_mode: "business_company" } as any)
-                .eq("id", data.user.id) as any);
+            if (!existingIsBusiness && !profile?.company_id) {
+              // 会社の登録がまだなら、会社の登録に進む
+              setSignupData({ session: data.session, user: data.user } as AuthResponse["data"]);
+              setStep("biz-type");
+              return;
             }
+            await setMode(existingIsBusiness ? existingMode : "business_company", data.user.id);
             navigate({ to: "/business" });
           } else {
-            // private選択時
-            const { data: profile } = await (supabase
-              .from("profiles")
-              .select("user_mode")
-              .eq("id", data.user.id)
-              .maybeSingle() as any);
-            const existingMode = profile?.user_mode ?? "private_individual";
-
-            // 既にbusiness系ならprivate_individualに更新
-            if (
-              existingMode === "business_company" ||
-              existingMode === "business_school" ||
-              existingMode === "business_actor"
-            ) {
-              await (supabase
-                .from("profiles")
-                .update({ user_mode: "private_individual" } as any)
-                .eq("id", data.user.id) as any);
-            }
+            await setMode(existingIsBusiness ? "private_individual" : existingMode, data.user.id);
             navigate({ to: "/private" });
           }
         } else {
@@ -153,7 +146,13 @@ function LoginPage() {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/private/welcome` },
+          options: {
+            // 確認メールのリンクから戻ったときも、選んだモードで続ける
+            emailRedirectTo:
+              currentMode === "business"
+                ? `${window.location.origin}/login?mode=business`
+                : `${window.location.origin}/private/welcome`,
+          },
         });
         if (error) throw error;
         setSignupData(data);
@@ -165,10 +164,7 @@ function LoginPage() {
           if (currentMode === "business") {
             setStep("biz-type");
           } else {
-            await (supabase
-              .from("profiles")
-              .update({ user_mode: "private_individual" } as any)
-              .eq("id", data.session.user.id) as any);
+            await setMode("private_individual", data.session.user.id);
             navigate({ to: "/private/welcome" });
           }
         } else {
@@ -302,6 +298,7 @@ function LoginPage() {
                   } as any)
                   .eq("id", signupData.session!.user.id) as any);
                 // 企業は月額プランなし（人材の閲覧はコイン、求人掲載は今は無料）
+                await setMode("business_company", signupData.session!.user.id);
                 navigate({ to: "/business/company" });
               } catch (e) {
                 setError(toJapaneseError(e));
@@ -401,6 +398,7 @@ function LoginPage() {
                     company_role: "admin",
                   } as any)
                   .eq("id", signupData.session!.user.id) as any);
+                await setMode("business_school", signupData.session!.user.id);
                 navigate({ to: "/business/school" });
               } catch (e) {
                 setError(toJapaneseError(e));
@@ -479,6 +477,7 @@ function LoginPage() {
                     company_role: "admin",
                   } as any)
                   .eq("id", signupData.session!.user.id) as any);
+                await setMode("business_actor", signupData.session!.user.id);
                 setStep("actor-plan");
               } catch (e) {
                 setError(toJapaneseError(e));
