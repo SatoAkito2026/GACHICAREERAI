@@ -17,4 +17,6 @@
 ## その他
 - [ ] Cloudflare の DNS に残っている `_lovable.interview-copilot-ai` の TXT レコードを消すか確認
 - [ ] 法務の届出・規約の最終確認（下書きは `docs/legal/`）
-- [ ] 受験生向けのスマホ用ホーム画面を、個人向けと同じ形にするか決める
+- [x] 受験生向けのスマホ用ホーム画面を、個人向けと同じ形にする
+- [ ] Supabase の確認メールを日本語にする（文面は `docs/supabase-email-templates.md`）
+- [ ] Supabase のメール送信を Resend の SMTP にする（送れる通数を増やす・送信元を「ガチキャリAI」にする）

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
 import { useMode, type UserMode } from "@/hooks/use-mode";
+import { REFERRAL_STORAGE_KEY } from "@/lib/referral-client";
 import type { AuthResponse } from "@supabase/supabase-js";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
@@ -13,8 +14,12 @@ import { PLAN_LABELS, PLAN_PRICES } from "@/hooks/use-plan";
 const SHOW_SCHOOL_AND_ACTOR = false;
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>): { next?: string; mode?: "business" } => ({
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { next?: string; mode?: "business"; ref?: string } => ({
     ...(typeof s.next === "string" && s.next.startsWith("/") ? { next: s.next } : {}),
+    // 友だち紹介のリンクから来たとき
+    ...(typeof s.ref === "string" && /^[A-Za-z0-9]{4,12}$/.test(s.ref) ? { ref: s.ref } : {}),
     // 企業として新規登録し、確認メールのリンクから戻ってきたとき
     ...(s.mode === "business" ? { mode: "business" as const } : {}),
   }),
@@ -40,9 +45,20 @@ const SCHOOL_TYPES = [
 function LoginPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const { next, mode: searchMode } = Route.useSearch();
+  const { next, mode: searchMode, ref } = Route.useSearch();
   const { setMode, isBusiness, loading: modeLoading } = useMode();
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  // 紹介リンクから来た人は、はじめから新規登録の画面にする
+  const [authMode, setAuthMode] = useState<"login" | "signup">(ref ? "signup" : "login");
+
+  // 紹介コードを、登録が終わるまで覚えておく（登録後の /private/welcome で使う）
+  useEffect(() => {
+    if (!ref) return;
+    try {
+      localStorage.setItem(REFERRAL_STORAGE_KEY, ref.toUpperCase());
+    } catch {
+      // 保存できなくても登録はできる
+    }
+  }, [ref]);
   const [loginMode, setLoginMode] = useState<LoginMode>(searchMode ?? "private");
   const loginModeRef = useRef<LoginMode>(searchMode ?? "private");
   const [email, setEmail] = useState("");
@@ -561,6 +577,14 @@ function LoginPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {authMode === "login" ? "ログイン" : "新規登録"}
         </p>
+        {ref && (
+          <p
+            className="mt-3 rounded-lg px-3 py-2 text-[12px]"
+            style={{ background: "#16200A", border: "1px solid #3A4A12", color: "#E6F7B0" }}
+          >
+            🎁 友だちの招待です。登録して練習を1回終えると、練習のボーナスが3回もらえます。
+          </p>
+        )}
 
         <div className="mt-5 flex gap-2">
           {[

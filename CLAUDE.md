@@ -47,6 +47,9 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 
 - 通知：`src/lib/notify.ts` の `notify()` がアプリ内のお知らせ（`notifications`、ベルは `NotificationBell`）に残し、登録済みの端末（`push_subscriptions`）へプッシュを送る。プッシュは中身なしの合図だけで、`public/sw.js` が `/api/notifications/peek` から最新のお知らせを取って表示する。鍵は VAPID（公開鍵 `VAPID_PUBLIC_KEY`／`VITE_VAPID_PUBLIC_KEY`、秘密鍵 `VAPID_PRIVATE_KEY`）。対象：結果が買われた・面談の申し込み／承諾・メッセージ・応募（メールも従来どおり）と、練習のリマインド（毎時の Cron で日本時間19時台、3日練習していない人に7日に1回まで）
 
+- 友だち紹介：`/login?ref=コード` から登録 → `/private/welcome` で `/api/referral` の claim。紹介された人が最初の練習を終えると（`save-interview.ts` の `rewardReferralOnFirstPractice`）両方に練習のボーナス+3回（`practice_bonus_ledger`、お金・ポイントは渡さない）。ボーナスは1日・1か月の上限を超えたときに `create-practice-session.ts` で1回ずつ使う。画面は `/private/invite`
+- 評価のシェア：練習履歴の「結果を画像でシェア」（`ShareResultButton`、ブラウザで1080×1350の画像を作る。名前は入れず、文に招待リンクをつける）
+- 受験生のスマホのホームは個人と同じ形（`StudentMobileHome`）。Supabase の確認メールの日本語の文面は `docs/supabase-email-templates.md`
 - 「今日の質問」とリマインドメールは廃止（DBのテーブルは残している）
 - 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）
 - ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`

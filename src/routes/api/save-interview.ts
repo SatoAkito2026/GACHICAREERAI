@@ -1,3 +1,4 @@
+import { rewardReferralOnFirstPractice } from "@/lib/referral";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
@@ -370,6 +371,11 @@ ${conversationText}
         }
 
         // 個人モードの練習なら、公開プロフィールの人物まとめを作り直す印をつける（毎時の処理で更新）
+        // 友だち紹介で登録した人が最初の練習を終えたら、両方にボーナスを渡す
+        if (practiceMode && !body.isAbandoned) {
+          await rewardReferralOnFirstPractice(supabase, invitation.user_id);
+        }
+
         if (practiceMode === "individual") {
           if (!body.isAbandoned) {
             await autoShowNewInterview(supabase, invitation.user_id, interviewId);

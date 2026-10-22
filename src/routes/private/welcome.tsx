@@ -2,6 +2,28 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef } from "react";
 import { useAuth, registerDevice } from "@/hooks/use-auth";
+import { REFERRAL_STORAGE_KEY } from "@/lib/referral-client";
+
+/** 紹介リンク（/login?ref=）から来た人なら、紹介した人に結びつける（1回だけ） */
+async function claimPendingReferral(accessToken: string) {
+  let code: string | null = null;
+  try {
+    code = localStorage.getItem(REFERRAL_STORAGE_KEY);
+  } catch {
+    return;
+  }
+  if (!code) return;
+  try {
+    await fetch("/api/referral", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ action: "claim", code }),
+    });
+    localStorage.removeItem(REFERRAL_STORAGE_KEY);
+  } catch {
+    // 次に開いたときにもう一度試す
+  }
+}
 
 export const Route = createFileRoute("/private/welcome")({
   head: () => ({ meta: [{ title: "登録完了｜ガチキャリAI" }] }),
@@ -19,6 +41,7 @@ function WelcomePage() {
     if (!registeredRef.current && session?.access_token) {
       registeredRef.current = true;
       void registerDevice(session.access_token);
+      void claimPendingReferral(session.access_token);
     }
   }, [session?.access_token]);
 
