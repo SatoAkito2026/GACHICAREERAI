@@ -14,6 +14,7 @@ import {
   Cell,
 } from "recharts";
 import { useAuth } from "@/hooks/use-auth";
+import { AdminModeSwitch } from "@/components/AdminModeSwitch";
 
 type NameCount = { name: string; count: number };
 
@@ -181,6 +182,7 @@ function AdminDashboard() {
       className="min-h-screen"
       style={{ background: "#0F0F0F", fontFamily: "'Inter', sans-serif" }}
     >
+      <AdminModeSwitch />
       {/* ヘッダー */}
       <div
         className="flex items-center gap-3 border-b px-6 py-4"
