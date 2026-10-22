@@ -1167,11 +1167,18 @@ function LiveScreen({
             });
             const up = (await urlRes.json()) as { path?: string; uploadToken?: string };
             if (up.path && up.uploadToken) {
-              await supabase.storage
+              const { error: upError } = await supabase.storage
                 .from("interview-recordings")
                 .uploadToSignedUrl(up.path, up.uploadToken, blob, {
                   contentType: blob.type || "video/webm",
                 });
+              if (upError) throw upError;
+              // アップロードできたことをサーバーで確かめてから「録画あり」にする
+              await fetch("/api/talent/recording", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, interviewId: saved.interviewId, action: "done" }),
+              });
             }
           }
         } catch (e) {

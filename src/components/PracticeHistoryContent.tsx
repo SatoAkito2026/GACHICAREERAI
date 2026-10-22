@@ -48,6 +48,8 @@ type HistoryRow = {
   job_type: string | null;
   created_at: string;
   feedback: PracticeFeedback | null;
+  /** 録画（本人が「録画を残す」を選んだ練習だけ。新しいものから3本まで） */
+  recordingUrl?: string | null;
 };
 
 export function PracticeHistoryContent({
@@ -100,12 +102,22 @@ export function PracticeHistoryContent({
         ).map((s) => [s.interview_id, s.practice_feedback]),
       );
 
+      // 録画はサーバーで見られるURLを作ってもらう（個人の練習だけ）
+      const recordings = new Map<string, string | null>();
+      if (mode === "individual") {
+        const r = await talentApi<{ interviews: { id: string; recordingUrl: string | null }[] }>(
+          "/api/talent/my-interviews",
+        );
+        if (r.ok) for (const iv of r.data.interviews) recordings.set(iv.id, iv.recordingUrl);
+      }
+
       setRows(
         list.map((i) => ({
           id: i.id,
           job_type: i.job_type,
           created_at: i.created_at,
           feedback: feedbackMap.get(i.id) ?? null,
+          recordingUrl: recordings.get(i.id) ?? null,
         })),
       );
     })();
@@ -175,6 +187,14 @@ export function PracticeHistoryContent({
                   </span>
                 </span>
                 <span className="flex items-center gap-3">
+                  {r.recordingUrl && (
+                    <span
+                      className="rounded px-1.5 py-0.5 text-[10px]"
+                      style={{ background: "#3A1515", color: "#FF8A8A" }}
+                    >
+                      録画あり
+                    </span>
+                  )}
                   {r.feedback?.readiness_score != null && (
                     <span style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}>
                       {r.feedback.readiness_score}点
@@ -192,6 +212,15 @@ export function PracticeHistoryContent({
                 </span>
               </summary>
 
+              {r.recordingUrl && (
+                <video
+                  src={r.recordingUrl}
+                  controls
+                  preload="metadata"
+                  className="mt-4 w-full rounded-xl"
+                  style={{ background: "#000", maxHeight: 360 }}
+                />
+              )}
               {r.feedback ? (
                 <div className="mt-4 space-y-4">
                   {r.feedback.overall_impression && (

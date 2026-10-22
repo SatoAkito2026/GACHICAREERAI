@@ -3,6 +3,7 @@
  *
  * GET  /api/talent/recording?token=               → この面接を録画するか { record }
  * POST /api/talent/recording { token, interviewId } → Supabase Storage へ直接アップロードするための署名付きURL
+ * POST /api/talent/recording { token, interviewId, action: "done" } → アップロードできたかを確かめて記録する
  *
  * 動画は Worker を通さずブラウザから Storage へ直接送る（Worker のリクエストサイズ上限を避けるため）。
  * 容量を守るため、1人あたり新しいものから RECORDINGS_PER_USER 本だけ残す。
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/api/talent/recording")({
       POST: async ({ request }) => {
         const supabase = await serviceClient();
         if (!supabase) return jsonResponse({ error: "Server config missing" }, 500);
-        let body: { token?: unknown; interviewId?: unknown };
+        let body: { token?: unknown; interviewId?: unknown; action?: unknown };
         try {
           body = await request.json();
         } catch {
@@ -65,6 +66,19 @@ export const Route = createFileRoute("/api/talent/recording")({
           Date.now() - new Date(interview.created_at).getTime() > 3 * 60 * 60 * 1000
         ) {
           return jsonResponse({ error: "Interview not found" }, 404);
+        }
+
+        const path = `practice/${inv.userId}/${interview.id}.webm`;
+
+        // アップロードが終わったら、実際にファイルがあるのを確かめてから「録画あり」にする
+        if (body.action === "done") {
+          const { data: files } = await supabase.storage
+            .from(RECORDING_BUCKET)
+            .list(`practice/${inv.userId}`, { search: `${interview.id}.webm` });
+          const file = (files ?? []).find((f) => f.name === `${interview.id}.webm`);
+          if (!file) return jsonResponse({ error: "録画が見つかりません" }, 404);
+          await supabase.from("interviews").update({ recording_path: path }).eq("id", interview.id);
+          return jsonResponse({ ok: true });
         }
 
         // 古い録画を消す（今回の分を含めて RECORDINGS_PER_USER 本まで）
@@ -90,7 +104,6 @@ export const Route = createFileRoute("/api/talent/recording")({
             );
         }
 
-        const path = `practice/${inv.userId}/${interview.id}.webm`;
         const { data: signed, error } = await supabase.storage
           .from(RECORDING_BUCKET)
           .createSignedUploadUrl(path, { upsert: true });
@@ -98,7 +111,6 @@ export const Route = createFileRoute("/api/talent/recording")({
           console.error("[talent/recording] signed url failed", error);
           return jsonResponse({ error: "Upload URL failed" }, 500);
         }
-        await supabase.from("interviews").update({ recording_path: path }).eq("id", interview.id);
         return jsonResponse({ path, uploadToken: signed.token });
       },
     },

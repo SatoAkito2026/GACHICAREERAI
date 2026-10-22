@@ -330,17 +330,25 @@ function ResultPreview({ r }: { r: Result }) {
   );
 }
 
+const CONTACT_TEMPLATE = `はじめまして。模擬面接の結果を拝見し、ぜひ一度お話ししたいと思いご連絡しました。
+弊社で募集している仕事についてご説明し、あなたのご希望もお聞きできればうれしいです。
+まずはオンラインで30分ほど、面談のお時間をいただけないでしょうか。`;
+
 function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [needsCompany, setNeedsCompany] = useState(false);
 
   const send = async () => {
     setSending(true);
     setError("");
     const r = await talentApi("/api/talent/contacts", { action: "request", code: d.code, message });
     setSending(false);
-    if (!r.ok) return setError(r.data.error ?? "送信に失敗しました");
+    if (!r.ok) {
+      setNeedsCompany(!!r.data.needsCompany);
+      return setError(r.data.error ?? "送信に失敗しました");
+    }
     onChanged();
   };
 
@@ -397,6 +405,16 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
           <CheckCircle2 size={15} /> 閲覧済み（
           {d.unlockedAt ? new Date(d.unlockedAt).toLocaleDateString("ja-JP") : ""}）
         </p>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setMessage(CONTACT_TEMPLATE)}
+            className="text-[12px]"
+            style={{ color: C.accent }}
+          >
+            例文を入れる
+          </button>
+        </div>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -410,7 +428,12 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
           会社名・業種・所在地・募集職種など、設定画面に登録した会社情報も一緒に表示されます。
         </p>
         <ErrorText>{error}</ErrorText>
-        <div>
+        {needsCompany && (
+          <Link to="/business/company/settings" style={{ color: C.accent, fontSize: 13 }}>
+            設定画面で会社名を登録する →
+          </Link>
+        )}
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={() => void send()}
             loading={sending}
@@ -418,6 +441,11 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
           >
             面談を申し込む
           </Button>
+          {message.trim().length < 10 && (
+            <span className="text-[12px]" style={{ color: C.muted }}>
+              メッセージをあと{10 - message.trim().length}文字以上書くと申し込めます
+            </span>
+          )}
         </div>
       </div>
     </Card>
