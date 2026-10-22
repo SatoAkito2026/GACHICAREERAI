@@ -7,6 +7,7 @@ import {
   sanitizeCompetencies,
   sanitizeRecruiterView,
   autoShowNewInterview,
+  recomputeSummaryScores,
 } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -373,10 +374,8 @@ ${conversationText}
           if (!body.isAbandoned) {
             await autoShowNewInterview(supabase, invitation.user_id, interviewId);
           }
-          await supabase
-            .from("candidate_profiles")
-            .update({ summary_stale: true })
-            .eq("user_id", invitation.user_id);
+          // 点数・回数はすぐ、文章は毎時の処理で作り直す
+          await recomputeSummaryScores(supabase, invitation.user_id);
         }
 
         // 面接タイプが指定されている個人モードの練習面接なら、会話内容から書類を自動生成する

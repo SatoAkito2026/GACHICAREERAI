@@ -21,6 +21,7 @@ import {
   CompanyInterviewBlock,
   type CompanyInterview,
 } from "@/components/talent/CompanyInterviewBlock";
+import { summaryAverage } from "@/lib/talent-score";
 
 export const Route = createFileRoute("/business/company/talent/$code")({
   head: () => ({ meta: [{ title: "人材の詳細｜ガチキャリAI Business" }] }),
@@ -117,7 +118,7 @@ function TalentDetailPage() {
                 </div>
                 <div className="text-right">
                   <p style={{ color: C.accent, fontSize: 34, fontWeight: 800, lineHeight: 1 }}>
-                    {competencyAverage(d.summary)?.toFixed(1) ?? "-"}
+                    {summaryAverage(d.summary)?.toFixed(1) ?? "-"}
                   </p>
                   <p className="text-[11px]" style={{ color: C.muted }}>
                     評価の平均（5点満点）
@@ -303,13 +304,4 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
       </div>
     </Card>
   );
-}
-
-/** 企業向けの点数は「7つの評価」の平均（本人向けの練習の点数は使わない） */
-function competencyAverage(summary: TalentSummary | null): number | null {
-  const scores = (summary?.competencies ?? [])
-    .map((c) => c.score)
-    .filter((n): n is number => typeof n === "number");
-  if (scores.length === 0) return null;
-  return scores.reduce((a, b) => a + b, 0) / scores.length;
 }

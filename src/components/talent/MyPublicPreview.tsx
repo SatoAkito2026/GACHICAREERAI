@@ -10,12 +10,7 @@ import {
   type CompanyInterview,
 } from "@/components/talent/CompanyInterviewBlock";
 import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
-
-function average(scores: (number | null)[]): number | null {
-  const list = scores.filter((n): n is number => typeof n === "number");
-  if (list.length === 0) return null;
-  return list.reduce((a, b) => a + b, 0) / list.length;
-}
+import { interviewAverage } from "@/lib/talent-score";
 
 /** 企業に見える形の、面接1回分のカード */
 function ResultCard({
@@ -29,7 +24,7 @@ function ResultCard({
   corner?: React.ReactNode;
   footer?: React.ReactNode;
 }) {
-  const avg = average(iv.competencies.map((c) => c.score));
+  const avg = interviewAverage(iv.competencies);
   const style = iv.settings?.avatar_style ? AVATAR_STYLE_LABELS[iv.settings.avatar_style] : null;
   return (
     <div
@@ -129,6 +124,13 @@ export function MyInterviewCards() {
   const shown = (interviews ?? []).filter((iv) => iv.shown);
   const stock = (interviews ?? []).filter((iv) => !iv.shown);
   const hasRoom = limit === null || shown.length < limit;
+  // 企業の一覧に出る「評価の平均」と同じ出し方（面接ごとの平均をさらに平均）
+  const shownAverage = (() => {
+    const avgs = shown
+      .map((iv) => interviewAverage(iv.competencies))
+      .filter((n): n is number => n !== null);
+    return avgs.length ? avgs.reduce((a, b) => a + b, 0) / avgs.length : null;
+  })();
 
   const toggle = async (id: string, show: boolean) => {
     if (!show && !window.confirm("この結果を公開から外しますか？（結果は消えず、あとで戻せます）"))
@@ -157,6 +159,7 @@ export function MyInterviewCards() {
           <span className="text-[13px]" style={{ color: C.accent, fontWeight: 700 }}>
             現在公開中（{shown.length}/{limit ?? "上限なし"}
             {limit !== null && "件"}）
+            {shownAverage !== null && ` ・ 評価の平均 ${shownAverage.toFixed(1)}`}
           </span>
         )
       }

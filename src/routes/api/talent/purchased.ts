@@ -15,6 +15,7 @@ import {
   serviceClient,
   type TalentSummary,
 } from "@/lib/talent";
+import { summaryAverage } from "@/lib/talent-score";
 
 export const Route = createFileRoute("/api/talent/purchased")({
   server: {
@@ -69,18 +70,13 @@ export const Route = createFileRoute("/api/talent/purchased")({
             const p = profileBy.get(u.candidate_user_id);
             if (!p) return null;
             const s = (p.summary ?? null) as TalentSummary | null;
-            const scores = (s?.competencies ?? [])
-              .map((c) => c.score)
-              .filter((n): n is number => typeof n === "number");
             return {
               code: p.public_code,
               displayName: p.display_name || "（名前未登録）",
               headline: p.headline,
               desiredJobs: p.desired_jobs,
               overview: s?.overview ?? "",
-              competencyAverage: scores.length
-                ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
-                : null,
+              competencyAverage: summaryAverage(s),
               interviewCount: p.interview_count,
               purchasedAt: u.created_at,
               viaApplication: u.amount === 0,

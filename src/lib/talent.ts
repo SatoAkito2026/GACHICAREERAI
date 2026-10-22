@@ -6,6 +6,7 @@
  */
 import { coinExpiryFrom } from "@/lib/coins";
 import { practiceRule } from "@/lib/plan-rules";
+import { interviewAverage } from "@/lib/talent-score";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -56,6 +57,8 @@ export type TalentSummary = {
   }[];
   score_trend: { date: string; score: number }[];
   interview_count: number;
+  /** 公開中の面接ごとの評価の平均を、さらに平均したもの（企業に見せる「評価の平均」） */
+  overall_average?: number | null;
   generated_at: string;
 };
 
@@ -353,6 +356,51 @@ function aggregateCompetencies(rows: FeedbackRow[]): TalentSummary["competencies
   });
 }
 
+/** 公開中の面接ごとの評価の平均を、さらに平均する（本人の面接カードの数字と合わせる） */
+function overallAverage(rows: FeedbackRow[]): number | null {
+  const avgs = rows
+    .map((r) => interviewAverage(r.feedback.competencies as InterviewCompetency[] | undefined))
+    .filter((n): n is number => n !== null);
+  if (avgs.length === 0) return null;
+  return Math.round((avgs.reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10;
+}
+
+/**
+ * 点数と面接の回数だけ、すぐに作り直す（AIは使わない）。
+ * 公開する面接を入れ替えたときに、企業に見える数字がすぐ合うようにする。文章は毎時の処理で作り直す。
+ */
+export async function recomputeSummaryScores(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<void> {
+  const rows = await loadPracticeFeedback(supabase, userId);
+  const { data: profile } = await supabase
+    .from("candidate_profiles")
+    .select("summary")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile) return;
+  const prev = (profile.summary ?? null) as TalentSummary | null;
+  const summary: TalentSummary | null =
+    rows.length === 0
+      ? null
+      : {
+          overview: prev?.overview ?? "",
+          strengths: prev?.strengths ?? [],
+          growth_areas: prev?.growth_areas ?? [],
+          work_style: prev?.work_style ?? "",
+          competencies: aggregateCompetencies(rows),
+          score_trend: prev?.score_trend ?? [],
+          interview_count: rows.length,
+          overall_average: overallAverage(rows),
+          generated_at: prev?.generated_at ?? new Date().toISOString(),
+        };
+  await supabase
+    .from("candidate_profiles")
+    .update({ summary, interview_count: rows.length, summary_stale: rows.length > 0 })
+    .eq("user_id", userId);
+}
+
 /**
  * ユーザーの模擬面接（個人モード）の結果をまとめて、企業に見せる人物まとめを作り直す。
  * 面接の結果がなければ summary は null のまま。
@@ -471,6 +519,7 @@ strengthsは2〜3個。`;
     competencies,
     score_trend: scoreTrend.slice(-12),
     interview_count: rows.length,
+    overall_average: overallAverage(rows),
     generated_at: now,
   };
 

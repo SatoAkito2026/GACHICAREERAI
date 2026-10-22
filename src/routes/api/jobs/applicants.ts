@@ -8,6 +8,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import { jsonResponse, serviceClient, type TalentSummary } from "@/lib/talent";
+import { summaryAverage } from "@/lib/talent-score";
 
 export const Route = createFileRoute("/api/jobs/applicants")({
   server: {
@@ -45,9 +46,6 @@ export const Route = createFileRoute("/api/jobs/applicants")({
         const applicants = (apps ?? []).map((a) => {
           const p = by.get(a.applicant_user_id);
           const s = (p?.summary ?? null) as TalentSummary | null;
-          const scores = (s?.competencies ?? [])
-            .map((c) => c.score)
-            .filter((n): n is number => typeof n === "number");
           return {
             id: a.id,
             code: p?.public_code ?? null,
@@ -56,9 +54,7 @@ export const Route = createFileRoute("/api/jobs/applicants")({
             message: a.message,
             createdAt: a.created_at,
             interviewCount: p?.interview_count ?? 0,
-            competencyAverage: scores.length
-              ? Math.round((scores.reduce((x, y) => x + y, 0) / scores.length) * 10) / 10
-              : null,
+            competencyAverage: summaryAverage(s),
           };
         });
         return jsonResponse({ applicants });

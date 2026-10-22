@@ -18,6 +18,7 @@ import {
   serviceClient,
   type TalentSummary,
 } from "@/lib/talent";
+import { summaryAverage } from "@/lib/talent-score";
 
 export const Route = createFileRoute("/api/talent/search")({
   server: {
@@ -90,12 +91,7 @@ export const Route = createFileRoute("/api/talent/search")({
 
         let list = (rows ?? []).map((r) => {
           const s = (r.summary ?? null) as TalentSummary | null;
-          const scored = (s?.competencies ?? [])
-            .map((x) => x.score)
-            .filter((n): n is number => typeof n === "number");
-          const competencyAverage = scored.length
-            ? Math.round((scored.reduce((a, b) => a + b, 0) / scored.length) * 10) / 10
-            : null;
+          const competencyAverage = summaryAverage(s);
           return {
             code: r.public_code,
             headline: r.headline,
