@@ -65,7 +65,6 @@ import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
-import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
 import { Route as ApiTalentCoinsRouteImport } from './routes/api/talent/coins'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
@@ -402,11 +401,6 @@ const ApiSchoolStudentsRoute = ApiSchoolStudentsRouteImport.update({
   path: '/api/school/students',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
-  id: '/api/talent/admin-stats',
-  path: '/api/talent/admin-stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiTalentCoinsRoute = ApiTalentCoinsRouteImport.update({
   id: '/api/talent/coins',
   path: '/api/talent/coins',
@@ -738,7 +732,6 @@ export interface FileRoutesByFullPath {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -848,7 +841,6 @@ export interface FileRoutesByTo {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -959,7 +951,6 @@ export interface FileRoutesById {
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
   '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
@@ -1071,7 +1062,6 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1181,7 +1171,6 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1291,7 +1280,6 @@ export interface FileRouteTypes {
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
     | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
@@ -1402,7 +1390,6 @@ export interface RootRouteChildren {
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
-  ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
   ApiTalentCoinsRoute: typeof ApiTalentCoinsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
@@ -1850,13 +1837,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSchoolStudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/talent/admin-stats': {
-      id: '/api/talent/admin-stats'
-      path: '/api/talent/admin-stats'
-      fullPath: '/api/talent/admin-stats'
-      preLoaderRoute: typeof ApiTalentAdminStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/talent/coins': {
       id: '/api/talent/coins'
       path: '/api/talent/coins'
@@ -2274,7 +2254,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
-  ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
   ApiTalentCoinsRoute: ApiTalentCoinsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
