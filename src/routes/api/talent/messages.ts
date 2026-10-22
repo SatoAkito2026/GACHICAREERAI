@@ -4,6 +4,7 @@
  * GET  /api/talent/messages?requestId=   → メッセージ一覧（開いた側の未読を既読にする）
  * POST /api/talent/messages { requestId, body } → 送信（相手にメールで知らせる）
  */
+import { notify } from "@/lib/notify";
 import { createFileRoute } from "@tanstack/react-router";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { verifyApiUser } from "@/lib/api-auth";
@@ -137,6 +138,14 @@ export const Route = createFileRoute("/api/talent/messages")({
               .maybeSingle();
             fromName = p?.display_name ? `${p.display_name} さん` : "候補者";
           }
+          await notify(supabase, to, {
+            kind: "message",
+            title: `${fromName} から新しいメッセージ`,
+            body: text.slice(0, 120),
+            link: fromCompany
+              ? `/private/individual/offers?id=${r.id}`
+              : `/business/company/messages?id=${r.id}`,
+          });
           await sendNotice(
             await getUserEmail(supabase, to),
             `${fromName} から新しいメッセージが届きました`,

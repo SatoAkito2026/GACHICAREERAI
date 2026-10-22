@@ -45,6 +45,8 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 
 ## スマホ・アプリ化
 
+- 通知：`src/lib/notify.ts` の `notify()` がアプリ内のお知らせ（`notifications`、ベルは `NotificationBell`）に残し、登録済みの端末（`push_subscriptions`）へプッシュを送る。プッシュは中身なしの合図だけで、`public/sw.js` が `/api/notifications/peek` から最新のお知らせを取って表示する。鍵は VAPID（公開鍵 `VAPID_PUBLIC_KEY`／`VITE_VAPID_PUBLIC_KEY`、秘密鍵 `VAPID_PRIVATE_KEY`）。対象：結果が買われた・面談の申し込み／承諾・メッセージ・応募（メールも従来どおり）と、練習のリマインド（毎時の Cron で日本時間19時台、3日練習していない人に7日に1回まで）
+
 - 「今日の質問」とリマインドメールは廃止（DBのテーブルは残している）
 - 端末ごとのレイアウト：スマホは下部メニュー（`PrivateNav`）、面接画面はスマホ・縦向きタブレットで縦積み（`useCompactLayout`）
 - ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`
@@ -89,7 +91,7 @@ npm run deploy     # build + wrangler deploy
 |---|---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_PROJECT_ID` | ブラウザ用（ビルド時に埋め込み） | `.env.production` / `.env.development`（コミット済み） |
 | `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` / `APP_URL` | サーバー用の公開値 | `wrangler.jsonc` の `vars` |
-| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
+| `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `VAPID_PRIVATE_KEY` | 秘密鍵 | ローカル: `.dev.vars` / 本番: `wrangler secret put` |
 
 テンプレート: `.env.example`, `.dev.vars.example`
 

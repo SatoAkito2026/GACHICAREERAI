@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/NotificationBell";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
@@ -64,6 +65,7 @@ export default function PrivateNav() {
 
         {/* パソコン：上にタブ */}
         <div className="hidden items-center gap-1.5 lg:flex">
+          <NotificationBell />
           {TABS.map((tab) => {
             const active = activeTab === tab.to;
             return (
@@ -85,6 +87,7 @@ export default function PrivateNav() {
 
         {/* スマホ・タブレット：上はAIチャットとマイページのアイコンだけ（ほかは下のメニュー） */}
         <div className="flex items-center gap-1 lg:hidden">
+          <NotificationBell />
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event(OPEN_AI_CHAT_EVENT))}
