@@ -10,12 +10,7 @@ import {
   type CompanyInterview,
 } from "@/components/talent/CompanyInterviewBlock";
 import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
-
-function average(scores: (number | null)[]): number | null {
-  const list = scores.filter((n): n is number => typeof n === "number");
-  if (list.length === 0) return null;
-  return list.reduce((a, b) => a + b, 0) / list.length;
-}
+import { interviewAverage } from "@/lib/talent-score";
 
 /** 企業に見える形の、面接1回分のカード */
 function ResultCard({
@@ -29,7 +24,7 @@ function ResultCard({
   corner?: React.ReactNode;
   footer?: React.ReactNode;
 }) {
-  const avg = average(iv.competencies.map((c) => c.score));
+  const avg = interviewAverage(iv.competencies);
   const style = iv.settings?.avatar_style ? AVATAR_STYLE_LABELS[iv.settings.avatar_style] : null;
   return (
     <div
@@ -162,7 +157,7 @@ export function MyInterviewCards() {
       }
     >
       <p className="mb-4 text-[12px]" style={{ color: C.muted, lineHeight: 1.7 }}>
-        コインで見た企業には、ここに並べた結果だけが見えます（練習の点数・改善点・模範回答は見えません）。人物まとめも、この結果から1時間以内に作り直されます。新しい練習は、枠が空いていれば自動で入ります。
+        企業の一覧には、ここに並べた結果が1つずつ別々に表示されます（評価・値段も結果ごと）。練習の点数・改善点・模範回答は見えません。新しい練習は、枠が空いていれば自動で入ります。
       </p>
       {interviews === null ? (
         <Loading />

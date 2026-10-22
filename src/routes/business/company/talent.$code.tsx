@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, Lock, X } from "lucide-react";
+import { CheckCircle2, Lock, Video } from "lucide-react";
 import { BusinessShell } from "@/components/ModeShell";
 import { CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 import {
@@ -12,20 +12,38 @@ import {
   Loading,
   PageFrame,
   StatusBadge,
-  SummaryView,
+  Tag,
   inputStyle,
   talentApi,
-  type TalentSummary,
 } from "@/components/talent/TalentUI";
 import {
   CompanyInterviewBlock,
   type CompanyInterview,
 } from "@/components/talent/CompanyInterviewBlock";
+import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
 
 export const Route = createFileRoute("/business/company/talent/$code")({
-  head: () => ({ meta: [{ title: "人材の詳細｜ガチキャリAI Business" }] }),
+  head: () => ({ meta: [{ title: "面接結果の詳細｜ガチキャリAI Business" }] }),
+  validateSearch: (s: Record<string, unknown>): { iv?: string } =>
+    typeof s.iv === "string" ? { iv: s.iv } : {},
   component: TalentDetailPage,
 });
+
+/** 公開中の面接の結果1つ分。買った結果だけ detail（詳しい評価・会話・録画）がつく */
+type Result = {
+  id: string;
+  date: string;
+  jobType: string | null;
+  avatarStyle: string | null;
+  overview: string;
+  strengths: string[];
+  competencies: { key: string; label: string; score: number | null }[];
+  average: number | null;
+  hasRecording: boolean;
+  priceCoins: number;
+  unlocked: boolean;
+  detail: CompanyInterview | null;
+};
 
 type Detail = {
   code: string;
@@ -34,44 +52,23 @@ type Detail = {
   desiredJobs: string | null;
   desiredLocations: string | null;
   selfPr: string | null;
-  summary: TalentSummary | null;
-  interviewCount: number;
-  hasRecording: boolean;
-  priceCoins: number;
   coins: CoinBalance;
   unlocked: boolean;
   contact: { id: string; status: string; created_at: string } | null;
+  results: Result[];
   displayName?: string;
   unlockedAt?: string;
-  interviews?: CompanyInterview[];
 };
 
 function TalentDetailPage() {
   const { code } = Route.useParams();
+  const { iv } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [d, setD] = useState<Detail | null>(null);
   const [error, setError] = useState("");
   const [buying, setBuying] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
   const [unlockError, setUnlockError] = useState("");
-
-  const unlock = async () => {
-    if (!d) return;
-    if (d.coins.balance < d.priceCoins) return setBuying(true);
-    if (!window.confirm(`${d.priceCoins}コインを使って、この方の詳しい評価を見ますか？`)) return;
-    setUnlocking(true);
-    setUnlockError("");
-    const r = await talentApi<{ priceCoins?: number }>("/api/talent/unlock", {
-      code: d.code,
-      expectedCoins: d.priceCoins,
-    });
-    setUnlocking(false);
-    if (r.status === 402) return setBuying(true);
-    if (r.status === 409 && r.data.priceCoins) {
-      setD((prev) => (prev ? { ...prev, priceCoins: r.data.priceCoins! } : prev));
-    }
-    if (!r.ok) return setUnlockError(r.data.error ?? "失敗しました");
-    void load();
-  };
 
   const load = useCallback(async () => {
     const r = await talentApi<Detail>(`/api/talent/detail?code=${encodeURIComponent(code)}`);
@@ -82,6 +79,31 @@ function TalentDetailPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const selected = d ? (d.results.find((r) => r.id === iv) ?? d.results[0] ?? null) : null;
+  const others = d && selected ? d.results.filter((r) => r.id !== selected.id) : [];
+
+  const unlock = async () => {
+    if (!d || !selected) return;
+    if (d.coins.balance < selected.priceCoins) return setBuying(true);
+    if (!window.confirm(`${selected.priceCoins}コインを使って、この面接結果を詳しく見ますか？`))
+      return;
+    setUnlocking(true);
+    setUnlockError("");
+    const r = await talentApi<{ priceCoins?: number }>("/api/talent/unlock", {
+      code: d.code,
+      interviewId: selected.id,
+      expectedCoins: selected.priceCoins,
+    });
+    setUnlocking(false);
+    if (r.status === 402) return setBuying(true);
+    if (!r.ok) {
+      setUnlockError(r.data.error ?? "失敗しました");
+      if (r.status === 409) void load();
+      return;
+    }
+    void load();
+  };
 
   return (
     <BusinessShell>
@@ -95,7 +117,7 @@ function TalentDetailPage() {
           className="self-start text-[13px]"
           style={{ color: C.muted }}
         >
-          ← 人材一覧へ戻る
+          ← 一覧へ戻る
         </Link>
         {!d ? (
           error ? (
@@ -106,66 +128,85 @@ function TalentDetailPage() {
         ) : (
           <>
             <Card>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-col gap-1.5 text-[13px]" style={{ color: C.sub }}>
-                  <span>状況：{d.careerStage ? CAREER_STAGE_LABELS[d.careerStage] : "未登録"}</span>
-                  {d.desiredJobs && <span>希望職種：{d.desiredJobs}</span>}
-                  {d.desiredLocations && <span>希望勤務地：{d.desiredLocations}</span>}
-                  <span>
-                    模擬面接 {d.interviewCount}回 ・ 録画 {d.hasRecording ? "あり" : "なし"}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p style={{ color: C.accent, fontSize: 34, fontWeight: 800, lineHeight: 1 }}>
-                    {competencyAverage(d.summary)?.toFixed(1) ?? "-"}
-                  </p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>
-                    評価の平均（5点満点）
-                  </p>
-                </div>
+              <div className="flex flex-col gap-1.5 text-[13px]" style={{ color: C.sub }}>
+                <span>状況：{d.careerStage ? CAREER_STAGE_LABELS[d.careerStage] : "未登録"}</span>
+                {d.desiredJobs && <span>希望職種：{d.desiredJobs}</span>}
+                {d.desiredLocations && <span>希望勤務地：{d.desiredLocations}</span>}
+                <span>公開中の面接結果 {d.results.length}件（結果ごとに評価・値段が別です）</span>
               </div>
             </Card>
 
-            {d.unlocked ? (
-              <ContactCard d={d} onChanged={() => void load()} />
-            ) : (
+            {!selected ? (
               <Card>
-                <div className="flex flex-col gap-3">
-                  <p
-                    className="flex items-center gap-2"
-                    style={{ color: C.text, fontSize: 15, fontWeight: 700 }}
-                  >
-                    <Lock size={16} color={C.accent} /> コインで詳しく見る
-                  </p>
-                  <ul
-                    className="list-disc pl-5 text-[13px]"
-                    style={{ color: C.sub, lineHeight: 1.9 }}
-                  >
-                    <li>お名前</li>
-                    <li>面接ごとの詳しい評価と、面接の会話すべて</li>
-                    <li>
-                      {d.hasRecording ? "面接の録画" : "録画（この方は録画を公開していません）"}
-                    </li>
-                    <li>面談の申し込み（承諾されると直接メッセージでやり取りできます）</li>
-                  </ul>
-                  <p className="text-[12px]" style={{ color: C.muted }}>
-                    この方は <b style={{ color: C.accent }}>{d.priceCoins}コイン</b>
-                    （評価が高い方・多くの企業に見られている方ほど高くなります）。買い切りで、採用の成否にかかわらず追加の料金はかかりません。
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Button onClick={() => void unlock()} loading={unlocking}>
-                      {d.coins.balance >= d.priceCoins
-                        ? `${d.priceCoins}コインで詳しく見る`
-                        : `コインを買って見る（${d.priceCoins}コイン）`}
-                    </Button>
-                    <span className="text-[12px]" style={{ color: C.muted }}>
-                      残り {d.coins.balance.toLocaleString()}コイン
-                    </span>
+                <p className="text-[14px]" style={{ color: C.muted }}>
+                  公開中の面接結果がありません。
+                </p>
+              </Card>
+            ) : (
+              <Card
+                title={`${selected.jobType || "職種指定なし"}の面接（${new Date(selected.date).toLocaleDateString("ja-JP")}）`}
+                right={
+                  <div className="text-right">
+                    <p style={{ color: C.accent, fontSize: 30, fontWeight: 800, lineHeight: 1 }}>
+                      {selected.average?.toFixed(1) ?? "-"}
+                    </p>
+                    <p className="text-[11px]" style={{ color: C.muted }}>
+                      評価の平均（5点満点）
+                    </p>
                   </div>
-                  <ErrorText>{unlockError}</ErrorText>
-                </div>
+                }
+              >
+                {selected.unlocked && selected.detail ? (
+                  <CompanyInterviewBlock key={selected.id} iv={selected.detail} defaultOpen />
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <ResultPreview r={selected} />
+                    <div
+                      className="flex flex-col gap-3 rounded-xl p-4"
+                      style={{ background: C.card2 }}
+                    >
+                      <p
+                        className="flex items-center gap-2"
+                        style={{ color: C.text, fontSize: 15, fontWeight: 700 }}
+                      >
+                        <Lock size={16} color={C.accent} /> コインでこの結果を詳しく見る
+                      </p>
+                      <ul
+                        className="list-disc pl-5 text-[13px]"
+                        style={{ color: C.sub, lineHeight: 1.9 }}
+                      >
+                        <li>7つの評価の理由と、根拠になった発言</li>
+                        <li>採用担当者向けの見立て・確認したい点</li>
+                        <li>この面接の会話すべて</li>
+                        <li>
+                          {selected.hasRecording
+                            ? "この面接の録画"
+                            : "録画（この結果にはありません）"}
+                        </li>
+                        <li>お名前と、面談の申し込み（どれか1つ買えば開きます）</li>
+                      </ul>
+                      <p className="text-[12px]" style={{ color: C.muted }}>
+                        この結果は <b style={{ color: C.accent }}>{selected.priceCoins}コイン</b>
+                        。同じ人のほかの結果は、それぞれ別に買います。買い切りで、採用の成否にかかわらず追加の料金はかかりません。
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button onClick={() => void unlock()} loading={unlocking}>
+                          {d.coins.balance >= selected.priceCoins
+                            ? `${selected.priceCoins}コインで詳しく見る`
+                            : `コインを買って見る（${selected.priceCoins}コイン）`}
+                        </Button>
+                        <span className="text-[12px]" style={{ color: C.muted }}>
+                          残り {d.coins.balance.toLocaleString()}コイン
+                        </span>
+                      </div>
+                      <ErrorText>{unlockError}</ErrorText>
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
+
+            {d.unlocked && <ContactCard d={d} onChanged={() => void load()} />}
 
             {d.selfPr && (
               <Card title="自己PR（本人が記入）">
@@ -175,31 +216,64 @@ function TalentDetailPage() {
               </Card>
             )}
 
-            <Card title="人物まとめ">
-              <SummaryView summary={d.summary} />
-            </Card>
-
-            {d.unlocked && d.interviews && (
-              <Card title="面接ごとの評価">
-                {d.interviews.length === 0 ? (
-                  <p className="text-[14px]" style={{ color: C.muted }}>
-                    面接の記録がありません。
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {d.interviews.map((iv, i) => (
-                      <CompanyInterviewBlock key={iv.id} iv={iv} defaultOpen={i === 0} />
-                    ))}
-                  </div>
-                )}
+            {others.length > 0 && (
+              <Card title="この人のほかの面接結果">
+                <div className="grid gap-3 md:grid-cols-2">
+                  {others.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => {
+                        setUnlockError("");
+                        void navigate({ search: { iv: r.id } });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="flex flex-col gap-2 rounded-xl p-4 text-left"
+                      style={{ background: C.bg, border: `1px solid ${C.border}` }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>
+                            {r.jobType || "職種指定なし"}
+                          </p>
+                          <p className="mt-0.5 text-[12px]" style={{ color: C.muted }}>
+                            {new Date(r.date).toLocaleDateString("ja-JP")}
+                            {r.avatarStyle &&
+                              ` ・ 面接官：${AVATAR_STYLE_LABELS[r.avatarStyle] ?? ""}`}
+                          </p>
+                        </div>
+                        <p
+                          style={{ color: C.accent, fontSize: 20, fontWeight: 800, lineHeight: 1 }}
+                        >
+                          {r.average?.toFixed(1) ?? "-"}
+                        </p>
+                      </div>
+                      <span className="flex items-center gap-2">
+                        {r.hasRecording && (
+                          <span
+                            className="flex items-center gap-1 text-[12px]"
+                            style={{ color: C.muted }}
+                          >
+                            <Video size={12} /> 録画あり
+                          </span>
+                        )}
+                        {r.unlocked ? (
+                          <Tag color={C.accent}>購入済み</Tag>
+                        ) : (
+                          <Tag color={C.accent}>{r.priceCoins}コイン</Tag>
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </Card>
             )}
           </>
         )}
       </PageFrame>
-      {buying && d && (
+      {buying && d && selected && (
         <CoinShopModal
-          needCoins={Math.max(0, d.priceCoins - d.coins.balance) || d.priceCoins}
+          needCoins={Math.max(0, selected.priceCoins - d.coins.balance) || selected.priceCoins}
           onClose={() => setBuying(false)}
           onDone={(coins) => {
             setBuying(false);
@@ -208,6 +282,51 @@ function TalentDetailPage() {
         />
       )}
     </BusinessShell>
+  );
+}
+
+/** 買う前に見える、その結果の要約（7つの評価の点数・見立ての要約・強み） */
+function ResultPreview({ r }: { r: Result }) {
+  const style = r.avatarStyle ? AVATAR_STYLE_LABELS[r.avatarStyle] : null;
+  return (
+    <div className="flex flex-col gap-3">
+      {style && (
+        <p className="text-[12px]" style={{ color: C.muted }}>
+          面接官：{style}
+        </p>
+      )}
+      {r.overview && <p style={{ color: C.sub, fontSize: 14, lineHeight: 1.8 }}>{r.overview}</p>}
+      {r.strengths.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {r.strengths.map((s) => (
+            <Tag key={s} color={C.accent}>
+              {s}
+            </Tag>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-col gap-2">
+        {r.competencies.map((c) => (
+          <div key={c.key} className="flex items-center gap-3 text-[13px]">
+            <span className="w-24 shrink-0" style={{ color: C.sub }}>
+              {c.label}
+            </span>
+            <div className="h-2 flex-1 rounded-full" style={{ background: C.bg }}>
+              <div
+                className="h-2 rounded-full"
+                style={{
+                  width: `${((c.score ?? 0) / 5) * 100}%`,
+                  background: C.accent,
+                }}
+              />
+            </div>
+            <span className="w-10 text-right" style={{ color: C.text, fontWeight: 700 }}>
+              {c.score?.toFixed(1) ?? "-"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -303,13 +422,4 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
       </div>
     </Card>
   );
-}
-
-/** 企業向けの点数は「7つの評価」の平均（本人向けの練習の点数は使わない） */
-function competencyAverage(summary: TalentSummary | null): number | null {
-  const scores = (summary?.competencies ?? [])
-    .map((c) => c.score)
-    .filter((n): n is number => typeof n === "number");
-  if (scores.length === 0) return null;
-  return scores.reduce((a, b) => a + b, 0) / scores.length;
 }

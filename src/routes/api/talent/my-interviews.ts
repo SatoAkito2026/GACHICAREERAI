@@ -12,6 +12,7 @@ import {
   jsonResponse,
   loadCompanyInterviews,
   RECORDING_BUCKET,
+  recomputeSummaryScores,
   serviceClient,
   shownInterviewLimit,
 } from "@/lib/talent";
@@ -91,11 +92,8 @@ export const Route = createFileRoute("/api/talent/my-interviews")({
           }
         }
 
-        // 人物まとめ・面接の回数を作り直す（毎時の自動更新で反映）
-        await supabase
-          .from("candidate_profiles")
-          .update({ summary_stale: true })
-          .eq("user_id", auth.userId);
+        // 点数・面接の回数はすぐ作り直し、人物まとめの文章は毎時の自動更新で作り直す
+        await recomputeSummaryScores(supabase, auth.userId);
         return jsonResponse({ ok: true });
       },
     },

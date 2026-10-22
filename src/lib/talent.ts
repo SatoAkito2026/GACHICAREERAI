@@ -5,7 +5,8 @@
  * - 企業に見せる評価に、年齢・性別・出身地など選考に使うべきでない情報は含めない
  */
 import { coinExpiryFrom } from "@/lib/coins";
-import { practiceRule } from "@/lib/plan-rules";
+import { normalizeJobType, practiceRule } from "@/lib/plan-rules";
+import { interviewAverage } from "@/lib/talent-score";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -197,7 +198,11 @@ export async function loadCompanyInterviews(
   supabase: SupabaseClient,
   candidateUserId: string,
   showRecording: boolean,
-  { limit = 30, onlyShown = true }: { limit?: number; onlyShown?: boolean } = {},
+  {
+    limit = 30,
+    onlyShown = true,
+    ids: onlyIds,
+  }: { limit?: number; onlyShown?: boolean; ids?: string[] } = {},
 ) {
   let query = supabase
     .from("interviews")
@@ -207,6 +212,10 @@ export async function loadCompanyInterviews(
     .neq("impression", "途中退出");
   // 企業に見えるのは、本人が公開に選んだ面接だけ
   if (onlyShown) query = query.eq("shown_to_companies", true);
+  // 企業が買った結果だけに絞る
+  if (onlyIds) {
+    query = query.in("id", onlyIds.length ? onlyIds : ["00000000-0000-0000-0000-000000000000"]);
+  }
   const { data: interviews } = await query.order("created_at", { ascending: false }).limit(limit);
   const ids = (interviews ?? []).map((i) => i.id);
   if (ids.length === 0) return [];
@@ -351,6 +360,41 @@ function aggregateCompetencies(rows: FeedbackRow[]): TalentSummary["competencies
       : null;
     return { key, label, score, evidence_count: evidenceCount, interviews: scores.length };
   });
+}
+
+/**
+ * 点数と面接の回数だけ、すぐに作り直す（AIは使わない）。
+ * 公開する面接を入れ替えたときに、回数などがすぐ合うようにする。文章は毎時の処理で作り直す。
+ */
+export async function recomputeSummaryScores(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<void> {
+  const rows = await loadPracticeFeedback(supabase, userId);
+  const { data: profile } = await supabase
+    .from("candidate_profiles")
+    .select("summary")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile) return;
+  const prev = (profile.summary ?? null) as TalentSummary | null;
+  const summary: TalentSummary | null =
+    rows.length === 0
+      ? null
+      : {
+          overview: prev?.overview ?? "",
+          strengths: prev?.strengths ?? [],
+          growth_areas: prev?.growth_areas ?? [],
+          work_style: prev?.work_style ?? "",
+          competencies: aggregateCompetencies(rows),
+          score_trend: prev?.score_trend ?? [],
+          interview_count: rows.length,
+          generated_at: prev?.generated_at ?? new Date().toISOString(),
+        };
+  await supabase
+    .from("candidate_profiles")
+    .update({ summary, interview_count: rows.length, summary_stale: rows.length > 0 })
+    .eq("user_id", userId);
 }
 
 /**
@@ -531,6 +575,107 @@ export async function getCoinBalance(
   };
 }
 
+/**
+ * 企業が持っている閲覧権（人ごと）。
+ * all＝その人の結果をすべて見られる（これまでの購入・求人への応募）、ids＝結果ごとに買ったもの。
+ * どれか1つでもあれば、名前を見て面談を申し込める。
+ */
+export type UnlockAccess = { all: boolean; ids: Set<string>; firstAt: string; paid: boolean };
+
+export async function getUnlockAccess(
+  supabase: SupabaseClient,
+  companyUserId: string,
+  candidateUserIds: string[],
+): Promise<Map<string, UnlockAccess>> {
+  const access = new Map<string, UnlockAccess>();
+  if (candidateUserIds.length === 0) return access;
+  const { data } = await supabase
+    .from("profile_unlocks")
+    .select("candidate_user_id, interview_id, created_at, amount")
+    .eq("company_user_id", companyUserId)
+    .in("candidate_user_id", candidateUserIds)
+    .order("created_at", { ascending: true })
+    .limit(5000);
+  for (const r of data ?? []) {
+    const a = access.get(r.candidate_user_id) ?? {
+      all: false,
+      ids: new Set<string>(),
+      firstAt: r.created_at,
+      paid: false,
+    };
+    if (r.interview_id) a.ids.add(r.interview_id);
+    else a.all = true;
+    if (r.amount > 0) a.paid = true;
+    access.set(r.candidate_user_id, a);
+  }
+  return access;
+}
+
+export function canSeeInterview(a: UnlockAccess | undefined, interviewId: string): boolean {
+  return !!a && (a.all || a.ids.has(interviewId));
+}
+
+/** 企業の一覧・詳細に出す、公開中の面接1回分の要約（名前・会話・録画は入れない） */
+export type ResultCard = {
+  id: string;
+  userId: string;
+  date: string;
+  jobType: string | null;
+  avatarStyle: string | null;
+  overview: string;
+  strengths: string[];
+  competencies: { key: string; label: string; score: number | null }[];
+  average: number | null;
+  hasRecording: boolean;
+};
+
+/** 公開中の面接を、企業向けの要約にして返す（新しい順） */
+export async function loadShownResults(
+  supabase: SupabaseClient,
+  userIds: string[],
+  limit = 2000,
+): Promise<ResultCard[]> {
+  if (userIds.length === 0) return [];
+  const { data: interviews } = await supabase
+    .from("interviews")
+    .select("id, user_id, created_at, job_type, recording_path, practice_settings")
+    .in("user_id", userIds)
+    .eq("mode", "individual")
+    .neq("impression", "途中退出")
+    .eq("shown_to_companies", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  const ids = (interviews ?? []).map((i) => i.id);
+  if (ids.length === 0) return [];
+  const { data: summaries } = await supabase
+    .from("interview_summaries")
+    .select("interview_id, practice_feedback")
+    .in("interview_id", ids);
+  const fb = new Map((summaries ?? []).map((s: any) => [s.interview_id, s.practice_feedback]));
+  return (interviews ?? []).map((iv) => {
+    const f = (fb.get(iv.id) ?? {}) as any;
+    const comps = ((f.competencies ?? []) as InterviewCompetency[]).map((c) => ({
+      key: c.key,
+      label: c.label,
+      score: typeof c.score === "number" ? c.score : null,
+    }));
+    const rv = (f.recruiter_view ?? null) as RecruiterView | null;
+    const avg = interviewAverage(comps);
+    return {
+      id: iv.id,
+      userId: iv.user_id,
+      date: iv.created_at,
+      jobType: normalizeJobType(iv.job_type) || null,
+      avatarStyle: (iv.practice_settings as PracticeSettings | null)?.avatar_style ?? null,
+      overview: rv?.summary ?? "",
+      strengths: (rv?.strengths ?? []).map((x) => x.point).slice(0, 3),
+      competencies: comps,
+      average: avg === null ? null : Math.round(avg * 10) / 10,
+      hasRecording: !!iv.recording_path,
+    };
+  });
+}
+
 /** コインで見られた回数（応募で見られた0円の分は数えない）。値段の「人気」の上乗せに使う */
 export async function getPaidViewCounts(
   supabase: SupabaseClient,
@@ -704,6 +849,7 @@ export async function recordUnlockFromPaymentIntent(
     .select("id")
     .eq("company_user_id", m.company_user_id)
     .eq("candidate_user_id", m.candidate_user_id)
+    .is("interview_id", null)
     .maybeSingle();
   if (before)
     return { candidateUserId: m.candidate_user_id, companyUserId: m.company_user_id, isNew: false };

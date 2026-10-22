@@ -1,8 +1,9 @@
 /**
- * 企業向け：公開されている人材の一覧（匿名）
+ * 企業向け：公開されている面接の結果の一覧（匿名）
  *
- * GET /api/talent/search?keyword=&stage=&minScore=&sort=recent|score|<能力のkey>
+ * GET /api/talent/search?keyword=&stage=&job=&area=&minScore=&sort=recent|score|<能力のkey>
  *
+ * 本人が公開に選んだ面接の結果を1つずつ別のカードとして返す（同じ人でも結果ごとに評価・値段が別）。
  * 名前・連絡先・録画はここでは返さない。年齢・性別での絞り込みはしない（公正な採用のため）。
  */
 import { priceCoins } from "@/lib/coins";
@@ -11,12 +12,14 @@ import { verifyApiUser } from "@/lib/api-auth";
 import {
   COMPANY_REQUIRED_MESSAGE,
   COMPETENCIES,
+  canSeeInterview,
   getCompanyProfile,
   getCoinBalance,
   getPaidViewCounts,
+  getUnlockAccess,
   jsonResponse,
+  loadShownResults,
   serviceClient,
-  type TalentSummary,
 } from "@/lib/talent";
 
 export const Route = createFileRoute("/api/talent/search")({
@@ -34,7 +37,7 @@ export const Route = createFileRoute("/api/talent/search")({
         const url = new URL(request.url);
         const keyword = (url.searchParams.get("keyword") ?? "").trim().toLowerCase().slice(0, 50);
         const stage = url.searchParams.get("stage") ?? "";
-        // 企業向けの点数は「7つの力」の平均（1〜5）。本人向けの練習の点数（100点満点）は使わない
+        // 企業向けの点数は「7つの評価」の平均（1〜5）。本人向けの練習の点数（100点満点）は使わない
         const minScore = Number(url.searchParams.get("minScore") ?? "") || 0;
         const sort = url.searchParams.get("sort") ?? "recent";
         const job = (url.searchParams.get("job") ?? "").trim().slice(0, 50);
@@ -43,97 +46,62 @@ export const Route = createFileRoute("/api/talent/search")({
         const { data: rows, error } = await supabase
           .from("candidate_profiles")
           .select(
-            "user_id, public_code, headline, career_stage, desired_jobs, desired_locations, summary, summary_updated_at, interview_count, show_recording",
+            "user_id, public_code, headline, career_stage, desired_jobs, desired_locations, show_recording",
           )
           .eq("is_public", true)
-          .gt("interview_count", 0)
-          .order("summary_updated_at", { ascending: false, nullsFirst: false })
-          .limit(300);
+          .neq("user_id", auth.userId)
+          .limit(500);
         if (error) {
           console.error("[talent/search]", error);
           return jsonResponse({ error: "読み込みに失敗しました" }, 500);
         }
 
-        const ids = (rows ?? []).map((r) => r.user_id);
-        const [{ data: unlocks }, { data: requests }] = await Promise.all([
-          supabase
-            .from("profile_unlocks")
-            .select("candidate_user_id")
-            .eq("company_user_id", auth.userId)
-            .in("candidate_user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
+        const profileBy = new Map((rows ?? []).map((r) => [r.user_id, r]));
+        const ids = [...profileBy.keys()];
+        const [results, access, paidViews, { data: requests }] = await Promise.all([
+          loadShownResults(supabase, ids),
+          getUnlockAccess(supabase, auth.userId, ids),
+          getPaidViewCounts(supabase, ids),
           supabase
             .from("contact_requests")
             .select("candidate_user_id, status")
             .eq("company_user_id", auth.userId)
             .in("candidate_user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
         ]);
-        const paidViews = await getPaidViewCounts(supabase, ids);
-        // 練習した職種（面接ごとの設定）。職種での絞り込み・キーワード検索・カードの表示に使う
-        const { data: practiced } = await supabase
-          .from("interviews")
-          .select("user_id, job_type")
-          .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"])
-          .eq("mode", "individual")
-          .neq("impression", "途中退出")
-          .eq("shown_to_companies", true)
-          .limit(5000);
-        const practicedJobs = new Map<string, string[]>();
-        for (const iv of practiced ?? []) {
-          const jt = (iv.job_type ?? "").trim();
-          if (!jt || jt === "模擬面接") continue;
-          const list = practicedJobs.get(iv.user_id) ?? [];
-          if (!list.includes(jt)) list.push(jt);
-          practicedJobs.set(iv.user_id, list);
-        }
-        const unlocked = new Set((unlocks ?? []).map((u) => u.candidate_user_id));
         const statusBy = new Map((requests ?? []).map((r) => [r.candidate_user_id, r.status]));
 
-        let list = (rows ?? []).map((r) => {
-          const s = (r.summary ?? null) as TalentSummary | null;
-          const scored = (s?.competencies ?? [])
-            .map((x) => x.score)
-            .filter((n): n is number => typeof n === "number");
-          const competencyAverage = scored.length
-            ? Math.round((scored.reduce((a, b) => a + b, 0) / scored.length) * 10) / 10
-            : null;
+        let list = results.map((r) => {
+          const p = profileBy.get(r.userId)!;
           return {
-            code: r.public_code,
-            headline: r.headline,
-            careerStage: r.career_stage,
-            desiredJobs: r.desired_jobs,
-            desiredLocations: r.desired_locations,
-            overview: s?.overview ?? "",
-            strengths: (s?.strengths ?? []).map((x) => x.title),
-            competencies: s?.competencies ?? [],
-            interviewCount: r.interview_count,
-            competencyAverage,
-            priceCoins: priceCoins(competencyAverage, paidViews.get(r.user_id) ?? 0),
-            hasRecording: r.show_recording,
-            practicedJobs: practicedJobs.get(r.user_id) ?? [],
-            updatedAt: r.summary_updated_at,
-            unlocked: unlocked.has(r.user_id),
-            contactStatus: statusBy.get(r.user_id) ?? null,
+            id: r.id,
+            code: p.public_code,
+            headline: p.headline,
+            careerStage: p.career_stage,
+            desiredJobs: p.desired_jobs,
+            desiredLocations: p.desired_locations,
+            date: r.date,
+            jobType: r.jobType,
+            avatarStyle: r.avatarStyle,
+            overview: r.overview,
+            strengths: r.strengths,
+            competencies: r.competencies,
+            competencyAverage: r.average,
+            priceCoins: priceCoins(r.average, paidViews.get(r.userId) ?? 0),
+            hasRecording: r.hasRecording && !!p.show_recording,
+            unlocked: canSeeInterview(access.get(r.userId), r.id),
+            contactStatus: statusBy.get(r.userId) ?? null,
           };
         });
 
         if (stage) list = list.filter((c) => c.careerStage === stage);
         if (job) {
-          list = list.filter(
-            (c) => c.practicedJobs.includes(job) || (c.desiredJobs ?? "").includes(job),
-          );
+          list = list.filter((c) => c.jobType === job || (c.desiredJobs ?? "").includes(job));
         }
         if (area) list = list.filter((c) => (c.desiredLocations ?? "").includes(area));
         if (minScore) list = list.filter((c) => (c.competencyAverage ?? 0) >= minScore);
         if (keyword) {
           list = list.filter((c) =>
-            [
-              c.headline,
-              c.desiredJobs,
-              c.desiredLocations,
-              c.overview,
-              ...c.strengths,
-              ...c.practicedJobs,
-            ]
+            [c.headline, c.desiredJobs, c.desiredLocations, c.overview, c.jobType, ...c.strengths]
               .filter(Boolean)
               .join(" ")
               .toLowerCase()
@@ -149,7 +117,7 @@ export const Route = createFileRoute("/api/talent/search")({
         }
 
         return jsonResponse({
-          candidates: list.slice(0, 100),
+          results: list.slice(0, 100),
           coins: await getCoinBalance(supabase, auth.userId),
         });
       },
