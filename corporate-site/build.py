@@ -22,7 +22,7 @@ SRC = ROOT / "src"
 OUT = ROOT / "public"
 SITE = "https://akitogroup.jp"
 # Cloudflare Web Analytics のトークン（ダッシュボードの「Web Analytics」→ サイトを追加 で出る token）。空なら計測しない
-CF_BEACON_TOKEN = "1fdaf6c3558348479669be865088b90e"
+CF_BEACON_TOKEN = ""
 
 NAV = [
     ("about", "about.html", "会社概要", "Company"),
