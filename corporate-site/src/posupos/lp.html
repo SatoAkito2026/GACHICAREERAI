@@ -295,6 +295,10 @@ p{margin:0}
 .plan{background:var(--white);border:1px solid var(--line);border-radius:24px;padding:26px 24px;display:grid;gap:14px;position:relative}
 .plan h3{font-size:24px}
 .plan .who{font-size:14.5px;color:var(--ink-2)}
+.plan .price .py{font-size:15px}
+.plan .price .py b{font-size:30px;font-weight:900;margin:0 2px}
+.plan .price .py small{font-size:11px;font-weight:500}
+.plan .price .pn{display:block;font-size:12px;font-weight:500;opacity:.85}
 .plan .price{font-weight:700;font-size:15px;padding:10px 14px;border-radius:12px;background:var(--mist);text-align:center}
 .plan .plus{font-weight:700;font-size:14px;color:var(--blue);display:flex;align-items:center;gap:8px}
 .plan .plus::before{content:"＋";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:13px}
@@ -742,6 +746,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
           <a class="btn btn-line" href="contact.html#pos">お問い合わせ</a>
         </div>
         <ul class="hero-pts">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>月額11,000円〜・初期費用0円</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>インストール不要</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>パソコン・タブレット・スマホ</li>
 {{#day}}          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>QR で注文・券売機も</li>{{/day}}
@@ -1571,13 +1576,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <div class="sec-head rv">
         <p class="eyebrow">Plans</p>
         <h2>プラン</h2>
-        <p>お店の大きさや、やりたいことに合わせて選べます。料金はお問い合わせください。</p>
+        <p>お店の大きさや、やりたいことに合わせて選べます。初期費用は0円。1か月無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。</p>
       </div>
       <div class="plans stagger">
         <article class="plan rv">
           <h3>ライトプラン</h3>
           <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
-          <p class="price">料金はお問い合わせください</p>
+          <p class="price"><span class="py">月額 <b class="n">11,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円</span></p>
           <ul>
             <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
             <li><span>店内<small>{{#day}}卓の配置図、受付・注文・会計（フロアも分けられる）{{/day}}{{#night}}ホール・配置図、卓の受付・注文・会計{{/night}}</small></span></li>
@@ -1597,7 +1602,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          <p class="price">料金はお問い合わせください</p>
+          {{#day}}<p class="price"><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円・5店舗まで追加料金なし</span></p>{{/day}}{{#night}}<p class="price"><span class="py">月額 <b class="n">33,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円・5店舗まで追加料金なし</span></p>{{/night}}
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
 {{#night}}
@@ -1626,7 +1631,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <article class="plan cus rv" id="plan-cus">
           <h3>個別プラン</h3>
           <p class="who">お店のやり方に、アプリを合わせたいお店に（1店舗ごと）。</p>
-          <p class="price">料金はお問い合わせください</p>
+          <p class="price"><span class="py">月額 <b class="n">55,000〜</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
             <li><span>お店専用の URL<small>お店の名前.akitogroup.jp</small></span></li>
@@ -1670,9 +1675,10 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <details><summary>売掛（ツケ）やボトルキープも管理できますか？</summary><p>はい。売掛の一覧と回収（一部回収も）、ボトルキープの残り・期限・延長を管理できます。</p></details>
 {{/night}}
         <details><summary>今使っている Excel やレジのデータは引っ越せますか？</summary><p>今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。</p></details>
-        <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お問い合わせフォームからお申し込みください。</p></details>
+        <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
+        <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。</p></details>
         <details><summary>解約はできますか？</summary><p>ご契約の内容や解約の方法は、お問い合わせのときにご案内します。</p></details>
-        <details><summary>料金はいくらですか？</summary><p>プランやお店の数によって変わるため、お問い合わせいただいた方に個別にご案内しています。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン {{#day}}22,000円{{/day}}{{#night}}33,000円{{/night}}（5店舗まで追加料金なし）、個別プラン 55,000円〜です。初期費用は0円です。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします。</p></details>
       </div>
     </div>
   </section>
@@ -1681,7 +1687,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   <section class="sec final">
     <div class="wrap rv">
       <h2>まずは無料で、1か月。</h2>
-      <p>お試しのお申し込み・料金のご案内は、お問い合わせフォームから。</p>
+      <p>月額11,000円〜・初期費用0円。お試しのお申し込みは、お問い合わせフォームから。</p>
       <div class="btns">
         <a class="btn btn-w" href="contact.html#pos-trial">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="contact.html#pos">お問い合わせ</a>
