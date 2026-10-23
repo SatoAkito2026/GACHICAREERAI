@@ -9,6 +9,7 @@ import {
   INTERVIEWER_RATE,
   STUDIO_SAMPLE_RATE,
   isStudioRequest,
+  lineTempo,
   speakLines,
   writeRewriteScript,
 } from "@/lib/studio";
@@ -58,6 +59,8 @@ export const Route = createFileRoute("/api/studio/job")({
             ...script,
             audio,
             sampleRate: STUDIO_SAMPLE_RATE,
+            // 音の高さを変えずに速くする倍率（撮影側の ffmpeg の atempo と、画面の時刻表の両方で使う）
+            tempos: script.lines.map((l) => lineTempo(l.speaker)),
             interviewerRate: INTERVIEWER_RATE,
           });
         } catch (e) {

@@ -67,7 +67,8 @@ const THEMES = [
   },
 ] as const;
 
-export type StudioLine = { speaker: "interviewer" | "candidate"; text: string };
+/** narrator は最初の引き・オファーの紹介などのナレーション（アバターの口は動かさない） */
+export type StudioLine = { speaker: "interviewer" | "candidate" | "narrator"; text: string };
 export type StudioScript = {
   theme: string;
   themeLabel: string;
@@ -227,7 +228,11 @@ ${learnedExamples(history)}
 }
 
 // 受験者の声。gpt-4o-mini-tts は話し方を指示できるので、就活生らしくスラスラ話させる
-const CANDIDATE_VOICES = ["ash", "coral", "sage", "verse", "ballad"];
+const CANDIDATE_VOICES = ["coral", "sage", "verse", "ballad", "echo"];
+// ナレーション：面接官とはっきり違う声と話し方で、最初の1秒で引きつける
+const NARRATOR_VOICE = "ash";
+const NARRATOR_STYLE =
+  "TikTokの人気ナレーター。最初の一言で視聴者の手を止める。強く、テンポよく、抑揚をつけて言い切る。驚きと危機感を込めて。";
 const CANDIDATE_STYLE =
   "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
@@ -243,6 +248,7 @@ export async function speakLines(
   return Promise.all(
     lines.map(async (line, i) => {
       const interviewer = line.speaker === "interviewer";
+      const narrator = line.speaker === "narrator";
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -259,8 +265,8 @@ export async function speakLines(
             : {
                 model: "gpt-4o-mini-tts",
                 input: toSpeechText(line.text),
-                voice: candidateVoice,
-                instructions: styles?.[i] ?? CANDIDATE_STYLE,
+                voice: narrator ? NARRATOR_VOICE : candidateVoice,
+                instructions: narrator ? NARRATOR_STYLE : (styles?.[i] ?? CANDIDATE_STYLE),
                 response_format: "pcm",
               },
         ),
@@ -289,19 +295,82 @@ export function isStudioRequest(request: Request): boolean {
 
 /** 面接でよく聞かれて、言い方しだいで印象が大きく変わる質問 */
 const REWRITE_TOPICS = [
-  { key: "taishoku", q: "前の会社を辞めた理由を教えてください", who: "転職" },
-  { key: "shibou", q: "当社を志望した理由を教えてください", who: "就活・転職" },
-  { key: "tansho", q: "あなたの短所を教えてください", who: "就活・転職" },
-  { key: "gakuchika", q: "学生時代に力を入れたことは何ですか", who: "就活" },
-  { key: "zangyo", q: "残業についてどう考えていますか", who: "就活・転職" },
-  { key: "tasha", q: "他社の選考状況を教えてください", who: "就活・転職" },
-  { key: "blank", q: "職歴にブランクがありますが、その間は何をしていましたか", who: "転職" },
-  { key: "shippai", q: "これまでで一番の失敗を教えてください", who: "就活・転職" },
-  { key: "gyaku", q: "最後に、何か質問はありますか", who: "就活・転職" },
-  { key: "5nen", q: "5年後、どうなっていたいですか", who: "就活・転職" },
-  { key: "nigate", q: "苦手な人とはどう接していますか", who: "就活・転職" },
-  { key: "kaisu", q: "転職の回数が多いようですが、理由を教えてください", who: "転職" },
+  {
+    key: "taishoku",
+    q: "前の会社を辞めた理由を教えてください",
+    short: "なぜ前の会社を辞めたの？",
+    who: "転職",
+  },
+  {
+    key: "shibou",
+    q: "当社を志望した理由を教えてください",
+    short: "志望動機は？",
+    who: "就活・転職",
+  },
+  {
+    key: "tansho",
+    q: "あなたの短所を教えてください",
+    short: "あなたの短所は？",
+    who: "就活・転職",
+  },
+  { key: "gakuchika", q: "学生時代に力を入れたことは何ですか", short: "ガクチカは？", who: "就活" },
+  {
+    key: "zangyo",
+    q: "残業についてどう考えていますか",
+    short: "残業は大丈夫？",
+    who: "就活・転職",
+  },
+  {
+    key: "tasha",
+    q: "他社の選考状況を教えてください",
+    short: "他社の選考状況は？",
+    who: "就活・転職",
+  },
+  {
+    key: "blank",
+    q: "職歴にブランクがありますが、その間は何をしていましたか",
+    short: "ブランク期間は何を？",
+    who: "転職",
+  },
+  {
+    key: "shippai",
+    q: "これまでで一番の失敗を教えてください",
+    short: "一番の失敗は？",
+    who: "就活・転職",
+  },
+  {
+    key: "gyaku",
+    q: "最後に、何か質問はありますか",
+    short: "何か質問はありますか？",
+    who: "就活・転職",
+  },
+  {
+    key: "5nen",
+    q: "5年後、どうなっていたいですか",
+    short: "5年後どうなりたい？",
+    who: "就活・転職",
+  },
+  {
+    key: "nigate",
+    q: "苦手な人とはどう接していますか",
+    short: "苦手な人とはどう接する？",
+    who: "就活・転職",
+  },
+  {
+    key: "kaisu",
+    q: "転職の回数が多いようですが、理由を教えてください",
+    short: "転職回数が多いのはなぜ？",
+    who: "転職",
+  },
 ] as const;
+
+/** オファーの演出で、ナレーターが言うひとこと（約束にならない言い方にする） */
+const OFFER_NARRATION = "しかも、練習の結果を公開しておくと…企業から面談の申し込みが届くことも！";
+
+/** せりふごとの再生の速さ（ナレーションと受験者は少し速く。面接官はアプリと同じ） */
+export function lineTempo(speaker: StudioLine["speaker"]): number {
+  return speaker === "candidate" ? 1.3 : speaker === "narrator" ? 1.15 : 1.08;
+}
 
 export type RewriteItem = {
   label: string;
@@ -325,7 +394,9 @@ export type RewriteScript = {
   /** 声にする順番（面接官の前ふり → 質問 → 各パターンの NG・OK・ポイント → 締め） */
   lines: StudioLine[];
   /** lines のそれぞれが何か（画面の出し分けに使う） */
-  roles: ("hook" | "question" | "ng" | "ok" | "point" | "cta")[];
+  roles: ("hook" | "question" | "ng" | "ok" | "point" | "offer" | "cta")[];
+  /** 最後の演出：練習の結果を公開しておくと、企業から面談の申し込みが届く（架空の会社） */
+  offer: { companyType: string; message: string };
   /** lines のそれぞれが、何番目のパターンのものか（なければ -1） */
   itemIndex: number[];
 };
@@ -347,11 +418,12 @@ export async function writeRewriteScript(history: StudioHistory[]): Promise<Rewr
 
 【型（必ず守る）】
 - タイトル：「『◯◯』と聞かれた時の最高な答え方」のように、一目で何の動画か分かる（28文字以内）
-- 前ふり（hook）：見る人の不安や痛みを突く一言。例「本当のことを言うと、面接で落とされます」（30文字以内）
+- 前ふり（hook）：ナレーターが言う、見る人の手を止める強い一言。不安・危機感を突き、言い切る。例「これ言ったら、即落ちます」「9割の人がやってるNG回答」（20文字以内）
 - よくある本音・状況を3パターン（label：例「給料が少なかった」15文字以内）
-- それぞれ、落ちる言い方（ng：ありがちな本音のまま、30文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。50文字以内）
+- それぞれ、落ちる言い方（ng：ありがちな本音のまま、25文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。40文字以内）
 - AI面接官の点数：ng は15〜45点、ok は78〜95点（100点満点）
 - 言い換えのポイント（point：20文字以内。例「不満ではなく、これからやりたいことを話す」）
+- オファーの演出（offer）：最後に「練習した結果を公開しておくと、企業から面談の申し込みが届く」ことを見せる。申し込んできた架空の会社の種類（companyType：例「IT企業」15文字以内）と、企業からのひとこと（message：30文字以内。この質問への受かる言い方を評価した内容）
 - 締め（cta）：保存をうながす一言（25文字以内。例「保存して、面接の前に見返してね」）
 - 投稿の文：中身が分かる1文＋「あなたならどう答える？コメントで教えて」＋ハッシュタグ4〜6個（#ガチキャリAI #面接対策 を必ず入れる）
 
@@ -364,6 +436,7 @@ ${learnedExamples(history)}
   "title": "...",
   "hook": "...",
   "items": [{"label": "...", "ng": "...", "ngScore": 数字, "ok": "...", "okScore": 数字, "point": "..."}],
+  "offer": {"companyType": "...", "message": "..."},
   "cta": "...",
   "caption": "..."
 }`;
@@ -379,14 +452,21 @@ ${learnedExamples(history)}
     .slice(0, 3)
     .map((it) => ({
       label: String(it.label ?? "").slice(0, 20),
-      ng: String(it.ng).slice(0, 50),
+      ng: String(it.ng).slice(0, 40),
       ngScore: Math.min(50, Math.max(5, Math.round(Number(it.ngScore) || 30))),
-      ok: String(it.ok).slice(0, 70),
+      ok: String(it.ok).slice(0, 60),
       okScore: Math.min(98, Math.max(70, Math.round(Number(it.okScore) || 85))),
       point: String(it.point ?? "").slice(0, 30),
     }));
   if (items.length < 2) throw new Error("rewrite script parse failed");
-  const hook = String(raw?.hook ?? "言い方ひとつで、印象は大きく変わります").slice(0, 40);
+  const hook = String(raw?.hook ?? "これ言ったら、即落ちます").slice(0, 30);
+  const rawOffer = (raw as { offer?: { companyType?: unknown; message?: unknown } } | null)?.offer;
+  const offer = {
+    companyType: String(rawOffer?.companyType ?? "IT企業").slice(0, 20),
+    message: String(
+      rawOffer?.message ?? "あなたの考え方に共感しました。ぜひ一度お話ししませんか？",
+    ).slice(0, 50),
+  };
   const cta = String(raw?.cta ?? "保存して、面接の前に見返してね").slice(0, 30);
   let caption = String(raw?.caption ?? "").slice(0, 300);
   for (const tag of ["#ガチキャリAI", "#面接対策"])
@@ -405,23 +485,26 @@ ${learnedExamples(history)}
     roles.push(role);
     itemIndex.push(i);
   };
-  push("interviewer", hook, "hook");
+  push("narrator", hook, "hook");
   push("interviewer", topic.q, "question");
   items.forEach((it, i) => {
     push("candidate", it.ng, "ng", i);
     push("candidate", it.ok, "ok", i);
     if (it.point) push("interviewer", it.point, "point", i);
   });
+  push("narrator", OFFER_NARRATION, "offer");
   push("interviewer", cta, "cta");
 
   return {
     format: "rewrite",
     theme: `rewrite:${topic.key}`,
     themeLabel: "言い換え型",
-    title: String(raw?.title ?? `「${topic.q}」と聞かれた時の最高な答え方`).slice(0, 36),
+    // 見出しはAIに任せず形を固定する（言葉の崩れを防ぐ）
+    title: `「${topic.short}」と聞かれた時の最高な答え方`,
     hook,
     question: topic.q,
     items,
+    offer,
     cta,
     caption,
     lines,

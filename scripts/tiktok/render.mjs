@@ -99,9 +99,11 @@ async function main() {
       writeFileSync(file, Buffer.from(job.audio[i], "base64"));
       inputs.push("-f", "s16le", "-ar", String(job.sampleRate), "-ac", "1", "-i", file);
       const delay = Math.round(line.start * 1000);
-      // 面接官はアプリと同じく少し速く・高く再生する
-      const speed = line.rate !== 1 ? `asetrate=${Math.round(job.sampleRate * line.rate)},` : "";
-      filters.push(`[${i + 1}:a]${speed}aresample=48000,adelay=${delay}|${delay}[a${i}]`);
+      // 面接官はアプリと同じく少し速く・高く再生する（pitchRate）。tempo は音の高さを変えずに速くする
+      const pitchRate = line.pitchRate ?? line.rate;
+      const speed = pitchRate !== 1 ? `asetrate=${Math.round(job.sampleRate * pitchRate)},` : "";
+      const tempo = line.tempo && line.tempo !== 1 ? `,atempo=${line.tempo}` : "";
+      filters.push(`[${i + 1}:a]${speed}aresample=48000${tempo},adelay=${delay}|${delay}[a${i}]`);
     });
     const mix = timeline.lines.map((_, i) => `[a${i}]`).join("");
     filters.push(
