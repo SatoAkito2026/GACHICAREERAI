@@ -38,11 +38,11 @@ export type RewriteJobData = {
 const START = 0;
 const GAP = 0.2;
 /** 面接官の質問のあと、答え始めるまでの間 */
-const QUESTION_GAP = 0.7;
+const QUESTION_GAP = 0.35;
 /** 点数を見せる間（NG・OK のあと） */
 const SCORE_HOLD = 0.8;
 /** オファーの通知を見せる間 */
-const OFFER_HOLD = 1.4;
+const OFFER_HOLD = 0.9;
 const END = 3;
 /** 点数が数字くるくるで上がっていく長さ（NG・OK） */
 const NG_COUNT = 0.5;
