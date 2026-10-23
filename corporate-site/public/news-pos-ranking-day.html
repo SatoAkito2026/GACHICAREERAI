@@ -154,6 +154,50 @@
 .type a span{font-size:14px;color:var(--ink-2)}
 .type a em{font-style:normal;font-size:12.5px;font-weight:700;color:#1E5BD8;white-space:nowrap}
 @media (max-width:639px){.type a{grid-template-columns:minmax(0,1fr)}.type a em{justify-self:start}}
+
+.two-col{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.two-col{grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start}}
+.side-in{display:grid;gap:16px}
+@media (min-width:1080px){.side{position:sticky;top:96px}.side-in{max-height:calc(100vh - 116px);overflow-y:auto;padding-bottom:8px;scrollbar-width:thin}}
+.sbn{display:grid;gap:8px;text-decoration:none;border-radius:18px;padding:16px;border:2px solid #1E5BD8;background:#fff;text-align:center;transition:transform .3s,box-shadow .3s}
+.sbn:hover{transform:translateY(-3px);box-shadow:0 20px 34px -24px rgba(30,91,216,.7)}
+.sbn img{width:140px;height:auto;margin:0 auto}
+.sbn b{font-size:16px}
+.sbn small{display:block;font-size:12px;color:var(--ink-2);line-height:1.6}
+.sbn em{font-style:normal;background:#1E5BD8;color:#fff;border-radius:999px;padding:9px 0;font-weight:700;font-size:14px}
+.sbn2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbn2 a{text-decoration:none;border-radius:14px;padding:12px;display:grid;gap:2px;transition:transform .3s}
+.sbn2 a:hover{transform:translateY(-2px)}
+.sbn2 small{font-size:9.5px;letter-spacing:.08em;font-weight:700}
+.sbn2 b{font-size:16px}
+.sbn2 span{font-size:11px;line-height:1.5}
+.sbn2 .d{background:linear-gradient(140deg,#fff,#E6F0FF);border:1px solid var(--line)}
+.sbn2 .d small{color:#1557D6}.sbn2 .d span{color:var(--ink-2)}
+.sbn2 .n{background:#0B1330;color:#ECF0FF}
+.sbn2 .n small{color:#FFB547}.sbn2 .n span{color:#A9B4D6}
+.stoc,.skw,.spop{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px}
+.stoc p,.skw p,.spop p{margin:0 0 8px;font-weight:900;font-size:13px;letter-spacing:.06em}
+.stoc ol{margin:0;padding:0;list-style:none;display:grid;gap:2px;counter-reset:s}
+.stoc li{counter-increment:s}
+.stoc a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;text-decoration:none;font-size:13px;line-height:1.5;padding:5px 6px;border-radius:8px;color:var(--ink-2)}
+.stoc a::before{content:counter(s);font-family:var(--ff-latin);font-weight:800;color:#A3AEC6}
+.stoc a:hover{background:#F5F8FF;color:var(--ink)}
+.stoc a.on{background:#EAF1FF;color:#1E5BD8;font-weight:700}
+.stoc a.on::before{color:#1E5BD8}
+.skw ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skw a{display:block;text-decoration:none;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.skw a::before{content:"#";color:#1E5BD8;margin-right:2px}
+.skw a:hover{border-color:#1E5BD8;color:#1E5BD8}
+.sdl{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:12px;background:#3FAE3A;color:#fff;transition:transform .3s}
+.sdl:hover{transform:translateY(-2px)}
+.spop ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.spop a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;text-decoration:none;font-size:12.5px;line-height:1.55;font-weight:700}
+.spop img{width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+.spop em{display:inline-block;font-style:normal;font-size:10px;background:#EAF1FF;color:#1E5BD8;border-radius:4px;padding:0 6px;margin-right:6px}
+.spop em.nt{background:#0B1330;color:#FFB547}.spop em.ot{background:#F4F2F7;color:var(--ink-2)}
+.spop a:hover span{text-decoration:underline}
+.prose .side p{margin:0}
+.prose .side ul,.prose .side ol{padding-left:0}
 </style>
 
 <section class="page-hero">
@@ -167,7 +211,9 @@
 
 <section class="block">
   <div class="wrap">
-    <article class="prose article" style="max-width:860px">
+    <div class="two-col">
+    <div class="maincol">
+    <article class="prose article">
 
       <p>注文の伝えもれ、閉店後の締め、スタッフの給料計算。飲食店の毎日には、お会計のほかにもたくさんの仕事があります。POSレジを選ぶときは、レジの機能だけでなく、そのあとの仕事までどれだけ楽になるかが大事です。</p>
       <p>この記事では、居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェなどの飲食店向けPOSレジを、比較表と選び方とあわせて紹介します。</p>
@@ -334,8 +380,31 @@
       <p class="note">夜のお店の方は <a href="news-pos-ranking.html">夜のお店のPOSシステムおすすめ5選</a> もどうぞ。</p>
     </article>
     <a class="btn btn-line" href="news.html" style="margin-top:48px">← お知らせ一覧へ</a>
+    </div>
+    <aside class="side" aria-label="サイドメニュー">
+      <div class="side-in">
+        <a class="sbn main" href="posupos-day.html"><img src="assets/img/posupos-logo.webp" alt="ポスポス かんたん、つながる、会計ソフト" width="800" height="800" loading="lazy"><span><b>無料で1か月ためせる</b><small>伝票・会計・打刻・シフト・給料・顧客をまとめて管理</small></span><em>飲食店のポスポスを見る →</em></a>
+        <div class="sbn2"><a class="d" href="posupos-day.html#izakaya"><small>FOR RESTAURANTS</small><b>昼のお店</b><span>居酒屋・ラーメン・カフェなど</span></a><a class="n" href="posupos-night.html#cabaret"><small>FOR NIGHT</small><b>夜のお店</b><span>キャバクラ・ホストなど</span></a></div>
+        <nav class="stoc" aria-label="この記事の目次"><p>目次</p><ol><li><a href="#what">飲食店向けPOSレジとは</a></li><li><a href="#table">ひと目で比較</a></li><li><a href="#func">あると便利な機能</a></li><li><a href="#price">料金の考え方</a></li><li><a href="#merit">メリットと気をつけたいこと</a></li><li><a href="#howto">失敗しない選び方5つ</a></li><li><a href="#ranking">おすすめ5選</a></li><li><a href="#types">お店の種類別のポイント</a></li><li><a href="#flow">導入の流れ</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+        <div class="skw"><p>KEYWORDS</p><ul><li><a href="#func">QR注文</a></li><li><a href="#func">厨房の画面</a></li><li><a href="#func">券売機</a></li><li><a href="#howto">給料計算</a></li><li><a href="#howto">キャッシュレス</a></li><li><a href="#price">料金</a></li></ul></div>
+        <a class="sdl" href="contact.html#pos">資料請求・お問い合わせ →</a>
+        <div class="spop"><p>よく読まれる記事</p><ul>
+          <li><a href="news-pos-ranking-day.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のPOSレジおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-pos-ranking.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>夜のお店のPOSシステムおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-barracks.html"><img src="assets/img/barracks.webp" alt="" width="640" height="480" loading="lazy"><span><em class="ot">コラム</em>防衛省が動く、隊舎改革の波。相部屋から個室へ</span></a></li>
+        </ul></div>
+      </div>
+    </aside>
+    </div>
   </div>
 </section>
+<script>
+// 右の目次：いま読んでいる見出しに色を付ける
+(function(){var links=[].slice.call(document.querySelectorAll('.stoc a'));if(!links.length||!('IntersectionObserver' in window))return;
+var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-20% 0px -70% 0px'});
+Object.keys(map).forEach(function(id){var h=document.getElementById(id);if(h)io.observe(h)})})();
+</script>
 </main>
 
 <section class="cta-band" aria-label="お問い合わせ">
