@@ -21,6 +21,8 @@ ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / "src"
 OUT = ROOT / "public"
 SITE = "https://akitogroup.jp"
+# Cloudflare Web Analytics のトークン（ダッシュボードの「Web Analytics」→ サイトを追加 で出る token）。空なら計測しない
+CF_BEACON_TOKEN = ""
 
 NAV = [
     ("about", "about.html", "会社概要", "Company"),
@@ -162,6 +164,17 @@ def main():
             print("wrote", f"public/posupos-{mode}.html")
 
 
+def add_analytics():
+    """全ページに Cloudflare Web Analytics の計測タグを入れる（クッキーなし。ページごとの閲覧数がわかる）"""
+    if not CF_BEACON_TOKEN:
+        return
+    tag = f"<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{{\"token\": \"{CF_BEACON_TOKEN}\"}}'></script>"
+    for f in OUT.glob("*.html"):
+        s = f.read_text(encoding="utf-8")
+        if "cloudflareinsights" not in s and "</body>" in s:
+            f.write_text(s.replace("</body>", tag + "</body>", 1), encoding="utf-8")
+
+
 def clean_links():
     """サイト内リンクを .html なしの URL にそろえる（本番では .html 付きは転送になり、Google の巡回が遅れるため）"""
     names = {p.stem for p in OUT.glob("*.html")}
@@ -176,3 +189,4 @@ def clean_links():
 if __name__ == "__main__":
     main()
     clean_links()
+    add_analytics()
