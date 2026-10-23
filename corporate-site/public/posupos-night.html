@@ -47,6 +47,7 @@
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:clip}
 [id]{scroll-margin-top:76px}
+body[data-shop] [id]{scroll-margin-top:128px}
 body{margin:0;background:var(--bg);color:var(--navy);font-family:var(--ff);font-size:16px;line-height:1.85;word-break:auto-phrase;overflow-wrap:anywhere}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
 [hidden]{display:none!important}
@@ -660,6 +661,24 @@ body.night .plan li::before{background-color:var(--blue)}
 .sec.light-row .scroll-hint{color:var(--ink-2)}
 
 .gallery .span2{grid-column:1/-1}
+
+/* 昼：お店の種類のタブ（画面イメージがその業種に変わる） */
+.v{display:none}
+body[data-shop="izakaya"] .v[data-v="izakaya"]{display:block}
+body[data-shop="ramen"] .v[data-v="ramen"]{display:block}
+body[data-shop="italian"] .v[data-v="italian"]{display:block}
+body[data-shop="sushi"] .v[data-v="sushi"]{display:block}
+body[data-shop="yakiniku"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
+.shopbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:45;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.shopbar .wrap{display:flex;align-items:center;gap:12px;padding-block:8px}
+.shopbar .lb{font-size:13px;font-weight:900;flex:none;color:var(--ink-2)}
+.shopbar .sb{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.shopbar .sb::-webkit-scrollbar{display:none}
+.shopbar button{appearance:none;font:inherit;font-weight:700;font-size:14.5px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 16px;min-height:40px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
+.shopbar button:hover{border-color:var(--blue)}
+.shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+@media (max-width:479px){.shopbar .lb{display:none}}
 </style>
 </head>
 <body class="night">
@@ -683,6 +702,7 @@ body.night .plan li::before{background-color:var(--blue)}
     <a class="btn btn-blue head-cta" href="contact.html#pos">お問い合わせ</a>
   </div>
 </header>
+
 
 <main>
   <!-- 1. ファーストビュー -->
@@ -1108,6 +1128,19 @@ body.night .plan li::before{background-color:var(--blue)}
   var $=function(id){return document.getElementById(id)};
   $('year').textContent=new Date().getFullYear();
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+  // 昼：お店の種類のタブ。選ぶと、ページの画面イメージがすべてその業種になる
+  var bar=document.querySelector('.shopbar');
+  if(bar){
+    var setShop=function(k,save){
+      document.body.setAttribute('data-shop',k);
+      bar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
+    };
+    try{var saved=localStorage.getItem('posupos-shop');if(saved&&bar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
+    bar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true);var sb=b.parentNode;sb.scrollTo({left:b.offsetLeft-sb.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})})});
+  }
 
   // プランの「すべての機能を見る」
   document.querySelectorAll('.plan .toggle').forEach(function(btn){
