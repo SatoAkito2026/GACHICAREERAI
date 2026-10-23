@@ -274,6 +274,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      link_clicks: {
+        Row: {
+          created_at: string
+          id: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          source?: string
+        }
+        Relationships: []
+      }
       tiktok_videos: {
         Row: {
           caption: string;

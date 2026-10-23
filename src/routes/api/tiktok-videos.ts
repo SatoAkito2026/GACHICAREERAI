@@ -2,11 +2,13 @@
  * 管理者：TikTok 用に作った動画の一覧（profiles.is_admin = true のユーザーだけ）
  *
  * GET  /api/tiktok-videos                         → 新しい順に20本（見る・保存する用の期限つきURLつき）
+ *                                                   ＋プロフィールのリンク（/tiktok）が押された回数
  * POST /api/tiktok-videos { action: "posted", id } → 投稿済みにする
  * POST /api/tiktok-videos { action: "delete", id } → 消す
  * POST /api/tiktok-videos { action: "metrics", id, views, likes } → 再生数・いいねを入れる（次の台本づくりで参考にする）
  */
 import { createFileRoute } from "@tanstack/react-router";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { verifyApiUser } from "@/lib/api-auth";
 import { jsonResponse, serviceClient } from "@/lib/talent";
 import { STUDIO_BUCKET } from "@/lib/studio";
@@ -25,6 +27,28 @@ async function adminClient(request: Request) {
     return { error: jsonResponse({ error: "forbidden" }, 403) };
   }
   return { supabase };
+}
+
+/** /tiktok が押された回数（今日・7日間・全部）。日付は日本時間で区切る */
+async function countClicks(supabase: SupabaseClient) {
+  const jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const todayStart =
+    Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate()) - 9 * 60 * 60 * 1000;
+  const count = async (since?: number) => {
+    let q = supabase
+      .from("link_clicks")
+      .select("id", { count: "exact", head: true })
+      .eq("source", "tiktok");
+    if (since !== undefined) q = q.gte("created_at", new Date(since).toISOString());
+    const { count: n } = await q;
+    return n ?? 0;
+  };
+  const [today, week, total] = await Promise.all([
+    count(todayStart),
+    count(todayStart - 6 * 86400000),
+    count(),
+  ]);
+  return { today, week, total };
 }
 
 export const Route = createFileRoute("/api/tiktok-videos")({
@@ -65,7 +89,7 @@ export const Route = createFileRoute("/api/tiktok-videos")({
             url,
           });
         }
-        return jsonResponse({ videos });
+        return jsonResponse({ videos, clicks: await countClicks(r.supabase) });
       },
 
       POST: async ({ request }) => {
