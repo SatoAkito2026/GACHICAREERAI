@@ -162,5 +162,17 @@ def main():
             print("wrote", f"public/posupos-{mode}.html")
 
 
+def clean_links():
+    """サイト内リンクを .html なしの URL にそろえる（本番では .html 付きは転送になり、Google の巡回が遅れるため）"""
+    names = {p.stem for p in OUT.glob("*.html")}
+    pat = re.compile(r'href="(' + "|".join(sorted(map(re.escape, names), key=len, reverse=True)) + r')\.html(#[^"]*)?"')
+    for f in OUT.glob("*.html"):
+        s = f.read_text(encoding="utf-8")
+        t = pat.sub(lambda m: 'href="/' + ("" if m.group(1) == "index" else m.group(1)) + (m.group(2) or "") + '"', s)
+        if t != s:
+            f.write_text(t, encoding="utf-8")
+
+
 if __name__ == "__main__":
     main()
+    clean_links()
