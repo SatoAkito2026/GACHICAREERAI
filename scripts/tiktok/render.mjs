@@ -55,7 +55,13 @@ async function main() {
   mkdirSync(join(WORK, "frames"), { recursive: true });
 
   console.log("台本と音声を作っています…");
-  const job = await api("/api/studio/job", { method: "POST" });
+  // 決まった時刻の実行では、今日の動画がもうあれば作らない（手動のときはいつでも作る）
+  const query = process.env.ONLY_IF_NONE_TODAY ? "?onlyIfNoneToday=1" : "";
+  const job = await api(`/api/studio/job${query}`, { method: "POST" });
+  if (job.skipped) {
+    console.log("今日の動画はもうできているので、作りませんでした");
+    return;
+  }
   console.log(`「${job.title}」（${job.themeLabel}）`);
 
   try {

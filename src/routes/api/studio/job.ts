@@ -2,6 +2,7 @@
  * TikTok 動画づくり：台本と音声を作る（GitHub Actions だけが呼ぶ。合言葉 STUDIO_SECRET）
  *
  * POST /api/studio/job → { id, title, lines, result, audio[], sampleRate, interviewerRate, ... }
+ * POST /api/studio/job?onlyIfNoneToday=1 → 今日の動画がもうあれば { skipped: true }
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse, serviceClient } from "@/lib/talent";
@@ -21,6 +22,19 @@ export const Route = createFileRoute("/api/studio/job")({
         if (!isStudioRequest(request)) return jsonResponse({ error: "forbidden" }, 403);
         const supabase = await serviceClient();
         if (!supabase) return jsonResponse({ error: "Server config missing" }, 500);
+
+        // 決まった時刻の実行（1日2回）では、今日（日本時間）の動画がもうあれば作らない
+        if (new URL(request.url).searchParams.get("onlyIfNoneToday")) {
+          const jst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+          jst.setUTCHours(0, 0, 0, 0);
+          const todayStart = new Date(jst.getTime() - 9 * 60 * 60 * 1000).toISOString();
+          const { count } = await supabase
+            .from("tiktok_videos")
+            .select("id", { count: "exact", head: true })
+            .in("status", ["rendering", "ready", "posted"])
+            .gte("created_at", todayStart);
+          if ((count ?? 0) > 0) return jsonResponse({ skipped: true });
+        }
 
         // これまでの動画（テーマ・タイトル・再生数）から、伸びたものを真似し、続けて同じテーマにしない
         const { data: history } = await supabase

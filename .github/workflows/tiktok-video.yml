@@ -1,11 +1,14 @@
-# 毎日 TikTok 用の動画を1本作る（日本時間 17:00）。Actions の画面から手動でも動かせる
+# 毎日 TikTok 用の動画を1本作る（17時の投稿に間に合うよう、日本時間 16:13 と 16:43 の2回）。
+# GitHub の決まった時刻の実行は、混む「ちょうど0分」だと遅れたり飛ばされたりするので、時刻をずらして2回にしている。
+# 1回目で作れた日は、2回目は何もしない（ONLY_IF_NONE_TODAY）。Actions の画面から手動で動かすと、いつでも1本作る
 # 必要な設定：リポジトリの Settings → Secrets and variables → Actions に STUDIO_SECRET
 #（Cloudflare の STUDIO_SECRET と同じ値）
 name: TikTok video
 
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "13 7 * * *"
+    - cron: "43 7 * * *"
   workflow_dispatch:
 
 jobs:
@@ -32,6 +35,7 @@ jobs:
         env:
           APP_URL: https://gachicareer-ai.akitogroup.jp
           STUDIO_SECRET: ${{ secrets.STUDIO_SECRET }}
+          ONLY_IF_NONE_TODAY: ${{ github.event_name == 'schedule' && '1' || '' }}
         run: node render.mjs
       - name: 失敗したときは、撮ったコマの一部を残す
         if: failure()
