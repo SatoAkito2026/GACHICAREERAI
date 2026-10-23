@@ -248,7 +248,8 @@ p{margin:0}
 .flow b{display:block;font-size:16.5px}
 .flow span{font-size:14.5px;color:var(--ink-2)}
 #panel-night .flow .tm{background:var(--night)}
-.shots-2{display:grid;gap:22px}
+.shots-2{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+.shot{min-width:0}
 .word{font-weight:700;color:var(--blue)}
 
 /* ===== 5. 画面ごとの機能 ===== */
@@ -381,6 +382,289 @@ body.night .shot figcaption::before{background:var(--blue);color:var(--on-blue)}
 body.night .chip{background:rgba(255,181,71,.14)}
 body.night .tc[open],body.night .faq details[open]{border-color:var(--blue)}
 body.night .plan li::before{background-color:var(--blue)}
+
+/* ===== 画面イメージ：本物のアプリと同じ配置・デザイン（名前・金額・店名は架空） ===== */
+.ap{border-radius:14px;overflow:hidden;border:1px solid #E6DFD6;box-shadow:0 30px 60px -38px rgba(19,35,74,.55);font-family:var(--ff);font-size:11.5px;line-height:1.5;color:#1F2433;background:#FAF7F4;text-align:left}
+.ap *{box-sizing:border-box}
+.ap b{font-weight:700}
+.ap .n{font-variant-numeric:tabular-nums}
+.ap-top{display:flex;align-items:center;gap:10px;padding:8px 12px;color:#fff;white-space:nowrap;overflow:hidden}
+.ap-top .lg{display:flex;align-items:center;gap:6px;font-weight:900;font-size:14px}
+.ap-top .lg img{width:18px;height:18px;border-radius:4px;background:#fff}
+.ap-top .st{font-size:11px;opacity:.95}
+.ap-top .rt{margin-left:auto;display:flex;gap:6px;font-size:10px;align-items:center}
+.ap-top .rt span{border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:1px 8px}
+.ap-day .ap-top{background:#C8102E}
+.ap-night .ap-top{background:linear-gradient(90deg,#140B22,#2A1446 60%,#4A2280)}
+.ap-night .ap-top .lg{font-family:"Times New Roman",serif;font-weight:400;letter-spacing:.32em;color:#F2A33A;font-size:15px}
+.ap-tabs{display:flex;gap:14px;padding:6px 12px 0;background:#fff;border-bottom:1px solid #EEE6F3;font-size:10.5px;color:#55506A;white-space:nowrap;overflow:hidden}
+.ap-tabs span{padding-bottom:5px}
+.ap-tabs .on{color:#4B1F7A;font-weight:700;box-shadow:inset 0 -2px 0 #4B1F7A}
+.ap-night{background:linear-gradient(180deg,#F5EDFA,#FDEBDD)}
+.ap-body{display:grid;grid-template-columns:96px minmax(0,1fr)}
+.ap-side{background:#fff;border-right:1px solid #EEE7DF;padding:6px 0;font-size:10.5px;color:#4A4F5E}
+.ap-side span{display:block;padding:5px 10px}
+.ap-side .on{background:#FDECEF;color:#C8102E;font-weight:700;box-shadow:inset 3px 0 0 #C8102E}
+@media (max-width:520px){.ap-body{grid-template-columns:minmax(0,1fr)}.ap-side{display:none}}
+.ap-main{padding:12px;display:grid;gap:10px;min-width:0}
+.ap-h{font-weight:700;font-size:13px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ap-h small{font-weight:400;font-size:10.5px;color:#6A6F7E}
+.ac{background:#fff;border:1px solid #EEE7DF;border-radius:8px;padding:9px 10px;min-width:0}
+.ap-night .ac{border-color:#F1E2EC;border-top:2px solid #F08A24}
+.ac h5{margin:0 0 6px;font-size:11.5px}
+.k4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.k5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+@media (max-width:520px){.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.k5{grid-template-columns:repeat(2,minmax(0,1fr))}.k5>:nth-child(n+5){display:none}}
+.kc{background:#fff;border:1px solid #EEE7DF;border-radius:8px;padding:7px 8px;display:grid;gap:1px;min-width:0}
+.ap-night .kc{border-color:#F1E2EC}
+.kc span{font-size:9.5px;color:#6A6F7E}
+.kc b{font-size:15px}
+.kc small{font-size:9px;color:#6A6F7E}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pl{font-size:9.5px;border:1px solid #E7A0AC;color:#C8102E;background:#fff;border-radius:999px;padding:1px 8px}
+.profit{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap;border:1.5px solid #1F2433;border-radius:8px;background:#fff;padding:8px 10px}
+.profit b{font-size:20px;color:#2E7D32;display:block}
+.profit small{font-size:9.5px;color:#6A6F7E}
+.profit .eq{font-size:9.5px;color:#6A6F7E}
+.profit .eq b{display:inline;font-size:10px;color:#1F2433}
+.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:8px}
+@media (max-width:520px){.two{grid-template-columns:minmax(0,1fr)}}
+.bars2{display:flex;align-items:flex-end;gap:2px;height:72px;border-bottom:1px solid #DDD}
+.bars2 i{flex:1;background:#C8102E;border-radius:2px 2px 0 0;height:var(--h)}
+.hb{display:grid;gap:5px}
+.hb div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 6px;font-size:10px}
+.hb div::after{content:"";grid-column:1/-1;height:4px;border-radius:2px;background:linear-gradient(90deg,#C8102E var(--w),#F4EDE6 var(--w))}
+.hb small{color:#888}
+/* 店内（配置図） */
+.floor2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:8px}
+@media (max-width:520px){.floor2{grid-template-columns:minmax(0,1fr)}}
+.fl{background:#F3EAE0;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-content:start}
+.tb{background:#fff;border:1.5px solid #2B2F45;border-radius:6px;padding:6px 2px;text-align:center;font-size:9.5px;line-height:1.35;min-height:62px;display:grid;align-content:center}
+.tb b{font-size:13px}
+.tb.busy{background:#FDECEF}
+.tb.busy b{color:#C8102E}
+.tb.sel{border-width:3px}
+.tb.tall{grid-row:span 2;min-height:130px}
+.tb i{font-style:normal;font-size:8.5px;background:#fff;border-radius:3px;font-weight:700;padding:0 3px}
+.ord{display:grid;gap:5px}
+.ord .hd{display:flex;justify-content:space-between;font-size:10.5px}
+.ord .hd b{color:#C8102E;font-size:14px}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chips span{font-size:9.5px;border:1px solid #E6DFD6;border-radius:999px;padding:1px 8px;background:#fff}
+.chips .on{background:#C8102E;color:#fff;border-color:#C8102E}
+.mbtn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.mbtn span{border:1px solid #E6DFD6;border-radius:6px;background:#fff;text-align:center;font-size:9.5px;font-weight:700;padding:5px 2px}
+.mbtn small{display:block;font-weight:400;color:#888}
+.ol div{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid #F1ECE6}
+.ol .op{color:#C9521B;padding-left:12px}
+.tot{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+.tot b{color:#C8102E;font-size:18px}
+.btn2{display:grid;grid-template-columns:1.5fr 1fr;gap:5px}
+.btn2 span{border-radius:6px;text-align:center;padding:6px 0;font-weight:700;font-size:10.5px;border:1px solid #E6DFD6;background:#fff}
+.btn2 .r{background:#C8102E;color:#fff;border-color:#C8102E}
+/* お支払い方法 */
+.pay2{background:#fff;border-radius:12px;padding:12px;display:grid;gap:8px;max-width:420px;margin:0 auto;box-shadow:0 20px 40px -24px rgba(0,0,0,.4)}
+.pay2 .amt{font-size:20px;font-weight:700;color:#C8102E}
+.pay2 .amt small{font-size:10px;color:#6A6F7E;font-weight:400}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.seg2 span{text-align:center;border-radius:6px;padding:5px 0;font-weight:700;font-size:10.5px;border:1px solid #E6DFD6}
+.seg2 .on{background:#C8102E;color:#fff;border-color:#C8102E}
+.fld{border:1px solid #E6DFD6;border-radius:6px;padding:5px 8px;color:#999;font-size:10.5px;background:#FBF8F5}
+.lnk{color:#C8102E;text-decoration:underline;font-size:9.5px}
+.ptile{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ptile span{border:1px solid #E6DFD6;border-radius:8px;padding:8px;font-weight:700;font-size:12px}
+.ptile small{display:block;font-weight:400;font-size:9px;color:#6A6F7E}
+/* 厨房 */
+.kd{background:#1C1C1E;border-radius:14px;overflow:hidden;font-size:11px;color:#1F2433;box-shadow:0 30px 60px -38px rgba(0,0,0,.6)}
+.kd-top{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#000;color:#fff;font-weight:900;white-space:nowrap;overflow:hidden}
+.kd-top .t{background:#fff;color:#1F2433;border-radius:6px;padding:2px 8px;font-size:10.5px}
+.kd-top .t2{border-radius:6px;padding:2px 8px;font-size:10.5px;background:#222}
+.kd-top i{font-style:normal;background:#E5484D;color:#fff;border-radius:999px;padding:0 5px;margin-left:3px;font-size:9.5px}
+.kd-top .f{display:flex;gap:2px;background:#222;border-radius:6px;padding:2px;font-size:10px}
+.kd-top .f span{padding:1px 6px;border-radius:4px}
+.kd-top .f .on{background:#F29D12}
+.kd-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;align-items:start}
+@media (max-width:520px){.kd-g{grid-template-columns:repeat(2,minmax(0,1fr))}.kd-g>:nth-child(3){display:none}}
+.kc2{background:#fff;border-radius:8px;padding:7px;display:grid;gap:4px}
+.kc2 .h{display:flex;align-items:center;gap:5px;font-weight:900;font-size:15px}
+.kc2 .h i{font-style:normal;font-size:8.5px;background:#2B2F45;color:#fff;border-radius:999px;padding:0 6px}
+.kc2 .m{display:flex;justify-content:space-between;font-size:9px;color:#6A6F7E;border-bottom:1px solid #EEE;padding-bottom:2px}
+.kc2 .it{font-weight:700;font-size:12px}
+.kc2 .it em{font-style:normal;font-size:8px;background:#F1F1F1;color:#666;border-radius:3px;padding:0 3px;margin-right:4px;vertical-align:2px}
+.kc2 .op{color:#C9521B;font-weight:700;font-size:10px}
+.kb{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.kb span{text-align:center;font-weight:700;font-size:10px;padding:5px 0;border-radius:4px}
+.kb .s{background:#F29D12;color:#fff}
+.kb .c{color:#C8102E;border-top:1px solid #C8102E;border-bottom:1px solid #C8102E}
+/* レシート */
+.rc{background:#E4E4E4;border-radius:14px;padding:16px;display:grid;place-items:center}
+.rc .pp{background:#fff;width:min(100%,240px);padding:12px 12px 18px;font-family:var(--ff-mono);font-size:10px;line-height:1.7;box-shadow:0 8px 16px -10px rgba(0,0,0,.4)}
+.rc .pp hr{border:0;border-top:1px dashed #999;margin:4px 0}
+.rc .pp div{display:flex;justify-content:space-between;gap:8px}
+.rc .pp .t{justify-content:center;font-weight:700;font-size:11.5px}
+.rc .pp .big{font-weight:700;font-size:12.5px}
+/* 夜：ランキング */
+.rk3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.rk3{grid-template-columns:repeat(2,minmax(0,1fr))}.rk3>:nth-child(3){display:none}}
+.rk3 h6{margin:0 0 4px;font-size:11.5px}
+.rkl{background:#fff;border-radius:8px;border:1px solid #F1E2EC;overflow:hidden}
+.rkl div{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:6px;align-items:center;padding:6px 8px;border-top:1px solid #F4EEF1;font-size:10.5px}
+.rkl div:first-child{border-top:0}
+.rkl i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;background:#F4EEF1;font-weight:700}
+.rkl .cr{background:#F08A24;color:#fff}
+.rkl .cr svg{width:12px;height:12px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linejoin:round}
+.rkl u{text-decoration:underline;text-decoration-color:#C9B8D8;text-underline-offset:2px}
+/* 夜：付け回し */
+.tk2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:8px}
+@media (max-width:520px){.tk2{grid-template-columns:minmax(0,1fr)}}
+.stp{display:grid;gap:5px;font-size:10px}
+.stp p{margin:0;font-weight:700}
+.ch2{display:flex;gap:4px;flex-wrap:wrap}
+.ch2 span{border:1px solid #E5DCEB;border-radius:999px;padding:1px 7px;font-size:9.5px;background:#fff}
+.ch2 .on{background:#3D1A6B;color:#fff;border-color:#3D1A6B}
+.ch2 .c1{background:#FBE38A;border-color:#FBE38A}.ch2 .c2{background:#F9C9D3;border-color:#F9C9D3}.ch2 .c3{background:#A7EBC9;border-color:#A7EBC9}.ch2 .c4{background:#DCD3FB;border-color:#DCD3FB}
+.go2{background:#3D1A6B;color:#fff;border-radius:6px;font-weight:700;text-align:center;padding:6px;font-size:11px}
+.now div{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10px;padding:4px 0;border-bottom:1px solid #F4EEF1}
+.now em{font-style:normal;font-size:8.5px;background:#BFE6FA;border:1px solid #3B8CFF;color:#1F5DA8;border-radius:3px;padding:0 4px;margin-left:4px}
+.now .a{font-weight:700}.now .b{color:#B8860B}
+.now s{text-decoration:none;font-size:8.5px;border:1px solid #DDD;border-radius:3px;padding:0 4px}
+.tl{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:0;font-size:9px}
+.tl .ax{grid-column:2;display:flex;justify-content:space-between;color:#888;border-bottom:1px solid #EEE;padding-bottom:2px}
+.tl .rw{grid-column:1/-1;display:grid;grid-template-columns:34px minmax(0,1fr);border-bottom:1px solid #F4EEF1}
+.tl .rw>b{font-size:10px;color:#4B1F7A;padding-top:4px}
+.tl .ln{position:relative;height:84px;background:repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 1px),#F1ECF4 calc(16.66% - 1px) 16.66%)}
+.tl .bar{position:absolute;height:15px;border-radius:3px;font-size:8.5px;padding:0 4px;line-height:15px;background:#BFE6FA;border:1.5px solid #2B2F8F;white-space:nowrap;overflow:hidden}
+.tl .bar.p{border-style:dashed;border-color:#3B8CFF;background:#E3F3FC}
+.tl .bar.y{background:#FBE38A;border-color:#B08A00}
+.tl .now-l{position:absolute;top:0;bottom:0;width:2px;background:#3D1A6B}
+.lg2{display:flex;gap:4px;flex-wrap:wrap}
+.lg2 span{font-size:8.5px;padding:2px 6px;border-radius:3px}
+/* 夜：伝票の内わけ */
+.bk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:520px){.bk{grid-template-columns:minmax(0,1fr)}}
+.bk .r{display:flex;justify-content:space-between;font-size:10.5px;padding:2px 0}
+.bk .r.s{padding-left:10px;color:#6A6F7E}
+.bk .r.t{border-top:1px solid #1F2433;margin-top:3px;padding-top:4px;font-weight:700}
+.cst{border:1px solid #F1E2EC;border-radius:6px;padding:6px 8px;margin-bottom:5px}
+.cst .r.s{font-size:9.5px}
+/* 夜：給料 */
+.tbw{overflow-x:auto}
+.tbs{width:100%;min-width:520px;border-collapse:collapse;font-size:10px}
+.tbs th{font-weight:700;color:#6A6F7E;text-align:right;padding:4px;font-size:9px;white-space:nowrap}
+.tbs th:first-child,.tbs td:first-child{text-align:left}
+.tbs td{text-align:right;padding:5px 4px;border-top:1px solid #F4EEF1;white-space:nowrap}
+.tbs td:first-child{color:#4B1F7A;text-decoration:underline;text-underline-offset:2px}
+.tbs .big{font-weight:700;font-size:11px}
+.st2{font-size:8.5px;border-radius:999px;padding:0 6px;margin-left:3px}
+.st2.ok{background:#E6F6EE;color:#1E8E5A}.st2.ch{background:#F3E8FD;color:#7B3FC4}.st2.no{background:#F2F2F2;color:#888}
+.tbs small{display:block;font-size:8.5px;color:#7B3FC4}
+.sub3{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.sub3 span{font-size:10px;border:1px solid #E5DCEB;border-radius:999px;padding:2px 9px;background:#fff}
+.sub3 .on{background:#3D1A6B;color:#fff;border-color:#3D1A6B}
+.sub3 .pay{margin-left:auto;font-weight:700}
+.sub3 .pay b{font-size:15px}
+/* 夜：バック項目 */
+.bq{border:1px solid #F1E2EC;border-radius:6px;padding:7px 8px;display:grid;gap:4px}
+.bq .h{font-weight:700;font-size:11px}.bq .h small{font-weight:400;color:#888;font-size:9px}
+.bq .row{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:9.5px}
+.bq .row span{border:1px solid #E6DFD6;border-radius:5px;padding:2px 6px;background:#fff}
+.bq .row .p{background:#3D1A6B;color:#fff;border-color:#3D1A6B}
+.bq .lk{display:flex;justify-content:space-between;font-size:10px}
+.bq .lk em{font-style:normal;font-size:8.5px;background:#F4EEF1;border-radius:3px;padding:0 4px;margin-left:4px}
+.bq .ex{background:#FBEFE6;border-radius:4px;padding:3px 6px;font-weight:700;font-size:9.5px}
+/* 夜：お金 */
+.wal{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1.5px solid #F08A24;border-radius:8px;background:#fff;padding:8px 10px}
+.wal b{font-size:16px}
+.wal small{display:block;font-size:9.5px;color:#6A6F7E}
+.wal .bt{display:flex;gap:4px;font-size:9.5px}
+.wal .bt span{border:1px solid #E6DFD6;border-radius:5px;padding:2px 6px}
+.wal .bt .p{background:#3D1A6B;color:#fff;border-color:#3D1A6B}
+.pt{width:100%;border-collapse:collapse;font-size:10px}
+.pt th{font-size:9px;color:#6A6F7E;text-align:right;padding:3px}
+.pt th:first-child,.pt td:first-child{text-align:left}
+.pt td{text-align:right;padding:4px 3px;border-top:1px solid #F4EEF1}
+.pt td:last-child{font-weight:700}
+/* スマホ（スタッフ・キャスト／お客さま） */
+.ph2{width:min(100%,250px);border-radius:30px;padding:8px;background:#0B1124;box-shadow:0 30px 50px -30px rgba(19,35,74,.7);margin:0 auto}
+.ph2 .in{border-radius:23px;overflow:hidden;background:#FAF7F4;height:470px;display:flex;flex-direction:column;font-size:11px;line-height:1.5;color:#1F2433;position:relative}
+.ph2 .tp{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 12px 8px;color:#fff;background:#C8102E;font-size:11px;font-weight:700}
+.ph2.nt .tp{background:linear-gradient(90deg,#140B22,#4A2280)}
+.ph2.nt .tp .lg{font-family:"Times New Roman",serif;font-weight:400;letter-spacing:.28em;color:#F2A33A;font-size:13px}
+.ph2 .tp span:last-child{border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:0 7px;font-size:9.5px;font-weight:400}
+.ph2.nt .in{background:linear-gradient(180deg,#F5EDFA,#FDEBDD)}
+.ph2 .bd{padding:10px 12px;display:grid;gap:7px;align-content:start;flex:1;overflow:hidden}
+.ph2 .hi{font-size:9.5px;color:#6A6F7E}.ph2 .nm{font-size:15px;font-weight:900;margin-top:-6px}
+.cd{background:#fff;border:1.5px solid #F08A24;border-radius:10px;padding:8px 10px;display:grid;gap:1px}
+.ph2:not(.nt) .cd{border-color:#EEC9CF}
+.cd.pu{border-color:#4B1F7A;background:#F3E8FD}
+.ph2:not(.nt) .cd.pu{border-color:#C8102E;background:#FDECEF}
+.cd small{font-size:9px;color:#6A6F7E}
+.cd b{font-size:11.5px}
+.cd .big{font-size:22px;color:#3D1A6B}
+.ph2:not(.nt) .cd .big{color:#C8102E}
+.cd.pu b{color:#3D1A6B}
+.ph2:not(.nt) .cd.pu b{color:#C8102E}
+.mini2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ph2 .nv{display:grid;grid-template-columns:repeat(var(--c,5),1fr);background:#fff;border-top:1px solid #EEE;font-size:8.5px;text-align:center;color:#888;padding:6px 0 8px}
+.ph2 .nv .on{color:#3D1A6B;font-weight:700}
+.ph2:not(.nt) .nv .on{color:#C8102E}
+.sh{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #EDE4F2;border-radius:10px;padding:7px 10px;font-weight:700}
+.sh .tg{display:flex;font-size:9.5px;border:1px solid #DDD;border-radius:6px;overflow:hidden;font-weight:400}
+.sh .tg span{padding:3px 8px}
+.sh .tg .on{background:#1F2433;color:#fff}
+.sh .tg .ok{background:#3D1A6B;color:#fff}
+.ph2:not(.nt) .sh .tg .ok{background:#C8102E}
+.sh small{display:block;font-size:9px;color:#6A6F7E;font-weight:400}
+.wide{background:#3D1A6B;color:#fff;border-radius:8px;text-align:center;font-weight:700;padding:7px}
+.ph2:not(.nt) .wide{background:#C8102E}
+.cl{background:#fff;border-radius:10px;border:1px solid #EDE4F2;overflow:hidden}
+.cl div{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 9px;border-top:1px solid #F4EEF1}
+.cl div:first-child{border-top:0}
+.cl i{width:30px;height:30px;border-radius:50%;background:var(--g,#F4D9C6)}
+.cl b{display:block;font-size:11px}
+.cl small{font-size:9px;color:#6A6F7E}
+.cl span{font-size:8.5px;color:#888}
+.cu{background:#fff;border-radius:10px;border:1px solid #EDE4F2;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+.cu b{display:block}
+.cu small{font-size:9px;color:#6A6F7E}
+/* お客さまのスマホ（QR注文） */
+.cq .tp{flex-wrap:wrap;background:#B5222F;padding-bottom:10px}
+.cq .ic{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%}
+.cq .ic span{border:1px solid rgba(255,255,255,.55);border-radius:8px;text-align:center;font-size:8.5px;padding:4px 0;font-weight:700}
+.cq .gn{display:flex;gap:4px;width:100%;overflow:hidden}
+.cq .gn span{background:rgba(255,255,255,.18);border-radius:999px;padding:2px 9px;font-size:10px;white-space:nowrap}
+.cq .gn .on{background:#fff;color:#B5222F}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mg span{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 10px -6px rgba(0,0,0,.25);font-weight:700;font-size:11px;display:grid}
+.mg span::before{content:attr(data-n);display:grid;place-items:center;height:62px;background:#F7F2EC;color:#BDB6AE;font-size:10.5px;padding:0 6px;text-align:center}
+.mg em{font-style:normal;padding:4px 8px 0}
+.mg b{color:#B5222F;font-size:13px;padding:0 8px 6px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:12px;display:grid;gap:7px;box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+.sheet .tt{font-weight:900;font-size:14px;text-align:center}
+.sheet .tt small{display:block;font-weight:400;font-size:9.5px;color:#6A6F7E}
+.sheet .rb{background:#B5222F;color:#fff;border-radius:8px;text-align:center;font-weight:700;padding:8px}
+.sheet .wb{border:1.5px solid #E6DFD6;border-radius:8px;text-align:center;font-weight:700;padding:7px}
+.sheet .r{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.sheet .tag{font-size:8.5px;background:#EEE;border-radius:999px;padding:0 6px;font-weight:700}
+.mem{background:#C8102E;color:#fff;padding:12px 14px}
+.mem small{display:block;font-size:9px;opacity:.85}
+.mem b{font-size:15px}
+.qr2{width:116px;height:116px;margin:4px auto;background:
+  conic-gradient(from 90deg at 18px 18px,#111 25%,transparent 0) 0 0/116px 116px,
+  repeating-linear-gradient(90deg,#111 0 6px,transparent 6px 11px),
+  repeating-linear-gradient(0deg,#fff 0 4px,transparent 4px 9px);
+  -webkit-mask:repeating-conic-gradient(#000 0 25%,rgba(0,0,0,.5) 0 50%) 0 0/14px 14px;mask:repeating-conic-gradient(#000 0 25%,rgba(0,0,0,.5) 0 50%) 0 0/14px 14px}
+.sec.light-row{background:var(--mist)}
+.mg.tp2 span::before{display:none}
+.cast-row figure{flex-basis:250px}
+.cu>span:last-child{white-space:nowrap}
+.mbtn span{font-size:9px}
+.sec.light-row .cast-row figcaption{color:var(--navy)}
+.sec.light-row .cast-row figcaption small{color:var(--ink-2)}
+.sec.light-row .scroll-hint{color:var(--ink-2)}
+
+.gallery .span2{grid-column:1/-1}
 </style>
 </head>
 <body class="{{mode}}">
@@ -392,6 +676,8 @@ body.night .plan li::before{background-color:var(--blue)}
     <nav aria-label="ページ内">
       <a href="#can">できること</a>
       <a href="#day">お店の1日</a>
+{{#day}}      <a href="#qr">QR注文</a>
+{{/day}}
       <a href="#screens">画面と機能</a>
       <a href="#plans">プラン</a>
       <a href="#faq">よくある質問</a>
@@ -435,48 +721,24 @@ body.night .plan li::before{background-color:var(--blue)}
 {{#night}}        <p class="mode-note">昼の飲食店の方は <a href="posupos-day.html">昼のお店のページへ →</a></p>{{/night}}
       </div>
 {{#day}}
-      <figure class="shot" data-shot="home">
-        <div class="scr">
-          <div class="scr-bar"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ホーム<small>10月23日（木）</small></div>
-          <div class="scr-body">
-            <div class="kpis k4">
-              <div class="kpi"><span>今日の売上</span><b>¥186,400</b><i>前週より +12%</i></div>
-              <div class="kpi"><span>客数</span><b>42人</b><i>前週より +5人</i></div>
-              <div class="kpi"><span>客単価</span><b>¥4,438</b></div>
-              <div class="kpi"><span>今月の利益</span><b>¥1.28M</b></div>
-            </div>
-            <div class="chart"><small>日別の売上（10月）</small>
-              <div class="bars"><i style="--h:42%"></i><i style="--h:55%"></i><i style="--h:38%"></i><i style="--h:61%"></i><i style="--h:78%"></i><i style="--h:92%"></i><i style="--h:50%"></i><i style="--h:47%"></i><i style="--h:58%"></i><i style="--h:44%"></i><i style="--h:66%"></i><i style="--h:83%"></i><i style="--h:97%"></i><i style="--h:52%"></i><i style="--h:49%"></i><i style="--h:63%"></i><i style="--h:57%"></i><i style="--h:72%"></i><i style="--h:88%"></i><i style="--h:94%"></i><i style="--h:55%"></i><i style="--h:60%"></i><i style="--h:70%"></i></div>
-            </div>
-            <div class="rows">
-              <div class="hd"><span>今日の出勤</span><span>未打刻 1人</span></div>
-              <div><span>山田（ホール）</span><span class="chip ok">出勤中</span></div>
-              <div><span>佐々木（キッチン）</span><span class="chip ok">出勤中</span></div>
-              <div><span>中村（ホール）</span><span class="chip red">未打刻</span></div>
-            </div>
-          </div>
-        </div>
-        <figcaption>ホーム：今日・今月の売上、客数、出勤の様子がひと目でわかります（数字はサンプル）</figcaption>
-      </figure>
+      <figure class="shot " data-shot="home"><div class="ap ap-day"><div class="ap-top"><span class=lg><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</span><span class="st">麺処 こはく ▾</span><span class="rt"><span>画面を開く</span><span>店内モード</span>ログアウト</span></div><div class="ap-body"><div class="ap-side"><span class="on">ホーム</span><span>店内</span><span>伝票</span><span>チャット</span><span>カレンダー</span><span>お金</span><span>経費</span><span>日報・月報</span><span>クーポン</span><span>出数・在庫</span><span>顧客</span><span>勤怠</span><span>給料</span><span>シフト</span></div><div class="ap-main">
+<div class="ap-h">今日　10/23（金）</div>
+<div class="k4"><div class="kc"><span>今日の売上（税込）</span><b class="n">86,350円</b><small>伝票 31件</small></div><div class="kc"><span>出勤済み</span><b>4人</b><small>シフト 5人</small></div><div class="kc"><span>未打刻</span><b>1人</b><small>中村</small></div><div class="kc"><span>遅刻</span><b>0人</b><small>なし</small></div></div>
+<div class="pills"><span class="pl">給与プランが未設定の在籍者 1件 ›</span></div>
+<div class="ap-h">2026年10月 <small>← 前月　次月 →</small></div>
+<div class="profit"><div><small>この月の利益（押すと「お金」へ）</small><b class="n">1,108,420円</b><small>利益率 33%</small></div><div class="eq">売上 <b>3,352,800円</b> − 消費税 <b>304,800円</b> − 手数料 <b>21,300円</b> − 人件費 <b>1,186,000円</b> − 仕入れ <b>612,280円</b> − 経費 <b>120,000円</b></div></div>
+<div class="two"><div class="ac"><h5>日別の売上（税込）</h5><div class="bars2"><i style="--h:58%"></i><i style="--h:72%"></i><i style="--h:81%"></i><i style="--h:66%"></i><i style="--h:40%"></i><i style="--h:61%"></i><i style="--h:69%"></i><i style="--h:84%"></i><i style="--h:92%"></i><i style="--h:63%"></i><i style="--h:48%"></i><i style="--h:57%"></i><i style="--h:74%"></i><i style="--h:88%"></i><i style="--h:95%"></i><i style="--h:60%"></i><i style="--h:52%"></i><i style="--h:70%"></i><i style="--h:79%"></i><i style="--h:86%"></i><i style="--h:97%"></i><i style="--h:55%"></i><i style="--h:42%"></i></div></div>
+<div class="ac"><h5>項目別の売上</h5><div class="hb"><div style="--w:100%"><span>醤油ラーメン <small>×1,204</small></span><b class="n">1,204,000円</b></div><div style="--w:51%"><span>油そば <small>×612</small></span><b class="n">612,000円</b></div><div style="--w:41%"><span>つけ麺 <small>×488</small></span><b class="n">488,000円</b></div><div style="--w:15%"><span>生ビール <small>×301</small></span><b class="n">180,600円</b></div></div></div></div>
+</div></div></div><figcaption>ホーム：今日の売上・出勤・未打刻、今月の利益と、その内わけまでひと目で（店名・数字は架空）</figcaption></figure>
 {{/day}}
 {{#night}}
-      <figure class="shot" data-shot="hall">
-        <div class="scr dk">
-          <div class="scr-bar">店内（ホール）<small>22:48</small></div>
-          <div class="scr-body">
-            <div class="tables">
-              <div class="tbl"><b>A1</b><span>3名 · 本指名 あかり</span><span class="t">38分</span></div>
-              <div class="tbl end"><b>A2</b><span>2名 · 場内 みゆ</span><span class="t">残り 4分</span></div>
-              <div class="tbl"><b>A3</b><span>1名 · 同伴 れな</span><span class="t">52分</span></div>
-              <div class="tbl"><b>B1</b><span>4名 · フリー</span><span class="t">21分</span></div>
-              <div class="tbl free"><b>B2</b><span>空き</span></div>
-              <div class="tbl"><b>VIP</b><span>2名 · 本指名 さくら</span><span class="t">1時間12分</span></div>
-            </div>
-            <div class="rows"><div class="hd"><span>A2 の合計</span><b>¥28,600</b></div><div><span>セット 60分 ×2</span><b>¥16,000</b></div><div><span>場内指名</span><b>¥2,000</b></div><div><span>ドリンク（みゆ）×3</span><b>¥4,500</b></div></div>
-          </div>
-        </div>
-        <figcaption>店内（ホール）：人数・残り時間・合計がタイルで。もうすぐ終わる卓は赤でお知らせ（名前と金額はサンプル）</figcaption>
-      </figure>
+      <figure class="shot " data-shot="ranking"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span>お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span class="on">ランキング</span><span>顧客</span></div><div class="ap-main">
+<div class="ap-h">2026年10月のランキング <small>← 前月　次月 →</small></div>
+<div class="rk3">
+<div><h6>売上</h6><div class="rkl"><div><i class="cr"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg></i><u>さくら</u><b class="n">512,400円</b></div><div><i>2</i><u>あかり</u><b class="n">287,600円</b></div><div><i>3</i><u>れな</u><b class="n">214,300円</b></div><div><i>4</i><u>みゆ</u><b class="n">158,000円</b></div><div><i>5</i><u>ゆい</u><b class="n">96,500円</b></div></div></div>
+<div><h6>本指名</h6><div class="rkl"><div><i class="cr"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg></i><u>さくら</u><b>28本</b></div><div><i>2</i><u>あかり</u><b>21本</b></div><div><i>3</i><u>れな</u><b>15本</b></div><div><i>4</i><u>ゆい</u><b>6本</b></div><div><i>5</i><u>みゆ</u><b>4本</b></div></div></div>
+<div><h6>ドリンク</h6><div class="rkl"><div><i class="cr"><svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg></i><u>さくら</u><b>152杯</b></div><div><i>2</i><u>れな</u><b>124杯</b></div><div><i>3</i><u>あかり</u><b>81杯</b></div><div><i>4</i><u>みゆ</u><b>60杯</b></div><div><i>5</i><u>ゆい</u><b>37杯</b></div></div></div>
+</div></div></div><figcaption>ランキング：売上・本指名・ドリンク・シャンパンなど。名前を押すと日ごとの成績まで（店名・名前・数字は架空）</figcaption></figure>
 {{/night}}
     </div>
   </section>
@@ -557,36 +819,30 @@ body.night .plan li::before{background-color:var(--blue)}
           <li class="rv"><span class="tm">給料</span><div><b>給料は自動で計算</b><span>打刻の記録から、スタッフごとの給料を計算。Excel にも書き出せます。</span></div></li>
         </ol>
         <div class="shots-2">
-          <figure class="shot rv" data-shot="floor">
-            <div class="scr">
-              <div class="scr-bar"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">店内（配置図）<small>12:30</small></div>
-              <div class="scr-body">
-                <div class="floor-tabs"><span class="on">1階</span><span>2階</span><span>テラス</span></div>
-                <div class="floor">
-                  <span class="ft busy" style="left:6%;top:12%;width:20%;height:30%">1 · 2人</span>
-                  <span class="ft" style="left:32%;top:12%;width:20%;height:30%">2</span>
-                  <span class="ft busy round" style="left:60%;top:10%;width:16%;height:34%">3 · 4人</span>
-                  <span class="ft busy" style="left:6%;top:58%;width:30%;height:30%">4 · 5人</span>
-                  <span class="ft" style="left:42%;top:58%;width:14%;height:30%">5</span>
-                  <span class="ft busy" style="left:62%;top:58%;width:32%;height:30%">カウンター · 3人</span>
-                </div>
-              </div>
-            </div>
-            <figcaption>店内（配置図）：卓を自由に置いて、1階・2階をタブで切りかえ</figcaption>
-          </figure>
-          <figure class="shot rv" data-shot="kitchen">
-            <div class="scr dk">
-              <div class="scr-bar">厨房<small>料理の持ち場</small></div>
-              <div class="scr-body">
-                <div class="kds">
-                  <div class="tk"><h4 class="go"><span>卓 3</span><span>作り中</span></h4><ul><li>日替わりランチ ×2</li><li>ハンバーグ定食</li><li class="done">ポテト</li></ul></div>
-                  <div class="tk"><h4><span>卓 1</span><span>2分前</span></h4><ul><li>パスタセット</li><li>サラダ（大）</li></ul></div>
-                  <div class="tk"><h4><span>持ち帰り</span><span>今</span></h4><ul><li>からあげ弁当 ×3</li></ul></div>
-                </div>
-              </div>
-            </div>
-            <figcaption>厨房：注文が卓ごとにまとまり、「作り始める → できた」をタップ</figcaption>
-          </figure>
+<figure class="shot rv" data-shot="floor"><div class="ap ap-day"><div class="ap-top"><span class=lg><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</span><span class="st">麺処 こはく ▾</span><span class="rt"><span>画面を開く</span><span>店内モード</span>ログアウト</span></div><div class="ap-main">
+<div class="ap-h">店内　10/23（金）<small>お客さま 3組・7名・まだ会計していない合計 9,350円</small></div>
+<div class="floor2"><div class="fl">
+<span class="tb busy"><b>1</b>12:07〜<br>18分<br><b class="n" style="color:#1F2433;font-size:11px">3,410円</b></span>
+<span class="tb"><b>2</b>空席・4席</span>
+<span class="tb busy"><b>3</b>12:10〜<br><i>放題 残105分</i><br><b class="n" style="color:#1F2433;font-size:11px">3,190円</b></span>
+<span class="tb"><b>4</b>空席・4席</span>
+<span class="tb busy sel tall" style="grid-column:2"><b>5</b>12:24〜<br>0分<br><b class="n" style="color:#1F2433;font-size:11px">2,750円</b></span>
+<span class="tb tall" style="grid-column:4"><b>6</b>空席・4席</span>
+</div>
+<div class="ac ord"><div class="hd"><span><b>5</b>　12:24 入店・入店から 0分</span><span>✕</span></div>
+<div class="fld" style="color:#1F2433">2名 <span class="lnk" style="float:right">変更</span></div>
+<div class="chips"><span class="on">麺</span><span>トッピング</span><span>サイド</span><span>アルコール</span></div>
+<div class="mbtn"><span>醤油ラーメン<small>1,000円</small></span><span>油そば<small>1,000円</small></span><span>つけ麺<small>1,000円</small></span></div>
+<div class="ol"><div><span>12:24　油そば</span><span class="n">1,000円</span></div><div class="op"><span>└ 麺大盛り（400g）</span><span class="n">200円</span></div><div class="op"><span>└ ほうれん草</span><span class="n">100円</span></div><div><span>12:24　醤油ラーメン</span><span class="n">1,000円</span></div><div class="op"><span>└ 麺大盛り（400g）</span><span class="n">200円</span></div></div>
+<div class="tot"><span>合計（税込）</span><b class="n">2,750円</b></div>
+<div class="btn2"><span class="r">会計する</span><span>分けて会計</span></div></div></div>
+</div></div><figcaption>店内：配置図で卓をタップして、そのまま注文。トッピングは注文の下にまとまります（架空のメニュー）</figcaption></figure>
+<figure class="shot rv" data-shot="kitchen"><div class="kd"><div class="kd-top">ポスポス 厨房<span class="t">注文<i>8</i></span><span class="t2">呼び出し<i>1</i></span><span class="f"><span class="on">全部</span><span>料理</span><span>ドリンク</span></span></div>
+<div class="kd-g">
+<div class="kc2"><div class="h">1 <i>2回の注文</i></div><div class="m"><span>1回目 店員</span><span>7分前</span></div><div class="it"><em>麺</em>醤油ラーメン</div><div class="op">＋ 麺大盛り（300g）<br>＋ チャーシュー</div><div class="kb"><span class="s">作り始める</span><span class="c">取り消し</span></div></div>
+<div class="kc2"><div class="h">3 <i>3回の注文</i></div><div class="m"><span>1回目 店員</span><span>7分前</span></div><div class="it"><em>サイド</em>明太たまご丼</div><div class="kb"><span class="s">作り始める</span><span class="c">取り消し</span></div><div class="m"><span>2回目 店員</span><span>6分前</span></div><div class="it"><em>コース</em>飲み放題コース ×2</div><div class="kb"><span class="s">作り始める</span><span class="c">取り消し</span></div></div>
+<div class="kc2"><div class="h">2</div><div class="m"><span>大人2・お客さま</span><span>5分前</span></div><div class="it"><em>麺</em>油そば</div><div class="op">＋ ほうれん草</div><div class="kb"><span class="s">作り始める</span><span class="c">取り消し</span></div></div>
+</div></div><figcaption>厨房：卓ごと・何回目の注文かがまとまり、「作り始める」をタップ。料理とドリンクで持ち場を分けられます</figcaption></figure>
         </div>
 {{/day}}
 {{#night}}
@@ -599,31 +855,53 @@ body.night .plan li::before{background-color:var(--blue)}
           <li class="rv"><span class="tm">給料</span><div><b>時給・バック・前借りまで自動</b><span>売上や指名で変わる時給・歩合、バック、前借りの差し引きまで、キャストごとに計算します。</span></div></li>
         </ol>
         <div class="shots-2">
-          <figure class="shot rv" data-shot="ranking">
-            <div class="scr dk">
-              <div class="scr-bar">ランキング・付け回し<small>10月</small></div>
-              <div class="scr-body">
-                <div class="rows"><div class="hd"><span>売上ランキング</span><span>指名</span></div><div><span>1　さくら</span><b>¥1,284,000 · 46</b></div><div><span>2　あかり</span><b>¥962,500 · 38</b></div><div><span>3　れな</span><b>¥815,000 · 31</b></div></div>
-                <div class="rows"><div class="hd"><span>付け回し（22時〜）</span><span>卓</span></div><div><span>みゆ</span><b>A2 → B1 → A3</b></div><div><span>ゆい</span><b>B1 → VIP</b></div></div>
-              </div>
-            </div>
-            <figcaption>ランキング・付け回し：名前を押すと日ごと・卓ごとの中身も見られます（サンプル）</figcaption>
-          </figure>
-          <figure class="shot rv" data-shot="urikake">
-            <div class="scr dk">
-              <div class="scr-bar">売掛・ボトル<small>10月</small></div>
-              <div class="scr-body">
-                <div class="rows"><div class="hd"><span>売掛（ツケ）</span><span>残り</span></div><div><span>K様（担当 さくら）</span><b>¥86,000</b></div><div><span>T様（担当 あかり）　一部回収</span><b>¥24,000</b></div></div>
-                <div class="rows"><div class="hd"><span>期限の近いボトル</span><span>期限</span></div><div><span>M様　焼酎（残り 1/3）</span><b>11/02</b></div><div><span>S様　ウイスキー（残り 1/2）</span><b>11/08</b></div></div>
-              </div>
-            </div>
-            <figcaption>売掛・ボトル：ツケの回収と、ボトルキープの残り・期限（サンプル）</figcaption>
-          </figure>
+<figure class="shot rv" data-shot="tsukemawashi"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span class="on">付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span>お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
+<div class="tk2"><div class="ac stp"><h5>付ける</h5>
+<p>1. どのテーブルに</p><div class="ch2"><span class="on">A1 2名</span><span>A3 1名</span></div>
+<p>2. 誰を付ける（何人でも）</p><div class="ch2"><span class="on">みゆ 20:00〜</span><span>ゆい 20:00〜</span><span>ひな 21:00〜</span><span>ここ 21:00〜</span></div>
+<p>3. 付け方</p><div class="ch2"><span class="on">フリー</span><span class="c1">場内指名</span><span class="c2">本指名</span><span class="c3">ヘルプ</span><span class="c4">送り</span></div>
+<p>4. 何分付ける</p><div class="ch2"><span>いつもの20分</span><span class="on">15分</span><span>30分</span><span>45分</span><span>決めない</span></div>
+<div class="go2">A1 に付ける（1人）</div></div>
+<div class="ac now"><h5>今の席</h5><b style="color:#4B1F7A">A1</b><div><span>さくら<em>本指名</em></span><span class="a">あと 32分</span><s>抜く</s></div><div><span>れな<em>フリー</em></span><span class="a">あと 6分</span><s>抜く</s></div><div><span>ゆい<em>フリー</em></span><span class="b">6分後から</span><s>抜く</s></div><b style="color:#4B1F7A">A3</b><div><span>あかり<em>場内</em></span><span class="a">あと 18分</span><s>抜く</s></div></div></div>
+<div class="ac"><h5>タイムテーブル <small style="font-weight:400;color:#888">テーブルごと　区切り 10分</small></h5>
+<div class="tl"><div class="ax"><span>21:00</span><span>:10</span><span>:20</span><span>:30</span><span>:40</span><span>:50</span></div>
+<div class="rw"><b>A1</b><div class="ln"><span class="bar" style="left:2%;width:60%;top:4px;background:#F9C9D3;border-color:#B03A5B">さくら</span><span class="bar" style="left:10%;width:28%;top:22px">れな</span><span class="bar p" style="left:38%;width:28%;top:40px">ゆい（予定）</span><span class="now-l" style="left:33%"></span></div></div>
+<div class="rw"><b>A3</b><div class="ln" style="height:28px"><span class="bar y" style="left:14%;width:36%;top:6px">あかり</span><span class="now-l" style="left:33%"></span></div></div></div>
+<div class="lg2" style="margin-top:6px"><span style="background:#BFE6FA">フリー</span><span style="background:#FBE38A">場内指名</span><span style="background:#F9C9D3">本指名</span><span style="background:#A7EBC9">ヘルプ</span><span style="background:#DCD3FB">送り</span><span style="border:1px dashed #3B8CFF">点線は予定</span></div></div>
+</div></div><figcaption>付け回し：卓・キャスト・付け方・何分を選ぶだけ。付けたキャストのスマホに「今の席・あと何分」が出ます</figcaption></figure>
+<figure class="shot rv" data-shot="slip"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span class="on">伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span>お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
+<div class="ac"><h5>この伝票の内わけ（店・キャスト・利益）</h5><div class="bk">
+<div><b style="font-size:10.5px">お店</b><div class="r"><span>お客さまが払った額（税こみ）</span><span class="n">33,000円</span></div><div class="r s"><span>うち 消費税</span><span class="n">3,000円</span></div><div class="r"><span>カードなどの手数料</span><span class="n">−0円</span></div><div class="r"><b>お店に入る額（税ぬき）</b><b class="n">30,000円</b></div><div class="r"><span>キャストのバック合計</span><span class="n">−5,400円</span></div><div class="r t"><span>利益（時給は入っていません）</span><span class="n">24,600円</span></div></div>
+<div><b style="font-size:10.5px">キャスト</b><div class="cst"><b>さくら</b><div class="r"><span>売上</span><span class="n">30,000円</span></div><div class="r"><span>バック</span><span class="n">4,200円</span></div><div class="r s"><span>リクエストバック1A ×1</span><span class="n">300円</span></div><div class="r s"><span>ドリンクバック ×13</span><span class="n">3,900円</span></div></div><div class="cst"><b>あかり</b><div class="r"><span>売上</span><span class="n">0円</span></div><div class="r"><span>バック</span><span class="n">1,200円</span></div><div class="r s"><span>ドリンクバック ×4</span><span class="n">1,200円</span></div></div></div>
+</div></div>
+<div class="ac" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px"><div><b>メモ</b><div class="fld">&nbsp;</div></div><div><b>直した理由（必ず入れる）</b><div class="fld">ドリンクの数を直しました</div><small style="color:#888">あとで見られるように残ります</small></div></div>
+</div></div><figcaption>伝票：誰にいくらバックが付いたか、お店の利益まで自動で。直した理由は必ず残ります</figcaption></figure>
         </div>
 {{/night}}
       </div>
     </div>
   </section>
+
+{{#day}}
+  <!-- お客さまのスマホ（QR注文） -->
+  <section class="sec light-row" id="qr">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">QR order</p>
+        <h2>お客さまのスマホから注文</h2>
+        <p>卓の QR を読むだけ。アプリもログインもいりません。注文はそのまま厨房の画面へ届きます。</p>
+      </div>
+      <p class="scroll-hint">横にスクロールできます →</p>
+      <div class="cast-row">
+        <figure data-shot="qr-menu"><div class="ph2 cq"><div class="in"><div class="tp"><span>麺処 こはく<br><small style="font-weight:400">卓 2</small></span><div class="ic"><span>店員を呼ぶ</span><span>会員証</span><span>注文履歴</span><span>お会計</span></div><div class="gn"><span class="on">麺</span><span>サイド</span><span>アルコール</span><span>ノンアルコール</span></div></div><div class="bd"><div class="mg"><span data-n="醤油ラーメン"><em>醤油ラーメン</em><b>1,100円</b></span><span data-n="油そば"><em>油そば</em><b>1,100円</b></span><span data-n="つけ麺"><em>つけ麺</em><b>1,100円</b></span><span data-n="辛味噌ラーメン"><em>辛味噌ラーメン</em><b>1,210円</b></span></div></div></div></div><figcaption>メニュー<small>卓の QR から、写真つきで注文</small></figcaption></figure>
+        <figure data-shot="qr-topping"><div class="ph2 cq"><div class="in"><div class="tp"><span>麺処 こはく<br><small style="font-weight:400">卓 2</small></span><div class="ic"><span>店員を呼ぶ</span><span>会員証</span><span>注文履歴</span><span>お会計</span></div><div class="gn"><span class="on">麺</span><span>サイド</span><span>アルコール</span><span>ノンアルコール</span></div></div><div class="bd"><div class="mg"><span data-n="醤油ラーメン"><em>醤油ラーメン</em><b>1,100円</b></span><span data-n="油そば"><em>油そば</em><b>1,100円</b></span><span data-n="つけ麺"><em>つけ麺</em><b>1,100円</b></span><span data-n="辛味噌ラーメン"><em>辛味噌ラーメン</em><b>1,210円</b></span></div></div><div class="dim"></div><div class="sheet"><div class="r"><b style="font-size:14px">醤油ラーメン</b><span>✕</span></div><small style="color:#6A6F7E">いっしょに選べます（なくてもかまいません）</small><b>トッピング</b><div class="mg tp2" style="gap:5px"><span style="padding:6px 8px;font-size:10.5px">ほうれん草<b style="padding:0;font-size:10.5px">＋110円</b></span><span style="padding:6px 8px;font-size:10.5px">味玉<b style="padding:0;font-size:10.5px">＋110円</b></span><span style="padding:6px 8px;font-size:10.5px">麺大盛り（400g）<b style="padding:0;font-size:10.5px">＋220円</b></span><span style="padding:6px 8px;font-size:10.5px">チャーシュー<b style="padding:0;font-size:10.5px">＋440円</b></span></div><div class="rb">かごに入れる（1,100円）</div></div></div></div><figcaption>トッピング<small>いっしょに選べるオプション</small></figcaption></figure>
+        <figure data-shot="qr-recommend"><div class="ph2 cq"><div class="in"><div class="tp"><span>麺処 こはく<br><small style="font-weight:400">卓 2</small></span><div class="ic"><span>店員を呼ぶ</span><span>会員証</span><span>注文履歴</span><span>お会計</span></div><div class="gn"><span class="on">麺</span><span>サイド</span><span>アルコール</span><span>ノンアルコール</span></div></div><div class="bd"><div class="mg"><span data-n="醤油ラーメン"><em>醤油ラーメン</em><b>1,100円</b></span><span data-n="油そば"><em>油そば</em><b>1,100円</b></span><span data-n="つけ麺"><em>つけ麺</em><b>1,100円</b></span><span data-n="辛味噌ラーメン"><em>辛味噌ラーメン</em><b>1,210円</b></span></div></div><div class="dim"></div><div class="sheet"><div class="tt"><small>ご注文ありがとうございます</small>こちらもいかがですか？</div><div class="mg"><span data-n="ライス（小）"><em>ライス（小）</em><b>110円</b></span><span data-n="明太たまご丼"><em>明太たまご丼</em><b>770円</b></span></div><div class="wb">今回はけっこうです</div></div></div></div><figcaption>こちらもいかがですか<small>注文のあとにおすすめを出す</small></figcaption></figure>
+        <figure data-shot="qr-history"><div class="ph2 cq"><div class="in"><div class="tp"><span>麺処 こはく<br><small style="font-weight:400">卓 2</small></span><div class="ic"><span>店員を呼ぶ</span><span>会員証</span><span>注文履歴</span><span>お会計</span></div><div class="gn"><span class="on">麺</span><span>サイド</span><span>アルコール</span><span>ノンアルコール</span></div></div><div class="bd"><div class="mg"><span data-n="醤油ラーメン"><em>醤油ラーメン</em><b>1,100円</b></span><span data-n="油そば"><em>油そば</em><b>1,100円</b></span><span data-n="つけ麺"><em>つけ麺</em><b>1,100円</b></span><span data-n="辛味噌ラーメン"><em>辛味噌ラーメン</em><b>1,210円</b></span></div></div><div class="dim"></div><div class="sheet"><div class="r"><b style="font-size:14px">注文履歴</b><span>✕</span></div><div class="r"><span>醤油ラーメン ×1</span><span>1,100円 <span class="tag">準備中</span></span></div><div class="r" style="font-weight:900;font-size:13px"><span>お会計の目安</span><span>1,100円</span></div><small style="color:#6A6F7E">サービス料・消費税を含みます</small><div class="rb">お会計をお願いする</div></div></div></div><figcaption>注文履歴・お会計<small>「お会計をお願い」は厨房の画面に届く</small></figcaption></figure>
+        <figure data-shot="member"><div class="ph2"><div class="in"><div class="mem"><small>会員証</small><b>麺処 こはく</b></div><div class="bd" style="text-align:center"><div class="cu" style="display:block"><small>お会計のときに、この画面をお店の人に見せてください</small><div class="qr" aria-hidden="true"></div><small>会員番号</small><b class="n" style="font-size:18px;letter-spacing:.08em">3021 4587</b></div><div class="cu" style="display:block;text-align:left"><small>いまのポイント</small><b style="font-size:22px;color:#C8102E">38<small style="color:#C8102E">点</small></b><small>1点 = 1円 としてお会計で使えます（2027/10/22まで）</small></div></div></div></div><figcaption>会員証<small>名前や電話番号なしでポイント</small></figcaption></figure>
+      </div>
+    </div>
+  </section>
+{{/day}}
 
   <!-- 5. 画面ごとの機能 -->
   <section class="sec tint" id="screens">
@@ -636,75 +914,58 @@ body.night .plan li::before{background-color:var(--blue)}
 
       <div class="gallery">
 {{#day}}
-        <figure class="shot rv" data-shot="checkout">
-          <div class="scr">
-            <div class="scr-bar"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">会計<small>卓 4 · 5人</small></div>
-            <div class="scr-body">
-              <div class="rows"><div class="hd"><span>お会計の明細</span><span>金額</span></div><div><span>小計</span><b>¥18,200</b></div><div><span>消費税（10%）</span><b>¥1,820</b></div><div><span>クーポン（10%引き）</span><b>−¥2,002</b></div><div><span>ポイント利用</span><b>−¥300</b></div><div class="hd"><span>お支払い</span><b>¥17,718</b></div></div>
-              <div class="kpis"><div class="kpi"><span>現金</span><b>¥10,000</b></div><div class="kpi"><span>カード（Square）</span><b>¥7,718</b></div></div>
-            </div>
-          </div>
-          <figcaption>会計：分けて払う・ポイント・クーポン・Square の読み取り機</figcaption>
-        </figure>
-        <figure class="shot rv" data-shot="order">
-          <div class="scr">
-            <div class="scr-bar">お客さまの注文（卓 2）<small>飲み放題 残り 48分</small></div>
-            <div class="scr-body">
-              <div class="menu-g">
-                <span style="--g:linear-gradient(135deg,#F7C873,#E08A3C)">からあげ<small>¥580</small></span>
-                <span style="--g:linear-gradient(135deg,#F2E6B8,#E3B54A)">生ビール<small>飲み放題</small></span>
-                <span style="--g:linear-gradient(135deg,#B9E3B0,#5DA75B)">シーザーサラダ<small>¥680</small></span>
-                <span style="--g:linear-gradient(135deg,#F3B3A8,#D45D4C)">ピザ<small>¥980</small></span>
-                <span style="--g:linear-gradient(135deg,#C9DCF7,#6E9BE0)">ハイボール<small>飲み放題</small></span>
-                <span style="--g:linear-gradient(135deg,#EED6F3,#B47AC9)">デザート<small>¥450</small></span>
-              </div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">注文履歴</span><span class="chip">店員を呼ぶ</span><span class="chip">お会計の目安 ¥6,240</span></div>
-            </div>
-          </div>
-          <figcaption>お客さまの注文：卓のタブレットや QR から、写真つきメニューで注文（ログイン不要）</figcaption>
-        </figure>
-        <figure class="shot rv" data-shot="money">
-          <div class="scr">
-            <div class="scr-bar"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">お金（利益）<small>10月</small></div>
-            <div class="scr-body">
-              <div class="kpis k4"><div class="kpi"><span>売上</span><b>¥4.62M</b></div><div class="kpi"><span>人件費</span><b>¥1.38M</b></div><div class="kpi"><span>原価率</span><b>29.4%</b></div><div class="kpi"><span>利益</span><b>¥1.28M</b></div></div>
-              <div class="rows"><div class="hd"><span>よく出た商品</span><span>出数</span></div><div><span>日替わりランチ</span><b>412</b></div><div><span>生ビール</span><b>388</b></div><div><span>からあげ</span><b>201</b></div></div>
-            </div>
-          </div>
-          <figcaption>お金・日報・出数在庫：利益（売上−手数料−人件費−仕入れ−経費）と原価率</figcaption>
-        </figure>
-        <figure class="shot rv" data-shot="salary">
-          <div class="scr">
-            <div class="scr-bar"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">給料<small>10/1〜10/15</small></div>
-            <div class="scr-body">
-              <div class="rows"><div class="hd"><span>名前</span><span>支給額</span></div><div><span>山田　時給 ¥1,200 × 64h</span><b>¥76,800</b></div><div><span>佐々木　時給 ¥1,300 × 72h</span><b>¥93,600</b></div><div><span>中村　前借り −¥10,000</span><b>¥41,200</b></div></div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ok">確定</span><span class="chip">Excel 出力</span><span class="chip amb">支払い待ち 2人</span></div>
-            </div>
-          </div>
-          <figcaption>給料・給与プラン：時給・手当・控除、前借りの差し引きまで自動（サンプル）</figcaption>
-        </figure>
+<figure class="shot rv" data-shot="checkout"><div class="rc" style="background:#8A8784"><div class="pay2">
+<div style="display:flex;justify-content:space-between"><b>お支払い方法</b><span>✕</span></div>
+<div class="amt n">2,750円 <small>（税込・消費税 250円）</small></div>
+<div class="seg2"><span class="on">店内</span><span>お持ち帰り</span></div>
+<div style="font-size:10px">☑ 消費税（10%）をつける</div>
+<div><b style="font-size:10.5px">ポイント</b><div class="fld">会員番号・会員証の QR・呼び名</div><span class="lnk">はじめてのお客さまを会員にする</span></div>
+<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:10px">お会計を変える <span class="fld" style="min-width:60px;text-align:right">2750</span>円 <span class="fld">100円で繰り上げ</span><span class="fld">1,000円で繰り上げ</span></div>
+<div class="seg2"><span class="on">1つの方法で払う</span><span>分けて払う（現金＋カードなど）</span></div>
+<div class="ptile"><span>現金<small>手数料なし</small></span><span>PayPay<small>手数料なし</small></span><span>クレジットカード<small>手数料なし</small></span><span>売掛（ツケ）<small>あとで回収（「売掛」の一覧に入ります）</small></span></div>
+</div></div><figcaption>お支払い方法：店内／お持ち帰り、ポイント、繰り上げ、分けて払う、売掛まで</figcaption></figure>
+<figure class="shot rv" data-shot="receipt"><div class="rc"><div class="pp">
+<div class="t">レシート</div><hr>
+<div><span>2026年10月23日（金）12:51</span><span>5 2名</span></div><hr>
+<div><span>醤油ラーメン</span><span>¥1,000</span></div><div><span>麺大盛り（400g）×2</span><span>¥400</span></div><div><span>油そば</span><span>¥1,000</span></div><div><span>ほうれん草</span><span>¥100</span></div><hr>
+<div><span>小計</span><span>¥2,500</span></div><div><span>消費税（10%）</span><span>¥250</span></div><div class="big"><span>合計</span><span>¥2,750</span></div><hr>
+<div><span>現金</span><span>¥2,750</span></div>
+<div class="t" style="font-weight:400;font-size:9.5px;margin-top:6px">ありがとうございました</div>
+</div></div><figcaption>レシート・領収書：ロール紙の幅や文字の大きさを選んで印刷</figcaption></figure>
+<figure class="shot rv span2" data-shot="money"><div class="ap ap-day"><div class="ap-top"><span class=lg><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</span><span class="st">麺処 こはく ▾</span><span class="rt"><span>画面を開く</span><span>店内モード</span>ログアウト</span></div><div class="ap-main">
+<div class="wal"><div><small>今お財布にある現金（麺処 こはく）</small><b class="n">64,200円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
+<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">3,352,800円</b></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">1,108,420円</b><small>利益率 33%</small></div><div class="kc"><span>給料</span><b class="n">1,186,000円</b></div><div class="kc"><span>仕入れ</span><b class="n">612,280円</b><small>原価率 20.1%</small></div></div>
+<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
+<tr><td>現金</td><td>2,288</td><td class="n">2,516,400</td><td>—</td><td class="n">2,516,400</td></tr>
+<tr><td>PayPay</td><td>402</td><td class="n">468,300</td><td class="n">−7,490</td><td class="n">460,810</td></tr>
+<tr><td>クレジットカード</td><td>274</td><td class="n">368,100</td><td class="n">−13,810</td><td class="n">354,290</td></tr></table></div>
+</div></div><figcaption>お金：レジの現金・今月の利益・払い方ごとの手数料と「店に入る額」</figcaption></figure>
 {{/day}}
 {{#night}}
-        <figure class="shot rv" data-shot="checkout-night">
-          <div class="scr dk">
-            <div class="scr-bar">会計<small>A2 · 2名</small></div>
-            <div class="scr-body">
-              <div class="rows"><div class="hd"><span>お会計の明細</span><span>金額</span></div><div><span>セット 60分 ×2・延長 30分</span><b>¥22,000</b></div><div><span>場内指名（みゆ）</span><b>¥2,000</b></div><div><span>ドリンク ×3・シャンパン</span><b>¥34,500</b></div><div><span>サービス料（20%）・消費税</span><b>¥16,380</b></div><div class="hd"><span>お支払い</span><b>¥74,880</b></div></div>
-              <div class="kpis"><div class="kpi"><span>カード（Square）</span><b>¥50,000</b></div><div class="kpi"><span>売掛</span><b>¥24,880</b></div></div>
-            </div>
-          </div>
-          <figcaption>会計：延長・サービス料・分けて払う・売掛（サンプル）</figcaption>
-        </figure>
-        <figure class="shot rv" data-shot="salary-night">
-          <div class="scr dk">
-            <div class="scr-bar">給料<small>10/1〜10/15</small></div>
-            <div class="scr-body">
-              <div class="rows"><div class="hd"><span>名前</span><span>支給額</span></div><div><span>さくら　時給＋指名・ドリンクバック</span><b>¥318,400</b></div><div><span>あかり　前借り −¥20,000</span><b>¥201,750</b></div><div><span>ドライバー 田中　送り 18人</span><b>¥54,000</b></div></div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ok">確定</span><span class="chip">Excel 出力</span><span class="chip amb">支払い待ち 3人</span></div>
-            </div>
-          </div>
-          <figcaption>給料・給与プラン：時給・歩合・バック・送りの手当・前借りまで自動（サンプル）</figcaption>
-        </figure>
+<figure class="shot rv span2" data-shot="salary"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
+<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
+<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
+<tr><td>さくら</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
+<tr><td>あかり</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
+<tr><td>れな</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
+<tr><td>みゆ</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
+<tr><td>ゆい</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
+<tr><td>ひな</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
+</div></div><figcaption>給料：日払い・週払い・月払い。金額を決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ</figcaption></figure>
+<figure class="shot rv" data-shot="back"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
+<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
+<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
+<div class="bq"><span class="h">ショット <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
+</div></div></div><figcaption>バック項目：ジャンルごとに円か％で一括。商品ごとの上書きも、いつからの日付つき</figcaption></figure>
+<figure class="shot rv" data-shot="money-night"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
+<div class="wal"><div><small>今お財布にある現金（LUNÉA）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
+<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
+<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
+<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
+<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
+<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
+<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
+</div></div><figcaption>お金：レジの現金・今月の利益・払い方ごとの手数料。お金の明細は Excel にも出せます</figcaption></figure>
 {{/night}}
       </div>
 
@@ -719,9 +980,9 @@ body.night .plan li::before{background-color:var(--blue)}
 {{#night}}
             <details class="tc"><summary><b>店内</b><span>ホールで卓の受付 → 注文 → 延長 → 会計</span></summary><ul><li>ホール：卓のタイルに人数・残り時間・合計。もうすぐ終わる卓を赤で知らせる・自動延長</li><li>配置図：卓を自由に置ける・1階／2階のタブ</li><li>卓を開く（人数・指名・同伴）→ 注文（誰の分か・折半・オプション）→ 延長 → 会計</li><li>会計：消費税・サービス料・繰り上げ／値引き・分けて払う・分けて会計・ポイント／クーポン・Square の読み取り機</li><li>概算伝票・お会計の明細・レシート・領収書の印刷</li></ul></details>
 {{/night}}
-            <details class="tc"><summary><b>伝票</b><span>日ごとの伝票と修正、売上の内わけ</span></summary><ul><li>日ごとの伝票、支払い方法ごとのタブ</li><li>修正（理由を残す）</li><li>伝票ごとの売上・{{#night}}バック・{{/night}}利益の内わけ</li><li>その日の人件費</li></ul></details>
+            <details class="tc"><summary><b>伝票</b><span>日ごとの伝票と修正、売上の内わけ</span></summary><ul><li>日ごとの伝票、支払い方法ごとのタブ</li><li>直すとき・消すときは理由が必須。あとから見られる</li><li>伝票ごとの売上・{{#night}}バック・{{/night}}利益の内わけ</li><li>その日の人件費</li></ul></details>
 {{#night}}
-            <details class="tc"><summary><b>付け回し</b><span>どのキャストをどの卓に何分</span></summary><ul><li>どのキャストをどの卓に何分</li><li>タイムテーブル（卓ごと／キャストごと）</li><li>月の集計</li></ul></details>
+            <details class="tc"><summary><b>付け回し</b><span>どのキャストをどの卓に何分</span></summary><ul><li>卓 → キャスト（何人でも）→ 付け方（フリー・場内指名・本指名・ヘルプ・送り）→ 何分、を選ぶだけ</li><li>先の時刻を入れると「予定」（点線）で入る</li><li>付けたキャストのスマホに「今の席・あと何分」</li><li>タイムテーブル（卓ごと／キャストごと、区切りは1時間〜10分）</li><li>月の集計（回数と席にいた時間）</li></ul></details>
             <details class="tc"><summary><b>遠隔</b><span>お店にいないキャストへの差し入れ</span></summary><ul><li>お店にいないキャストへの差し入れ</li><li>BASE などで先に払ってもらった注文に対応</li></ul></details>
 {{/night}}
             <details class="tc"><summary><b>チャット</b><span>1対1・グループ・全体のお知らせ</span></summary><ul><li>1対1・グループ・全体のお知らせ</li><li>写真・既読</li><li>スマホへの通知</li></ul></details>
@@ -730,9 +991,7 @@ body.night .plan li::before{background-color:var(--blue)}
             <details class="tc"><summary><b>経費</b><span>家賃・水道光熱費などを記録</span></summary><ul><li>家賃・水道光熱費などの経費を記録</li><li>利益の計算に自動で反映</li></ul></details>
             <details class="tc"><summary><b>日報・月報</b><span>売上・客数・客単価・人件費（印刷できる）</span></summary><ul><li>売上・客数・組数・客単価</li><li>支払い方法ごと・人件費</li><li>よく出た商品・入店の時間</li><li>印刷できる</li></ul></details>
             <details class="tc"><summary><b>タグ</b><span>{{#day}}新規・リピートなどの件数と売上{{/day}}{{#night}}案内所・新規・リピートなどの件数と売上{{/night}}</span></summary><ul><li>{{#day}}新規・リピートなどのタグ{{/day}}{{#night}}案内所・新規・リピートなどのタグ{{/night}}</li><li>タグごとの件数と売上</li></ul></details>
-{{#night}}
-            <details class="tc"><summary><b>売掛</b><span>ツケの一覧と回収</span></summary><ul><li>ツケ（売掛）の一覧</li><li>回収の記録（一部回収も）</li></ul></details>
-{{/night}}
+            <details class="tc"><summary><b>売掛</b><span>ツケの一覧と回収</span></summary><ul><li>お会計で「売掛（ツケ）」を選ぶと一覧に入る</li><li>回収の記録（一部回収も）</li></ul></details>
             <details class="tc"><summary><b>クーポン</b><span>円引き・％引き・期間・回数</span></summary><ul><li>円引き・％引き・◯円以上</li><li>期間・回数・1人1回</li></ul></details>
             <details class="tc"><summary><b>出数・在庫</b><span>よく出たメニュー・在庫・原価</span></summary><ul><li>よく出たメニューのランキング</li><li>ジャンルごとの出数（前月と比べる）</li><li>在庫・入荷・原価</li><li>氷・おしぼりなど在庫だけのもの</li></ul></details>
 {{#night}}
@@ -747,13 +1006,13 @@ body.night .plan li::before{background-color:var(--blue)}
 {{#night}}
             <details class="tc"><summary><b>送り</b><span>ドライバーと送った人数、手当を給料に</span></summary><ul><li>ドライバーと送った人数</li><li>手当を給料に自動で反映</li></ul></details>
 {{/night}}
-            <details class="tc"><summary><b>給料</b><span>{{#day}}時給・手当・控除、Excel 出力{{/day}}{{#night}}時給・バック・手当・控除、Excel 出力{{/night}}</span></summary><ul><li>期間ごとの給料（時給・{{#night}}バック・{{/night}}手当・控除）</li><li>日別の明細</li><li>確定・支払済み</li><li>Excel 出力</li></ul></details>
+            <details class="tc"><summary><b>給料</b><span>{{#day}}時給・手当・控除、Excel 出力{{/day}}{{#night}}時給・バック・手当・控除、Excel 出力{{/night}}</span></summary><ul><li>日払い・週払い・月払い</li><li>期間ごとの給料（時給・{{#night}}バック・{{/night}}手当・控除）</li><li>金額を決める → 渡したら「渡した」</li><li>決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ</li><li>Excel 出力</li></ul></details>
             <details class="tc"><summary><b>前借り</b><span>記録と、次の給料からの自動の差し引き</span></summary><ul><li>前借りの記録</li><li>次の給料から自動で差し引き</li></ul></details>
             <details class="tc"><summary><b>シフト</b><span>希望の締め切り・決めたシフト</span></summary><ul><li>希望の締め切り</li><li>決めたシフト</li><li>臨時営業／休業</li></ul></details>
             <details class="tc"><summary><b>アカウント</b><span>{{w}}のログインと権限</span></summary><ul><li>{{w}}のログイン（メールアドレス＋パスワード）</li><li>アカウントごとの権限</li></ul></details>
             <details class="tc"><summary><b>従業員</b><span>雇用の形・給与プラン・IC カード</span></summary><ul><li>名前・雇用の形</li><li>給与プラン・IC カード</li><li>時給保証</li></ul></details>
             <details class="tc"><summary><b>給与プラン</b><span>{{#day}}時給・日給・手当・控除{{/day}}{{#night}}時給・日給・バック・歩合{{/night}}</span></summary><ul><li>時給・日給・{{#night}}バック・{{/night}}控除</li>{{#night}}<li>売上や指名で変わる時給・歩合</li>{{/night}}</ul></details>
-            <details class="tc"><summary><b>項目マスタ</b><span>メニュー・値段・写真・飲み放題</span></summary><ul><li>メニュー・値段（日付つきで変えられる）・写真・ジャンル</li><li>オプション（トッピング・セット）・飲み放題／食べ放題</li><li>{{#night}}バック・{{/night}}控除・おすすめ</li><li>厨房の持ち場</li></ul></details>
+            <details class="tc"><summary><b>項目マスタ</b><span>メニュー・値段・写真・飲み放題</span></summary><ul><li>メニュー・値段（適用開始日つきで変えられる。過去の売上は当時の値段のまま）・写真・ジャンル</li>{{#night}}<li>リクエスト（売上はリクエストした子へ）・本指名数・同伴数の数え方を項目ごとに</li><li>ジャンルごとの杯数・本数ランキング</li>{{/night}}<li>オプション（トッピング・セット）・飲み放題／食べ放題</li><li>{{#night}}バック・{{/night}}控除・おすすめ</li><li>厨房の持ち場</li></ul></details>
             <details class="tc"><summary><b>打刻端末</b><span>お店の端末を打刻専用に</span></summary><ul><li>お店の端末を打刻専用にする</li><li>IC カード（Suica など）でタッチ</li></ul></details>
             <details class="tc"><summary><b>Excel 取り込み</b><span>今までの Excel の実績を取り込む</span></summary><ul><li>今までの Excel の実績を取り込める</li></ul></details>
             <details class="tc"><summary><b>設定</b><span>使う機能・支払い方法・見た目など</span></summary><ul><li>使う機能、支払い方法・手数料、Square</li><li>お客さまの注文・{{#day}}券売機・{{/day}}厨房、レシート</li><li>営業時間、給料日、呼び名、見た目（色・メニューの並び）</li><li>店内モード：お店に置く端末を「店内と伝票だけ」に</li></ul></details>
@@ -804,154 +1063,15 @@ body.night .plan li::before{background-color:var(--blue)}
       <p class="scroll-hint">横にスクロールできます →</p>
       <div class="cast-row">
 {{#day}}
-        <figure data-shot="staff-home">
-          <div class="phone"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>ホーム</span><small>山田</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>今日の出勤</small><b>10:00〜15:00 · 出勤中</b></div>
-              <div class="card-s"><small>次のシフト</small><b>10/25（土）11:00〜17:00</b></div>
-              <div class="card-s"><small>お知らせ</small><b>来週のシフト希望は日曜まで</b></div>
-            </div>
-            <div class="ph-tabs"><span class="on">ホーム</span><span>シフト</span><span>給料</span><span>チャット</span></div>
-          </div></div>
-          <figcaption>ホーム<small>今日の出勤・次のシフト</small></figcaption>
-        </figure>
-        <figure data-shot="staff-shift">
-          <div class="phone"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>シフト</span><small>11月の希望</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>11/3（月）</small><b>10:00〜15:00</b></div>
-              <div class="card-s"><small>11/4（火）</small><b>お休み</b></div>
-              <div class="card-s"><small>11/5（水）</small><b>11:00〜17:00</b></div>
-              <span class="chip">締め切り 10/26</span>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span class="on">シフト</span><span>給料</span><span>チャット</span></div>
-          </div></div>
-          <figcaption>シフト<small>希望を出す・決まったシフト</small></figcaption>
-        </figure>
-        <figure data-shot="staff-salary">
-          <div class="phone"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>給料</span><small>10/1〜10/15</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>今の期間の給料</small><b class="big">¥76,800</b></div>
-              <div class="card-s"><small>内わけ</small><b>時給 ¥1,200 × 64h</b><b>前借り ¥0</b></div>
-              <div class="card-s"><small>10/22</small><b>¥6,000</b></div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span class="on">給料</span><span>チャット</span></div>
-          </div></div>
-          <figcaption>給料<small>日別の明細・前借り</small></figcaption>
-        </figure>
-        <figure data-shot="staff-chat">
-          <div class="phone"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>チャット</span><small>全体のお知らせ</small></div>
-            <div class="ph-body">
-              <div class="bubble"><small>店長</small>明日から新メニューです。写真をアップしました！</div>
-              <div class="bubble me">確認しました！</div>
-              <div class="bubble"><small>店長</small>来週のシフト希望、日曜までに出してください</div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span>給料</span><span class="on">チャット</span></div>
-          </div></div>
-          <figcaption>チャット<small>1対1・グループ・お知らせ</small></figcaption>
-        </figure>
-        <figure data-shot="member">
-          <div class="phone"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>会員証</span><small>お客さま</small></div>
-            <div class="ph-body" style="text-align:center">
-              <div class="qr" aria-hidden="true"></div>
-              <div class="card-s"><small>会員番号</small><b class="num">0012-4836</b></div>
-              <div class="card-s"><small>ポイント</small><b class="big">1,240 pt</b><small>使えるクーポン 2枚</small></div>
-            </div>
-          </div></div>
-          <figcaption>会員証（お客さま）<small>名前や電話番号なしでポイント</small></figcaption>
-        </figure>
+        <figure data-shot="staff-home"><div class="ph2"><div class="in"><div class="tp"><span>麺処 こはく</span><span>本部画面へ</span></div><div class="bd"><span class="hi">おつかれさまです</span><span class="nm">山田 さん</span><div class="cd pu"><b>シフト希望をまだ出していません</b><small>10/26（月）までに出してください</small></div><b>今月の稼ぎ</b><div class="cd"><small>もらえる金額（いまの予定）</small><b class="big n">96,000円</b></div><div class="mini2"><div class="cd"><small>出勤した日</small><b>12日</b></div><div class="cd"><small>前借り</small><b>0円</b></div></div><div class="cd"><small>次の給料日</small><b>10/25（日）</b></div></div><div class="nv" style="--c:5"><span class="on">ホーム</span><span>シフト</span><span>チャット</span><span>給料</span><span>出退勤</span></div></div></div><figcaption>ホーム<small>今月の稼ぎ・次の給料日</small></figcaption></figure>
+        <figure data-shot="staff-shift"><div class="ph2"><div class="in"><div class="tp"><span>麺処 こはく</span><span>本部画面へ</span></div><div class="bd"><span class="hi">10/26〜11/1 の週</span><span class="nm">シフト希望</span><div class="cu"><span><small>締め切り</small><b>10/26（月）の夜まで</b></span><span class="tag" style="font-size:8.5px;background:#FDECEF;color:#C8102E;border-radius:999px;padding:0 6px">まだ出していません</span></div><div class="sh">10/27（火）<span class="tg"><span>休み</span><span class="ok">出勤</span></span></div><div class="sh">10/28（水）<span class="tg"><span class="on">休み</span><span>出勤</span></span></div><div class="sh"><span>10/30（金）<small>11:00〜16:00</small></span><span class="tg"><span>休み</span><span class="ok">出勤</span></span></div><div class="sh">10/31（土）<span class="tg"><span class="on">休み</span><span>出勤</span></span></div><div class="wide">この内容で出す</div></div><div class="nv" style="--c:5"><span>ホーム</span><span class="on">シフト</span><span>チャット</span><span>給料</span><span>出退勤</span></div></div></div><figcaption>シフト希望<small>出られる日を選んで出すだけ</small></figcaption></figure>
+        <figure data-shot="staff-chat"><div class="ph2"><div class="in"><div class="tp"><span>麺処 こはく</span><span>本部画面へ</span></div><div class="bd"><div class="cu"><small>この端末に通知が届きます</small><small style="text-decoration:underline">テスト</small></div><div class="mini2"><div class="cu" style="justify-content:center;font-size:10px">＋ 1対1で話す</div><div class="cu" style="justify-content:center;font-size:10px">＋ グループを作る</div></div><div class="cl"><div><i style="--g:#F8DCC8"></i><span><b>お店からのお知らせ</b><small>店長：明日から新メニューです</small></span><span>10/22</span></div><div><i style="--g:#DCE6F8"></i><span><b>佐々木（キッチン）</b><small>自分：了解です！</small></span><span>10/21</span></div><div><i style="--g:#E4F2DD"></i><span><b>中村（ホール）</b><small>中村：明日少し遅れます</small></span><span>10/20</span></div></div></div><div class="nv" style="--c:5"><span>ホーム</span><span>シフト</span><span class="on">チャット</span><span>給料</span><span>出退勤</span></div></div></div><figcaption>チャット<small>1対1・グループ・お知らせ</small></figcaption></figure>
 {{/day}}
 {{#night}}
-        <figure data-shot="cast-home">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>ホーム</span><small>さくら</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>今日の出勤</small><b>20:00〜 · 出勤中</b></div>
-              <div class="card-s"><small>今の席</small><b>VIP（本指名）</b><small>次の席まで 12分</small></div>
-              <div class="card-s"><small>開催中のイベント</small><b>ハロウィン週間</b><small>シャンパン 3本で賞</small></div>
-            </div>
-            <div class="ph-tabs"><span class="on">ホーム</span><span>シフト</span><span>給料</span><span>成績</span></div>
-          </div></div>
-          <figcaption>ホーム<small>出勤・今の席・イベント</small></figcaption>
-        </figure>
-        <figure data-shot="cast-salary">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>給料</span><small>10/1〜10/15</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>今の期間の給料</small><b class="big">¥318,400</b></div>
-              <div class="card-s"><small>内わけ</small><b>時給 ¥142,000</b><b>バック ¥196,400</b><b>前借り −¥20,000</b></div>
-              <div class="card-s"><small>10/22</small><b>¥31,200</b></div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span class="on">給料</span><span>成績</span></div>
-          </div></div>
-          <figcaption>給料<small>日別の明細・前借り</small></figcaption>
-        </figure>
-        <figure data-shot="cast-ranking">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>成績・ランキング</span><small>10月</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>自分の売上</small><b class="big">¥1,284,000</b><small>指名 46 · 杯数 212</small></div>
-              <div class="rank-l">
-                <div class="me"><i>1</i><span>さくら（自分）</span><span>¥1.28M</span></div>
-                <div><i>2</i><span>あかり</span><span>¥0.96M</span></div>
-                <div><i>3</i><span>れな</span><span>¥0.82M</span></div>
-              </div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span>給料</span><span class="on">成績</span></div>
-          </div></div>
-          <figcaption>成績・ランキング<small>売上・指名・杯数と順位</small></figcaption>
-        </figure>
-        <figure data-shot="cast-visit">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>来客予定</span><small>お店のホームに出ます</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>10/24（金）21:00</small><b>K様 · 2名</b><small>ボトル：焼酎（残り 1/3）</small></div>
-              <div class="card-s"><small>10/25（土）20:30</small><b>T様 · 同伴</b></div>
-              <span class="chip">＋ 予定を入れる</span>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span>給料</span><span>成績</span></div>
-          </div></div>
-          <figcaption>来客予定・顧客<small>自分のお客さまと来店の記録</small></figcaption>
-        </figure>
-        <figure data-shot="cast-tax">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>確定申告</span><small>2026年分</small></div>
-            <div class="ph-body">
-              <div class="card-s"><small>収入</small><b>¥6,420,000</b></div>
-              <div class="card-s"><small>経費（レシートの写真 38枚）</small><b>¥812,000</b></div>
-              <div class="card-s"><small>税金の目安</small><b class="big">¥486,000</b><small>国税庁の作成コーナーでの入れ方も案内</small></div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span>給料</span><span>成績</span></div>
-          </div></div>
-          <figcaption>確定申告<small>収入・経費・控除から税金の目安</small></figcaption>
-        </figure>
-        <figure data-shot="cast-chat">
-          <div class="phone dk"><div class="in">
-            <div class="notch"></div>
-            <div class="ph-head"><span>チャット</span><small>全体のお知らせ</small></div>
-            <div class="ph-body">
-              <div class="bubble"><small>店長</small>今週末はハロウィンイベントです。衣装の確認をお願いします！</div>
-              <div class="bubble me">了解です！</div>
-              <div class="bubble"><small>店長</small>来週のシフト希望、日曜までに出してください</div>
-            </div>
-            <div class="ph-tabs"><span>ホーム</span><span>シフト</span><span>給料</span><span>成績</span></div>
-          </div></div>
-          <figcaption>チャット<small>1対1・グループ・お知らせ</small></figcaption>
-        </figure>
+        <figure data-shot="cast-home"><div class="ph2 nt"><div class="in"><div class="tp"><span class="lg">LUNÉA</span><span>本部画面へ</span></div><div class="bd"><span class="hi">おつかれさまです</span><span class="nm">さくら さん</span><div class="cd"><b>来客予定</b><small>来る予定のお客さまを入れると、お店に伝わります</small></div><div class="cd pu"><b>シフト希望をまだ出していません</b><small>10/26（月）までに出してください</small></div><b>今月の稼ぎ</b><div class="cd"><small>もらえる金額（いまの予定）</small><b class="big n">318,400円</b></div><div class="mini2"><div class="cd"><small>出勤した日</small><b>14日</b></div><div class="cd"><small>バック</small><b class="n">196,400円</b></div></div></div><div class="nv" style="--c:6"><span class="on">ホーム</span><span>シフト</span><span>チャット</span><span>給料</span><span>顧客</span><span>出退勤</span></div></div></div><figcaption>ホーム<small>来客予定・今月の稼ぎ</small></figcaption></figure>
+        <figure data-shot="cast-shift"><div class="ph2 nt"><div class="in"><div class="tp"><span class="lg">LUNÉA</span><span>本部画面へ</span></div><div class="bd"><span class="hi">10/26〜11/1 の週</span><span class="nm">シフト希望</span><div class="cu"><span><small>締め切り</small><b>10/26（月）の夜まで</b></span><span style="font-size:8.5px;background:#F3E8FD;color:#7B3FC4;border-radius:999px;padding:0 6px">まだ出していません</span></div><div class="sh"><span>10/27（火）<small>20:00〜LAST</small></span><span class="tg"><span>休み</span><span class="ok">出勤</span></span></div><div class="sh">10/28（水）<span class="tg"><span class="on">休み</span><span>出勤</span></span></div><div class="sh"><span>10/30（金）<small>19:00〜LAST</small></span><span class="tg"><span>休み</span><span class="ok">出勤</span></span></div><div class="sh">10/31（土）<span class="tg"><span class="on">休み</span><span>出勤</span></span></div><div class="wide">この週は全部休みで出す</div></div><div class="nv" style="--c:6"><span>ホーム</span><span class="on">シフト</span><span>チャット</span><span>給料</span><span>顧客</span><span>出退勤</span></div></div></div><figcaption>シフト希望<small>締め切りまで何度でも出し直せる</small></figcaption></figure>
+        <figure data-shot="cast-chat"><div class="ph2 nt"><div class="in"><div class="tp"><span class="lg">LUNÉA</span><span>本部画面へ</span></div><div class="bd"><div class="cu"><small>この端末に通知が届きます</small><small style="text-decoration:underline">テスト</small></div><div class="mini2"><div class="cu" style="justify-content:center;font-size:10px">＋ 1対1で話す</div><div class="cu" style="justify-content:center;font-size:10px">＋ グループを作る</div></div><div class="cl"><div><i style="--g:#F8DCC8"></i><span><b>お店からのお知らせ</b><small>店長：週末はイベントです！</small></span><span>10/17</span></div><div><i style="--g:#E8D9F6"></i><span><b>あかり（本部）</b><small>自分：了解です</small></span><span>10/19</span></div><div><i style="--g:#F6D9E4"></i><span><b>れな（本部）</b><small>自分：写真</small></span><span>10/11</span></div></div></div><div class="nv" style="--c:6"><span>ホーム</span><span>シフト</span><span class="on">チャット</span><span>給料</span><span>顧客</span><span>出退勤</span></div></div></div><figcaption>チャット<small>1対1・グループ・お店からのお知らせ</small></figcaption></figure>
+        <figure data-shot="cast-customers"><div class="ph2 nt"><div class="in"><div class="tp"><span class="lg">LUNÉA</span><span>本部画面へ</span></div><div class="bd"><span class="hi">12人</span><span class="nm">自分のお客さま</span><div class="wide">＋ お客さまを登録</div><div class="fld">ニックネームで探す</div><div class="cu"><span><b>たかさん</b><small>最後に来た日 10/17（土）・来店2回</small></span>›</div><div class="cu"><span><b>ゆうきさん</b><small>最後に来た日 10/14（水）・来店1回</small></span>›</div><div class="cu"><span><b>こうじさん</b><small>まだ来店していません</small></span>›</div></div><div class="nv" style="--c:6"><span>ホーム</span><span>シフト</span><span>チャット</span><span>給料</span><span class="on">顧客</span><span>出退勤</span></div></div></div><figcaption>自分のお客さま<small>来店の記録と来客予定</small></figcaption></figure>
 {{/night}}
       </div>
       <ul class="cast-pts" aria-label="スマホ画面でできること">
@@ -1012,7 +1132,7 @@ body.night .plan li::before{background-color:var(--blue)}
             <li><span>グループ店<small>1つの契約で5店舗まで（お店の切りかえ）</small></span></li>
             <li><span>キャストモード<small>{{w}}がスマホでシフト・給料・{{#night}}成績・{{/night}}チャット</small></span></li>
             <li><span>打刻・シフト・給料<small>IC カード打刻、シフトの希望→決定、給料の計算・給料日・前借り</small></span></li>
-            <li{{#night}} class="plan-more"{{/night}}><span>顧客カルテ・クーポン・タグ<small>{{#day}}新規・リピートなど{{/day}}{{#night}}新規・リピート・案内所など{{/night}}</small></span></li>
+            <li{{#night}} class="plan-more"{{/night}}><span>顧客カルテ・クーポン・ボトルキープ・タグ<small>{{#day}}新規・リピートなど{{/day}}{{#night}}新規・リピート・案内所など{{/night}}</small></span></li>
             <li{{#night}} class="plan-more"{{/night}}><span>お金<small>利益・レジの現金・経費・明細、freee・マネーフォワード・弥生へ書き出し</small></span></li>
             <li{{#night}} class="plan-more"{{/night}}><span>日報・月報<small>売上・客数・客単価・人件費・よく出た商品</small></span></li>
             <li class="plan-more"><span>出数・在庫<small>ランキング・在庫・仕入れ・原価率</small></span></li>
@@ -1042,7 +1162,7 @@ body.night .plan li::before{background-color:var(--blue)}
             <li class="plan-more"><span>予約の受付、LINE とのつなぎ込み</span></li>
             <li class="plan-more"><span>釣銭機・キャッシュドロア・プリンターとのつなぎ込み</span></li>
             <li class="plan-more"><span>複数ブランド・多店舗の本部の画面<small>グループ全体の売上を見る</small></span></li>
-            <li class="plan-more"><span>お店のロゴ・色に合わせた見た目</span></li>
+            <li class="plan-more"><span>お店のロゴ・色に合わせた見た目<small>季節の飾り（ハロウィンなど）も</small></span></li>
           </ul>
           <button type="button" class="toggle" aria-expanded="false" data-plan="plan-cus">すべての例を見る</button>
         </article>
