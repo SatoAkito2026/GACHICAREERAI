@@ -85,6 +85,17 @@ def main():
     for page in sorted((SRC / "standalone").glob("*.html")):
         (OUT / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
         print("copied", f"public/{page.name}")
+    # ポスポスのLPは1つのひな形から、昼のお店用と夜のお店用の2ページを作る
+    # {{#day}}…{{/day}} は昼だけ、{{#night}}…{{/night}} は夜だけ、{{w}} は「スタッフ」／「キャスト」
+    lp = SRC / "posupos" / "lp.html"
+    if lp.exists():
+        text = lp.read_text(encoding="utf-8")
+        for mode, other, word in (("day", "night", "スタッフ"), ("night", "day", "キャスト")):
+            html = re.sub(r"\{\{#" + other + r"\}\}.*?\{\{/" + other + r"\}\}", "", text, flags=re.S)
+            html = html.replace("{{#" + mode + "}}", "").replace("{{/" + mode + "}}", "")
+            html = html.replace("{{w}}", word).replace("{{mode}}", mode)
+            (OUT / f"posupos-{mode}.html").write_text(html, encoding="utf-8")
+            print("wrote", f"public/posupos-{mode}.html")
 
 
 if __name__ == "__main__":

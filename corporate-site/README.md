@@ -9,7 +9,8 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 | `index` | トップ | `/` |
 | `about` | 会社概要・役員挨拶・代表経歴 | `/about-company/` |
 | `gachicareer-ai` | ガチキャリAI（個人の面接練習・企業向け） | `/interview-copilot-ai/` |
-| `posupos` | ポスポス（飲食店向け会計ソフト）のLP。料金は載せず、お問い合わせで案内する | — |
+| `posupos` | ポスポスの入口（昼のお店／夜のお店を選ぶ） | — |
+| `posupos-day` / `posupos-night` | ポスポスのLP（昼のお店用・夜のお店用）。`src/posupos/lp.html` の1つのひな形から `build.py` が2ページを作る。料金は載せず、お問い合わせで案内する | — |
 | （トップへ転送） | 無料相談会（終了） | `/無料相談・イベント/` |
 | `news` / `news-*` | お知らせ・ブログ | `/blog-2/`、`/2025/...` |
 | `contact` | お問い合わせフォーム | `/contact/` |
