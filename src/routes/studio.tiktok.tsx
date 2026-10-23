@@ -19,7 +19,11 @@ type AnyJob = StudioJobData | RewriteJobData;
 type StudioWindow = Window & {
   __STUDIO_JOB__?: AnyJob;
   __studioReady?: boolean;
-  __studioTimeline?: { lines: { start: number; rate: number }[]; total: number };
+  __studioTimeline?: {
+    lines: { start: number; rate: number }[];
+    total: number;
+    sfx?: { at: number; dur: number; kind: "ng" | "ok" }[];
+  };
 };
 
 const isRewrite = (job: AnyJob): job is RewriteJobData =>

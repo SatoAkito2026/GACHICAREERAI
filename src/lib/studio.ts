@@ -394,12 +394,14 @@ export type RewriteScript = {
   /** 声にする順番（面接官の前ふり → 質問 → 各パターンの NG・OK・ポイント → 締め） */
   lines: StudioLine[];
   /** lines のそれぞれが何か（画面の出し分けに使う） */
-  roles: ("hook" | "question" | "ng" | "ok" | "point" | "offer" | "cta")[];
+  roles: ("hook" | "question" | "label" | "ng" | "ok" | "point" | "offer" | "cta")[];
   /** 最後の演出：練習の結果を公開しておくと、企業から面談の申し込みが届く（架空の会社） */
   offer: { companyType: string; message: string };
   /** lines のそれぞれが、何番目のパターンのものか（なければ -1） */
   itemIndex: number[];
 };
+
+const ITEM_ORDINALS = ["1つ目", "2つ目", "3つ目"];
 
 export async function writeRewriteScript(history: StudioHistory[]): Promise<RewriteScript> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -488,6 +490,8 @@ ${learnedExamples(history)}
   push("narrator", hook, "hook");
   push("interviewer", topic.q, "question");
   items.forEach((it, i) => {
+    // 「①〜」の見出しもナレーターが読み上げる
+    if (it.label) push("narrator", `${ITEM_ORDINALS[i]}、${it.label}`, "label", i);
     push("candidate", it.ng, "ng", i);
     push("candidate", it.ok, "ok", i);
     if (it.point) push("interviewer", it.point, "point", i);

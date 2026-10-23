@@ -50,6 +50,23 @@ const CLOCK = `
 })();
 `;
 
+// 効果音は ffmpeg の式で作る（音のファイルを持たない）
+const SFX_RATE = 48000;
+const tone = (expr, dur) => `aevalsrc=exprs='${expr}':s=${SFX_RATE}:d=${dur}`;
+/** 数字が上がっていく間のカチカチ（だんだん高くなる） */
+const tickSound = (dur) =>
+  tone(`0.3*sin(2*PI*(1400+900*t/${dur})*t)*exp(-90*mod(t,0.04))`, dur.toFixed(3));
+/** 受かる：ピロン */
+const OK_SOUND = tone(
+  "0.3*if(lt(t,0.09),sin(2*PI*1047*t),sin(2*PI*1568*t)+0.4*sin(2*PI*3136*t))*exp(-3.5*max(t-0.09,0))",
+  "0.8",
+);
+/** 落ちる：ブブー */
+const NG_SOUND = tone(
+  "0.2*(sin(2*PI*150*t)+0.5*sin(2*PI*300*t)+0.3*sin(2*PI*450*t))*lt(mod(t,0.22),0.17)",
+  "0.44",
+);
+
 async function main() {
   rmSync(WORK, { recursive: true, force: true });
   mkdirSync(join(WORK, "frames"), { recursive: true });
@@ -111,9 +128,21 @@ async function main() {
       const tempo = line.tempo && line.tempo !== 1 ? `,atempo=${line.tempo}` : "";
       filters.push(`[${i + 1}:a]${speed}aresample=48000${tempo},adelay=${delay}|${delay}[a${i}]`);
     });
-    const mix = timeline.lines.map((_, i) => `[a${i}]`).join("");
+    // 効果音：点数がくるくる上がる間のカチカチ → 止まったら NG は「ブブー」、OK は「ピロン」
+    const sfxLabels = [];
+    (timeline.sfx || []).forEach((s, i) => {
+      for (const [k, sound] of [
+        ["t", tickSound(s.dur)],
+        ["e", s.kind === "ok" ? OK_SOUND : NG_SOUND],
+      ]) {
+        const at = Math.round((k === "t" ? s.at : s.at + s.dur) * 1000);
+        filters.push(`${sound},adelay=delays=${at}:all=1[s${k}${i}]`);
+        sfxLabels.push(`[s${k}${i}]`);
+      }
+    });
+    const mix = timeline.lines.map((_, i) => `[a${i}]`).join("") + sfxLabels.join("");
     filters.push(
-      `${mix}amix=inputs=${timeline.lines.length}:normalize=0,apad,atrim=0:${timeline.total.toFixed(3)}[aout]`,
+      `${mix}amix=inputs=${timeline.lines.length + sfxLabels.length}:normalize=0,apad,atrim=0:${timeline.total.toFixed(3)}[aout]`,
     );
 
     const out = join(WORK, "out.mp4");
