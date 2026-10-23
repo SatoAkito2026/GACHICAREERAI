@@ -61,6 +61,30 @@ def drawer_html(active: str) -> str:
     return "\n    ".join(items)
 
 
+def page_ld(name, title, meta, body, url):
+    """ページごとの構造化データ（パンくずと、お知らせ記事の Article）"""
+    import json
+    if name in ("index", "404"):
+        out = [{"@context": "https://schema.org", "@type": "WebSite", "name": "AKITOグループ", "url": f"{SITE}/"}] if name == "index" else []
+    else:
+        items = [{"@type": "ListItem", "position": 1, "name": "トップ", "item": f"{SITE}/"}]
+        if name.startswith("news-"):
+            items.append({"@type": "ListItem", "position": 2, "name": "お知らせ", "item": f"{SITE}/news"})
+        items.append({"@type": "ListItem", "position": len(items) + 1, "name": title, "item": url})
+        out = [{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items}]
+        if name.startswith("news-") and '"@type": "Article"' not in body:
+            m = re.search(r'<time datetime="([0-9-]+)"', body)
+            img = re.search(r'<img src="(assets/img/[^"]+)"', body)
+            out.append({"@context": "https://schema.org", "@type": "Article", "headline": title, "description": meta.get("description", ""),
+                        "datePublished": m.group(1) if m else None, "image": f"{SITE}/{img.group(1)}" if img else f"{SITE}/assets/img/logo-full.webp",
+                        "author": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": f"{SITE}/"},
+                        "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "logo": {"@type": "ImageObject", "url": f"{SITE}/icon-512.png"}},
+                        "mainEntityOfPage": url})
+    if '"@type": "BreadcrumbList"' in body:
+        out = [d for d in out if d["@type"] != "BreadcrumbList"]
+    return "".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>" for d in out)
+
+
 def posupos_ld(html, mode):
     """ポスポスLPの構造化データ（サービスの説明・よくある質問・パンくず）"""
     import json, html as H
@@ -92,7 +116,12 @@ def main():
         meta, body = parse(page.read_text(encoding="utf-8"))
         name = page.stem
         title = meta.get("title", "")
-        full_title = "AKITOグループ｜愛ある事業で煌めくあなたに届ける未来" if name == "index" else f"{title}｜AKITOグループ"
+        if name == "index":
+            full_title = "合同会社AKITOグループ｜AI面接練習・キャリア支援・POSレジ（東京・池袋）"
+        elif len(title) > 30:
+            full_title = title  # 長いタイトルは会社名を付けない（検索結果で切れないように）
+        else:
+            full_title = f"{title}｜AKITOグループ"
         url = f"{SITE}/" if name == "index" else f"{SITE}/{name}"
         html = (
             layout.replace("{{title}}", full_title)
@@ -103,6 +132,7 @@ def main():
             .replace("{{drawer}}", drawer_html(meta.get("nav", "")))
             .replace("{{cta}}", cta if meta.get("cta", "yes") != "no" else "")
             .replace("{{content}}", body.strip())
+            .replace("{{pageld}}", page_ld(name, title, meta, body, url))
         )
         (OUT / f"{name}.html").write_text(html, encoding="utf-8")
         print("wrote", f"public/{name}.html")
