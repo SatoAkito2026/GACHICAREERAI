@@ -22,19 +22,24 @@ export type RewriteJobData = {
     okScore: number;
     point: string;
   }[];
+  offer?: { companyType: string; message: string };
   cta: string;
-  lines: { speaker: "interviewer" | "candidate"; text: string }[];
-  roles: ("hook" | "question" | "ng" | "ok" | "point" | "cta")[];
+  lines: { speaker: "interviewer" | "candidate" | "narrator"; text: string }[];
+  roles: ("hook" | "question" | "ng" | "ok" | "point" | "offer" | "cta")[];
   itemIndex: number[];
   audio: string[];
   sampleRate: number;
   interviewerRate: number;
+  /** 音の高さを変えずに速くする倍率（せりふごと） */
+  tempos?: number[];
 };
 
-const START = 0.4;
-const GAP = 0.3;
+const START = 0.15;
+const GAP = 0.2;
 /** 点数を見せる間（NG・OK のあと） */
-const SCORE_HOLD = 1.1;
+const SCORE_HOLD = 0.8;
+/** オファーの通知を見せる間 */
+const OFFER_HOLD = 1.4;
 const END = 3;
 const RED = "#FF4D5E";
 const GREEN = "#2BD67B";
@@ -44,11 +49,22 @@ export function buildRewriteTimeline(job: RewriteJobData) {
   let t = START;
   const lines = job.lines.map((line, i) => {
     const samples = ((job.audio[i]?.length ?? 0) * 0.75) / 2;
-    const rate = line.speaker === "interviewer" ? job.interviewerRate : 1;
-    const dur = Math.max(0.6, samples / job.sampleRate / rate);
+    const pitchRate = line.speaker === "interviewer" ? job.interviewerRate : 1;
+    const tempo = job.tempos?.[i] ?? 1;
+    const rate = pitchRate * tempo;
+    const dur = Math.max(0.5, samples / job.sampleRate / rate);
     const role = job.roles[i];
-    const item = { ...line, start: t, dur, rate, role, itemIndex: job.itemIndex[i] };
-    t += dur + (role === "ng" || role === "ok" ? SCORE_HOLD : GAP);
+    const item = {
+      ...line,
+      start: t,
+      dur,
+      rate,
+      pitchRate,
+      tempo,
+      role,
+      itemIndex: job.itemIndex[i],
+    };
+    t += dur + (role === "ng" || role === "ok" ? SCORE_HOLD : role === "offer" ? OFFER_HOLD : GAP);
     return item;
   });
   const endStart = t;
@@ -78,6 +94,11 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
   const lineOf = (role: string, i: number) =>
     timeline.lines.find((l) => l.role === role && l.itemIndex === i);
   const inEnd = t >= timeline.endStart;
+  const hookLine = timeline.lines.find((l) => l.role === "hook");
+  const inHook = !!hookLine && t < hookLine.start + hookLine.dur + GAP;
+  const offerLine = timeline.lines.find((l) => l.role === "offer");
+  const inOffer =
+    !!offerLine && t >= offerLine.start && t < offerLine.start + offerLine.dur + OFFER_HOLD;
 
   return (
     <div
@@ -164,7 +185,7 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
       </div>
 
       {/* 字幕（話している部分だけ） */}
-      {caption && !inEnd && (
+      {caption && !inEnd && !inHook && !inOffer && (
         <div style={{ position: "absolute", top: 384, left: 24, right: 24, textAlign: "center" }}>
           <span
             style={{
@@ -212,6 +233,47 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
           />
         )}
       </div>
+
+      {/* 最初の1秒：ナレーターの強い一言を、画面いっぱいに大きく */}
+      {inHook && hookLine && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 176,
+            bottom: 0,
+            background: "rgba(10,12,16,.92)",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: 120,
+          }}
+        >
+          <p
+            style={{
+              margin: "0 30px",
+              textAlign: "center",
+              fontSize: 38,
+              fontWeight: 900,
+              lineHeight: 1.3,
+              color: "#FFE45C",
+              WebkitTextStroke: "7px #000",
+              paintOrder: "stroke fill",
+              transform: `scale(${1.1 - 0.1 * ease((t - hookLine.start) / 0.18)}) rotate(-2deg)`,
+              wordBreak: "keep-all",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {job.hook}
+          </p>
+        </div>
+      )}
+
+      {/* オファー：練習の結果を公開しておくと、企業から面談の申し込みが届く */}
+      {inOffer && offerLine && job.offer && (
+        <OfferNotice offer={job.offer} t={t - offerLine.start} />
+      )}
 
       {/* 締め：保存してね ＋ ロゴ */}
       {inEnd && (
@@ -385,6 +447,120 @@ function AnswerCard({
         }}
       >
         「{text}」
+      </p>
+    </div>
+  );
+}
+
+function OfferNotice({ offer, t }: { offer: NonNullable<RewriteJobData["offer"]>; t: number }) {
+  const slide = ease((t - 0.5) / 0.4);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: 176,
+        bottom: 0,
+        background: "#0F1216",
+        padding: "30px 64px 0 22px",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 24,
+          fontWeight: 900,
+          lineHeight: 1.45,
+          color: "#FFFFFF",
+          opacity: ease(t / 0.25),
+        }}
+      >
+        練習の結果を公開しておくと…
+      </p>
+      <div
+        style={{
+          marginTop: 18,
+          transform: `translateY(${(1 - slide) * -50}px)`,
+          opacity: slide,
+          background: "#1E242C",
+          border: "1px solid #364150",
+          borderRadius: 20,
+          padding: "14px 16px",
+          boxShadow: "0 10px 40px rgba(0,0,0,.5)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            style={{ width: 32, height: 32, borderRadius: 8 }}
+          />
+          <span style={{ fontSize: 13, color: "#AAB4C0", flex: 1 }}>ガチキャリAI ・ たった今</span>
+        </div>
+        <p style={{ fontSize: 21, fontWeight: 900, marginTop: 10, lineHeight: 1.45 }}>
+          {offer.companyType}から
+          <br />
+          面談の申し込みが届きました
+        </p>
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: 16,
+            color: "#DDE3EA",
+            lineHeight: 1.6,
+            background: "#151A20",
+            borderRadius: 12,
+            padding: "8px 12px",
+          }}
+        >
+          「{offer.message}」
+        </p>
+        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+          <span
+            style={{
+              flex: 1,
+              textAlign: "center",
+              background: ACCENT,
+              color: "#0F0F0F",
+              borderRadius: 12,
+              padding: "9px 0",
+              fontWeight: 900,
+              fontSize: 16,
+            }}
+          >
+            承諾する
+          </span>
+          <span
+            style={{
+              flex: 1,
+              textAlign: "center",
+              border: "1px solid #4A5562",
+              borderRadius: 12,
+              padding: "9px 0",
+              fontSize: 16,
+              color: "#BBC4CE",
+            }}
+          >
+            あとで
+          </span>
+        </div>
+      </div>
+      <p
+        style={{
+          marginTop: 18,
+          fontSize: 22,
+          fontWeight: 900,
+          textAlign: "center",
+          color: "#FFE45C",
+          WebkitTextStroke: "5px #000",
+          paintOrder: "stroke fill",
+          opacity: ease((t - 1.2) / 0.3),
+        }}
+      >
+        練習するだけで、企業の目に留まる
+      </p>
+      <p style={{ marginTop: 10, fontSize: 11, color: "#7C8794", textAlign: "center" }}>
+        ※ 演出です（架空の会社）。申し込みを約束するものではありません
       </p>
     </div>
   );

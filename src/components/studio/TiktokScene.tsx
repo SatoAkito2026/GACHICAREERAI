@@ -86,13 +86,15 @@ export function buildTimeline(job: StudioJobData) {
   return { lines, resultStart, offerStart, outroStart, total: outroStart + OUTRO };
 }
 
+type Speaker = "interviewer" | "candidate" | "narrator";
 type VoiceJob = {
-  lines: { speaker: "interviewer" | "candidate" }[];
+  lines: { speaker: Speaker }[];
   audio: string[];
   sampleRate: number;
 };
 type VoiceTimeline = {
-  lines: { speaker: "interviewer" | "candidate"; start: number; dur: number; rate: number }[];
+  /** rate は再生の速さ（口の動きを音声に合わせるのに使う） */
+  lines: { speaker: Speaker; start: number; dur: number; rate: number }[];
 };
 
 /** 撮影用の「声」：決まった時刻に面接官のせりふが流れているものとして、口の形を返す */
@@ -167,7 +169,7 @@ function splitCaption(text: string): string[] {
 /** いま出す字幕（せりふの長さを文字数で割り振って、話している部分を選ぶ） */
 export function currentCaption(
   lines: {
-    speaker: "interviewer" | "candidate";
+    speaker: Speaker;
     text: string;
     start: number;
     dur: number;

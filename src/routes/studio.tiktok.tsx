@@ -41,10 +41,13 @@ function StudioPage() {
     return <p style={{ padding: 24, color: "#888" }}>撮影用の画面です。</p>;
   }
   const onReady = () => {
-    // 締めで出すロゴも読み込み終わってから撮り始める
-    const logo = new Image();
-    logo.src = "/brand/logo.webp";
-    void Promise.all([document.fonts.ready, logo.decode().catch(() => undefined)]).then(() => {
+    // 締めのロゴ・通知のアイコンも読み込み終わってから撮り始める
+    const images = ["/brand/logo.webp", "/icons/icon-192.png"].map((src) => {
+      const img = new Image();
+      img.src = src;
+      return img.decode().catch(() => undefined);
+    });
+    void Promise.all([document.fonts.ready, ...images]).then(() => {
       (window as StudioWindow).__studioReady = true;
     });
   };
