@@ -34,6 +34,13 @@ cta: no
 .topics button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;transition:border-color .2s,background .2s}
 .topics button:hover{border-color:var(--ink)}
 .topics button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pos-box{border:2px solid #1E5BD8;border-radius:18px;padding:18px 20px;background:#F5F8FF;display:grid;gap:12px;margin-bottom:6px}
+.pos-box .pb-h{margin:0;font-weight:900;color:#1E5BD8}
+.pos-box .lbl{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
+.chips2{display:flex;flex-wrap:wrap;gap:8px}
+.chips2 button{font:inherit;font-size:14px;font-weight:700;border:1.5px solid #C9D6F2;background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;color:var(--ink)}
+.chips2 button[aria-pressed="true"]{background:#1E5BD8;border-color:#1E5BD8;color:#fff}
+.pos-box select{width:100%;font:inherit;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
 </style>
 
 <section class="page-hero">
@@ -74,6 +81,23 @@ cta: no
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
         </ul>
+      </div>
+      <div class="pos-box" id="pos-box" hidden>
+        <p class="pb-h">ポスポスについて（押すだけでOK）</p>
+        <div class="field"><span class="lbl">ご希望</span>
+          <div class="chips2" id="pos-want">
+            <button type="button" data-v="無料で1か月ためしたい" aria-pressed="false">無料で1か月ためしたい</button>
+            <button type="button" data-v="料金を知りたい" aria-pressed="false">料金を知りたい</button>
+            <button type="button" data-v="画面を見ながら相談したい" aria-pressed="false">画面を見ながら相談したい</button>
+          </div></div>
+        <div class="field"><label for="f-shop">お店の種類</label>
+          <select id="f-shop"><option value="">選んでください</option>
+            <optgroup label="昼のお店"><option>居酒屋</option><option>ラーメン</option><option>イタリアン</option><option>寿司</option><option>焼肉</option><option>カフェ</option><option>その他の飲食店</option></optgroup>
+            <optgroup label="夜のお店"><option>キャバクラ</option><option>ホスト</option><option>ガールズバー</option><option>コンカフェ</option><option>スナック</option><option>ラウンジ</option><option>その他の夜のお店</option></optgroup>
+          </select></div>
+        <div class="field"><label for="f-stores">店舗数</label>
+          <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
+        <p class="hint">メールアドレスかお電話番号に、担当者からご連絡します。お問い合わせ内容は空欄でも送れます。</p>
       </div>
       <div class="field">
         <label for="f-name">お名前 <span class="req">必須</span></label>
@@ -128,8 +152,20 @@ cta: no
       pick(b.getAttribute('data-topic'),true);
     });
   });
+  // ポスポス：選ぶだけで送れる欄
+  var posBox=document.getElementById('pos-box'),msg=document.getElementById('f-message'),want='';
+  var wantBtns=document.querySelectorAll('#pos-want button');
+  var setWant=function(v){want=v;wantBtns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===v?'true':'false')})};
+  wantBtns.forEach(function(b){b.addEventListener('click',function(){setWant(b.dataset.v)})});
+  var syncPos=function(){var on=topic==='pos';posBox.hidden=!on;msg.required=!on};
+  document.querySelectorAll('#topics button').forEach(function(b){b.addEventListener('click',syncPos)});
+  try{var SHOP={izakaya:'居酒屋',ramen:'ラーメン',italian:'イタリアン',sushi:'寿司',yakiniku:'焼肉',cafe:'カフェ',cabaret:'キャバクラ',host:'ホスト',girlsbar:'ガールズバー',concafe:'コンカフェ',snack:'スナック',lounge:'ラウンジ'};var sv=SHOP[localStorage.getItem('posupos-shop')];if(sv)document.getElementById('f-shop').value=sv}catch(e){}
+  var from=(function(){try{var r=new URL(document.referrer);return r.host===location.host?r.pathname:''}catch(e){return ''}})();
   var h=(location.hash||'').slice(1);
-  if(h)pick(h,true);
+  if(h==='pos-trial'){pick('pos',true);setWant('無料で1か月ためしたい')}
+  else if(h==='pos-price'){pick('pos',true);setWant('料金を知りたい')}
+  else if(h)pick(h,true);
+  syncPos();
 
   var show=function(ok,msg){status.hidden=false;status.className='status '+(ok?'ok':'ng');status.textContent=msg};
 
@@ -138,13 +174,20 @@ cta: no
     var data={};
     new FormData(form).forEach(function(v,k){data[k]=String(v).trim()});
     data.topic=topic;
+    if(topic==='pos'){
+      var shop=document.getElementById('f-shop').value,st=document.getElementById('f-stores').value;
+      var head=['ご希望：'+(want||'（未選択）'),'お店の種類：'+(shop||'（未選択）'),'店舗数：'+(st||'（未選択）')];
+      if(from)head.push('見ていたページ：'+from);
+      data.message=head.join('\n')+'\n\n'+(data.message||'（お問い合わせ内容なし）');
+      if(want&&data.subject===LABELS.pos)data.subject='ポスポス：'+want;
+    }
     if(!data.name||!data.email||!data.subject||!data.message){show(false,'お名前・メールアドレス・件名・お問い合わせ内容を入力してください。');return}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)){show(false,'メールアドレスの形をご確認ください（例：name@example.com）。');return}
     submit.disabled=true;submit.firstChild.textContent='送信しています… ';
     fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
       .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {ok:r.ok,j:j}})})
       .then(function(res){
-        if(res.ok){form.reset();pick('',false);show(true,'送信しました。内容を確認のうえ、担当者からご連絡します。');}
+        if(res.ok){form.reset();pick('',false);setWant('');syncPos();show(true,'送信しました。内容を確認のうえ、担当者からご連絡します。');}
         else show(false,(res.j&&res.j.error)||'送信できませんでした。お手数ですが、info@akitogroup.jp へメールでご連絡ください。');
       })
       .catch(function(){show(false,'送信できませんでした。通信の状態を確かめるか、info@akitogroup.jp へメールでご連絡ください。')})

@@ -61,6 +61,28 @@ def drawer_html(active: str) -> str:
     return "\n    ".join(items)
 
 
+def posupos_ld(html, mode):
+    """ポスポスLPの構造化データ（サービスの説明・よくある質問・パンくず）"""
+    import json, html as H
+    url = f"{SITE}/posupos-{mode}"
+    desc = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+    faq = re.search(r'id="faq".*?</section>', html, re.S).group(0)
+    qa = [(H.unescape(re.sub(r"<[^>]+>", "", q)).strip(), H.unescape(re.sub(r"<[^>]+>", "", a)).strip())
+          for q, a in re.findall(r"<summary>(.*?)</summary><p>(.*?)</p>", faq, re.S)]
+    data = [
+        {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS",
+         "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）",
+         "description": desc, "url": url, "image": f"{SITE}/assets/img/ogp-posupos-{mode}.png",
+         "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": f"{SITE}/"}},
+        {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]},
+        {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": f"{SITE}/"},
+            {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": f"{SITE}/posupos"},
+            {"@type": "ListItem", "position": 3, "name": "昼のお店" if mode == "day" else "夜のお店", "item": url}]},
+    ]
+    return "".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>" for d in data)
+
+
 def main():
     layout = (SRC / "layout.html").read_text(encoding="utf-8")
     cta = (SRC / "cta.html").read_text(encoding="utf-8")
@@ -74,6 +96,7 @@ def main():
             layout.replace("{{title}}", full_title)
             .replace("{{description}}", meta.get("description", ""))
             .replace("{{url}}", url)
+            .replace("{{image}}", SITE + "/assets/img/" + meta.get("image", "logo-full.webp"))
             .replace("{{nav}}", nav_html(meta.get("nav", "")))
             .replace("{{drawer}}", drawer_html(meta.get("nav", "")))
             .replace("{{cta}}", cta if meta.get("cta", "yes") != "no" else "")
@@ -85,6 +108,14 @@ def main():
     for page in sorted((SRC / "standalone").glob("*.html")):
         (OUT / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
         print("copied", f"public/{page.name}")
+    # 検索エンジン向けの sitemap.xml と robots.txt
+    import datetime
+    today = datetime.date.today().isoformat()
+    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"]
+    urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index' else n}</loc><lastmod>{today}</lastmod></url>" for n in names)
+    (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n", encoding="utf-8")
+    (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
+    print("wrote public/sitemap.xml, public/robots.txt")
     # ポスポスのLPは1つのひな形から、昼のお店用と夜のお店用の2ページを作る
     # {{#day}}…{{/day}} は昼だけ、{{#night}}…{{/night}} は夜だけ、{{w}} は「スタッフ」／「キャスト」
     lp = SRC / "posupos" / "lp.html"
@@ -94,6 +125,7 @@ def main():
             html = re.sub(r"\{\{#" + other + r"\}\}.*?\{\{/" + other + r"\}\}", "", text, flags=re.S)
             html = html.replace("{{#" + mode + "}}", "").replace("{{/" + mode + "}}", "")
             html = html.replace("{{w}}", word).replace("{{mode}}", mode)
+            html = html.replace("<!--LDJSON-->", posupos_ld(html, mode))
             (OUT / f"posupos-{mode}.html").write_text(html, encoding="utf-8")
             print("wrote", f"public/posupos-{mode}.html")
 

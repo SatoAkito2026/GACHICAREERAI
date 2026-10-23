@@ -8,15 +8,20 @@
 <meta name="description" content="ポスポス（POSPOS）は、ラーメン・居酒屋・カフェ・焼肉・寿司など昼の飲食店のための会計ソフト。注文・会計・厨房・券売機から、打刻・シフト・給料・顧客までまとめて管理。ブラウザで動くのでインストール不要。">
 <meta property="og:title" content="ポスポス｜昼の飲食店の会計ソフト">
 <meta property="og:url" content="https://akitogroup.jp/posupos-day">
+<meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-day">
 <meta name="theme-color" content="#1557D6">{{/day}}
 {{#night}}<title>ポスポス 夜のお店</title>
 <meta name="description" content="ポスポス（POSPOS）は、キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのための会計ソフト。セット料金・延長・指名・付け回し・売掛から、キャストの給料・バックまでまとめて管理。">
 <meta property="og:title" content="ポスポス｜夜のお店の会計ソフト">
 <meta property="og:url" content="https://akitogroup.jp/posupos-night">
+<meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-night">
 <meta name="theme-color" content="#0B1330">{{/night}}
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ポスポス">
+<meta name="twitter:card" content="summary_large_image">
 <meta property="og:description" content="かんたん、つながる、会計ソフト。伝票・会計・打刻・シフト・給料・顧客をまとめて管理する、お店のアプリ。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -733,7 +738,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <p class="lead">キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのお店のアプリ。セット料金・延長・指名・付け回し・売掛から、キャストの給料・バックまで、まとめて管理できます。</p>
 {{/night}}
         <div class="btns" style="margin-top:28px">
-          <a class="btn btn-blue" href="contact.html#pos">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-blue" href="contact.html#pos-trial">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="contact.html#pos">お問い合わせ</a>
         </div>
         <ul class="hero-pts">
@@ -1678,7 +1683,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <h2>まずは無料で、1か月。</h2>
       <p>お試しのお申し込み・料金のご案内は、お問い合わせフォームから。</p>
       <div class="btns">
-        <a class="btn btn-w" href="contact.html#pos">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="contact.html#pos-trial">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="contact.html#pos">お問い合わせ</a>
       </div>
       <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
@@ -1692,14 +1697,16 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     <nav aria-label="リンク">
       <a href="posupos-day.html">昼のお店</a>
       <a href="posupos-night.html">夜のお店</a>
-      <a href="contact.html#pos">お問い合わせ</a>
+{{#day}}      <a href="news-pos-ranking-day.html">飲食店のPOSレジの選び方</a>
+{{/day}}{{#night}}      <a href="news-pos-ranking.html">夜のお店のPOSシステムの選び方</a>
+{{/night}}      <a href="contact.html#pos">お問い合わせ</a>
       <a href="./">運営会社（合同会社AKITOグループ）</a>
     </nav>
     <span>© <span id="year">2026</span> 合同会社AKITOグループ</span>
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="contact.html#pos">無料で1か月ためす</a><a class="btn btn-line" href="contact.html#pos">お問い合わせ</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="contact.html#pos-trial">無料で1か月ためす</a><a class="btn btn-line" href="contact.html#pos">お問い合わせ</a></div>
 
 <script>
 (function(){
@@ -1760,5 +1767,5 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   });
 })();
 </script>
-</body>
+<!--LDJSON--></body>
 </html>
