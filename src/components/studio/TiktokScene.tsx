@@ -27,8 +27,8 @@ const INTRO = 1.6;
 const GAP = 0.35;
 const RESULT = 5.5;
 const OUTRO = 3;
-const ACCENT = "#C8FF00";
-const FONT = `"Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", sans-serif`;
+export const ACCENT = "#C8FF00";
+export const FONT = `"Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", sans-serif`;
 
 function decodePcm(b64: string): Float32Array {
   const bin = atob(b64);
@@ -86,13 +86,22 @@ export function buildTimeline(job: StudioJobData) {
   return { lines, resultStart, offerStart, outroStart, total: outroStart + OUTRO };
 }
 
+type VoiceJob = {
+  lines: { speaker: "interviewer" | "candidate" }[];
+  audio: string[];
+  sampleRate: number;
+};
+type VoiceTimeline = {
+  lines: { speaker: "interviewer" | "candidate"; start: number; dur: number; rate: number }[];
+};
+
 /** 撮影用の「声」：決まった時刻に面接官のせりふが流れているものとして、口の形を返す */
-class StudioVoice {
+export class StudioVoice {
   private tracks: (MouthTrack | null)[] = [];
   private samples: (Float32Array | null)[];
   constructor(
-    private job: StudioJobData,
-    private timeline: ReturnType<typeof buildTimeline>,
+    private job: VoiceJob,
+    private timeline: VoiceTimeline,
   ) {
     this.samples = job.lines.map((l, i) =>
       l.speaker === "interviewer" && job.audio[i] ? decodePcm(job.audio[i]) : null,
@@ -156,7 +165,16 @@ function splitCaption(text: string): string[] {
 }
 
 /** いま出す字幕（せりふの長さを文字数で割り振って、話している部分を選ぶ） */
-function currentCaption(lines: TimelineLine[], t: number) {
+export function currentCaption(
+  lines: {
+    speaker: "interviewer" | "candidate";
+    text: string;
+    start: number;
+    dur: number;
+    reaction?: boolean;
+  }[],
+  t: number,
+) {
   const line = lines.find((l) => t >= l.start && t < l.start + l.dur);
   if (!line) return null;
   const chunks = splitCaption(line.text);
@@ -164,14 +182,15 @@ function currentCaption(lines: TimelineLine[], t: number) {
   let at = line.start;
   for (const c of chunks) {
     const d = (line.dur * c.length) / total;
-    if (t < at + d) return { text: c, speaker: line.speaker, age: t - at, reaction: line.reaction };
+    if (t < at + d)
+      return { text: c, speaker: line.speaker, age: t - at, reaction: !!line.reaction };
     at += d;
   }
   return null;
 }
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const ease = (x: number) => 1 - Math.pow(1 - clamp01(x), 3);
+export const ease = (x: number) => 1 - Math.pow(1 - clamp01(x), 3);
 
 export function TiktokScene({ job, onReady }: { job: StudioJobData; onReady: () => void }) {
   const timeline = useMemo(() => buildTimeline(job), [job]);
