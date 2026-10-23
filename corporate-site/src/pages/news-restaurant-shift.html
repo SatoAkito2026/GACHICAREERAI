@@ -1,0 +1,289 @@
+<!--
+title: 飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例
+description: 居酒屋・ラーメン・カフェなど飲食店のシフト作りの流れ、打刻（勤怠）の記録、深夜割増・残業・休憩・最低賃金など給料計算のルールを、アルバイトの計算例つきで解説。紙やエクセル管理のつまずきどころと、まとめて管理する方法も。
+nav: news
+image: ogp-restaurant-shift.png
+-->
+<style>
+.page-hero h1{font-size:clamp(26px,4.2vw,46px);line-height:1.4;max-width:24em}
+.toc{border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 48px;background:#fff}
+.toc p{font-weight:700;margin:0 0 8px}
+.toc ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(22px,3.4vw,30px);margin:64px 0 18px;padding-top:4px}
+.article h2:first-child{margin-top:0}
+.article h3{font-size:19px;margin:28px 0 8px}
+.points{list-style:none;padding:0;margin:20px 0;display:grid;gap:12px;counter-reset:pt}
+.points li{counter-increment:pt;border:1px solid var(--line);border-radius:16px;padding:18px 20px 18px 64px;position:relative;background:#fff}
+.points li::before{content:counter(pt);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--ff-latin);font-weight:800}
+.points b{display:block;font-size:16.5px}
+.points span{color:var(--ink-2);font-size:14.5px}
+.rank{border:1px solid var(--line);border-radius:24px;background:#fff;margin:22px 0 0;overflow:hidden}
+.rank-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.rank-no{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;align-content:center;background:var(--paper-2,#F4F2F7);font-family:var(--ff-latin);font-weight:800;font-size:26px;line-height:1}
+.rank-no small{font-size:10.5px;letter-spacing:.1em;font-weight:700;margin-top:2px}
+.rank-head h3{margin:0;font-size:clamp(20px,2.8vw,24px)}
+.rank-head p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.rank-body{padding:20px 22px 24px;display:grid;gap:14px}
+.rank-body ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.rank-body ul.fit{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.fit li+li,.feat-grid li+li,.points li+li{margin-top:0}
+.fit li{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--paper-2,#F4F2F7)}
+.rank-body .src{font-size:12.5px;color:var(--muted)}
+.rank-body .src a{color:inherit}
+.rank.top{border:2px solid #1E5BD8;box-shadow:0 30px 50px -36px rgba(30,91,216,.6)}
+.rank.top .rank-head{background:linear-gradient(135deg,#F2F6FF,#E3ECFF)}
+.rank.top .rank-no{background:#1E5BD8;color:#fff}
+.rank.top .logo-row{display:flex;align-items:center;gap:12px}
+.rank.top .logo-row img{width:44px;height:44px}
+.rank.top .fit li{background:#E8EFFE;color:#1748B0}
+.rank-body ul.feat-grid{display:grid;padding:0;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:0;list-style:none}
+@media (min-width:640px){.feat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.feat-grid li{font-size:14px;padding:8px 12px;border-radius:10px;background:#F5F8FF;border:1px solid #DCE6FB}
+.btn-blue{background:#1E5BD8;color:#fff}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(30,91,216,.7)}
+.sum{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+.sum table{width:100%;min-width:560px;border-collapse:collapse;font-size:14.5px}
+.sum th,.sum td{padding:13px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum tr:last-child th,.sum tr:last-child td{border-bottom:0}
+.sum thead th{background:var(--paper-2,#F4F2F7);font-size:13px}
+.sum tbody tr:first-child{background:#F5F8FF}
+.cta-box{margin-top:56px;border-radius:24px;padding:clamp(24px,4vw,40px);background:linear-gradient(135deg,#163E9E,#1E5BD8 55%,#3B8CFF);color:#fff;display:grid;gap:14px;justify-items:start}
+.cta-box h2{margin:0;color:#fff;border-left-color:#fff}
+.cta-box .btns{display:flex;flex-wrap:wrap;gap:12px}
+.cta-box .btn-w{background:#fff;color:#1E5BD8}
+.cta-box .btn-o{border:2px solid rgba(255,255,255,.7);color:#fff;background:transparent}
+.note{font-size:12.5px;color:var(--muted);margin-top:28px}
+
+.ti{width:44px;height:44px;border-radius:12px;flex:none;border:1px solid var(--line);background:#fff;object-fit:cover}
+.ti.sm{width:28px;height:28px;border-radius:8px}
+.concl{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.concl>p:first-child{font-weight:900;font-size:17px;margin:0 0 12px}
+.concl ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.concl li{display:grid;grid-template-columns:28px 28px minmax(0,1fr);gap:10px;align-items:center;font-size:14.5px}
+.concl li>b:first-child{font-family:var(--ff-latin);font-size:16px;text-align:center}
+.concl li span b{margin-right:6px}
+.concl li.top{background:#F2F6FF;border-radius:10px;padding:6px 8px;margin:0 -8px}
+.cmpw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:14px}
+.cmp{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px}
+.cmp th,.cmp td{padding:12px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px;white-space:nowrap}
+.cmp tbody th{position:sticky;left:0;background:#fff;min-width:150px;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.cmp tbody th div{display:flex;align-items:center;gap:8px;font-weight:700}
+.cmp tbody tr.us th,.cmp tbody tr.us td{background:#F5F8FF}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.grid2{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin:16px 0}
+@media (min-width:640px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.box{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff}
+.box b{display:block;font-size:15.5px;margin-bottom:4px}
+.box span{font-size:14px;color:var(--ink-2)}
+.box.warn{border-color:#F0D89A;background:#FFFBF0}
+.rank-head .ttl{display:flex;align-items:center;gap:12px}
+.rank-body h4{margin:4px 0 0;font-size:15px}
+.flowx{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px;counter-reset:f}
+.flowx li{counter-increment:f;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.flowx li::before{content:counter(f);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
+.flowx b{display:block}
+.flowx span{font-size:14px;color:var(--ink-2)}
+.faqx{display:grid;gap:10px;margin-top:14px}
+.faqx details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 18px}
+.faqx summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none}
+.faqx summary::-webkit-details-marker{display:none}
+.faqx summary::before{content:"Q.";color:#1E5BD8;font-family:var(--ff-latin);font-weight:800;margin-right:8px}
+.faqx details p{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+.type{display:grid;gap:10px;margin:14px 0}
+.type a{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;text-decoration:none;transition:border-color .3s}
+.type a:hover{border-color:#1E5BD8}
+.type a b{font-size:16px}
+.type a span{font-size:14px;color:var(--ink-2)}
+.type a em{font-style:normal;font-size:12.5px;font-weight:700;color:#1E5BD8;white-space:nowrap}
+@media (max-width:639px){.type a{grid-template-columns:minmax(0,1fr)}.type a em{justify-self:start}}
+
+.midcta{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:14px;align-items:center;border:2px solid #1E5BD8;border-radius:18px;padding:16px 18px;margin:28px 0;background:linear-gradient(135deg,#F5F8FF,#fff)}
+.midcta img{width:52px;height:52px;border-radius:12px;border:1px solid var(--line)}
+.midcta b{display:block;font-size:15.5px}
+.midcta span{font-size:13px;color:var(--ink-2)}
+.midcta .lk{font-size:13.5px;font-weight:700;color:#1E5BD8}
+@media (max-width:719px){.midcta{grid-template-columns:52px minmax(0,1fr)}.midcta .btn{grid-column:1/-1}.midcta .lk{grid-column:1/-1;justify-self:center}}
+
+.two-col{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.two-col{grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start}}
+.side-in{display:grid;gap:16px}
+@media (min-width:1080px){.side{position:sticky;top:96px}.side-in{max-height:calc(100vh - 116px);overflow-y:auto;padding-bottom:8px;scrollbar-width:thin}}
+.sbn{display:grid;gap:8px;text-decoration:none;border-radius:18px;padding:16px;border:2px solid #1E5BD8;background:#fff;text-align:center;transition:transform .3s,box-shadow .3s}
+.sbn:hover{transform:translateY(-3px);box-shadow:0 20px 34px -24px rgba(30,91,216,.7)}
+.sbn img{width:140px;height:auto;margin:0 auto}
+.sbn b{font-size:16px}
+.sbn small{display:block;font-size:12px;color:var(--ink-2);line-height:1.6}
+.sbn em{font-style:normal;background:#1E5BD8;color:#fff;border-radius:999px;padding:9px 0;font-weight:700;font-size:14px}
+.sbn2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbn2 a{text-decoration:none;border-radius:14px;padding:12px;display:grid;gap:2px;transition:transform .3s}
+.sbn2 a:hover{transform:translateY(-2px)}
+.sbn2 small{font-size:9.5px;letter-spacing:.08em;font-weight:700}
+.sbn2 b{font-size:16px}
+.sbn2 span{font-size:11px;line-height:1.5}
+.sbn2 .d{background:linear-gradient(140deg,#fff,#E6F0FF);border:1px solid var(--line)}
+.sbn2 .d small{color:#1557D6}.sbn2 .d span{color:var(--ink-2)}
+.sbn2 .n{background:#0B1330;color:#ECF0FF}
+.sbn2 .n small{color:#FFB547}.sbn2 .n span{color:#A9B4D6}
+.stoc,.skw,.spop{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px}
+.stoc p,.skw p,.spop p{margin:0 0 8px;font-weight:900;font-size:13px;letter-spacing:.06em}
+.stoc ol{margin:0;padding:0;list-style:none;display:grid;gap:2px;counter-reset:s}
+.stoc li{counter-increment:s}
+.stoc a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;text-decoration:none;font-size:13px;line-height:1.5;padding:5px 6px;border-radius:8px;color:var(--ink-2)}
+.stoc a::before{content:counter(s);font-family:var(--ff-latin);font-weight:800;color:#A3AEC6}
+.stoc a:hover{background:#F5F8FF;color:var(--ink)}
+.stoc a.on{background:#EAF1FF;color:#1E5BD8;font-weight:700}
+.stoc a.on::before{color:#1E5BD8}
+.skw ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skw a{display:block;text-decoration:none;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.skw a::before{content:"#";color:#1E5BD8;margin-right:2px}
+.skw a:hover{border-color:#1E5BD8;color:#1E5BD8}
+.sdl{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:12px;background:#3FAE3A;color:#fff;transition:transform .3s}
+.sdl:hover{transform:translateY(-2px)}
+.spop ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.spop a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;text-decoration:none;font-size:12.5px;line-height:1.55;font-weight:700}
+.spop img{width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+.spop em{display:inline-block;font-style:normal;font-size:10px;background:#EAF1FF;color:#1E5BD8;border-radius:4px;padding:0 6px;margin-right:6px}
+.spop em.nt{background:#0B1330;color:#FFB547}.spop em.ot{background:#F4F2F7;color:var(--ink-2)}
+.spop a:hover span{text-decoration:underline}
+.prose .side p{margin:0}
+.prose .side ul,.prose .side ol{padding-left:0}
+
+.calc{width:100%;border-collapse:collapse;font-size:14px}
+.calc th,.calc td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.calc td.n{text-align:right;white-space:nowrap;font-family:var(--ff-latin);font-weight:700}
+.calc thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px}
+.calc tr.sum th,.calc tr.sum td{background:#F5F8FF;font-weight:900}
+.calc tr.minus td.n{color:#C2410C}
+.calc tr:last-child th,.calc tr:last-child td{border-bottom:0}
+.calcw{border:1px solid var(--line);border-radius:18px;background:#fff;overflow-x:auto;margin-top:14px}
+.calc th small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.calc thead th small{display:inline;margin:0 0 0 6px}
+.calc th.n{text-align:right}
+.formula{border:2px solid var(--ink);border-radius:16px;padding:16px 18px;background:#fff;font-weight:700;text-align:center;margin:16px 0}
+.formula small{display:block;font-weight:400;font-size:13px;color:var(--ink-2);margin-top:4px}
+.learn{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
+.learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / <a href="news.html">お知らせ</a> / 飲食店のシフト管理と給料計算</nav>
+    <p class="eyebrow"><time datetime="2026-10-23">2026.10.23</time>　コラム</p>
+    <h1>飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例</h1>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="two-col">
+    <div class="maincol">
+    <article class="prose article">
+
+      <p>LINEで集めたシフトの希望を紙に書き写し、タイムカードを見ながら電卓で給料を計算する。飲食店の店長の仕事のなかでも、シフトと給料の管理は毎月かならず時間がかかる作業です。</p>
+      <p>この記事では、<b>シフト作りの流れ</b>、<b>打刻（勤怠）の記録のしかた</b>、<b>深夜の割増や休憩など、給料計算で守るルール</b>を、アルバイトの給料の計算例とあわせてまとめました。居酒屋・ラーメン・カフェなど、アルバイトが多いお店向けの内容です。</p>
+
+      <div class="learn"><p>この記事でわかること</p><ul>
+        <li>シフトの希望集めから共有までの流れ</li>
+        <li>打刻の記録で気をつけること（1分単位・休憩）</li>
+        <li>深夜の割増・残業・最低賃金など、給料計算のルール</li>
+        <li>紙やエクセルで管理するときのつまずきどころと、まとめる方法</li>
+      </ul></div>
+
+      <nav class="toc" aria-label="目次"><p>目次</p><ol><li><a href="#shift">シフト作りの流れ</a></li><li><a href="#dakoku">打刻（勤怠）の記録</a></li><li><a href="#rule">給料計算で守るルール</a></li><li><a href="#rei">アルバイトの給料の計算例</a></li><li><a href="#excel">紙・エクセル管理でつまずくところ</a></li><li><a href="#pos">POSでシフトと給料をまとめる</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+
+      <h2 id="shift">シフト作りの流れ</h2>
+      <ol class="flowx">
+        <li><div><b>必要な人数を決める</b><span>曜日・時間帯ごとに、ホール・キッチンが何人いれば回るかを決めます。売上や客数の記録があると決めやすくなります。</span></div></li>
+        <li><div><b>希望を集める</b><span>締め切りを決めて、スタッフから出られる日・時間を集めます。</span></div></li>
+        <li><div><b>シフトを組む</b><span>希望と必要な人数を見ながら組みます。足りない時間帯はスタッフに相談します。</span></div></li>
+        <li><div><b>共有する</b><span>決まったシフトを全員が見られるようにします。変更があったときも、すぐ伝わるようにしておきます。</span></div></li>
+      </ol>
+      <p>人件費は売上との割合で見るのが一般的です。飲食店では、食材費（Food）と人件費（Labor）を合わせた「FLコスト」として管理することもよくあります。</p>
+
+      <h2 id="dakoku">打刻（勤怠）の記録</h2>
+      <ul class="points">
+        <li><b>1分単位で記録する</b><span>毎日の労働時間を15分単位などで切り捨てることはできません。出勤・退勤は1分単位で記録します。</span></li>
+        <li><b>休憩を記録する</b><span>6時間を超えて働く日は45分以上、8時間を超える日は1時間以上の休憩が必要です。何時から何時まで休んだかを残します。</span></li>
+        <li><b>代わりに打刻させない</b><span>ほかのスタッフが代わりに打刻できると、記録が正しくなくなります。本人のICカードやスマホで打刻するしくみが安心です。</span></li>
+        <li><b>記録を残しておく</b><span>出勤簿などの勤怠の記録は、法律で一定の期間の保存が求められています。紙の場合はなくさない工夫が必要です。</span></li>
+      </ul>
+
+      <div class="midcta"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600"><div><b>ICカードで打刻、シフトも給料もアプリで</b><span>月額11,000円〜・初期費用0円。無料で1か月お試しできます。</span></div><a class="btn btn-blue" href="contact.html#pos-trial">無料で試す <span class="arr" aria-hidden="true">→</span></a><a class="lk" href="posupos-day.html">画面を見る</a></div>
+
+      <h2 id="rule">給料計算で守るルール</h2>
+      <div class="grid2">
+        <div class="box"><b>深夜の割増（25%以上）</b><span>午後10時〜午前5時に働いた時間は、通常の賃金の25%以上を上乗せします。閉店作業が10時を過ぎるお店はとくに注意。</span></div>
+        <div class="box"><b>残業の割増（25%以上）</b><span>1日8時間・週40時間を超えた時間は、25%以上の割増が必要です。深夜と重なる時間は、両方の割増を合わせて50%以上になります。</span></div>
+        <div class="box"><b>最低賃金</b><span>都道府県ごとに決まっていて、毎年秋ごろに改定されます。時給が下回っていないか、改定のたびに確認します。</span></div>
+        <div class="box"><b>税金・保険</b><span>給料から源泉徴収する所得税は「給与所得の源泉徴収税額表」で計算します。雇用保険や社会保険は、働く時間などで加入の条件が決まります。</span></div>
+      </div>
+      <p class="hint">くわしくは、労働基準監督署や社会保険労務士、税理士にご確認ください。</p>
+
+      <h2 id="rei">アルバイトの給料の計算例</h2>
+      <p>ある日のアルバイト「はると」さん（架空の例）の給料を計算してみます。時給は1,400円、17:00〜23:30の勤務で、途中に30分の休憩をとりました。</p>
+      <div class="calcw"><table class="calc"><thead><tr><th scope="col">項目<small>内わけ</small></th><th scope="col" class="n">金額</th></tr></thead><tbody><tr class=""><th scope="row">働いた時間<small>17:00〜23:30 から休憩30分を引く</small></th><td class="n">6時間</td></tr><tr class=""><th scope="row">基本の給料<small>1,400円 × 6時間</small></th><td class="n">8,400円</td></tr><tr class=""><th scope="row">深夜の割増<small>22:00〜23:30 の1.5時間 × 1,400円 × 25%</small></th><td class="n">525円</td></tr><tr class=""><th scope="row">交通費<small>お店の決まりで1日分</small></th><td class="n">500円</td></tr><tr class="sum"><th scope="row">この日の合計</th><td class="n">9,425円</td></tr></tbody></table></div>
+      <p class="hint">税金・保険料の差し引きは、月の合計の給料で計算します。</p>
+      <p>深夜の割増を付け忘れると、毎日数百円ずつ払い不足がたまっていきます。<b>閉店時間がいつも10時を過ぎるお店ほど、自動で計算できるしくみ</b>にしておくのが安心です。</p>
+
+      <h2 id="excel">紙・エクセル管理でつまずくところ</h2>
+      <ul class="points">
+        <li><b>シフトの希望がばらばらに届く</b><span>LINE・紙・口頭で届いた希望を、1つの表に書き写す手間がかかります。</span></li>
+        <li><b>タイムカードの打ち込み</b><span>月末にタイムカードを見ながらエクセルに打ち込むので、まちがいが起きやすくなります。</span></li>
+        <li><b>割増や時給の変更が反映されない</b><span>時給を上げたのに表の式を直し忘れる、深夜の時間を数えまちがえる。</span></li>
+        <li><b>「今月いくら？」の問い合わせ</b><span>スタッフが自分で確認できないので、店長に毎回聞かれます。</span></li>
+      </ul>
+
+      <h2 id="pos">POSでシフトと給料をまとめる</h2>
+      <p>レジとシフト・給料の管理がひとつになったPOSを使うと、打刻の記録がそのまま給料計算に使えます。たとえば<a href="posupos-day.html">ポスポス</a>では、次のことができます。</p>
+      <div class="grid2">
+        <div class="box"><b>ICカードで打刻</b><span>ICカードをタッチするだけで出勤・退勤を記録します。</span></div>
+        <div class="box"><b>シフトの希望→決定</b><span>スタッフがスマホから希望を出し、店長がアプリでシフトを決めて共有できます。</span></div>
+        <div class="box"><b>給料の計算</b><span>打刻の記録から、スタッフごとの給料（時給・日給・手当・控除）を計算。Excel にも書き出せます。</span></div>
+        <div class="box"><b>スタッフのスマホ画面</b><span>スタッフは自分のスマホで、シフト・給料・チャットを確認できます。シフト集めや給料の問い合わせが減ります。</span></div>
+      </div>
+      <p>注文・会計・厨房の機能もそろっているので、レジと勤怠を別々のサービスで契約する必要がありません。料金は月額（税込）で、ライトプラン 11,000円、スタンダードプラン 22,000円（5店舗まで追加料金なし）、個別プラン 55,000円〜。初期費用は0円で、無料で1か月お試しできます。</p>
+
+      <h2 id="faq">よくある質問</h2>
+      <div class="faqx"><details><summary>アルバイトの勤務時間を15分単位で切り捨ててもいいですか？</summary><p>毎日の労働時間を15分単位などで切り捨てることはできません。労働時間は1分単位で記録して給料を払うのが原則です。残業・深夜・休日の時間の1か月の合計について、30分未満を切り捨て・30分以上を切り上げる処理は認められています。</p></details><details><summary>深夜の割増はいつからいつまでですか？</summary><p>午後10時から午前5時までの間に働いた時間には、通常の賃金の25%以上の割増が必要です。アルバイトでも同じです。</p></details><details><summary>休憩は何分取らせればいいですか？</summary><p>労働時間が6時間を超える場合は45分以上、8時間を超える場合は1時間以上の休憩を、勤務の途中に与える必要があります。</p></details><details><summary>最低賃金はどこで確認できますか？</summary><p>最低賃金は都道府県ごとに決まっていて、毎年秋ごろに改定されます。厚生労働省の「地域別最低賃金の全国一覧」で確認できます。時給が改定後の最低賃金を下回らないか、毎年確認しましょう。</p></details><details><summary>ポスポスでシフトと給料を管理できますか？</summary><p>できます。ICカードで打刻し、シフトの希望集めから決定までアプリの中で行えます。打刻の記録からスタッフごとの給料（時給・日給・手当・控除）を計算し、Excel にも書き出せます。スタッフは自分のスマホでシフトと給料を確認できます。</p></details></div>
+
+      <div class="cta-box">
+        <h2>レジも、シフトも、給料も。ポスポスひとつで。</h2>
+        <p>月額11,000円〜・初期費用0円。無料で1か月お試しできます。</p>
+        <div class="btns"><a class="btn btn-w" href="posupos-day.html">飲食店のポスポスを見る <span class="arr" aria-hidden="true">→</span></a><a class="btn btn-o" href="contact.html#pos-trial">無料で1か月ためす</a></div>
+      </div>
+
+      <p class="note">※ 記事中の計算例は説明のための架空の数字です。法律の内容は2026年10月時点の概要です。実際の対応は労働基準監督署・社会保険労務士・税理士などにご確認ください。</p>
+    </article>
+    <a class="btn btn-line" href="news.html" style="margin-top:48px">← お知らせ一覧へ</a>
+    </div>
+    <aside class="side" aria-label="サイドメニュー">
+      <div class="side-in">
+        <a class="sbn main" href="posupos-day.html"><img src="assets/img/posupos-logo.webp" alt="ポスポス かんたん、つながる、会計ソフト" width="800" height="800" loading="lazy"><span><b>無料で1か月ためせる</b><small>伝票・会計・打刻・シフト・給料・顧客をまとめて管理</small></span><em>飲食店のポスポスを見る →</em></a>
+        <div class="sbn2"><a class="d" href="posupos-day.html#izakaya"><small>FOR RESTAURANTS</small><b>昼のお店</b><span>居酒屋・ラーメン・カフェなど</span></a><a class="n" href="posupos-night.html#cabaret"><small>FOR NIGHT</small><b>夜のお店</b><span>キャバクラ・ホストなど</span></a></div>
+        <nav class="stoc" aria-label="この記事の目次"><p>目次</p><ol><li><a href="#shift">シフト作りの流れ</a></li><li><a href="#dakoku">打刻（勤怠）の記録</a></li><li><a href="#rule">給料計算で守るルール</a></li><li><a href="#rei">アルバイトの給料の計算例</a></li><li><a href="#excel">紙・エクセル管理でつまずくところ</a></li><li><a href="#pos">POSでシフトと給料をまとめる</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+        <div class="skw"><p>KEYWORDS</p><ul><li><a href="news-pos-ranking-day.html#func">QR注文</a></li><li><a href="news-pos-ranking-day.html#func">厨房の画面</a></li><li><a href="news-pos-ranking-day.html#func">券売機</a></li><li><a href="news-pos-ranking-day.html#howto">給料計算</a></li><li><a href="news-pos-ranking-day.html#howto">キャッシュレス</a></li><li><a href="news-pos-ranking-day.html#price">料金</a></li></ul></div>
+        <a class="sdl" href="contact.html#pos-trial">無料で1か月ためす →</a>
+        <div class="spop"><p>よく読まれる記事</p><ul>
+          <li><a href="news-izakaya-qr.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>居酒屋のQR注文の始め方</span></a></li>
+          <li><a href="news-restaurant-shift.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のシフト管理と給料計算</span></a></li>
+          <li><a href="news-pos-ranking-day.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のPOSレジおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-pos-ranking.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>夜のお店のPOSシステムおすすめ5選｜選び方と比較表</span></a></li>
+        </ul></div>
+      </div>
+    </aside>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例", "description": "居酒屋・ラーメン・カフェなど飲食店のシフト作りの流れ、打刻（勤怠）の記録、深夜割増・残業・休憩・最低賃金など給料計算のルールを、アルバイトの計算例つきで解説。紙やエクセル管理のつまずきどころと、まとめて管理する方法も。", "image": "https://akitogroup.jp/assets/img/ogp-restaurant-shift.png", "datePublished": "2026-10-23", "dateModified": "2026-10-23", "author": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "mainEntityOfPage": "https://akitogroup.jp/news-restaurant-shift"}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "お知らせ", "item": "https://akitogroup.jp/news"}, {"@type": "ListItem", "position": 3, "name": "飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例", "item": "https://akitogroup.jp/news-restaurant-shift"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "アルバイトの勤務時間を15分単位で切り捨ててもいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "毎日の労働時間を15分単位などで切り捨てることはできません。労働時間は1分単位で記録して給料を払うのが原則です。残業・深夜・休日の時間の1か月の合計について、30分未満を切り捨て・30分以上を切り上げる処理は認められています。"}}, {"@type": "Question", "name": "深夜の割増はいつからいつまでですか？", "acceptedAnswer": {"@type": "Answer", "text": "午後10時から午前5時までの間に働いた時間には、通常の賃金の25%以上の割増が必要です。アルバイトでも同じです。"}}, {"@type": "Question", "name": "休憩は何分取らせればいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "労働時間が6時間を超える場合は45分以上、8時間を超える場合は1時間以上の休憩を、勤務の途中に与える必要があります。"}}, {"@type": "Question", "name": "最低賃金はどこで確認できますか？", "acceptedAnswer": {"@type": "Answer", "text": "最低賃金は都道府県ごとに決まっていて、毎年秋ごろに改定されます。厚生労働省の「地域別最低賃金の全国一覧」で確認できます。時給が改定後の最低賃金を下回らないか、毎年確認しましょう。"}}, {"@type": "Question", "name": "ポスポスでシフトと給料を管理できますか？", "acceptedAnswer": {"@type": "Answer", "text": "できます。ICカードで打刻し、シフトの希望集めから決定までアプリの中で行えます。打刻の記録からスタッフごとの給料（時給・日給・手当・控除）を計算し、Excel にも書き出せます。スタッフは自分のスマホでシフトと給料を確認できます。"}}]}</script>
+<script>
+(function(){var links=[].slice.call(document.querySelectorAll('.stoc a'));if(!links.length||!('IntersectionObserver' in window))return;
+var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-20% 0px -70% 0px'});
+Object.keys(map).forEach(function(id){var h=document.getElementById(id);if(h)io.observe(h)})})();
+</script>
