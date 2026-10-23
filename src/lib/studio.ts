@@ -237,6 +237,19 @@ const CANDIDATE_STYLE =
   "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
 /** せりふごとに音声を作る（PCM 24kHz 16bit mono） */
+/** 声の前後の無音を切る（せりふの間が空きすぎないように）。16bit・1チャンネルの PCM */
+function trimSilence(pcm: Buffer): Buffer {
+  const n = Math.floor(pcm.length / 2);
+  const loud = (i: number) => Math.abs(pcm.readInt16LE(i * 2)) > 500;
+  let a = 0;
+  while (a < n && !loud(a)) a++;
+  let b = n - 1;
+  while (b > a && !loud(b)) b--;
+  if (a >= b) return pcm;
+  const margin = Math.round(STUDIO_SAMPLE_RATE * 0.04);
+  return pcm.subarray(Math.max(0, a - margin) * 2, Math.min(n, b + margin + 1) * 2);
+}
+
 export async function speakLines(
   lines: StudioLine[],
   /** 受験者のせりふごとの話し方（言い換え型の NG は自信なさげに、OK ははきはき） */
@@ -272,7 +285,7 @@ export async function speakLines(
         ),
       });
       if (!res.ok) throw new Error(`tts ${res.status}: ${await res.text()}`);
-      return Buffer.from(await res.arrayBuffer()).toString("base64");
+      return trimSilence(Buffer.from(await res.arrayBuffer())).toString("base64");
     }),
   );
 }
