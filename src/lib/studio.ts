@@ -369,7 +369,7 @@ const OFFER_NARRATION = "しかも練習するだけで、企業から申し込�
 
 /** せりふごとの再生の速さ（ナレーションと受験者は少し速く。面接官はアプリと同じ） */
 export function lineTempo(speaker: StudioLine["speaker"]): number {
-  return speaker === "candidate" ? 1.3 : speaker === "narrator" ? 1.4 : 1.08;
+  return speaker === "candidate" ? 1.45 : speaker === "narrator" ? 1.6 : 1.08;
 }
 
 export type RewriteItem = {
