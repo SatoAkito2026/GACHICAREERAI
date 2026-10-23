@@ -1373,6 +1373,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
     };
     try{var saved=localStorage.getItem('posupos-shop');if(saved&&shopBar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
+    var hs=decodeURIComponent((location.hash||'').slice(1));if(hs&&shopBar.querySelector('[data-shop="'+hs+'"]'))setShop(hs,false);
     shopBar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true)})});
   }
 
