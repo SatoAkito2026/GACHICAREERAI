@@ -454,6 +454,8 @@ type TiktokVideo = {
   likes: number | null;
 };
 
+const TIKTOK_LINK = "https://gachicareer-ai.akitogroup.jp/tiktok";
+
 const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
   rendering: "作成中",
   ready: "投稿待ち",
@@ -463,6 +465,7 @@ const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
 
 function TiktokVideos({ token }: { token: string }) {
   const [videos, setVideos] = useState<TiktokVideo[] | null>(null);
+  const [clicks, setClicks] = useState<{ today: number; week: number; total: number } | null>(null);
 
   const call = useCallback(
     async (body?: unknown) => {
@@ -480,8 +483,12 @@ function TiktokVideos({ token }: { token: string }) {
     [token],
   );
   const load = useCallback(async () => {
-    const d = (await call()) as { videos: TiktokVideo[] } | null;
+    const d = (await call()) as {
+      videos: TiktokVideo[];
+      clicks?: { today: number; week: number; total: number };
+    } | null;
     setVideos(d?.videos ?? []);
+    setClicks(d?.clicks ?? null);
   }, [call]);
 
   useEffect(() => {
@@ -498,118 +505,142 @@ function TiktokVideos({ token }: { token: string }) {
   };
 
   if (!videos) return <p style={{ color: T.muted, fontSize: 13 }}>読み込み中...</p>;
+  const clickPanel = (
+    <Panel>
+      <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+        プロフィールのリンク（{TIKTOK_LINK}）が押された回数
+      </p>
+      <div className="mt-2 flex gap-6 text-[13px]" style={{ color: T.sub }}>
+        <span>
+          今日 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.today ?? 0}</b>
+        </span>
+        <span>
+          7日間 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.week ?? 0}</b>
+        </span>
+        <span>
+          全部 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.total ?? 0}</b>
+        </span>
+      </div>
+    </Panel>
+  );
   if (videos.length === 0) {
     return (
-      <Panel>
-        <p className="text-[13px]" style={{ color: T.muted, lineHeight: 1.8 }}>
-          まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok
-          video」から、今すぐ作ることもできます）。
-        </p>
-      </Panel>
+      <div className="flex flex-col gap-4">
+        {clickPanel}
+        <Panel>
+          <p className="text-[13px]" style={{ color: T.muted, lineHeight: 1.8 }}>
+            まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok
+            video」から、今すぐ作ることもできます）。
+          </p>
+        </Panel>
+      </div>
     );
   }
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {videos.map((v) => (
-        <div
-          key={v.id}
-          className="flex flex-col gap-3 rounded-2xl p-4"
-          style={{ background: T.card, border: `1px solid ${T.border}` }}
-        >
-          <div className="flex items-center justify-between gap-2 text-[11px]">
-            <span style={{ color: T.muted }}>
-              {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
-            </span>
-            <span
-              className="rounded-md px-2 py-0.5"
-              style={{
-                background: v.status === "ready" ? T.accent : "#262626",
-                color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
-                fontWeight: 700,
-              }}
-            >
-              {VIDEO_STATUS[v.status]}
-            </span>
-          </div>
-          <p className="text-[14px]" style={{ color: T.text, fontWeight: 700 }}>
-            {v.title}
-          </p>
-          {v.url ? (
-            <video
-              src={v.url}
-              controls
-              preload="metadata"
-              playsInline
-              className="w-full rounded-xl"
-              style={{ aspectRatio: "9 / 16", background: "#000" }}
-            />
-          ) : v.status === "failed" ? (
-            <p className="text-[12px]" style={{ color: T.bad }}>
-              作れませんでした：{(v.error ?? "").slice(0, 120)}
-            </p>
-          ) : (
-            <p className="text-[12px]" style={{ color: T.muted }}>
-              作成中です…
-            </p>
-          )}
-          <p
-            className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
-            style={{ background: T.bg, color: T.sub }}
+    <div className="flex flex-col gap-4">
+      {clickPanel}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {videos.map((v) => (
+          <div
+            key={v.id}
+            className="flex flex-col gap-3 rounded-2xl p-4"
+            style={{ background: T.card, border: `1px solid ${T.border}` }}
           >
-            {v.caption}
-          </p>
-          <div className="flex flex-wrap gap-2 text-[12px]">
-            {v.url && (
-              <a
-                href={v.url}
-                download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
-                className="rounded-lg px-3 py-1.5"
-                style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
+            <div className="flex items-center justify-between gap-2 text-[11px]">
+              <span style={{ color: T.muted }}>
+                {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
+              </span>
+              <span
+                className="rounded-md px-2 py-0.5"
+                style={{
+                  background: v.status === "ready" ? T.accent : "#262626",
+                  color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
+                  fontWeight: 700,
+                }}
               >
-                動画を保存
-              </a>
+                {VIDEO_STATUS[v.status]}
+              </span>
+            </div>
+            <p className="text-[14px]" style={{ color: T.text, fontWeight: 700 }}>
+              {v.title}
+            </p>
+            {v.url ? (
+              <video
+                src={v.url}
+                controls
+                preload="metadata"
+                playsInline
+                className="w-full rounded-xl"
+                style={{ aspectRatio: "9 / 16", background: "#000" }}
+              />
+            ) : v.status === "failed" ? (
+              <p className="text-[12px]" style={{ color: T.bad }}>
+                作れませんでした：{(v.error ?? "").slice(0, 120)}
+              </p>
+            ) : (
+              <p className="text-[12px]" style={{ color: T.muted }}>
+                作成中です…
+              </p>
             )}
-            <button
-              type="button"
-              onClick={() => void copy(v.caption)}
-              className="rounded-lg px-3 py-1.5"
-              style={{ border: `1px solid ${T.border}`, color: T.sub }}
+            <p
+              className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
+              style={{ background: T.bg, color: T.sub }}
             >
-              投稿の文をコピー
-            </button>
-            {v.status === "ready" && (
+              {v.caption}
+            </p>
+            <div className="flex flex-wrap gap-2 text-[12px]">
+              {v.url && (
+                <a
+                  href={v.url}
+                  download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
+                  className="rounded-lg px-3 py-1.5"
+                  style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
+                >
+                  動画を保存
+                </a>
+              )}
               <button
                 type="button"
-                onClick={() => void call({ action: "posted", id: v.id }).then(load)}
+                onClick={() => void copy(v.caption)}
                 className="rounded-lg px-3 py-1.5"
                 style={{ border: `1px solid ${T.border}`, color: T.sub }}
               >
-                投稿済みにする
+                投稿の文をコピー
               </button>
-            )}
-            {v.status === "posted" && (
-              <MetricsForm
-                video={v}
-                onSave={(views, likes) =>
-                  void call({ action: "metrics", id: v.id, views, likes }).then(load)
-                }
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm("この動画を消しますか？")) {
-                  void call({ action: "delete", id: v.id }).then(load);
-                }
-              }}
-              className="rounded-lg px-3 py-1.5"
-              style={{ color: T.bad }}
-            >
-              削除
-            </button>
+              {v.status === "ready" && (
+                <button
+                  type="button"
+                  onClick={() => void call({ action: "posted", id: v.id }).then(load)}
+                  className="rounded-lg px-3 py-1.5"
+                  style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                >
+                  投稿済みにする
+                </button>
+              )}
+              {v.status === "posted" && (
+                <MetricsForm
+                  video={v}
+                  onSave={(views, likes) =>
+                    void call({ action: "metrics", id: v.id, views, likes }).then(load)
+                  }
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm("この動画を消しますか？")) {
+                    void call({ action: "delete", id: v.id }).then(load);
+                  }
+                }}
+                className="rounded-lg px-3 py-1.5"
+                style={{ color: T.bad }}
+              >
+                削除
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

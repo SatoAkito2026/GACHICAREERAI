@@ -19,6 +19,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TiktokRouteImport } from './routes/tiktok'
 import { Route as TokushoRouteImport } from './routes/tokusho'
 import { Route as ActorInterviewTokenRouteImport } from './routes/actor-interview/$token'
 import { Route as ApiActorInterviewTurnRouteImport } from './routes/api/actor-interview-turn'
@@ -173,6 +174,11 @@ const ScreeningRoute = ScreeningRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiktokRoute = TiktokRouteImport.update({
+  id: '/tiktok',
+  path: '/tiktok',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TokushoRoute = TokushoRouteImport.update({
@@ -734,6 +740,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -851,6 +858,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -969,6 +977,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -1088,6 +1097,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1205,6 +1215,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1322,6 +1333,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1440,6 +1452,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ScreeningRoute: typeof ScreeningRoute
   TermsRoute: typeof TermsRoute
+  TiktokRoute: typeof TiktokRoute
   TokushoRoute: typeof TokushoRoute
   ActorInterviewTokenRoute: typeof ActorInterviewTokenRoute
   ApiActorInterviewTurnRoute: typeof ApiActorInterviewTurnRoute
@@ -1617,6 +1630,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tiktok': {
+      id: '/tiktok'
+      path: '/tiktok'
+      fullPath: '/tiktok'
+      preLoaderRoute: typeof TiktokRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tokusho': {
@@ -2368,6 +2388,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ScreeningRoute: ScreeningRoute,
   TermsRoute: TermsRoute,
+  TiktokRoute: TiktokRoute,
   TokushoRoute: TokushoRoute,
   ActorInterviewTokenRoute: ActorInterviewTokenRoute,
   ApiActorInterviewTurnRoute: ApiActorInterviewTurnRoute,

@@ -36,6 +36,8 @@ export type RewriteJobData = {
 
 const START = 0.15;
 const GAP = 0.2;
+/** 面接官の質問のあと、答え始めるまでの間 */
+const QUESTION_GAP = 0.7;
 /** 点数を見せる間（NG・OK のあと） */
 const SCORE_HOLD = 0.8;
 /** オファーの通知を見せる間 */
@@ -64,7 +66,15 @@ export function buildRewriteTimeline(job: RewriteJobData) {
       role,
       itemIndex: job.itemIndex[i],
     };
-    t += dur + (role === "ng" || role === "ok" ? SCORE_HOLD : role === "offer" ? OFFER_HOLD : GAP);
+    t +=
+      dur +
+      (role === "ng" || role === "ok"
+        ? SCORE_HOLD
+        : role === "offer"
+          ? OFFER_HOLD
+          : line.speaker === "interviewer"
+            ? QUESTION_GAP
+            : GAP);
     return item;
   });
   const endStart = t;
