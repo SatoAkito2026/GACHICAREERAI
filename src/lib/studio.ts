@@ -232,7 +232,7 @@ const CANDIDATE_VOICES = ["coral", "sage", "verse", "ballad", "echo"];
 // ナレーション：面接官とはっきり違う声と話し方で、最初の1秒で引きつける
 const NARRATOR_VOICE = "ash";
 const NARRATOR_STYLE =
-  "TikTokの人気ナレーター。最初の一言で視聴者の手を止める。強く、テンポよく、抑揚をつけて言い切る。驚きと危機感を込めて。";
+  "TikTokの人気ナレーター。最初の一言で視聴者の手を止める。早口で畳みかけるように、強く短く言い切る。間を空けない。驚きと危機感を込めて。";
 const CANDIDATE_STYLE =
   "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
@@ -365,11 +365,11 @@ const REWRITE_TOPICS = [
 ] as const;
 
 /** オファーの演出で、ナレーターが言うひとこと（約束にならない言い方にする） */
-const OFFER_NARRATION = "しかも、練習の結果を公開しておくと…企業から面談の申し込みが届くことも！";
+const OFFER_NARRATION = "しかも練習するだけで、企業から申し込みが届くことも！";
 
 /** せりふごとの再生の速さ（ナレーションと受験者は少し速く。面接官はアプリと同じ） */
 export function lineTempo(speaker: StudioLine["speaker"]): number {
-  return speaker === "candidate" ? 1.3 : speaker === "narrator" ? 1.15 : 1.08;
+  return speaker === "candidate" ? 1.3 : speaker === "narrator" ? 1.4 : 1.08;
 }
 
 export type RewriteItem = {
@@ -418,7 +418,7 @@ export async function writeRewriteScript(history: StudioHistory[]): Promise<Rewr
 
 【型（必ず守る）】
 - タイトル：「『◯◯』と聞かれた時の最高な答え方」のように、一目で何の動画か分かる（28文字以内）
-- 前ふり（hook）：ナレーターが言う、見る人の手を止める強い一言。不安・危機感を突き、言い切る。例「これ言ったら、即落ちます」「9割の人がやってるNG回答」（20文字以内）
+- 前ふり（hook）：ナレーターが言う、見る人の手を止める強い一言。不安・危機感を突き、言い切る。例「これ言ったら即落ち」「9割がやるNG回答」（15文字以内）
 - よくある本音・状況を3パターン（label：例「給料が少なかった」15文字以内）
 - それぞれ、落ちる言い方（ng：ありがちな本音のまま、25文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。40文字以内）
 - AI面接官の点数：ng は15〜45点、ok は78〜95点（100点満点）
@@ -459,7 +459,7 @@ ${learnedExamples(history)}
       point: String(it.point ?? "").slice(0, 30),
     }));
   if (items.length < 2) throw new Error("rewrite script parse failed");
-  const hook = String(raw?.hook ?? "これ言ったら、即落ちます").slice(0, 30);
+  const hook = String(raw?.hook ?? "これ言ったら即落ち").slice(0, 20);
   const rawOffer = (raw as { offer?: { companyType?: unknown; message?: unknown } } | null)?.offer;
   const offer = {
     companyType: String(rawOffer?.companyType ?? "IT企業").slice(0, 20),
