@@ -10,7 +10,7 @@ import {
   STUDIO_SAMPLE_RATE,
   isStudioRequest,
   speakLines,
-  writeScript,
+  writeRewriteScript,
 } from "@/lib/studio";
 
 export const Route = createFileRoute("/api/studio/job")({
@@ -29,12 +29,18 @@ export const Route = createFileRoute("/api/studio/job")({
           .order("created_at", { ascending: false })
           .limit(40);
         try {
-          const script = await writeScript(history ?? []);
-          // 最後の音声は、オファーを見た受験者のひとこと
-          const audio = await speakLines([
-            ...script.lines,
-            { speaker: "candidate", text: script.offer.reaction },
-          ]);
+          // 今は「言い換え型」（◯◯と聞かれた時の最高な答え方）で作る。前の寸劇の型は writeScript に残している
+          const script = await writeRewriteScript(history ?? []);
+          const audio = await speakLines(
+            script.lines,
+            script.roles.map((r) =>
+              r === "ng"
+                ? "日本の面接で、本音をそのまま言ってしまう受験者。少し気まずそうに、でも自然にスラスラ話す。"
+                : r === "ok"
+                  ? "日本の面接で、自信を持ってはきはき、よどみなく自然に話す受験者。少し速めのテンポで。"
+                  : null,
+            ),
+          );
           const { data: row, error } = await supabase
             .from("tiktok_videos")
             .insert({

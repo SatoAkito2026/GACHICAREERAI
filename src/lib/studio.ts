@@ -232,12 +232,16 @@ const CANDIDATE_STYLE =
   "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
 /** せりふごとに音声を作る（PCM 24kHz 16bit mono） */
-export async function speakLines(lines: StudioLine[]): Promise<string[]> {
+export async function speakLines(
+  lines: StudioLine[],
+  /** 受験者のせりふごとの話し方（言い換え型の NG は自信なさげに、OK ははきはき） */
+  styles?: (string | null)[],
+): Promise<string[]> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OPENAI_API_KEY missing");
   const candidateVoice = CANDIDATE_VOICES[Math.floor(Math.random() * CANDIDATE_VOICES.length)];
   return Promise.all(
-    lines.map(async (line) => {
+    lines.map(async (line, i) => {
       const interviewer = line.speaker === "interviewer";
       const res = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
@@ -256,7 +260,7 @@ export async function speakLines(lines: StudioLine[]): Promise<string[]> {
                 model: "gpt-4o-mini-tts",
                 input: toSpeechText(line.text),
                 voice: candidateVoice,
-                instructions: CANDIDATE_STYLE,
+                instructions: styles?.[i] ?? CANDIDATE_STYLE,
                 response_format: "pcm",
               },
         ),
@@ -277,4 +281,151 @@ export function isStudioRequest(request: Request): boolean {
   let diff = 0;
   for (let i = 0; i < secret.length; i++) diff |= secret.charCodeAt(i) ^ given.charCodeAt(i);
   return diff === 0;
+}
+
+// ---- 言い換え型：「◯◯と聞かれた時の最高な答え方」 --------------------------------
+// 伸びている面接動画（NG の言い方 → OK の言い方、受かる／落ちる、保存してね）を参考にした型。
+// AI面接官の点数が、言い換えで上がるところを目玉にする
+
+/** 面接でよく聞かれて、言い方しだいで印象が大きく変わる質問 */
+const REWRITE_TOPICS = [
+  { key: "taishoku", q: "前の会社を辞めた理由を教えてください", who: "転職" },
+  { key: "shibou", q: "当社を志望した理由を教えてください", who: "就活・転職" },
+  { key: "tansho", q: "あなたの短所を教えてください", who: "就活・転職" },
+  { key: "gakuchika", q: "学生時代に力を入れたことは何ですか", who: "就活" },
+  { key: "zangyo", q: "残業についてどう考えていますか", who: "就活・転職" },
+  { key: "tasha", q: "他社の選考状況を教えてください", who: "就活・転職" },
+  { key: "blank", q: "職歴にブランクがありますが、その間は何をしていましたか", who: "転職" },
+  { key: "shippai", q: "これまでで一番の失敗を教えてください", who: "就活・転職" },
+  { key: "gyaku", q: "最後に、何か質問はありますか", who: "就活・転職" },
+  { key: "5nen", q: "5年後、どうなっていたいですか", who: "就活・転職" },
+  { key: "nigate", q: "苦手な人とはどう接していますか", who: "就活・転職" },
+  { key: "kaisu", q: "転職の回数が多いようですが、理由を教えてください", who: "転職" },
+] as const;
+
+export type RewriteItem = {
+  label: string;
+  ng: string;
+  ngScore: number;
+  ok: string;
+  okScore: number;
+  point: string;
+};
+
+export type RewriteScript = {
+  format: "rewrite";
+  theme: string;
+  themeLabel: string;
+  title: string;
+  hook: string;
+  question: string;
+  items: RewriteItem[];
+  cta: string;
+  caption: string;
+  /** 声にする順番（面接官の前ふり → 質問 → 各パターンの NG・OK・ポイント → 締め） */
+  lines: StudioLine[];
+  /** lines のそれぞれが何か（画面の出し分けに使う） */
+  roles: ("hook" | "question" | "ng" | "ok" | "point" | "cta")[];
+  /** lines のそれぞれが、何番目のパターンのものか（なければ -1） */
+  itemIndex: number[];
+};
+
+export async function writeRewriteScript(history: StudioHistory[]): Promise<RewriteScript> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY missing");
+  const used = new Set(history.slice(0, 6).map((h) => h.theme));
+  const pool = REWRITE_TOPICS.filter((t) => !used.has(`rewrite:${t.key}`));
+  const topic = (pool.length ? pool : REWRITE_TOPICS)[
+    Math.floor(Math.random() * (pool.length || REWRITE_TOPICS.length))
+  ];
+
+  const prompt = `あなたはTikTokで就活・転職の面接対策動画を作る構成作家です。
+再生数の多い面接動画（「なぜ前の会社を辞めたんですかと聞かれた時の最高な答え方」440万回再生、「面接でよく間違える敬語 受かる／落ちる」など）の型で、
+「ガチキャリAI」（AI模擬面接アプリ）の動画の台本を作ってください。
+
+【今回の質問】「${topic.q}」（対象：${topic.who}）
+
+【型（必ず守る）】
+- タイトル：「『◯◯』と聞かれた時の最高な答え方」のように、一目で何の動画か分かる（28文字以内）
+- 前ふり（hook）：見る人の不安や痛みを突く一言。例「本当のことを言うと、面接で落とされます」（30文字以内）
+- よくある本音・状況を3パターン（label：例「給料が少なかった」15文字以内）
+- それぞれ、落ちる言い方（ng：ありがちな本音のまま、30文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。50文字以内）
+- AI面接官の点数：ng は15〜45点、ok は78〜95点（100点満点）
+- 言い換えのポイント（point：20文字以内。例「不満ではなく、これからやりたいことを話す」）
+- 締め（cta）：保存をうながす一言（25文字以内。例「保存して、面接の前に見返してね」）
+- 投稿の文：中身が分かる1文＋「あなたならどう答える？コメントで教えて」＋ハッシュタグ4〜6個（#ガチキャリAI #面接対策 を必ず入れる）
+
+【ルール】
+- 実在の会社・人物の名前は出さない。嘘をつかせる言い換えにしない（事実は変えず、伝え方を変える）
+- ふざけない。実際の面接でそのまま使える内容にする
+${learnedExamples(history)}
+次のJSONだけを返してください：
+{
+  "title": "...",
+  "hook": "...",
+  "items": [{"label": "...", "ng": "...", "ngScore": 数字, "ok": "...", "okScore": 数字, "point": "..."}],
+  "cta": "...",
+  "caption": "..."
+}`;
+  const anthropic = new Anthropic({ apiKey });
+  const res = await anthropic.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 2000,
+    messages: [{ role: "user", content: prompt }],
+  });
+  const raw = extractJson(lastTextBlock(res.content)) as Partial<RewriteScript> | null;
+  const items = (Array.isArray(raw?.items) ? raw.items : [])
+    .filter((it) => it && it.ng && it.ok)
+    .slice(0, 3)
+    .map((it) => ({
+      label: String(it.label ?? "").slice(0, 20),
+      ng: String(it.ng).slice(0, 50),
+      ngScore: Math.min(50, Math.max(5, Math.round(Number(it.ngScore) || 30))),
+      ok: String(it.ok).slice(0, 70),
+      okScore: Math.min(98, Math.max(70, Math.round(Number(it.okScore) || 85))),
+      point: String(it.point ?? "").slice(0, 30),
+    }));
+  if (items.length < 2) throw new Error("rewrite script parse failed");
+  const hook = String(raw?.hook ?? "言い方ひとつで、印象は大きく変わります").slice(0, 40);
+  const cta = String(raw?.cta ?? "保存して、面接の前に見返してね").slice(0, 30);
+  let caption = String(raw?.caption ?? "").slice(0, 300);
+  for (const tag of ["#ガチキャリAI", "#面接対策"])
+    if (!caption.includes(tag)) caption += ` ${tag}`;
+
+  const lines: StudioLine[] = [];
+  const roles: RewriteScript["roles"] = [];
+  const itemIndex: number[] = [];
+  const push = (
+    speaker: StudioLine["speaker"],
+    text: string,
+    role: RewriteScript["roles"][number],
+    i = -1,
+  ) => {
+    lines.push({ speaker, text });
+    roles.push(role);
+    itemIndex.push(i);
+  };
+  push("interviewer", hook, "hook");
+  push("interviewer", topic.q, "question");
+  items.forEach((it, i) => {
+    push("candidate", it.ng, "ng", i);
+    push("candidate", it.ok, "ok", i);
+    if (it.point) push("interviewer", it.point, "point", i);
+  });
+  push("interviewer", cta, "cta");
+
+  return {
+    format: "rewrite",
+    theme: `rewrite:${topic.key}`,
+    themeLabel: "言い換え型",
+    title: String(raw?.title ?? `「${topic.q}」と聞かれた時の最高な答え方`).slice(0, 36),
+    hook,
+    question: topic.q,
+    items,
+    cta,
+    caption,
+    lines,
+    roles,
+    itemIndex,
+  };
 }
