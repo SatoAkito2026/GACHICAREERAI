@@ -47,7 +47,6 @@
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:clip}
 [id]{scroll-margin-top:76px}
-body[data-shop] [id]{scroll-margin-top:128px}
 body{margin:0;background:var(--bg);color:var(--navy);font-family:var(--ff);font-size:16px;line-height:1.85;word-break:auto-phrase;overflow-wrap:anywhere}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
 [hidden]{display:none!important}
@@ -670,15 +669,20 @@ body[data-shop="italian"] .v[data-v="italian"]{display:block}
 body[data-shop="sushi"] .v[data-v="sushi"]{display:block}
 body[data-shop="yakiniku"] .v[data-v="yakiniku"]{display:block}
 body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
-.shopbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:45;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.shopbar .wrap{display:flex;align-items:center;gap:12px;padding-block:8px}
-.shopbar .lb{font-size:13px;font-weight:900;flex:none;color:var(--ink-2)}
-.shopbar .sb{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
-.shopbar .sb::-webkit-scrollbar{display:none}
-.shopbar button{appearance:none;font:inherit;font-weight:700;font-size:14.5px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 16px;min-height:40px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
+body[data-shop="cabaret"] .v[data-v="cabaret"]{display:block}
+body[data-shop="host"] .v[data-v="host"]{display:block}
+body[data-shop="girlsbar"] .v[data-v="girlsbar"]{display:block}
+body[data-shop="concafe"] .v[data-v="concafe"]{display:block}
+body[data-shop="snack"] .v[data-v="snack"]{display:block}
+body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
+.shopbar{margin-top:18px;display:grid;gap:8px}
+.shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
+.shopbar .sb{display:flex;gap:6px;flex-wrap:wrap}
+.shopbar button{appearance:none;font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
 .shopbar button:hover{border-color:var(--blue)}
-.shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
-@media (max-width:479px){.shopbar .lb{display:none}}
+.shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+@media (max-width:479px){.shopbar button{padding:0 14px;font-size:14px}}
 </style>
 </head>
 <body class="day" data-shop="izakaya">
@@ -704,11 +708,6 @@ body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
   </div>
 </header>
 
-
-<div class="shopbar" role="tablist" aria-label="お店の種類を選ぶと、画面がそのお店の形に変わります">
-  <div class="wrap"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div></div>
-</div>
-
 <main>
   <!-- 1. ファーストビュー -->
   <section class="hero">
@@ -718,7 +717,8 @@ body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
         <p class="eyebrow">POSPOS for restaurants</p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
         <p class="tag">かんたん、つながる、会計ソフト。</p>
-        <p class="lead">居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェなど、昼の飲食店のためのお店のアプリ。上のタブでお店の種類を選ぶと、画面の例がそのお店の形に変わります。注文・会計・厨房から、打刻・シフト・給料・顧客まで、まとめて管理できます。</p>
+        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div></div>
+        <p class="lead">居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェなど、昼の飲食店のためのお店のアプリ。注文・会計・厨房から、打刻・シフト・給料・顧客まで、まとめて管理できます。</p>
 
 
         <div class="btns" style="margin-top:28px">
@@ -1373,7 +1373,7 @@ body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
     };
     try{var saved=localStorage.getItem('posupos-shop');if(saved&&shopBar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
-    shopBar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true);var sb=b.parentNode;sb.scrollTo({left:b.offsetLeft-sb.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})})});
+    shopBar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true)})});
   }
 
   // プランの「すべての機能を見る」
