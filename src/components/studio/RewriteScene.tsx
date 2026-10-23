@@ -25,7 +25,7 @@ export type RewriteJobData = {
   offer?: { companyType: string; message: string };
   cta: string;
   lines: { speaker: "interviewer" | "candidate" | "narrator"; text: string }[];
-  roles: ("hook" | "question" | "ng" | "ok" | "point" | "offer" | "cta")[];
+  roles: ("hook" | "question" | "label" | "ng" | "ok" | "point" | "offer" | "cta")[];
   itemIndex: number[];
   audio: string[];
   sampleRate: number;
@@ -34,7 +34,8 @@ export type RewriteJobData = {
   tempos?: number[];
 };
 
-const START = 0.15;
+// 最初のコマから見出しと前ふりを出す（表紙になる・冒頭が黒くならない）
+const START = 0;
 const GAP = 0.2;
 /** 面接官の質問のあと、答え始めるまでの間 */
 const QUESTION_GAP = 0.7;
@@ -43,6 +44,9 @@ const SCORE_HOLD = 0.8;
 /** オファーの通知を見せる間 */
 const OFFER_HOLD = 1.4;
 const END = 3;
+/** 点数が数字くるくるで上がっていく長さ（NG・OK） */
+const NG_COUNT = 0.5;
+const OK_COUNT = 0.6;
 const RED = "#FF4D5E";
 const GREEN = "#2BD67B";
 const NUM = ["①", "②", "③", "④"];
@@ -72,13 +76,21 @@ export function buildRewriteTimeline(job: RewriteJobData) {
         ? SCORE_HOLD
         : role === "offer"
           ? OFFER_HOLD
-          : line.speaker === "interviewer"
+          : role === "question"
             ? QUESTION_GAP
             : GAP);
     return item;
   });
   const endStart = t;
-  return { lines, endStart, total: endStart + END };
+  // 効果音：点数がくるくる上がる間のカチカチと、止まったときの音（撮影側の ffmpeg で重ねる）
+  const sfx = lines
+    .filter((l) => l.role === "ng" || l.role === "ok")
+    .map((l) => ({
+      at: l.start + l.dur,
+      dur: l.role === "ng" ? NG_COUNT : OK_COUNT,
+      kind: l.role as "ng" | "ok",
+    }));
+  return { lines, endStart, total: endStart + END, sfx };
 }
 
 export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: () => void }) {
@@ -359,7 +371,7 @@ function ItemPanel({
         text={item.ng}
         score={item.ngScore}
         appear={ng ? ease((t - ng.start) / 0.25) : 1}
-        reveal={ng ? (t - (ng.start + ng.dur)) / 0.5 : 1}
+        reveal={ng ? (t - (ng.start + ng.dur)) / NG_COUNT : 1}
         dim={!!showOk}
       />
       {showOk && ok && (
@@ -368,7 +380,7 @@ function ItemPanel({
           text={item.ok}
           score={item.okScore}
           appear={ease((t - ok.start) / 0.25)}
-          reveal={(t - (ok.start + ok.dur)) / 0.6}
+          reveal={(t - (ok.start + ok.dur)) / OK_COUNT}
           diff={item.okScore - item.ngScore}
         />
       )}
