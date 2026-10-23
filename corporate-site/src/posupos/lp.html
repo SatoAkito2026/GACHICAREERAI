@@ -1487,15 +1487,15 @@ body[data-shop="cafe"] .v[data-v="cafe"]{display:block}
 
 
   // 昼：お店の種類のタブ。選ぶと、ページの画面イメージがすべてその業種になる
-  var bar=document.querySelector('.shopbar');
-  if(bar){
+  var shopBar=document.querySelector('.shopbar');
+  if(shopBar){
     var setShop=function(k,save){
       document.body.setAttribute('data-shop',k);
-      bar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
     };
-    try{var saved=localStorage.getItem('posupos-shop');if(saved&&bar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
-    bar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true);var sb=b.parentNode;sb.scrollTo({left:b.offsetLeft-sb.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})})});
+    try{var saved=localStorage.getItem('posupos-shop');if(saved&&shopBar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
+    shopBar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true);var sb=b.parentNode;sb.scrollTo({left:b.offsetLeft-sb.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})})});
   }
 
   // プランの「すべての機能を見る」
