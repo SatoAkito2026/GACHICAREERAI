@@ -1,5 +1,5 @@
 /**
- * スマホ・タブレット用のホーム画面（個人）。パソコンのカード一覧とは別の、アプリらしい形にする。
+ * 個人のホーム画面（スマホ・パソコン共通）。はじめての人には使い方のスライドを出す。
  * - 下のメニューと同じリンクを並べるのではなく、「次にやること」と「今の状況」を出す
  * - 練習・評価・公開・オファーへの移動は下のメニューに任せる
  */
@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { talentApi } from "@/components/talent/TalentUI";
 import { supabase } from "@/integrations/supabase/client";
+import { useWelcomeTour } from "@/components/WelcomeTour";
 
 type Summary = {
   practiceCount: number;
@@ -86,18 +87,12 @@ export function MobileHome() {
   const latest = summary?.latest ?? null;
   const isPublic = !!summary?.profile?.is_public;
   const offerBadge = (offers?.pending ?? 0) + (offers?.unread ?? 0);
+  const tour = useWelcomeTour("individual");
 
   return (
-    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5">
-      <div>
-        <p className="text-[13px]" style={{ color: "#888888" }}>
-          {greeting()}
-          {name ? `、${name}さん` : ""}
-        </p>
-        <h1 className="mt-0.5 text-[22px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
-          今日も1回、練習しよう
-        </h1>
-      </div>
+    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5 lg:pt-8">
+      {tour.node}
+      <HomeHeader title="今日も1回、練習しよう" name={name} onTour={tour.open} />
 
       {/* 次にやること：いちばん大きく */}
       <Link
@@ -155,6 +150,9 @@ export function MobileHome() {
       {/* 次の一歩のヒント（状況に合わせて1つだけ） */}
       {summary && <NextStep summary={summary} pendingOffers={offers?.pending ?? 0} />}
 
+      {/* 進め方（何をすればいいか一目で分かるように） */}
+      <HowItWorks />
+
       {/* そのほかのツール：アプリの設定画面のような一覧 */}
       <section>
         <h2 className="mb-2 px-1 text-[12px]" style={{ color: "#888888", fontWeight: 600 }}>
@@ -209,6 +207,70 @@ export function MobileHome() {
         練習を重ねるほど、評価と人物まとめが正確になります
       </p>
     </main>
+  );
+}
+
+function HomeHeader({ title, name, onTour }: { title: string; name: string; onTour: () => void }) {
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <div>
+        <p className="text-[13px]" style={{ color: "#888888" }}>
+          {greeting()}
+          {name ? `、${name}さん` : ""}
+        </p>
+        <h1 className="mt-0.5 text-[22px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
+          {title}
+        </h1>
+      </div>
+      <button
+        onClick={onTour}
+        className="shrink-0 rounded-full px-3 py-1.5 text-[12px]"
+        style={{ background: "#1A1A1A", border: "1px solid #2A2A2A", color: "#CCCCCC" }}
+      >
+        ？ 使い方
+      </button>
+    </div>
+  );
+}
+
+/** 練習 → 評価 → 公開 → 申し込み の流れ。評価が上がるほど企業に見つけてもらいやすいことも伝える */
+function HowItWorks() {
+  const steps = [
+    { n: "1", t: "練習する", d: "AIの面接官と話す" },
+    { n: "2", t: "評価を見る", d: "発言を根拠に採点" },
+    { n: "3", t: "結果を公開", d: "名前は伏せて表示" },
+    { n: "4", t: "申し込みが届く", d: "企業から面談の依頼" },
+  ];
+  return (
+    <section
+      className="rounded-2xl p-4"
+      style={{ background: "#141414", border: "1px solid #262626" }}
+    >
+      <h2 className="text-[13px]" style={{ color: "#F0F0F0", fontWeight: 700 }}>
+        ガチキャリAIの進め方
+      </h2>
+      <div className="mt-3 grid grid-cols-4 gap-1.5">
+        {steps.map((s) => (
+          <div key={s.n} className="flex flex-col items-center text-center">
+            <span
+              className="flex h-8 w-8 items-center justify-center rounded-full text-[13px]"
+              style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 900 }}
+            >
+              {s.n}
+            </span>
+            <span className="mt-1.5 text-[11.5px]" style={{ color: "#F0F0F0", fontWeight: 700 }}>
+              {s.t}
+            </span>
+            <span className="mt-0.5 text-[10px] leading-tight" style={{ color: "#888" }}>
+              {s.d}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11.5px] leading-relaxed" style={{ color: "#AAB4A0" }}>
+        企業は評価で絞り込んで人を探します。練習して評価が上がるほど、見つけてもらいやすくなります。
+      </p>
+    </section>
   );
 }
 
@@ -386,18 +448,12 @@ export function StudentMobileHome() {
   }, [user]);
 
   const name = (user?.user_metadata?.full_name as string | undefined) ?? "";
+  const tour = useWelcomeTour("student");
 
   return (
-    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5">
-      <div>
-        <p className="text-[13px]" style={{ color: "#888888" }}>
-          {greeting()}
-          {name ? `、${name}さん` : ""}
-        </p>
-        <h1 className="mt-0.5 text-[22px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
-          合格に向けて、今日も1回
-        </h1>
-      </div>
+    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5 lg:pt-8">
+      {tour.node}
+      <HomeHeader title="合格に向けて、今日も1回" name={name} onTour={tour.open} />
 
       <Link
         to="/private/student/practice"

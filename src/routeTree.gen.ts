@@ -80,6 +80,7 @@ import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
 import { Route as ApiTalentMessagesRouteImport } from './routes/api/talent/messages'
 import { Route as ApiTalentMyInterviewsRouteImport } from './routes/api/talent/my-interviews'
 import { Route as ApiTalentMyProfileRouteImport } from './routes/api/talent/my-profile'
+import { Route as ApiTalentMyRankRouteImport } from './routes/api/talent/my-rank'
 import { Route as ApiTalentPurchasedRouteImport } from './routes/api/talent/purchased'
 import { Route as ApiTalentRecordingRouteImport } from './routes/api/talent/recording'
 import { Route as ApiTalentSearchRouteImport } from './routes/api/talent/search'
@@ -485,6 +486,11 @@ const ApiTalentMyProfileRoute = ApiTalentMyProfileRouteImport.update({
   path: '/api/talent/my-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTalentMyRankRoute = ApiTalentMyRankRouteImport.update({
+  id: '/api/talent/my-rank',
+  path: '/api/talent/my-rank',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTalentPurchasedRoute = ApiTalentPurchasedRouteImport.update({
   id: '/api/talent/purchased',
   path: '/api/talent/purchased',
@@ -800,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/api/talent/messages': typeof ApiTalentMessagesRoute
   '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -918,6 +925,7 @@ export interface FileRoutesByTo {
   '/api/talent/messages': typeof ApiTalentMessagesRoute
   '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -1037,6 +1045,7 @@ export interface FileRoutesById {
   '/api/talent/messages': typeof ApiTalentMessagesRoute
   '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -1157,6 +1166,7 @@ export interface FileRouteTypes {
     | '/api/talent/messages'
     | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1275,6 +1285,7 @@ export interface FileRouteTypes {
     | '/api/talent/messages'
     | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1393,6 +1404,7 @@ export interface FileRouteTypes {
     | '/api/talent/messages'
     | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1512,6 +1524,7 @@ export interface RootRouteChildren {
   ApiTalentMessagesRoute: typeof ApiTalentMessagesRoute
   ApiTalentMyInterviewsRoute: typeof ApiTalentMyInterviewsRoute
   ApiTalentMyProfileRoute: typeof ApiTalentMyProfileRoute
+  ApiTalentMyRankRoute: typeof ApiTalentMyRankRoute
   ApiTalentPurchasedRoute: typeof ApiTalentPurchasedRoute
   ApiTalentRecordingRoute: typeof ApiTalentRecordingRoute
   ApiTalentSearchRoute: typeof ApiTalentSearchRoute
@@ -2059,6 +2072,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTalentMyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/talent/my-rank': {
+      id: '/api/talent/my-rank'
+      path: '/api/talent/my-rank'
+      fullPath: '/api/talent/my-rank'
+      preLoaderRoute: typeof ApiTalentMyRankRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/talent/purchased': {
       id: '/api/talent/purchased'
       path: '/api/talent/purchased'
@@ -2448,6 +2468,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTalentMessagesRoute: ApiTalentMessagesRoute,
   ApiTalentMyInterviewsRoute: ApiTalentMyInterviewsRoute,
   ApiTalentMyProfileRoute: ApiTalentMyProfileRoute,
+  ApiTalentMyRankRoute: ApiTalentMyRankRoute,
   ApiTalentPurchasedRoute: ApiTalentPurchasedRoute,
   ApiTalentRecordingRoute: ApiTalentRecordingRoute,
   ApiTalentSearchRoute: ApiTalentSearchRoute,

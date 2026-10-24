@@ -1,4 +1,6 @@
 import { rewardReferralOnFirstPractice } from "@/lib/referral";
+import { speechStats } from "@/lib/speech-stats";
+import { sanitizeDelivery } from "@/lib/delivery-tracker";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
@@ -329,6 +331,12 @@ ${conversationText}
                   detailed_analysis: summaryData.detailed_analysis ?? null,
                   // 根拠の引用が本人の発言に実際にあるものだけを残す
                   competencies: sanitizeCompetencies(summaryData.competencies, spokenText),
+                  // 話し方の数字（答えの長さ・言いよどみ）。AIを使わず文字から数える
+                  speech_stats: speechStats(
+                    body.messages.filter((m) => m.role === "user").map((m) => m.content),
+                  ),
+                  // 間・声の波・目線（ブラウザで測った数字だけ）
+                  delivery: sanitizeDelivery((body as { delivery?: unknown }).delivery),
                   // 企業に見せるのはこちら（本人向けの改善点などは企業には出さない）
                   recruiter_view:
                     practiceMode === "individual"

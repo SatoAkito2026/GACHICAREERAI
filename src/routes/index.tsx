@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SafeNavigate } from "@/components/SafeNavigate";
+import { LandingPage } from "@/components/pages/LandingPage";
 
 export const Route = createFileRoute("/")({
-  component: () => <SafeNavigate to="/login" />,
+  component: LandingPage,
 });
