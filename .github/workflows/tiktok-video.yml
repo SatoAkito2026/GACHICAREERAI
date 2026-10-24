@@ -10,6 +10,13 @@ on:
     - cron: "13 7 * * *"
     - cron: "43 7 * * *"
   workflow_dispatch:
+    inputs:
+      format:
+        description: "作る動画（daily＝毎日の動画、ad＝広告）"
+        required: false
+        default: daily
+        type: choice
+        options: [daily, ad]
 
 jobs:
   render:
@@ -36,6 +43,7 @@ jobs:
           APP_URL: https://gachicareer-ai.akitogroup.jp
           STUDIO_SECRET: ${{ secrets.STUDIO_SECRET }}
           ONLY_IF_NONE_TODAY: ${{ github.event_name == 'schedule' && '1' || '' }}
+          FORMAT: ${{ inputs.format || 'daily' }}
         run: node render.mjs
       - name: 失敗したときは、撮ったコマの一部を残す
         if: failure()

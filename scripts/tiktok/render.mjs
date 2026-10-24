@@ -73,7 +73,13 @@ async function main() {
 
   console.log("台本と音声を作っています…");
   // 決まった時刻の実行では、今日の動画がもうあれば作らない（手動のときはいつでも作る）
-  const query = process.env.ONLY_IF_NONE_TODAY ? "?onlyIfNoneToday=1" : "";
+  // FORMAT=ad のときは広告（決まった台本）を作る
+  const query =
+    process.env.FORMAT === "ad"
+      ? "?format=ad"
+      : process.env.ONLY_IF_NONE_TODAY
+        ? "?onlyIfNoneToday=1"
+        : "";
   const job = await api(`/api/studio/job${query}`, { method: "POST" });
   if (job.skipped) {
     console.log("今日の動画はもうできているので、作りませんでした");

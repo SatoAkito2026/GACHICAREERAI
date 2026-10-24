@@ -3,10 +3,12 @@
  *
  * POST /api/studio/job → { id, title, lines, result, audio[], sampleRate, interviewerRate, ... }
  * POST /api/studio/job?onlyIfNoneToday=1 → 今日の動画がもうあれば { skipped: true }
+ * POST /api/studio/job?format=ad → 広告（決まった台本）
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse, serviceClient } from "@/lib/talent";
 import {
+  adScript,
   INTERVIEWER_RATE,
   STUDIO_SAMPLE_RATE,
   isStudioRequest,
@@ -32,8 +34,40 @@ export const Route = createFileRoute("/api/studio/job")({
             .from("tiktok_videos")
             .select("id", { count: "exact", head: true })
             .in("status", ["rendering", "ready", "posted"])
+            .neq("theme", "ad")
             .gte("created_at", todayStart);
           if ((count ?? 0) > 0) return jsonResponse({ skipped: true });
+        }
+
+        // 広告：決まった台本で、ナレーターと面接官の声だけ作る
+        if (new URL(request.url).searchParams.get("format") === "ad") {
+          try {
+            const script = adScript();
+            const audio = await speakLines(script.lines);
+            const { data: row, error } = await supabase
+              .from("tiktok_videos")
+              .insert({
+                theme: script.theme,
+                title: script.title,
+                caption: script.caption,
+                script: script as never,
+                status: "rendering",
+              })
+              .select("id")
+              .single();
+            if (error || !row) throw error ?? new Error("insert failed");
+            return jsonResponse({
+              id: row.id,
+              ...script,
+              audio,
+              sampleRate: STUDIO_SAMPLE_RATE,
+              tempos: script.lines.map((l) => lineTempo(l.speaker)),
+              interviewerRate: INTERVIEWER_RATE,
+            });
+          } catch (e) {
+            console.error("[studio/job ad]", e);
+            return jsonResponse({ error: String((e as Error)?.message ?? e) }, 500);
+          }
         }
 
         // これまでの動画（テーマ・タイトル・再生数）から、伸びたものを真似し、続けて同じテーマにしない
