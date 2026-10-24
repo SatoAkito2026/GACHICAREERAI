@@ -27,6 +27,8 @@ export class AvatarVoice {
   private rate = PLAYBACK_RATE;
   private shapes: VisemeShapes | null = null;
   private playing: { data: Float32Array; sampleRate: number } | null = null;
+  /** 録画用：面接官の声と本人のマイクを混ぜた音の出口 */
+  private recDest: MediaStreamAudioDestinationNode | null = null;
 
   private ensure(): AudioContext {
     if (!this.ctx) {
@@ -87,6 +89,7 @@ export class AvatarVoice {
     source.buffer = buffer;
     source.playbackRate.value = rate;
     source.connect(ctx.destination);
+    if (this.recDest) source.connect(this.recDest);
     this.current = source;
     this.track = track;
     this.playing = { data, sampleRate };
@@ -104,6 +107,17 @@ export class AvatarVoice {
       this.startedAt = ctx.currentTime;
       source.start();
     });
+  }
+
+  /**
+   * 録画用の音（面接官の声＋本人のマイク）。これをカメラの映像と合わせて録ると、両方の声が残る
+   */
+  recordingAudio(mic: MediaStream): MediaStreamTrack[] {
+    const ctx = this.ensure();
+    if (!this.recDest) this.recDest = ctx.createMediaStreamDestination();
+    const tracks = mic.getAudioTracks();
+    if (tracks.length) ctx.createMediaStreamSource(new MediaStream(tracks)).connect(this.recDest);
+    return this.recDest.stream.getAudioTracks();
   }
 
   stop(): void {

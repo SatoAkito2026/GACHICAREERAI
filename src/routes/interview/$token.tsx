@@ -1080,6 +1080,12 @@ function LiveScreen({
         });
     }
 
+    // 最初の挨拶（アバターはブラウザ内で描画するので接続待ちは不要）。二重送信しないよう一度だけ
+    const greet = () => {
+      if (greetedRef.current) return;
+      greetedRef.current = true;
+      void sendTurn("（面接開始）", []);
+    };
     // 画面録画はパソコンだけ（スマホ・タブレットのブラウザには画面録画の機能がない）
     if (!invitation.practice_mode && typeof media?.getDisplayMedia === "function") {
       // 企業の本番面接：画面録画
@@ -1107,20 +1113,29 @@ function LiveScreen({
           }
           const stream = mediaStreamRef.current;
           if (!stream) return;
-          const recorder = startPracticeRecorder(stream, practiceChunksRef.current);
+          // カメラの映像に、面接官の声と本人のマイクを混ぜた音を合わせて録る（両方の声が残る）
+          let recStream = stream;
+          try {
+            recStream = new MediaStream([
+              ...stream.getVideoTracks(),
+              ...voice.recordingAudio(stream),
+            ]);
+          } catch {
+            // 混ぜられない端末は、これまでどおりカメラとマイクだけ
+          }
+          const recorder = startPracticeRecorder(recStream, practiceChunksRef.current);
           if (recorder) {
             practiceRecorderRef.current = recorder;
             setIsRecording(true);
           }
         })
-        .catch(() => {});
+        .catch(() => {})
+        // 録画を始めてから最初のあいさつをする（冒頭が切れないように）
+        .finally(greet);
+      setTimeout(greet, 5000);
     }
 
-    // 最初の挨拶（アバターはブラウザ内で描画するので接続待ちは不要）。二重送信しないよう一度だけ
-    if (!greetedRef.current) {
-      greetedRef.current = true;
-      sendTurn("（面接開始）", []);
-    }
+    if (invitation.practice_mode !== "individual") greet();
 
     return () => {
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -1174,20 +1189,21 @@ function LiveScreen({
       }
 
       if (data.isEnded) {
+        // AIが締めのあいさつを言い終わるまで待ってから保存する（録画が途中で切れないように）
+        await new Promise<void>((resolve) => {
+          const started = Date.now();
+          const checkSpeaking = () => {
+            if (!isAiSpeakingRef.current || Date.now() - started > 60000) {
+              resolve();
+            } else {
+              setTimeout(checkSpeaking, 300);
+            }
+          };
+          setTimeout(checkSpeaking, 500);
+        });
         // 総評生成・保存を待ってから画面遷移（確実に保存させる）
         setIsSavingResult(true);
         await saveInterview(false, withAi);
-        // AIが話し終わるまで待ってから終了画面へ
-        await new Promise<void>((resolve) => {
-          const checkSpeaking = () => {
-            if (!isAiSpeakingRef.current) {
-              resolve();
-            } else {
-              setTimeout(checkSpeaking, 500);
-            }
-          };
-          setTimeout(checkSpeaking, 2000);
-        });
         onEnd();
       }
       return withAi;

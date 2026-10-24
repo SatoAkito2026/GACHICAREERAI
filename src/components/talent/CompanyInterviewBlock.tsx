@@ -4,6 +4,7 @@
  * 7つの評価（根拠つき）と採用担当向けの見立て、会話・録画だけを見せる。
  */
 import { useState } from "react";
+import { RecordingVideo } from "@/components/talent/RecordingVideo";
 import { C, CompetencyBars, EvidenceQuote, Tag } from "@/components/talent/TalentUI";
 import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
 import type { SpeechStats } from "@/lib/speech-stats";
@@ -83,10 +84,8 @@ export function CompanyInterviewBlock({
           {avg && <VerdictCard avg={Number(avg)} forCompany />}
           {iv.settings && <SettingsRow settings={iv.settings} />}
           {iv.recordingUrl && (
-            <video
+            <RecordingVideo
               src={iv.recordingUrl}
-              controls
-              preload="metadata"
               className="w-full rounded-lg"
               style={{ background: "#000", maxHeight: 420 }}
             />
