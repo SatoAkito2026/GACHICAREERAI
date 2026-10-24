@@ -5,10 +5,10 @@
  *   参考動画から学習した「口を開けたとき・横に広げたときの顔全体の動き方」を使うので、あご・ほっぺ・唇が一緒に動く
  *   開いた唇の間には、口を開けた写真から取った口の中（歯・舌）を貼る
  * - 首の傾き・位置: 参考動画の聞いている場面から取り出した動きの数値を、控えめ（6割）にして動かす
- * - 表情: 話している動画から学習した「目を細める・口角を上げる・眉を上げる」ときの顔の動き方で網目を動かす。
- *   話している間は少し目を細めてほほえみ、話し始めや強調で眉を上げる。話し終わったあとも少しほほえみを残す
- * - まばたき: 人の動きに合わせて「さっと閉じて、ゆっくり開く」。閉じるときは目のまわりを目を閉じた写真に素早く切り替え、
- *   開くときは写真を戻してから、細めた目（網目）をゆっくり開いていく（写真を重ねたまま開くと目が二重に見えるため）
+ * - 表情: 話している動画から学習した「口角を上げる・眉を上げる」ときの顔の動き方で網目を動かす。
+ *   話している間は少しほほえみ、話し始めや強調で眉を上げる。話し終わったあとも少しほほえみを残す。
+ *   目を細める動き（eyeField）は、網目で目をつぶすと黒目もつぶれて不自然なので使わない
+ * - まばたき: 目のまわりだけを、同じ構図で目を閉じた写真に 0.14 秒で切り替える（途中の重なりが見えないよう素早く）
  * - 体と背景は動かさない
  */
 import { useEffect, useRef } from "react";
@@ -443,32 +443,24 @@ function setupScene(
     const b = curve[(i + 1) % curve.length];
     return a.map((v, n) => v * (1 - k) + b[n] * k);
   };
-  const hasExpressions = !!(rig.eyeField && rig.smileField && rig.browField);
   const ease = (v: number) => v * v * (3 - 2 * v);
 
-  // まばたき: 人の動き（話している動画で測ったもの）に合わせて、さっと閉じて少し止まり、ゆっくり開く。
+  // まばたき: 目のまわりを目を閉じた写真に 0.14 秒で切り替える（途中の重なりが見えないよう素早く）。
+  // 網目で目を細めたり、ゆっくり開いたりすると黒目がつぶれて不自然に見えたので使わない。
   // 話している間は 2〜4 秒おき、黙っている間は 3〜6 秒おき
-  const CLOSE = 0.06;
-  const HOLD = 0.1;
-  const SWAP_BACK = 0.04;
-  const REOPEN = hasExpressions ? 0.26 : 0;
-  const REOPEN_FROM = -0.2; // 写真を戻した直後の目の開き具合（網目で細めた目から開いていく）
+  const BLINK_TIME = 0.14;
   let nextBlink = 1.5 + Math.random() * 2;
   let blinkStart = -1;
-  const blinkAt = (t: number, speaking: number) => {
+  const blinkAmount = (t: number, speaking: number) => {
     if (blinkStart < 0 && t > nextBlink) blinkStart = t;
-    if (blinkStart < 0) return { photo: 0, eye: 0 };
-    const p = t - blinkStart;
-    if (p < CLOSE)
-      return { photo: ease(p / CLOSE), eye: REOPEN ? REOPEN_FROM * ease(p / CLOSE) : 0 };
-    if (p < CLOSE + HOLD) return { photo: 1, eye: REOPEN ? REOPEN_FROM : 0 };
-    const q = p - CLOSE - HOLD;
-    if (q < SWAP_BACK) return { photo: 1 - ease(q / SWAP_BACK), eye: REOPEN ? REOPEN_FROM : 0 };
-    const r = q - SWAP_BACK;
-    if (r < REOPEN) return { photo: 0, eye: REOPEN_FROM * (1 - r / REOPEN) ** 2 };
-    blinkStart = -1;
-    nextBlink = t + (speaking > 0.5 ? 2 + Math.random() * 2 : 3 + Math.random() * 3);
-    return { photo: 0, eye: 0 };
+    if (blinkStart < 0) return 0;
+    const p = (t - blinkStart) / BLINK_TIME;
+    if (p >= 1) {
+      blinkStart = -1;
+      nextBlink = t + (speaking > 0.5 ? 2 + Math.random() * 2 : 3 + Math.random() * 3);
+      return 0;
+    }
+    return p < 0.35 ? ease(p / 0.35) : p < 0.6 ? 1 : 1 - ease((p - 0.6) / 0.4);
   };
 
   // 眉: 話し始めと、ときどき強調するところで少し上げる
@@ -535,15 +527,12 @@ function setupScene(
     if (t > browUntil) browTarget = 0;
     brow += (browTarget - brow) * Math.min(1, dt * (browTarget > brow ? 9 : 3));
 
-    const blink = blinkAt(t, speaking);
-    // 話している間は笑顔で頬が上がって目が少し細くなる（動画では目の開きが 0.39 → 0.28 ほど）
-    const eye = -0.08 * Math.max(speaking, smile * 0.6) + blink.eye;
     const smileAmount = 0.003 + 0.011 * smile;
 
     const set = (u: ReturnType<typeof uniforms>) => {
       gl.uniform1f(u.open, open);
       gl.uniform1f(u.width, width);
-      gl.uniform1f(u.eye, eye);
+      gl.uniform1f(u.eye, 0);
       gl.uniform1f(u.smile, smileAmount);
       gl.uniform1f(u.brow, brow);
       gl.uniform2f(u.pivot, ...rig.pivot);
@@ -562,7 +551,7 @@ function setupScene(
 
     gl.useProgram(faceProg);
     set(faceU);
-    gl.uniform1f(uBlink, blink.photo);
+    gl.uniform1f(uBlink, blinkAmount(t, speaking));
     gl.bindVertexArray(face.vao);
     gl.drawElements(gl.TRIANGLES, face.count, gl.UNSIGNED_SHORT, 0);
     gl.bindVertexArray(null);
