@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { RecordingVideo } from "@/components/talent/RecordingVideo";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -236,13 +237,13 @@ export function PracticeHistoryContent({
               </summary>
 
               {r.recordingUrl && (
-                <video
-                  src={r.recordingUrl}
-                  controls
-                  preload="metadata"
-                  className="mt-4 w-full rounded-xl"
-                  style={{ background: "#000", maxHeight: 360 }}
-                />
+                <div className="mt-4">
+                  <RecordingVideo
+                    src={r.recordingUrl}
+                    className="w-full rounded-xl"
+                    style={{ background: "#000", maxHeight: 360 }}
+                  />
+                </div>
               )}
               {r.feedback && (
                 <div className="mt-4 flex justify-end">
