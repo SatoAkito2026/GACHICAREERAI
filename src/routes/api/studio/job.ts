@@ -46,7 +46,8 @@ export const Route = createFileRoute("/api/studio/job")({
             const script = adScript(
               params.get("platform") === "instagram" ? "instagram" : "tiktok",
             );
-            const audio = await speakLines(script.lines);
+            // 広告は面接官の声をはっきり・自然な速さに（毎日の動画のように速くしない）
+            const audio = await speakLines(script.lines, undefined, { clearInterviewer: true });
             const { data: row, error } = await supabase
               .from("tiktok_videos")
               .insert({
@@ -65,8 +66,10 @@ export const Route = createFileRoute("/api/studio/job")({
               ...script,
               audio,
               sampleRate: STUDIO_SAMPLE_RATE,
-              tempos: script.lines.map((l) => lineTempo(l.speaker)),
-              interviewerRate: INTERVIEWER_RATE,
+              tempos: script.lines.map((l) =>
+                l.speaker === "interviewer" ? 1 : lineTempo(l.speaker),
+              ),
+              interviewerRate: 1,
             });
           } catch (e) {
             console.error("[studio/job ad]", e);

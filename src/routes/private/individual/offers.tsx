@@ -84,6 +84,8 @@ function OffersPage() {
         title="オファー"
         subtitle="プロフィールを見た企業からの面談の申し込みです。承諾すると企業と直接メッセージでやり取りできます。辞退しても理由は伝わりません。"
       >
+        {/* 企業にどう見えているかを、いつでもすぐ確かめられるように */}
+        {!selected && <ProfileLinkCard />}
         {!offers ? (
           error ? (
             <ErrorText>{error}</ErrorText>
@@ -131,11 +133,12 @@ function OffersPage() {
             <p className="text-[14px]" style={{ color: C.sub, lineHeight: 1.8 }}>
               まだ申し込みは届いていません。プロフィールを公開して模擬面接を続けると、企業の目に留まりやすくなります。
             </p>
-            <div className="mt-4 flex gap-3">
-              <Link to="/private/individual/talent" style={{ color: C.accent, fontSize: 14 }}>
-                公開プロフィールを確認 →
-              </Link>
-              <Link to="/private/individual/practice" style={{ color: C.accent, fontSize: 14 }}>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/private/individual/practice"
+                className="rounded-full px-5 py-2.5 text-[14px]"
+                style={{ background: C.accent, color: "#0F0F0F", fontWeight: 800 }}
+              >
                 模擬面接を受ける →
               </Link>
             </div>
@@ -216,5 +219,29 @@ function CompanyInfo({ offer }: { offer: Offer }) {
           ))}
       </dl>
     </div>
+  );
+}
+
+/** 公開プロフィール（企業から見える内容）へのリンク。オファー画面のいちばん上に置く */
+function ProfileLinkCard() {
+  return (
+    <Link
+      to="/private/individual/talent"
+      className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+      style={{ background: "#16200A", border: "1px solid #3A4A12" }}
+    >
+      <span className="text-[22px]">🌐</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14.5px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
+          公開プロフィールを確認・編集する
+        </span>
+        <span className="block text-[12px]" style={{ color: "#AAB4A0" }}>
+          企業からどう見えるか・公開する面接結果・録画を見せるか
+        </span>
+      </span>
+      <span className="text-[13px]" style={{ color: C.accent, fontWeight: 800 }}>
+        開く →
+      </span>
+    </Link>
   );
 }

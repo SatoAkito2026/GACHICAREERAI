@@ -2,6 +2,7 @@
  * 練習面接（個人モード）の録画。本人がプロフィールで「録画を残す」を選んだときだけ使う。
  *
  * GET  /api/talent/recording?token=               → この面接を録画するか { record }
+ * POST /api/talent/recording { token, action: "choose", record } → 面接の前に本人が選んだ「録画する／しない」を保存する
  * POST /api/talent/recording { token, interviewId } → Supabase Storage へ直接アップロードするための署名付きURL
  * POST /api/talent/recording { token, interviewId, action: "done" } → アップロードできたかを確かめて記録する
  *
@@ -52,6 +53,28 @@ export const Route = createFileRoute("/api/talent/recording")({
         }
         const inv = await loadInvitation(supabase, String(body.token ?? ""));
         if (!inv) return jsonResponse({ error: "Invalid token" }, 403);
+
+        // 面接の前の選択（毎回必ず選ぶ）。選んだ内容は次の練習の初期値にもなる
+        if (body.action === "choose") {
+          const record = (body as { record?: unknown }).record === true;
+          const { data: row } = await supabase
+            .from("candidate_profiles")
+            .select("user_id")
+            .eq("user_id", inv.userId)
+            .maybeSingle();
+          if (row) {
+            await supabase
+              .from("candidate_profiles")
+              .update({ record_practice: record })
+              .eq("user_id", inv.userId);
+          } else {
+            await supabase
+              .from("candidate_profiles")
+              .insert({ user_id: inv.userId, record_practice: record });
+          }
+          return jsonResponse({ ok: true, record });
+        }
+
         if (!inv.record) return jsonResponse({ skipped: true });
 
         const { data: interview } = await supabase

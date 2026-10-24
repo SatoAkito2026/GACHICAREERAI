@@ -235,24 +235,17 @@ function TalentProfilePage() {
                 </Field>
 
                 <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: C.card2 }}>
-                  <Toggle
-                    checked={form.record_practice}
-                    onChange={(v) =>
-                      setForm((f) => ({
-                        ...f,
-                        record_practice: v,
-                        show_recording: v ? f.show_recording : false,
-                      }))
-                    }
-                    label="これからの模擬面接（個人）をカメラで録画して残す"
-                    hint="オンにして「保存する」を押すと、次の練習から録画されます（面接中は画面に「録画中」と出ます）。新しいものから3回分まで残り、練習履歴と下の「中身を見る」で見られます"
-                  />
+                  <p className="text-[13px]" style={{ color: C.text, fontWeight: 700 }}>
+                    🎥 練習の録画
+                  </p>
+                  <p className="text-[12px]" style={{ color: C.sub, lineHeight: 1.7 }}>
+                    録画する・しないは、模擬面接の前に毎回選びます。録画は新しいものから3回分まで残り、練習履歴で見返せます。
+                  </p>
                   <Toggle
                     checked={form.show_recording}
-                    disabled={!form.record_practice}
                     onChange={(v) => setForm((f) => ({ ...f, show_recording: v }))}
-                    label="録画を、コインで見た企業に見せる"
-                    hint="オフにすると企業には録画が見えません"
+                    label="録画を企業にも見せる"
+                    hint="オンにすると、あなたの面接結果を見た企業（結果を購入した企業・応募先の企業）が録画も見られます。オフなら企業には見えません"
                   />
                 </div>
 

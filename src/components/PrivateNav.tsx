@@ -13,10 +13,21 @@ import {
 } from "lucide-react";
 import { OPEN_AI_CHAT_EVENT } from "@/components/PersistentChatBubble";
 
-const TABS = [
-  { label: "個人", to: "/private/individual" },
-  { label: "受験生", to: "/private/student" },
+// パソコンの上のメニュー：スマホの下のメニューと同じ並び（公開プロフィールにすぐ行けるように）
+const INDIVIDUAL_TABS = [
+  { label: "ホーム", to: "/private/individual", exact: true },
+  { label: "練習", to: "/private/individual/practice" },
+  { label: "評価", to: "/private/individual/history" },
+  { label: "公開プロフィール", to: "/private/individual/talent" },
   { label: "オファー", to: "/private/individual/offers" },
+  { label: "マイページ", to: "/mypage" },
+] as const;
+
+const STUDENT_TABS = [
+  { label: "ホーム", to: "/private/student", exact: true },
+  { label: "練習", to: "/private/student/practice" },
+  { label: "履歴", to: "/private/student/history" },
+  { label: "書類", to: "/private/student/documents" },
   { label: "マイページ", to: "/mypage" },
 ] as const;
 
@@ -46,8 +57,10 @@ export default function PrivateNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isStudent = pathname.startsWith("/private/student");
   const bottomItems = isStudent ? STUDENT_BOTTOM : INDIVIDUAL_BOTTOM;
-  // 「オファー」は個人の中のページなので、そこにいるときは「個人」ではなく「オファー」を光らせる
-  const activeTab = [...TABS].reverse().find((t) => isActive(pathname, t.to))?.to ?? null;
+  const tabs = isStudent ? STUDENT_TABS : INDIVIDUAL_TABS;
+  // いちばん深く一致するものを光らせる（「ホーム」は完全一致だけ）
+  const activeTab =
+    [...tabs].reverse().find((t) => isActive(pathname, t.to, "exact" in t && t.exact))?.to ?? null;
 
   return (
     <>
@@ -66,8 +79,9 @@ export default function PrivateNav() {
         {/* パソコン：上にタブ */}
         <div className="hidden items-center gap-1.5 lg:flex">
           <NotificationBell />
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const active = activeTab === tab.to;
+            const highlight = tab.to === "/private/individual/talent" && !active;
             return (
               <Link
                 key={tab.to}
@@ -76,7 +90,9 @@ export default function PrivateNav() {
                 style={
                   active
                     ? { background: "#C8FF00", color: "#0F0F0F", fontWeight: 600 }
-                    : { color: "#888888", fontWeight: 500 }
+                    : highlight
+                      ? { color: "#C8FF00", fontWeight: 600, border: "1px solid #3A4A12" }
+                      : { color: "#AAAAAA", fontWeight: 500 }
                 }
               >
                 {tab.label}
