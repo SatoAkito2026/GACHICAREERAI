@@ -8,9 +8,9 @@
     * 口の開き・横幅が変わったとき、顔の各点がどう動くか（あご・ほっぺ・唇が一緒に動く量）を学習する
     * 聞いているときの首の傾き・位置、まばたき、眉の動きを数値として取り出す
 - 口の中（歯・舌）は、同じ構図で口を開けた写真から取り、開いた口の形に合わせて貼る
-- 話している動画（任意）からは、話している間の表情と首の動きを取り出す:
+- 話している動画（任意）からは、話している間の表情を取り出す:
     * 目を細める（笑うと頬が上がって目が細くなる）・口角を上げる・眉を上げるときの顔の各点の動き
-    * 話している間の首の傾き・位置
+    * 首の動きは使わない（AIで作った動画は顔が細かく揺れていて、そのまま使うと顔がぐらぐらして見えたため）
 
 出力: public/avatar/rig.json（ブラウザが読み込む）、public/avatar/mouth-inside.webp
 必要なもの: mediapipe==0.10.14, opencv-python-headless, numpy
@@ -96,8 +96,8 @@ def region(base, eyew, kind):
     return np.array(out)
 
 
-def learn_talking(video, ffmpeg, base, eyew, W, H):
-    """話している動画から、表情の動き（目を細める・口角・眉）と話している間の首の動きを取り出す"""
+def learn_talking(video, ffmpeg, base, eyew):
+    """話している動画から、表情の動き（目を細める・口角・眉）を取り出す"""
     with tempfile.TemporaryDirectory() as tmp:
         # 小さい動画は顔の点が取りにくいので、拡大してから測る
         subprocess.run(
@@ -110,7 +110,7 @@ def learn_talking(video, ffmpeg, base, eyew, W, H):
     ref = vid[0]
     v_eyew = np.linalg.norm(ref[33] - ref[263])
     k = eyew / v_eyew
-    feats, disp, pose = [], [], []
+    feats, disp = [], []
     for f in vid:
         sc, r, t = similarity(f[POSE_POINTS], ref[POSE_POINTS])
         g = (sc * (r @ f.T)).T + t
@@ -126,9 +126,6 @@ def learn_talking(video, ffmpeg, base, eyew, W, H):
             (g[152][1] - g[1][1]) / v_eyew,
         ])
         disp.append(g)
-        ang = -np.degrees(np.arctan2(r[1, 0], r[0, 0]))
-        center = f[POSE_POINTS].mean(0) - ref[POSE_POINTS].mean(0)
-        pose.append([ang, 1 / sc, center[0] * k / W, center[1] * k / H])
     feats = np.array(feats)
     disp = np.array(disp).reshape(len(vid), -1)
     blinking = feats[:, 2] < 0.18
@@ -140,9 +137,8 @@ def learn_talking(video, ffmpeg, base, eyew, W, H):
     eye_f = fields[2] * region(base, eyew, "eye")[:, None]
     smile_f = fields[3] * region(base, eyew, "smile")[:, None]
     brow_f = fields[4] * region(base, eyew, "brow")[:, None]
-    talk = smooth_loop(pose + pose[-2:0:-1], np.concatenate([blinking, blinking[-2:0:-1]]))
     print("talk frames", len(vid), "eye open", feats[use, 2].min().round(2), feats[use, 2].max().round(2))
-    return eye_f, smile_f, brow_f, talk
+    return eye_f, smile_f, brow_f
 
 
 def detect(img_bgr, static=True, fm=None):
@@ -315,15 +311,12 @@ def main():
     pad = lambda f: [[round(x / W, 5), round(y / H, 5)] for x, y in list(f) + [np.zeros(2)] * (len(verts) - n_face)]
     extra = {}
     if talk_video:
-        eye_f, smile_f, brow_f, talk = learn_talking(talk_video, ffmpeg, base, eyew, W, H)
+        eye_f, smile_f, brow_f = learn_talking(talk_video, ffmpeg, base, eyew)
         extra = {
             # 表情の動き（目の開き具合の比率 / 目の間の距離を 1 とした口角・眉の高さ、1 あたりの点の動き）
             "eyeField": pad(eye_f),
             "smileField": pad(smile_f),
             "browField": pad(brow_f),
-            # 話している間の首の動き（25 コマ/秒）
-            "talk": talk,
-            "talkFps": 25,
         }
 
     pivot = base[152] + np.array([0, 0.35 * eyew])  # あごの少し下（首）を中心に頭を傾ける

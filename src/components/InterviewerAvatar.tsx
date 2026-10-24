@@ -4,7 +4,7 @@
  * - 口: 音声から作った口の形（avatar-voice.ts / lipsync.ts）に合わせて網目を動かす。
  *   参考動画から学習した「口を開けたとき・横に広げたときの顔全体の動き方」を使うので、あご・ほっぺ・唇が一緒に動く
  *   開いた唇の間には、口を開けた写真から取った口の中（歯・舌）を貼る
- * - 首の傾き・位置: 参考動画の聞いている場面から取り出した動きの数値で動かす。話している間は、話している動画の首の動きを重ねる
+ * - 首の傾き・位置: 参考動画の聞いている場面から取り出した動きの数値を、控えめ（6割）にして動かす
  * - 表情: 話している動画から学習した「目を細める・口角を上げる・眉を上げる」ときの顔の動き方で網目を動かす。
  *   話している間は少し目を細めてほほえみ、話し始めや強調で眉を上げる。話し終わったあとも少しほほえみを残す
  * - まばたき: 人の動きに合わせて「さっと閉じて、ゆっくり開く」。閉じるときは目のまわりを目を閉じた写真に素早く切り替え、
@@ -22,6 +22,8 @@ const ASSETS = {
   blink: "/avatar/eyes-closed.webp",
 } as const;
 
+/** 首の動きの大きさ（参考動画の動きそのままだと、顔が揺れて見えるため控えめにする） */
+const HEAD_MOTION = 0.6;
 /** 縦長の画面で中心に残す位置（写真の幅を 1 とした比率） */
 const FOCUS_X = 0.524;
 // まばたきで目を閉じた写真に切り替える範囲（顔の網目の点番号）
@@ -49,9 +51,6 @@ type Rig = {
   eyeField?: [number, number][];
   smileField?: [number, number][];
   browField?: [number, number][];
-  /** 話している間の首の動き */
-  talk?: [number, number, number, number][];
-  talkFps?: number;
 };
 
 type Props = {
@@ -444,8 +443,6 @@ function setupScene(
     const b = curve[(i + 1) % curve.length];
     return a.map((v, n) => v * (1 - k) + b[n] * k);
   };
-  const talk = rig.talk;
-  const talkFps = rig.talkFps ?? 25;
   const hasExpressions = !!(rig.eyeField && rig.smileField && rig.browField);
   const ease = (v: number) => v * v * (3 - 2 * v);
 
@@ -515,15 +512,11 @@ function setupScene(
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
-    let [ang, scale, tx, ty] = sampleCurve(rig.idle, rig.fps, t);
-    if (talk && speaking > 0.001) {
-      // 話している間の首の動き（話している動画のものを、少し控えめにして重ねる）
-      const [ta, ts, tx2, ty2] = sampleCurve(talk, talkFps, t);
-      ang += ta * 0.7 * speaking;
-      scale += (ts - 1) * speaking;
-      tx += tx2 * 0.5 * speaking;
-      ty += ty2 * 0.5 * speaking;
-    }
+    const [idleAng, idleScale, idleX, idleY] = sampleCurve(rig.idle, rig.fps, t);
+    const ang = idleAng * HEAD_MOTION;
+    const scale = 1 + (idleScale - 1) * HEAD_MOTION;
+    const tx = idleX * HEAD_MOTION;
+    const ty = idleY * HEAD_MOTION;
     // 話している間は、ゆっくり小さくうなずく（音節ごとに動かすと顔が小刻みに揺れて見えるため）
     const nod = speaking * 0.0012 * (0.5 + 0.5 * Math.sin(t * 2.4));
 
