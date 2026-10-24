@@ -101,7 +101,7 @@ def posupos_ld(html, mode):
          "description": desc, "url": url, "image": f"{SITE}/assets/img/ogp-posupos-{mode}.png",
          "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": f"{SITE}/"},
          "offers": [{"@type": "Offer", "name": n, "price": str(v), "priceCurrency": "JPY", "url": url + "#plans"}
-                    for n, v in (("ライトプラン（月額・税込）", 11000), ("スタンダードプラン（月額・税込）", 22000 if mode == "day" else 33000), ("個別プラン（月額・税込）〜", 55000))]},
+                    for n, v in (("ライトプラン（月額・税込）", 11000), ("スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", 22000 if mode == "day" else 33000), ("個別プラン（月額・税込）〜", 55000))]},
         {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]},
         {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": f"{SITE}/"},

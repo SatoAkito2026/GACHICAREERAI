@@ -312,6 +312,17 @@ p{margin:0}
 .plan.open li.plan-more,.plan.open ul.plan-more{display:grid}.plan.open p.plan-more{display:flex}
 .plan .toggle{appearance:none;border:1px solid var(--line);background:var(--white);border-radius:999px;font:inherit;font-weight:700;font-size:14px;padding:10px;cursor:pointer;color:var(--blue)}
 .plan-note{margin-top:20px;font-size:13.5px;color:var(--ink-2)}
+.plan .price .cp{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:2px}
+.plan .price .reg{display:block;font-size:13px;font-weight:700;margin-top:2px}
+.plan .camp{font-size:12.5px;line-height:1.7;color:var(--ink-2);background:var(--mist);border-radius:10px;padding:8px 12px;margin:0}
+.annual{margin-top:28px;border:1px solid var(--line);border-radius:24px;background:var(--white);padding:24px;display:grid;gap:14px}
+.annual h3{font-size:21px;margin:0}
+.annual .lead2{margin:0;font-size:14.5px;color:var(--ink-2)}
+.annual .disc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.annual .disc div{border-radius:16px;background:var(--mist);padding:14px 10px;text-align:center}
+.annual .disc small{display:block;font-size:13px;font-weight:700;color:var(--ink-2)}
+.annual .disc b{display:block;font-size:clamp(18px,3vw,24px);font-weight:900;color:var(--blue)}
+.annual ul{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
 
 /* ===== 8. よくある質問 ===== */
 .faq{display:grid;gap:10px;max-width:860px}
@@ -847,10 +858,10 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
         <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6"/></svg></span><h3>注文・会計・厨房</h3><p>配置図で卓を開いて、注文からお会計まで。注文はそのまま厨房の画面へ。料理とドリンクの持ち場も分けられます。</p></article>
         <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg></span><h3>QR 注文・券売機</h3><p>お客さまのスマホや卓のタブレットから注文。券売機（食券）にもなります。お持ち帰りの軽減税率にも対応。</p></article>
-        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h4M15 10v4"/></svg></span><h3>給料・打刻・シフト</h3><p>IC カードでタッチして打刻。シフトの希望集めから、給料の計算・前借りの差し引きまで自動です。</p></article>
-        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h3>お金・日報・在庫</h3><p>利益・原価率・レジの現金・経費をまとめて確認。よく出たメニューと在庫もひと目で。会計ソフトへの書き出しも。</p></article>
+        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 12h4M15 10v4"/></svg></span><h3>給料・打刻・シフト</h3><p>IC カードでタッチして打刻。シフトの希望集めから、深夜時給・交通費を入れた給料の計算、前借りの差し引きまで自動です。</p></article>
+        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h3>お金・日報・在庫</h3><p>利益・原価率・レジの現金・経費をまとめて確認。よく出たメニューと在庫もひと目で。会計ソフトへの書き出しや、お店の確定申告の準備も。</p></article>
         <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><h3>ポイント・会員証</h3><p>名前や電話番号を聞かずに、会員証の QR でポイントを貯めて使えます。クーポンも作れます。</p></article>
-        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><h3>スタッフのスマホ画面</h3><p>スタッフは自分のスマホで、シフト・給料・チャットを確認。グループ店なら5店舗まで切りかえて管理できます。</p></article>
+        <article class="can-c rv"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><h3>スタッフのスマホ画面</h3><p>スタッフは自分のスマホで、シフト・給料・チャットを確認。グループ店なら、5店舗まで切りかえて使えます。</p></article>
 
 
       </div>
@@ -1174,6 +1185,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
             <details class="tc"><summary><b>勤怠</b><span>打刻の一覧・直し・修正申請の承認</span></summary><ul><li>打刻の一覧・直し・再出勤</li><li>修正申請の承認</li></ul></details>
 
             <details class="tc"><summary><b>給料</b><span>時給・手当・控除、Excel 出力</span></summary><ul><li>日払い・週払い・月払い</li><li>期間ごとの給料（時給・手当・控除）</li><li>金額を決める → 渡したら「渡した」</li><li>決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ</li><li>Excel 出力</li></ul></details>
+
+
+            <details class="tc"><summary><b>深夜時給</b><span>22時〜翌5時の時給を25%増しなど</span></summary><ul><li>22時〜翌5時のスタッフの時給を25%増しなど</li></ul></details>
+
+            <details class="tc"><summary><b>交通費</b><span>1日いくら・月の上限を人ごとに</span></summary><ul><li>1日いくら</li><li>月の上限</li><li>人ごとに決められる</li></ul></details>
+            <details class="tc"><summary><b>深夜料金（お会計）</b><span>22時からの注文に10%など</span></summary><ul><li>22時からの注文に10%など</li></ul></details>
+            <details class="tc"><summary><b>お店の確定申告の準備</b><span>青色申告決算書の数字と消費税の目安</span></summary><ul><li>1年の売上・仕入れ・経費・給料を集める</li><li>青色申告決算書の数字を出す</li><li>消費税の目安を出す</li></ul></details>
             <details class="tc"><summary><b>前借り</b><span>記録と、次の給料からの自動の差し引き</span></summary><ul><li>前借りの記録</li><li>次の給料から自動で差し引き</li></ul></details>
             <details class="tc"><summary><b>シフト</b><span>希望の締め切り・決めたシフト</span></summary><ul><li>希望の締め切り</li><li>決めたシフト</li><li>臨時営業／休業</li></ul></details>
             <details class="tc"><summary><b>アカウント</b><span>スタッフのログインと権限</span></summary><ul><li>スタッフのログイン（メールアドレス＋パスワード）</li><li>アカウントごとの権限</li></ul></details>
@@ -1184,7 +1202,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
             <details class="tc"><summary><b>Excel 取り込み</b><span>今までの Excel の実績を取り込む</span></summary><ul><li>今までの Excel の実績を取り込める</li></ul></details>
             <details class="tc"><summary><b>設定</b><span>使う機能・支払い方法・見た目など</span></summary><ul><li>使う機能、支払い方法・手数料、Square</li><li>お客さまの注文・券売機・厨房、レシート</li><li>営業時間、給料日、呼び名、見た目（色・メニューの並び）</li><li>店内モード：お店に置く端末を「店内と伝票だけ」に</li></ul></details>
             <details class="tc"><summary><b>変更の記録</b><span>だれが・いつ・何を変えたか</span></summary><ul><li>だれが・いつ・何を変えたか</li><li>改ざんチェックつき</li></ul></details>
-            <details class="tc"><summary><b>ご契約・お支払い</b><span>プラン・お試し・グループ店</span></summary><ul><li>プラン・お試し・カード登録</li><li>グループ店</li><li>プランの比べ表</li></ul></details>
+            <details class="tc"><summary><b>ご契約・お支払い</b><span>プラン・お試し・グループ店・年間契約</span></summary><ul><li>プラン・お試し・カード登録</li><li>グループ店（5店舗まで・料金は1店舗ごと）</li><li>年間契約（前払い）</li><li>プランの比べ表</li></ul></details>
             <details class="tc"><summary><b>お問い合わせ</b><span>運営への問い合わせ・LINE</span></summary><ul><li>運営への問い合わせ・LINE</li></ul></details>
           </div>
         </div>
@@ -1220,7 +1238,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <p class="eyebrow">Cast mode</p>
 
         <h2>スタッフのスマホ画面</h2>
-        <p>キャストモード（従業員の画面）で、スタッフは自分のスマホからシフト・給料・チャットを確認できます。シフト集めや給料の問い合わせが減ります。</p>
+        <p>キャストモード（従業員の画面）で、スタッフは自分のスマホからシフト・給料・チャットを確認できます。シフト集めや給料の問い合わせが減ります。グループ店なら、5店舗まで切りかえて使えます。</p>
 
 
       </div>
@@ -1275,11 +1293,18 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          <p class="price"><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円・5店舗まで追加料金なし</span></p>
+          <p class="price"><span class="cp">作りたてキャンペーン価格</span><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="reg">（通常価格 月額33,000円・税込）</span><span class="pn">1店舗ごと・初期費用 0円</span></p>
+          <p class="camp">キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。</p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
 
-            <li><span>グループ店<small>1つの契約で5店舗まで（お店の切りかえ）</small></span></li>
+
+            <li><span>深夜料金（お会計）<small>22時からの注文に10%など</small></span></li>
+            <li><span>深夜時給<small>22時〜翌5時のスタッフの時給を25%増しなど</small></span></li>
+            <li><span>交通費<small>1日いくら・月の上限を人ごとに決められる</small></span></li>
+            <li><span>お店の確定申告の準備<small>1年の売上・仕入れ・経費・給料を集めて、青色申告決算書の数字と消費税の目安を出す</small></span></li>
+
+            <li><span>グループ店<small>5店舗まで（お店の切りかえ）。料金は1店舗ごと</small></span></li>
             <li><span>キャストモード<small>スタッフがスマホでシフト・給料・チャット</small></span></li>
             <li><span>打刻・シフト・給料<small>IC カード打刻、シフトの希望→決定、給料の計算・給料日・前借り</small></span></li>
             <li><span>顧客カルテ・クーポン・ボトルキープ・タグ<small>新規・リピートなど</small></span></li>
@@ -1318,6 +1343,18 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         </article>
       </div>
       <p class="plan-note rv">※ どのプランも、パソコン・タブレット・スマホのブラウザで動きます（アプリのインストールは不要。ホーム画面に追加もできます）。</p>
+      <p class="plan-note rv">※ グループ店は5店舗まで。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、5店舗まで切りかえて使えます。</p>
+      <div class="annual rv" id="annual">
+        <h3>年間契約（前払い）</h3>
+        <p class="lead2">1年分以上をまとめて前払いすると、月額で払うよりおトクになります。</p>
+        <div class="disc"><div><small>1年契約</small><b>1か月分おトク</b></div><div><small>2年契約</small><b>3か月分おトク</b></div><div><small>3年契約</small><b>5か月分おトク</b></div></div>
+        <ul>
+          <li>前払いのお支払いです（Stripe。領収書が出ます）。</li>
+          <li>自動では更新しません。期間が終わる1か月前に、画面でお知らせします。</li>
+          <li>途中でおやめになっても、残りの期間のお金はお返しできません。</li>
+          <li>グループ店は、1店舗の金額 × 店舗の数です。</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -1340,7 +1377,9 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
         <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。</p></details>
         <details><summary>解約はできますか？</summary><p>ご契約の内容や解約の方法は、お問い合わせのときにご案内します。</p></details>
-        <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン 22,000円（5店舗まで追加料金なし）、個別プラン 55,000円〜です。初期費用は0円です。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 22,000円（通常価格 33,000円）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。</p></details>
+        <details><summary>グループ店（2店舗以上）の料金は？</summary><p>グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、5店舗まで切りかえて使えます。</p></details>
+        <details><summary>年間契約はありますか？</summary><p>あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。</p></details>
       </div>
     </div>
   </section>
@@ -1439,5 +1478,5 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ラーメン・居酒屋・カフェ・焼肉・寿司など昼の飲食店のための会計ソフト。注文・会計・厨房・券売機から、打刻・シフト・給料・顧客までまとめて管理。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "スタンダードプラン（月額・税込）", "price": "22000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "券売機（食券）としても使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。お店の端末を券売機にして、お金を入れてメニューを選び、食券を印刷できます。"}}, {"@type": "Question", "name": "お持ち帰りの消費税（軽減税率）は？", "acceptedAnswer": {"@type": "Answer", "text": "お持ち帰りの軽減税率に対応しています。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "解約はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "ご契約の内容や解約の方法は、お問い合わせのときにご案内します。"}}, {"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン 22,000円（5店舗まで追加料金なし）、個別プラン 55,000円〜です。初期費用は0円です。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script></body>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ラーメン・居酒屋・カフェ・焼肉・寿司など昼の飲食店のための会計ソフト。注文・会計・厨房・券売機から、打刻・シフト・給料・顧客までまとめて管理。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "22000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "券売機（食券）としても使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。お店の端末を券売機にして、お金を入れてメニューを選び、食券を印刷できます。"}}, {"@type": "Question", "name": "お持ち帰りの消費税（軽減税率）は？", "acceptedAnswer": {"@type": "Answer", "text": "お持ち帰りの軽減税率に対応しています。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "解約はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "ご契約の内容や解約の方法は、お問い合わせのときにご案内します。"}}, {"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 22,000円（通常価格 33,000円）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、5店舗まで切りかえて使えます。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script></body>
 </html>
