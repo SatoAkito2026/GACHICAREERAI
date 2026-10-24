@@ -16,6 +16,13 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import {
+  DeliveryScreen,
+  InterviewScreen,
+  OfferScreen,
+  PhoneFrame,
+  ResultScreen,
+} from "@/components/landing/Mockups";
 import { COMPANY_INTERVIEW_PRICE_JPY, PRACTICE_RULES } from "@/lib/plan-rules";
 import { COIN_EXPIRY_MONTHS, COIN_PACKS, PRICE_TIERS } from "@/lib/coins";
 
@@ -28,6 +35,8 @@ export function LandingPage() {
       <Header loggedIn={!!session} />
       <Hero loggedIn={!!session} />
       <Steps />
+      <Screens />
+      <AdVideo loggedIn={!!session} />
       <Features />
       <ResultSample />
       <Pricing />
@@ -152,72 +161,116 @@ function Hero({ loggedIn }: { loggedIn: boolean }) {
           </ul>
         </div>
 
-        {/* 面接中の画面のイメージ */}
-        <div className="relative mx-auto w-full max-w-[420px]">
-          <div
-            className="overflow-hidden rounded-[28px]"
-            style={{ border: "1px solid #2A2A2A", boxShadow: "0 30px 80px rgba(0,0,0,.6)" }}
-          >
-            <div className="relative aspect-[4/5]">
-              <img
-                src="/avatar/base.webp"
-                alt="AIの面接官"
-                className="h-full w-full object-cover"
-                style={{ objectPosition: "50% 15%" }}
-              />
-              <span
-                className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px]"
-                style={{ background: "rgba(0,0,0,.65)" }}
+        {/* アプリの画面のイメージ（面接中の画面と、評価の画面） */}
+        <div className="relative mx-auto flex w-full max-w-[460px] justify-center">
+          <div className="absolute right-0 top-10 hidden scale-[0.86] opacity-90 sm:block md:-right-6">
+            <PhoneFrame tilt={6}>
+              <ResultScreen />
+            </PhoneFrame>
+          </div>
+          <div className="relative sm:-translate-x-16">
+            <PhoneFrame tilt={-3}>
+              <InterviewScreen />
+            </PhoneFrame>
+          </div>
+        </div>
+      </div>
+      <p
+        className="relative -mt-8 pb-6 text-center text-[11px] md:text-right md:pr-10"
+        style={{ color: "#666" }}
+      >
+        ※画面はイメージです
+      </p>
+    </section>
+  );
+}
+
+function Screens() {
+  const items: { screen: ReactNode; t: string; d: string }[] = [
+    {
+      screen: <InterviewScreen />,
+      t: "AIの面接官と話す",
+      d: "声で答えるだけ。答えに合わせて深掘りされます",
+    },
+    { screen: <ResultScreen />, t: "すぐに評価が届く", d: "7つの力と、根拠になったあなたの発言" },
+    { screen: <DeliveryScreen />, t: "間・声・目線まで", d: "話し方のくせが数字で分かります" },
+    {
+      screen: <OfferScreen />,
+      t: "企業から申し込み",
+      d: "結果を公開すると、面談の申し込みが届くことも",
+    },
+  ];
+  return (
+    <section style={{ background: "#0F0F0F", borderTop: "1px solid #1A1A1A" }}>
+      <div className="mx-auto max-w-[1180px] py-14">
+        <div className="px-4">
+          <SectionTitle
+            kicker="SCREENS"
+            title="アプリの画面"
+            sub="スマホでもパソコンでも。ホーム画面に追加すれば、アプリのように使えます。"
+          />
+        </div>
+        <div className="mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 lg:justify-center lg:overflow-visible">
+          {items.map((it) => (
+            <div key={it.t} className="flex w-[260px] shrink-0 snap-center flex-col items-center">
+              <PhoneFrame>{it.screen}</PhoneFrame>
+              <p className="mt-4 text-[16px]" style={{ fontWeight: 800 }}>
+                {it.t}
+              </p>
+              <p
+                className="mt-1 text-center text-[12.5px] leading-relaxed"
+                style={{ color: "#AAAAAA" }}
               >
-                ● AI面接官
-              </span>
-              <div
-                className="absolute inset-x-3 bottom-3 rounded-2xl p-3"
-                style={{ background: "rgba(10,10,10,.85)", border: "1px solid #2A2A2A" }}
-              >
-                <p className="text-[11px]" style={{ color: "#888" }}>
-                  面接官
-                </p>
-                <p className="mt-0.5 text-[14px] leading-snug" style={{ fontWeight: 700 }}>
-                  そのとき、あなたはどう工夫しましたか？
-                </p>
-              </div>
+                {it.d}
+              </p>
             </div>
-          </div>
-          {/* 浮かんだ結果カード */}
-          <div
-            className="absolute -left-4 top-8 rounded-2xl px-3.5 py-2.5 md:-left-10"
-            style={{
-              background: "#151515",
-              border: "1px solid #2E2E2E",
-              boxShadow: "0 12px 30px rgba(0,0,0,.5)",
-            }}
-          >
-            <p className="text-[10.5px]" style={{ color: "#888" }}>
-              AI採点
-            </p>
-            <p className="text-[24px] leading-none" style={{ color: ACCENT, fontWeight: 900 }}>
-              86<span className="text-[12px]">点</span>
-            </p>
-          </div>
-          <div
-            className="absolute -right-3 bottom-24 rounded-2xl px-3.5 py-2.5 md:-right-8"
-            style={{
-              background: "#151515",
-              border: "1px solid #2E2E2E",
-              boxShadow: "0 12px 30px rgba(0,0,0,.5)",
-            }}
-          >
-            <p className="text-[10.5px]" style={{ color: "#888" }}>
-              練習した人の中で
-            </p>
-            <p className="text-[16px]" style={{ fontWeight: 900 }}>
-              上位 <span style={{ color: ACCENT }}>12%</span>
-            </p>
-          </div>
-          <p className="mt-3 text-center text-[11px]" style={{ color: "#666" }}>
-            ※画面はイメージです
+          ))}
+        </div>
+        <p className="mt-2 text-center text-[11px]" style={{ color: "#666" }}>
+          ※画面はイメージです。数字や会社名は説明用のサンプルです
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function AdVideo({ loggedIn }: { loggedIn: boolean }) {
+  return (
+    <section className="mx-auto max-w-[1080px] px-4 py-14">
+      <div className="grid items-center gap-10 md:grid-cols-2">
+        <div className="order-2 md:order-1">
+          <p className="text-[12px] tracking-widest" style={{ color: ACCENT, fontWeight: 700 }}>
+            MOVIE
           </p>
+          <h2 className="mt-2 text-[26px] leading-snug md:text-[32px]" style={{ fontWeight: 900 }}>
+            20秒でわかる
+            <br />
+            ガチキャリAI
+          </h2>
+          <p className="mt-3 text-[14px] leading-relaxed" style={{ color: "#AAAAAA" }}>
+            面接の練習から、評価、企業からの申し込みまで。流れを動画で見てみてください。
+          </p>
+          <div className="mt-6">
+            <PrimaryCta loggedIn={loggedIn} big />
+          </div>
+        </div>
+        <div className="order-1 flex justify-center md:order-2">
+          <div
+            className="relative w-[270px] overflow-hidden rounded-[28px]"
+            style={{ border: "1px solid #2A2A2A", boxShadow: "0 30px 70px rgba(0,0,0,.6)" }}
+          >
+            <video
+              src="/videos/ad.mp4"
+              poster="/videos/ad-poster.jpg"
+              controls
+              playsInline
+              muted
+              loop
+              autoPlay
+              preload="metadata"
+              className="block aspect-[9/16] w-full bg-black"
+            />
+          </div>
         </div>
       </div>
     </section>
