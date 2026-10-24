@@ -391,13 +391,11 @@ const REWRITE_TOPICS = [
 const OFFER_NARRATION = "しかも練習するだけで、企業から申し込みが届くことも！";
 
 /** せりふごとの再生の速さ（ナレーションと受験者は少し速く。面接官はアプリと同じ） */
-/** 動画全体の話す速さ（全員に掛ける） */
-const VIDEO_SPEED = 1.2;
+/** 動画の話す速さ（全員同じ。声の高さは変えずに速くする） */
+const VIDEO_TEMPO = 1.75;
 
-/** せりふごとの速さ（声の高さは変えずに速くする）。面接官はアプリと同じ1.5倍が基準 */
-export function lineTempo(speaker: StudioLine["speaker"]): number {
-  const base = speaker === "candidate" ? 1.45 : speaker === "narrator" ? 1.6 : 1.5;
-  return Math.round(base * VIDEO_SPEED * 100) / 100;
+export function lineTempo(_speaker: StudioLine["speaker"]): number {
+  return VIDEO_TEMPO;
 }
 
 export type RewriteItem = {
