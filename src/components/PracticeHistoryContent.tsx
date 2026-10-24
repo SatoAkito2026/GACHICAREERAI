@@ -172,7 +172,7 @@ export function PracticeHistoryContent({
           ← 戻る
         </Link>
         <h1 className="mt-4 text-[22px]" style={{ fontWeight: 700, color: "#F0F0F0" }}>
-          練習履歴
+          {mode === "student" ? "練習履歴" : "評価"}
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
           {mode === "student" ? "入試面接練習" : "模擬面接AI"}の結果一覧です。
@@ -180,7 +180,7 @@ export function PracticeHistoryContent({
 
         {rows.length === 0 && (
           <p className="mt-6 text-[13px]" style={{ color: "#888888" }}>
-            まだ練習履歴がありません。
+            まだ練習の結果がありません。
           </p>
         )}
 

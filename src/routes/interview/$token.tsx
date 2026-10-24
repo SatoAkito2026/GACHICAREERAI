@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { DeliveryTracker } from "@/lib/delivery-tracker";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -299,7 +300,8 @@ function InterviewTokenPage() {
         {isPractice ? (
           <>
             <p style={{ color: "#888", fontSize: 14 }}>
-              お疲れ様でした。結果は「練習履歴」からすぐに確認できます。
+              お疲れ様でした。結果は「{invitation.practice_mode === "student" ? "履歴" : "評価"}
+              」からすぐに確認できます。
             </p>
             <a
               href={homeTo}
@@ -865,7 +867,7 @@ function RecordChoice({
         {option(
           true,
           "録画する",
-          "自分の話し方を練習履歴で見返せます（新しいもの3回分）。企業に見せるかは、公開プロフィールで別に選べます",
+          "自分の話し方を「評価」で見返せます（新しいもの3回分）。企業に見せるかは、公開プロフィールで別に選べます",
         )}
         {option(
           false,
@@ -1131,16 +1133,27 @@ function LiveScreen({
   const sendTurn = async (candidateText: string, history: Message[]) => {
     setIsProcessing(true);
     try {
-      const res = await fetch("/api/interview-turn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, candidateText, conversationHistory: history }),
-      });
+      // 返事が来ないまま「処理中」で止まらないよう、待つ時間に上限をつけて1回だけやり直す
+      const post = () =>
+        fetch("/api/interview-turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, candidateText, conversationHistory: history }),
+          signal: AbortSignal.timeout(45000),
+        });
+      let res: Response;
+      try {
+        res = await post();
+        if (res.status >= 500) res = await post();
+      } catch {
+        res = await post();
+      }
       const data = (await res.json()) as {
         aiText: string;
         audioBase64: string | null;
         isEnded: boolean;
       };
+      if (!data?.aiText) throw new Error("no reply");
 
       const newMessages: Message[] = [...history];
       if (candidateText !== "（面接開始）") {
@@ -1180,6 +1193,7 @@ function LiveScreen({
       return withAi;
     } catch (e) {
       console.error(e);
+      toast.error("通信がうまくいきませんでした。もう一度、答えを話してください");
       return history;
     } finally {
       setIsProcessing(false);
@@ -1206,11 +1220,13 @@ function LiveScreen({
     trackerRef.current?.answerEnded();
     setIsListening(false);
     setIsProcessing(true);
-    mediaRecorderRef.current.stop();
-
-    await new Promise<void>((resolve) => {
+    // 止める前に「止まった」の合図を受け取る準備をしておく（取りこぼすと処理中のまま止まる）
+    const stopped = new Promise<void>((resolve) => {
       if (mediaRecorderRef.current) mediaRecorderRef.current.onstop = () => resolve();
+      setTimeout(resolve, 3000);
     });
+    mediaRecorderRef.current.stop();
+    await stopped;
 
     try {
       const recordedType =
@@ -1220,7 +1236,11 @@ function LiveScreen({
       formData.append("audio", audioBlob, `audio.${extForMimeType(recordedType)}`);
       formData.append("token", token);
 
-      const whisperRes = await fetch("/api/whisper-transcribe", { method: "POST", body: formData });
+      const whisperRes = await fetch("/api/whisper-transcribe", {
+        method: "POST",
+        body: formData,
+        signal: AbortSignal.timeout(30000),
+      });
       const { text } = (await whisperRes.json()) as { text: string };
 
       if (!text?.trim()) {

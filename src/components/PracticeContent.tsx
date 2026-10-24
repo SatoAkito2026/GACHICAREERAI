@@ -506,7 +506,8 @@ export function PracticeContent({
         </button>
 
         <p className="mt-4 text-[12px]" style={{ color: "#666666" }}>
-          カメラ・マイクへのアクセス許可が必要です。終了後、練習履歴からフィードバックを確認できます。
+          カメラ・マイクへのアクセス許可が必要です。終了後、
+          {mode === "student" ? "「履歴」" : "「評価」"}で結果を確認できます。
         </p>
       </div>
     </PrivateShell>

@@ -239,7 +239,7 @@ function TalentProfilePage() {
                     🎥 練習の録画
                   </p>
                   <p className="text-[12px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-                    録画する・しないは、模擬面接の前に毎回選びます。録画は新しいものから3回分まで残り、練習履歴で見返せます。
+                    録画する・しないは、模擬面接の前に毎回選びます。録画は新しいものから3回分まで残り、「評価」で見返せます。
                   </p>
                   <Toggle
                     checked={form.show_recording}
