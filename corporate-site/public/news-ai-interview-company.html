@@ -235,6 +235,85 @@
 .learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
 .learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
 
+.appw{--line:#2A2A2A;--sub:#888888;--lime:#C8FF00;--lime-dim:rgba(200,255,0,.14);--text:#F0F0F0;--ff-num:var(--ff-latin);--ff-mono:var(--ff-latin);color:#F0F0F0;margin:20px 0}
+.appw p{margin:0}.appw ul,.appw ol{margin:0}
+.appw .app{text-align:left}
+.appw .bars li{grid-template-columns:7.6em minmax(0,1fr) 4.2em}
+.appw .bars .na{white-space:nowrap}
+.appw figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* アプリの画面のサンプル（実際の画面と同じ形。名前・発言・数字は架空） */
+.appw .app{background:#121212;border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:12px;position:relative}
+.appw .app .sample-badge{position:absolute;top:-10px;right:18px}
+.appw .app-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700;font-size:15px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.appw .app-hd small{color:var(--sub);font-weight:500;font-family:var(--ff-num);font-size:12px;margin-left:6px}
+.appw .app-hd .sc{color:var(--lime);font-family:var(--ff-num);font-weight:800}
+.appw .app-box{background:#1A1A1A;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.appw .app-box h4{margin:0 0 8px;font-size:13px;color:var(--lime);font-weight:900}
+.appw .app-box h4.bl{color:#5AB4FF}
+.appw .app-box h4.or{color:#FFB547}
+.appw .app-box p,.app-box li{font-size:13.5px;color:#D6D6D6;line-height:1.75}
+.appw .app-box ol,.app-box ul{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.appw .verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;border-color:rgba(255,181,71,.4)}
+.appw .verdict .big{font-family:var(--ff-num);font-weight:800;font-size:34px;line-height:1}
+.appw .verdict .big small{font-size:13px;color:var(--sub);margin-left:2px}
+.appw .verdict .lb{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+.appw .verdict b{display:block;color:#FFB547;font-size:19px}
+.appw .verdict span.h{font-size:12px;color:var(--sub)}
+.appw .next{background:#1F1A0E;border-color:rgba(255,181,71,.3)}
+.appw .radar{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:14px;align-items:center}
+.appw .radar svg{width:100%;height:auto}
+.appw .radar svg .gr{fill:none;stroke:#333;stroke-width:1}
+.appw .radar svg .ar{fill:rgba(200,255,0,.28);stroke:var(--lime);stroke-width:2}
+.appw .radar ul{list-style:none;padding:0}
+.appw .radar li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dashed #2E2E2E;padding:4px 0}
+.appw .radar li b{color:var(--lime);font-family:var(--ff-num)}
+.appw .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.appw .metrics div{background:#121212;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.appw .metrics small{display:block;font-size:11.5px;color:var(--sub)}
+.appw .metrics b{font-family:var(--ff-num);font-size:22px;font-weight:800;line-height:1.3}
+.appw .metrics b i{font-style:normal;font-size:12px;margin-left:2px}
+.appw .metrics em{display:block;font-style:normal;font-size:11px;color:#666}
+.appw .vwave{display:flex;align-items:center;gap:2px;height:40px;margin-top:8px}
+.appw .vwave i{flex:1;background:#5AB4FF;border-radius:2px;min-width:2px}
+.appw .ev{display:grid;gap:8px}
+.appw .ev div{background:#121212;border-radius:12px;padding:10px 12px}
+.appw .ev .t{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px}
+.appw .ev .t b{color:var(--lime);font-family:var(--ff-num)}
+.appw .ev p{font-size:12.5px;color:#AFAFAF;margin-top:2px}
+.appw .ev q{display:block;quotes:"「" "」";border-left:3px solid var(--lime);padding-left:8px;margin-top:6px;font-size:12.5px;color:#E2E2E2}
+.appw .better-ex{background:#121212;border-radius:12px;padding:10px 12px}
+.appw .better-ex small{display:block;color:var(--sub);font-size:12px}
+.appw .better-ex p{font-size:13px}
+.appw .shots{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.shots{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+.appw .shots>div{display:grid;gap:16px}
+.appw .shot-note{font-size:12.5px;color:var(--sub);margin-top:14px}
+.appw .recruit .app-box p{font-size:13.5px}
+.appw .recruit h5{margin:10px 0 4px;font-size:13px;color:#E6E6E6}
+.appw .recruit blockquote{margin:6px 0 0;border-left:3px solid var(--lime);padding:4px 10px;background:#121212;border-radius:0 8px 8px 0;font-size:12.5px;color:#DADADA}
+.appw .tools{display:grid;gap:14px;margin-top:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.appw .tools .card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.appw .tools .ic{width:44px;height:44px;border-radius:12px;background:var(--lime-dim);display:grid;place-items:center}
+.appw .tools .ic svg{width:22px;height:22px;stroke:var(--lime);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.appw .tools h3{font-size:16.5px}
+.appw .tools p{font-size:14px;color:#B8B8B8;margin-top:2px}
+.appw .tools .pl{display:inline-block;font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-top:6px}
+
+
+.appw .sample-badge{display:inline-block;font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:#0F0F0F;background:var(--lime);border-radius:6px;padding:2px 8px;font-weight:500}
+.appw .bars{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:12px}
+.appw .bars li{display:grid;grid-template-columns:8.2em minmax(0,1fr) 4.2em;gap:12px;align-items:center;font-size:14px}
+.appw .bars .tr{display:block;height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden}
+.appw .bars .fl{display:block;height:100%;background:var(--lime);border-radius:4px;transform-origin:left;transition:transform 1.2s var(--ease)}
+.appw .bars li:nth-child(2) .fl{transition-delay:.06s}.bars li:nth-child(3) .fl{transition-delay:.12s}.bars li:nth-child(4) .fl{transition-delay:.18s}.bars li:nth-child(5) .fl{transition-delay:.24s}.bars li:nth-child(6) .fl{transition-delay:.3s}.bars li:nth-child(7) .fl{transition-delay:.36s}
+.appw .bars .fl.none{background:repeating-linear-gradient(90deg,#3A3A3A 0 6px,transparent 6px 10px)}
+.appw .bars .v{text-align:right;font-family:var(--ff-num);font-weight:800}
+.appw .bars .v small{color:var(--sub);font-weight:600}
+.appw .bars .na{white-space:nowrap;color:var(--sub);font-size:12px;font-family:var(--ff-jp);font-weight:500;text-align:right}
+.appw .pending .bars .fl{transform:scaleX(0)}
+.appw .foot-note{margin-top:14px;font-size:12.5px;color:var(--sub)}
 .midcta.gc{border-color:#0B0B0B;background:linear-gradient(135deg,#F4FFE0,#fff)}
 .midcta.gc .btn{background:#0B0B0B;color:#C8FF00}
 .midcta.gc .lk{color:#0B0B0B}
@@ -287,6 +366,20 @@
       <h2 id="gc">ガチキャリAIのAI面接</h2>
       <p><a href="/gachicareer-ai">ガチキャリAI</a>のAI面接では、AIの面接官が応募者と声で面接し、発言にもとづいて評価をまとめます。</p>
       <div class="grid2"><div class="box "><b>7つの力と採用担当者向けの見立て</b><span>伝える力・論理的に考える力・主体性・協調性・粘り強さ・誠実さ・学ぶ姿勢の7つの評価と、採用担当者向けの見立てを確認できます。</span></div><div class="box "><b>会話と録画</b><span>面接の会話の内容を確認できます。録画は、応募者が許可した場合に見られます。</span></div><div class="box "><b>料金は使った分だけ</b><span>1回5,500円（税込）。応募者が面接を始めた回だけ、月末締めで請求されます。</span></div><div class="box "><b>求人掲載は当面無料</b><span>求人を掲載中の企業は、書類選考AIも無料で使えます。</span></div></div>
+      <figure class="appw"><div class="app recruit">
+          <span class="sample-badge">サンプル</span>
+          <div class="app-hd"><span>営業の面接<small>2026/10/20</small></span><span class="sc">2.9<small style="color:var(--sub)">評価の平均（5点満点）</small></span></div>
+          <div class="app-box"><h4>採用担当者向けの見立て</h4>
+            <p>自分で目標を決めて動き続けられる行動派。訪問の順番を毎朝組み立て直すなど、工夫を重ねながら現場で成果を出そうとする姿勢が見られる。</p>
+            <h5>仕事で活きそうな強み</h5>
+            <p>・決めた目標をやりきる行動力</p>
+            <blockquote>「毎朝、前日の結果を見直してから回る順番を決めていました」</blockquote>
+            <h5>面談で確かめるとよい点</h5>
+            <ul><li>訪問の目標件数や成果の具体的な数字と、それを支えた工夫。</li><li>チームで動いた経験と、その中での役割。</li></ul>
+            <h5>面談で聞くとよい質問</h5>
+            <ul><li>目標に届かなかった日は、どのように立て直しましたか？</li><li>上司や同僚と意見が違ったとき、どのように対応しますか？</li></ul>
+          </div>
+        </div><figcaption>企業が見る「採用担当者向けの見立て」の画面（サンプル。内容は架空です）</figcaption></figure>
       <p class="hint">料金は2026年10月時点のものです。最新の料金はガチキャリAIの利用規約・特定商取引法に基づく表記をご確認ください。</p>
 
       <h2 id="faq">よくある質問</h2>

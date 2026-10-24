@@ -179,6 +179,85 @@ image: ogp-ai-interview-practice.png
 .learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
 .learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
 
+.appw{--line:#2A2A2A;--sub:#888888;--lime:#C8FF00;--lime-dim:rgba(200,255,0,.14);--text:#F0F0F0;--ff-num:var(--ff-latin);--ff-mono:var(--ff-latin);color:#F0F0F0;margin:20px 0}
+.appw p{margin:0}.appw ul,.appw ol{margin:0}
+.appw .app{text-align:left}
+.appw .bars li{grid-template-columns:7.6em minmax(0,1fr) 4.2em}
+.appw .bars .na{white-space:nowrap}
+.appw figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* アプリの画面のサンプル（実際の画面と同じ形。名前・発言・数字は架空） */
+.appw .app{background:#121212;border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:12px;position:relative}
+.appw .app .sample-badge{position:absolute;top:-10px;right:18px}
+.appw .app-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700;font-size:15px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.appw .app-hd small{color:var(--sub);font-weight:500;font-family:var(--ff-num);font-size:12px;margin-left:6px}
+.appw .app-hd .sc{color:var(--lime);font-family:var(--ff-num);font-weight:800}
+.appw .app-box{background:#1A1A1A;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.appw .app-box h4{margin:0 0 8px;font-size:13px;color:var(--lime);font-weight:900}
+.appw .app-box h4.bl{color:#5AB4FF}
+.appw .app-box h4.or{color:#FFB547}
+.appw .app-box p,.app-box li{font-size:13.5px;color:#D6D6D6;line-height:1.75}
+.appw .app-box ol,.app-box ul{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.appw .verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;border-color:rgba(255,181,71,.4)}
+.appw .verdict .big{font-family:var(--ff-num);font-weight:800;font-size:34px;line-height:1}
+.appw .verdict .big small{font-size:13px;color:var(--sub);margin-left:2px}
+.appw .verdict .lb{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+.appw .verdict b{display:block;color:#FFB547;font-size:19px}
+.appw .verdict span.h{font-size:12px;color:var(--sub)}
+.appw .next{background:#1F1A0E;border-color:rgba(255,181,71,.3)}
+.appw .radar{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:14px;align-items:center}
+.appw .radar svg{width:100%;height:auto}
+.appw .radar svg .gr{fill:none;stroke:#333;stroke-width:1}
+.appw .radar svg .ar{fill:rgba(200,255,0,.28);stroke:var(--lime);stroke-width:2}
+.appw .radar ul{list-style:none;padding:0}
+.appw .radar li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dashed #2E2E2E;padding:4px 0}
+.appw .radar li b{color:var(--lime);font-family:var(--ff-num)}
+.appw .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.appw .metrics div{background:#121212;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.appw .metrics small{display:block;font-size:11.5px;color:var(--sub)}
+.appw .metrics b{font-family:var(--ff-num);font-size:22px;font-weight:800;line-height:1.3}
+.appw .metrics b i{font-style:normal;font-size:12px;margin-left:2px}
+.appw .metrics em{display:block;font-style:normal;font-size:11px;color:#666}
+.appw .vwave{display:flex;align-items:center;gap:2px;height:40px;margin-top:8px}
+.appw .vwave i{flex:1;background:#5AB4FF;border-radius:2px;min-width:2px}
+.appw .ev{display:grid;gap:8px}
+.appw .ev div{background:#121212;border-radius:12px;padding:10px 12px}
+.appw .ev .t{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px}
+.appw .ev .t b{color:var(--lime);font-family:var(--ff-num)}
+.appw .ev p{font-size:12.5px;color:#AFAFAF;margin-top:2px}
+.appw .ev q{display:block;quotes:"「" "」";border-left:3px solid var(--lime);padding-left:8px;margin-top:6px;font-size:12.5px;color:#E2E2E2}
+.appw .better-ex{background:#121212;border-radius:12px;padding:10px 12px}
+.appw .better-ex small{display:block;color:var(--sub);font-size:12px}
+.appw .better-ex p{font-size:13px}
+.appw .shots{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.shots{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+.appw .shots>div{display:grid;gap:16px}
+.appw .shot-note{font-size:12.5px;color:var(--sub);margin-top:14px}
+.appw .recruit .app-box p{font-size:13.5px}
+.appw .recruit h5{margin:10px 0 4px;font-size:13px;color:#E6E6E6}
+.appw .recruit blockquote{margin:6px 0 0;border-left:3px solid var(--lime);padding:4px 10px;background:#121212;border-radius:0 8px 8px 0;font-size:12.5px;color:#DADADA}
+.appw .tools{display:grid;gap:14px;margin-top:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.appw .tools .card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.appw .tools .ic{width:44px;height:44px;border-radius:12px;background:var(--lime-dim);display:grid;place-items:center}
+.appw .tools .ic svg{width:22px;height:22px;stroke:var(--lime);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.appw .tools h3{font-size:16.5px}
+.appw .tools p{font-size:14px;color:#B8B8B8;margin-top:2px}
+.appw .tools .pl{display:inline-block;font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-top:6px}
+
+
+.appw .sample-badge{display:inline-block;font-family:var(--ff-mono);font-size:11px;letter-spacing:.1em;color:#0F0F0F;background:var(--lime);border-radius:6px;padding:2px 8px;font-weight:500}
+.appw .bars{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:12px}
+.appw .bars li{display:grid;grid-template-columns:8.2em minmax(0,1fr) 4.2em;gap:12px;align-items:center;font-size:14px}
+.appw .bars .tr{display:block;height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden}
+.appw .bars .fl{display:block;height:100%;background:var(--lime);border-radius:4px;transform-origin:left;transition:transform 1.2s var(--ease)}
+.appw .bars li:nth-child(2) .fl{transition-delay:.06s}.bars li:nth-child(3) .fl{transition-delay:.12s}.bars li:nth-child(4) .fl{transition-delay:.18s}.bars li:nth-child(5) .fl{transition-delay:.24s}.bars li:nth-child(6) .fl{transition-delay:.3s}.bars li:nth-child(7) .fl{transition-delay:.36s}
+.appw .bars .fl.none{background:repeating-linear-gradient(90deg,#3A3A3A 0 6px,transparent 6px 10px)}
+.appw .bars .v{text-align:right;font-family:var(--ff-num);font-weight:800}
+.appw .bars .v small{color:var(--sub);font-weight:600}
+.appw .bars .na{white-space:nowrap;color:var(--sub);font-size:12px;font-family:var(--ff-jp);font-weight:500;text-align:right}
+.appw .pending .bars .fl{transform:scaleX(0)}
+.appw .foot-note{margin-top:14px;font-size:12.5px;color:var(--sub)}
 .midcta.gc{border-color:#0B0B0B;background:linear-gradient(135deg,#F4FFE0,#fff)}
 .midcta.gc .btn{background:#0B0B0B;color:#C8FF00}
 .midcta.gc .lk{color:#0B0B0B}
@@ -228,9 +307,55 @@ image: ogp-ai-interview-practice.png
       <p>ガチキャリAIは、面接で話した内容から、次の7つの力をそれぞれ5段階で評価します。</p>
       <div class="calcw"><table class="calc"><thead><tr><th scope="col">力<small>見ているところ（目安）</small></th><th scope="col" class="n">評価</th></tr></thead><tbody><tr class=""><th scope="row">伝える力<small>相手にわかりやすく伝えられているか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">論理的に考える力<small>筋道を立てて話せているか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">主体性<small>自分から考えて動いた経験があるか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">協調性<small>周りと協力して物事を進めたか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">粘り強さ<small>あきらめずにやりきった経験があるか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">誠実さ<small>まじめに、正直に向き合っているか</small></th><td class="n">1〜5</td></tr><tr class=""><th scope="row">学ぶ姿勢<small>経験から学び、成長しようとしているか</small></th><td class="n">1〜5</td></tr></tbody></table></div>
       <p>評価には、<b>根拠としてあなたの実際の発言が引用</b>されます。根拠になる発言がなかった力は「評価しない」になるので、「伝えたつもりで伝わっていなかったこと」がわかります。</p>
+      <figure class="appw"><div class="app">
+            <span class="sample-badge">サンプル</span>
+            <div class="app-box"><h4>7つの評価（あなたの発言が根拠）</h4>
+              <ul class="bars" style="margin-top:4px">
+                <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>論理的に考える力</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
+                <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4<small> /5</small></span></li>
+                <li><span>協調性</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
+                <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>学ぶ姿勢</span><span class="tr"><span class="fl none" style="width:100%"></span></span><span class="na">根拠なし</span></li>
+              </ul>
+              <div class="ev" style="margin-top:12px">
+                <div><p class="t">主体性<b>4 / 5</b></p><p>自分で目標を決めて工夫を続けた経験を、具体的に話せている。</p><q>毎朝、前日の結果を見直してから回る順番を決めていました</q></div>
+                <div><p class="t">論理的に考える力<b>2 / 5</b></p><p>結論は話せているが、理由や経緯の説明が続かない。</p><q>なんとなく、営業が合ってるかなと思って</q></div>
+              </div>
+              <p class="foot-note">点数は面接での本人の発言を根拠にしたものです。発言に根拠がない力は評価していません。</p>
+            </div>
+          </div><figcaption>7つの評価の画面（サンプル。発言・点数は架空です）</figcaption></figure>
+      <p>評価の画面では、7つの力のほかに、<b>本番の一次面接ならどのくらいか</b>の目安、<b>次の練習で直すこと</b>、練習の点数の内訳、良かった点、<b>より良い回答例</b>も届きます。</p>
+      <figure class="appw"><div class="app">
+            <span class="sample-badge">サンプル</span>
+            <div class="app-hd"><span>営業<small>2026/10/20 19:42</small></span><span class="sc">2.9 / 5</span></div>
+            <div class="app-box verdict"><div><span class="lb">7つの力の平均</span><span class="big">2.9<small>/ 5</small></span></div><div><span class="lb">本番の一次面接なら</span><b>もう少し練習を</b><span class="h">結論→理由→具体例の順で話す練習をすると伸びます</span></div></div>
+            <div class="app-box next"><h4 class="or">次の練習で直すこと</h4><ol><li>「〜みたいな」「なんか」など話し言葉が多いので、面接向けの言葉づかいに整えましょう。</li><li>答えが一言で終わりがちです。状況→行動→結果→学びの順で、1つの答えを100〜150字ほどで話す練習をしましょう。</li><li>志望動機に、その会社を選んだ理由を1つ足すと説得力が増します。</li></ol></div>
+            <div class="app-box"><h4>練習の点数の内訳（100点満点・58点）</h4>
+              <div class="radar">
+                <svg viewBox="0 0 120 120" role="img" aria-label="4項目のレーダーチャートのサンプル"><path class="gr" d="M60 10 L110 60 L60 110 L10 60 Z"/><path class="gr" d="M60 30 L90 60 L60 90 L30 60 Z"/><path class="gr" d="M60 10 V110 M10 60 H110"/><path class="ar" d="M60 27 L94 60 L60 85 L27 60 Z"/></svg>
+                <ul><li>自己PR・強みの伝え方<b>66点</b></li><li>志望動機の説得力<b>68点</b></li><li>事前準備・企業研究<b>50点</b></li><li>回答の具体性<b>66点</b></li></ul>
+              </div>
+            </div>
+            <div class="app-box"><h4>良かった点</h4><ul><li>「毎朝、前日の結果を見直してから回る順番を決めた」と、工夫を自分の言葉で話せています。</li><li>苦手なことを正直に話し、どう対処しているかまで伝えられています。</li></ul></div>
+            <div class="app-box"><h4 style="color:var(--text)">より良い回答例</h4><div class="better-ex"><small>Q. 強みと弱みを教えていただけますか？</small><p>強みは、決めた目標を毎日やりきる行動力です。前職では1日の訪問件数の目標を自分で決め、前日の結果を見直して回る順番を変えながら続けてきました。弱みは、余裕があると準備が遅れがちな点で、締め切りを自分で前倒しにして対処しています。</p></div></div>
+          </div><figcaption>評価の画面（サンプル。発言・点数は架空です）</figcaption></figure>
 
       <h2 id="delivery">話し方のチェック</h2>
       <div class="grid2"><div class="box "><b>間</b><span>AIが話し終えてから答え始めるまでの秒数と、答えの途中の長い沈黙の回数。</span></div><div class="box "><b>声の抑揚</b><span>答えている間の声の大きさの移り変わり。単調になっていないかがわかります。</span></div><div class="box "><b>目線</b><span>カメラを使うと、画面の方を見て話せた割合がわかります。</span></div><div class="box "><b>プライバシー</b><span>これらはブラウザの中で測り、音や映像は外に送らず、数字だけを結果に残します。</span></div></div>
+      <figure class="appw"><div class="app">
+            <span class="sample-badge">サンプル</span>
+            <div class="app-box"><h4 class="bl">話し方</h4>
+              <div class="metrics"><div><small>1回の答えの長さ（平均）</small><b>96<i>文字</i></b><em>目安 150〜300文字</em></div><div><small>言いよどみ（えー・あの など）</small><b>4<i>回</i></b><em>1回の答えで 0.6回</em></div></div>
+              <p style="margin-top:8px;font-size:12.5px">・答えが短めです。結論のあとに、理由と具体的なエピソードを1つ足しましょう。</p>
+            </div>
+            <div class="app-box"><h4 class="bl">間・声・目線</h4>
+              <div class="metrics"><div><small>答え始めるまでの間</small><b>1.4<i>秒</i></b><em>目安 1〜3秒</em></div><div><small>話の途中の長い沈黙</small><b>1<i>回</i></b><em>3秒以上止まった回数</em></div><div><small>声の強弱（抑揚）</small><b style="font-size:18px">ちょうど良い</b><em>52 / 100</em></div><div><small>目線（画面を見て話せた割合）</small><b>78<i>%</i></b><em>目安 70%以上</em></div></div>
+              <div style="margin-top:8px"><small class="sub" style="font-size:11.5px">声の波（答えている間の声の大きさ）</small><div class="vwave" aria-hidden="true"><i style="height:70%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:90%"></i><i style="height:75%"></i><i style="height:40%"></i><i style="height:10%"></i><i style="height:80%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:65%"></i><i style="height:85%"></i><i style="height:55%"></i><i style="height:30%"></i><i style="height:8%"></i><i style="height:75%"></i><i style="height:90%"></i><i style="height:80%"></i><i style="height:60%"></i><i style="height:72%"></i><i style="height:88%"></i><i style="height:64%"></i><i style="height:50%"></i><i style="height:20%"></i><i style="height:6%"></i><i style="height:82%"></i><i style="height:91%"></i><i style="height:77%"></i><i style="height:58%"></i><i style="height:69%"></i><i style="height:83%"></i><i style="height:61%"></i><i style="height:45%"></i><i style="height:12%"></i><i style="height:70%"></i><i style="height:86%"></i><i style="height:92%"></i><i style="height:66%"></i><i style="height:54%"></i><i style="height:80%"></i><i style="height:95%"></i><i style="height:60%"></i><i style="height:18%"></i><i style="height:5%"></i><i style="height:74%"></i><i style="height:88%"></i><i style="height:79%"></i><i style="height:63%"></i><i style="height:90%"></i><i style="height:70%"></i><i style="height:52%"></i><i style="height:30%"></i><i style="height:84%"></i><i style="height:93%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:12%"></i></div></div>
+              <p class="foot-note">間・声・目線はブラウザの中で測り、音や映像は外に送りません。</p>
+            </div>
+          </div><figcaption>話し方・間・声・目線の画面（サンプル。数字は架空です）</figcaption></figure>
 
       <h2 id="tips">練習の効果を上げるコツ</h2>
       <ul class="points"><li><b>本番と同じ環境で</b><span>静かな場所で、できれば本番と同じ姿勢・服装で練習すると、緊張に慣れられます。</span></li><li><b>1回ごとにテーマを決める</b><span>「今回は結論から話す」「今回は具体例を入れる」など、直すところを1つ決めて練習します。</span></li><li><b>評価の根拠を読む</b><span>点数だけでなく、どの発言が根拠になったかを読むと、何を話せば伝わるかがわかります。</span></li><li><b>同じ質問をくり返す</b><span>志望動機や自己PRなど、かならず聞かれる質問は、答えが安定するまでくり返します。</span></li></ul>
@@ -239,7 +364,7 @@ image: ogp-ai-interview-practice.png
       <p>練習の評価に納得できたら、名前を伏せたプロフィールを公開することもできます。公開したプロフィールを見た企業から、面談の申し込み（オファー）が届くことがあります。プロフィールは初期設定で「非公開」で、公開するかは本人が決め、いつでも非公開に戻せます。運営が企業に人材を推薦することはありません。</p>
 
       <h2 id="plan">料金</h2>
-      <p>料金は、無料プラン（1日1回・月5回まで、1回10分）、ライトプラン 月額980円（1日2回・月15回まで、1回15分）、プロプラン 月額2,980円（1日3回・月30回まで、1回30分）。いずれも税込です。評価の中身・プロフィールの公開・企業からのオファーはどのプランも同じです。</p>
+      <p>料金は、無料プラン（1日1回・月5回まで、1回10分）、ライトプラン 月額980円（1日2回・月15回まで、1回15分）、プロプラン 月額2,980円（1日3回・月30回まで、1回30分）。いずれも税込です。根拠つきの評価・プロフィールの公開・企業からのオファーはどのプランも同じで、プランによって変わるのは練習の回数・時間と、書類生成AI・自己分析レポート・企業研究AIなどのツールを使える回数です。</p>
 
       <h2 id="faq">よくある質問</h2>
       <div class="faqx"><details><summary>AIの面接練習は無料でできますか？</summary><p>ガチキャリAIの無料プランでは、1日1回・月5回まで、1回10分の模擬面接ができます。評価の中身は有料プランと同じです。</p></details><details><summary>スマホでも練習できますか？</summary><p>できます。ブラウザで動くので、アプリのインストールはいりません。声で答えるので、マイクを使える静かな場所で練習してください。</p></details><details><summary>練習の録音や映像はどこかに送られますか？</summary><p>話し方（間・声の抑揚・目線）はブラウザの中で測り、音や映像は外に送らず、数字だけを結果に残します。練習の録画は、本人が許可したときだけ保存されます。</p></details><details><summary>練習した結果が勝手に企業に見られることはありますか？</summary><p>ありません。プロフィールは初期設定で「非公開」です。公開するかは本人が決め、公開しても名前は伏せて表示されます。いつでも非公開に戻せます。</p></details><details><summary>AIで練習すれば面接に受かりますか？</summary><p>内定や採用をお約束するものではありません。声に出して練習を重ね、評価を見ながら改善していくことで、本番の準備を進めるためのものです。</p></details></div>

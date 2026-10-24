@@ -202,14 +202,14 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
 .result .sample-badge{position:absolute;top:-10px;right:18px}
 .result h3{font-size:17px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .bars{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:12px}
-.bars li{display:grid;grid-template-columns:8.2em minmax(0,1fr) 3.2em;gap:12px;align-items:center;font-size:14px}
+.bars li{display:grid;grid-template-columns:8.2em minmax(0,1fr) 4.2em;gap:12px;align-items:center;font-size:14px}
 .bars .tr{display:block;height:8px;border-radius:4px;background:#2A2A2A;overflow:hidden}
 .bars .fl{display:block;height:100%;background:var(--lime);border-radius:4px;transform-origin:left;transition:transform 1.2s var(--ease)}
 .bars li:nth-child(2) .fl{transition-delay:.06s}.bars li:nth-child(3) .fl{transition-delay:.12s}.bars li:nth-child(4) .fl{transition-delay:.18s}.bars li:nth-child(5) .fl{transition-delay:.24s}.bars li:nth-child(6) .fl{transition-delay:.3s}.bars li:nth-child(7) .fl{transition-delay:.36s}
 .bars .fl.none{background:repeating-linear-gradient(90deg,#3A3A3A 0 6px,transparent 6px 10px)}
 .bars .v{text-align:right;font-family:var(--ff-num);font-weight:800}
 .bars .v small{color:var(--sub);font-weight:600}
-.bars .na{color:var(--sub);font-size:12px;font-family:var(--ff-jp);font-weight:500;text-align:right}
+.bars .na{white-space:nowrap;color:var(--sub);font-size:12px;font-family:var(--ff-jp);font-weight:500;text-align:right}
 .pending .bars .fl{transform:scaleX(0)}
 .foot-note{margin-top:14px;font-size:12.5px;color:var(--sub)}
 .quotes{display:grid;gap:10px;margin-top:14px}
@@ -332,6 +332,67 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
 .dock .btn{width:100%}
 @media (min-width:860px){.dock{display:none}}
 
+
+/* アプリの画面のサンプル（実際の画面と同じ形。名前・発言・数字は架空） */
+.app{background:#121212;border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:12px;position:relative}
+.app .sample-badge{position:absolute;top:-10px;right:18px}
+.app-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700;font-size:15px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.app-hd small{color:var(--sub);font-weight:500;font-family:var(--ff-num);font-size:12px;margin-left:6px}
+.app-hd .sc{color:var(--lime);font-family:var(--ff-num);font-weight:800}
+.app-box{background:#1A1A1A;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.app-box h4{margin:0 0 8px;font-size:13px;color:var(--lime);font-weight:900}
+.app-box h4.bl{color:#5AB4FF}
+.app-box h4.or{color:#FFB547}
+.app-box p,.app-box li{font-size:13.5px;color:#D6D6D6;line-height:1.75}
+.app-box ol,.app-box ul{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;border-color:rgba(255,181,71,.4)}
+.verdict .big{font-family:var(--ff-num);font-weight:800;font-size:34px;line-height:1}
+.verdict .big small{font-size:13px;color:var(--sub);margin-left:2px}
+.verdict .lb{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+.verdict b{display:block;color:#FFB547;font-size:19px}
+.verdict span.h{font-size:12px;color:var(--sub)}
+.next{background:#1F1A0E;border-color:rgba(255,181,71,.3)}
+.radar{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:14px;align-items:center}
+.radar svg{width:100%;height:auto}
+.radar svg .gr{fill:none;stroke:#333;stroke-width:1}
+.radar svg .ar{fill:rgba(200,255,0,.28);stroke:var(--lime);stroke-width:2}
+.radar ul{list-style:none;padding:0}
+.radar li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dashed #2E2E2E;padding:4px 0}
+.radar li b{color:var(--lime);font-family:var(--ff-num)}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metrics div{background:#121212;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.metrics small{display:block;font-size:11.5px;color:var(--sub)}
+.metrics b{font-family:var(--ff-num);font-size:22px;font-weight:800;line-height:1.3}
+.metrics b i{font-style:normal;font-size:12px;margin-left:2px}
+.metrics em{display:block;font-style:normal;font-size:11px;color:#666}
+.vwave{display:flex;align-items:center;gap:2px;height:40px;margin-top:8px}
+.vwave i{flex:1;background:#5AB4FF;border-radius:2px;min-width:2px}
+.ev{display:grid;gap:8px}
+.ev div{background:#121212;border-radius:12px;padding:10px 12px}
+.ev .t{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px}
+.ev .t b{color:var(--lime);font-family:var(--ff-num)}
+.ev p{font-size:12.5px;color:#AFAFAF;margin-top:2px}
+.ev q{display:block;quotes:"「" "」";border-left:3px solid var(--lime);padding-left:8px;margin-top:6px;font-size:12.5px;color:#E2E2E2}
+.better-ex{background:#121212;border-radius:12px;padding:10px 12px}
+.better-ex small{display:block;color:var(--sub);font-size:12px}
+.better-ex p{font-size:13px}
+.shots{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.shots{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+.shots>div{display:grid;gap:16px}
+.shot-note{font-size:12.5px;color:var(--sub);margin-top:14px}
+.recruit .app-box p{font-size:13.5px}
+.recruit h5{margin:10px 0 4px;font-size:13px;color:#E6E6E6}
+.recruit blockquote{margin:6px 0 0;border-left:3px solid var(--lime);padding:4px 10px;background:#121212;border-radius:0 8px 8px 0;font-size:12.5px;color:#DADADA}
+.tools{display:grid;gap:14px;margin-top:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.tools{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tools .card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.tools .ic{width:44px;height:44px;border-radius:12px;background:var(--lime-dim);display:grid;place-items:center}
+.tools .ic svg{width:22px;height:22px;stroke:var(--lime);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tools h3{font-size:16.5px}
+.tools p{font-size:14px;color:#B8B8B8;margin-top:2px}
+.tools .pl{display:inline-block;font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-top:6px}
+
 /* 動き */
 .rv{transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .rv.pending{opacity:0;transform:translateY(24px)}
@@ -447,7 +508,7 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
       <ol class="steps only-biz">
         <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span><span class="n"></span><h3>無料で企業登録</h3><p>登録するとすぐに、匿名の人材一覧と人物まとめを見られます。</p></li>
         <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><span class="n"></span><h3>評価で人材を探す</h3><p>7つの力・人物まとめ・根拠になった発言で、気になる人を探します。</p></li>
-        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span><span class="n"></span><h3>チケットで詳しく見る</h3><p>1人¥10,000（税込）で、名前・面接ごとの評価・会話などが見られます。</p></li>
+        <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span><span class="n"></span><h3>コインで詳しく見る</h3><p>1人あたり50〜330コイン（コインは50コイン¥5,000から・税込）で、名前・面接ごとの評価・会話などが見られます。</p></li>
         <li class="rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="n"></span><h3>面談を申し込む</h3><p>相手が承諾すると、そのままメッセージでやり取りできます。</p></li>
       </ol>
     </div>
@@ -509,6 +570,18 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
           </ul>
         </article>
       </div>
+
+      <div class="sec-head rv" style="margin-top:clamp(48px,7vw,80px);margin-bottom:0">
+        <h2 style="font-size:clamp(22px,4.4vw,32px)">練習のほかにも、<span class="lime">就活・転職のツール</span>がそろっています。</h2>
+      </div>
+      <div class="tools">
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><div><h3>書類生成AI</h3><p>AIと会話するだけで、自己PR・エントリーシート・履歴書・職務経歴書の下書きを作成。会社や学校指定のフォーマット（PDF）にも合わせられます。</p><span class="pl">無料 月3回 ／ ライト 月5回 ／ プロ 月15回</span></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><div><h3>自己分析レポート</h3><p>模擬面接の評価と、根拠になった発言・プロフィールから、強み・弱み・向いている仕事をAIがまとめます。練習するほど正確に。</p><span class="pl">無料 月1回 ／ ライト 月3回 ／ プロ 月10回（詳細分析も）</span></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h3>企業研究AI</h3><p>志望企業ごとに、聞かれそうな質問をAIが用意。応募先の会社や聞いてほしい質問を決めて練習することもできます。</p><span class="pl">プロ 月5回</span></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span><div><h3>求人を探す</h3><p>掲載中の求人を見て、そのまま応募。応募すると、練習の評価を企業に見てもらえます。</p><span class="pl">全プラン</span></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9.5 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 14.5 8 12 8z"/></svg></span><div><h3>友だちを招待</h3><p>招待リンクから友だちが登録して練習を1回終えると、あなたと友だちの両方に練習のボーナスが3回ずつ入ります。</p><span class="pl">全プラン</span></div></article>
+        <article class="card rv"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 12 5l9 5-9 5z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg></span><div><h3>学校・塾とつながる</h3><p>学校・塾の招待コードを入れると、先生が練習の回数・点数・フィードバックを見られるようになります。いつでも抜けられます。</p><span class="pl">全プラン</span></div></article>
+      </div>
     </div>
   </section>
 
@@ -518,52 +591,55 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
       <div class="sec-head rv">
         <p class="eyebrow">Your result</p>
         <h2>評価は、こんなふうに届きます。</h2>
-        <p>下はすべて説明用のサンプルです。実際の評価は、あなたが面接で話した内容から作られます。</p>
+        <p>実際のアプリの評価画面と同じ形のサンプルです（名前・発言・点数は架空）。面接が終わるとすぐに、この画面が届きます。</p>
       </div>
-      <div class="result">
-        <div class="card rv" id="sample-bars">
-          <span class="sample-badge">サンプル</span>
-          <h3><span>能力の評価</span><span class="sub" style="font-size:13px;font-weight:500">営業職の模擬面接</span></h3>
-          <ul class="bars">
-            <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
-            <li><span>論理的に考える力</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
-            <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4<small> /5</small></span></li>
-            <li><span>協調性</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
-            <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:100%"></span></span><span class="v">5<small> /5</small></span></li>
-            <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
-            <li><span>学ぶ姿勢</span><span class="tr"><span class="fl none" style="width:100%"></span></span><span class="na">根拠なし</span></li>
-          </ul>
-          <p class="foot-note">「学ぶ姿勢」は根拠になる発言がなかったため、評価していません。</p>
-          <div class="quotes">
-            <div class="q"><b>粘り強さ　5 / 5</b><p>「目標に届かなかった月も、毎日10件の訪問だけは続けました」</p><small>根拠になった発言（サンプル）</small></div>
-            <div class="q"><b>論理的に考える力　2 / 5</b><p>「なんとなく、いけると思ったので選びました」</p><small>根拠になった発言（サンプル）</small></div>
+      <div class="shots">
+        <div>
+          <div class="app rv">
+            <span class="sample-badge">サンプル</span>
+            <div class="app-hd"><span>営業<small>2026/10/20 19:42</small></span><span class="sc">2.9 / 5</span></div>
+            <div class="app-box verdict"><div><span class="lb">7つの力の平均</span><span class="big">2.9<small>/ 5</small></span></div><div><span class="lb">本番の一次面接なら</span><b>もう少し練習を</b><span class="h">結論→理由→具体例の順で話す練習をすると伸びます</span></div></div>
+            <div class="app-box next"><h4 class="or">次の練習で直すこと</h4><ol><li>「〜みたいな」「なんか」など話し言葉が多いので、面接向けの言葉づかいに整えましょう。</li><li>答えが一言で終わりがちです。状況→行動→結果→学びの順で、1つの答えを100〜150字ほどで話す練習をしましょう。</li><li>志望動機に、その会社を選んだ理由を1つ足すと説得力が増します。</li></ol></div>
+            <div class="app-box"><h4>練習の点数の内訳（100点満点・58点）</h4>
+              <div class="radar">
+                <svg viewBox="0 0 120 120" role="img" aria-label="4項目のレーダーチャートのサンプル"><path class="gr" d="M60 10 L110 60 L60 110 L10 60 Z"/><path class="gr" d="M60 30 L90 60 L60 90 L30 60 Z"/><path class="gr" d="M60 10 V110 M10 60 H110"/><path class="ar" d="M60 27 L94 60 L60 85 L27 60 Z"/></svg>
+                <ul><li>自己PR・強みの伝え方<b>66点</b></li><li>志望動機の説得力<b>68点</b></li><li>事前準備・企業研究<b>50点</b></li><li>回答の具体性<b>66点</b></li></ul>
+              </div>
+            </div>
+            <div class="app-box"><h4>良かった点</h4><ul><li>「毎朝、前日の結果を見直してから回る順番を決めた」と、工夫を自分の言葉で話せています。</li><li>苦手なことを正直に話し、どう対処しているかまで伝えられています。</li></ul></div>
+            <div class="app-box"><h4 style="color:var(--text)">より良い回答例</h4><div class="better-ex"><small>Q. 強みと弱みを教えていただけますか？</small><p>強みは、決めた目標を毎日やりきる行動力です。前職では1日の訪問件数の目標を自分で決め、前日の結果を見直して回る順番を変えながら続けてきました。弱みは、余裕があると準備が遅れがちな点で、締め切りを自分で前倒しにして対処しています。</p></div></div>
           </div>
         </div>
-
-        <div style="display:grid;gap:16px">
-          <div class="card rv" id="sample-trend">
+        <div>
+          <div class="app rv">
             <span class="sample-badge">サンプル</span>
-            <h3><span>総合点の推移</span><span class="sub" style="font-size:13px;font-weight:500">直近8回</span></h3>
-            <svg class="trend" viewBox="0 0 320 150" role="img" aria-label="総合点の推移のサンプル。42点から68点まで上がっている">
-              <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C8FF00" stop-opacity=".28"/><stop offset="1" stop-color="#C8FF00" stop-opacity="0"/></linearGradient></defs>
-              <line class="axis" x1="20" y1="130" x2="310" y2="130"/>
-              <line class="axis" x1="20" y1="80" x2="310" y2="80" stroke-dasharray="3 4"/>
-              <line class="axis" x1="20" y1="30" x2="310" y2="30" stroke-dasharray="3 4"/>
-              <text x="4" y="133">0</text><text x="0" y="83">50</text><text x="-2" y="33">100</text>
-              <path class="area" d="M30 88 L70 85 L110 78 L150 80 L190 70 L230 66 L270 64 L300 62 L300 130 L30 130 Z"/>
-              <path class="line" d="M30 88 L70 85 L110 78 L150 80 L190 70 L230 66 L270 64 L300 62"/>
-              <circle cx="30" cy="88" r="3.5"/><circle cx="70" cy="85" r="3.5"/><circle cx="110" cy="78" r="3.5"/><circle cx="150" cy="80" r="3.5"/><circle cx="190" cy="70" r="3.5"/><circle cx="230" cy="66" r="3.5"/><circle cx="270" cy="64" r="3.5"/><circle class="last" cx="300" cy="62" r="5"/>
-              <text x="22" y="104">42</text><text class="hl" x="288" y="52">68</text>
-            </svg>
-            <p class="foot-note">練習を重ねるたびに、点数の変化を確かめられます。</p>
+            <div class="app-box"><h4>7つの評価（あなたの発言が根拠）</h4>
+              <ul class="bars" style="margin-top:4px">
+                <li><span>伝える力</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>論理的に考える力</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
+                <li><span>主体性</span><span class="tr"><span class="fl" style="width:80%"></span></span><span class="v">4<small> /5</small></span></li>
+                <li><span>協調性</span><span class="tr"><span class="fl" style="width:40%"></span></span><span class="v">2<small> /5</small></span></li>
+                <li><span>粘り強さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>誠実さ</span><span class="tr"><span class="fl" style="width:60%"></span></span><span class="v">3<small> /5</small></span></li>
+                <li><span>学ぶ姿勢</span><span class="tr"><span class="fl none" style="width:100%"></span></span><span class="na">根拠なし</span></li>
+              </ul>
+              <div class="ev" style="margin-top:12px">
+                <div><p class="t">主体性<b>4 / 5</b></p><p>自分で目標を決めて工夫を続けた経験を、具体的に話せている。</p><q>毎朝、前日の結果を見直してから回る順番を決めていました</q></div>
+                <div><p class="t">論理的に考える力<b>2 / 5</b></p><p>結論は話せているが、理由や経緯の説明が続かない。</p><q>なんとなく、営業が合ってるかなと思って</q></div>
+              </div>
+              <p class="foot-note">点数は面接での本人の発言を根拠にしたものです。発言に根拠がない力は評価していません。</p>
+            </div>
           </div>
-          <div class="card rv">
-            <span class="sample-badge" style="position:absolute;top:-10px;right:18px">サンプル</span>
-            <h3><span>アドバイス</span></h3>
-            <div class="advice" style="margin-top:12px">
-              <div class="good"><b>良かった点</b>訪問件数など、行動を数字で語れている。</div>
-              <div class="grow"><b>伸びしろ</b>理由が「なんとなく」で終わっている。結論 → 理由 → 具体例の順で話すと伝わりやすい。</div>
-              <div class="better"><b>より良い回答例</b>「数字で成果が見える仕事に挑戦したいと考え、営業を選びました。前職でも訪問件数を毎日記録し…」</div>
+          <div class="app rv">
+            <span class="sample-badge">サンプル</span>
+            <div class="app-box"><h4 class="bl">話し方</h4>
+              <div class="metrics"><div><small>1回の答えの長さ（平均）</small><b>96<i>文字</i></b><em>目安 150〜300文字</em></div><div><small>言いよどみ（えー・あの など）</small><b>4<i>回</i></b><em>1回の答えで 0.6回</em></div></div>
+              <p style="margin-top:8px;font-size:12.5px">・答えが短めです。結論のあとに、理由と具体的なエピソードを1つ足しましょう。</p>
+            </div>
+            <div class="app-box"><h4 class="bl">間・声・目線</h4>
+              <div class="metrics"><div><small>答え始めるまでの間</small><b>1.4<i>秒</i></b><em>目安 1〜3秒</em></div><div><small>話の途中の長い沈黙</small><b>1<i>回</i></b><em>3秒以上止まった回数</em></div><div><small>声の強弱（抑揚）</small><b style="font-size:18px">ちょうど良い</b><em>52 / 100</em></div><div><small>目線（画面を見て話せた割合）</small><b>78<i>%</i></b><em>目安 70%以上</em></div></div>
+              <div style="margin-top:8px"><small class="sub" style="font-size:11.5px">声の波（答えている間の声の大きさ）</small><div class="vwave" aria-hidden="true"><i style="height:70%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:90%"></i><i style="height:75%"></i><i style="height:40%"></i><i style="height:10%"></i><i style="height:80%"></i><i style="height:95%"></i><i style="height:70%"></i><i style="height:65%"></i><i style="height:85%"></i><i style="height:55%"></i><i style="height:30%"></i><i style="height:8%"></i><i style="height:75%"></i><i style="height:90%"></i><i style="height:80%"></i><i style="height:60%"></i><i style="height:72%"></i><i style="height:88%"></i><i style="height:64%"></i><i style="height:50%"></i><i style="height:20%"></i><i style="height:6%"></i><i style="height:82%"></i><i style="height:91%"></i><i style="height:77%"></i><i style="height:58%"></i><i style="height:69%"></i><i style="height:83%"></i><i style="height:61%"></i><i style="height:45%"></i><i style="height:12%"></i><i style="height:70%"></i><i style="height:86%"></i><i style="height:92%"></i><i style="height:66%"></i><i style="height:54%"></i><i style="height:80%"></i><i style="height:95%"></i><i style="height:60%"></i><i style="height:18%"></i><i style="height:5%"></i><i style="height:74%"></i><i style="height:88%"></i><i style="height:79%"></i><i style="height:63%"></i><i style="height:90%"></i><i style="height:70%"></i><i style="height:52%"></i><i style="height:30%"></i><i style="height:84%"></i><i style="height:93%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:12%"></i></div></div>
+              <p class="foot-note">間・声・目線はブラウザの中で測り、音や映像は外に送りません。</p>
             </div>
           </div>
         </div>
@@ -590,10 +666,31 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
           <p style="margin-top:10px;font-size:13.5px;color:#D0D0D0">お客様の声を数字で振り返り、売り場を改善してきた人物。任されたことをやり切る粘り強さが、複数の面接で一貫して見られる。</p>
           <ul class="chips"><li class="s">数字で振り返る習慣</li><li class="s">やり切る力</li><li>主体性 4.0</li><li>粘り強さ 3.5</li></ul>
           <p class="sub" style="font-size:12.5px">希望：企画・マーケティング　・　模擬面接 8回</p>
-          <div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>名前・面接ごとの評価・会話は<strong class="lime">閲覧チケット</strong>で見られます</span></div>
+          <div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>名前・面接ごとの評価・会話は<strong class="lime">ガチキャリコイン</strong>で見られます</span></div>
         </div>
       </div>
 
+
+      <div class="shots" style="margin-top:clamp(32px,5vw,48px)">
+        <div class="app recruit rv">
+          <span class="sample-badge">サンプル</span>
+          <div class="app-hd"><span>営業の面接<small>2026/10/20</small></span><span class="sc">2.9<small style="color:var(--sub)">評価の平均（5点満点）</small></span></div>
+          <div class="app-box"><h4>採用担当者向けの見立て</h4>
+            <p>自分で目標を決めて動き続けられる行動派。訪問の順番を毎朝組み立て直すなど、工夫を重ねながら現場で成果を出そうとする姿勢が見られる。</p>
+            <h5>仕事で活きそうな強み</h5>
+            <p>・決めた目標をやりきる行動力</p>
+            <blockquote>「毎朝、前日の結果を見直してから回る順番を決めていました」</blockquote>
+            <h5>面談で確かめるとよい点</h5>
+            <ul><li>訪問の目標件数や成果の具体的な数字と、それを支えた工夫。</li><li>チームで動いた経験と、その中での役割。</li></ul>
+            <h5>面談で聞くとよい質問</h5>
+            <ul><li>目標に届かなかった日は、どのように立て直しましたか？</li><li>上司や同僚と意見が違ったとき、どのように対応しますか？</li></ul>
+          </div>
+        </div>
+        <div style="display:grid;gap:16px;align-content:start">
+          <div class="card rv"><h3 style="font-size:18px">企業が見るのは、採用担当者向けの評価</h3><p style="color:#B8B8B8;font-size:14.5px;margin-top:6px">本人向けの点数・改善点・回答例は企業には表示されません。企業に見えるのは、7つの力の評価と根拠になった発言、採用担当者向けの見立て、面接の会話、話し方の数字、録画（本人が許可した場合）です。</p></div>
+          <div class="card rv"><h3 style="font-size:18px">面談の申し込みまで、そのまま</h3><p style="color:#B8B8B8;font-size:14.5px;margin-top:6px">評価を見て会いたいと思ったら、会社の紹介や面談したい理由を書いて申し込めます。本人が承諾すると、メッセージでやり取りできます。</p></div>
+        </div>
+      </div>
       <div class="biz-feats">
         <article class="card rv">
           <h3>人材を探す</h3>
@@ -601,9 +698,9 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
           <ul><li>模擬面接の評価（7つの力・人物まとめ・根拠になった発言）で人材を探せる</li><li>匿名の一覧とまとめを見るのは無料</li></ul>
         </article>
         <article class="card wide rv">
-          <h3>閲覧チケット</h3>
-          <p class="price">¥10,000<small>／1人（税込・買い切り）</small></p>
-          <ul><li>名前・面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）が見られる</li><li>そのまま面談を申し込める</li><li>採用が決まっても、成功報酬はゼロ</li></ul>
+          <h3>人材の閲覧（ガチキャリコイン）</h3>
+          <p class="price">50〜330<small>コイン／1人</small></p>
+          <ul><li>名前・面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）が見られる</li><li>コインの数は、評価の平均と閲覧された回数で変わります</li><li>コインは 50コイン ¥5,000／110コイン ¥10,000／360コイン ¥30,000（税込・有効期限6か月）</li><li>採用が決まっても、成功報酬はゼロ</li></ul>
         </article>
         <article class="card rv">
           <h3>AI面接（URL発行）</h3>
@@ -647,21 +744,21 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
           <div class="card plan rv">
             <span class="name">無料</span>
             <span class="price">¥0<small>／月</small></span>
-            <dl><dt>練習回数</dt><dd>1日1回・月5回まで</dd><dt>1回の長さ</dt><dd>10分</dd><dt>練習できる職種</dt><dd>月2つ</dd><dt>保存できる結果</dt><dd>5件</dd></dl>
+            <dl><dt>練習回数</dt><dd>1日1回・月5回まで</dd><dt>1回の長さ</dt><dd>10分</dd><dt>練習できる職種</dt><dd>月2つ</dd><dt>保存できる結果</dt><dd>新しい5件</dd><dt>書類生成AI</dt><dd>1日1回・月3回</dd><dt>自己分析レポート</dt><dd>月1回</dd></dl>
           </div>
           <div class="card plan rv">
             <span class="name">ライト</span>
             <span class="price">¥980<small>／月</small></span>
-            <dl><dt>練習回数</dt><dd>1日2回・月15回まで</dd><dt>1回の長さ</dt><dd>15分</dd><dt>練習できる職種</dt><dd>月5つ</dd><dt>保存できる結果</dt><dd>10件</dd></dl>
+            <dl><dt>練習回数</dt><dd>1日2回・月15回まで</dd><dt>1回の長さ</dt><dd>15分</dd><dt>練習できる職種</dt><dd>月5つ</dd><dt>保存できる結果</dt><dd>新しい10件</dd><dt>書類生成AI</dt><dd>1日2回・月5回</dd><dt>自己分析レポート</dt><dd>月3回</dd></dl>
           </div>
           <div class="card plan rec rv">
             <span class="badge">いちばん練習できる</span>
             <span class="name">プロ</span>
             <span class="price">¥2,980<small>／月</small></span>
-            <dl><dt>練習回数</dt><dd>1日3回・月30回まで</dd><dt>1回の長さ</dt><dd>30分</dd><dt>練習できる職種</dt><dd>無制限</dd><dt>保存できる結果</dt><dd>無制限</dd></dl>
+            <dl><dt>練習回数</dt><dd>1日3回・月30回まで</dd><dt>1回の長さ</dt><dd>30分</dd><dt>練習できる職種</dt><dd>無制限</dd><dt>保存できる結果</dt><dd>無制限</dd><dt>書類生成AI</dt><dd>1日3回・月15回</dd><dt>自己分析レポート</dt><dd>月10回（詳細分析も）</dd><dt>企業研究AI</dt><dd>月5回</dd><dt>練習の任意設定</dt><dd>応募先・聞いてほしい質問・書類アップロード</dd></dl>
           </div>
         </div>
-        <p class="same rv">評価の中身・プロフィール公開・オファーは、<strong>全プラン同じ</strong>です。変わるのは練習できる回数・時間・職種・保存できる結果の数だけです。</p>
+        <p class="same rv">根拠つきの評価・プロフィール公開・オファーは、<strong>全プラン同じ</strong>です。変わるのは、練習できる回数・時間・職種・保存できる結果の数と、ツールを使える回数です。<br>プロフィールを公開して企業があなたの詳しい評価を見ると、その料金の1/4が<strong>ガチキャリポイント</strong>で入ります（1pt＝1円。ライト・プロの月額の支払いに使えます）。</p>
         <div class="btns rv" style="margin-top:20px"><a class="btn btn-lime" href="https://gachicareer-ai.akitogroup.jp/login">無料で模擬面接をはじめる <span class="arr" aria-hidden="true">→</span></a></div>
       </div>
 
@@ -671,7 +768,8 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
             <thead><tr><th scope="col">内容</th><th scope="col">料金</th><th scope="col">くわしく</th></tr></thead>
             <tbody>
               <tr><th scope="row">人材一覧・人物まとめの閲覧</th><td class="p">無料</td><td class="d">匿名の一覧とまとめを見られます</td></tr>
-              <tr><th scope="row">閲覧チケット</th><td class="p">¥10,000<small>1人・買い切り</small></td><td class="d">名前・面接ごとの評価・会話・録画（本人が許可した場合）。面談の申し込み。成功報酬はゼロ</td></tr>
+              <tr><th scope="row">人材の閲覧</th><td class="p">50〜330コイン<small>1人あたり</small></td><td class="d">名前・面接ごとの評価・会話・録画（本人が許可した場合）。面談の申し込み。コインの数は評価の平均と閲覧された回数で変わります。成功報酬はゼロ</td></tr>
+              <tr><th scope="row">ガチキャリコイン</th><td class="p">¥5,000〜<small>50コインから</small></td><td class="d">50コイン ¥5,000／110コイン ¥10,000／360コイン ¥30,000。有効期限は購入日から6か月</td></tr>
               <tr><th scope="row">AI面接（URL発行）</th><td class="p">¥5,500<small>1回・従量課金</small></td><td class="d">候補者が面接を始めた回だけ請求。月額はなし</td></tr>
               <tr><th scope="row">求人掲載</th><td class="p">今は無料</td><td class="d">応募者の練習の評価を見て、メッセージできます</td></tr>
               <tr><th scope="row">書類選考AI</th><td class="p">掲載中は無料</td><td class="d">求人を掲載中の企業は、履歴書PDFの一括判定が無料</td></tr>
@@ -711,11 +809,11 @@ body[data-mode="person"] .only-biz,body[data-mode="biz"] .only-person{display:no
         <details class="rv"><summary><span class="tag">個人</span>本当に無料で使えますか？</summary><p class="a">はい。無料プランでは1日1回・月5回まで、1回10分の模擬面接ができます。評価の中身・プロフィール公開・オファーは有料プランと同じです。</p></details>
         <details class="rv"><summary><span class="tag">個人</span>評価はどうやって決まるのですか？</summary><p class="a">模擬面接であなたが話した内容から、7つの力をそれぞれ5段階で評価します。評価には必ずあなたの実際の発言を根拠として引用し、根拠となる発言がない力は評価しません。</p></details>
         <details class="rv"><summary><span class="tag">個人</span>プロフィールは勝手に公開されませんか？</summary><p class="a">されません。初期設定は「非公開」で、公開に同意した場合だけ、名前を伏せたプロフィールを企業が見られるようになります。いつでも非公開に戻せます。</p></details>
-        <details class="rv"><summary><span class="tag">個人</span>企業に名前は知られますか？</summary><p class="a">公開したプロフィールでは、名前は伏せて表示されます。企業が閲覧チケットを使った場合は、その企業にお名前と面接ごとの評価・会話が表示されます。録画は、本人が許可した場合だけ見られます。</p></details>
+        <details class="rv"><summary><span class="tag">個人</span>企業に名前は知られますか？</summary><p class="a">公開したプロフィールでは、名前は伏せて表示されます。企業がコインを使って閲覧した場合は、その企業にお名前と面接ごとの評価・会話が表示されます。録画は、本人が許可した場合だけ見られます。</p></details>
         <details class="rv"><summary><span class="tag">個人</span>スマホでも使えますか？</summary><p class="a">使えます。スマホのブラウザで模擬面接ができ、ホーム画面に追加すればアプリのように開けます。</p></details>
         <details class="rv"><summary><span class="tag">個人</span>使えば内定がもらえますか？</summary><p class="a">内定や採用をお約束するサービスではありません。練習と評価で面接の準備を進め、評価を公開すれば企業から面談の申し込みが届くことがある、という仕組みです。</p></details>
         <details class="rv"><summary><span class="tag">企業</span>運営が人材を紹介してくれるのですか？</summary><p class="a">いいえ。ガチキャリAIは求人メディアで、運営が人材を推薦・仲介することはありません。企業ご自身が評価を見て、面談を申し込む相手を決めます。</p></details>
-        <details class="rv"><summary><span class="tag">企業</span>料金はいつ、いくらかかりますか？</summary><p class="a">人材一覧と人物まとめの閲覧は無料です。詳しく見たい人ごとに閲覧チケット（1人¥10,000・税込・買い切り）、AI面接は候補者が面接を始めた回だけ1回¥5,500（税込）です。月額料金や成功報酬はありません。</p></details>
+        <details class="rv"><summary><span class="tag">企業</span>料金はいつ、いくらかかりますか？</summary><p class="a">人材一覧と人物まとめの閲覧は無料です。詳しく見たい人ごとにガチキャリコイン（1人あたり50〜330コイン。コインは50コイン¥5,000から・税込）、AI面接は候補者が面接を始めた回だけ1回¥5,500（税込）です。月額料金や成功報酬はありません。</p></details>
       </div>
     </div>
   </section>
