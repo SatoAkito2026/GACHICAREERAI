@@ -1,0 +1,271 @@
+<!--
+title: ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応
+description: ラーメン屋の注文とお会計を、券売機（先払い）・後会計のレジ・QR注文で比較。回転・人数・メニューの多さでの選び方、2024年の新しいお札とキャッシュレスへの対応、食券から厨房への伝え方、費用の考え方まで解説。
+nav: news
+image: ogp-ramen-ticket.png
+-->
+<style>
+.page-hero h1{font-size:clamp(26px,4.2vw,46px);line-height:1.4;max-width:24em}
+.toc{border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 48px;background:#fff}
+.toc p{font-weight:700;margin:0 0 8px}
+.toc ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(22px,3.4vw,30px);margin:64px 0 18px;padding-top:4px}
+.article h2:first-child{margin-top:0}
+.article h3{font-size:19px;margin:28px 0 8px}
+.points{list-style:none;padding:0;margin:20px 0;display:grid;gap:12px;counter-reset:pt}
+.points li{counter-increment:pt;border:1px solid var(--line);border-radius:16px;padding:18px 20px 18px 64px;position:relative;background:#fff}
+.points li::before{content:counter(pt);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--ff-latin);font-weight:800}
+.points b{display:block;font-size:16.5px}
+.points span{color:var(--ink-2);font-size:14.5px}
+.rank{border:1px solid var(--line);border-radius:24px;background:#fff;margin:22px 0 0;overflow:hidden}
+.rank-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.rank-no{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;align-content:center;background:var(--paper-2,#F4F2F7);font-family:var(--ff-latin);font-weight:800;font-size:26px;line-height:1}
+.rank-no small{font-size:10.5px;letter-spacing:.1em;font-weight:700;margin-top:2px}
+.rank-head h3{margin:0;font-size:clamp(20px,2.8vw,24px)}
+.rank-head p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.rank-body{padding:20px 22px 24px;display:grid;gap:14px}
+.rank-body ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.rank-body ul.fit{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.fit li+li,.feat-grid li+li,.points li+li{margin-top:0}
+.fit li{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--paper-2,#F4F2F7)}
+.rank-body .src{font-size:12.5px;color:var(--muted)}
+.rank-body .src a{color:inherit}
+.rank.top{border:2px solid #1E5BD8;box-shadow:0 30px 50px -36px rgba(30,91,216,.6)}
+.rank.top .rank-head{background:linear-gradient(135deg,#F2F6FF,#E3ECFF)}
+.rank.top .rank-no{background:#1E5BD8;color:#fff}
+.rank.top .logo-row{display:flex;align-items:center;gap:12px}
+.rank.top .logo-row img{width:44px;height:44px}
+.rank.top .fit li{background:#E8EFFE;color:#1748B0}
+.rank-body ul.feat-grid{display:grid;padding:0;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:0;list-style:none}
+@media (min-width:640px){.feat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.feat-grid li{font-size:14px;padding:8px 12px;border-radius:10px;background:#F5F8FF;border:1px solid #DCE6FB}
+.btn-blue{background:#1E5BD8;color:#fff}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(30,91,216,.7)}
+.sum{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+.sum table{width:100%;min-width:560px;border-collapse:collapse;font-size:14.5px}
+.sum th,.sum td{padding:13px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum tr:last-child th,.sum tr:last-child td{border-bottom:0}
+.sum thead th{background:var(--paper-2,#F4F2F7);font-size:13px}
+.sum tbody tr:first-child{background:#F5F8FF}
+.cta-box{margin-top:56px;border-radius:24px;padding:clamp(24px,4vw,40px);background:linear-gradient(135deg,#163E9E,#1E5BD8 55%,#3B8CFF);color:#fff;display:grid;gap:14px;justify-items:start}
+.cta-box h2{margin:0;color:#fff;border-left-color:#fff}
+.cta-box .btns{display:flex;flex-wrap:wrap;gap:12px}
+.cta-box .btn-w{background:#fff;color:#1E5BD8}
+.cta-box .btn-o{border:2px solid rgba(255,255,255,.7);color:#fff;background:transparent}
+.note{font-size:12.5px;color:var(--muted);margin-top:28px}
+
+.ti{width:44px;height:44px;border-radius:12px;flex:none;border:1px solid var(--line);background:#fff;object-fit:cover}
+.ti.sm{width:28px;height:28px;border-radius:8px}
+.concl{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.concl>p:first-child{font-weight:900;font-size:17px;margin:0 0 12px}
+.concl ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.concl li{display:grid;grid-template-columns:28px 28px minmax(0,1fr);gap:10px;align-items:center;font-size:14.5px}
+.concl li>b:first-child{font-family:var(--ff-latin);font-size:16px;text-align:center}
+.concl li span b{margin-right:6px}
+.concl li.top{background:#F2F6FF;border-radius:10px;padding:6px 8px;margin:0 -8px}
+.cmpw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:14px}
+.cmp{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px}
+.cmp th,.cmp td{padding:12px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px;white-space:nowrap}
+.cmp tbody th{position:sticky;left:0;background:#fff;min-width:150px;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.cmp tbody th div{display:flex;align-items:center;gap:8px;font-weight:700}
+.cmp tbody tr.us th,.cmp tbody tr.us td{background:#F5F8FF}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.grid2{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin:16px 0}
+@media (min-width:640px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.box{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff}
+.box b{display:block;font-size:15.5px;margin-bottom:4px}
+.box span{font-size:14px;color:var(--ink-2)}
+.box.warn{border-color:#F0D89A;background:#FFFBF0}
+.rank-head .ttl{display:flex;align-items:center;gap:12px}
+.rank-body h4{margin:4px 0 0;font-size:15px}
+.flowx{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px;counter-reset:f}
+.flowx li{counter-increment:f;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.flowx li::before{content:counter(f);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
+.flowx b{display:block}
+.flowx span{font-size:14px;color:var(--ink-2)}
+.faqx{display:grid;gap:10px;margin-top:14px}
+.faqx details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 18px}
+.faqx summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none}
+.faqx summary::-webkit-details-marker{display:none}
+.faqx summary::before{content:"Q.";color:#1E5BD8;font-family:var(--ff-latin);font-weight:800;margin-right:8px}
+.faqx details p{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+.type{display:grid;gap:10px;margin:14px 0}
+.type a{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;text-decoration:none;transition:border-color .3s}
+.type a:hover{border-color:#1E5BD8}
+.type a b{font-size:16px}
+.type a span{font-size:14px;color:var(--ink-2)}
+.type a em{font-style:normal;font-size:12.5px;font-weight:700;color:#1E5BD8;white-space:nowrap}
+@media (max-width:639px){.type a{grid-template-columns:minmax(0,1fr)}.type a em{justify-self:start}}
+
+.midcta{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:14px;align-items:center;border:2px solid #1E5BD8;border-radius:18px;padding:16px 18px;margin:28px 0;background:linear-gradient(135deg,#F5F8FF,#fff)}
+.midcta img{width:52px;height:52px;border-radius:12px;border:1px solid var(--line)}
+.midcta b{display:block;font-size:15.5px}
+.midcta span{font-size:13px;color:var(--ink-2)}
+.midcta .lk{font-size:13.5px;font-weight:700;color:#1E5BD8}
+.midcta span em{font-style:normal;font-weight:900;color:#D92D20}
+.ofr{margin:0;border:2px dashed rgba(255,255,255,.75);border-radius:14px;padding:10px 16px;background:rgba(255,255,255,.12);font-weight:700}
+.ofr b{display:block;font-size:12.5px;letter-spacing:.06em;color:#FFD27A}
+.sdl small{display:block;font-size:11px;font-weight:700;opacity:.9}
+.sdl.gc{background:#0B0B0B;color:#C8FF00}
+.spop em.ca{background:#0B0B0B;color:#C8FF00}
+@media (max-width:719px){.midcta{grid-template-columns:52px minmax(0,1fr)}.midcta .btn{grid-column:1/-1}.midcta .lk{grid-column:1/-1;justify-self:center}}
+
+.two-col{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.two-col{grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start}}
+.side-in{display:grid;gap:16px}
+/* ガチキャリAIの広告（300×600）。PCでは右の欄のいちばん上、スマホでは右の欄のいちばん下 */
+.side{display:flex;flex-direction:column;gap:16px}
+.side-ad{order:2;display:flex;justify-content:center}
+.side-ad iframe{display:block;max-width:100%}
+@media (min-width:1080px){.side{align-self:stretch}.side-ad{order:0}.side-in{position:sticky;top:96px;max-height:calc(100vh - 116px);overflow-y:auto;padding-bottom:8px;scrollbar-width:thin}}
+.sbn{display:grid;gap:8px;text-decoration:none;border-radius:18px;padding:16px;border:2px solid #1E5BD8;background:#fff;text-align:center;transition:transform .3s,box-shadow .3s}
+.sbn:hover{transform:translateY(-3px);box-shadow:0 20px 34px -24px rgba(30,91,216,.7)}
+.sbn img{width:140px;height:auto;margin:0 auto}
+.sbn b{font-size:16px}
+.sbn small{display:block;font-size:12px;color:var(--ink-2);line-height:1.6}
+.sbn em{font-style:normal;background:#1E5BD8;color:#fff;border-radius:999px;padding:9px 0;font-weight:700;font-size:14px}
+.sbn2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbn2 a{text-decoration:none;border-radius:14px;padding:12px;display:grid;gap:2px;transition:transform .3s}
+.sbn2 a:hover{transform:translateY(-2px)}
+.sbn2 small{font-size:9.5px;letter-spacing:.08em;font-weight:700}
+.sbn2 b{font-size:16px}
+.sbn2 span{font-size:11px;line-height:1.5}
+.sbn2 .d{background:linear-gradient(140deg,#fff,#E6F0FF);border:1px solid var(--line)}
+.sbn2 .d small{color:#1557D6}.sbn2 .d span{color:var(--ink-2)}
+.sbn2 .n{background:#0B1330;color:#ECF0FF}
+.sbn2 .n small{color:#FFB547}.sbn2 .n span{color:#A9B4D6}
+.stoc,.skw,.spop{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px}
+.stoc p,.skw p,.spop p{margin:0 0 8px;font-weight:900;font-size:13px;letter-spacing:.06em}
+.stoc ol{margin:0;padding:0;list-style:none;display:grid;gap:2px;counter-reset:s}
+.stoc li{counter-increment:s}
+.stoc a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;text-decoration:none;font-size:13px;line-height:1.5;padding:5px 6px;border-radius:8px;color:var(--ink-2)}
+.stoc a::before{content:counter(s);font-family:var(--ff-latin);font-weight:800;color:#A3AEC6}
+.stoc a:hover{background:#F5F8FF;color:var(--ink)}
+.stoc a.on{background:#EAF1FF;color:#1E5BD8;font-weight:700}
+.stoc a.on::before{color:#1E5BD8}
+.skw ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skw a{display:block;text-decoration:none;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.skw a::before{content:"#";color:#1E5BD8;margin-right:2px}
+.skw a:hover{border-color:#1E5BD8;color:#1E5BD8}
+.sdl{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:12px;background:#3FAE3A;color:#fff;transition:transform .3s}
+.sdl:hover{transform:translateY(-2px)}
+.spop ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.spop a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;text-decoration:none;font-size:12.5px;line-height:1.55;font-weight:700}
+.spop img{width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+.spop em{display:inline-block;font-style:normal;font-size:10px;background:#EAF1FF;color:#1E5BD8;border-radius:4px;padding:0 6px;margin-right:6px}
+.spop em.nt{background:#0B1330;color:#FFB547}.spop em.ot{background:#F4F2F7;color:var(--ink-2)}
+.spop a:hover span{text-decoration:underline}
+.prose .side p{margin:0}
+.prose .side ul,.prose .side ol{padding-left:0}
+
+.calc{width:100%;border-collapse:collapse;font-size:14px}
+.calc th,.calc td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.calc td.n{text-align:right;white-space:nowrap;font-family:var(--ff-latin);font-weight:700}
+.calc thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px}
+.calc tr.sum th,.calc tr.sum td{background:#F5F8FF;font-weight:900}
+.calc tr.minus td.n{color:#C2410C}
+.calc tr:last-child th,.calc tr:last-child td{border-bottom:0}
+.calcw{border:1px solid var(--line);border-radius:18px;background:#fff;overflow-x:auto;margin-top:14px}
+.calc th small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.calc thead th small{display:inline;margin:0 0 0 6px}
+.calc th.n{text-align:right}
+.formula{border:2px solid var(--ink);border-radius:16px;padding:16px 18px;background:#fff;font-weight:700;text-align:center;margin:16px 0}
+.formula small{display:block;font-weight:400;font-size:13px;color:var(--ink-2);margin-top:4px}
+.learn{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
+.learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / <a href="news.html">お知らせ</a> / ラーメン屋の券売機とPOSレジ</nav>
+    <p class="eyebrow"><time datetime="2026-10-23">2026.10.23</time>　コラム</p>
+    <h1>ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応</h1>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="two-col">
+    <div class="maincol">
+    <article class="prose article">
+
+      <p>お昼どきの行列、少ない人数で回す厨房。ラーメン屋の注文とお会計は、<b>券売機</b>にするか、<b>後会計のレジ</b>にするか、最近増えている<b>QR注文</b>にするかで、お店の回り方が大きく変わります。</p>
+      <p>この記事では、3つの方法の違いと選び方、2024年に発行された新しいお札やキャッシュレスへの対応、食券から厨房への伝え方、費用の考え方をまとめました。</p>
+
+      <div class="learn"><p>この記事でわかること</p><ul><li>券売機・後会計・QR注文、それぞれの向き不向き</li><li>新しいお札やキャッシュレス決済への対応で気をつけること</li><li>トッピング・麺のかたさなどを厨房にもれなく伝えるコツ</li><li>券売機を入れるときの費用の考え方</li></ul></div>
+
+      <nav class="toc" aria-label="目次"><p>目次</p><ol><li><a href="#ways">注文とお会計の3つの方法</a></li><li><a href="#cmp">券売機・後会計・QR注文の比べ方</a></li><li><a href="#bill">新しいお札とキャッシュレス</a></li><li><a href="#kitchen">食券から厨房への伝え方</a></li><li><a href="#cost">かかる費用の考え方</a></li><li><a href="#pos">ポスポスの券売機</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+
+      <h2 id="ways">注文とお会計の3つの方法</h2>
+      <div class="grid2"><div class="box "><b>券売機（先払い）</b><span>お客さまが入口の券売機で食券を買い、カウンターに出します。お会計がその場で終わるので、スタッフは調理と提供に集中できます。</span></div><div class="box "><b>後会計のレジ</b><span>スタッフが注文を聞き、食べ終わったあとにレジでお会計。追加の注文がしやすく、会話も生まれます。</span></div><div class="box "><b>QR注文</b><span>お客さまが自分のスマホで注文。先払いにも後会計にもできます。</span></div><div class="box "><b>組み合わせ</b><span>ふだんは券売機、追加のトッピングやビールはスタッフが受ける、など。</span></div></div>
+
+      <h2 id="cmp">券売機・後会計・QR注文の比べ方</h2>
+      <ul class="points"><li><b>お客さまの回転</b><span>行列ができるお店は、お会計を先にすませる券売機が有利です。食べ終わったらすぐ席を立ってもらえます。</span></li><li><b>スタッフの人数</b><span>ワンオペや少人数のお店は、お金を受け取る手間が減る券売機やQR注文が向いています。</span></li><li><b>メニューの多さ</b><span>トッピング・麺のかたさ・味の濃さなど選択肢が多いお店は、画面で選べる券売機やQR注文のほうが聞きまちがいが減ります。</span></li><li><b>追加の注文</b><span>替え玉・ビールのおかわりなど、あとからの注文が多いお店は、後会計やQR注文と組み合わせると便利です。</span></li><li><b>お客さまの層</b><span>年配のお客さまが多いお店は、ボタンの大きさや操作のわかりやすさも大切です。</span></li></ul>
+
+      <div class="midcta"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600"><div><b>券売機も、QR注文も、レジも。ひとつの売上に</b><span>この記事からのお申し込みで、商品・写真・スタッフの登録代行が<em>無料</em>。月額11,000円〜・初期費用0円・1か月無料。</span></div><a class="btn btn-blue" href="contact.html#pos-offer">特典つきで試す <span class="arr" aria-hidden="true">→</span></a><a class="lk" href="posupos-day.html#ramen">画面を見る</a></div>
+
+      <h2 id="bill">新しいお札とキャッシュレス</h2>
+      <p>2024年7月に、新しい日本銀行券（一万円・五千円・千円）が発行されました。古い券売機の中には、新しいお札を読み取れないものがあり、対応のために部品の交換や買い替えが必要になったお店もあります。</p>
+      <div class="grid2"><div class="box "><b>現金に対応する場合</b><span>お札・硬貨を受け付ける機械が必要です。新しいお札への対応、釣り銭の補充、閉店後の現金の回収と照合の手間がかかります。</span></div><div class="box "><b>キャッシュレスに対応する場合</b><span>クレジットカード・交通系IC・QR決済を使えるようにすると、釣り銭の準備が減ります。決済の手数料がかかります。</span></div></div>
+      <p>現金だけ、キャッシュレスだけ、と決めつけず、お店のお客さまがどちらを使うかで決めるのがおすすめです。</p>
+
+      <h2 id="kitchen">食券から厨房への伝え方</h2>
+      <ul class="points"><li><b>食券に選択肢を印字する</b><span>麺のかたさ・味の濃さ・トッピングを食券に印字すると、口頭で聞く必要がなくなります。</span></li><li><b>厨房の画面に送る</b><span>食券を受け取ってから伝えるのではなく、買った時点で厨房の画面に注文が出るようにすると、作り始めが早くなります。</span></li><li><b>お持ち帰りを分ける</b><span>店内とお持ち帰りで消費税の税率が違います（店内10%、お持ち帰りの飲食料品8%）。選んでもらえるようにしておきます。</span></li></ul>
+
+      <h2 id="cost">かかる費用の考え方</h2>
+      <div class="grid2"><div class="box "><b>はじめにかかるもの</b><span>券売機本体や端末、食券を印刷するプリンター、現金を扱う場合はお札・硬貨を受け付ける機械、設置の工事。</span></div><div class="box "><b>毎月かかるもの</b><span>システムの月額料金、保守料、キャッシュレス決済の手数料、食券の用紙。</span></div><div class="box "><b>忘れがちなもの</b><span>メニューや値段を変えるときの設定の手間、お札の変更への対応、故障したときの修理。</span></div><div class="box "><b>レジとの二重の管理</b><span>券売機とレジが別々だと、売上を合わせる手間がかかります。同じしくみで動くものを選ぶと集計が楽です。</span></div></div>
+      <p>POSレジ全体の選び方は<a href="news-pos-ranking-day.html">飲食店のPOSレジおすすめ5選</a>で比べています。</p>
+
+      <h2 id="pos">ポスポスの券売機</h2>
+      <p><a href="posupos-day.html#ramen">ポスポス</a>は、ラーメン・居酒屋・カフェなどの飲食店のためのクラウドPOSレジです。券売機・QR注文・レジ・厨房の画面が、ひとつのしくみでつながっています。</p>
+      <div class="grid2"><div class="box "><b>お店の端末が券売機に</b><span>お店の端末を券売機にして、メニューを選び、食券を印刷できます。</span></div><div class="box "><b>QR注文も</b><span>お客さまのスマホや卓のタブレットからも注文できます。</span></div><div class="box "><b>厨房の画面</b><span>注文は厨房の画面に届きます。料理とドリンクで持ち場を分けられます。</span></div><div class="box "><b>お持ち帰りの軽減税率</b><span>店内／お持ち帰りを選べて、税率も自動で計算します。</span></div><div class="box "><b>キャッシュレス</b><span>Square の読み取り機で、クレジットカード・交通系IC・QR決済を受け付けられます。</span></div><div class="box "><b>売上の集計</b><span>売上・客数・客単価・よく出た商品を自動で集計します。</span></div></div>
+      <p>料金は月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 22,000円（通常価格 33,000円）、個別プラン 55,000円〜（料金は1店舗ごと）。初期費用は0円で、無料で1か月お試しできます。</p>
+
+      <h2 id="faq">よくある質問</h2>
+      <div class="faqx"><details><summary>ラーメン屋は券売機と後会計のどちらがいいですか？</summary><p>回転を早くしたい、少ない人数で回したいお店は券売機（先払い）が向いています。トッピングや追加の注文が多い、会話を大事にしたいお店は後会計が向いています。両方を組み合わせるお店もあります。</p></details><details><summary>券売機は新しいお札に対応していますか？</summary><p>2024年7月に新しい日本銀行券（お札）が発行されました。古い券売機は、新しいお札を読み取れない場合があります。お使いの機械が対応しているか、メーカーや販売店にご確認ください。</p></details><details><summary>キャッシュレス決済だけの券売機にできますか？</summary><p>できます。現金を扱わない形にすると、釣り銭の準備やお札の対応が不要になります。ただし現金しか使わないお客さまもいるので、お店のお客さまに合わせて決めましょう。</p></details><details><summary>お持ち帰りの消費税はどうなりますか？</summary><p>店内で食べるものは10%、お持ち帰りの飲食料品は軽減税率の8%です。店内とお持ち帰りを選べるようにし、正しい税率で会計できるしくみにしておきます。</p></details><details><summary>ポスポスは券売機として使えますか？</summary><p>使えます。お店の端末を券売機にして、メニューを選んで食券を印刷できます。QR注文やレジとも同じしくみの中で動き、売上は自動で集計されます。お持ち帰りの軽減税率にも対応しています。</p></details></div>
+
+      <div class="cta-box">
+        <h2>券売機も、厨房も、売上も。ポスポスひとつで。</h2>
+        <p class="ofr"><b>この記事からのお申し込み特典</b>商品・写真・スタッフの登録代行が無料（通常は別途お見積もり）</p>
+        <p>月額11,000円〜・初期費用0円。無料で1か月お試しできます。</p>
+        <div class="btns"><a class="btn btn-w" href="posupos-day.html#ramen">ラーメン屋のポスポスを見る <span class="arr" aria-hidden="true">→</span></a><a class="btn btn-o" href="contact.html#pos-offer">特典つきで申し込む</a></div>
+      </div>
+
+      <p class="note">※ 記事の内容は2026年10月時点のものです。券売機の機能や費用は製品によって異なります。</p>
+    </article>
+    <a class="btn btn-line" href="news.html" style="margin-top:48px">← お知らせ一覧へ</a>
+    </div>
+    <aside class="side" aria-label="サイドメニュー">
+      <div class="side-ad"><iframe src="https://gachicareer-ai.akitogroup.jp/embed/ad" width="300" height="600" style="border:0;border-radius:12px" loading="lazy" title="ガチキャリAIの広告"></iframe></div>
+      <div class="side-in">
+        <a class="sbn main" href="posupos-day.html"><img src="assets/img/posupos-logo.webp" alt="ポスポス" width="800" height="800" loading="lazy"><span><b>無料で1か月ためせる</b><small>伝票・会計・打刻・シフト・給料・顧客をまとめて管理</small></span><em>飲食店のポスポスを見る →</em></a>
+        <div class="sbn2"><a class="d" href="posupos-day.html#izakaya"><small>FOR RESTAURANTS</small><b>昼のお店</b><span>居酒屋・ラーメン・カフェなど</span></a><a class="n" href="posupos-night.html#cabaret"><small>FOR NIGHT</small><b>夜のお店</b><span>キャバクラ・ホストなど</span></a></div>
+        <nav class="stoc" aria-label="この記事の目次"><p>目次</p><ol><li><a href="#ways">注文とお会計の3つの方法</a></li><li><a href="#cmp">券売機・後会計・QR注文の比べ方</a></li><li><a href="#bill">新しいお札とキャッシュレス</a></li><li><a href="#kitchen">食券から厨房への伝え方</a></li><li><a href="#cost">かかる費用の考え方</a></li><li><a href="#pos">ポスポスの券売機</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+        <div class="skw"><p>KEYWORDS</p><ul><li><a href="news-pos-ranking-day.html#func">QR注文</a></li><li><a href="news-pos-ranking-day.html#func">厨房の画面</a></li><li><a href="news-pos-ranking-day.html#func">券売機</a></li><li><a href="news-pos-ranking-day.html#howto">給料計算</a></li><li><a href="news-pos-ranking-day.html#howto">キャッシュレス</a></li><li><a href="news-pos-ranking-day.html#price">料金</a></li></ul></div>
+        <a class="sdl" href="contact.html#pos-offer"><small>この記事からのお申し込み特典</small>登録代行が無料 → 申し込む</a>
+        <div class="spop"><p>よく読まれる記事</p><ul>
+          <li><a href="news-izakaya-qr.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>居酒屋のQR注文の始め方</span></a></li>
+          <li><a href="news-restaurant-shift.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のシフト管理と給料計算</span></a></li>
+          <li><a href="news-ramen-ticket.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>ラーメン屋の券売機とPOSレジ</span></a></li>
+          <li><a href="news-cafe-point.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>カフェのポイントカードの作り方</span></a></li>
+          <li><a href="news-pos-ranking-day.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のPOSレジおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-pos-ranking.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>夜のお店のPOSシステムおすすめ5選｜選び方と比較表</span></a></li>
+        </ul></div>
+      </div>
+    </aside>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応", "description": "ラーメン屋の注文とお会計を、券売機（先払い）・後会計のレジ・QR注文で比較。回転・人数・メニューの多さでの選び方、2024年の新しいお札とキャッシュレスへの対応、食券から厨房への伝え方、費用の考え方まで解説。", "image": "https://akitogroup.jp/assets/img/ogp-ramen-ticket.png", "datePublished": "2026-10-23", "dateModified": "2026-10-24", "author": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "mainEntityOfPage": "https://akitogroup.jp/news-ramen-ticket"}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "お知らせ", "item": "https://akitogroup.jp/news"}, {"@type": "ListItem", "position": 3, "name": "ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応", "item": "https://akitogroup.jp/news-ramen-ticket"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ラーメン屋は券売機と後会計のどちらがいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "回転を早くしたい、少ない人数で回したいお店は券売機（先払い）が向いています。トッピングや追加の注文が多い、会話を大事にしたいお店は後会計が向いています。両方を組み合わせるお店もあります。"}}, {"@type": "Question", "name": "券売機は新しいお札に対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "2024年7月に新しい日本銀行券（お札）が発行されました。古い券売機は、新しいお札を読み取れない場合があります。お使いの機械が対応しているか、メーカーや販売店にご確認ください。"}}, {"@type": "Question", "name": "キャッシュレス決済だけの券売機にできますか？", "acceptedAnswer": {"@type": "Answer", "text": "できます。現金を扱わない形にすると、釣り銭の準備やお札の対応が不要になります。ただし現金しか使わないお客さまもいるので、お店のお客さまに合わせて決めましょう。"}}, {"@type": "Question", "name": "お持ち帰りの消費税はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "店内で食べるものは10%、お持ち帰りの飲食料品は軽減税率の8%です。店内とお持ち帰りを選べるようにし、正しい税率で会計できるしくみにしておきます。"}}, {"@type": "Question", "name": "ポスポスは券売機として使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "使えます。お店の端末を券売機にして、メニューを選んで食券を印刷できます。QR注文やレジとも同じしくみの中で動き、売上は自動で集計されます。お持ち帰りの軽減税率にも対応しています。"}}]}</script>
+<script>
+(function(){var links=[].slice.call(document.querySelectorAll('.stoc a'));if(!links.length||!('IntersectionObserver' in window))return;
+var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-20% 0px -70% 0px'});
+Object.keys(map).forEach(function(id){var h=document.getElementById(id);if(h)io.observe(h)})})();
+</script>

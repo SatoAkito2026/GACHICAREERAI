@@ -1,0 +1,190 @@
+<!--
+title: お知らせ
+description: AKITOグループのお知らせ・コラム・活動報告。飲食店や夜のお店のPOSレジの選び方、自衛隊・公務員のニュース、地域のボランティア活動などを発信しています。
+nav: news
+-->
+<style>
+.post-list{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.post-list a{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:center;padding:24px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.post-list .thumb{border-radius:14px;overflow:hidden;aspect-ratio:16/10;background:var(--paper-2);display:grid;place-items:center}
+.post-list .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.post-list a:hover .thumb img{transform:scale(1.05)}
+.post-list .meta{font-family:var(--ff-mono);font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.post-list .cat{font-family:var(--ff-body);font-weight:700;color:var(--ink)}
+.post-list h2{font-size:clamp(18px,2.2vw,22px);margin-top:6px;line-height:1.5}
+.post-list p{font-size:14px;color:var(--muted);margin-top:6px}
+.post-list a:hover h2{text-decoration:underline;text-underline-offset:5px}
+@media (max-width:640px){.post-list a{grid-template-columns:minmax(0,1fr);gap:14px}}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.cat-tabs button{appearance:none;font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
+.cat-tabs button span{font-family:var(--ff-mono);font-size:12px;color:var(--muted);margin-left:6px}
+.cat-tabs button:hover{border-color:var(--ink)}
+.cat-tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.cat-tabs button[aria-selected="true"] span{color:rgba(255,255,255,.75)}
+.cat-empty{color:var(--muted);padding:24px 0}
+.post-list li[hidden]{display:none}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / お知らせ</nav>
+    <p class="eyebrow">Blog &amp; News</p>
+    <h1>お知らせ</h1>
+    <p class="lead">AKITOグループからのお知らせ、活動報告、代表のブログです。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="cat-tabs" role="tablist" aria-label="お知らせの種類">
+      <button type="button" role="tab" data-c="all" aria-selected="true">すべて<span></span></button>
+      <button type="button" role="tab" data-c="pos-day" aria-selected="false">飲食店（ポスポス）<span></span></button>
+      <button type="button" role="tab" data-c="pos-night" aria-selected="false">夜のお店（ポスポス）<span></span></button>
+      <button type="button" role="tab" data-c="career" aria-selected="false">就活・転職（ガチキャリAI）<span></span></button>
+      <button type="button" role="tab" data-c="jsdf" aria-selected="false">自衛隊・公務員<span></span></button>
+      <button type="button" role="tab" data-c="company" aria-selected="false">会社のお知らせ・活動<span></span></button>
+    </div>
+    <p class="cat-empty" hidden>この種類の記事は、まだありません。</p>
+    <ul class="post-list">
+      <li class="rv" data-cat="career"><a href="news-ai-interview-practice.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>AIで面接練習するやり方｜無料でできる模擬面接の流れ・評価の見方・効果を上げるコツ</h2>
+        <p>AIの面接官との模擬面接の流れ、7つの力の評価と話し方のチェックの見方、練習のコツをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career jsdf"><a href="news-jsdf-career.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>元自衛官の転職と面接のコツ｜自衛隊で身につく力の伝え方と、よく聞かれる質問</h2>
+        <p>元陸上自衛官の代表・副代表が、自衛隊で身につく力の伝え方と面接の答え方をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="news-interview-questions.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>面接でよく聞かれる質問10と答え方｜回答例と、答えるときのコツ・失敗例</h2>
+        <p>よく聞かれる質問10の答え方と回答例、答えるときのコツ、やってしまいがちな失敗をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="news-self-pr.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>自己PRの作り方と例文｜4ステップで作る方法と、強みの言いかえ・よくある失敗</h2>
+        <p>自己PRで伝える3つのこと、4ステップの作り方、経験別の例文、強みの言いかえ一覧をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="news-reverse-questions.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>面接の逆質問の例｜印象がよくなる質問と、段階別のポイント・避けたい質問</h2>
+        <p>目的別の逆質問の例、一次面接・最終面接での聞き分け、避けたい逆質問、準備のしかたをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="news-ai-interview-company.html">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>AI面接とは？企業が導入するメリットと注意点・導入の流れ</h2>
+        <p>AI面接のしくみ、企業のメリット、導入するときの注意点、導入の流れと料金をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="news-cafe-point.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>カフェのポイントカードの作り方｜紙・アプリ・QR会員証の比較とクーポンの使い方</h2>
+        <p>ポイントカードの3つの形、還元率と特典の決め方、クーポンの使いどころ、始め方をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-lounge-customer.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ラウンジの顧客管理のやり方｜顧客カルテの項目・来店予定・ボトル管理と個人情報の注意点</h2>
+        <p>顧客カルテに残す項目、来店予定とボトルの管理、キャストとの共有、個人情報の注意点をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="news-ramen-ticket.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応</h2>
+        <p>券売機・後会計・QR注文の選び方、新しいお札とキャッシュレス、厨房への伝え方、費用をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-snack-sales.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>スナックの売上管理のやり方｜ボトルキープ・ツケの管理と確定申告の準備</h2>
+        <p>料金と売上のしくみ、1日の売上のつけ方、ボトルキープとツケの管理、確定申告の準備をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="news-restaurant-shift.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例</h2>
+        <p>シフト作りの流れ、打刻の記録、深夜割増・休憩・最低賃金のルール、アルバイトの給料の計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="news-izakaya-qr.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>居酒屋のQR注文（モバイルオーダー）の始め方｜メリット・費用・7ステップと飲み放題のコツ</h2>
+        <p>QR注文のしくみ、ハンディとの違い、始め方の7ステップ、飲み放題など居酒屋ならではのポイントをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-girlsbar-back.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ガールズバー・コンカフェのバック計算｜ドリンクバック・チェキバックの決め方と給料の計算例</h2>
+        <p>ドリンク・チェキ・シャンパンのバックの決め方、給料の計算例、イベントの集計、法律の注意点をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-host-sales.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ホストクラブの売上管理のやり方｜担当・付け回し・売掛・給料計算と2025年の法改正</h2>
+        <p>担当・ヘルプ・送り指名の売上のしくみ、付け回しと売掛の記録、改正風営法のポイント、給料の計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-cabaret-payroll.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>キャバクラの売上集計と給料計算のやり方｜バック・時給・源泉徴収の計算例つき</h2>
+        <p>閉店後の売上集計で見る項目、キャストの給料のしくみ、源泉徴収まで入れた計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="news-pos-ranking-day.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>【2026年版】飲食店のPOSレジおすすめ5選｜居酒屋・ラーメン・カフェの選び方と比較表</h2>
+        <p>居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェ。飲食店のPOSレジの選び方と、おすすめの5つを紹介します。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="news-pos-ranking.html">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>【2026年版】夜のお店のPOSシステムおすすめ5選｜キャバクラ・ホスト・ガールズバーの選び方と比較表</h2>
+        <p>キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジ。夜のお店のPOSシステムの選び方と、おすすめの5つを紹介します。</p></span>
+      </a></li>
+      <li class="rv" data-cat="jsdf"><a href="news-barracks.html">
+        <span class="thumb"><img src="assets/img/barracks.webp" alt="窓から光が差し込む個室" width="640" height="480" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2025-10-06">2025.10.06</time><span class="cat">自衛隊・公務員</span></span>
+        <h2>防衛省が動く、隊舎改革の波。</h2>
+        <p>相部屋から個室へ。変わるのは建物だけじゃない。元自衛官の代表が、隊舎の完全個室化について考えます。</p></span>
+      </a></li>
+      <li class="rv" data-cat="company"><a href="news-volunteer.html">
+        <span class="thumb"><img src="assets/img/volunteer-1.webp" alt="体育館で絵を描く子どもたち" width="1024" height="577" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">会社のお知らせ・活動</span></span>
+        <h2>椎名町小学校でボランティア活動をしてまいりました！</h2>
+        <p>夏休みの小学生60名と中学生15名に、レクリエーションを行いました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="company"><a href="news-open.html">
+        <span class="thumb"><img src="assets/img/logo-full.webp" alt="AKITOグループのロゴ" width="900" height="352" loading="lazy" style="object-fit:contain;width:72%;height:auto"></span>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">会社のお知らせ・活動</span></span>
+        <h2>AKITOグループのホームページを開設しました！</h2>
+        <p>この度、ホームページを開設しました。</p></span>
+      </a></li>
+    </ul>
+  </div>
+</section>
+
+<script>
+// お知らせの種類で絞り込む（#pos-night のように URL の後ろに付けると、その種類で開く）
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.cat-tabs button')),items=[].slice.call(document.querySelectorAll('.post-list li[data-cat]')),empty=document.querySelector('.cat-empty');
+  var has=function(li,c){return c==='all'||(' '+li.dataset.cat+' ').indexOf(' '+c+' ')>=0};
+  tabs.forEach(function(b){var n=items.filter(function(li){return has(li,b.dataset.c)}).length;b.querySelector('span').textContent=n;if(!n&&b.dataset.c!=='all')b.hidden=true});
+  var show=function(c,push){
+    if(!tabs.some(function(b){return b.dataset.c===c&&!b.hidden}))c='all';
+    tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.c===c?'true':'false')});
+    var n=0;items.forEach(function(li){var on=has(li,c);li.hidden=!on;if(on){n++;li.classList.remove('pending')}});
+    empty.hidden=n>0;
+    if(push)history.replaceState(null,'',c==='all'?location.pathname:'#'+c);
+  };
+  tabs.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.c,true)})});
+  show(decodeURIComponent(location.hash.slice(1))||'all',false);
+})();
+</script>

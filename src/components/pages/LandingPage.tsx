@@ -8,9 +8,14 @@ import {
   BarChart3,
   Building2,
   Check,
+  Briefcase,
+  Compass,
   Eye,
   FileText,
+  Gift,
+  GraduationCap,
   Mic,
+  Search,
   ShieldCheck,
   Trophy,
 } from "lucide-react";
@@ -23,8 +28,14 @@ import {
   PhoneFrame,
   ResultScreen,
 } from "@/components/landing/Mockups";
-import { COMPANY_INTERVIEW_PRICE_JPY, PRACTICE_RULES } from "@/lib/plan-rules";
-import { COIN_EXPIRY_MONTHS, COIN_PACKS, PRICE_TIERS } from "@/lib/coins";
+import {
+  COMPANY_INTERVIEW_PRICE_JPY,
+  DOCUMENT_RULES,
+  PRACTICE_RULES,
+  RESEARCH_PER_MONTH_PRO,
+  SELF_ANALYSIS_PER_MONTH,
+} from "@/lib/plan-rules";
+import { CANDIDATE_SHARE_RATE, COIN_EXPIRY_MONTHS, COIN_PACKS, PRICE_TIERS } from "@/lib/coins";
 
 const ACCENT = "#C8FF00";
 
@@ -38,6 +49,7 @@ export function LandingPage() {
       <Screens />
       <AdVideo loggedIn={!!session} />
       <Features />
+      <Tools />
       <ResultSample />
       <Pricing />
       <ForCompanies />
@@ -434,6 +446,89 @@ function Features() {
   );
 }
 
+/** 練習のほかのツール。回数は plan-rules の数字から出す */
+function Tools() {
+  const d = DOCUMENT_RULES;
+  const a = SELF_ANALYSIS_PER_MONTH;
+  const items: { icon: ReactNode; t: string; d: string; plan: string }[] = [
+    {
+      icon: <FileText size={22} />,
+      t: "書類生成AI",
+      d: "AIと会話するだけで、自己PR・エントリーシート・履歴書・職務経歴書の下書きを作成。会社や学校指定のフォーマット（PDF）にも合わせられます。",
+      plan: `無料 月${d.free.perMonth}回 ／ ライト 月${d.individual_light.perMonth}回 ／ プロ 月${d.individual_pro.perMonth}回`,
+    },
+    {
+      icon: <Compass size={22} />,
+      t: "自己分析レポート",
+      d: "模擬面接の評価と、根拠になった発言・プロフィールから、強み・弱み・向いている仕事をAIがまとめます。練習するほど正確に。",
+      plan: `無料 月${a.free}回 ／ ライト 月${a.individual_light}回 ／ プロ 月${a.individual_pro}回（詳細分析も）`,
+    },
+    {
+      icon: <Search size={22} />,
+      t: "企業研究AI",
+      d: "志望企業ごとに、聞かれそうな質問をAIが用意。応募先の会社や聞いてほしい質問を決めて練習することもできます。",
+      plan: `プロ 月${RESEARCH_PER_MONTH_PRO}回`,
+    },
+    {
+      icon: <Briefcase size={22} />,
+      t: "求人を探す",
+      d: "掲載中の求人を見て、そのまま応募。応募すると、練習の評価を企業に見てもらえます。",
+      plan: "全プラン",
+    },
+    {
+      icon: <Gift size={22} />,
+      t: "友だちを招待",
+      d: "招待リンクから友だちが登録して練習を1回終えると、あなたと友だちの両方に練習のボーナスが3回ずつ入ります。",
+      plan: "全プラン",
+    },
+    {
+      icon: <GraduationCap size={22} />,
+      t: "学校・塾とつながる",
+      d: "学校・塾の招待コードを入れると、先生が練習の回数・点数・フィードバックを見られます。いつでも抜けられます。",
+      plan: "全プラン",
+    },
+  ];
+  return (
+    <section className="mx-auto max-w-[1080px] px-4 py-14">
+      <SectionTitle
+        kicker="TOOLS"
+        title="練習のほかにも、就活・転職のツール"
+        sub="書類づくりから自己分析、企業研究まで。面接の準備がひとつのアプリでそろいます。"
+      />
+      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((it) => (
+          <div
+            key={it.t}
+            className="flex gap-4 rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: "rgba(200,255,0,.12)", color: ACCENT }}
+            >
+              {it.icon}
+            </span>
+            <div>
+              <p className="text-[15px]" style={{ fontWeight: 800 }}>
+                {it.t}
+              </p>
+              <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "#BBBBBB" }}>
+                {it.d}
+              </p>
+              <span
+                className="mt-2 inline-block rounded-md px-2 py-0.5 text-[11px]"
+                style={{ border: "1px solid #2A2A2A", color: "#888" }}
+              >
+                {it.plan}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Pricing() {
   const plans = [
     { key: "free" as const, name: "無料", note: "まずはお試し" },
@@ -445,7 +540,7 @@ function Pricing() {
       <SectionTitle
         kicker="PRICING"
         title="料金"
-        sub="評価の中身・プロフィール公開・企業からの申し込みは、どのプランでも同じです。変わるのは練習の回数と時間です。"
+        sub="根拠つきの評価・プロフィール公開・企業からの申し込みは、どのプランでも同じです。変わるのは、練習の回数・時間と、ツールを使える回数です。"
       />
       <div className="mt-8 grid gap-3 md:grid-cols-3">
         {plans.map((p) => {
@@ -490,11 +585,41 @@ function Pricing() {
                   <Check size={15} color={ACCENT} /> 結果{" "}
                   {r.results == null ? "すべて" : `${r.results}件`}まで表示
                 </li>
+                <li className="flex items-center gap-2">
+                  <Check size={15} color={ACCENT} /> 練習できる職種{" "}
+                  {r.jobTypes == null ? "無制限" : `月${r.jobTypes}つ`}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={15} color={ACCENT} /> 書類生成AI 月{DOCUMENT_RULES[p.key].perMonth}
+                  回（1日
+                  {DOCUMENT_RULES[p.key].perDay}回まで）
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={15} color={ACCENT} /> 自己分析レポート 月
+                  {SELF_ANALYSIS_PER_MONTH[p.key]}回
+                  {p.key === "individual_pro" ? "（詳細分析も）" : ""}
+                </li>
+                {p.key === "individual_pro" && (
+                  <>
+                    <li className="flex items-center gap-2">
+                      <Check size={15} color={ACCENT} /> 企業研究AI 月{RESEARCH_PER_MONTH_PRO}回
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={15} color={ACCENT} className="mt-0.5 shrink-0" />
+                      練習の任意設定（応募先・聞いてほしい質問・書類のアップロード）
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           );
         })}
       </div>
+      <p className="mt-4 text-[12.5px] leading-relaxed" style={{ color: "#999" }}>
+        表示は税込です。プロフィールを公開して、企業があなたの詳しい評価を見ると、その料金の
+        {CANDIDATE_SHARE_RATE * 100}
+        %（4分の1）がガチキャリポイントで入ります（1pt＝1円。ライト・プロの月額の支払いに使えます）。
+      </p>
     </section>
   );
 }
@@ -571,11 +696,55 @@ function ResultSample() {
             style={{ background: "#141414", border: "1px solid #232323" }}
           >
             <p className="text-[12px]" style={{ color: "#FFB84D", fontWeight: 700 }}>
-              伸びしろ
+              次の練習で直すこと
             </p>
-            <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "#CCCCCC" }}>
-              理由が「なんとなく」で終わっています。結論 → 理由 →
-              具体例の順で話すと伝わりやすくなります。
+            <ol
+              className="mt-2 list-decimal space-y-1 pl-5 text-[13.5px] leading-relaxed"
+              style={{ color: "#CCCCCC" }}
+            >
+              <li>
+                理由が「なんとなく」で終わっています。結論 → 理由 → 具体例の順で話しましょう。
+              </li>
+              <li>
+                答えが一言で終わりがちです。状況 → 行動 → 結果 → 学びの順で、100〜150字ほどで。
+              </li>
+            </ol>
+          </div>
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <p className="text-[12px]" style={{ color: ACCENT, fontWeight: 700 }}>
+              練習の点数の内訳（100点満点）
+            </p>
+            <div className="mt-2 space-y-1.5 text-[13px]">
+              {(
+                [
+                  ["自己PR・強みの伝え方", 72],
+                  ["志望動機の説得力", 64],
+                  ["事前準備・企業研究", 58],
+                  ["回答の具体性", 70],
+                ] as const
+              ).map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-3">
+                  <span style={{ color: "#CCCCCC" }}>{k}</span>
+                  <span style={{ color: ACCENT, fontWeight: 800 }}>{v}点</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <p className="text-[12px]" style={{ fontWeight: 700 }}>
+              より良い回答例
+            </p>
+            <p className="mt-1 text-[11.5px]" style={{ color: "#888" }}>
+              Q. 強みと弱みを教えていただけますか？
+            </p>
+            <p className="mt-1 text-[13.5px] leading-relaxed" style={{ color: "#CCCCCC" }}>
+              強みは、決めた目標を毎日やりきる行動力です。前職では訪問件数の目標を自分で決め、前日の結果を見直して回る順番を変えながら続けてきました。
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -662,6 +831,70 @@ function ForCompanies() {
           {COIN_PACKS[0].priceJpy.toLocaleString()}）からまとめて購入でき、有効期限は
           {COIN_EXPIRY_MONTHS}か月です。
         </p>
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: "#121212", border: "1px solid #2A2A2A" }}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-[12px]" style={{ color: ACCENT, fontWeight: 700 }}>
+                採用担当者向けの見立て
+              </p>
+              <span
+                className="rounded-full px-2 py-0.5 text-[10.5px]"
+                style={{ background: "#232323", color: "#999" }}
+              >
+                サンプル
+              </span>
+            </div>
+            <p className="mt-2 text-[13.5px] leading-relaxed" style={{ color: "#DDDDDD" }}>
+              自分で目標を決めて動き続けられる行動派。訪問の順番を毎朝組み立て直すなど、工夫を重ねながら現場で成果を出そうとする姿勢が見られる。
+            </p>
+            <p className="mt-3 text-[12.5px]" style={{ fontWeight: 700 }}>
+              仕事で活きそうな強み
+            </p>
+            <p
+              className="mt-1 rounded-r-lg py-1.5 pl-3 text-[12.5px]"
+              style={{ borderLeft: `3px solid ${ACCENT}`, background: "#181818", color: "#DADADA" }}
+            >
+              「毎朝、前日の結果を見直してから回る順番を決めていました」
+            </p>
+            <p className="mt-3 text-[12.5px]" style={{ fontWeight: 700 }}>
+              面談で聞くとよい質問
+            </p>
+            <ul
+              className="mt-1 list-disc space-y-0.5 pl-5 text-[12.5px]"
+              style={{ color: "#BBBBBB" }}
+            >
+              <li>目標に届かなかった日は、どのように立て直しましたか？</li>
+              <li>上司や同僚と意見が違ったとき、どのように対応しますか？</li>
+            </ul>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: "#121212", border: "1px solid #2A2A2A" }}
+            >
+              <p className="text-[14px]" style={{ fontWeight: 800 }}>
+                企業が見るのは、採用担当者向けの評価
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "#AAAAAA" }}>
+                本人向けの点数・改善点・回答例は企業には表示されません。企業に見えるのは、7つの力の評価と根拠になった発言、採用担当者向けの見立て、面接の会話、話し方の数字、録画（本人が許可した場合）です。
+              </p>
+            </div>
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: "#121212", border: "1px solid #2A2A2A" }}
+            >
+              <p className="text-[14px]" style={{ fontWeight: 800 }}>
+                面談の申し込みまで、そのまま
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "#AAAAAA" }}>
+                評価を見て会いたいと思ったら、会社の紹介や面談したい理由を書いて申し込めます。本人が承諾すると、メッセージでやり取りできます。
+              </p>
+            </div>
+          </div>
+        </div>
         <Link
           to="/login"
           search={{ mode: "business" }}

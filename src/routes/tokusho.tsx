@@ -31,7 +31,7 @@ function TokushoPage() {
         <Item label="販売業者名">合同会社AKITOグループ</Item>
         <Item label="代表者名">佐藤光彪</Item>
         <Item label="所在地">東京都豊島区東池袋2丁目62番8号BIGオフィスプラザ池袋1206</Item>
-        <Item label="電話番号">080-2420-4900（受付時間：平日10:00〜18:00）</Item>
+        <Item label="電話番号">080-2420-4900（受付時間：年中無休・24時間）</Item>
         <Item label="メールアドレス">info@akitogroup.jp</Item>
       </LegalSection>
 

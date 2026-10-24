@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>お知らせ｜AKITOグループ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="AKITOグループのお知らせ・コラム・活動報告。飲食店や夜のお店のPOSレジの選び方、自衛隊・公務員のニュース、地域のボランティア活動などを発信しています。">
+<link rel="canonical" href="https://akitogroup.jp/news">
+<meta property="og:title" content="お知らせ｜AKITOグループ">
+<meta property="og:description" content="AKITOグループのお知らせ・コラム・活動報告。飲食店や夜のお店のPOSレジの選び方、自衛隊・公務員のニュース、地域のボランティア活動などを発信しています。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://akitogroup.jp/news">
+<meta property="og:image" content="https://akitogroup.jp/assets/img/logo-full.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="max-image-preview:large">
+<meta property="og:site_name" content="AKITOグループ">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"合同会社AKITOグループ","alternateName":"AKITOグループ","url":"https://akitogroup.jp/","logo":"https://akitogroup.jp/icon-512.png","telephone":"080-2420-4900","email":"info@akitogroup.jp","address":{"@type":"PostalAddress","postalCode":"170-0013","addressRegion":"東京都","addressLocality":"豊島区","streetAddress":"東池袋2丁目62番8号 BIGオフィスプラザ池袋1206","addressCountry":"JP"}}</script>
+<meta name="theme-color" content="#24113F">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="assets/img/logo.webp" alt="AKITOグループ" width="600" height="255"></a>
+    <nav class="nav" id="nav" aria-label="メインメニュー">
+      <a href="/about">会社概要</a>
+      <a href="./#services">事業内容</a>
+      <a href="https://gachicareer-ai.akitogroup.jp/">ガチキャリAI</a>
+      <a href="/gachicareer">ガチキャリ</a>
+      <a href="/news" aria-current="page">お知らせ</a>
+      <a class="nav-cta" href="/contact">お問い合わせ</a>
+    </nav>
+    <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="メニューを開く"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
+  </div>
+</header>
+<div class="drawer" id="drawer" aria-label="メニュー">
+  <nav>
+    <a href="/about">会社概要<small>Company</small></a>
+    <a href="./#services">事業内容<small>Services</small></a>
+    <a href="https://gachicareer-ai.akitogroup.jp/">ガチキャリAI<small>Gachi Career AI</small></a>
+    <a href="/gachicareer">ガチキャリ<small>Gachi Career</small></a>
+    <a href="/news" aria-current="page">お知らせ<small>News</small></a>
+    <a href="/contact">お問い合わせ<small>Contact</small></a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="btn btn-ink" href="/contact">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+    <a class="tel" href="tel:08024204900">080-2420-4900</a>
+    <small>年中無休・24時間受付　info@akitogroup.jp</small>
+  </div>
+</div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<main id="main">
+<style>
+.post-list{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.post-list a{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:center;padding:24px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.post-list .thumb{border-radius:14px;overflow:hidden;aspect-ratio:16/10;background:var(--paper-2);display:grid;place-items:center}
+.post-list .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.post-list a:hover .thumb img{transform:scale(1.05)}
+.post-list .meta{font-family:var(--ff-mono);font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.post-list .cat{font-family:var(--ff-body);font-weight:700;color:var(--ink)}
+.post-list h2{font-size:clamp(18px,2.2vw,22px);margin-top:6px;line-height:1.5}
+.post-list p{font-size:14px;color:var(--muted);margin-top:6px}
+.post-list a:hover h2{text-decoration:underline;text-underline-offset:5px}
+@media (max-width:640px){.post-list a{grid-template-columns:minmax(0,1fr);gap:14px}}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.cat-tabs button{appearance:none;font:inherit;font-size:14px;font-weight:700;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
+.cat-tabs button span{font-family:var(--ff-mono);font-size:12px;color:var(--muted);margin-left:6px}
+.cat-tabs button:hover{border-color:var(--ink)}
+.cat-tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.cat-tabs button[aria-selected="true"] span{color:rgba(255,255,255,.75)}
+.cat-empty{color:var(--muted);padding:24px 0}
+.post-list li[hidden]{display:none}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / お知らせ</nav>
+    <p class="eyebrow">Blog &amp; News</p>
+    <h1>お知らせ</h1>
+    <p class="lead">AKITOグループからのお知らせ、活動報告、代表のブログです。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="cat-tabs" role="tablist" aria-label="お知らせの種類">
+      <button type="button" role="tab" data-c="all" aria-selected="true">すべて<span></span></button>
+      <button type="button" role="tab" data-c="pos-day" aria-selected="false">飲食店（ポスポス）<span></span></button>
+      <button type="button" role="tab" data-c="pos-night" aria-selected="false">夜のお店（ポスポス）<span></span></button>
+      <button type="button" role="tab" data-c="career" aria-selected="false">就活・転職（ガチキャリAI）<span></span></button>
+      <button type="button" role="tab" data-c="jsdf" aria-selected="false">自衛隊・公務員<span></span></button>
+      <button type="button" role="tab" data-c="company" aria-selected="false">会社のお知らせ・活動<span></span></button>
+    </div>
+    <p class="cat-empty" hidden>この種類の記事は、まだありません。</p>
+    <ul class="post-list">
+      <li class="rv" data-cat="career"><a href="/news-ai-interview-practice">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>AIで面接練習するやり方｜無料でできる模擬面接の流れ・評価の見方・効果を上げるコツ</h2>
+        <p>AIの面接官との模擬面接の流れ、7つの力の評価と話し方のチェックの見方、練習のコツをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career jsdf"><a href="/news-jsdf-career">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>元自衛官の転職と面接のコツ｜自衛隊で身につく力の伝え方と、よく聞かれる質問</h2>
+        <p>元陸上自衛官の代表・副代表が、自衛隊で身につく力の伝え方と面接の答え方をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="/news-interview-questions">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>面接でよく聞かれる質問10と答え方｜回答例と、答えるときのコツ・失敗例</h2>
+        <p>よく聞かれる質問10の答え方と回答例、答えるときのコツ、やってしまいがちな失敗をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="/news-self-pr">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>自己PRの作り方と例文｜4ステップで作る方法と、強みの言いかえ・よくある失敗</h2>
+        <p>自己PRで伝える3つのこと、4ステップの作り方、経験別の例文、強みの言いかえ一覧をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="/news-reverse-questions">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>面接の逆質問の例｜印象がよくなる質問と、段階別のポイント・避けたい質問</h2>
+        <p>目的別の逆質問の例、一次面接・最終面接での聞き分け、避けたい逆質問、準備のしかたをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="career"><a href="/news-ai-interview-company">
+        <span class="thumb"><img src="assets/img/gcai-logo.webp" alt="ガチキャリAIのロゴ" width="800" height="800" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">就活・転職（ガチキャリAI）</span></span>
+        <h2>AI面接とは？企業が導入するメリットと注意点・導入の流れ</h2>
+        <p>AI面接のしくみ、企業のメリット、導入するときの注意点、導入の流れと料金をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="/news-cafe-point">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>カフェのポイントカードの作り方｜紙・アプリ・QR会員証の比較とクーポンの使い方</h2>
+        <p>ポイントカードの3つの形、還元率と特典の決め方、クーポンの使いどころ、始め方をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-lounge-customer">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ラウンジの顧客管理のやり方｜顧客カルテの項目・来店予定・ボトル管理と個人情報の注意点</h2>
+        <p>顧客カルテに残す項目、来店予定とボトルの管理、キャストとの共有、個人情報の注意点をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="/news-ramen-ticket">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>ラーメン屋の券売機とPOSレジの選び方｜後会計・QR注文との比較と新紙幣・キャッシュレス対応</h2>
+        <p>券売機・後会計・QR注文の選び方、新しいお札とキャッシュレス、厨房への伝え方、費用をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-snack-sales">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>スナックの売上管理のやり方｜ボトルキープ・ツケの管理と確定申告の準備</h2>
+        <p>料金と売上のしくみ、1日の売上のつけ方、ボトルキープとツケの管理、確定申告の準備をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="/news-restaurant-shift">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>飲食店のシフト管理と給料計算のやり方｜深夜割増・休憩のルールとアルバイトの計算例</h2>
+        <p>シフト作りの流れ、打刻の記録、深夜割増・休憩・最低賃金のルール、アルバイトの給料の計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="/news-izakaya-qr">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>居酒屋のQR注文（モバイルオーダー）の始め方｜メリット・費用・7ステップと飲み放題のコツ</h2>
+        <p>QR注文のしくみ、ハンディとの違い、始め方の7ステップ、飲み放題など居酒屋ならではのポイントをまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-girlsbar-back">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ガールズバー・コンカフェのバック計算｜ドリンクバック・チェキバックの決め方と給料の計算例</h2>
+        <p>ドリンク・チェキ・シャンパンのバックの決め方、給料の計算例、イベントの集計、法律の注意点をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-host-sales">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>ホストクラブの売上管理のやり方｜担当・付け回し・売掛・給料計算と2025年の法改正</h2>
+        <p>担当・ヘルプ・送り指名の売上のしくみ、付け回しと売掛の記録、改正風営法のポイント、給料の計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-cabaret-payroll">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>キャバクラの売上集計と給料計算のやり方｜バック・時給・源泉徴収の計算例つき</h2>
+        <p>閉店後の売上集計で見る項目、キャストの給料のしくみ、源泉徴収まで入れた計算例をまとめました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-day"><a href="/news-pos-ranking-day">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-24">2026.10.24</time><span class="cat">飲食店（ポスポス）</span></span>
+        <h2>【2026年版】飲食店のPOSレジおすすめ5選｜居酒屋・ラーメン・カフェの選び方と比較表</h2>
+        <p>居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェ。飲食店のPOSレジの選び方と、おすすめの5つを紹介します。</p></span>
+      </a></li>
+      <li class="rv" data-cat="pos-night"><a href="/news-pos-ranking">
+        <span class="thumb"><img src="assets/img/posupos-logo.webp" alt="ポスポスのロゴ" width="800" height="800" loading="lazy" style="object-fit:contain;width:52%;height:auto"></span>
+        <span><span class="meta"><time datetime="2026-10-23">2026.10.23</time><span class="cat">夜のお店（ポスポス）</span></span>
+        <h2>【2026年版】夜のお店のPOSシステムおすすめ5選｜キャバクラ・ホスト・ガールズバーの選び方と比較表</h2>
+        <p>キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジ。夜のお店のPOSシステムの選び方と、おすすめの5つを紹介します。</p></span>
+      </a></li>
+      <li class="rv" data-cat="jsdf"><a href="/news-barracks">
+        <span class="thumb"><img src="assets/img/barracks.webp" alt="窓から光が差し込む個室" width="640" height="480" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2025-10-06">2025.10.06</time><span class="cat">自衛隊・公務員</span></span>
+        <h2>防衛省が動く、隊舎改革の波。</h2>
+        <p>相部屋から個室へ。変わるのは建物だけじゃない。元自衛官の代表が、隊舎の完全個室化について考えます。</p></span>
+      </a></li>
+      <li class="rv" data-cat="company"><a href="/news-volunteer">
+        <span class="thumb"><img src="assets/img/volunteer-1.webp" alt="体育館で絵を描く子どもたち" width="1024" height="577" loading="lazy"></span>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">会社のお知らせ・活動</span></span>
+        <h2>椎名町小学校でボランティア活動をしてまいりました！</h2>
+        <p>夏休みの小学生60名と中学生15名に、レクリエーションを行いました。</p></span>
+      </a></li>
+      <li class="rv" data-cat="company"><a href="/news-open">
+        <span class="thumb"><img src="assets/img/logo-full.webp" alt="AKITOグループのロゴ" width="900" height="352" loading="lazy" style="object-fit:contain;width:72%;height:auto"></span>
+        <span><span class="meta"><time datetime="2025-09-25">2025.09.25</time><span class="cat">会社のお知らせ・活動</span></span>
+        <h2>AKITOグループのホームページを開設しました！</h2>
+        <p>この度、ホームページを開設しました。</p></span>
+      </a></li>
+    </ul>
+  </div>
+</section>
+
+<script>
+// お知らせの種類で絞り込む（#pos-night のように URL の後ろに付けると、その種類で開く）
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.cat-tabs button')),items=[].slice.call(document.querySelectorAll('.post-list li[data-cat]')),empty=document.querySelector('.cat-empty');
+  var has=function(li,c){return c==='all'||(' '+li.dataset.cat+' ').indexOf(' '+c+' ')>=0};
+  tabs.forEach(function(b){var n=items.filter(function(li){return has(li,b.dataset.c)}).length;b.querySelector('span').textContent=n;if(!n&&b.dataset.c!=='all')b.hidden=true});
+  var show=function(c,push){
+    if(!tabs.some(function(b){return b.dataset.c===c&&!b.hidden}))c='all';
+    tabs.forEach(function(b){b.setAttribute('aria-selected',b.dataset.c===c?'true':'false')});
+    var n=0;items.forEach(function(li){var on=has(li,c);li.hidden=!on;if(on){n++;li.classList.remove('pending')}});
+    empty.hidden=n>0;
+    if(push)history.replaceState(null,'',c==='all'?location.pathname:'#'+c);
+  };
+  tabs.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.c,true)})});
+  show(decodeURIComponent(location.hash.slice(1))||'all',false);
+})();
+</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "お知らせ", "item": "https://akitogroup.jp/news"}]}</script>
+</main>
+
+<section class="cta-band" aria-label="お問い合わせ">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Contact</p>
+      <h2 style="margin-top:12px">まずは、お気軽にご連絡ください。</h2>
+      <p>ガチキャリAIの導入・資料請求、ガチキャリへの参加やポスポス（POSレジ）のご相談、採用へのご応募など、どんなことでも受け付けています。</p>
+    </div>
+    <div class="cta-actions rv">
+      <a class="btn btn-ink" href="/contact">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+      <a class="cta-tel" href="tel:08024204900"><b>080-2420-4900</b><small>年中無休・24時間受付</small></a>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="foot-stripe"></div>
+  <div class="site-foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <span class="logo-chip"><img src="assets/img/logo-full.webp" alt="AKITOグループ　愛ある事業で煌めくあなたに届ける未来" width="900" height="352"></span>
+          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休・24時間受付）<br>info@akitogroup.jp</p>
+        </div>
+        <div class="foot-col">
+          <h4>COMPANY</h4>
+          <ul>
+            <li><a href="./">トップ</a></li>
+            <li><a href="/about">会社概要・役員挨拶</a></li>
+            <li><a href="/news">お知らせ</a></li>
+            <li><a href="/contact">お問い合わせ</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h4>SERVICES</h4>
+          <ul>
+            <li><a href="https://gachicareer-ai.akitogroup.jp/">ガチキャリAI</a></li>
+            <li><a href="/gachicareer">ガチキャリ</a></li>
+            <li><a href="/posupos">ポスポス（POSレジ）</a></li>
+            <li><a href="/news-pos-ranking-day">飲食店のPOSレジの選び方</a></li>
+            <li><a href="/news-pos-ranking">夜のお店のPOSシステムの選び方</a></li>
+            <li><a href="/news">お店の運営コラム一覧</a></li>
+            <li><a href="/contact#recruit">採用情報</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© <span data-year>2026</span> AKITOgroup.llc</span>
+        <span>愛ある事業で煌めくあなたに届ける未来</span>
+      </div>
+    </div>
+  </div>
+</footer>
+<button class="to-top" id="to-top" type="button" aria-label="ページの先頭へ戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<script src="assets/site.js"></script>
+</body>
+</html>
