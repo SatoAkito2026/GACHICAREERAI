@@ -102,7 +102,10 @@ const OLD_URLS = {
   "/contact": "/contact",
   "/blog-2": "/news",
   "/blog": "/news",
-  "/interview-copilot-ai": "/gachicareer-ai",
+  // ガチキャリAIのLPはアプリのトップページ（gachicareer-ai.akitogroup.jp）に一本化
+  "/interview-copilot-ai": "https://gachicareer-ai.akitogroup.jp/",
+  "/gachicareer-ai": "https://gachicareer-ai.akitogroup.jp/",
+  "/gachicareer-ai.html": "https://gachicareer-ai.akitogroup.jp/",
   "/無料相談・イベント": "/",
   "/2025/10/06/blog-3": "/news-barracks",
   "/2025/09/25/椎名町小学校でボランティア活動をしてまいりました！": "/news-volunteer",
