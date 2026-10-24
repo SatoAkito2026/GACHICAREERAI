@@ -108,8 +108,7 @@ const SECTIONS = [
   { id: "market", label: "人材の市場" },
   { id: "company", label: "企業" },
   { id: "points", label: "ポイント" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "instagram", label: "Instagram" },
+  { id: "sns", label: "SNS動画" },
 ] as const;
 
 function AdminDashboard() {
@@ -428,21 +427,9 @@ function AdminDashboard() {
           </div>
         </Section>
 
-        {/* ---- TikTok ---- */}
-        <Section id="tiktok" title="TikTok用の動画（毎日17時に自動で1本）">
-          <p className="mb-3 text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
-            投稿したら「投稿済みにする」を押し、数日後に再生数といいねを入れてください。伸びたテーマやタイトルを、次からの台本づくりで参考にします。
-          </p>
-          <TiktokVideos token={session?.access_token ?? ""} platform="tiktok" />
-        </Section>
-
-        {/* ---- Instagram ---- */}
-        <Section id="instagram" title="Instagram用の動画">
-          <p className="mb-3 text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
-            広告は 4:5（フィード・広告枠用）で作ります。リール・ストーリーズには TikTok
-            タブの縦長（9:16）の動画をそのまま使えます。ストーリーズでは「プロフィールのリンクから」の代わりにリンクスタンプを置いてください。
-          </p>
-          <TiktokVideos token={session?.access_token ?? ""} platform="instagram" />
+        {/* ---- SNS用の動画（TikTok・Instagram をタブで切り替え） ---- */}
+        <Section id="sns" title="SNS用の動画">
+          <SnsVideos token={session?.access_token ?? ""} />
         </Section>
       </main>
     </div>
@@ -473,8 +460,45 @@ const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
   failed: "失敗",
 };
 
+function SnsVideos({ token }: { token: string }) {
+  const [tab, setTab] = useState<"tiktok" | "instagram">("tiktok");
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-2">
+        {(
+          [
+            ["tiktok", "TikTok"],
+            ["instagram", "Instagram"],
+          ] as const
+        ).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTab(k)}
+            className="rounded-full px-4 py-1.5 text-[13px]"
+            style={
+              tab === k
+                ? { background: T.accent, color: "#0F0F0F", fontWeight: 700 }
+                : { border: `1px solid ${T.border}`, color: T.sub }
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+        {tab === "tiktok"
+          ? "毎日16時台に自動で1本。投稿したら「投稿済みにする」を押し、数日後に再生数といいねを入れてください（次の台本づくりで参考にします）。"
+          : "広告は 4:5（フィード・広告枠用）。リール・ストーリーズには TikTok タブの縦長の動画を使えます（ストーリーズはリンクスタンプを置く）。"}
+      </p>
+      <TiktokVideos key={tab} token={token} platform={tab} />
+    </div>
+  );
+}
+
 function TiktokVideos({ token, platform }: { token: string; platform: "tiktok" | "instagram" }) {
   const [videos, setVideos] = useState<TiktokVideo[] | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const [clicks, setClicks] = useState<{ today: number; week: number; total: number } | null>(null);
 
   const call = useCallback(
@@ -551,107 +575,148 @@ function TiktokVideos({ token, platform }: { token: string; platform: "tiktok" |
   return (
     <div className="flex flex-col gap-4">
       {clickPanel}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {videos.map((v) => (
-          <div
-            key={v.id}
-            className="flex flex-col gap-3 rounded-2xl p-4"
-            style={{ background: T.card, border: `1px solid ${T.border}` }}
-          >
-            <div className="flex items-center justify-between gap-2 text-[11px]">
-              <span style={{ color: T.muted }}>
-                {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
-              </span>
-              <span
-                className="rounded-md px-2 py-0.5"
-                style={{
-                  background: v.status === "ready" ? T.accent : "#262626",
-                  color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
-                  fontWeight: 700,
-                }}
-              >
-                {VIDEO_STATUS[v.status]}
-              </span>
-            </div>
-            <p className="text-[14px]" style={{ color: T.text, fontWeight: 700 }}>
-              {v.title}
-            </p>
-            {v.url ? (
-              <video
-                src={v.url}
-                controls
-                preload="metadata"
-                playsInline
-                className="w-full rounded-xl"
-                style={{ aspectRatio: "9 / 16", background: "#000" }}
-              />
-            ) : v.status === "failed" ? (
-              <p className="text-[12px]" style={{ color: T.bad }}>
-                作れませんでした：{(v.error ?? "").slice(0, 120)}
-              </p>
-            ) : (
-              <p className="text-[12px]" style={{ color: T.muted }}>
-                作成中です…
-              </p>
-            )}
-            <p
-              className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
-              style={{ background: T.bg, color: T.sub }}
-            >
-              {v.caption}
-            </p>
-            <div className="flex flex-wrap gap-2 text-[12px]">
-              {v.url && (
-                <a
-                  href={v.url}
-                  download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
-                  className="rounded-lg px-3 py-1.5"
-                  style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
-                >
-                  動画を保存
-                </a>
-              )}
+      <div
+        className="overflow-hidden rounded-2xl"
+        style={{ background: T.card, border: `1px solid ${T.border}` }}
+      >
+        {videos.map((v, i) => {
+          const isOpen = openId === v.id;
+          return (
+            <div key={v.id} style={{ borderTop: i ? `1px solid ${T.border}` : "none" }}>
+              {/* 1行：小さな画面・日付・題名・状態。押すと開く */}
               <button
                 type="button"
-                onClick={() => void copy(v.caption)}
-                className="rounded-lg px-3 py-1.5"
-                style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                onClick={() => setOpenId(isOpen ? null : v.id)}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
               >
-                投稿の文をコピー
-              </button>
-              {v.status === "ready" && (
-                <button
-                  type="button"
-                  onClick={() => void call({ action: "posted", id: v.id }).then(load)}
-                  className="rounded-lg px-3 py-1.5"
-                  style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                <span
+                  className="flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md"
+                  style={{ background: "#000" }}
                 >
-                  投稿済みにする
-                </button>
-              )}
-              {v.status === "posted" && (
-                <MetricsForm
-                  video={v}
-                  onSave={(views, likes) =>
-                    void call({ action: "metrics", id: v.id, views, likes }).then(load)
-                  }
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm("この動画を消しますか？")) {
-                    void call({ action: "delete", id: v.id }).then(load);
-                  }
-                }}
-                className="rounded-lg px-3 py-1.5"
-                style={{ color: T.bad }}
-              >
-                削除
+                  {v.url ? (
+                    <video
+                      src={v.url}
+                      muted
+                      preload="metadata"
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span style={{ color: T.muted, fontSize: 10 }}>
+                      {v.status === "failed" ? "×" : "…"}
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px]" style={{ color: T.muted }}>
+                    {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
+                    {v.views != null && ` ・ 再生 ${v.views.toLocaleString()}`}
+                  </span>
+                  <span
+                    className="block truncate text-[13px]"
+                    style={{ color: T.text, fontWeight: 700 }}
+                  >
+                    {v.title}
+                  </span>
+                </span>
+                <span
+                  className="shrink-0 rounded-md px-2 py-0.5 text-[11px]"
+                  style={{
+                    background: v.status === "ready" ? T.accent : "#262626",
+                    color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
+                    fontWeight: 700,
+                  }}
+                >
+                  {VIDEO_STATUS[v.status]}
+                </span>
+                <span className="shrink-0 text-[12px]" style={{ color: T.muted }}>
+                  {isOpen ? "▲" : "▼"}
+                </span>
               </button>
+
+              {isOpen && (
+                <div className="grid gap-3 px-3 pb-4 md:grid-cols-[220px_1fr]">
+                  {v.url ? (
+                    <video
+                      src={v.url}
+                      controls
+                      preload="metadata"
+                      playsInline
+                      className="w-full rounded-xl"
+                      style={{ maxHeight: 400, background: "#000" }}
+                    />
+                  ) : v.status === "failed" ? (
+                    <p className="text-[12px]" style={{ color: T.bad }}>
+                      作れませんでした：{(v.error ?? "").slice(0, 120)}
+                    </p>
+                  ) : (
+                    <p className="text-[12px]" style={{ color: T.muted }}>
+                      作成中です…（消さずにお待ちください）
+                    </p>
+                  )}
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <p
+                      className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
+                      style={{ background: T.bg, color: T.sub }}
+                    >
+                      {v.caption}
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-[12px]">
+                      {v.url && (
+                        <a
+                          href={v.url}
+                          download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
+                          className="rounded-lg px-3 py-1.5"
+                          style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
+                        >
+                          動画を保存
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void copy(v.caption)}
+                        className="rounded-lg px-3 py-1.5"
+                        style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                      >
+                        投稿の文をコピー
+                      </button>
+                      {v.status === "ready" && (
+                        <button
+                          type="button"
+                          onClick={() => void call({ action: "posted", id: v.id }).then(load)}
+                          className="rounded-lg px-3 py-1.5"
+                          style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                        >
+                          投稿済みにする
+                        </button>
+                      )}
+                      {v.status === "posted" && (
+                        <MetricsForm
+                          video={v}
+                          onSave={(views, likes) =>
+                            void call({ action: "metrics", id: v.id, views, likes }).then(load)
+                          }
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("この動画を消しますか？")) {
+                            void call({ action: "delete", id: v.id }).then(load);
+                          }
+                        }}
+                        className="rounded-lg px-3 py-1.5"
+                        style={{ color: T.bad }}
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

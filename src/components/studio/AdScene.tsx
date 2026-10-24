@@ -32,7 +32,8 @@ const GAP = 0.3;
 const END = 0.7;
 /** 1コマ目の点数がくるくる上がる長さ */
 const COUNT = 1.1;
-const SCORE = 86;
+/** アプリの評価の見出しと同じ「7つの力の平均（5点満点）」 */
+const AVG = 4.2;
 const BG = "#0B0D10";
 
 /** 撮影する画面の高さ（幅は 540） */
@@ -281,10 +282,10 @@ function ScoreChip({ local }: { local: number }) {
         transform: `scale(${pop})`,
       }}
     >
-      <p style={{ fontSize: 13, color: "#AAB4C0", fontWeight: 700 }}>AI採点</p>
+      <p style={{ fontSize: 13, color: "#AAB4C0", fontWeight: 700 }}>AI評価</p>
       <p style={{ fontSize: 46, fontWeight: 900, lineHeight: 1, color: done ? ACCENT : "#F0F0F0" }}>
-        {Math.round(SCORE * k)}
-        <span style={{ fontSize: 18 }}>点</span>
+        {(AVG * k).toFixed(1)}
+        <span style={{ fontSize: 18 }}> / 5</span>
       </p>
     </div>
   );
@@ -339,53 +340,84 @@ function Hook({ text, local }: { text: string; local: number }) {
 }
 
 function ScoreCard({ local }: { local: number }) {
-  const r = 78;
-  const c = 2 * Math.PI * r;
-  const fill = ease(local / 0.6);
-  const pop = ease((local - 0.35) / 0.3);
+  const comps: [string, number][] = [
+    ["伝える力", 4],
+    ["論理的に考える力", 4],
+    ["主体性", 5],
+    ["粘り強さ", 5],
+  ];
+  const verdict = ease((local - 0.25) / 0.3);
+  const rank = ease((local - 0.9) / 0.3);
   return (
     <Card local={local}>
-      <p style={{ fontSize: 20, color: "#8FA0B3", fontWeight: 800, textAlign: "center" }}>
-        AI面接官の採点
-      </p>
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 6 }}>
-        <svg width={190} height={190} viewBox="0 0 190 190">
-          <circle cx={95} cy={95} r={r} stroke="#232A33" strokeWidth={16} fill="none" />
-          <circle
-            cx={95}
-            cy={95}
-            r={r}
-            stroke={ACCENT}
-            strokeWidth={16}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={`${(c * SCORE * fill) / 100} ${c}`}
-            transform="rotate(-90 95 95)"
-          />
-          <text x={95} y={110} textAnchor="middle" fontSize={58} fontWeight={900} fill="#F0F0F0">
-            {SCORE}
-          </text>
-          <text x={95} y={138} textAnchor="middle" fontSize={16} fill="#8FA0B3">
-            / 100点
-          </text>
-        </svg>
+      {/* アプリの評価のいちばん上と同じ：7つの力の平均と、一次面接の目安 */}
+      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ textAlign: "center", flexShrink: 0 }}>
+          <p style={{ fontSize: 14, color: "#8FA0B3", fontWeight: 700 }}>7つの力の平均</p>
+          <p style={{ fontSize: 56, fontWeight: 900, lineHeight: 1.05 }}>
+            {AVG.toFixed(1)}
+            <span style={{ fontSize: 20, color: "#8FA0B3" }}> / 5</span>
+          </p>
+        </div>
+        <div
+          style={{
+            opacity: verdict,
+            transform: `scale(${0.85 + 0.15 * verdict})`,
+            transformOrigin: "left center",
+          }}
+        >
+          <p style={{ fontSize: 16, color: "#AAB4C0", fontWeight: 700 }}>本番の一次面接なら</p>
+          <p style={{ fontSize: 36, color: ACCENT, fontWeight: 900, lineHeight: 1.15 }}>
+            通過ライン
+          </p>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 16 }}>
+        {comps.map(([label, v], i) => {
+          const k = ease((local - 0.4 - i * 0.1) / 0.4);
+          return (
+            <div key={label}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 18,
+                  fontWeight: 800,
+                }}
+              >
+                <span>{label}</span>
+                <span style={{ color: ACCENT }}>{Math.round(v * k)} / 5</span>
+              </div>
+              <div style={{ height: 10, background: "#232A33", borderRadius: 6, marginTop: 5 }}>
+                <div
+                  style={{
+                    width: `${(v / 5) * 100 * k}%`,
+                    height: "100%",
+                    background: ACCENT,
+                    borderRadius: 6,
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
       <div
         style={{
-          marginTop: 10,
+          marginTop: 14,
           background: ACCENT,
           color: "#0F0F0F",
-          borderRadius: 18,
-          padding: "12px 16px",
+          borderRadius: 16,
+          padding: "10px 14px",
           textAlign: "center",
-          opacity: pop,
-          transform: `scale(${0.8 + 0.2 * pop})`,
+          opacity: rank,
+          transform: `scale(${0.8 + 0.2 * rank})`,
         }}
       >
-        <span style={{ fontSize: 20, fontWeight: 800 }}>練習した人の中で </span>
-        <span style={{ fontSize: 34, fontWeight: 900 }}>上位12%</span>
+        <span style={{ fontSize: 18, fontWeight: 800 }}>練習した人の中で </span>
+        <span style={{ fontSize: 30, fontWeight: 900 }}>上位12%</span>
       </div>
-      <p style={{ fontSize: 13, color: "#66717E", marginTop: 10, textAlign: "center" }}>
+      <p style={{ fontSize: 12, color: "#66717E", marginTop: 8, textAlign: "center" }}>
         ※画面はイメージです
       </p>
     </Card>
@@ -419,9 +451,22 @@ function Evidence({ local }: { local: number }) {
           />
         </div>
       </div>
-      <p style={{ fontSize: 15, color: "#8FA0B3", marginTop: 16 }}>
-        7つの力を、発言を根拠に5段階で評価
-      </p>
+      {/* アプリと同じく「次の練習で直すこと」も出る */}
+      <div
+        style={{
+          marginTop: 18,
+          background: "#1F1A0A",
+          border: "1px solid #4A3A12",
+          borderRadius: 16,
+          padding: "12px 14px",
+          opacity: ease((local - 0.8) / 0.3),
+        }}
+      >
+        <p style={{ fontSize: 15, color: "#FFB84D", fontWeight: 800 }}>次の練習で直すこと</p>
+        <p style={{ fontSize: 20, fontWeight: 800, marginTop: 4, lineHeight: 1.45 }}>
+          結論から話し、数字のあとに工夫を1つ足す
+        </p>
+      </div>
     </Card>
   );
 }

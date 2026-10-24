@@ -60,7 +60,7 @@ export const Route = createFileRoute("/api/studio/upload")({
             kind: "studio",
             title: "今日のTikTok動画ができました",
             body: video.title,
-            link: "/private/admin#tiktok",
+            link: "/private/admin#sns",
           });
         }
         return jsonResponse({ ok: true });
