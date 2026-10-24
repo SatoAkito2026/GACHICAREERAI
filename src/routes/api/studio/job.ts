@@ -65,10 +65,7 @@ export const Route = createFileRoute("/api/studio/job")({
               ...script,
               audio,
               sampleRate: STUDIO_SAMPLE_RATE,
-              tempos: script.lines.map((l) =>
-                // 面接官は声の高さを変えずに1.5倍（アプリの面接と同じ速さ）
-                l.speaker === "interviewer" ? 1.5 : lineTempo(l.speaker),
-              ),
+              tempos: script.lines.map((l) => lineTempo(l.speaker)),
               interviewerRate: 1,
             });
           } catch (e) {
@@ -117,9 +114,7 @@ export const Route = createFileRoute("/api/studio/job")({
             audio,
             sampleRate: STUDIO_SAMPLE_RATE,
             // 音の高さを変えずに速くする倍率（撮影側の ffmpeg の atempo と、画面の時刻表の両方で使う）
-            tempos: script.lines.map((l) =>
-              l.speaker === "interviewer" ? 1.5 : lineTempo(l.speaker),
-            ),
+            tempos: script.lines.map((l) => lineTempo(l.speaker)),
             interviewerRate: 1,
           });
         } catch (e) {
