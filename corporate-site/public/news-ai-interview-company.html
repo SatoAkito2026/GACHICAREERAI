@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI面接とは？企業が導入するメリットと注意点・導入の流れ｜AKITOグループ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="AIの面接官が応募者と面接するAI面接のしくみを解説。日程調整の手間や評価のばらつきを減らせるなどの企業のメリット、合否の判断や応募者への説明など導入するときの注意点、導入の流れと料金まで。">
+<link rel="canonical" href="https://akitogroup.jp/news-ai-interview-company">
+<meta property="og:title" content="AI面接とは？企業が導入するメリットと注意点・導入の流れ｜AKITOグループ">
+<meta property="og:description" content="AIの面接官が応募者と面接するAI面接のしくみを解説。日程調整の手間や評価のばらつきを減らせるなどの企業のメリット、合否の判断や応募者への説明など導入するときの注意点、導入の流れと料金まで。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://akitogroup.jp/news-ai-interview-company">
+<meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-ai-interview-company.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="max-image-preview:large">
+<meta property="og:site_name" content="AKITOグループ">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"合同会社AKITOグループ","alternateName":"AKITOグループ","url":"https://akitogroup.jp/","logo":"https://akitogroup.jp/icon-512.png","telephone":"080-2420-4900","email":"info@akitogroup.jp","address":{"@type":"PostalAddress","postalCode":"170-0013","addressRegion":"東京都","addressLocality":"豊島区","streetAddress":"東池袋2丁目62番8号 BIGオフィスプラザ池袋1206","addressCountry":"JP"}}</script>
+<meta name="theme-color" content="#24113F">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="assets/img/logo.webp" alt="AKITOグループ" width="600" height="255"></a>
+    <nav class="nav" id="nav" aria-label="メインメニュー">
+      <a href="/about">会社概要</a>
+      <a href="./#services">事業内容</a>
+      <a href="/gachicareer-ai">ガチキャリAI</a>
+      <a href="/gachicareer">ガチキャリ</a>
+      <a href="/news" aria-current="page">お知らせ</a>
+      <a class="nav-cta" href="/contact">お問い合わせ</a>
+    </nav>
+    <a class="head-tel" href="tel:08024204900"><small>年中無休・24時間受付</small>080-2420-4900</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" aria-label="メニューを開く"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span></button>
+  </div>
+</header>
+<div class="drawer" id="drawer" aria-label="メニュー">
+  <nav>
+    <a href="/about">会社概要<small>Company</small></a>
+    <a href="./#services">事業内容<small>Services</small></a>
+    <a href="/gachicareer-ai">ガチキャリAI<small>Gachi Career AI</small></a>
+    <a href="/gachicareer">ガチキャリ<small>Gachi Career</small></a>
+    <a href="/news" aria-current="page">お知らせ<small>News</small></a>
+    <a href="/contact">お問い合わせ<small>Contact</small></a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="btn btn-ink" href="/contact">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+    <a class="tel" href="tel:08024204900">080-2420-4900</a>
+    <small>年中無休・24時間受付　info@akitogroup.jp</small>
+  </div>
+</div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<main id="main">
+<style>
+.page-hero h1{font-size:clamp(26px,4.2vw,46px);line-height:1.4;max-width:24em}
+.toc{border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 48px;background:#fff}
+.toc p{font-weight:700;margin:0 0 8px}
+.toc ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(22px,3.4vw,30px);margin:64px 0 18px;padding-top:4px}
+.article h2:first-child{margin-top:0}
+.article h3{font-size:19px;margin:28px 0 8px}
+.points{list-style:none;padding:0;margin:20px 0;display:grid;gap:12px;counter-reset:pt}
+.points li{counter-increment:pt;border:1px solid var(--line);border-radius:16px;padding:18px 20px 18px 64px;position:relative;background:#fff}
+.points li::before{content:counter(pt);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--ff-latin);font-weight:800}
+.points b{display:block;font-size:16.5px}
+.points span{color:var(--ink-2);font-size:14.5px}
+.rank{border:1px solid var(--line);border-radius:24px;background:#fff;margin:22px 0 0;overflow:hidden}
+.rank-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.rank-no{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;align-content:center;background:var(--paper-2,#F4F2F7);font-family:var(--ff-latin);font-weight:800;font-size:26px;line-height:1}
+.rank-no small{font-size:10.5px;letter-spacing:.1em;font-weight:700;margin-top:2px}
+.rank-head h3{margin:0;font-size:clamp(20px,2.8vw,24px)}
+.rank-head p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.rank-body{padding:20px 22px 24px;display:grid;gap:14px}
+.rank-body ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.rank-body ul.fit{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.fit li+li,.feat-grid li+li,.points li+li{margin-top:0}
+.fit li{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--paper-2,#F4F2F7)}
+.rank-body .src{font-size:12.5px;color:var(--muted)}
+.rank-body .src a{color:inherit}
+.rank.top{border:2px solid #1E5BD8;box-shadow:0 30px 50px -36px rgba(30,91,216,.6)}
+.rank.top .rank-head{background:linear-gradient(135deg,#F2F6FF,#E3ECFF)}
+.rank.top .rank-no{background:#1E5BD8;color:#fff}
+.rank.top .logo-row{display:flex;align-items:center;gap:12px}
+.rank.top .logo-row img{width:44px;height:44px}
+.rank.top .fit li{background:#E8EFFE;color:#1748B0}
+.rank-body ul.feat-grid{display:grid;padding:0;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:0;list-style:none}
+@media (min-width:640px){.feat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.feat-grid li{font-size:14px;padding:8px 12px;border-radius:10px;background:#F5F8FF;border:1px solid #DCE6FB}
+.btn-blue{background:#1E5BD8;color:#fff}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(30,91,216,.7)}
+.sum{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+.sum table{width:100%;min-width:560px;border-collapse:collapse;font-size:14.5px}
+.sum th,.sum td{padding:13px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum tr:last-child th,.sum tr:last-child td{border-bottom:0}
+.sum thead th{background:var(--paper-2,#F4F2F7);font-size:13px}
+.sum tbody tr:first-child{background:#F5F8FF}
+.cta-box{margin-top:56px;border-radius:24px;padding:clamp(24px,4vw,40px);background:linear-gradient(135deg,#163E9E,#1E5BD8 55%,#3B8CFF);color:#fff;display:grid;gap:14px;justify-items:start}
+.cta-box h2{margin:0;color:#fff;border-left-color:#fff}
+.cta-box .btns{display:flex;flex-wrap:wrap;gap:12px}
+.cta-box .btn-w{background:#fff;color:#1E5BD8}
+.cta-box .btn-o{border:2px solid rgba(255,255,255,.7);color:#fff;background:transparent}
+.note{font-size:12.5px;color:var(--muted);margin-top:28px}
+
+.ti{width:44px;height:44px;border-radius:12px;flex:none;border:1px solid var(--line);background:#fff;object-fit:cover}
+.ti.sm{width:28px;height:28px;border-radius:8px}
+.concl{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.concl>p:first-child{font-weight:900;font-size:17px;margin:0 0 12px}
+.concl ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.concl li{display:grid;grid-template-columns:28px 28px minmax(0,1fr);gap:10px;align-items:center;font-size:14.5px}
+.concl li>b:first-child{font-family:var(--ff-latin);font-size:16px;text-align:center}
+.concl li span b{margin-right:6px}
+.concl li.top{background:#F2F6FF;border-radius:10px;padding:6px 8px;margin:0 -8px}
+.cmpw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:14px}
+.cmp{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px}
+.cmp th,.cmp td{padding:12px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px;white-space:nowrap}
+.cmp tbody th{position:sticky;left:0;background:#fff;min-width:150px;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.cmp tbody th div{display:flex;align-items:center;gap:8px;font-weight:700}
+.cmp tbody tr.us th,.cmp tbody tr.us td{background:#F5F8FF}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.grid2{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin:16px 0}
+@media (min-width:640px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.box{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff}
+.box b{display:block;font-size:15.5px;margin-bottom:4px}
+.box span{font-size:14px;color:var(--ink-2)}
+.box.warn{border-color:#F0D89A;background:#FFFBF0}
+.rank-head .ttl{display:flex;align-items:center;gap:12px}
+.rank-body h4{margin:4px 0 0;font-size:15px}
+.flowx{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px;counter-reset:f}
+.flowx li{counter-increment:f;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.flowx li::before{content:counter(f);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
+.flowx b{display:block}
+.flowx span{font-size:14px;color:var(--ink-2)}
+.faqx{display:grid;gap:10px;margin-top:14px}
+.faqx details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 18px}
+.faqx summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none}
+.faqx summary::-webkit-details-marker{display:none}
+.faqx summary::before{content:"Q.";color:#1E5BD8;font-family:var(--ff-latin);font-weight:800;margin-right:8px}
+.faqx details p{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+.type{display:grid;gap:10px;margin:14px 0}
+.type a{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;text-decoration:none;transition:border-color .3s}
+.type a:hover{border-color:#1E5BD8}
+.type a b{font-size:16px}
+.type a span{font-size:14px;color:var(--ink-2)}
+.type a em{font-style:normal;font-size:12.5px;font-weight:700;color:#1E5BD8;white-space:nowrap}
+@media (max-width:639px){.type a{grid-template-columns:minmax(0,1fr)}.type a em{justify-self:start}}
+
+.midcta{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:14px;align-items:center;border:2px solid #1E5BD8;border-radius:18px;padding:16px 18px;margin:28px 0;background:linear-gradient(135deg,#F5F8FF,#fff)}
+.midcta img{width:52px;height:52px;border-radius:12px;border:1px solid var(--line)}
+.midcta b{display:block;font-size:15.5px}
+.midcta span{font-size:13px;color:var(--ink-2)}
+.midcta .lk{font-size:13.5px;font-weight:700;color:#1E5BD8}
+.midcta span em{font-style:normal;font-weight:900;color:#D92D20}
+.ofr{margin:0;border:2px dashed rgba(255,255,255,.75);border-radius:14px;padding:10px 16px;background:rgba(255,255,255,.12);font-weight:700}
+.ofr b{display:block;font-size:12.5px;letter-spacing:.06em;color:#FFD27A}
+.sdl small{display:block;font-size:11px;font-weight:700;opacity:.9}
+.sdl.gc{background:#0B0B0B;color:#C8FF00}
+.spop em.ca{background:#0B0B0B;color:#C8FF00}
+@media (max-width:719px){.midcta{grid-template-columns:52px minmax(0,1fr)}.midcta .btn{grid-column:1/-1}.midcta .lk{grid-column:1/-1;justify-self:center}}
+
+.two-col{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.two-col{grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start}}
+.side-in{display:grid;gap:16px}
+/* ガチキャリAIの広告（300×600）。PCでは右の欄のいちばん上、スマホでは右の欄のいちばん下 */
+.side{display:flex;flex-direction:column;gap:16px}
+.side-ad{order:2;display:flex;justify-content:center}
+.side-ad iframe{display:block;max-width:100%}
+@media (min-width:1080px){.side{align-self:stretch}.side-ad{order:0}.side-in{position:sticky;top:96px;max-height:calc(100vh - 116px);overflow-y:auto;padding-bottom:8px;scrollbar-width:thin}}
+.sbn{display:grid;gap:8px;text-decoration:none;border-radius:18px;padding:16px;border:2px solid #1E5BD8;background:#fff;text-align:center;transition:transform .3s,box-shadow .3s}
+.sbn:hover{transform:translateY(-3px);box-shadow:0 20px 34px -24px rgba(30,91,216,.7)}
+.sbn img{width:140px;height:auto;margin:0 auto}
+.sbn b{font-size:16px}
+.sbn small{display:block;font-size:12px;color:var(--ink-2);line-height:1.6}
+.sbn em{font-style:normal;background:#1E5BD8;color:#fff;border-radius:999px;padding:9px 0;font-weight:700;font-size:14px}
+.sbn2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbn2 a{text-decoration:none;border-radius:14px;padding:12px;display:grid;gap:2px;transition:transform .3s}
+.sbn2 a:hover{transform:translateY(-2px)}
+.sbn2 small{font-size:9.5px;letter-spacing:.08em;font-weight:700}
+.sbn2 b{font-size:16px}
+.sbn2 span{font-size:11px;line-height:1.5}
+.sbn2 .d{background:linear-gradient(140deg,#fff,#E6F0FF);border:1px solid var(--line)}
+.sbn2 .d small{color:#1557D6}.sbn2 .d span{color:var(--ink-2)}
+.sbn2 .n{background:#0B1330;color:#ECF0FF}
+.sbn2 .n small{color:#FFB547}.sbn2 .n span{color:#A9B4D6}
+.stoc,.skw,.spop{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px}
+.stoc p,.skw p,.spop p{margin:0 0 8px;font-weight:900;font-size:13px;letter-spacing:.06em}
+.stoc ol{margin:0;padding:0;list-style:none;display:grid;gap:2px;counter-reset:s}
+.stoc li{counter-increment:s}
+.stoc a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;text-decoration:none;font-size:13px;line-height:1.5;padding:5px 6px;border-radius:8px;color:var(--ink-2)}
+.stoc a::before{content:counter(s);font-family:var(--ff-latin);font-weight:800;color:#A3AEC6}
+.stoc a:hover{background:#F5F8FF;color:var(--ink)}
+.stoc a.on{background:#EAF1FF;color:#1E5BD8;font-weight:700}
+.stoc a.on::before{color:#1E5BD8}
+.skw ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skw a{display:block;text-decoration:none;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.skw a::before{content:"#";color:#1E5BD8;margin-right:2px}
+.skw a:hover{border-color:#1E5BD8;color:#1E5BD8}
+.sdl{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:12px;background:#3FAE3A;color:#fff;transition:transform .3s}
+.sdl:hover{transform:translateY(-2px)}
+.spop ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.spop a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;text-decoration:none;font-size:12.5px;line-height:1.55;font-weight:700}
+.spop img{width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+.spop em{display:inline-block;font-style:normal;font-size:10px;background:#EAF1FF;color:#1E5BD8;border-radius:4px;padding:0 6px;margin-right:6px}
+.spop em.nt{background:#0B1330;color:#FFB547}.spop em.ot{background:#F4F2F7;color:var(--ink-2)}
+.spop a:hover span{text-decoration:underline}
+.prose .side p{margin:0}
+.prose .side ul,.prose .side ol{padding-left:0}
+
+.calc{width:100%;border-collapse:collapse;font-size:14px}
+.calc th,.calc td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.calc td.n{text-align:right;white-space:nowrap;font-family:var(--ff-latin);font-weight:700}
+.calc thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px}
+.calc tr.sum th,.calc tr.sum td{background:#F5F8FF;font-weight:900}
+.calc tr.minus td.n{color:#C2410C}
+.calc tr:last-child th,.calc tr:last-child td{border-bottom:0}
+.calcw{border:1px solid var(--line);border-radius:18px;background:#fff;overflow-x:auto;margin-top:14px}
+.calc th small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.calc thead th small{display:inline;margin:0 0 0 6px}
+.calc th.n{text-align:right}
+.formula{border:2px solid var(--ink);border-radius:16px;padding:16px 18px;background:#fff;font-weight:700;text-align:center;margin:16px 0}
+.formula small{display:block;font-weight:400;font-size:13px;color:var(--ink-2);margin-top:4px}
+.learn{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
+.learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+
+.midcta.gc{border-color:#0B0B0B;background:linear-gradient(135deg,#F4FFE0,#fff)}
+.midcta.gc .btn{background:#0B0B0B;color:#C8FF00}
+.midcta.gc .lk{color:#0B0B0B}
+.cta-box.gc{background:linear-gradient(135deg,#0B0B0B,#17201B);}
+.cta-box.gc .btn-w{background:#C8FF00;color:#0B0B0B}
+.cta-box.gc h2{border-left-color:#C8FF00}
+.qa{display:grid;gap:12px;margin:16px 0}
+.qa div{border:1px solid var(--line);border-radius:16px;background:#fff;padding:16px 18px}
+.qa b{display:block;font-size:16px;margin-bottom:6px}
+.qa b::before{content:"Q.";font-family:var(--ff-latin);color:#1E5BD8;margin-right:6px}
+.qa p{margin:0;font-size:14.5px;color:var(--ink-2)}
+.qa .ex{margin-top:8px;border-left:3px solid #C8FF00;background:#FAFFF0;padding:8px 12px;border-radius:0 10px 10px 0;font-size:14px;color:var(--ink)}
+.qa .ex::before{content:"回答例";display:block;font-size:11.5px;font-weight:900;letter-spacing:.06em;color:#5B7A00}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / <a href="/news">お知らせ</a> / AI面接とは</nav>
+    <p class="eyebrow"><time datetime="2026-10-24">2026.10.24</time>　コラム</p>
+    <h1>AI面接とは？企業が導入するメリットと注意点・導入の流れ</h1>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="two-col">
+    <div class="maincol">
+    <article class="prose article">
+
+      <p>応募は来るのに、一次面接の日程調整と面接だけで、採用担当者の時間がなくなってしまう。そんな悩みから注目されているのが、<b>AIの面接官が応募者と面接をするAI面接</b>です。</p>
+      <p>この記事では、AI面接のしくみと、企業にとってのメリット、<b>導入するときに気をつけること</b>、導入の流れをまとめました。</p>
+
+      <div class="learn"><p>この記事でわかること</p><ul><li>AI面接のしくみ</li><li>日程調整の手間や評価のばらつきを減らせるなどのメリット</li><li>合否の判断・応募者への説明など、導入するときの注意点</li><li>導入の流れと、ガチキャリAIのAI面接の料金</li></ul></div>
+
+      <nav class="toc" aria-label="目次"><p>目次</p><ol><li><a href="#what">AI面接とは</a></li><li><a href="#merit">企業にとってのメリット</a></li><li><a href="#care">導入するときに気をつけること</a></li><li><a href="#flow">導入の流れ</a></li><li><a href="#gc">ガチキャリAIのAI面接</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+
+      <h2 id="what">AI面接とは</h2>
+      <p>AI面接は、AIの面接官が応募者に質問し、応募者の答えをもとに評価をまとめるしくみです。応募者は、企業から届いたURLを開き、好きな時間にブラウザで面接を受けます。企業は、面接が終わったあとに、評価と会話の内容を確認します。</p>
+
+      <h2 id="merit">企業にとってのメリット</h2>
+      <div class="grid2"><div class="box "><b>日程調整がいらない</b><span>応募者が好きな時間に受けられるので、一次面接の日程を合わせる手間がなくなります。</span></div><div class="box "><b>評価の物差しがそろう</b><span>同じ観点で評価するので、面接官ごとの評価のばらつきを減らせます。</span></div><div class="box "><b>会いたい人に時間を使える</b><span>評価と会話を見てから、次の面接に進む人を決められます。</span></div><div class="box "><b>夜や休日の応募にも対応</b><span>働きながら転職活動をしている人も、受けやすくなります。</span></div></div>
+
+      <h2 id="care">導入するときに気をつけること</h2>
+      <ul class="points"><li><b>合否はAIだけで決めない</b><span>AIの評価は判断の材料のひとつです。最終的な判断は、担当者が評価の根拠や会話の内容を見て行います。</span></li><li><b>応募者に事前に伝える</b><span>AI面接であること、評価の使いみち、録画の有無などを、応募者にわかるように伝えます。</span></li><li><b>公正な選考を心がける</b><span>年齢・性別など、仕事の力と関係のないことで判断しないようにします。</span></li><li><b>評価の根拠を確かめる</b><span>どの発言をもとに評価したのかを確かめ、評価をうのみにしないようにします。</span></li></ul>
+
+      <h2 id="flow">導入の流れ</h2>
+      <ol class="flowx"><li><div><b>アカウントを作り、カードを登録する</b><span>AI面接は従量課金なので、カードの登録が必要です。</span></div></li><li><div><b>面接のURLを発行する</b><span>募集している職種に合わせて、面接のURLを発行します。</span></div></li><li><div><b>応募者にURLを送る</b><span>メールなどで応募者にURLを送ります。</span></div></li><li><div><b>評価と会話を確認する</b><span>面接が終わったら、評価と会話の内容を見て、次に進む人を決めます。</span></div></li></ol>
+
+      <h2 id="gc">ガチキャリAIのAI面接</h2>
+      <p><a href="/gachicareer-ai">ガチキャリAI</a>のAI面接では、AIの面接官が応募者と声で面接し、発言にもとづいて評価をまとめます。</p>
+      <div class="grid2"><div class="box "><b>7つの力と採用担当者向けの見立て</b><span>伝える力・論理的に考える力・主体性・協調性・粘り強さ・誠実さ・学ぶ姿勢の7つの評価と、採用担当者向けの見立てを確認できます。</span></div><div class="box "><b>会話と録画</b><span>面接の会話の内容を確認できます。録画は、応募者が許可した場合に見られます。</span></div><div class="box "><b>料金は使った分だけ</b><span>1回5,500円（税込）。応募者が面接を始めた回だけ、月末締めで請求されます。</span></div><div class="box "><b>求人掲載は当面無料</b><span>求人を掲載中の企業は、書類選考AIも無料で使えます。</span></div></div>
+      <p class="hint">料金は2026年10月時点のものです。最新の料金はガチキャリAIの利用規約・特定商取引法に基づく表記をご確認ください。</p>
+
+      <h2 id="faq">よくある質問</h2>
+      <div class="faqx"><details><summary>AI面接だけで合否を決めてもいいですか？</summary><p>おすすめしません。AI面接は、一次面接の負担を減らし、評価の材料をそろえるためのものです。最終的な判断は、担当者が評価と会話の内容を見て行いましょう。</p></details><details><summary>応募者はAI面接をどう受けますか？</summary><p>企業が発行したURLを応募者に送り、応募者はそのURLから、ブラウザでAIの面接官と面接を受けます。</p></details><details><summary>AI面接の料金はいくらですか？</summary><p>ガチキャリAIのAI面接は、1回5,500円（税込）の従量課金です。応募者が面接を始めた回だけ、月末締めで請求されます。URLの発行には、カードの登録が必要です。</p></details><details><summary>応募者の個人情報はどう扱われますか？</summary><p>面接の内容は、面接を依頼した企業が確認するためのものです。応募者には、AI面接であることや、内容の使いみちを事前に伝えておきましょう。</p></details><details><summary>求人の掲載にも費用がかかりますか？</summary><p>ガチキャリAIの求人掲載は当面無料です。求人を掲載中の企業は、書類選考AIも無料で使えます。</p></details></div>
+
+      <div class="cta-box gc">
+        <h2>一次面接は、AIの面接官にまかせよう。</h2>
+        <p>応募者は好きな時間にAIの面接官と面接。企業は評価と会話を見てから、会いたい人を決められます。AI面接は1回5,500円（税込）、応募者が面接を始めた回だけ。</p>
+        <div class="btns"><a class="btn btn-w" href="https://gachicareer-ai.akitogroup.jp/login?from=article" target="_blank" rel="noopener">無料で面接練習をはじめる <span class="arr" aria-hidden="true">→</span></a><a class="btn btn-o" href="/gachicareer-ai">ガチキャリAIを見る</a></div>
+      </div>
+
+      <p class="note">※ 記事の内容は2026年10月時点のものです。</p>
+    </article>
+    <a class="btn btn-line" href="/news" style="margin-top:48px">← お知らせ一覧へ</a>
+    </div>
+    <aside class="side" aria-label="サイドメニュー">
+      <div class="side-ad"><iframe src="https://gachicareer-ai.akitogroup.jp/embed/ad" width="300" height="600" style="border:0;border-radius:12px" loading="lazy" title="ガチキャリAIの広告"></iframe></div>
+      <div class="side-in">
+        <nav class="stoc" aria-label="この記事の目次"><p>目次</p><ol><li><a href="#what">AI面接とは</a></li><li><a href="#merit">企業にとってのメリット</a></li><li><a href="#care">導入するときに気をつけること</a></li><li><a href="#flow">導入の流れ</a></li><li><a href="#gc">ガチキャリAIのAI面接</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+        <div class="skw"><p>KEYWORDS</p><ul><li><a href="/news-interview-questions">面接の質問</a></li><li><a href="/news-self-pr">自己PR</a></li><li><a href="/news-reverse-questions">逆質問</a></li><li><a href="/news-ai-interview-practice">AI面接練習</a></li><li><a href="/news-jsdf-career">元自衛官</a></li><li><a href="/news-ai-interview-company">AI面接の導入</a></li></ul></div>
+        <a class="sdl gc" href="https://gachicareer-ai.akitogroup.jp/login?from=article" target="_blank" rel="noopener"><small>無料プランは1日1回・月5回まで</small>AIの面接官と練習する →</a>
+        <div class="spop"><p>就活・転職の記事</p><ul><li><a href="/news-interview-questions"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy"><span><em class="ca">就活・転職</em>面接でよく聞かれる質問と答え方</span></a></li><li><a href="/news-self-pr"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy"><span><em class="ca">就活・転職</em>自己PRの作り方と例文</span></a></li><li><a href="/news-ai-interview-practice"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy"><span><em class="ca">就活・転職</em>AIで面接練習するやり方</span></a></li><li><a href="/news-reverse-questions"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy"><span><em class="ca">就活・転職</em>面接の逆質問の例</span></a></li><li><a href="/news-jsdf-career"><img src="assets/img/gcai-logo.webp" alt="" width="800" height="800" loading="lazy"><span><em class="ca">就活・転職</em>元自衛官の転職と面接のコツ</span></a></li></ul></div>
+      </div>
+    </aside>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "AI面接とは？企業が導入するメリットと注意点・導入の流れ", "description": "AIの面接官が応募者と面接するAI面接のしくみを解説。日程調整の手間や評価のばらつきを減らせるなどの企業のメリット、合否の判断や応募者への説明など導入するときの注意点、導入の流れと料金まで。", "image": "https://akitogroup.jp/assets/img/ogp-ai-interview-company.png", "datePublished": "2026-10-24", "dateModified": "2026-10-24", "author": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "mainEntityOfPage": "https://akitogroup.jp/news-ai-interview-company"}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "お知らせ", "item": "https://akitogroup.jp/news"}, {"@type": "ListItem", "position": 3, "name": "AI面接とは？企業が導入するメリットと注意点・導入の流れ", "item": "https://akitogroup.jp/news-ai-interview-company"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI面接だけで合否を決めてもいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "おすすめしません。AI面接は、一次面接の負担を減らし、評価の材料をそろえるためのものです。最終的な判断は、担当者が評価と会話の内容を見て行いましょう。"}}, {"@type": "Question", "name": "応募者はAI面接をどう受けますか？", "acceptedAnswer": {"@type": "Answer", "text": "企業が発行したURLを応募者に送り、応募者はそのURLから、ブラウザでAIの面接官と面接を受けます。"}}, {"@type": "Question", "name": "AI面接の料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "ガチキャリAIのAI面接は、1回5,500円（税込）の従量課金です。応募者が面接を始めた回だけ、月末締めで請求されます。URLの発行には、カードの登録が必要です。"}}, {"@type": "Question", "name": "応募者の個人情報はどう扱われますか？", "acceptedAnswer": {"@type": "Answer", "text": "面接の内容は、面接を依頼した企業が確認するためのものです。応募者には、AI面接であることや、内容の使いみちを事前に伝えておきましょう。"}}, {"@type": "Question", "name": "求人の掲載にも費用がかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "ガチキャリAIの求人掲載は当面無料です。求人を掲載中の企業は、書類選考AIも無料で使えます。"}}]}</script>
+<script>
+(function(){var links=[].slice.call(document.querySelectorAll('.stoc a'));if(!links.length||!('IntersectionObserver' in window))return;
+var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-20% 0px -70% 0px'});
+Object.keys(map).forEach(function(id){var h=document.getElementById(id);if(h)io.observe(h)})})();
+</script>
+
+</main>
+
+<section class="cta-band" aria-label="お問い合わせ">
+  <div class="wrap">
+    <div class="rv">
+      <p class="eyebrow">Contact</p>
+      <h2 style="margin-top:12px">まずは、お気軽にご連絡ください。</h2>
+      <p>ガチキャリAIの導入・資料請求、ガチキャリへの参加やポスポス（会計システム）のご相談、採用へのご応募など、どんなことでも受け付けています。</p>
+    </div>
+    <div class="cta-actions rv">
+      <a class="btn btn-ink" href="/contact">フォームでお問い合わせ <span class="arr" aria-hidden="true">→</span></a>
+      <a class="cta-tel" href="tel:08024204900"><b>080-2420-4900</b><small>年中無休・24時間受付</small></a>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="foot-stripe"></div>
+  <div class="site-foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <span class="logo-chip"><img src="assets/img/logo-full.webp" alt="AKITOグループ　愛ある事業で煌めくあなたに届ける未来" width="900" height="352"></span>
+          <p>合同会社AKITOグループ<br>〒170-0013 東京都豊島区東池袋2丁目62番8号<br>BIGオフィスプラザ池袋1206<br>TEL 080-2420-4900（年中無休・24時間受付）<br>info@akitogroup.jp</p>
+        </div>
+        <div class="foot-col">
+          <h4>COMPANY</h4>
+          <ul>
+            <li><a href="./">トップ</a></li>
+            <li><a href="/about">会社概要・役員挨拶</a></li>
+            <li><a href="/news">お知らせ</a></li>
+            <li><a href="/contact">お問い合わせ</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h4>SERVICES</h4>
+          <ul>
+            <li><a href="/gachicareer-ai">ガチキャリAI</a></li>
+            <li><a href="/gachicareer">ガチキャリ</a></li>
+            <li><a href="/posupos">ポスポス（会計システム）</a></li>
+            <li><a href="/news-pos-ranking-day">飲食店のPOSレジの選び方</a></li>
+            <li><a href="/news-pos-ranking">夜のお店のPOSシステムの選び方</a></li>
+            <li><a href="/news">お店の運営コラム一覧</a></li>
+            <li><a href="/contact#recruit">採用情報</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© <span data-year>2026</span> AKITOgroup.llc</span>
+        <span>愛ある事業で煌めくあなたに届ける未来</span>
+      </div>
+    </div>
+  </div>
+</footer>
+<button class="to-top" id="to-top" type="button" aria-label="ページの先頭へ戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<script src="assets/site.js"></script>
+</body>
+</html>
