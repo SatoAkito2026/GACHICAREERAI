@@ -1,52 +1,30 @@
-// ポスポスのページへ行くリンクを押したら、「ポスポス♪」の効果音（assets/posupos.mp3）を鳴らしてから移動する。
-// 音が鳴らせないときはブラウザの読み上げで代わりに言う。どちらも使えない端末や、
-// 新しいタブで開くとき（Ctrl/⌘押し・中クリック・target=_blank）はそのまま移動する。
+// ポスポスのページ（入口・昼・夜）を開いた瞬間に「ポスポス♪」（assets/posupos.mp3）を1回鳴らす。
+// 同じタブでは1回だけ（昼↔夜を行き来しても鳴らし直さない）。
+// ブラウザが音の自動再生を止めたとき（iPhone・はじめて来た人など）は、そのページで最初に画面を押したときに鳴らす。
 (function () {
-  var TARGET = /^\/posupos(-day|-night)?(\.html)?$/;
-  var MAX_WAIT = 1400; // 鳴り終わらなくても、この時間で移動する
-  var sound = null;
+  var KEY = 'posupos-jingle-played';
+  try { if (sessionStorage.getItem(KEY)) return; } catch (err) { /* 保存できない端末は毎回鳴らす */ }
+  var sound;
   try {
     sound = new Audio(new URL('assets/posupos.mp3', document.baseURI).href);
     sound.preload = 'auto';
-  } catch (err) { sound = null; }
+  } catch (err) { return; }
 
-  var speak = function (done) {
-    var synth = window.speechSynthesis;
-    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return done();
-    try {
-      synth.cancel();
-      var u = new SpeechSynthesisUtterance('ポスポス');
-      u.lang = 'ja-JP';
-      u.rate = 1.15;
-      u.pitch = 1.4;
-      u.onend = function () { setTimeout(done, 60); };
-      u.onerror = done;
-      synth.speak(u);
-    } catch (err) { done(); }
+  var done = false;
+  var events = ['pointerdown', 'keydown', 'touchstart'];
+  var finish = function () {
+    done = true;
+    try { sessionStorage.setItem(KEY, '1'); } catch (err) { /* 何もしない */ }
+    events.forEach(function (ev) { window.removeEventListener(ev, tryPlay, true); });
   };
-
-  document.addEventListener('click', function (e) {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    var a = e.target.closest && e.target.closest('a[href]');
-    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
-    var url;
-    try { url = new URL(a.href, location.href); } catch (err) { return; }
-    if (url.origin !== location.origin || !TARGET.test(url.pathname)) return;
-    // 同じページの中の移動（#だけ違う）はそのまま
-    if (url.pathname === location.pathname && url.search === location.search) return;
-
-    e.preventDefault();
-    var gone = false;
-    var go = function () { if (gone) return; gone = true; location.href = url.href; };
-    setTimeout(go, MAX_WAIT);
-    if (!sound) return speak(go);
+  var tryPlay = function () {
+    if (done) return;
     try {
-      sound.currentTime = 0;
-      sound.onended = function () { setTimeout(go, 40); };
       var p = sound.play();
-      if (p && p.catch) p.catch(function () { speak(go); });
-    } catch (err) {
-      speak(go);
-    }
-  });
+      if (p && p.then) p.then(finish, function () { /* 自動再生が止められた。次の操作で鳴らす */ });
+      else finish();
+    } catch (err) { finish(); }
+  };
+  events.forEach(function (ev) { window.addEventListener(ev, tryPlay, { capture: true, passive: true }); });
+  tryPlay();
 })();
