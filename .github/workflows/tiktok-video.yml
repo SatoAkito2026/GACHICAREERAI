@@ -45,6 +45,13 @@ jobs:
           ONLY_IF_NONE_TODAY: ${{ github.event_name == 'schedule' && '1' || '' }}
           FORMAT: ${{ inputs.format || 'daily' }}
         run: node render.mjs
+      - name: 広告のときは、できた動画も残す（サイトに載せる用）
+        if: success() && inputs.format == 'ad'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ad-video
+          path: scripts/tiktok/.tiktok-work/out.mp4
+          if-no-files-found: ignore
       - name: 失敗したときは、撮ったコマの一部を残す
         if: failure()
         uses: actions/upload-artifact@v4
