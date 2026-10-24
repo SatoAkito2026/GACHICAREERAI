@@ -1,18 +1,29 @@
-// ポスポスのページへ行くリンクを押したら、ブラウザの読み上げで「ポスポス」と言ってから移動する。
-// 読み上げが使えない端末や、新しいタブで開くとき（Ctrl/⌘押し・中クリック・target=_blank）はそのまま移動する。
+// ポスポスのページへ行くリンクを押したら、「ポスポス♪」の効果音（assets/posupos.mp3）を鳴らしてから移動する。
+// 音が鳴らせないときはブラウザの読み上げで代わりに言う。どちらも使えない端末や、
+// 新しいタブで開くとき（Ctrl/⌘押し・中クリック・target=_blank）はそのまま移動する。
 (function () {
-  var synth = window.speechSynthesis;
-  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return;
   var TARGET = /^\/posupos(-day|-night)?(\.html)?$/;
-  var MAX_WAIT = 1200; // 読み上げが終わらなくても、この時間で移動する
+  var MAX_WAIT = 1400; // 鳴り終わらなくても、この時間で移動する
+  var sound = null;
+  try {
+    sound = new Audio(new URL('assets/posupos.mp3', document.baseURI).href);
+    sound.preload = 'auto';
+  } catch (err) { sound = null; }
 
-  var jaVoice = null;
-  var pickVoice = function () {
-    var vs = synth.getVoices() || [];
-    jaVoice = vs.filter(function (v) { return /^ja/i.test(v.lang); })[0] || null;
+  var speak = function (done) {
+    var synth = window.speechSynthesis;
+    if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return done();
+    try {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance('ポスポス');
+      u.lang = 'ja-JP';
+      u.rate = 1.15;
+      u.pitch = 1.4;
+      u.onend = function () { setTimeout(done, 60); };
+      u.onerror = done;
+      synth.speak(u);
+    } catch (err) { done(); }
   };
-  pickVoice();
-  if ('onvoiceschanged' in synth) synth.addEventListener('voiceschanged', pickVoice);
 
   document.addEventListener('click', function (e) {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -27,19 +38,15 @@
     e.preventDefault();
     var gone = false;
     var go = function () { if (gone) return; gone = true; location.href = url.href; };
+    setTimeout(go, MAX_WAIT);
+    if (!sound) return speak(go);
     try {
-      synth.cancel();
-      var u = new SpeechSynthesisUtterance('ポスポス');
-      u.lang = 'ja-JP';
-      if (jaVoice) u.voice = jaVoice;
-      u.rate = 1.15;
-      u.pitch = 1.4;
-      u.onend = function () { setTimeout(go, 60); };
-      u.onerror = go;
-      synth.speak(u);
-      setTimeout(go, MAX_WAIT);
+      sound.currentTime = 0;
+      sound.onended = function () { setTimeout(go, 40); };
+      var p = sound.play();
+      if (p && p.catch) p.catch(function () { speak(go); });
     } catch (err) {
-      go();
+      speak(go);
     }
   });
 })();
