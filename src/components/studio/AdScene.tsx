@@ -339,10 +339,10 @@ function ScoreCard({ local }: { local: number }) {
 
 function EvalCard({ local }: { local: number }) {
   const items: [string, number][] = [
-    ["論理的に話す力", 4.5],
+    ["論理的に考える力", 4.5],
     ["主体性", 4.0],
-    ["伝わりやすさ", 4.5],
-    ["問題を解決する力", 3.5],
+    ["伝える力", 4.5],
+    ["粘り強さ", 3.5],
   ];
   return (
     <Panel local={local} top={170}>

@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { PRACTICE_RULES } from "@/lib/plan-rules";
+import { COMPANY_INTERVIEW_PRICE_JPY, PRACTICE_RULES } from "@/lib/plan-rules";
+import { COIN_EXPIRY_MONTHS, COIN_PACKS, PRICE_TIERS } from "@/lib/coins";
 
 const ACCENT = "#C8FF00";
 
@@ -28,8 +29,10 @@ export function LandingPage() {
       <Hero loggedIn={!!session} />
       <Steps />
       <Features />
+      <ResultSample />
       <Pricing />
       <ForCompanies />
+      <FairSafe />
       <Faq />
       <FinalCta loggedIn={!!session} />
       <Footer />
@@ -408,7 +411,7 @@ function Pricing() {
                   className="absolute -top-3 left-6 rounded-full px-3 py-1 text-[11px]"
                   style={{ background: ACCENT, color: "#0F0F0F", fontWeight: 800 }}
                 >
-                  いちばん人気
+                  おすすめ
                 </span>
               )}
               <p className="text-[15px]" style={{ fontWeight: 800 }}>
@@ -443,39 +446,217 @@ function Pricing() {
   );
 }
 
+function ResultSample() {
+  const comps: [string, number | null][] = [
+    ["伝える力", 3],
+    ["論理的に考える力", 2],
+    ["主体性", 4],
+    ["協調性", 3],
+    ["粘り強さ", 5],
+    ["誠実さ", 3],
+    ["学ぶ姿勢", null],
+  ];
+  return (
+    <section className="mx-auto max-w-[1080px] px-4 py-14">
+      <SectionTitle
+        kicker="YOUR RESULT"
+        title="評価は、こんなふうに届きます"
+        sub="下はすべて説明用のサンプルです。実際の評価は、あなたが面接で話した内容から作られます。"
+      />
+      <div className="mt-8 grid gap-3 md:grid-cols-2">
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: "#141414", border: "1px solid #232323" }}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-[14px]" style={{ fontWeight: 800 }}>
+              7つの力（5段階）
+            </p>
+            <span
+              className="rounded-full px-2 py-0.5 text-[10.5px]"
+              style={{ background: "#232323", color: "#999" }}
+            >
+              サンプル
+            </span>
+          </div>
+          <div className="mt-4 space-y-2.5">
+            {comps.map(([label, v]) => (
+              <div key={label}>
+                <div className="flex justify-between text-[13px]">
+                  <span>{label}</span>
+                  <span style={{ color: v == null ? "#777" : ACCENT, fontWeight: 800 }}>
+                    {v == null ? "根拠なし" : `${v} / 5`}
+                  </span>
+                </div>
+                <div className="mt-1 h-2 rounded-full" style={{ background: "#232323" }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${((v ?? 0) / 5) * 100}%`, background: ACCENT }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-[12px] leading-relaxed" style={{ color: "#888" }}>
+            根拠になる発言がない力は評価しません。「なんとなく」の点数はつけない仕組みです。
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <p className="text-[12px]" style={{ color: ACCENT, fontWeight: 700 }}>
+              粘り強さ 5 / 5 ・ 根拠になった発言
+            </p>
+            <p className="mt-2 text-[15px] leading-relaxed">
+              「目標に届かなかった月も、毎日10件の訪問だけは続けました」
+            </p>
+          </div>
+          <div
+            className="rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <p className="text-[12px]" style={{ color: "#FFB84D", fontWeight: 700 }}>
+              伸びしろ
+            </p>
+            <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "#CCCCCC" }}>
+              理由が「なんとなく」で終わっています。結論 → 理由 →
+              具体例の順で話すと伝わりやすくなります。
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              ["答え始めるまで", "1.8秒"],
+              ["目線", "82%"],
+              ["上位", "12%"],
+            ].map(([k, v]) => (
+              <div
+                key={k}
+                className="rounded-2xl p-3 text-center"
+                style={{ background: "#141414", border: "1px solid #232323" }}
+              >
+                <p className="text-[10.5px]" style={{ color: "#888" }}>
+                  {k}
+                </p>
+                <p className="mt-1 text-[18px]" style={{ fontWeight: 900 }}>
+                  {v}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ForCompanies() {
+  const rows: [string, string, string][] = [
+    ["人材の一覧を見る", "無料", "名前は伏せて表示。評価・練習した職種・希望で絞り込めます"],
+    [
+      "面接の結果を見る",
+      `${PRICE_TIERS[PRICE_TIERS.length - 1].coins}〜${PRICE_TIERS[0].coins}コイン／件`,
+      "1コイン100円。評価が高い人ほど高め（よく見られている人は最大5割増し）。名前・評価・会話が見られ、そのまま面談を申し込めます",
+    ],
+    [
+      "AI面接（URLを発行）",
+      `¥${COMPANY_INTERVIEW_PRICE_JPY.toLocaleString()}／回`,
+      "候補者が面接を始めた回だけ。月額なし",
+    ],
+    ["求人の掲載", "今は無料", "応募があると、応募者の練習の評価を見てメッセージできます"],
+    ["書類選考AI", "掲載中は無料", "履歴書PDFをAIがまとめて判定します"],
+  ];
   return (
     <section className="mx-auto max-w-[1080px] px-4 pb-14">
       <div
-        className="grid items-center gap-6 rounded-3xl p-7 md:grid-cols-[1fr_auto] md:p-10"
+        className="rounded-3xl p-7 md:p-10"
         style={{
           background: "linear-gradient(135deg, #18200A 0%, #121212 60%)",
           border: "1px solid #2A3512",
         }}
       >
-        <div>
-          <p className="text-[12px] tracking-widest" style={{ color: ACCENT, fontWeight: 700 }}>
-            FOR COMPANIES
-          </p>
-          <h2 className="mt-2 text-[24px] md:text-[28px]" style={{ fontWeight: 900 }}>
-            採用担当の方へ
-          </h2>
-          <p
-            className="mt-3 max-w-[560px] text-[14px] leading-relaxed"
-            style={{ color: "#BBBBBB" }}
-          >
-            AI面接の結果と会話を見て、会いたい人に直接、面談を申し込めます。
-            月額なし。見たい人の分だけコインで。求人の掲載は今は無料です。
-          </p>
+        <p className="text-[12px] tracking-widest" style={{ color: ACCENT, fontWeight: 700 }}>
+          FOR COMPANIES
+        </p>
+        <h2 className="mt-2 text-[24px] md:text-[28px]" style={{ fontWeight: 900 }}>
+          書類ではわからない「話す力」を、本人の発言で確かめてから会える
+        </h2>
+        <p className="mt-3 max-w-[640px] text-[14px] leading-relaxed" style={{ color: "#BBBBBB" }}>
+          ガチキャリAIは求人メディアです。運営が人材を推薦・仲介することはありません。企業ご自身が評価を見て、会いたい人に面談を申し込みます。月額料金・成功報酬はありません。
+        </p>
+        <div className="mt-6 overflow-hidden rounded-2xl" style={{ border: "1px solid #2A2A2A" }}>
+          {rows.map(([k, price, note], i) => (
+            <div
+              key={k}
+              className="grid gap-1 px-4 py-3.5 md:grid-cols-[200px_180px_1fr] md:items-center md:gap-4"
+              style={{ background: i % 2 ? "#121212" : "#161616" }}
+            >
+              <span className="text-[14px]" style={{ fontWeight: 700 }}>
+                {k}
+              </span>
+              <span className="text-[15px]" style={{ color: ACCENT, fontWeight: 900 }}>
+                {price}
+              </span>
+              <span className="text-[12.5px]" style={{ color: "#AAAAAA" }}>
+                {note}
+              </span>
+            </div>
+          ))}
         </div>
+        <p className="mt-3 text-[11.5px]" style={{ color: "#777" }}>
+          表示は税込です。コインは{COIN_PACKS[0].coins}コイン（¥
+          {COIN_PACKS[0].priceJpy.toLocaleString()}）からまとめて購入でき、有効期限は
+          {COIN_EXPIRY_MONTHS}か月です。
+        </p>
         <Link
           to="/login"
           search={{ mode: "business" }}
-          className="inline-flex h-12 items-center justify-center rounded-full px-6 text-[14px]"
+          className="mt-6 inline-flex h-12 items-center justify-center rounded-full px-6 text-[14px]"
           style={{ background: "#F0F0F0", color: "#0F0F0F", fontWeight: 800 }}
         >
-          企業として登録する
+          無料で企業登録する
         </Link>
+      </div>
+    </section>
+  );
+}
+
+function FairSafe() {
+  const items: [string, string][] = [
+    [
+      "年齢・性別などで絞り込めない",
+      "企業は年齢や性別で人材を絞り込めません。評価は面接での発言にもとづくものだけです。",
+    ],
+    [
+      "公開は本人の同意制",
+      "プロフィールは最初は非公開。公開するかは本人が決め、いつでも非公開に戻せます。",
+    ],
+    [
+      "運営は推薦・仲介をしない",
+      "求人メディアとして、運営が人材を企業に推薦したり、取り次いだりはしません。",
+    ],
+    ["成功報酬はなし", "採用が決まっても、成功報酬はいただきません。"],
+  ];
+  return (
+    <section className="mx-auto max-w-[1080px] px-4 pb-14">
+      <SectionTitle kicker="FAIR & SAFE" title="安心・公正への取り組み" />
+      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        {items.map(([t, d]) => (
+          <div
+            key={t}
+            className="rounded-2xl p-5"
+            style={{ background: "#141414", border: "1px solid #232323" }}
+          >
+            <p className="flex items-center gap-2 text-[15px]" style={{ fontWeight: 800 }}>
+              <ShieldCheck size={18} color={ACCENT} />
+              {t}
+            </p>
+            <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: "#AAAAAA" }}>
+              {d}
+            </p>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -494,6 +675,14 @@ function Faq() {
     {
       q: "企業に名前や結果が勝手に見られませんか？",
       a: "プロフィールは最初は非公開です。公開しても名前は伏せて表示し、企業に見せる結果はあなたが選べます。",
+    },
+    {
+      q: "使えば内定がもらえますか？",
+      a: "内定や採用をお約束するサービスではありません。練習と評価で面接の準備を進め、評価を公開すれば企業から面談の申し込みが届くことがある、という仕組みです。",
+    },
+    {
+      q: "（企業の方）運営が人材を紹介してくれるのですか？",
+      a: "いいえ。ガチキャリAIは求人メディアで、運営が人材を推薦・仲介することはありません。企業ご自身が評価を見て、面談を申し込む相手を決めます。",
     },
     {
       q: "カメラの映像は保存されますか？",
