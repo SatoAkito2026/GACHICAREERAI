@@ -534,8 +534,13 @@ ${learnedExamples(history)}
 
 export type AdRole = "hook" | "ask" | "score" | "eval" | "delivery" | "offer" | "cta";
 
+export type AdPlatform = "tiktok" | "instagram";
+
 export type AdScript = {
   format: "ad";
+  platform: AdPlatform;
+  /** TikTok・リールは 9:16、Instagram のフィード・広告は 4:5 */
+  aspect: "9x16" | "4x5";
   theme: "ad";
   themeLabel: string;
   title: string;
@@ -544,7 +549,7 @@ export type AdScript = {
   roles: AdRole[];
 };
 
-export function adScript(): AdScript {
+export function adScript(platform: AdPlatform = "tiktok"): AdScript {
   const parts: [StudioLine["speaker"], string, AdRole][] = [
     ["narrator", "面接、ぶっつけ本番で行くの？", "hook"],
     ["interviewer", "では、あなたの強みを教えてください。", "ask"],
@@ -554,13 +559,18 @@ export function adScript(): AdScript {
     ["narrator", "評価が上がれば、企業から面談の申し込みも。", "offer"],
     ["narrator", "ガチキャリAI。まずは無料で練習しよう。", "cta"],
   ];
+  const instagram = platform === "instagram";
   return {
     format: "ad",
+    platform,
+    aspect: instagram ? "4x5" : "9x16",
     theme: "ad",
-    themeLabel: "広告",
+    themeLabel: instagram ? "広告（Instagram 4:5）" : "広告（TikTok 9:16）",
     title: "ガチキャリAI｜AIの面接官と本番さながらに練習",
-    caption:
-      "面接、ぶっつけ本番で行く？AIの面接官と練習して、点数・話し方・目線までチェック。無料で練習できます👉プロフィールのリンクから #ガチキャリAI #面接対策 #就活 #転職 #AI面接",
+    // Instagram は検索で探す人が多いので、本文にも言葉を入れ、ハッシュタグは5個までにする
+    caption: instagram
+      ? "面接、ぶっつけ本番で行く？\nAI面接で面接対策。自己PRや志望動機の答え方を、AIの面接官が点数で採点。話し方・間・目線までチェックできます。\n無料で練習できます👉プロフィールのリンクから\n#面接対策 #AI面接 #就活 #転職 #ガチキャリAI"
+      : "面接、ぶっつけ本番で行く？AIの面接官と練習して、点数・話し方・目線までチェック。無料で練習できます👉プロフィールのリンクから #ガチキャリAI #面接対策 #就活 #転職 #AI面接",
     lines: parts.map(([speaker, text]) => ({ speaker, text })),
     roles: parts.map(([, , role]) => role),
   };

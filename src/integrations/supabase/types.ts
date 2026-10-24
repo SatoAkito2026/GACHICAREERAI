@@ -309,6 +309,7 @@ export type Database = {
           title: string;
           views: number | null;
           likes: number | null;
+          platform: string;
         };
         Insert: {
           caption?: string;
@@ -326,6 +327,7 @@ export type Database = {
           title: string;
           views?: number | null;
           likes?: number | null;
+          platform?: string;
         };
         Update: {
           caption?: string;
@@ -343,6 +345,7 @@ export type Database = {
           title?: string;
           views?: number | null;
           likes?: number | null;
+          platform?: string;
         };
         Relationships: [];
       };

@@ -3,7 +3,7 @@
  *
  * POST /api/studio/job → { id, title, lines, result, audio[], sampleRate, interviewerRate, ... }
  * POST /api/studio/job?onlyIfNoneToday=1 → 今日の動画がもうあれば { skipped: true }
- * POST /api/studio/job?format=ad → 広告（決まった台本）
+ * POST /api/studio/job?format=ad&platform=tiktok|instagram → 広告（決まった台本。instagram は 4:5）
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse, serviceClient } from "@/lib/talent";
@@ -40,9 +40,12 @@ export const Route = createFileRoute("/api/studio/job")({
         }
 
         // 広告：決まった台本で、ナレーターと面接官の声だけ作る
-        if (new URL(request.url).searchParams.get("format") === "ad") {
+        const params = new URL(request.url).searchParams;
+        if (params.get("format") === "ad") {
           try {
-            const script = adScript();
+            const script = adScript(
+              params.get("platform") === "instagram" ? "instagram" : "tiktok",
+            );
             const audio = await speakLines(script.lines);
             const { data: row, error } = await supabase
               .from("tiktok_videos")
@@ -52,6 +55,7 @@ export const Route = createFileRoute("/api/studio/job")({
                 caption: script.caption,
                 script: script as never,
                 status: "rendering",
+                platform: script.platform,
               })
               .select("id")
               .single();

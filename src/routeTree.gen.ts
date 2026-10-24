@@ -57,6 +57,7 @@ import { Route as ApiTiktokVideosRouteImport } from './routes/api/tiktok-videos'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
+import { Route as EmbedAdRouteImport } from './routes/embed.ad'
 import { Route as InterviewTokenRouteImport } from './routes/interview/$token'
 import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
@@ -369,6 +370,11 @@ const BusinessIndexRoute = BusinessIndexRouteImport.update({
 const ChatInterviewTokenRoute = ChatInterviewTokenRouteImport.update({
   id: '/chat-interview/$token',
   path: '/chat-interview/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmbedAdRoute = EmbedAdRouteImport.update({
+  id: '/embed/ad',
+  path: '/embed/ad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InterviewTokenRoute = InterviewTokenRouteImport.update({
@@ -783,6 +789,7 @@ export interface FileRoutesByFullPath {
   '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
@@ -902,6 +909,7 @@ export interface FileRoutesByTo {
   '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
@@ -1022,6 +1030,7 @@ export interface FileRoutesById {
   '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
@@ -1143,6 +1152,7 @@ export interface FileRouteTypes {
     | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
     | '/private/invite'
@@ -1262,6 +1272,7 @@ export interface FileRouteTypes {
     | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
     | '/private/invite'
@@ -1381,6 +1392,7 @@ export interface FileRouteTypes {
     | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
     | '/private/invite'
@@ -1501,6 +1513,7 @@ export interface RootRouteChildren {
   ApiTiktokVideosRoute: typeof ApiTiktokVideosRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
+  EmbedAdRoute: typeof EmbedAdRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
   PrivateAdminRoute: typeof PrivateAdminRoute
   PrivateInviteRoute: typeof PrivateInviteRoute
@@ -1909,6 +1922,13 @@ declare module '@tanstack/react-router' {
       path: '/chat-interview/$token'
       fullPath: '/chat-interview/$token'
       preLoaderRoute: typeof ChatInterviewTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/embed/ad': {
+      id: '/embed/ad'
+      path: '/embed/ad'
+      fullPath: '/embed/ad'
+      preLoaderRoute: typeof EmbedAdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interview/$token': {
@@ -2445,6 +2465,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTiktokVideosRoute: ApiTiktokVideosRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
+  EmbedAdRoute: EmbedAdRoute,
   InterviewTokenRoute: InterviewTokenRoute,
   PrivateAdminRoute: PrivateAdminRoute,
   PrivateInviteRoute: PrivateInviteRoute,
