@@ -254,6 +254,8 @@ export async function speakLines(
   lines: StudioLine[],
   /** 受験者のせりふごとの話し方（言い換え型の NG は自信なさげに、OK ははきはき） */
   styles?: (string | null)[],
+  /** 広告用：面接官も聞き取りやすい声（速くしない・はっきり話す）にする */
+  { clearInterviewer = false }: { clearInterviewer?: boolean } = {},
 ): Promise<string[]> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OPENAI_API_KEY missing");
@@ -266,22 +268,31 @@ export async function speakLines(
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         body: JSON.stringify(
-          interviewer
+          interviewer && clearInterviewer
             ? {
-                // 面接官はアプリと同じ声・速さ
-                model: "tts-1",
-                input: toSpeechText(line.text),
-                voice: "shimmer",
-                response_format: "pcm",
-                speed: 1.3,
-              }
-            : {
                 model: "gpt-4o-mini-tts",
                 input: toSpeechText(line.text),
-                voice: narrator ? NARRATOR_VOICE : candidateVoice,
-                instructions: narrator ? NARRATOR_STYLE : (styles?.[i] ?? CANDIDATE_STYLE),
+                voice: "shimmer",
+                instructions:
+                  "日本の企業の面接官。落ち着いた丁寧な標準語で、一語ずつはっきり、自然な速さで話す。",
                 response_format: "pcm",
-              },
+              }
+            : interviewer
+              ? {
+                  // 面接官はアプリと同じ声・速さ
+                  model: "tts-1",
+                  input: toSpeechText(line.text),
+                  voice: "shimmer",
+                  response_format: "pcm",
+                  speed: 1.3,
+                }
+              : {
+                  model: "gpt-4o-mini-tts",
+                  input: toSpeechText(line.text),
+                  voice: narrator ? NARRATOR_VOICE : candidateVoice,
+                  instructions: narrator ? NARRATOR_STYLE : (styles?.[i] ?? CANDIDATE_STYLE),
+                  response_format: "pcm",
+                },
         ),
       });
       if (!res.ok) throw new Error(`tts ${res.status}: ${await res.text()}`);
