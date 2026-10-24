@@ -6,6 +6,9 @@
 import { useState } from "react";
 import { C, CompetencyBars, EvidenceQuote, Tag } from "@/components/talent/TalentUI";
 import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
+import type { SpeechStats } from "@/lib/speech-stats";
+import type { DeliveryStats } from "@/lib/delivery-tracker";
+import { DeliveryCard, SpeechStatsCard, VerdictCard } from "@/components/talent/ResultExtras";
 
 export type CompanyInterview = {
   id: string;
@@ -29,6 +32,9 @@ export type CompanyInterview = {
     suggestedQuestions: string[];
   } | null;
   transcript: { q: string; a: string }[];
+  /** 話し方・間・声・目線（古い面接には無い） */
+  speechStats?: SpeechStats | null;
+  delivery?: DeliveryStats | null;
   /** 練習の設定（古い面接には無い） */
   settings?: {
     avatar_style: string | null;
@@ -74,6 +80,7 @@ export function CompanyInterviewBlock({
       </button>
       {open && (
         <div className="flex flex-col gap-4 px-4 pb-4">
+          {avg && <VerdictCard avg={Number(avg)} forCompany />}
           {iv.settings && <SettingsRow settings={iv.settings} />}
           {iv.recordingUrl && (
             <video
@@ -122,6 +129,16 @@ export function CompanyInterviewBlock({
             </p>
           )}
 
+          {(iv.speechStats || iv.delivery) && (
+            <div className="flex flex-col gap-3 rounded-lg p-3" style={{ background: C.card2 }}>
+              <p className="text-[12px]" style={{ color: C.accent, fontWeight: 700 }}>
+                話し方・間・声・目線（面接中に測った数字）
+              </p>
+              {iv.speechStats && <SpeechStatsCard stats={iv.speechStats} />}
+              {iv.delivery && <DeliveryCard d={iv.delivery} />}
+            </div>
+          )}
+
           {iv.competencies.some((c) => c.score !== null) && (
             <div className="flex flex-col gap-3">
               <CompetencyBars
@@ -162,18 +179,21 @@ export function CompanyInterviewBlock({
               </button>
               {showTranscript && (
                 <div className="mt-2 flex flex-col gap-2">
-                  {iv.transcript.map((t, j) => (
-                    <div
-                      key={j}
-                      className="rounded-lg p-3 text-[13px]"
-                      style={{ background: C.card2, lineHeight: 1.7 }}
-                    >
-                      <p style={{ color: C.muted }}>面接官：{t.q}</p>
-                      <p className="mt-1" style={{ color: C.text }}>
-                        回答：{t.a || "（回答なし）"}
-                      </p>
-                    </div>
-                  ))}
+                  {iv.transcript
+                    // 最後のあいさつだけの回（答えがない）は出さない
+                    .filter((t, j, all) => t.a || j < all.length - 1)
+                    .map((t, j) => (
+                      <div
+                        key={j}
+                        className="rounded-lg p-3 text-[13px]"
+                        style={{ background: C.card2, lineHeight: 1.7 }}
+                      >
+                        <p style={{ color: C.muted }}>面接官：{t.q}</p>
+                        <p className="mt-1" style={{ color: C.text }}>
+                          回答：{t.a || "（回答なし）"}
+                        </p>
+                      </div>
+                    ))}
                 </div>
               )}
             </div>

@@ -5,6 +5,8 @@
  * - 企業に見せる評価に、年齢・性別・出身地など選考に使うべきでない情報は含めない
  */
 import { coinExpiryFrom } from "@/lib/coins";
+import type { SpeechStats } from "@/lib/speech-stats";
+import type { DeliveryStats } from "@/lib/delivery-tracker";
 import { normalizeJobType, practiceRule } from "@/lib/plan-rules";
 import { interviewAverage } from "@/lib/talent-score";
 import Anthropic from "@anthropic-ai/sdk";
@@ -250,6 +252,9 @@ export async function loadCompanyInterviews(
       competencies: (f.competencies ?? []) as InterviewCompetency[],
       recruiterView: (f.recruiter_view ?? null) as RecruiterView | null,
       settings: (iv.practice_settings ?? null) as PracticeSettings | null,
+      // 話し方（答えの長さ・言いよどみ）と、間・声・目線（面接中に測った数字）
+      speechStats: (f.speech_stats ?? null) as SpeechStats | null,
+      delivery: (f.delivery ?? null) as DeliveryStats | null,
       transcript: (turns ?? [])
         .filter((t) => t.interview_id === iv.id)
         .map((t) => ({ q: t.question, a: t.memo })),
