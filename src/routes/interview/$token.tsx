@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { DeliveryTracker } from "@/lib/delivery-tracker";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { InterviewerAvatar } from "@/components/InterviewerAvatar";
@@ -818,6 +819,35 @@ function LiveScreen({
   const [isRecording, setIsRecording] = useState(false);
   const compact = useCompactLayout();
   const analyserRef = useRef<AnalyserNode | null>(null);
+  // 練習の「話し方・態度」（間・声の波・目線）を測る。数字だけを結果に残す
+  const trackerRef = useRef<DeliveryTracker | null>(null);
+  if (!trackerRef.current) trackerRef.current = new DeliveryTracker();
+  const isListeningRef = useRef(false);
+  const isCameraOffRef = useRef(false);
+  const silenceHintRef = useRef(false);
+  const [silenceHint, setSilenceHint] = useState(false);
+  useEffect(() => {
+    isListeningRef.current = isListening;
+    if (!isListening && silenceHintRef.current) {
+      silenceHintRef.current = false;
+      setSilenceHint(false);
+    }
+  }, [isListening]);
+  useEffect(() => {
+    isCameraOffRef.current = isCameraOff;
+  }, [isCameraOff]);
+  // AIが話し終えた時刻（答え始めるまでの間を測る）
+  useEffect(() => {
+    if (!isAiSpeaking) trackerRef.current?.aiEnded();
+  }, [isAiSpeaking]);
+  // 練習ではカメラの映像で目線を測る（カメラがない・読み込めないときは測らない）
+  useEffect(() => {
+    if (!streamReady || !invitation.practice_mode) return;
+    const v = videoRef.current;
+    if (!v || !mediaStreamRef.current?.getVideoTracks().length) return;
+    void trackerRef.current?.startGaze(v, () => isListeningRef.current && !isCameraOffRef.current);
+  }, [streamReady, invitation.practice_mode]);
+  useEffect(() => () => trackerRef.current?.stop(), []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -858,32 +888,36 @@ function LiveScreen({
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const THRESHOLD = 30;
-    let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+    const tracker = trackerRef.current!;
+    let stopping = false;
 
     const check = () => {
       analyser.getByteFrequencyData(dataArray);
       const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      tracker.sample(avg, isListening);
 
       if (avg > THRESHOLD && !isListening && !isProcessing && !isAiSpeaking) {
         startListening();
-        if (silenceTimer) clearTimeout(silenceTimer);
-      } else if (avg <= THRESHOLD && isListening) {
-        if (!silenceTimer) {
-          silenceTimer = setTimeout(() => {
-            stopListening();
-            silenceTimer = null;
-          }, 1500);
+      } else if (isListening && !stopping) {
+        // 少し考えて黙っただけで回答を締めないよう、待つ長さを変える。
+        // 話し始めたばかり（声が4秒未満）は3秒、しっかり話したあとは2.3秒黙ったら回答を送る
+        const silent = tracker.silentMs;
+        const wait = tracker.answerVoicedMs < 4000 ? 3000 : 2300;
+        const hint = silent >= 1000;
+        if (hint !== silenceHintRef.current) {
+          silenceHintRef.current = hint;
+          setSilenceHint(hint);
         }
-      } else if (avg > THRESHOLD && silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
+        if (silent >= wait) {
+          stopping = true;
+          void stopListening();
+        }
       }
     };
 
     const interval = setInterval(check, 100);
     return () => {
       clearInterval(interval);
-      if (silenceTimer) clearTimeout(silenceTimer);
       source.disconnect();
       analyser.disconnect();
     };
@@ -1066,11 +1100,13 @@ function LiveScreen({
     recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
     recorder.start();
     mediaRecorderRef.current = recorder;
+    trackerRef.current?.answerStarted();
     setIsListening(true);
   }, [isListening, isAiSpeaking, isProcessing]);
 
   const stopListening = useCallback(async () => {
     if (!mediaRecorderRef.current || !isListening) return;
+    trackerRef.current?.answerEnded();
     setIsListening(false);
     setIsProcessing(true);
     mediaRecorderRef.current.stop();
@@ -1142,6 +1178,8 @@ function LiveScreen({
           jobType: invitation.job_type,
           companyName: invitation.company_name ?? null,
           isAbandoned,
+          // 練習だけ：間・声の波・目線の数字（音や映像は送らない）
+          delivery: invitation.practice_mode ? trackerRef.current?.summary() : undefined,
         }),
       });
 
@@ -1222,7 +1260,9 @@ function LiveScreen({
     : isProcessing
       ? "処理中..."
       : isListening
-        ? "聞いています..."
+        ? silenceHint
+          ? "このまま黙っていると回答を送ります（続けて話してOK）"
+          : "聞いています...（話し終えたら少し待つと送信）"
         : "話しかけてください（自動で検出します）";
   const statusColor = isAiSpeaking
     ? "#FFB800"

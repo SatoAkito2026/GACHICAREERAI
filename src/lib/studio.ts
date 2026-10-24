@@ -529,3 +529,39 @@ ${learnedExamples(history)}
     itemIndex,
   };
 }
+
+// ---- 広告（決まった台本。AIで台本を作らないので、毎回同じ内容になる） ----
+
+export type AdRole = "hook" | "ask" | "score" | "eval" | "delivery" | "offer" | "cta";
+
+export type AdScript = {
+  format: "ad";
+  theme: "ad";
+  themeLabel: string;
+  title: string;
+  caption: string;
+  lines: StudioLine[];
+  roles: AdRole[];
+};
+
+export function adScript(): AdScript {
+  const parts: [StudioLine["speaker"], string, AdRole][] = [
+    ["narrator", "面接、ぶっつけ本番で行くの？", "hook"],
+    ["interviewer", "では、あなたの強みを教えてください。", "ask"],
+    ["narrator", "話すだけで、AIの面接官が本番さながらに採点。", "score"],
+    ["narrator", "あなたの発言を根拠に、強みと直し方まで分かる。", "eval"],
+    ["narrator", "間の取り方、声の強弱、目線までチェック。", "delivery"],
+    ["narrator", "評価が上がれば、企業から面談の申し込みも。", "offer"],
+    ["narrator", "ガチキャリAI。まずは無料で練習しよう。", "cta"],
+  ];
+  return {
+    format: "ad",
+    theme: "ad",
+    themeLabel: "広告",
+    title: "ガチキャリAI｜AIの面接官と本番さながらに練習",
+    caption:
+      "面接、ぶっつけ本番で行く？AIの面接官と練習して、点数・話し方・目線までチェック。無料で練習できます👉プロフィールのリンクから #ガチキャリAI #面接対策 #就活 #転職 #AI面接",
+    lines: parts.map(([speaker, text]) => ({ speaker, text })),
+    roles: parts.map(([, , role]) => role),
+  };
+}

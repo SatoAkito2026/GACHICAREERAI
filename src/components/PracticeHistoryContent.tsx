@@ -17,6 +17,8 @@ import { usePlan } from "@/hooks/use-plan";
 import { practiceRule } from "@/lib/plan-rules";
 import { talentApi } from "@/components/talent/TalentUI";
 import { ShareResultButton } from "@/components/ShareResultButton";
+import { speechAdvice, type SpeechStats } from "@/lib/speech-stats";
+import { deliveryAdvice, type DeliveryStats } from "@/lib/delivery-tracker";
 
 type PracticeFeedback = {
   overall_impression?: string;
@@ -34,6 +36,8 @@ type PracticeFeedback = {
     reason: string;
     evidence: string[];
   }[];
+  speech_stats?: SpeechStats | null;
+  delivery?: DeliveryStats | null;
   /** 企業（採用担当）向けの見立て。プロフィールを公開して、コインで見た企業にだけ見える */
   recruiter_view?: {
     summary: string;
@@ -172,6 +176,12 @@ export function PracticeHistoryContent({
           <p className="mt-6 text-[13px]" style={{ color: "#888888" }}>
             まだ練習履歴がありません。
           </p>
+        )}
+
+        {rows.length > 0 && (
+          <div className="mt-5">
+            <RankBanner mode={mode} />
+          </div>
         )}
 
         <div className="mt-6 space-y-3">
@@ -395,6 +405,8 @@ export function PracticeHistoryContent({
                       </p>
                     </div>
                   )}
+                  {r.feedback.speech_stats && <SpeechStatsCard stats={r.feedback.speech_stats} />}
+                  {r.feedback.delivery && <DeliveryCard d={r.feedback.delivery} />}
                   {r.feedback.good_points && r.feedback.good_points.length > 0 && (
                     <div>
                       <p
@@ -491,6 +503,182 @@ export function PracticeHistoryContent({
 }
 
 /** 企業に見える見立てを、本人も同じ内容で確認できるようにする */
+function SpeechStatsCard({ stats }: { stats: SpeechStats }) {
+  return (
+    <div>
+      <p style={{ color: "#5CC8FF", fontSize: 12, fontWeight: 700, marginBottom: 6 }}>話し方</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div
+          className="rounded-xl p-3"
+          style={{ background: "#141414", border: "1px solid #262626" }}
+        >
+          <p style={{ color: "#888", fontSize: 11 }}>1回の答えの長さ（平均）</p>
+          <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 800 }}>
+            {stats.avgChars}
+            <span style={{ fontSize: 11, marginLeft: 2 }}>文字</span>
+          </p>
+          <p style={{ color: "#666", fontSize: 10.5 }}>目安 150〜300文字</p>
+        </div>
+        <div
+          className="rounded-xl p-3"
+          style={{ background: "#141414", border: "1px solid #262626" }}
+        >
+          <p style={{ color: "#888", fontSize: 11 }}>言いよどみ（えー・あの など）</p>
+          <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 800 }}>
+            {stats.fillers}
+            <span style={{ fontSize: 11, marginLeft: 2 }}>回</span>
+          </p>
+          <p style={{ color: "#666", fontSize: 10.5 }}>1回の答えで {stats.fillersPerAnswer} 回</p>
+        </div>
+      </div>
+      <ul className="mt-2 list-disc pl-5">
+        {speechAdvice(stats).map((t, i) => (
+          <li key={i} style={{ color: "#CCCCCC", fontSize: 12, lineHeight: 1.7 }}>
+            {t}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** いちばん新しい練習の点数が、練習した人の中で上位何%か */
+function RankBanner({ mode }: { mode: "individual" | "student" }) {
+  const [rank, setRank] = useState<{
+    score: number | null;
+    total?: number;
+    rank?: number;
+    percent?: number;
+    notEnough?: boolean;
+  } | null>(null);
+  useEffect(() => {
+    void talentApi<NonNullable<typeof rank>>(`/api/talent/my-rank?mode=${mode}`).then((r) => {
+      if (r.ok) setRank(r.data);
+    });
+  }, [mode]);
+  if (!rank || rank.score == null) return null;
+  return (
+    <div
+      className="mb-4 flex items-center gap-4 rounded-2xl p-4"
+      style={{
+        background: "linear-gradient(135deg, #1F2A08 0%, #141414 70%)",
+        border: "1px solid #3A4A12",
+      }}
+    >
+      <div
+        className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl"
+        style={{ background: "#C8FF00", color: "#0F0F0F" }}
+      >
+        <span style={{ fontSize: 10, fontWeight: 700 }}>上位</span>
+        <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
+          {rank.percent != null ? `${rank.percent}%` : "—"}
+        </span>
+      </div>
+      <div className="min-w-0">
+        <p style={{ color: "#888", fontSize: 11 }}>前回の練習 {rank.score}点</p>
+        {rank.percent != null ? (
+          <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, lineHeight: 1.5 }}>
+            練習した{rank.total!.toLocaleString()}人の中で {rank.rank!.toLocaleString()}位
+          </p>
+        ) : (
+          <p style={{ color: "#CCCCCC", fontSize: 13, lineHeight: 1.6 }}>
+            練習した人が集まると、あなたが上位何%か表示されます
+          </p>
+        )}
+        <p style={{ color: "#888", fontSize: 11, marginTop: 2 }}>
+          1人につき一番良い点数で比べています
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DeliveryCard({ d }: { d: DeliveryStats }) {
+  const tiles: { label: string; value: string; unit: string; note: string }[] = [];
+  if (d.avgLatencySec != null)
+    tiles.push({
+      label: "答え始めるまでの間",
+      value: d.avgLatencySec.toFixed(1),
+      unit: "秒",
+      note: "目安 1〜3秒",
+    });
+  tiles.push({
+    label: "話の途中の長い沈黙",
+    value: String(d.longPauses),
+    unit: "回",
+    note: "3秒以上止まった回数",
+  });
+  if (d.intonation != null)
+    tiles.push({
+      label: "声の強弱（抑揚）",
+      value: d.intonation < 25 ? "小さめ" : d.intonation > 75 ? "大きめ" : "ちょうど良い",
+      unit: "",
+      note: `${d.intonation} / 100`,
+    });
+  if (d.gazePercent != null)
+    tiles.push({
+      label: "目線（画面を見て話せた割合）",
+      value: String(d.gazePercent),
+      unit: "%",
+      note: "目安 70%以上",
+    });
+  const tips = deliveryAdvice(d);
+  return (
+    <div>
+      <p style={{ color: "#5CC8FF", fontSize: 12, fontWeight: 700, marginBottom: 6 }}>
+        間・声・目線
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        {tiles.map((t) => (
+          <div
+            key={t.label}
+            className="rounded-xl p-3"
+            style={{ background: "#141414", border: "1px solid #262626" }}
+          >
+            <p style={{ color: "#888", fontSize: 11 }}>{t.label}</p>
+            <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 800 }}>
+              {t.value}
+              {t.unit && <span style={{ fontSize: 11, marginLeft: 2 }}>{t.unit}</span>}
+            </p>
+            <p style={{ color: "#666", fontSize: 10.5 }}>{t.note}</p>
+          </div>
+        ))}
+      </div>
+      {d.wave.length > 4 && (
+        <div
+          className="mt-2 rounded-xl p-3"
+          style={{ background: "#141414", border: "1px solid #262626" }}
+        >
+          <p style={{ color: "#888", fontSize: 11, marginBottom: 6 }}>
+            声の波（答えている間の声の大きさ）
+          </p>
+          <svg
+            viewBox={`0 0 ${d.wave.length * 3} 40`}
+            className="h-10 w-full"
+            preserveAspectRatio="none"
+          >
+            {d.wave.map((v, i) => {
+              const h = Math.max(1.5, (v / 100) * 38);
+              return (
+                <rect key={i} x={i * 3} y={20 - h / 2} width={2} height={h} rx={1} fill="#5CC8FF" />
+              );
+            })}
+          </svg>
+        </div>
+      )}
+      {tips.length > 0 && (
+        <ul className="mt-2 list-disc pl-5">
+          {tips.map((t, i) => (
+            <li key={i} style={{ color: "#CCCCCC", fontSize: 12, lineHeight: 1.7 }}>
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function RecruiterViewPreview({ view }: { view: NonNullable<PracticeFeedback["recruiter_view"]> }) {
   return (
     <details

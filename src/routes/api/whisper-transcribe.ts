@@ -105,7 +105,8 @@ export const Route = createFileRoute("/api/whisper-transcribe")({
           whisperForm.append("model", "whisper-1");
           whisperForm.append("language", "ja");
           // 句読点つきの自然な日本語で書き起こしてもらうためのヒント
-          whisperForm.append("prompt", "就職・転職の面接での受け答えです。");
+          // 「えー」「あの」も消さずに書き起こしてもらう（話し方の採点で数える）
+          whisperForm.append("prompt", "えーと、就職・転職の面接での、あの、受け答えです。");
 
           const whisperRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
             method: "POST",

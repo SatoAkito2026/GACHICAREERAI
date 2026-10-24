@@ -1883,6 +1883,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      practice_rank: {
+        Args: { p_mode: string; p_score: number };
+        Returns: { total: number; above: number }[];
+      };
       spend_coins_for_unlock: {
         Args: {
           p_company: string;

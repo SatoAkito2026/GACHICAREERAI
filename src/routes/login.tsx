@@ -16,12 +16,14 @@ const SHOW_SCHOOL_AND_ACTOR = false;
 export const Route = createFileRoute("/login")({
   validateSearch: (
     s: Record<string, unknown>,
-  ): { next?: string; mode?: "business"; ref?: string } => ({
+  ): { next?: string; mode?: "business"; ref?: string; signup?: "1" } => ({
     ...(typeof s.next === "string" && s.next.startsWith("/") ? { next: s.next } : {}),
     // 友だち紹介のリンクから来たとき
     ...(typeof s.ref === "string" && /^[A-Za-z0-9]{4,12}$/.test(s.ref) ? { ref: s.ref } : {}),
     // 企業として新規登録し、確認メールのリンクから戻ってきたとき
     ...(s.mode === "business" ? { mode: "business" as const } : {}),
+    // トップページの「無料ではじめる」から来たとき（はじめから新規登録の画面にする）
+    ...(s.signup === "1" || s.signup === 1 ? { signup: "1" as const } : {}),
   }),
   component: LoginPage,
 });
@@ -45,10 +47,11 @@ const SCHOOL_TYPES = [
 function LoginPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const { next, mode: searchMode, ref } = Route.useSearch();
+  const { next, mode: searchMode, ref, signup } = Route.useSearch();
   const { setMode, isBusiness, loading: modeLoading } = useMode();
   // 紹介リンクから来た人は、はじめから新規登録の画面にする
-  const [authMode, setAuthMode] = useState<"login" | "signup">(ref ? "signup" : "login");
+  const [authMode, setAuthMode] = useState<"login" | "signup">(ref || signup ? "signup" : "login");
+  const [showPassword, setShowPassword] = useState(false);
 
   // 紹介コードを、登録が終わるまで覚えておく（登録後の /private/welcome で使う）
   useEffect(() => {
@@ -573,10 +576,18 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-foreground">ガチキャリAI</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {authMode === "login" ? "ログイン" : "新規登録"}
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/icons/icon-192.png" alt="" className="h-8 w-8 rounded-lg" />
+          <span className="text-xl font-semibold text-foreground">ガチキャリAI</span>
+        </Link>
+        <p className="mt-3 text-[17px] text-foreground" style={{ fontWeight: 700 }}>
+          {authMode === "login" ? "ログイン" : "無料で新規登録"}
         </p>
+        {authMode === "signup" && (
+          <p className="mt-1 text-[12.5px] leading-relaxed" style={{ color: "#AAAAAA" }}>
+            メールアドレスとパスワードだけで、1分で始められます。クレジットカードはいりません。
+          </p>
+        )}
         {ref && (
           <p
             className="mt-3 rounded-lg px-3 py-2 text-[12px]"
@@ -588,8 +599,8 @@ function LoginPage() {
 
         <div className="mt-5 flex gap-2">
           {[
-            { key: "private" as LoginMode, label: "👤 個人・受験生" },
-            { key: "business" as LoginMode, label: "🏢 企業・学校" },
+            { key: "private" as LoginMode, label: "👤 個人の方" },
+            { key: "business" as LoginMode, label: "🏢 企業の方" },
           ].map((opt) => {
             const active = loginMode === opt.key;
             return (
@@ -605,14 +616,14 @@ function LoginPage() {
                         color: "#0F0F0F",
                         fontWeight: 600,
                         borderRadius: 8,
-                        padding: "8px 20px",
+                        padding: "8px 10px",
                       }
                     : {
                         background: "#2A2A2A",
                         color: "#888888",
                         border: "1px solid #333",
                         borderRadius: 8,
-                        padding: "8px 20px",
+                        padding: "8px 10px",
                       }
                 }
               >
@@ -622,7 +633,13 @@ function LoginPage() {
           })}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <p className="mt-2 text-[11.5px]" style={{ color: "#777" }}>
+          {loginMode === "private"
+            ? "就活・転職・入試の面接を練習したい方"
+            : "人材を探したい・AI面接を使いたい採用担当の方"}
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
             <label className="text-sm font-medium text-foreground">メールアドレス</label>
             <input
@@ -635,14 +652,26 @@ function LoginPage() {
           </div>
           <div>
             <label className="text-sm font-medium text-foreground">パスワード</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
+            <div className="relative mt-1">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={authMode === "signup" ? "6文字以上" : ""}
+                autoComplete={authMode === "signup" ? "new-password" : "current-password"}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 pr-14 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[12px]"
+                style={{ color: "#888" }}
+              >
+                {showPassword ? "隠す" : "表示"}
+              </button>
+            </div>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           {info && <p className="text-sm text-green-600">{info}</p>}
@@ -687,7 +716,7 @@ function LoginPage() {
             disabled={submitting || (authMode === "signup" && !agreedToTerms)}
             className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {submitting ? "処理中..." : authMode === "login" ? "ログイン" : "登録する"}
+            {submitting ? "処理中..." : authMode === "login" ? "ログイン" : "無料で登録する"}
           </button>
         </form>
 
@@ -701,9 +730,12 @@ function LoginPage() {
           className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
         >
           {authMode === "login"
-            ? "アカウントをお持ちでない方はこちら"
+            ? "はじめての方は こちらから無料登録"
             : "すでにアカウントをお持ちの方はこちら"}
         </button>
+        <Link to="/" className="mt-3 block text-center text-[12px]" style={{ color: "#666" }}>
+          ガチキャリAIとは？（トップページへ）
+        </Link>
       </div>
     </div>
   );
