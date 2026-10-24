@@ -900,6 +900,8 @@ function LiveScreen({
   const screenChunksRef = useRef<Blob[]>([]);
   const practiceRecorderRef = useRef<MediaRecorder | null>(null);
   const practiceChunksRef = useRef<Blob[]>([]);
+  /** 面接官の締めのあいさつが終わった時点で止めた録画（結果を作っている間は撮らない） */
+  const recordedBlobRef = useRef<Promise<Blob | null> | null>(null);
   const voice = getAvatarVoice();
   const greetedRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1201,6 +1203,15 @@ function LiveScreen({
           };
           setTimeout(checkSpeaking, 500);
         });
+        // 面接官が言い終わったら、ここで録画を止める（結果を作っている間は撮らない）
+        if (practiceRecorderRef.current) {
+          recordedBlobRef.current = stopPracticeRecorder(
+            practiceRecorderRef.current,
+            practiceChunksRef.current,
+          );
+          practiceRecorderRef.current = null;
+          setIsRecording(false);
+        }
         // 総評生成・保存を待ってから画面遷移（確実に保存させる）
         setIsSavingResult(true);
         await saveInterview(false, withAi);
@@ -1317,14 +1328,14 @@ function LiveScreen({
       });
 
       // 個人の練習で録画していれば、Storage へ直接アップロードする
-      if (practiceRecorderRef.current && !isAbandoned) {
+      if ((practiceRecorderRef.current || recordedBlobRef.current) && !isAbandoned) {
         try {
           const saved = (await saveRes.json().catch(() => ({}))) as { interviewId?: string };
-          const blob = await stopPracticeRecorder(
-            practiceRecorderRef.current,
-            practiceChunksRef.current,
-          );
+          const blob = recordedBlobRef.current
+            ? await recordedBlobRef.current
+            : await stopPracticeRecorder(practiceRecorderRef.current!, practiceChunksRef.current);
           practiceRecorderRef.current = null;
+          recordedBlobRef.current = null;
           if (
             saved.interviewId &&
             blob &&
