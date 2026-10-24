@@ -52,7 +52,7 @@ cta: no
     <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / お問い合わせ</nav>
     <p class="eyebrow">Contact</p>
     <h1>お問い合わせ</h1>
-    <p class="lead">ガチキャリAIの資料請求、ガチキャリやポスポス（会計システム）のご相談、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
+    <p class="lead">ガチキャリAIの資料請求、ガチキャリやポスポス（POSレジ）のご相談、採用へのご応募など、お気軽にどうぞ。内容を確認のうえ、担当者からご連絡します。</p>
   </div>
 </section>
 
@@ -80,7 +80,7 @@ cta: no
         <ul class="topics" id="topics">
           <li><button type="button" data-topic="gachicareer-ai" aria-pressed="false">ガチキャリAIの資料請求・導入</button></li>
           <li><button type="button" data-topic="gachicareer" aria-pressed="false">ガチキャリ（キャリアコミュニティ）</button></li>
-          <li><button type="button" data-topic="pos" aria-pressed="false">ポスポス（会計システム）</button></li>
+          <li><button type="button" data-topic="pos" aria-pressed="false">ポスポス（POSレジ）</button></li>
           <li><button type="button" data-topic="recruit" aria-pressed="false">採用への応募</button></li>
           <li><button type="button" data-topic="other" aria-pressed="false">その他</button></li>
         </ul>
@@ -142,7 +142,7 @@ cta: no
   var subject=document.getElementById('f-subject');
   var status=document.getElementById('form-status');
   var submit=document.getElementById('f-submit');
-  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（キャリアコミュニティ）への参加について',pos:'ポスポス（会計システム）について',recruit:'採用への応募',other:''};
+  var LABELS={'gachicareer-ai':'ガチキャリAIの資料請求・導入について',gachicareer:'ガチキャリ（キャリアコミュニティ）への参加について',pos:'ポスポス（POSレジ）について',recruit:'採用への応募',other:''};
   var topic='';
   var pick=function(key,fill){
     topic=LABELS.hasOwnProperty(key)?key:'';
