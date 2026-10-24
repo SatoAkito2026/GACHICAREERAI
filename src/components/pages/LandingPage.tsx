@@ -411,7 +411,7 @@ function Pricing() {
                   className="absolute -top-3 left-6 rounded-full px-3 py-1 text-[11px]"
                   style={{ background: ACCENT, color: "#0F0F0F", fontWeight: 800 }}
                 >
-                  いちばん練習できる
+                  おすすめ
                 </span>
               )}
               <p className="text-[15px]" style={{ fontWeight: 800 }}>
