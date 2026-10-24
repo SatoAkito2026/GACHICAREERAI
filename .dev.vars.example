@@ -15,3 +15,9 @@ STRIPE_WEBHOOK_SECRET=
 
 # メール送信
 RESEND_API_KEY=
+
+# プッシュ通知の秘密鍵（公開鍵は wrangler.jsonc の VAPID_PUBLIC_KEY）
+VAPID_PRIVATE_KEY=
+
+# TikTok 動画づくり（GitHub Actions との合言葉。GitHub の Secrets にも同じ値）
+STUDIO_SECRET=

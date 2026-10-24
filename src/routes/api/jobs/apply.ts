@@ -7,6 +7,7 @@
  * そのままメッセージでやりとりできる（本人が応募した＝その企業に見せることに同意した、とみなす）。
  * 運営は推薦・仲介をしない。料金はかからない（企業側も、今は求人掲載が無料）。
  */
+import { notify } from "@/lib/notify";
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyApiUser } from "@/lib/api-auth";
 import {
@@ -84,12 +85,21 @@ export const Route = createFileRoute("/api/jobs/apply")({
         }
 
         // 企業が評価を見られるようにする（0円。チケットの売上には数えない）
-        await supabase
+        //    応募した企業には、公開中の結果をすべて見せる（interview_id が空＝すべて）
+        const { data: allAccess } = await supabase
           .from("profile_unlocks")
-          .upsert(
-            { company_user_id: job.company_user_id, candidate_user_id: auth.userId, amount: 0 },
-            { onConflict: "company_user_id,candidate_user_id", ignoreDuplicates: true },
-          );
+          .select("id")
+          .eq("company_user_id", job.company_user_id)
+          .eq("candidate_user_id", auth.userId)
+          .is("interview_id", null)
+          .maybeSingle();
+        if (!allAccess) {
+          await supabase.from("profile_unlocks").insert({
+            company_user_id: job.company_user_id,
+            candidate_user_id: auth.userId,
+            amount: 0,
+          });
+        }
 
         // そのままメッセージでやりとりできるようにする
         const intro = `【求人「${job.title}」への応募】${message ? `\n${message}` : ""}`;
@@ -119,6 +129,12 @@ export const Route = createFileRoute("/api/jobs/apply")({
             .insert({ request_id: contact.id, sender_user_id: auth.userId, body: intro });
         }
 
+        await notify(supabase, job.company_user_id, {
+          kind: "application",
+          title: `求人「${job.title}」に応募がありました`,
+          body: `${name} さんから応募がありました。`,
+          link: "/business/company/jobs",
+        });
         await sendNotice(
           await getUserEmail(supabase, job.company_user_id),
           `求人「${job.title}」に応募がありました`,

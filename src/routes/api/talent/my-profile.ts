@@ -42,10 +42,13 @@ export const Route = createFileRoute("/api/talent/my-profile")({
           .select("*")
           .eq("user_id", auth.userId)
           .maybeSingle();
-        const { count: unlocks } = await supabase
+        // 見た企業の数（同じ企業が結果を複数買っても1社）
+        const { data: unlockRows } = await supabase
           .from("profile_unlocks")
-          .select("id", { count: "exact", head: true })
-          .eq("candidate_user_id", auth.userId);
+          .select("company_user_id")
+          .eq("candidate_user_id", auth.userId)
+          .limit(5000);
+        const unlocks = new Set((unlockRows ?? []).map((u) => u.company_user_id)).size;
         // スマホのホーム画面に出す「前回の点数」
         const { data: last } = await supabase
           .from("interviews")

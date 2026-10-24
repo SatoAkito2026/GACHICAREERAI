@@ -20,9 +20,7 @@ type Person = {
   displayName: string;
   headline: string | null;
   desiredJobs: string | null;
-  overview: string;
-  competencyAverage: number | null;
-  interviewCount: number;
+  boughtResults: number | null;
   purchasedAt: string;
   viaApplication: boolean;
   lastPracticeAt: string | null;
@@ -55,7 +53,7 @@ function PurchasedPage() {
       <PageFrame
         width={1000}
         title="購入した人材"
-        subtitle="チケットを買った人と、求人に応募してきた人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
+        subtitle="コインで見た人と、求人に応募してきた人の一覧です。開くと、面接ごとの採用担当者向けの評価・会話・録画（本人が許可した場合）を見られます。"
       >
         {!people ? (
           <Loading />
@@ -71,7 +69,7 @@ function PurchasedPage() {
         ) : people.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-10">
             <p className="text-[14px]" style={{ color: C.muted }}>
-              まだチケットを買った人はいません。
+              まだコインで見た人はいません。
             </p>
             <Link to="/business/company/talent" style={{ color: C.accent, fontSize: 14 }}>
               人材を探す →
@@ -94,16 +92,8 @@ function PurchasedPage() {
                       {p.headline || ""}
                     </span>
                   </p>
-                  {p.overview && (
-                    <p
-                      className="mt-1 line-clamp-2 text-[13px]"
-                      style={{ color: C.sub, lineHeight: 1.7 }}
-                    >
-                      {p.overview}
-                    </p>
-                  )}
                   <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
-                    {p.desiredJobs ? `希望：${p.desiredJobs} ・ ` : ""}面接 {p.interviewCount}回 ・
+                    {p.desiredJobs ? `希望：${p.desiredJobs} ・ ` : ""}
                     最後の練習 {date(p.lastPracticeAt)} ・ {p.viaApplication ? "応募" : "購入"}{" "}
                     {date(p.purchasedAt)}
                   </p>
@@ -111,11 +101,11 @@ function PurchasedPage() {
                 <div className="flex shrink-0 items-center gap-3">
                   <StatusBadge status={p.contactStatus} />
                   <div className="text-right">
-                    <p style={{ color: C.accent, fontSize: 20, fontWeight: 800, lineHeight: 1 }}>
-                      {p.competencyAverage?.toFixed(1) ?? "-"}
+                    <p style={{ color: C.accent, fontSize: 18, fontWeight: 800, lineHeight: 1 }}>
+                      {p.boughtResults === null ? "すべて" : `${p.boughtResults}件`}
                     </p>
                     <p className="text-[10px]" style={{ color: C.muted }}>
-                      力の平均
+                      見られる結果
                     </p>
                   </div>
                 </div>

@@ -1,15 +1,21 @@
 /**
  * 企業向け：1回分の模擬面接の評価。
  * 本人向けの練習アドバイス（点数・改善点・模範回答）は出さず、
- * 7つの力（根拠つき）と採用担当向けの見立て、会話・録画だけを見せる。
+ * 7つの評価（根拠つき）と採用担当向けの見立て、会話・録画だけを見せる。
  */
 import { useState } from "react";
 import { C, CompetencyBars, EvidenceQuote, Tag } from "@/components/talent/TalentUI";
+import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
+import type { SpeechStats } from "@/lib/speech-stats";
+import type { DeliveryStats } from "@/lib/delivery-tracker";
+import { DeliveryCard, SpeechStatsCard, VerdictCard } from "@/components/talent/ResultExtras";
 
 export type CompanyInterview = {
   id: string;
   date: string;
   jobType: string | null;
+  /** 本人が企業への公開に選んでいるか（本人の画面だけで使う） */
+  shown?: boolean;
   recordingUrl: string | null;
   competencies: {
     key: string;
@@ -26,6 +32,18 @@ export type CompanyInterview = {
     suggestedQuestions: string[];
   } | null;
   transcript: { q: string; a: string }[];
+  /** 話し方・間・声・目線（古い面接には無い） */
+  speechStats?: SpeechStats | null;
+  delivery?: DeliveryStats | null;
+  /** 練習の設定（古い面接には無い） */
+  settings?: {
+    avatar_style: string | null;
+    interview_type: string | null;
+    max_minutes: number | null;
+    job_type: string | null;
+    target_company: string | null;
+    custom_questions: string[];
+  } | null;
 };
 
 function competencyAverage(iv: CompanyInterview): string | null {
@@ -57,11 +75,13 @@ export function CompanyInterviewBlock({
           {iv.recordingUrl && <Tag color={C.accent}>録画</Tag>}
         </span>
         <span style={{ color: C.accent, fontWeight: 700, fontSize: 13 }}>
-          {avg ? `力の平均 ${avg} / 5` : "評価なし"}
+          {avg ? `評価の平均 ${avg} / 5` : "評価なし"}
         </span>
       </button>
       {open && (
         <div className="flex flex-col gap-4 px-4 pb-4">
+          {avg && <VerdictCard avg={Number(avg)} forCompany />}
+          {iv.settings && <SettingsRow settings={iv.settings} />}
           {iv.recordingUrl && (
             <video
               src={iv.recordingUrl}
@@ -105,8 +125,18 @@ export function CompanyInterviewBlock({
             </div>
           ) : (
             <p className="text-[12px]" style={{ color: C.muted }}>
-              この回は、採用担当者向けの見立てを作る前の練習です（下の7つの力と会話をご覧ください）。
+              この回は、採用担当者向けの見立てを作る前の練習です（下の7つの評価と会話をご覧ください）。
             </p>
+          )}
+
+          {(iv.speechStats || iv.delivery) && (
+            <div className="flex flex-col gap-3 rounded-lg p-3" style={{ background: C.card2 }}>
+              <p className="text-[12px]" style={{ color: C.accent, fontWeight: 700 }}>
+                話し方・間・声・目線（面接中に測った数字）
+              </p>
+              {iv.speechStats && <SpeechStatsCard stats={iv.speechStats} />}
+              {iv.delivery && <DeliveryCard d={iv.delivery} />}
+            </div>
           )}
 
           {iv.competencies.some((c) => c.score !== null) && (
@@ -149,18 +179,21 @@ export function CompanyInterviewBlock({
               </button>
               {showTranscript && (
                 <div className="mt-2 flex flex-col gap-2">
-                  {iv.transcript.map((t, j) => (
-                    <div
-                      key={j}
-                      className="rounded-lg p-3 text-[13px]"
-                      style={{ background: C.card2, lineHeight: 1.7 }}
-                    >
-                      <p style={{ color: C.muted }}>面接官：{t.q}</p>
-                      <p className="mt-1" style={{ color: C.text }}>
-                        回答：{t.a || "（回答なし）"}
-                      </p>
-                    </div>
-                  ))}
+                  {iv.transcript
+                    // 最後のあいさつだけの回（答えがない）は出さない
+                    .filter((t, j, all) => t.a || j < all.length - 1)
+                    .map((t, j) => (
+                      <div
+                        key={j}
+                        className="rounded-lg p-3 text-[13px]"
+                        style={{ background: C.card2, lineHeight: 1.7 }}
+                      >
+                        <p style={{ color: C.muted }}>面接官：{t.q}</p>
+                        <p className="mt-1" style={{ color: C.text }}>
+                          回答：{t.a || "（回答なし）"}
+                        </p>
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
@@ -196,6 +229,41 @@ function ListBox({ title, items }: { title: string; items: string[] }) {
           <li key={i}>{x}</li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function SettingsRow({ settings }: { settings: NonNullable<CompanyInterview["settings"]> }) {
+  const tags = [
+    settings.job_type ? `職種：${settings.job_type}` : null,
+    settings.avatar_style
+      ? `面接官：${AVATAR_STYLE_LABELS[settings.avatar_style] ?? settings.avatar_style}`
+      : null,
+    settings.max_minutes ? `${settings.max_minutes}分まで` : null,
+    settings.target_company ? `応募先の想定：${settings.target_company}` : null,
+  ].filter(Boolean) as string[];
+  return (
+    <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: C.card2 }}>
+      <p className="text-[12px]" style={{ color: C.sub, fontWeight: 700 }}>
+        この練習の設定
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {tags.map((t) => (
+          <Tag key={t}>{t}</Tag>
+        ))}
+      </div>
+      {settings.custom_questions.length > 0 && (
+        <div>
+          <p className="text-[12px]" style={{ color: C.muted }}>
+            本人が「聞いてほしい」と設定した質問
+          </p>
+          <ul className="list-disc pl-5 text-[12px]" style={{ color: C.text, lineHeight: 1.7 }}>
+            {settings.custom_questions.map((q, i) => (
+              <li key={i}>{q}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,11 @@
  * - 評価は面接での本人の発言（引用）を根拠にする。引用は実際の発言に含まれるものだけを残す
  * - 企業に見せる評価に、年齢・性別・出身地など選考に使うべきでない情報は含めない
  */
+import { coinExpiryFrom } from "@/lib/coins";
+import type { SpeechStats } from "@/lib/speech-stats";
+import type { DeliveryStats } from "@/lib/delivery-tracker";
+import { normalizeJobType, practiceRule } from "@/lib/plan-rules";
+import { interviewAverage } from "@/lib/talent-score";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -123,6 +128,16 @@ ${COMPETENCIES.map((c) => `- ${c.key}: ${c.label}`).join("\n")}
  * 企業（採用担当）向けの見立て。本人向けの練習アドバイス（改善点・模範回答・点数）とは分けて作り、
  * 企業にはこちらだけを見せる。合否や推薦はしない（運営が推薦・仲介しないため）。
  */
+/** 練習の設定（save-interview.ts が interviews.practice_settings に保存する） */
+export type PracticeSettings = {
+  avatar_style: string | null;
+  interview_type: string | null;
+  max_minutes: number | null;
+  job_type: string | null;
+  target_company: string | null;
+  custom_questions: string[];
+};
+
 export type RecruiterView = {
   summary: string;
   strengths: { point: string; evidence: string[] }[];
@@ -185,15 +200,25 @@ export async function loadCompanyInterviews(
   supabase: SupabaseClient,
   candidateUserId: string,
   showRecording: boolean,
+  {
+    limit = 30,
+    onlyShown = true,
+    ids: onlyIds,
+  }: { limit?: number; onlyShown?: boolean; ids?: string[] } = {},
 ) {
-  const { data: interviews } = await supabase
+  let query = supabase
     .from("interviews")
-    .select("id, created_at, job_type, recording_path")
+    .select("id, created_at, job_type, recording_path, practice_settings, shown_to_companies")
     .eq("user_id", candidateUserId)
     .eq("mode", "individual")
-    .neq("impression", "途中退出")
-    .order("created_at", { ascending: false })
-    .limit(10);
+    .neq("impression", "途中退出");
+  // 企業に見えるのは、本人が公開に選んだ面接だけ
+  if (onlyShown) query = query.eq("shown_to_companies", true);
+  // 企業が買った結果だけに絞る
+  if (onlyIds) {
+    query = query.in("id", onlyIds.length ? onlyIds : ["00000000-0000-0000-0000-000000000000"]);
+  }
+  const { data: interviews } = await query.order("created_at", { ascending: false }).limit(limit);
   const ids = (interviews ?? []).map((i) => i.id);
   if (ids.length === 0) return [];
   const [{ data: summaries }, { data: turns }] = await Promise.all([
@@ -222,15 +247,64 @@ export async function loadCompanyInterviews(
       id: iv.id,
       date: iv.created_at,
       jobType: iv.job_type,
+      shown: !!iv.shown_to_companies,
       recordingUrl,
       competencies: (f.competencies ?? []) as InterviewCompetency[],
       recruiterView: (f.recruiter_view ?? null) as RecruiterView | null,
+      settings: (iv.practice_settings ?? null) as PracticeSettings | null,
+      // 話し方（答えの長さ・言いよどみ）と、間・声・目線（面接中に測った数字）
+      speechStats: (f.speech_stats ?? null) as SpeechStats | null,
+      delivery: (f.delivery ?? null) as DeliveryStats | null,
       transcript: (turns ?? [])
         .filter((t) => t.interview_id === iv.id)
         .map((t) => ({ q: t.question, a: t.memo })),
     });
   }
   return details;
+}
+
+/** 企業に公開できる面接の結果の数（プランの「結果の数」と同じ。null は上限なし） */
+export async function shownInterviewLimit(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<number | null> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, plan_expires_at")
+    .eq("id", userId)
+    .maybeSingle();
+  const expired = profile?.plan_expires_at
+    ? new Date(profile.plan_expires_at).getTime() < Date.now()
+    : false;
+  return practiceRule(expired ? "free" : profile?.plan).results;
+}
+
+/** いま企業に公開している面接の数 */
+export async function countShownInterviews(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<number> {
+  const { count } = await supabase
+    .from("interviews")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("mode", "individual")
+    .eq("shown_to_companies", true);
+  return count ?? 0;
+}
+
+/** 新しい面接は、公開の枠が空いていれば自動で公開に入れる（本人があとで外せる） */
+export async function autoShowNewInterview(
+  supabase: SupabaseClient,
+  userId: string,
+  interviewId: string,
+): Promise<void> {
+  const [limit, shown] = await Promise.all([
+    shownInterviewLimit(supabase, userId),
+    countShownInterviews(supabase, userId),
+  ]);
+  if (limit !== null && shown >= limit) return;
+  await supabase.from("interviews").update({ shown_to_companies: true }).eq("id", interviewId);
 }
 
 // ---- 人物まとめの作成 --------------------------------------------------------
@@ -251,6 +325,8 @@ async function loadPracticeFeedback(
     .eq("user_id", userId)
     .eq("mode", "individual")
     .neq("impression", "途中退出")
+    // 人物まとめも、企業に公開している面接だけから作る
+    .eq("shown_to_companies", true)
     .order("created_at", { ascending: false })
     .limit(20);
   const ids = (interviews ?? []).map((i) => i.id);
@@ -289,6 +365,41 @@ function aggregateCompetencies(rows: FeedbackRow[]): TalentSummary["competencies
       : null;
     return { key, label, score, evidence_count: evidenceCount, interviews: scores.length };
   });
+}
+
+/**
+ * 点数と面接の回数だけ、すぐに作り直す（AIは使わない）。
+ * 公開する面接を入れ替えたときに、回数などがすぐ合うようにする。文章は毎時の処理で作り直す。
+ */
+export async function recomputeSummaryScores(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<void> {
+  const rows = await loadPracticeFeedback(supabase, userId);
+  const { data: profile } = await supabase
+    .from("candidate_profiles")
+    .select("summary")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile) return;
+  const prev = (profile.summary ?? null) as TalentSummary | null;
+  const summary: TalentSummary | null =
+    rows.length === 0
+      ? null
+      : {
+          overview: prev?.overview ?? "",
+          strengths: prev?.strengths ?? [],
+          growth_areas: prev?.growth_areas ?? [],
+          work_style: prev?.work_style ?? "",
+          competencies: aggregateCompetencies(rows),
+          score_trend: prev?.score_trend ?? [],
+          interview_count: rows.length,
+          generated_at: prev?.generated_at ?? new Date().toISOString(),
+        };
+  await supabase
+    .from("candidate_profiles")
+    .update({ summary, interview_count: rows.length, summary_stale: rows.length > 0 })
+    .eq("user_id", userId);
 }
 
 /**
@@ -448,16 +559,187 @@ export async function runTalentSummaryJob(): Promise<void> {
   }
 }
 
-// ---- チケット・メール -------------------------------------------------------
+// ---- コイン・ポイント・メール -------------------------------------------------
 
-/** 企業が1人分のプロフィール（録画・名前・詳しい評価）を見るためのチケットの値段（円・税込） */
-export function getTicketPrice(): number {
-  const n = Number(process.env.TALENT_TICKET_PRICE_JPY);
-  return Number.isFinite(n) && n >= 100 ? Math.round(n) : 10000;
+/** 企業の使えるコイン（期限内の残り）と、いちばん近い期限 */
+export async function getCoinBalance(
+  supabase: SupabaseClient,
+  companyUserId: string,
+): Promise<{ balance: number; nextExpiry: string | null }> {
+  const { data } = await supabase
+    .from("coin_lots")
+    .select("coins_remaining, expires_at")
+    .eq("company_user_id", companyUserId)
+    .gt("expires_at", new Date().toISOString())
+    .gt("coins_remaining", 0)
+    .order("expires_at", { ascending: true });
+  const rows = data ?? [];
+  return {
+    balance: rows.reduce((n, r) => n + r.coins_remaining, 0),
+    nextExpiry: rows[0]?.expires_at ?? null,
+  };
+}
+
+/**
+ * 企業が持っている閲覧権（人ごと）。
+ * all＝その人の結果をすべて見られる（これまでの購入・求人への応募）、ids＝結果ごとに買ったもの。
+ * どれか1つでもあれば、名前を見て面談を申し込める。
+ */
+export type UnlockAccess = { all: boolean; ids: Set<string>; firstAt: string; paid: boolean };
+
+export async function getUnlockAccess(
+  supabase: SupabaseClient,
+  companyUserId: string,
+  candidateUserIds: string[],
+): Promise<Map<string, UnlockAccess>> {
+  const access = new Map<string, UnlockAccess>();
+  if (candidateUserIds.length === 0) return access;
+  const { data } = await supabase
+    .from("profile_unlocks")
+    .select("candidate_user_id, interview_id, created_at, amount")
+    .eq("company_user_id", companyUserId)
+    .in("candidate_user_id", candidateUserIds)
+    .order("created_at", { ascending: true })
+    .limit(5000);
+  for (const r of data ?? []) {
+    const a = access.get(r.candidate_user_id) ?? {
+      all: false,
+      ids: new Set<string>(),
+      firstAt: r.created_at,
+      paid: false,
+    };
+    if (r.interview_id) a.ids.add(r.interview_id);
+    else a.all = true;
+    if (r.amount > 0) a.paid = true;
+    access.set(r.candidate_user_id, a);
+  }
+  return access;
+}
+
+export function canSeeInterview(a: UnlockAccess | undefined, interviewId: string): boolean {
+  return !!a && (a.all || a.ids.has(interviewId));
+}
+
+/** 企業の一覧・詳細に出す、公開中の面接1回分の要約（名前・会話・録画は入れない） */
+export type ResultCard = {
+  id: string;
+  userId: string;
+  date: string;
+  jobType: string | null;
+  avatarStyle: string | null;
+  overview: string;
+  strengths: string[];
+  competencies: { key: string; label: string; score: number | null }[];
+  average: number | null;
+  hasRecording: boolean;
+};
+
+/** 公開中の面接を、企業向けの要約にして返す（新しい順） */
+export async function loadShownResults(
+  supabase: SupabaseClient,
+  userIds: string[],
+  limit = 2000,
+): Promise<ResultCard[]> {
+  if (userIds.length === 0) return [];
+  const { data: interviews } = await supabase
+    .from("interviews")
+    .select("id, user_id, created_at, job_type, recording_path, practice_settings")
+    .in("user_id", userIds)
+    .eq("mode", "individual")
+    .neq("impression", "途中退出")
+    .eq("shown_to_companies", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  const ids = (interviews ?? []).map((i) => i.id);
+  if (ids.length === 0) return [];
+  const { data: summaries } = await supabase
+    .from("interview_summaries")
+    .select("interview_id, practice_feedback")
+    .in("interview_id", ids);
+  const fb = new Map((summaries ?? []).map((s: any) => [s.interview_id, s.practice_feedback]));
+  return (interviews ?? []).map((iv) => {
+    const f = (fb.get(iv.id) ?? {}) as any;
+    const comps = ((f.competencies ?? []) as InterviewCompetency[]).map((c) => ({
+      key: c.key,
+      label: c.label,
+      score: typeof c.score === "number" ? c.score : null,
+    }));
+    const rv = (f.recruiter_view ?? null) as RecruiterView | null;
+    const avg = interviewAverage(comps);
+    return {
+      id: iv.id,
+      userId: iv.user_id,
+      date: iv.created_at,
+      jobType: normalizeJobType(iv.job_type) || null,
+      avatarStyle: (iv.practice_settings as PracticeSettings | null)?.avatar_style ?? null,
+      overview: rv?.summary ?? "",
+      strengths: (rv?.strengths ?? []).map((x) => x.point).slice(0, 3),
+      competencies: comps,
+      average: avg === null ? null : Math.round(avg * 10) / 10,
+      hasRecording: !!iv.recording_path,
+    };
+  });
+}
+
+/** コインで見られた回数（応募で見られた0円の分は数えない）。値段の「人気」の上乗せに使う */
+export async function getPaidViewCounts(
+  supabase: SupabaseClient,
+  candidateUserIds: string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (candidateUserIds.length === 0) return counts;
+  const { data } = await supabase
+    .from("profile_unlocks")
+    .select("candidate_user_id")
+    .in("candidate_user_id", candidateUserIds)
+    .gt("amount", 0)
+    .limit(10000);
+  for (const r of data ?? []) {
+    counts.set(r.candidate_user_id, (counts.get(r.candidate_user_id) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** コインの購入（Stripe の支払い）を記録する。同じ支払いを二度記録しない */
+export async function recordCoinPackFromPaymentIntent(
+  supabase: SupabaseClient,
+  pi: {
+    id: string;
+    status: string;
+    amount_received?: number | null;
+    created?: number;
+    metadata?: Record<string, string> | null;
+  },
+): Promise<{ isNew: boolean } | null> {
+  const m = pi.metadata ?? {};
+  if (pi.status !== "succeeded" || m.kind !== "coin_pack") return null;
+  const coins = Number(m.coins);
+  if (!m.company_user_id || !Number.isFinite(coins) || coins <= 0) return null;
+  const purchasedAt = pi.created ? new Date(pi.created * 1000) : new Date();
+  const { error } = await supabase.from("coin_lots").insert({
+    company_user_id: m.company_user_id,
+    coins_total: coins,
+    coins_remaining: coins,
+    amount_jpy: pi.amount_received ?? 0,
+    stripe_payment_intent_id: pi.id,
+    purchased_at: purchasedAt.toISOString(),
+    expires_at: coinExpiryFrom(purchasedAt).toISOString(),
+  });
+  if (error && error.code !== "23505") {
+    console.error("[talent] coin lot insert failed", error);
+    return null;
+  }
+  return { isNew: !error };
+}
+
+/** 本人のポイント残高（1ポイント＝1円） */
+export async function getPointBalance(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { data } = await supabase.from("point_ledger").select("points").eq("user_id", userId);
+  return (data ?? []).reduce((n, r) => n + r.points, 0);
 }
 
 export function appUrl(): string {
-  return process.env.APP_URL || "https://interview-copilot-ai.akitogroup.jp";
+  return process.env.APP_URL || "https://gachicareer-ai.akitogroup.jp";
 }
 
 export async function getUserEmail(
@@ -572,6 +854,7 @@ export async function recordUnlockFromPaymentIntent(
     .select("id")
     .eq("company_user_id", m.company_user_id)
     .eq("candidate_user_id", m.candidate_user_id)
+    .is("interview_id", null)
     .maybeSingle();
   if (before)
     return { candidateUserId: m.candidate_user_id, companyUserId: m.company_user_id, isNew: false };
@@ -596,6 +879,13 @@ export async function notifyUnlocked(
   companyUserId: string,
 ): Promise<void> {
   const company = await getCompanyProfile(supabase, companyUserId);
+  const { notify } = await import("@/lib/notify");
+  await notify(supabase, candidateUserId, {
+    kind: "unlocked",
+    title: "企業があなたの面接結果を見ました",
+    body: `${company?.company_name ?? "企業"} が、あなたの面接結果を詳しく見ました。`,
+    link: "/private/individual/offers",
+  });
   await sendNotice(
     await getUserEmail(supabase, candidateUserId),
     "企業があなたのプロフィールを詳しく見ています",

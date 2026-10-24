@@ -8,7 +8,7 @@
  *   （plan_expires_atはそのまま→期限到来でフロントがfreeに降格）
  *
  * Stripeダッシュボードで設定するWebhook URL:
- *   https://interview-copilot-ai.akitogroup.jp/api/stripe-webhook
+ *   https://gachicareer-ai.akitogroup.jp/api/stripe-webhook（旧URL interview-copilot-ai.akitogroup.jp でも届く）
  *
  * 設定するイベント:
  *   invoice.payment_succeeded
@@ -19,7 +19,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { notifyUnlocked, recordUnlockFromPaymentIntent } from "@/lib/talent";
+import {
+  notifyUnlocked,
+  recordCoinPackFromPaymentIntent,
+  recordUnlockFromPaymentIntent,
+} from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 
 function json(body: unknown, status = 200) {
@@ -164,6 +168,12 @@ export const Route = createFileRoute("/api/stripe-webhook")({
             // ─── 人材プロフィールの閲覧チケット（確認APIが呼ばれなかった場合の保険） ───
             case "payment_intent.succeeded": {
               const pi = event.data.object as Stripe.PaymentIntent;
+              // コインの購入（確認APIが呼ばれなかった場合の保険）
+              if (pi.metadata?.kind === "coin_pack") {
+                await recordCoinPackFromPaymentIntent(supabase, pi);
+                break;
+              }
+              // 以前のチケット（1人分）の支払い
               const result = await recordUnlockFromPaymentIntent(supabase, pi);
               if (result?.isNew) {
                 await notifyUnlocked(supabase, result.candidateUserId, result.companyUserId);

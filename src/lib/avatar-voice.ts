@@ -4,9 +4,11 @@
  * 再生前に音声全体を解析して口の動き（lipsync.ts）を作り、再生中の位置に合わせて返す。
  */
 import { analyzeSpeech, type MouthTrack, type VisemeShapes } from "@/lib/lipsync";
+import { timeStretch } from "@/lib/time-stretch";
 
-// 以前（Simli 利用時）と同じ話速・声の高さに揃える（24kHz を 14.7kHz 扱いで 16kHz 再生していた）
-const PLAYBACK_RATE = 16000 / 14700;
+// 面接官の声の速さ。声の高さは変えずに速くする（再生の速さを上げると声が高くなって聞き取りにくい）
+const VOICE_TEMPO = 1.5;
+const PLAYBACK_RATE = 1;
 
 export type MouthPose = {
   /** 口の開き（参考動画で測った比率。0 = 閉じている） */
@@ -67,7 +69,7 @@ export class AvatarVoice {
     const samples = Math.floor(pcm.byteLength / 2);
     const data = new Float32Array(samples);
     for (let i = 0; i < samples; i++) data[i] = view.getInt16(i * 2, true) / 32768;
-    return this.playSamples(data, sampleRate, rate);
+    return this.playSamples(timeStretch(data, sampleRate, VOICE_TEMPO), sampleRate, rate);
   }
 
   /** -1〜1 の音声データを再生し、再生し終わったら resolve する */

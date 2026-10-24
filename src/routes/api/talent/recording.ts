@@ -2,7 +2,9 @@
  * 練習面接（個人モード）の録画。本人がプロフィールで「録画を残す」を選んだときだけ使う。
  *
  * GET  /api/talent/recording?token=               → この面接を録画するか { record }
+ * POST /api/talent/recording { token, action: "choose", record } → 面接の前に本人が選んだ「録画する／しない」を保存する
  * POST /api/talent/recording { token, interviewId } → Supabase Storage へ直接アップロードするための署名付きURL
+ * POST /api/talent/recording { token, interviewId, action: "done" } → アップロードできたかを確かめて記録する
  *
  * 動画は Worker を通さずブラウザから Storage へ直接送る（Worker のリクエストサイズ上限を避けるため）。
  * 容量を守るため、1人あたり新しいものから RECORDINGS_PER_USER 本だけ残す。
@@ -43,7 +45,7 @@ export const Route = createFileRoute("/api/talent/recording")({
       POST: async ({ request }) => {
         const supabase = await serviceClient();
         if (!supabase) return jsonResponse({ error: "Server config missing" }, 500);
-        let body: { token?: unknown; interviewId?: unknown };
+        let body: { token?: unknown; interviewId?: unknown; action?: unknown };
         try {
           body = await request.json();
         } catch {
@@ -51,6 +53,28 @@ export const Route = createFileRoute("/api/talent/recording")({
         }
         const inv = await loadInvitation(supabase, String(body.token ?? ""));
         if (!inv) return jsonResponse({ error: "Invalid token" }, 403);
+
+        // 面接の前の選択（毎回必ず選ぶ）。選んだ内容は次の練習の初期値にもなる
+        if (body.action === "choose") {
+          const record = (body as { record?: unknown }).record === true;
+          const { data: row } = await supabase
+            .from("candidate_profiles")
+            .select("user_id")
+            .eq("user_id", inv.userId)
+            .maybeSingle();
+          if (row) {
+            await supabase
+              .from("candidate_profiles")
+              .update({ record_practice: record })
+              .eq("user_id", inv.userId);
+          } else {
+            await supabase
+              .from("candidate_profiles")
+              .insert({ user_id: inv.userId, record_practice: record });
+          }
+          return jsonResponse({ ok: true, record });
+        }
+
         if (!inv.record) return jsonResponse({ skipped: true });
 
         const { data: interview } = await supabase
@@ -65,6 +89,19 @@ export const Route = createFileRoute("/api/talent/recording")({
           Date.now() - new Date(interview.created_at).getTime() > 3 * 60 * 60 * 1000
         ) {
           return jsonResponse({ error: "Interview not found" }, 404);
+        }
+
+        const path = `practice/${inv.userId}/${interview.id}.webm`;
+
+        // アップロードが終わったら、実際にファイルがあるのを確かめてから「録画あり」にする
+        if (body.action === "done") {
+          const { data: files } = await supabase.storage
+            .from(RECORDING_BUCKET)
+            .list(`practice/${inv.userId}`, { search: `${interview.id}.webm` });
+          const file = (files ?? []).find((f) => f.name === `${interview.id}.webm`);
+          if (!file) return jsonResponse({ error: "録画が見つかりません" }, 404);
+          await supabase.from("interviews").update({ recording_path: path }).eq("id", interview.id);
+          return jsonResponse({ ok: true });
         }
 
         // 古い録画を消す（今回の分を含めて RECORDINGS_PER_USER 本まで）
@@ -90,7 +127,6 @@ export const Route = createFileRoute("/api/talent/recording")({
             );
         }
 
-        const path = `practice/${inv.userId}/${interview.id}.webm`;
         const { data: signed, error } = await supabase.storage
           .from(RECORDING_BUCKET)
           .createSignedUploadUrl(path, { upsert: true });
@@ -98,7 +134,6 @@ export const Route = createFileRoute("/api/talent/recording")({
           console.error("[talent/recording] signed url failed", error);
           return jsonResponse({ error: "Upload URL failed" }, 500);
         }
-        await supabase.from("interviews").update({ recording_path: path }).eq("id", interview.id);
         return jsonResponse({ path, uploadToken: signed.token });
       },
     },

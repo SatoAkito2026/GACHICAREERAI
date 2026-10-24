@@ -1,604 +1,979 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
-  LineChart,
-  Line,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { AdminModeSwitch } from "@/components/AdminModeSwitch";
 
 type NameCount = { name: string; count: number };
+type Daily = { date: string; count: number }[];
 
 type DashboardData = {
-  planCounts: Record<string, number>;
-  monthlyRevenue: number;
-  individualRevenue: number;
-  companyRevenue: number;
-  meteredInterviewsThisMonth: number;
-  signupTrend: { date: string; count: number }[];
-  totalUsers: number;
-  usageThisPeriod: Record<string, number>;
-  interviewsThisMonth: number;
-  estimatedMonthlyCostJpy: number;
-  estimatedProfitJpy: number;
-  jobTypeRanking: NameCount[];
-  schoolRanking: NameCount[];
-  prefectureRanking: NameCount[];
-  companyJobTypeRanking: NameCount[];
-  ageDistribution: NameCount[];
-  genderDistribution: NameCount[];
-  gradeDistribution: NameCount[];
-  weakSubjectRanking: NameCount[];
-  strongSubjectRanking: NameCount[];
-  rankDistribution: NameCount[];
-  featureAdoption: { name: string; count: number; rate: number }[];
-  retentionRate7d: number;
-  retentionRate30d: number;
-  note: string;
+  generatedAt: string;
+  money: {
+    revenue: number;
+    subscription: number;
+    coinSales: number;
+    coinSalesPrev: number;
+    meteredSales: number;
+    meteredCount: number;
+    meteredPrev: number;
+    aiCost: number;
+    pointsIssuedThisMonth: number;
+    profit: number;
+    unusedYen: number;
+    expiringYen: number;
+  };
+  growth: {
+    totalUsers: number;
+    individuals: number;
+    companies: number;
+    newThisMonth: number;
+    newPrevMonth: number;
+    paid: number;
+    lightCount: number;
+    proCount: number;
+    paidRate: number;
+    signupsDaily: Daily;
+    practicesDaily: Daily;
+  };
+  individual: {
+    funnel: NameCount[];
+    active7: number;
+    active30: number;
+    practicesThisMonth: number;
+    practicesPrevMonth: number;
+    perActive: number;
+    features: NameCount[];
+    jobRanking: NameCount[];
+  };
+  market: {
+    publicUsers: number;
+    shownResults: number;
+    unlocksThisMonth: number;
+    unlocksTotal: number;
+    coinsSpentThisMonth: number;
+    contacts: number;
+    acceptRate: number | null;
+    shownJobRanking: NameCount[];
+  };
+  company: {
+    companies: number;
+    meteredCompanies: number;
+    openJobs: number;
+    applicationsThisMonth: number;
+    applicationsPrevMonth: number;
+    buyingCompanies: number;
+    topCompanies: { name: string; coins: number; yen: number; results: number }[];
+  };
+  points: { issued: number; used: number; balance: number };
+  alerts: { pendingContactsOver3Days: number; staleSummaries: number; expiringYen: number };
 };
 
-const PLAN_LABELS: Record<string, string> = {
-  free: "無料",
-  individual_light: "個人ライト",
-  individual_pro: "個人プロ",
-  company_metered: "企業従量課金",
-  company_light: "企業ライト",
-  company_pro: "企業プロ",
+// 画面の色（アプリと同じ暗い背景＋黄緑のアクセント）
+const T = {
+  bg: "#0F0F0F",
+  card: "#1A1A1A",
+  border: "#2A2A2A",
+  grid: "#242424",
+  text: "#F0F0F0",
+  sub: "#BBBBBB",
+  muted: "#888888",
+  accent: "#C8FF00",
+  warn: "#FFB84D",
+  bad: "#FF6B6B",
 };
 
-const FEATURE_LABELS: Record<string, string> = {
-  chat_image_upload: "チャット画像送信",
-  doc_generation_resume: "履歴書生成",
-  doc_generation_statement_of_purpose: "志望理由書生成",
-  doc_generation_motivation_letter: "志望動機書生成",
-  doc_generation_self_pr: "自己PR生成",
-  doc_generation_es_review: "ES改稿",
-  doc_generation_essay_review: "小論文改稿",
-  self_analysis_basic: "自己分析(基本)",
-  self_analysis_detailed: "自己分析(詳細)",
-  daily_question_ai_generation: "今日の質問AI生成",
-};
-
-const RANK_COLORS: Record<string, string> = {
-  A: "#C8FF00",
-  B: "#7CD4FF",
-  C: "#FFB84D",
-  D: "#FF6B6B",
-};
-
-function fmtYen(n: number) {
-  return `¥${Math.round(n).toLocaleString("ja-JP")}`;
-}
-
-const cardStyle = { background: "#1A1A1A", border: "1px solid #2A2A2A", borderRadius: 16 } as const;
-
-function RankingList({ items }: { items: NameCount[] }) {
-  if (items.length === 0)
-    return <p style={{ color: "#666666", fontSize: 12 }}>まだデータがありません。</p>;
-  const max = items[0]?.count || 1;
-  return (
-    <div className="flex flex-col gap-2">
-      {items.map((item, i) => (
-        <div key={item.name} className="flex items-center gap-3">
-          <span style={{ color: "#666666", fontSize: 11, width: 16 }}>{i + 1}</span>
-          <span style={{ color: "#F0F0F0", fontSize: 12, width: 140, flexShrink: 0 }}>
-            {item.name}
-          </span>
-          <div className="flex-1 rounded-full" style={{ background: "#0F0F0F", height: 8 }}>
-            <div
-              className="rounded-full"
-              style={{ background: "#C8FF00", height: 8, width: `${(item.count / max) * 100}%` }}
-            />
-          </div>
-          <span style={{ color: "#999999", fontSize: 11, width: 28, textAlign: "right" }}>
-            {item.count}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const NAV_ITEMS = [
-  { key: "overview", label: "概要" },
-  { key: "individual", label: "個人・受験生分析" },
-  { key: "company", label: "企業分析" },
-  { key: "engagement", label: "エンゲージメント" },
-  { key: "talent", label: "人材・チケット" },
-] as const;
-type NavKey = (typeof NAV_ITEMS)[number]["key"];
+const yen = (n: number) => `¥${Math.round(n).toLocaleString("ja-JP")}`;
+const num = (n: number) => n.toLocaleString("ja-JP");
 
 export const Route = createFileRoute("/private/admin")({
   head: () => ({ meta: [{ title: "管理ダッシュボード｜ガチキャリAI" }] }),
   component: AdminDashboard,
 });
 
+const SECTIONS = [
+  { id: "money", label: "お金" },
+  { id: "growth", label: "伸び" },
+  { id: "individual", label: "個人" },
+  { id: "market", label: "人材の市場" },
+  { id: "company", label: "企業" },
+  { id: "points", label: "ポイント" },
+  { id: "sns", label: "SNS動画" },
+] as const;
+
 function AdminDashboard() {
   const { session, loading } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [forbidden, setForbidden] = useState(false);
+  const [error, setError] = useState("");
   const [fetching, setFetching] = useState(true);
-  const [navOpen, setNavOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<NavKey>("overview");
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!session) return;
-    (async () => {
-      try {
-        const res = await fetch(`/api/admin-dashboard-data?_t=${Date.now()}`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          cache: "no-store",
-        });
-        if (res.status === 403) {
-          setForbidden(true);
-          return;
-        }
-        if (!res.ok) throw new Error(`status ${res.status}`);
-        setData((await res.json()) as DashboardData);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setFetching(false);
-      }
-    })();
+    setFetching(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin-dashboard-data", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      });
+      if (res.status === 403) return setForbidden(true);
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      setData((await res.json()) as DashboardData);
+    } catch (e) {
+      console.error(e);
+      setError("読み込みに失敗しました。もう一度お試しください");
+    } finally {
+      setFetching(false);
+    }
   }, [session]);
 
-  if (loading || fetching) {
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (!loading && !session) return <SafeNavigate to="/login" />;
+  if (forbidden) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ background: "#0F0F0F" }}
-      >
-        <p className="text-sm" style={{ color: "#888888" }}>
-          読み込み中...
-        </p>
-      </div>
+      <Center>
+        <p style={{ color: T.bad, fontSize: 14 }}>このページは管理者だけが見られます。</p>
+      </Center>
     );
   }
-  if (!session) return <SafeNavigate to="/login" />;
-  if (forbidden || !data) {
+  if (!data) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ background: "#0F0F0F" }}
-      >
-        <p className="text-sm" style={{ color: "#888888" }}>
-          このページを見る権限がありません。
-        </p>
-      </div>
+      <Center>
+        <p style={{ color: error ? T.bad : T.muted, fontSize: 14 }}>{error || "読み込み中..."}</p>
+      </Center>
     );
   }
+
+  const { money, growth, individual, market, company, points, alerts } = data;
+  const alertItems = [
+    alerts.pendingContactsOver3Days > 0 &&
+      `返事が3日以上ない面談の申し込み ${alerts.pendingContactsOver3Days}件`,
+    alerts.expiringYen > 0 && `30日以内に期限が切れる企業のコイン ${yen(alerts.expiringYen)}分`,
+    alerts.staleSummaries > 10 && `人物まとめの作り直し待ち ${alerts.staleSummaries}人`,
+  ].filter(Boolean) as string[];
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#0F0F0F", fontFamily: "'Inter', sans-serif" }}
-    >
-      {/* ヘッダー */}
-      <div
-        className="flex items-center gap-3 border-b px-6 py-4"
-        style={{ borderColor: "#2A2A2A" }}
+    <div className="min-h-screen" style={{ background: T.bg, fontFamily: "'Inter', sans-serif" }}>
+      <AdminModeSwitch />
+      <header
+        className="sticky top-0 z-10 border-b px-4 py-3 md:px-8"
+        style={{ background: T.bg, borderColor: T.border }}
       >
-        <button
-          onClick={() => setNavOpen((v) => !v)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg"
-          style={{ background: "#1A1A1A", border: "1px solid #2A2A2A", color: "#F0F0F0" }}
-          aria-label="メニュー"
-        >
-          ☰
-        </button>
-        <h1 style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 700 }}>社内管理ダッシュボード</h1>
-      </div>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 style={{ color: T.text, fontSize: 18, fontWeight: 700 }}>社内管理ダッシュボード</h1>
+            <p className="text-[11px]" style={{ color: T.muted }}>
+              {new Date(data.generatedAt).toLocaleString("ja-JP")} 時点 ・
+              月は日本時間で区切っています
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={fetching}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px] disabled:opacity-50"
+            style={{ border: `1px solid ${T.border}`, color: T.sub }}
+          >
+            <RefreshCw size={13} className={fetching ? "animate-spin" : ""} /> 最新にする
+          </button>
+        </div>
+        <nav className="mx-auto mt-2 flex max-w-6xl gap-1 overflow-x-auto">
+          {SECTIONS.map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className="shrink-0 rounded-md px-2.5 py-1 text-[12px]"
+              style={{ color: T.muted }}
+            >
+              {s.label}
+            </a>
+          ))}
+        </nav>
+      </header>
 
-      <div className="flex">
-        {/* サイドナビ */}
-        {navOpen && (
-          <div className="w-56 shrink-0 border-r px-3 py-4" style={{ borderColor: "#2A2A2A" }}>
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className="mb-1 w-full rounded-lg px-3 py-2.5 text-left text-[13px]"
-                style={{
-                  background: activeTab === item.key ? "#C8FF00" : "transparent",
-                  color: activeTab === item.key ? "#0F0F0F" : "#CCCCCC",
-                  fontWeight: activeTab === item.key ? 700 : 500,
-                }}
-              >
-                {item.label}
-              </button>
+      <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-6 md:px-8">
+        {alertItems.length > 0 && (
+          <div
+            className="flex flex-col gap-1.5 rounded-xl p-4"
+            style={{ background: "#2A1F0A", border: `1px solid #5A4318` }}
+          >
+            {alertItems.map((a) => (
+              <p key={a} className="flex items-center gap-2 text-[13px]" style={{ color: T.text }}>
+                <AlertTriangle size={14} color={T.warn} aria-label="要対応" /> {a}
+              </p>
             ))}
           </div>
         )}
 
-        <div className="flex-1 px-6 py-6">
-          <div className="mx-auto max-w-4xl">
-            <p className="mb-4" style={{ color: "#666666", fontSize: 12 }}>
-              {data.note}
-            </p>
-
-            {activeTab === "overview" && <OverviewTab data={data} />}
-            {activeTab === "individual" && <IndividualTab data={data} />}
-            {activeTab === "company" && <CompanyTab data={data} />}
-            {activeTab === "engagement" && <EngagementTab data={data} />}
-            {activeTab === "talent" && <TalentTab token={session.access_token} />}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OverviewTab({ data }: { data: DashboardData }) {
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>総会員数</p>
-          <p style={{ color: "#F0F0F0", fontSize: 24, fontWeight: 700 }}>{data.totalUsers}</p>
-        </div>
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>今月の推定売上</p>
-          <p style={{ color: "#C8FF00", fontSize: 22, fontWeight: 700 }}>
-            {fmtYen(data.monthlyRevenue)}
-          </p>
-        </div>
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>今月の推定AIコスト</p>
-          <p style={{ color: "#FFB84D", fontSize: 22, fontWeight: 700 }}>
-            {fmtYen(data.estimatedMonthlyCostJpy)}
-          </p>
-        </div>
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>今月の推定粗利</p>
-          <p
-            style={{
-              color: data.estimatedProfitJpy >= 0 ? "#7CFFB2" : "#FF6B6B",
-              fontSize: 22,
-              fontWeight: 700,
-            }}
-          >
-            {fmtYen(data.estimatedProfitJpy)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>個人/受験生 今月の売上</p>
-          <p style={{ color: "#7CD4FF", fontSize: 20, fontWeight: 700 }}>
-            {fmtYen(data.individualRevenue)}
-          </p>
-        </div>
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>企業/学校 今月の売上</p>
-          <p style={{ color: "#E29CFF", fontSize: 20, fontWeight: 700 }}>
-            {fmtYen(data.companyRevenue)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          プラン別会員数
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {Object.entries(data.planCounts).map(([plan, count]) => (
-            <div
-              key={plan}
-              className="rounded-lg p-3"
-              style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
-            >
-              <p style={{ color: "#999999", fontSize: 11 }}>{PLAN_LABELS[plan] ?? plan}</p>
-              <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 700 }}>{count}人</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3" style={{ color: "#666666", fontSize: 11 }}>
-          今月の企業従量課金の発行数：{data.meteredInterviewsThisMonth}回
-        </p>
-      </div>
-
-      <div className="mt-6 rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          新規登録の推移（直近30日）
-        </p>
-        <div style={{ width: "100%", height: 220 }}>
-          <ResponsiveContainer>
-            <LineChart data={data.signupTrend}>
-              <CartesianGrid stroke="#2A2A2A" />
-              <XAxis dataKey="date" tick={{ fill: "#888888", fontSize: 10 }} />
-              <YAxis tick={{ fill: "#888888", fontSize: 10 }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }} />
-              <Line type="monotone" dataKey="count" stroke="#C8FF00" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div
-        className="mt-6 rounded-2xl p-4"
-        style={{ background: "#1A1A1A", border: "1px solid #FFB84D55" }}
-      >
-        <p style={{ color: "#FFB84D", fontSize: 12, fontWeight: 700 }}>
-          ⚠️ 実際の残クレジット・請求額の確認先
-        </p>
-        <p style={{ color: "#999999", fontSize: 12, marginTop: 4, lineHeight: 1.7 }}>
-          Claude(Anthropic)：console.anthropic.com の Plans & Billing
-          <br />
-          OpenAI（Whisper・音声合成）：platform.openai.com の Billing
-          <br />
-          上記のコスト表示は、あくまでDB上の利用実績から計算した概算です。
-        </p>
-      </div>
-    </>
-  );
-}
-
-function IndividualTab({ data }: { data: DashboardData }) {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          希望職種ランキング（個人）
-        </p>
-        <RankingList items={data.jobTypeRanking} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          志望校ランキング（受験生）
-        </p>
-        <RankingList items={data.schoolRanking} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          都道府県別の登録者分布
-        </p>
-        <RankingList items={data.prefectureRanking} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          年齢層分布
-        </p>
-        <RankingList items={data.ageDistribution} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          性別分布（任意回答分のみ）
-        </p>
-        <RankingList items={data.genderDistribution} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          学年分布（受験生）
-        </p>
-        <RankingList items={data.gradeDistribution} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          苦手科目ランキング（受験生）
-        </p>
-        <RankingList items={data.weakSubjectRanking} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          得意科目ランキング（受験生）
-        </p>
-        <RankingList items={data.strongSubjectRanking} />
-      </div>
-    </div>
-  );
-}
-
-function CompanyTab({ data }: { data: DashboardData }) {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          企業の採用ニーズ（募集職種）
-        </p>
-        <RankingList items={data.companyJobTypeRanking} />
-      </div>
-      <div className="rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          書類選考ランク分布
-        </p>
-        {data.rankDistribution.length === 0 ? (
-          <p style={{ color: "#666666", fontSize: 12 }}>まだデータがありません。</p>
-        ) : (
-          <div style={{ width: "100%", height: 220 }}>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={data.rankDistribution}
-                  dataKey="count"
-                  nameKey="name"
-                  outerRadius={80}
-                  label
-                >
-                  {data.rankDistribution.map((entry) => (
-                    <Cell key={entry.name} fill={RANK_COLORS[entry.name] ?? "#888888"} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function EngagementTab({ data }: { data: DashboardData }) {
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>7日継続率</p>
-          <p style={{ color: "#C8FF00", fontSize: 22, fontWeight: 700 }}>{data.retentionRate7d}%</p>
-        </div>
-        <div className="rounded-2xl p-4" style={cardStyle}>
-          <p style={{ color: "#888888", fontSize: 12 }}>30日継続率</p>
-          <p style={{ color: "#7CD4FF", fontSize: 22, fontWeight: 700 }}>
-            {data.retentionRate30d}%
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          機能利用率（会員全体のうち利用経験あり）
-        </p>
-        <div className="flex flex-col gap-3">
-          {data.featureAdoption.map((f) => (
-            <div key={f.name}>
-              <div className="mb-1 flex justify-between">
-                <span style={{ color: "#F0F0F0", fontSize: 12 }}>{f.name}</span>
-                <span style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700 }}>
-                  {f.rate}%（{f.count}人）
-                </span>
-              </div>
-              <div className="rounded-full" style={{ background: "#0F0F0F", height: 8 }}>
-                <div
-                  className="rounded-full"
-                  style={{ background: "#C8FF00", height: 8, width: `${f.rate}%` }}
+        {/* ---- お金 ---- */}
+        <Section id="money" title="お金（今月）">
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+            <Panel>
+              <p className="text-[12px]" style={{ color: T.muted }}>
+                今月の売上（見込み）
+              </p>
+              <p style={{ color: T.text, fontSize: 40, fontWeight: 800, lineHeight: 1.15 }}>
+                {yen(money.revenue)}
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                <BarRow
+                  label="個人の月額（ライト・プロ）"
+                  value={money.subscription}
+                  max={money.revenue}
+                  text={yen(money.subscription)}
+                  note={`ライト${growth.lightCount}人・プロ${growth.proCount}人`}
+                />
+                <BarRow
+                  label="企業のコイン購入"
+                  value={money.coinSales}
+                  max={money.revenue}
+                  text={yen(money.coinSales)}
+                  note={`前月 ${yen(money.coinSalesPrev)}`}
+                />
+                <BarRow
+                  label="企業のAI面接（従量課金）"
+                  value={money.meteredSales}
+                  max={money.revenue}
+                  text={yen(money.meteredSales)}
+                  note={`${money.meteredCount}回（前月 ${money.meteredPrev}回）`}
                 />
               </div>
+            </Panel>
+            <div className="grid grid-cols-2 gap-3">
+              <Stat label="AIのコスト（概算）" value={yen(money.aiCost)} />
+              <Stat
+                label="本人に渡したポイント"
+                value={yen(money.pointsIssuedThisMonth)}
+                hint="コイン売上の1/4"
+              />
+              <Stat
+                label="粗利（概算）"
+                value={yen(money.profit)}
+                tone={money.profit < 0 ? "bad" : "accent"}
+                hint="売上 − AIコスト − ポイント"
+              />
+              <Stat
+                label="使われていないコイン"
+                value={yen(money.unusedYen)}
+                hint="前受けのお金（まだ人材を見ていない分）"
+              />
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-2xl p-5" style={cardStyle}>
-        <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-          今月の機能利用状況（回数）
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div
-            className="rounded-lg p-3"
-            style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
-          >
-            <p style={{ color: "#999999", fontSize: 11 }}>面接実施数</p>
-            <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 700 }}>
-              {data.interviewsThisMonth}回
-            </p>
           </div>
-          {Object.entries(data.usageThisPeriod).map(([key, count]) => (
-            <div
-              key={key}
-              className="rounded-lg p-3"
-              style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
-            >
-              <p style={{ color: "#999999", fontSize: 11 }}>{FEATURE_LABELS[key] ?? key}</p>
-              <p style={{ color: "#F0F0F0", fontSize: 18, fontWeight: 700 }}>{count}回</p>
+          <p className="mt-3 text-[11px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+            月額はいま有効な会員数×料金の見込みです。AIのコストは利用回数からの概算です。正確な請求額は
+            Anthropic（console.anthropic.com）・OpenAI（platform.openai.com）・Stripe
+            の管理画面で確認してください。
+          </p>
+        </Section>
+
+        {/* ---- 伸び ---- */}
+        <Section id="growth" title="伸び">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Stat
+              label="会員の合計"
+              value={`${num(growth.totalUsers)}人`}
+              hint={`個人 ${num(growth.individuals)}・企業 ${num(growth.companies)}`}
+            />
+            <Stat
+              label="今月の新規登録"
+              value={`${num(growth.newThisMonth)}人`}
+              hint={`前月 ${num(growth.newPrevMonth)}人`}
+            />
+            <Stat
+              label="有料会員"
+              value={`${num(growth.paid)}人`}
+              hint={`個人のうち ${growth.paidRate}%`}
+            />
+            <Stat label="登録企業" value={`${num(growth.companies)}社`} />
+          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <TrendChart title="新規登録（直近30日・人）" data={growth.signupsDaily} unit="人" />
+            <TrendChart
+              title="模擬面接の回数（直近30日・回）"
+              data={growth.practicesDaily}
+              unit="回"
+            />
+          </div>
+        </Section>
+
+        {/* ---- 個人 ---- */}
+        <Section id="individual" title="個人・受験生">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel title="個人の流れ（これまでの合計・人）">
+              <Funnel steps={individual.funnel} />
+            </Panel>
+            <div className="grid grid-cols-2 gap-3">
+              <Stat label="7日以内に練習した人" value={`${num(individual.active7)}人`} />
+              <Stat label="30日以内に練習した人" value={`${num(individual.active30)}人`} />
+              <Stat
+                label="今月の模擬面接"
+                value={`${num(individual.practicesThisMonth)}回`}
+                hint={`前月 ${num(individual.practicesPrevMonth)}回`}
+              />
+              <Stat label="1人あたりの練習（30日）" value={`${individual.perActive}回`} />
             </div>
-          ))}
-        </div>
-      </div>
-    </>
+          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <Panel title="今月の機能の利用（回）">
+              <Bars items={individual.features} unit="回" />
+            </Panel>
+            <Panel title="今月よく練習された職種（回）">
+              <Bars items={individual.jobRanking} unit="回" empty="今月の練習はまだありません" />
+            </Panel>
+          </div>
+        </Section>
+
+        {/* ---- 人材の市場 ---- */}
+        <Section id="market" title="人材の市場">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <Stat label="公開している人" value={`${num(market.publicUsers)}人`} />
+            <Stat label="公開中の面接結果" value={`${num(market.shownResults)}件`} />
+            <Stat
+              label="今月買われた結果"
+              value={`${num(market.unlocksThisMonth)}件`}
+              hint={`累計 ${num(market.unlocksTotal)}件`}
+            />
+            <Stat label="今月使われたコイン" value={num(market.coinsSpentThisMonth)} />
+            <Stat label="面談の申し込み" value={`${num(market.contacts)}件`} />
+            <Stat
+              label="承諾率"
+              value={market.acceptRate === null ? "—" : `${market.acceptRate}%`}
+              hint="返事があったもののうち"
+            />
+          </div>
+          <div className="mt-4">
+            <Panel title="公開中の結果の職種（件）">
+              <Bars items={market.shownJobRanking} unit="件" empty="公開中の結果はまだありません" />
+            </Panel>
+          </div>
+        </Section>
+
+        {/* ---- 企業 ---- */}
+        <Section id="company" title="企業">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <Stat label="登録企業" value={`${num(company.companies)}社`} />
+            <Stat
+              label="カード登録済み"
+              value={`${num(company.meteredCompanies)}社`}
+              hint="AI面接のURLを出せる"
+            />
+            <Stat label="求人の掲載中" value={`${num(company.openJobs)}件`} />
+            <Stat
+              label="今月の応募"
+              value={`${num(company.applicationsThisMonth)}件`}
+              hint={`前月 ${num(company.applicationsPrevMonth)}件`}
+            />
+            <Stat label="コインを買った企業" value={`${num(company.buyingCompanies)}社`} />
+          </div>
+          <div className="mt-4">
+            <Panel title="よく使っている企業（これまでの合計）">
+              {company.topCompanies.length === 0 ? (
+                <p className="text-[13px]" style={{ color: T.muted }}>
+                  まだありません
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[13px]">
+                    <thead>
+                      <tr style={{ color: T.muted }}>
+                        <th className="py-2 text-left font-normal">会社名</th>
+                        <th className="py-2 text-right font-normal">コイン購入</th>
+                        <th className="py-2 text-right font-normal">買ったコイン</th>
+                        <th className="py-2 text-right font-normal">買った結果</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {company.topCompanies.map((c, i) => (
+                        <tr key={i} style={{ borderTop: `1px solid ${T.border}`, color: T.text }}>
+                          <td className="py-2">{c.name}</td>
+                          <td className="py-2 text-right">{yen(c.yen)}</td>
+                          <td className="py-2 text-right">{num(c.coins)}</td>
+                          <td className="py-2 text-right">{num(c.results)}件</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
+          </div>
+        </Section>
+
+        {/* ---- ポイント ---- */}
+        <Section id="points" title="本人のポイント（1pt＝1円）">
+          <div className="grid grid-cols-3 gap-3">
+            <Stat label="これまでに渡した" value={`${num(points.issued)}pt`} />
+            <Stat label="月額の支払いに使われた" value={`${num(points.used)}pt`} />
+            <Stat
+              label="まだ使われていない"
+              value={`${num(points.balance)}pt`}
+              tone="warn"
+              hint="今後の月額から差し引く予定の額"
+            />
+          </div>
+        </Section>
+
+        {/* ---- SNS用の動画（TikTok・Instagram をタブで切り替え） ---- */}
+        <Section id="sns" title="SNS用の動画">
+          <SnsVideos token={session?.access_token ?? ""} />
+        </Section>
+      </main>
+    </div>
   );
 }
 
-type TalentStats = {
-  profiles: { total: number; public: number; withRecording: number };
-  tickets: {
-    total: number;
-    revenue: number;
-    monthCount: number;
-    monthRevenue: number;
-    buyingCompanies: number;
-  };
-  contacts: { total: number; accepted: number; declined: number; pending: number };
-  messages: number;
-  topCompanies: { name: string; count: number; amount: number }[];
+type TiktokVideo = {
+  id: string;
+  themeLabel: string;
+  title: string;
+  caption: string;
+  status: "rendering" | "ready" | "posted" | "failed";
+  durationSec: number | null;
+  error: string | null;
+  createdAt: string;
+  postedAt: string | null;
+  url: string | null;
+  views: number | null;
+  likes: number | null;
 };
 
-function TalentTab({ token }: { token: string }) {
-  const [stats, setStats] = useState<TalentStats | null>(null);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    fetch("/api/talent/admin-stats", {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    })
-      .then(async (r) => {
-        if (!r.ok) throw new Error(String(r.status));
-        setStats((await r.json()) as TalentStats);
-      })
-      .catch(() =>
-        setError("読み込みに失敗しました（データベースの準備ができていない可能性があります）"),
-      );
-  }, [token]);
+const TIKTOK_LINK = "https://gachicareer-ai.akitogroup.jp/tiktok";
 
-  if (error) return <p style={{ color: "#FF5C5C", fontSize: 13 }}>{error}</p>;
-  if (!stats) return <p style={{ color: "#888888", fontSize: 13 }}>読み込み中...</p>;
-  const box = (label: string, value: string) => (
-    <div
-      key={label}
-      className="rounded-xl p-4"
-      style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
-    >
-      <p style={{ color: "#888888", fontSize: 12 }}>{label}</p>
-      <p className="mt-1" style={{ color: "#F0F0F0", fontSize: 22, fontWeight: 700 }}>
-        {value}
+const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
+  rendering: "作成中",
+  ready: "投稿待ち",
+  posted: "投稿済み",
+  failed: "失敗",
+};
+
+function SnsVideos({ token }: { token: string }) {
+  const [tab, setTab] = useState<"tiktok" | "instagram">("tiktok");
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-2">
+        {(
+          [
+            ["tiktok", "TikTok"],
+            ["instagram", "Instagram"],
+          ] as const
+        ).map(([k, label]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTab(k)}
+            className="rounded-full px-4 py-1.5 text-[13px]"
+            style={
+              tab === k
+                ? { background: T.accent, color: "#0F0F0F", fontWeight: 700 }
+                : { border: `1px solid ${T.border}`, color: T.sub }
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+        {tab === "tiktok"
+          ? "毎日16時台に自動で1本。投稿したら「投稿済みにする」を押し、数日後に再生数といいねを入れてください（次の台本づくりで参考にします）。"
+          : "広告は 4:5（フィード・広告枠用）。リール・ストーリーズには TikTok タブの縦長の動画を使えます（ストーリーズはリンクスタンプを置く）。"}
       </p>
+      <TiktokVideos key={tab} token={token} platform={tab} />
     </div>
   );
-  const acceptRate =
-    stats.contacts.accepted + stats.contacts.declined
-      ? Math.round(
-          (stats.contacts.accepted / (stats.contacts.accepted + stats.contacts.declined)) * 100,
-        )
-      : null;
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {box("今月のチケット売上", fmtYen(stats.tickets.monthRevenue))}
-        {box("今月のチケット枚数", `${stats.tickets.monthCount}枚`)}
-        {box("累計のチケット売上", fmtYen(stats.tickets.revenue))}
-        {box("購入した企業", `${stats.tickets.buyingCompanies}社`)}
-        {box("公開中のユーザー", `${stats.profiles.public}人`)}
-        {box("録画も公開", `${stats.profiles.withRecording}人`)}
-        {box("面談の申し込み", `${stats.contacts.total}件`)}
-        {box("承諾率", acceptRate === null ? "-" : `${acceptRate}%`)}
-      </div>
-      <div
-        className="rounded-xl p-4"
-        style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}
-      >
-        <p className="mb-3" style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700 }}>
-          チケットをよく買っている企業
+}
+
+function TiktokVideos({ token, platform }: { token: string; platform: "tiktok" | "instagram" }) {
+  const [videos, setVideos] = useState<TiktokVideo[] | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [clicks, setClicks] = useState<{ today: number; week: number; total: number } | null>(null);
+
+  const call = useCallback(
+    async (body?: unknown) => {
+      const res = await fetch(`/api/tiktok-videos${body ? "" : `?platform=${platform}`}`, {
+        method: body ? "POST" : "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        cache: "no-store",
+      });
+      return res.ok ? res.json() : null;
+    },
+    [token, platform],
+  );
+  const load = useCallback(async () => {
+    const d = (await call()) as {
+      videos: TiktokVideo[];
+      clicks?: { today: number; week: number; total: number };
+    } | null;
+    setVideos(d?.videos ?? []);
+    setClicks(d?.clicks ?? null);
+  }, [call]);
+
+  useEffect(() => {
+    if (token) void load();
+  }, [token, load]);
+
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("投稿の文をコピーしました");
+    } catch {
+      // コピーできない端末では何もしない
+    }
+  };
+
+  if (!videos) return <p style={{ color: T.muted, fontSize: 13 }}>読み込み中...</p>;
+  const clickPanel =
+    platform !== "tiktok" ? null : (
+      <Panel>
+        <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+          プロフィールのリンク（{TIKTOK_LINK}）が押された回数
         </p>
-        {stats.topCompanies.length === 0 ? (
-          <p style={{ color: "#888888", fontSize: 13 }}>まだ購入はありません</p>
-        ) : (
-          stats.topCompanies.map((c) => (
-            <div
-              key={c.name}
-              className="flex justify-between py-1.5 text-[13px]"
-              style={{ color: "#CCCCCC" }}
-            >
-              <span>{c.name}</span>
-              <span>
-                {c.count}枚 ・ {fmtYen(c.amount)}
-              </span>
-            </div>
-          ))
-        )}
+        <div className="mt-2 flex gap-6 text-[13px]" style={{ color: T.sub }}>
+          <span>
+            今日 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.today ?? 0}</b>
+          </span>
+          <span>
+            7日間 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.week ?? 0}</b>
+          </span>
+          <span>
+            全部 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.total ?? 0}</b>
+          </span>
+        </div>
+      </Panel>
+    );
+  if (videos.length === 0) {
+    return (
+      <div className="flex flex-col gap-4">
+        {clickPanel}
+        <Panel>
+          <p className="text-[13px]" style={{ color: T.muted, lineHeight: 1.8 }}>
+            {platform === "tiktok"
+              ? "まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok video」から、今すぐ作ることもできます）。"
+              : "まだ動画はありません。GitHub の Actions の「TikTok video」で format を ad、platform を instagram にして動かすと作れます。"}
+          </p>
+        </Panel>
       </div>
-      <p style={{ color: "#666666", fontSize: 12 }}>
-        返事待ち {stats.contacts.pending}件 ・ メッセージ累計 {stats.messages}通 ・ プロフィール作成{" "}
-        {stats.profiles.total}人
-      </p>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-4">
+      {clickPanel}
+      <div
+        className="overflow-hidden rounded-2xl"
+        style={{ background: T.card, border: `1px solid ${T.border}` }}
+      >
+        {videos.map((v, i) => {
+          const isOpen = openId === v.id;
+          return (
+            <div key={v.id} style={{ borderTop: i ? `1px solid ${T.border}` : "none" }}>
+              {/* 1行：小さな画面・日付・題名・状態。押すと開く */}
+              <button
+                type="button"
+                onClick={() => setOpenId(isOpen ? null : v.id)}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
+              >
+                <span
+                  className="flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md"
+                  style={{ background: "#000" }}
+                >
+                  {v.url ? (
+                    <video
+                      src={v.url}
+                      muted
+                      preload="metadata"
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span style={{ color: T.muted, fontSize: 10 }}>
+                      {v.status === "failed" ? "×" : "…"}
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px]" style={{ color: T.muted }}>
+                    {new Date(v.createdAt).toLocaleDateString("ja-JP")} ・ {v.themeLabel}
+                    {v.views != null && ` ・ 再生 ${v.views.toLocaleString()}`}
+                  </span>
+                  <span
+                    className="block truncate text-[13px]"
+                    style={{ color: T.text, fontWeight: 700 }}
+                  >
+                    {v.title}
+                  </span>
+                </span>
+                <span
+                  className="shrink-0 rounded-md px-2 py-0.5 text-[11px]"
+                  style={{
+                    background: v.status === "ready" ? T.accent : "#262626",
+                    color: v.status === "ready" ? "#0F0F0F" : v.status === "failed" ? T.bad : T.sub,
+                    fontWeight: 700,
+                  }}
+                >
+                  {VIDEO_STATUS[v.status]}
+                </span>
+                <span className="shrink-0 text-[12px]" style={{ color: T.muted }}>
+                  {isOpen ? "▲" : "▼"}
+                </span>
+              </button>
+
+              {isOpen && (
+                <div className="grid gap-3 px-3 pb-4 md:grid-cols-[220px_1fr]">
+                  {v.url ? (
+                    <video
+                      src={v.url}
+                      controls
+                      preload="metadata"
+                      playsInline
+                      className="w-full rounded-xl"
+                      style={{ maxHeight: 400, background: "#000" }}
+                    />
+                  ) : v.status === "failed" ? (
+                    <p className="text-[12px]" style={{ color: T.bad }}>
+                      作れませんでした：{(v.error ?? "").slice(0, 120)}
+                    </p>
+                  ) : (
+                    <p className="text-[12px]" style={{ color: T.muted }}>
+                      作成中です…（消さずにお待ちください）
+                    </p>
+                  )}
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <p
+                      className="whitespace-pre-wrap rounded-lg p-2 text-[12px]"
+                      style={{ background: T.bg, color: T.sub }}
+                    >
+                      {v.caption}
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-[12px]">
+                      {v.url && (
+                        <a
+                          href={v.url}
+                          download={`gachicareer-${v.id.slice(0, 8)}.mp4`}
+                          className="rounded-lg px-3 py-1.5"
+                          style={{ background: T.accent, color: "#0F0F0F", fontWeight: 700 }}
+                        >
+                          動画を保存
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void copy(v.caption)}
+                        className="rounded-lg px-3 py-1.5"
+                        style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                      >
+                        投稿の文をコピー
+                      </button>
+                      {v.status === "ready" && (
+                        <button
+                          type="button"
+                          onClick={() => void call({ action: "posted", id: v.id }).then(load)}
+                          className="rounded-lg px-3 py-1.5"
+                          style={{ border: `1px solid ${T.border}`, color: T.sub }}
+                        >
+                          投稿済みにする
+                        </button>
+                      )}
+                      {v.status === "posted" && (
+                        <MetricsForm
+                          video={v}
+                          onSave={(views, likes) =>
+                            void call({ action: "metrics", id: v.id, views, likes }).then(load)
+                          }
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("この動画を消しますか？")) {
+                            void call({ action: "delete", id: v.id }).then(load);
+                          }
+                        }}
+                        className="rounded-lg px-3 py-1.5"
+                        style={{ color: T.bad }}
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
+  );
+}
+
+/** 投稿した動画の再生数・いいねを入れる（伸びたテーマ・タイトルを、次の台本づくりで参考にする） */
+function MetricsForm({
+  video,
+  onSave,
+}: {
+  video: TiktokVideo;
+  onSave: (views: string, likes: string) => void;
+}) {
+  const [views, setViews] = useState(video.views?.toString() ?? "");
+  const [likes, setLikes] = useState(video.likes?.toString() ?? "");
+  const input = {
+    background: T.bg,
+    border: `1px solid ${T.border}`,
+    color: T.text,
+    borderRadius: 8,
+    padding: "4px 8px",
+    width: 90,
+  } as const;
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2">
+      <input
+        inputMode="numeric"
+        value={views}
+        onChange={(e) => setViews(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="再生数"
+        style={input}
+      />
+      <input
+        inputMode="numeric"
+        value={likes}
+        onChange={(e) => setLikes(e.target.value.replace(/[^0-9]/g, ""))}
+        placeholder="いいね"
+        style={input}
+      />
+      <button
+        type="button"
+        onClick={() => onSave(views, likes)}
+        className="rounded-lg px-3 py-1.5"
+        style={{ border: `1px solid ${T.border}`, color: T.sub }}
+      >
+        結果を保存
+      </button>
+    </div>
+  );
+}
+
+function Center({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col" style={{ background: T.bg }}>
+      <AdminModeSwitch />
+      <div className="flex flex-1 items-center justify-center">{children}</div>
+    </div>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-28">
+      <h2 className="mb-3" style={{ color: T.text, fontSize: 16, fontWeight: 700 }}>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Panel({ title, children }: { title?: string; children: ReactNode }) {
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{ background: T.card, border: `1px solid ${T.border}` }}
+    >
+      {title && (
+        <p className="mb-4 text-[13px]" style={{ color: T.sub, fontWeight: 600 }}>
+          {title}
+        </p>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  hint,
+  tone,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "accent" | "warn" | "bad";
+}) {
+  const color =
+    tone === "accent" ? T.accent : tone === "warn" ? T.warn : tone === "bad" ? T.bad : T.text;
+  return (
+    <div className="rounded-xl p-4" style={{ background: T.card, border: `1px solid ${T.border}` }}>
+      <p className="text-[11px]" style={{ color: T.muted }}>
+        {label}
+      </p>
+      <p className="mt-1" style={{ color, fontSize: 22, fontWeight: 800, lineHeight: 1.2 }}>
+        {value}
+      </p>
+      {hint && (
+        <p className="mt-1 text-[11px]" style={{ color: T.muted }}>
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** 横棒1本（値はいつも文字でも出す） */
+function BarRow({
+  label,
+  value,
+  max,
+  text,
+  note,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  text: string;
+  note?: string;
+}) {
+  const pct = max > 0 ? Math.max(value > 0 ? 2 : 0, (value / max) * 100) : 0;
+  return (
+    <div title={`${label}：${text}`}>
+      <div className="flex items-baseline justify-between gap-3 text-[13px]">
+        <span style={{ color: T.sub }}>{label}</span>
+        <span style={{ color: T.text, fontWeight: 700 }}>{text}</span>
+      </div>
+      <div className="mt-1.5 h-2 rounded-full" style={{ background: T.grid }}>
+        <div className="h-2 rounded-full" style={{ width: `${pct}%`, background: T.accent }} />
+      </div>
+      {note && (
+        <p className="mt-1 text-[11px]" style={{ color: T.muted }}>
+          {note}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Bars({ items, unit, empty }: { items: NameCount[]; unit: string; empty?: string }) {
+  if (items.length === 0 || items.every((i) => i.count === 0)) {
+    return (
+      <p className="text-[13px]" style={{ color: T.muted }}>
+        {empty ?? "まだありません"}
+      </p>
+    );
+  }
+  const max = Math.max(...items.map((i) => i.count));
+  return (
+    <div className="flex flex-col gap-3">
+      {items.map((i) => (
+        <BarRow
+          key={i.name}
+          label={i.name}
+          value={i.count}
+          max={max}
+          text={`${num(i.count)}${unit}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** 登録 → 練習 → 公開 → 買われた の流れ。次の段階へ進んだ割合も出す */
+function Funnel({ steps }: { steps: NameCount[] }) {
+  const max = Math.max(1, steps[0]?.count ?? 1);
+  return (
+    <div className="flex flex-col gap-3">
+      {steps.map((s, i) => {
+        const prev = i > 0 ? steps[i - 1].count : null;
+        const rate = prev ? Math.round((s.count / prev) * 100) : null;
+        return (
+          <BarRow
+            key={s.name}
+            label={s.name}
+            value={s.count}
+            max={max}
+            text={`${num(s.count)}人`}
+            note={rate === null ? undefined : `前の段階から ${rate}%`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function TrendChart({ title, data, unit }: { title: string; data: Daily; unit: string }) {
+  const total = data.reduce((a, d) => a + d.count, 0);
+  return (
+    <Panel>
+      <div className="mb-3 flex items-baseline justify-between">
+        <p className="text-[13px]" style={{ color: T.sub, fontWeight: 600 }}>
+          {title}
+        </p>
+        <p className="text-[12px]" style={{ color: T.muted }}>
+          合計 {num(total)}
+          {unit}
+        </p>
+      </div>
+      <div style={{ height: 180 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+            <defs>
+              <linearGradient id={`fill-${unit}-${title.length}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={T.accent} stopOpacity={0.25} />
+                <stop offset="100%" stopColor={T.accent} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke={T.grid} vertical={false} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: T.muted, fontSize: 10 }}
+              tickLine={false}
+              axisLine={{ stroke: T.border }}
+              interval={6}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fill: T.muted, fontSize: 10 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip
+              cursor={{ stroke: T.muted, strokeDasharray: "3 3" }}
+              contentStyle={{
+                background: T.card,
+                border: `1px solid ${T.border}`,
+                borderRadius: 8,
+                fontSize: 12,
+              }}
+              labelStyle={{ color: T.muted }}
+              itemStyle={{ color: T.text }}
+              formatter={(v: number) => [`${num(v)}${unit}`, ""]}
+              separator=""
+            />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke={T.accent}
+              strokeWidth={2}
+              fill={`url(#fill-${unit}-${title.length})`}
+              activeDot={{ r: 4, stroke: T.card, strokeWidth: 2 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </Panel>
   );
 }

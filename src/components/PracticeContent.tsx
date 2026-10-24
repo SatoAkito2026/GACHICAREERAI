@@ -90,6 +90,14 @@ export function PracticeContent({
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(EMPTY_PREFS);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  // 聞いてほしい質問は1行に1つ（保存するときは改行でつなぐ）
+  const questions = prefs.custom_questions ? prefs.custom_questions.split("\n") : [];
+  const setQuestions = (list: string[]) =>
+    setPrefs((p) => ({ ...p, custom_questions: list.join("\n") }));
+  const addQuestion = () => setQuestions([...questions, ""]);
+  const setQuestion = (idx: number, value: string) =>
+    setQuestions(questions.map((q, i) => (i === idx ? value.replace(/\n/g, " ") : q)));
+  const removeQuestion = (idx: number) => setQuestions(questions.filter((_, i) => i !== idx));
 
   const [resumeFileName, setResumeFileName] = useState("");
   const [resumeText, setResumeText] = useState("");
@@ -284,137 +292,208 @@ export function PracticeContent({
           </div>
         </div>
 
+        {/* どの職種（学校）で練習するか：全プランで選べる */}
         <div className="mt-4 rounded-2xl p-5" style={cardStyle}>
-          <p style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-            任意設定（保存して再利用できます）
-          </p>
-
-          <label className="mt-3 flex cursor-pointer items-start gap-2">
-            <input
-              type="checkbox"
-              checked={prefs.prioritize_profile}
-              onChange={(e) => setPrefs((p) => ({ ...p, prioritize_profile: e.target.checked }))}
-              className="mt-0.5 h-4 w-4 shrink-0"
-            />
-            <span style={{ color: "#F0F0F0", fontSize: 13 }}>
-              プロフィールの内容を優先的に反映する
-              <span style={{ display: "block", color: "#888888", fontSize: 11, marginTop: 2 }}>
-                オンにすると、下の希望条件よりプロフィールの登録内容を優先します（毎回入力するのが面倒な場合に）
-              </span>
-            </span>
-          </label>
-
           {mode === "individual" ? (
             <>
-              <div className="mt-4">
-                <label style={{ color: "#AAAAAA", fontSize: 12 }}>希望職種</label>
-                <select
-                  style={{ ...inputStyle, marginTop: 4 }}
-                  value={prefs.desired_job_type}
-                  onChange={(e) => setPrefs((p) => ({ ...p, desired_job_type: e.target.value }))}
-                >
-                  <option value="">選択しない</option>
-                  {INDUSTRY_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
+              <label style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600 }}>
+                どの職種で練習しますか？
+              </label>
+              <select
+                style={{ ...inputStyle, marginTop: 8 }}
+                value={prefs.desired_job_type}
+                onChange={(e) => setPrefs((p) => ({ ...p, desired_job_type: e.target.value }))}
+              >
+                <option value="">プロフィールの希望職種で練習する</option>
+                {INDUSTRY_OPTIONS.map((opt) => {
+                  // 今月の職種の数が上限に達していたら、まだ使っていない職種は選べない
+                  const locked =
+                    !!usage &&
+                    usage.rule.jobTypes != null &&
+                    usage.usage.jobTypes.length >= usage.rule.jobTypes &&
+                    !usage.usage.jobTypes.includes(opt);
+                  return (
+                    <option key={opt} value={opt} disabled={locked}>
                       {opt}
+                      {locked ? "（今月はこれ以上の職種を選べません）" : ""}
                     </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mt-3">
-                <label style={{ color: "#AAAAAA", fontSize: 12 }}>希望会社名（任意）</label>
-                <input
-                  style={{ ...inputStyle, marginTop: 4 }}
-                  value={prefs.desired_company_name}
-                  onChange={(e) =>
-                    setPrefs((p) => ({ ...p, desired_company_name: e.target.value }))
-                  }
-                  placeholder="例：株式会社〇〇"
-                />
-              </div>
+                  );
+                })}
+              </select>
+              {usage && usage.rule.jobTypes != null && (
+                <p className="mt-2 text-[11px]" style={{ color: "#888888", lineHeight: 1.6 }}>
+                  今月練習できる職種は{usage.rule.jobTypes}つまでです（
+                  {usage.usage.jobTypes.length > 0
+                    ? `今月：${usage.usage.jobTypes.join("・")}`
+                    : "まだ選んでいません"}
+                  ）。来月になると入れ替えられます。
+                </p>
+              )}
             </>
           ) : (
             <>
-              <div className="mt-4">
-                <label style={{ color: "#AAAAAA", fontSize: 12 }}>希望学校</label>
-                <input
-                  style={{ ...inputStyle, marginTop: 4 }}
-                  value={prefs.desired_school}
-                  onChange={(e) => setPrefs((p) => ({ ...p, desired_school: e.target.value }))}
-                  placeholder="例：〇〇大学"
-                />
-              </div>
-              <div className="mt-3">
-                <label style={{ color: "#AAAAAA", fontSize: 12 }}>希望学部・学科（任意）</label>
-                <input
-                  style={{ ...inputStyle, marginTop: 4 }}
-                  value={prefs.desired_faculty}
-                  onChange={(e) => setPrefs((p) => ({ ...p, desired_faculty: e.target.value }))}
-                  placeholder="例：経済学部"
-                />
-              </div>
+              <label style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600 }}>
+                どの学校の面接を練習しますか？
+              </label>
+              <input
+                style={{ ...inputStyle, marginTop: 8 }}
+                value={prefs.desired_school}
+                onChange={(e) => setPrefs((p) => ({ ...p, desired_school: e.target.value }))}
+                placeholder="例：〇〇大学（空欄ならプロフィールの志望校）"
+              />
             </>
           )}
+        </div>
 
-          <div className="mt-3">
-            <label style={{ color: "#AAAAAA", fontSize: 12 }}>聞いてほしい質問（任意）</label>
-            <textarea
-              style={{ ...inputStyle, marginTop: 4, minHeight: 70, resize: "vertical" }}
-              value={prefs.custom_questions}
-              onChange={(e) => setPrefs((p) => ({ ...p, custom_questions: e.target.value }))}
-              placeholder="例：転勤の可否について聞かれたい、部活動の話を深掘りしてほしい　など"
-            />
-          </div>
-
-          <div className="mt-4">
-            <label style={{ color: "#AAAAAA", fontSize: 12 }}>
-              書類をアップロードして反映（プロ限定）
-            </label>
-            {!isPro ? (
-              <p
-                className="mt-2 rounded-lg p-3"
-                style={{
-                  background: "#0F0F0F",
-                  border: "1px solid #2A2A2A",
-                  color: "#777777",
-                  fontSize: 12,
-                }}
-              >
-                この機能はプロプラン限定です。
-              </p>
-            ) : (
-              <div className="mt-2 flex items-center gap-2">
+        {/* そのほかの任意設定：プロだけ */}
+        <div className="mt-4 rounded-2xl p-5" style={cardStyle}>
+          <p style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+            任意設定（プロプラン）
+          </p>
+          {!isPro ? (
+            <p
+              className="mt-2 rounded-lg p-3"
+              style={{
+                background: "#0F0F0F",
+                border: "1px solid #2A2A2A",
+                color: "#888888",
+                fontSize: 12,
+                lineHeight: 1.7,
+              }}
+            >
+              プロプランでは、応募先の{mode === "individual" ? "会社" : "学部"}
+              ・聞いてほしい質問・書類のアップロードを設定して、本番に近い練習ができます。
+              <Link to="/pricing" className="ml-1 underline" style={{ color: "#C8FF00" }}>
+                プランを見る
+              </Link>
+            </p>
+          ) : (
+            <>
+              <label className="mt-3 flex cursor-pointer items-start gap-2">
                 <input
-                  type="file"
-                  accept="application/pdf"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  className="hidden"
+                  type="checkbox"
+                  checked={prefs.prioritize_profile}
+                  onChange={(e) =>
+                    setPrefs((p) => ({ ...p, prioritize_profile: e.target.checked }))
+                  }
+                  className="mt-0.5 h-4 w-4 shrink-0"
                 />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={extracting}
-                  className="rounded-full px-4 py-2 text-[12px] transition-opacity hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "#2A2A2A", color: "#F0F0F0" }}
-                >
-                  {extracting ? "読み込み中..." : "📎 PDFをアップロード"}
-                </button>
-                {resumeFileName && (
-                  <span style={{ color: "#999999", fontSize: 12 }}>{resumeFileName}</span>
+                <span style={{ color: "#F0F0F0", fontSize: 13 }}>
+                  プロフィールの内容を優先的に反映する
+                  <span style={{ display: "block", color: "#888888", fontSize: 11, marginTop: 2 }}>
+                    オンにすると、ここでの設定よりプロフィールの登録内容を優先します
+                  </span>
+                </span>
+              </label>
+
+              {mode === "individual" ? (
+                <div className="mt-4">
+                  <label style={{ color: "#AAAAAA", fontSize: 12 }}>応募先の会社名</label>
+                  <input
+                    style={{ ...inputStyle, marginTop: 4 }}
+                    value={prefs.desired_company_name}
+                    onChange={(e) =>
+                      setPrefs((p) => ({ ...p, desired_company_name: e.target.value }))
+                    }
+                    placeholder="例：株式会社〇〇"
+                  />
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <label style={{ color: "#AAAAAA", fontSize: 12 }}>志望学部・学科</label>
+                  <input
+                    style={{ ...inputStyle, marginTop: 4 }}
+                    value={prefs.desired_faculty}
+                    onChange={(e) => setPrefs((p) => ({ ...p, desired_faculty: e.target.value }))}
+                    placeholder="例：経済学部"
+                  />
+                </div>
+              )}
+
+              <div className="mt-4">
+                <label style={{ color: "#AAAAAA", fontSize: 12 }}>聞いてほしい質問</label>
+                <div className="mt-1 flex flex-col gap-2">
+                  {questions.map((q, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        style={inputStyle}
+                        value={q}
+                        onChange={(e) => setQuestion(idx, e.target.value)}
+                        placeholder="例：転勤の可否について聞いてほしい"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(idx)}
+                        aria-label="この質問を消す"
+                        className="shrink-0 rounded-lg px-3 text-[13px]"
+                        style={{ background: "#2A2A2A", color: "#AAAAAA" }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {questions.length < 10 && (
+                    <button
+                      type="button"
+                      onClick={addQuestion}
+                      className="self-start rounded-full px-4 py-1.5 text-[12px]"
+                      style={{ border: "1px solid #3A3A3A", color: "#C8FF00", fontWeight: 600 }}
+                    >
+                      ＋ 質問を追加
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label style={{ color: "#AAAAAA", fontSize: 12 }}>書類をアップロードして反映</label>
+                {!isPro ? (
+                  <p
+                    className="mt-2 rounded-lg p-3"
+                    style={{
+                      background: "#0F0F0F",
+                      border: "1px solid #2A2A2A",
+                      color: "#777777",
+                      fontSize: 12,
+                    }}
+                  >
+                    この機能はプロプラン限定です。
+                  </p>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={extracting}
+                      className="rounded-full px-4 py-2 text-[12px] transition-opacity hover:opacity-90 disabled:opacity-50"
+                      style={{ background: "#2A2A2A", color: "#F0F0F0" }}
+                    >
+                      {extracting ? "読み込み中..." : "📎 PDFをアップロード"}
+                    </button>
+                    {resumeFileName && (
+                      <span style={{ color: "#999999", fontSize: 12 }}>{resumeFileName}</span>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          <button
-            onClick={handleSavePrefs}
-            disabled={saving}
-            className="mt-4 w-full rounded-full py-2.5 text-[13px] transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ background: "#2A2A2A", color: "#F0F0F0", fontWeight: 600 }}
-          >
-            {saving ? "保存中..." : "この設定を保存する"}
-          </button>
+              <button
+                onClick={handleSavePrefs}
+                disabled={saving}
+                className="mt-4 w-full rounded-full py-2.5 text-[13px] transition-opacity hover:opacity-90 disabled:opacity-50"
+                style={{ background: "#2A2A2A", color: "#F0F0F0", fontWeight: 600 }}
+              >
+                {saving ? "保存中..." : "この設定を保存する"}
+              </button>
+            </>
+          )}
         </div>
 
         <button

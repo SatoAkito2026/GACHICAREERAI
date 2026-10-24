@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/NotificationBell";
 import { useEffect, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 
@@ -80,13 +81,16 @@ export default function BusinessNav() {
             </div>
           )}
         </div>
-        <Link
-          to="/mypage"
-          className="shrink-0 whitespace-nowrap text-[12px]"
-          style={{ color: "#888888", fontWeight: 500 }}
-        >
-          マイページ
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <NotificationBell />
+          <Link
+            to="/mypage"
+            className="whitespace-nowrap text-[12px]"
+            style={{ color: "#888888", fontWeight: 500 }}
+          >
+            マイページ
+          </Link>
+        </div>
       </div>
       {/* スマホでは1行のまま横にスクロールできるようにする */}
       <div

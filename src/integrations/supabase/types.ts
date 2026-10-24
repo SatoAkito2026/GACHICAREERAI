@@ -139,30 +139,306 @@ export type Database = {
         };
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          link: string | null;
+          read_at: string | null;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          link?: string | null;
+          read_at?: string | null;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          link?: string | null;
+          read_at?: string | null;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string | null;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string | null;
+          user_agent: string | null;
+          user_id: string;
+        };
+        Insert: {
+          auth?: string | null;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh?: string | null;
+          user_agent?: string | null;
+          user_id: string;
+        };
+        Update: {
+          auth?: string | null;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string | null;
+          user_agent?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      practice_bonus_ledger: {
+        Row: {
+          amount: number;
+          created_at: string;
+          id: string;
+          reason: string;
+          ref_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          id?: string;
+          reason: string;
+          ref_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          reason?: string;
+          ref_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      referral_codes: {
+        Row: {
+          code: string;
+          created_at: string;
+          user_id: string;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          user_id: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          created_at: string;
+          id: string;
+          referred_id: string;
+          referrer_id: string;
+          rewarded_at: string | null;
+          status: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          referred_id: string;
+          referrer_id: string;
+          rewarded_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          referred_id?: string;
+          referrer_id?: string;
+          rewarded_at?: string | null;
+          status?: string;
+        };
+        Relationships: [];
+      };
+      link_clicks: {
+        Row: {
+          created_at: string
+          id: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          source?: string
+        }
+        Relationships: []
+      }
+      tiktok_videos: {
+        Row: {
+          caption: string;
+          created_at: string;
+          duration_sec: number | null;
+          error: string | null;
+          id: string;
+          posted_at: string | null;
+          script: Json;
+          size_bytes: number | null;
+          status: string;
+          storage_path: string | null;
+          theme: string;
+          tiktok_publish_id: string | null;
+          title: string;
+          views: number | null;
+          likes: number | null;
+          platform: string;
+        };
+        Insert: {
+          caption?: string;
+          created_at?: string;
+          duration_sec?: number | null;
+          error?: string | null;
+          id?: string;
+          posted_at?: string | null;
+          script: Json;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          theme: string;
+          tiktok_publish_id?: string | null;
+          title: string;
+          views?: number | null;
+          likes?: number | null;
+          platform?: string;
+        };
+        Update: {
+          caption?: string;
+          created_at?: string;
+          duration_sec?: number | null;
+          error?: string | null;
+          id?: string;
+          posted_at?: string | null;
+          script?: Json;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          theme?: string;
+          tiktok_publish_id?: string | null;
+          title?: string;
+          views?: number | null;
+          likes?: number | null;
+          platform?: string;
+        };
+        Relationships: [];
+      };
       profile_unlocks: {
         Row: {
           amount: number;
           candidate_user_id: string;
+          coins: number;
           company_user_id: string;
           created_at: string;
           id: string;
+          interview_id: string | null;
           stripe_payment_intent_id: string | null;
         };
         Insert: {
           amount?: number;
           candidate_user_id: string;
+          coins?: number;
           company_user_id: string;
           created_at?: string;
           id?: string;
+          interview_id?: string | null;
           stripe_payment_intent_id?: string | null;
         };
         Update: {
           amount?: number;
           candidate_user_id?: string;
+          coins?: number;
           company_user_id?: string;
           created_at?: string;
           id?: string;
+          interview_id?: string | null;
           stripe_payment_intent_id?: string | null;
+        };
+        Relationships: [];
+      };
+      coin_lots: {
+        Row: {
+          amount_jpy: number;
+          coins_remaining: number;
+          coins_total: number;
+          company_user_id: string;
+          expires_at: string;
+          id: string;
+          purchased_at: string;
+          stripe_payment_intent_id: string | null;
+        };
+        Insert: {
+          amount_jpy: number;
+          coins_remaining: number;
+          coins_total: number;
+          company_user_id: string;
+          expires_at: string;
+          id?: string;
+          purchased_at?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Update: {
+          amount_jpy?: number;
+          coins_remaining?: number;
+          coins_total?: number;
+          company_user_id?: string;
+          expires_at?: string;
+          id?: string;
+          purchased_at?: string;
+          stripe_payment_intent_id?: string | null;
+        };
+        Relationships: [];
+      };
+      point_ledger: {
+        Row: {
+          created_at: string;
+          id: string;
+          points: number;
+          reason: string;
+          ref_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          points: number;
+          reason: string;
+          ref_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          points?: number;
+          reason?: string;
+          ref_id?: string | null;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -894,6 +1170,8 @@ export type Database = {
           interviewer_name: string | null;
           job_type: string | null;
           mode: string | null;
+          practice_settings: Json | null;
+          shown_to_companies: boolean;
           priorities: string[] | null;
           recording_path: string | null;
           screening_candidate_id: string | null;
@@ -910,6 +1188,8 @@ export type Database = {
           interviewer_name?: string | null;
           job_type?: string | null;
           mode?: string | null;
+          practice_settings?: Json | null;
+          shown_to_companies?: boolean;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;
@@ -926,6 +1206,8 @@ export type Database = {
           interviewer_name?: string | null;
           job_type?: string | null;
           mode?: string | null;
+          practice_settings?: Json | null;
+          shown_to_companies?: boolean;
           priorities?: string[] | null;
           recording_path?: string | null;
           screening_candidate_id?: string | null;
@@ -1604,6 +1886,24 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      practice_rank: {
+        Args: { p_mode: string; p_score: number };
+        Returns: { total: number; above: number }[];
+      };
+      spend_coins_for_unlock: {
+        Args: {
+          p_company: string;
+          p_candidate: string;
+          p_interview: string;
+          p_coins: number;
+          p_share_rate?: number;
+        };
+        Returns: { unlock_id: string; amount_jpy: number; points: number }[];
+      };
+      spend_points: {
+        Args: { p_user: string; p_points: number; p_reason: string; p_ref: string };
+        Returns: number;
+      };
       get_interview_invitation: {
         Args: { _token: string };
         Returns: {

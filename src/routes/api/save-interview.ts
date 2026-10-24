@@ -1,3 +1,6 @@
+import { rewardReferralOnFirstPractice } from "@/lib/referral";
+import { speechStats } from "@/lib/speech-stats";
+import { sanitizeDelivery } from "@/lib/delivery-tracker";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
@@ -6,6 +9,8 @@ import {
   RECRUITER_PROMPT,
   sanitizeCompetencies,
   sanitizeRecruiterView,
+  autoShowNewInterview,
+  recomputeSummaryScores,
 } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
@@ -81,9 +86,32 @@ export const Route = createFileRoute("/api/save-interview")({
         // screening_candidate_idを取得
         const { data: invFull } = await supabase
           .from("interview_invitations")
-          .select("screening_candidate_id")
+          .select(
+            "screening_candidate_id, avatar_style, practice_interview_type, practice_max_minutes, job_type, company_name, screening_data",
+          )
           .eq("token", body.token)
           .maybeSingle();
+        // 練習の設定（企業の人材検索で、どんな条件の面接だったかを見せる・絞り込むため）
+        const invSd = ((invFull as any)?.screening_data ?? {}) as Record<string, unknown>;
+        const practiceSettings = practiceMode
+          ? {
+              avatar_style: (invFull as any)?.avatar_style ?? null,
+              interview_type: (invFull as any)?.practice_interview_type ?? null,
+              max_minutes: (invFull as any)?.practice_max_minutes ?? null,
+              job_type: (invFull as any)?.job_type ?? body.jobType ?? null,
+              target_company:
+                typeof invSd.practice_desired_company_name === "string"
+                  ? invSd.practice_desired_company_name
+                  : null,
+              custom_questions:
+                typeof invSd.practice_custom_questions === "string"
+                  ? invSd.practice_custom_questions
+                      .split("\n")
+                      .map((q) => q.trim())
+                      .filter(Boolean)
+                  : [],
+            }
+          : null;
 
         // 1. interviewsテーブルに基本情報を保存
         const { data: interview, error: interviewError } = await supabase
@@ -97,7 +125,8 @@ export const Route = createFileRoute("/api/save-interview")({
             interviewer_name: "AI面接官",
             impression: body.isAbandoned ? "途中退出" : "完了",
             screening_candidate_id: (invFull as any)?.screening_candidate_id ?? null,
-          })
+            practice_settings: practiceSettings,
+          } as any)
           .select("id")
           .maybeSingle();
 
@@ -302,6 +331,12 @@ ${conversationText}
                   detailed_analysis: summaryData.detailed_analysis ?? null,
                   // 根拠の引用が本人の発言に実際にあるものだけを残す
                   competencies: sanitizeCompetencies(summaryData.competencies, spokenText),
+                  // 話し方の数字（答えの長さ・言いよどみ）。AIを使わず文字から数える
+                  speech_stats: speechStats(
+                    body.messages.filter((m) => m.role === "user").map((m) => m.content),
+                  ),
+                  // 間・声の波・目線（ブラウザで測った数字だけ）
+                  delivery: sanitizeDelivery((body as { delivery?: unknown }).delivery),
                   // 企業に見せるのはこちら（本人向けの改善点などは企業には出さない）
                   recruiter_view:
                     practiceMode === "individual"
@@ -344,11 +379,17 @@ ${conversationText}
         }
 
         // 個人モードの練習なら、公開プロフィールの人物まとめを作り直す印をつける（毎時の処理で更新）
+        // 友だち紹介で登録した人が最初の練習を終えたら、両方にボーナスを渡す
+        if (practiceMode && !body.isAbandoned) {
+          await rewardReferralOnFirstPractice(supabase, invitation.user_id);
+        }
+
         if (practiceMode === "individual") {
-          await supabase
-            .from("candidate_profiles")
-            .update({ summary_stale: true })
-            .eq("user_id", invitation.user_id);
+          if (!body.isAbandoned) {
+            await autoShowNewInterview(supabase, invitation.user_id, interviewId);
+          }
+          // 点数・回数はすぐ、文章は毎時の処理で作り直す
+          await recomputeSummaryScores(supabase, invitation.user_id);
         }
 
         // 面接タイプが指定されている個人モードの練習面接なら、会話内容から書類を自動生成する

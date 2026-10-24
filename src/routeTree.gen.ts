@@ -19,6 +19,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TiktokRouteImport } from './routes/tiktok'
 import { Route as TokushoRouteImport } from './routes/tokusho'
 import { Route as ActorInterviewTokenRouteImport } from './routes/actor-interview/$token'
 import { Route as ApiActorInterviewTurnRouteImport } from './routes/api/actor-interview-turn'
@@ -33,13 +34,14 @@ import { Route as ApiCreateActorInterviewRouteImport } from './routes/api/create
 import { Route as ApiCreatePracticeSessionRouteImport } from './routes/api/create-practice-session'
 import { Route as ApiCreateSubscriptionRouteImport } from './routes/api/create-subscription'
 import { Route as ApiCustomerPortalRouteImport } from './routes/api/customer-portal'
-import { Route as ApiDailyQuestionRouteImport } from './routes/api/daily-question'
 import { Route as ApiDeleteAccountRouteImport } from './routes/api/delete-account'
 import { Route as ApiExtractTemplateFieldsRouteImport } from './routes/api/extract-template-fields'
 import { Route as ApiGenerateDocumentRouteImport } from './routes/api/generate-document'
 import { Route as ApiGenerateSelfAnalysisRouteImport } from './routes/api/generate-self-analysis'
 import { Route as ApiInterviewTurnRouteImport } from './routes/api/interview-turn'
+import { Route as ApiPointsRouteImport } from './routes/api/points'
 import { Route as ApiPredictTicketSalesRouteImport } from './routes/api/predict-ticket-sales'
+import { Route as ApiReferralRouteImport } from './routes/api/referral'
 import { Route as ApiRefineDocumentRouteImport } from './routes/api/refine-document'
 import { Route as ApiRegisterDeviceRouteImport } from './routes/api/register-device'
 import { Route as ApiResearchActorRouteImport } from './routes/api/research-actor'
@@ -51,25 +53,35 @@ import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
+import { Route as ApiTiktokVideosRouteImport } from './routes/api/tiktok-videos'
 import { Route as ApiWhisperTranscribeRouteImport } from './routes/api/whisper-transcribe'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
+import { Route as EmbedAdRouteImport } from './routes/embed.ad'
 import { Route as InterviewTokenRouteImport } from './routes/interview/$token'
 import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
+import { Route as PrivateInviteRouteImport } from './routes/private/invite'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
+import { Route as StudioTiktokRouteImport } from './routes/studio.tiktok'
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
 import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
 import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
+import { Route as ApiNotificationsIndexRouteImport } from './routes/api/notifications/index'
+import { Route as ApiNotificationsPeekRouteImport } from './routes/api/notifications/peek'
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
-import { Route as ApiTalentAdminStatsRouteImport } from './routes/api/talent/admin-stats'
+import { Route as ApiStudioJobRouteImport } from './routes/api/studio/job'
+import { Route as ApiStudioUploadRouteImport } from './routes/api/studio/upload'
+import { Route as ApiTalentCoinsRouteImport } from './routes/api/talent/coins'
 import { Route as ApiTalentContactsRouteImport } from './routes/api/talent/contacts'
 import { Route as ApiTalentDetailRouteImport } from './routes/api/talent/detail'
 import { Route as ApiTalentMessagesRouteImport } from './routes/api/talent/messages'
+import { Route as ApiTalentMyInterviewsRouteImport } from './routes/api/talent/my-interviews'
 import { Route as ApiTalentMyProfileRouteImport } from './routes/api/talent/my-profile'
+import { Route as ApiTalentMyRankRouteImport } from './routes/api/talent/my-rank'
 import { Route as ApiTalentPurchasedRouteImport } from './routes/api/talent/purchased'
 import { Route as ApiTalentRecordingRouteImport } from './routes/api/talent/recording'
 import { Route as ApiTalentSearchRouteImport } from './routes/api/talent/search'
@@ -89,7 +101,6 @@ import { Route as BusinessCompanySettingsRouteImport } from './routes/business/c
 import { Route as BusinessSchoolIndexRouteImport } from './routes/business/school/index'
 import { Route as BusinessSchoolStudentsRouteImport } from './routes/business/school/students'
 import { Route as PrivateIndividualIndexRouteImport } from './routes/private/individual/index'
-import { Route as PrivateIndividualDailyQuestionsRouteImport } from './routes/private/individual/daily-questions'
 import { Route as PrivateIndividualDocumentsRouteImport } from './routes/private/individual/documents'
 import { Route as PrivateIndividualHistoryRouteImport } from './routes/private/individual/history'
 import { Route as PrivateIndividualOffersRouteImport } from './routes/private/individual/offers'
@@ -101,7 +112,6 @@ import { Route as PrivateIndividualResearchRouteImport } from './routes/private/
 import { Route as PrivateIndividualSelfAnalysisRouteImport } from './routes/private/individual/self-analysis'
 import { Route as PrivateIndividualTalentRouteImport } from './routes/private/individual/talent'
 import { Route as PrivateStudentIndexRouteImport } from './routes/private/student/index'
-import { Route as PrivateStudentDailyQuestionsRouteImport } from './routes/private/student/daily-questions'
 import { Route as PrivateStudentDocumentsRouteImport } from './routes/private/student/documents'
 import { Route as PrivateStudentHistoryRouteImport } from './routes/private/student/history'
 import { Route as PrivateStudentOnboardingRouteImport } from './routes/private/student/onboarding'
@@ -166,6 +176,11 @@ const ScreeningRoute = ScreeningRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiktokRoute = TiktokRouteImport.update({
+  id: '/tiktok',
+  path: '/tiktok',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TokushoRoute = TokushoRouteImport.update({
@@ -240,11 +255,6 @@ const ApiCustomerPortalRoute = ApiCustomerPortalRouteImport.update({
   path: '/api/customer-portal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiDailyQuestionRoute = ApiDailyQuestionRouteImport.update({
-  id: '/api/daily-question',
-  path: '/api/daily-question',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiDeleteAccountRoute = ApiDeleteAccountRouteImport.update({
   id: '/api/delete-account',
   path: '/api/delete-account',
@@ -271,9 +281,19 @@ const ApiInterviewTurnRoute = ApiInterviewTurnRouteImport.update({
   path: '/api/interview-turn',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPointsRoute = ApiPointsRouteImport.update({
+  id: '/api/points',
+  path: '/api/points',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPredictTicketSalesRoute = ApiPredictTicketSalesRouteImport.update({
   id: '/api/predict-ticket-sales',
   path: '/api/predict-ticket-sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReferralRoute = ApiReferralRouteImport.update({
+  id: '/api/referral',
+  path: '/api/referral',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiRefineDocumentRoute = ApiRefineDocumentRouteImport.update({
@@ -332,6 +352,11 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTiktokVideosRoute = ApiTiktokVideosRouteImport.update({
+  id: '/api/tiktok-videos',
+  path: '/api/tiktok-videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWhisperTranscribeRoute = ApiWhisperTranscribeRouteImport.update({
   id: '/api/whisper-transcribe',
   path: '/api/whisper-transcribe',
@@ -345,6 +370,11 @@ const BusinessIndexRoute = BusinessIndexRouteImport.update({
 const ChatInterviewTokenRoute = ChatInterviewTokenRouteImport.update({
   id: '/chat-interview/$token',
   path: '/chat-interview/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmbedAdRoute = EmbedAdRouteImport.update({
+  id: '/embed/ad',
+  path: '/embed/ad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InterviewTokenRoute = InterviewTokenRouteImport.update({
@@ -362,6 +392,11 @@ const PrivateAdminRoute = PrivateAdminRouteImport.update({
   path: '/private/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateInviteRoute = PrivateInviteRouteImport.update({
+  id: '/private/invite',
+  path: '/private/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
   id: '/private/welcome',
   path: '/private/welcome',
@@ -370,6 +405,11 @@ const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
 const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   id: '/screening_/history',
   path: '/screening/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioTiktokRoute = StudioTiktokRouteImport.update({
+  id: '/studio/tiktok',
+  path: '/studio/tiktok',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiJobsApplicantsRoute = ApiJobsApplicantsRouteImport.update({
@@ -387,6 +427,16 @@ const ApiJobsPublicRoute = ApiJobsPublicRouteImport.update({
   path: '/api/jobs/public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNotificationsIndexRoute = ApiNotificationsIndexRouteImport.update({
+  id: '/api/notifications/',
+  path: '/api/notifications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsPeekRoute = ApiNotificationsPeekRouteImport.update({
+  id: '/api/notifications/peek',
+  path: '/api/notifications/peek',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSchoolJoinRoute = ApiSchoolJoinRouteImport.update({
   id: '/api/school/join',
   path: '/api/school/join',
@@ -402,9 +452,19 @@ const ApiSchoolStudentsRoute = ApiSchoolStudentsRouteImport.update({
   path: '/api/school/students',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTalentAdminStatsRoute = ApiTalentAdminStatsRouteImport.update({
-  id: '/api/talent/admin-stats',
-  path: '/api/talent/admin-stats',
+const ApiStudioJobRoute = ApiStudioJobRouteImport.update({
+  id: '/api/studio/job',
+  path: '/api/studio/job',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStudioUploadRoute = ApiStudioUploadRouteImport.update({
+  id: '/api/studio/upload',
+  path: '/api/studio/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentCoinsRoute = ApiTalentCoinsRouteImport.update({
+  id: '/api/talent/coins',
+  path: '/api/talent/coins',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTalentContactsRoute = ApiTalentContactsRouteImport.update({
@@ -422,9 +482,19 @@ const ApiTalentMessagesRoute = ApiTalentMessagesRouteImport.update({
   path: '/api/talent/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTalentMyInterviewsRoute = ApiTalentMyInterviewsRouteImport.update({
+  id: '/api/talent/my-interviews',
+  path: '/api/talent/my-interviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTalentMyProfileRoute = ApiTalentMyProfileRouteImport.update({
   id: '/api/talent/my-profile',
   path: '/api/talent/my-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTalentMyRankRoute = ApiTalentMyRankRouteImport.update({
+  id: '/api/talent/my-rank',
+  path: '/api/talent/my-rank',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTalentPurchasedRoute = ApiTalentPurchasedRouteImport.update({
@@ -525,12 +595,6 @@ const PrivateIndividualIndexRoute = PrivateIndividualIndexRouteImport.update({
   path: '/private/individual/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateIndividualDailyQuestionsRoute =
-  PrivateIndividualDailyQuestionsRouteImport.update({
-    id: '/private/individual/daily-questions',
-    path: '/private/individual/daily-questions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const PrivateIndividualDocumentsRoute =
   PrivateIndividualDocumentsRouteImport.update({
     id: '/private/individual/documents',
@@ -593,12 +657,6 @@ const PrivateStudentIndexRoute = PrivateStudentIndexRouteImport.update({
   path: '/private/student/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateStudentDailyQuestionsRoute =
-  PrivateStudentDailyQuestionsRouteImport.update({
-    id: '/private/student/daily-questions',
-    path: '/private/student/daily-questions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const PrivateStudentDocumentsRoute = PrivateStudentDocumentsRouteImport.update({
   id: '/private/student/documents',
   path: '/private/student/documents',
@@ -694,6 +752,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -708,13 +767,14 @@ export interface FileRoutesByFullPath {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -726,25 +786,34 @@ export interface FileRoutesByFullPath {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -760,7 +829,6 @@ export interface FileRoutesByFullPath {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -771,7 +839,6 @@ export interface FileRoutesByFullPath {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -780,6 +847,7 @@ export interface FileRoutesByFullPath {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
@@ -804,6 +872,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -818,13 +887,14 @@ export interface FileRoutesByTo {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -836,25 +906,34 @@ export interface FileRoutesByTo {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business': typeof BusinessIndexRoute
   '/private': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -870,7 +949,6 @@ export interface FileRoutesByTo {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -881,7 +959,6 @@ export interface FileRoutesByTo {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -890,6 +967,7 @@ export interface FileRoutesByTo {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications': typeof ApiNotificationsIndexRoute
   '/business/actor': typeof BusinessActorIndexRoute
   '/business/company': typeof BusinessCompanyIndexRoute
   '/business/school': typeof BusinessSchoolIndexRoute
@@ -915,6 +993,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/screening': typeof ScreeningRoute
   '/terms': typeof TermsRoute
+  '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
@@ -929,13 +1008,14 @@ export interface FileRoutesById {
   '/api/create-practice-session': typeof ApiCreatePracticeSessionRoute
   '/api/create-subscription': typeof ApiCreateSubscriptionRoute
   '/api/customer-portal': typeof ApiCustomerPortalRoute
-  '/api/daily-question': typeof ApiDailyQuestionRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/extract-template-fields': typeof ApiExtractTemplateFieldsRoute
   '/api/generate-document': typeof ApiGenerateDocumentRoute
   '/api/generate-self-analysis': typeof ApiGenerateSelfAnalysisRoute
   '/api/interview-turn': typeof ApiInterviewTurnRoute
+  '/api/points': typeof ApiPointsRoute
   '/api/predict-ticket-sales': typeof ApiPredictTicketSalesRoute
+  '/api/referral': typeof ApiReferralRoute
   '/api/refine-document': typeof ApiRefineDocumentRoute
   '/api/register-device': typeof ApiRegisterDeviceRoute
   '/api/research-actor': typeof ApiResearchActorRoute
@@ -947,25 +1027,34 @@ export interface FileRoutesById {
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/tiktok-videos': typeof ApiTiktokVideosRoute
   '/api/whisper-transcribe': typeof ApiWhisperTranscribeRoute
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
+  '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
+  '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
   '/screening_/history': typeof ScreeningHistoryRoute
+  '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
   '/private/': typeof PrivateIndexRoute
   '/api/jobs/applicants': typeof ApiJobsApplicantsRoute
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
+  '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
-  '/api/talent/admin-stats': typeof ApiTalentAdminStatsRoute
+  '/api/studio/job': typeof ApiStudioJobRoute
+  '/api/studio/upload': typeof ApiStudioUploadRoute
+  '/api/talent/coins': typeof ApiTalentCoinsRoute
   '/api/talent/contacts': typeof ApiTalentContactsRoute
   '/api/talent/detail': typeof ApiTalentDetailRoute
   '/api/talent/messages': typeof ApiTalentMessagesRoute
+  '/api/talent/my-interviews': typeof ApiTalentMyInterviewsRoute
   '/api/talent/my-profile': typeof ApiTalentMyProfileRoute
+  '/api/talent/my-rank': typeof ApiTalentMyRankRoute
   '/api/talent/purchased': typeof ApiTalentPurchasedRoute
   '/api/talent/recording': typeof ApiTalentRecordingRoute
   '/api/talent/search': typeof ApiTalentSearchRoute
@@ -981,7 +1070,6 @@ export interface FileRoutesById {
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
-  '/private/individual/daily-questions': typeof PrivateIndividualDailyQuestionsRoute
   '/private/individual/documents': typeof PrivateIndividualDocumentsRoute
   '/private/individual/history': typeof PrivateIndividualHistoryRoute
   '/private/individual/offers': typeof PrivateIndividualOffersRoute
@@ -992,7 +1080,6 @@ export interface FileRoutesById {
   '/private/individual/research': typeof PrivateIndividualResearchRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
-  '/private/student/daily-questions': typeof PrivateStudentDailyQuestionsRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
   '/private/student/history': typeof PrivateStudentHistoryRoute
   '/private/student/onboarding': typeof PrivateStudentOnboardingRoute
@@ -1001,6 +1088,7 @@ export interface FileRoutesById {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
@@ -1027,6 +1115,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1041,13 +1130,14 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1059,25 +1149,34 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
+    | '/studio/tiktok'
     | '/business/'
     | '/private/'
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
+    | '/api/studio/job'
+    | '/api/studio/upload'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
+    | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1093,7 +1192,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1104,7 +1202,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1113,6 +1210,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
@@ -1137,6 +1235,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1151,13 +1250,14 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1169,25 +1269,34 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening/history'
+    | '/studio/tiktok'
     | '/business'
     | '/private'
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
+    | '/api/studio/job'
+    | '/api/studio/upload'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
+    | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1203,7 +1312,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1214,7 +1322,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1223,6 +1330,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications'
     | '/business/actor'
     | '/business/company'
     | '/business/school'
@@ -1247,6 +1355,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/screening'
     | '/terms'
+    | '/tiktok'
     | '/tokusho'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
@@ -1261,13 +1370,14 @@ export interface FileRouteTypes {
     | '/api/create-practice-session'
     | '/api/create-subscription'
     | '/api/customer-portal'
-    | '/api/daily-question'
     | '/api/delete-account'
     | '/api/extract-template-fields'
     | '/api/generate-document'
     | '/api/generate-self-analysis'
     | '/api/interview-turn'
+    | '/api/points'
     | '/api/predict-ticket-sales'
+    | '/api/referral'
     | '/api/refine-document'
     | '/api/register-device'
     | '/api/research-actor'
@@ -1279,25 +1389,34 @@ export interface FileRouteTypes {
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
+    | '/api/tiktok-videos'
     | '/api/whisper-transcribe'
     | '/chat-interview/$token'
+    | '/embed/ad'
     | '/interview/$token'
     | '/private/admin'
+    | '/private/invite'
     | '/private/welcome'
     | '/screening_/history'
+    | '/studio/tiktok'
     | '/business/'
     | '/private/'
     | '/api/jobs/applicants'
     | '/api/jobs/apply'
     | '/api/jobs/public'
+    | '/api/notifications/peek'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
-    | '/api/talent/admin-stats'
+    | '/api/studio/job'
+    | '/api/studio/upload'
+    | '/api/talent/coins'
     | '/api/talent/contacts'
     | '/api/talent/detail'
     | '/api/talent/messages'
+    | '/api/talent/my-interviews'
     | '/api/talent/my-profile'
+    | '/api/talent/my-rank'
     | '/api/talent/purchased'
     | '/api/talent/recording'
     | '/api/talent/search'
@@ -1313,7 +1432,6 @@ export interface FileRouteTypes {
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
-    | '/private/individual/daily-questions'
     | '/private/individual/documents'
     | '/private/individual/history'
     | '/private/individual/offers'
@@ -1324,7 +1442,6 @@ export interface FileRouteTypes {
     | '/private/individual/research'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
-    | '/private/student/daily-questions'
     | '/private/student/documents'
     | '/private/student/history'
     | '/private/student/onboarding'
@@ -1333,6 +1450,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/api/notifications/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
@@ -1358,6 +1476,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ScreeningRoute: typeof ScreeningRoute
   TermsRoute: typeof TermsRoute
+  TiktokRoute: typeof TiktokRoute
   TokushoRoute: typeof TokushoRoute
   ActorInterviewTokenRoute: typeof ActorInterviewTokenRoute
   ApiActorInterviewTurnRoute: typeof ApiActorInterviewTurnRoute
@@ -1372,13 +1491,14 @@ export interface RootRouteChildren {
   ApiCreatePracticeSessionRoute: typeof ApiCreatePracticeSessionRoute
   ApiCreateSubscriptionRoute: typeof ApiCreateSubscriptionRoute
   ApiCustomerPortalRoute: typeof ApiCustomerPortalRoute
-  ApiDailyQuestionRoute: typeof ApiDailyQuestionRoute
   ApiDeleteAccountRoute: typeof ApiDeleteAccountRoute
   ApiExtractTemplateFieldsRoute: typeof ApiExtractTemplateFieldsRoute
   ApiGenerateDocumentRoute: typeof ApiGenerateDocumentRoute
   ApiGenerateSelfAnalysisRoute: typeof ApiGenerateSelfAnalysisRoute
   ApiInterviewTurnRoute: typeof ApiInterviewTurnRoute
+  ApiPointsRoute: typeof ApiPointsRoute
   ApiPredictTicketSalesRoute: typeof ApiPredictTicketSalesRoute
+  ApiReferralRoute: typeof ApiReferralRoute
   ApiRefineDocumentRoute: typeof ApiRefineDocumentRoute
   ApiRegisterDeviceRoute: typeof ApiRegisterDeviceRoute
   ApiResearchActorRoute: typeof ApiResearchActorRoute
@@ -1390,25 +1510,34 @@ export interface RootRouteChildren {
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiTiktokVideosRoute: typeof ApiTiktokVideosRoute
   ApiWhisperTranscribeRoute: typeof ApiWhisperTranscribeRoute
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
+  EmbedAdRoute: typeof EmbedAdRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
   PrivateAdminRoute: typeof PrivateAdminRoute
+  PrivateInviteRoute: typeof PrivateInviteRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
+  StudioTiktokRoute: typeof StudioTiktokRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
   ApiJobsApplicantsRoute: typeof ApiJobsApplicantsRoute
   ApiJobsApplyRoute: typeof ApiJobsApplyRoute
   ApiJobsPublicRoute: typeof ApiJobsPublicRoute
+  ApiNotificationsPeekRoute: typeof ApiNotificationsPeekRoute
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
-  ApiTalentAdminStatsRoute: typeof ApiTalentAdminStatsRoute
+  ApiStudioJobRoute: typeof ApiStudioJobRoute
+  ApiStudioUploadRoute: typeof ApiStudioUploadRoute
+  ApiTalentCoinsRoute: typeof ApiTalentCoinsRoute
   ApiTalentContactsRoute: typeof ApiTalentContactsRoute
   ApiTalentDetailRoute: typeof ApiTalentDetailRoute
   ApiTalentMessagesRoute: typeof ApiTalentMessagesRoute
+  ApiTalentMyInterviewsRoute: typeof ApiTalentMyInterviewsRoute
   ApiTalentMyProfileRoute: typeof ApiTalentMyProfileRoute
+  ApiTalentMyRankRoute: typeof ApiTalentMyRankRoute
   ApiTalentPurchasedRoute: typeof ApiTalentPurchasedRoute
   ApiTalentRecordingRoute: typeof ApiTalentRecordingRoute
   ApiTalentSearchRoute: typeof ApiTalentSearchRoute
@@ -1424,7 +1553,6 @@ export interface RootRouteChildren {
   BusinessCompanyScreeningRoute: typeof BusinessCompanyScreeningRoute
   BusinessCompanySettingsRoute: typeof BusinessCompanySettingsRoute
   BusinessSchoolStudentsRoute: typeof BusinessSchoolStudentsRoute
-  PrivateIndividualDailyQuestionsRoute: typeof PrivateIndividualDailyQuestionsRoute
   PrivateIndividualDocumentsRoute: typeof PrivateIndividualDocumentsRoute
   PrivateIndividualHistoryRoute: typeof PrivateIndividualHistoryRoute
   PrivateIndividualOffersRoute: typeof PrivateIndividualOffersRoute
@@ -1435,7 +1563,6 @@ export interface RootRouteChildren {
   PrivateIndividualResearchRoute: typeof PrivateIndividualResearchRoute
   PrivateIndividualSelfAnalysisRoute: typeof PrivateIndividualSelfAnalysisRoute
   PrivateIndividualTalentRoute: typeof PrivateIndividualTalentRoute
-  PrivateStudentDailyQuestionsRoute: typeof PrivateStudentDailyQuestionsRoute
   PrivateStudentDocumentsRoute: typeof PrivateStudentDocumentsRoute
   PrivateStudentHistoryRoute: typeof PrivateStudentHistoryRoute
   PrivateStudentOnboardingRoute: typeof PrivateStudentOnboardingRoute
@@ -1444,6 +1571,7 @@ export interface RootRouteChildren {
   PrivateStudentResearchRoute: typeof PrivateStudentResearchRoute
   PrivateStudentSelfAnalysisRoute: typeof PrivateStudentSelfAnalysisRoute
   PrivateStudentStatementRoute: typeof PrivateStudentStatementRoute
+  ApiNotificationsIndexRoute: typeof ApiNotificationsIndexRoute
   BusinessActorIndexRoute: typeof BusinessActorIndexRoute
   BusinessCompanyIndexRoute: typeof BusinessCompanyIndexRoute
   BusinessSchoolIndexRoute: typeof BusinessSchoolIndexRoute
@@ -1528,6 +1656,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tiktok': {
+      id: '/tiktok'
+      path: '/tiktok'
+      fullPath: '/tiktok'
+      preLoaderRoute: typeof TiktokRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tokusho': {
@@ -1628,13 +1763,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCustomerPortalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/daily-question': {
-      id: '/api/daily-question'
-      path: '/api/daily-question'
-      fullPath: '/api/daily-question'
-      preLoaderRoute: typeof ApiDailyQuestionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/delete-account': {
       id: '/api/delete-account'
       path: '/api/delete-account'
@@ -1670,11 +1798,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInterviewTurnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/points': {
+      id: '/api/points'
+      path: '/api/points'
+      fullPath: '/api/points'
+      preLoaderRoute: typeof ApiPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/predict-ticket-sales': {
       id: '/api/predict-ticket-sales'
       path: '/api/predict-ticket-sales'
       fullPath: '/api/predict-ticket-sales'
       preLoaderRoute: typeof ApiPredictTicketSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/referral': {
+      id: '/api/referral'
+      path: '/api/referral'
+      fullPath: '/api/referral'
+      preLoaderRoute: typeof ApiReferralRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/refine-document': {
@@ -1754,6 +1896,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tiktok-videos': {
+      id: '/api/tiktok-videos'
+      path: '/api/tiktok-videos'
+      fullPath: '/api/tiktok-videos'
+      preLoaderRoute: typeof ApiTiktokVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/whisper-transcribe': {
       id: '/api/whisper-transcribe'
       path: '/api/whisper-transcribe'
@@ -1773,6 +1922,13 @@ declare module '@tanstack/react-router' {
       path: '/chat-interview/$token'
       fullPath: '/chat-interview/$token'
       preLoaderRoute: typeof ChatInterviewTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/embed/ad': {
+      id: '/embed/ad'
+      path: '/embed/ad'
+      fullPath: '/embed/ad'
+      preLoaderRoute: typeof EmbedAdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interview/$token': {
@@ -1796,6 +1952,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/private/invite': {
+      id: '/private/invite'
+      path: '/private/invite'
+      fullPath: '/private/invite'
+      preLoaderRoute: typeof PrivateInviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/private/welcome': {
       id: '/private/welcome'
       path: '/private/welcome'
@@ -1808,6 +1971,13 @@ declare module '@tanstack/react-router' {
       path: '/screening/history'
       fullPath: '/screening/history'
       preLoaderRoute: typeof ScreeningHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio/tiktok': {
+      id: '/studio/tiktok'
+      path: '/studio/tiktok'
+      fullPath: '/studio/tiktok'
+      preLoaderRoute: typeof StudioTiktokRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/jobs/applicants': {
@@ -1831,6 +2001,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiJobsPublicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/notifications/': {
+      id: '/api/notifications/'
+      path: '/api/notifications'
+      fullPath: '/api/notifications/'
+      preLoaderRoute: typeof ApiNotificationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/peek': {
+      id: '/api/notifications/peek'
+      path: '/api/notifications/peek'
+      fullPath: '/api/notifications/peek'
+      preLoaderRoute: typeof ApiNotificationsPeekRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/school/join': {
       id: '/api/school/join'
       path: '/api/school/join'
@@ -1852,11 +2036,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSchoolStudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/talent/admin-stats': {
-      id: '/api/talent/admin-stats'
-      path: '/api/talent/admin-stats'
-      fullPath: '/api/talent/admin-stats'
-      preLoaderRoute: typeof ApiTalentAdminStatsRouteImport
+    '/api/studio/job': {
+      id: '/api/studio/job'
+      path: '/api/studio/job'
+      fullPath: '/api/studio/job'
+      preLoaderRoute: typeof ApiStudioJobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/studio/upload': {
+      id: '/api/studio/upload'
+      path: '/api/studio/upload'
+      fullPath: '/api/studio/upload'
+      preLoaderRoute: typeof ApiStudioUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/coins': {
+      id: '/api/talent/coins'
+      path: '/api/talent/coins'
+      fullPath: '/api/talent/coins'
+      preLoaderRoute: typeof ApiTalentCoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/talent/contacts': {
@@ -1880,11 +2078,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTalentMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/talent/my-interviews': {
+      id: '/api/talent/my-interviews'
+      path: '/api/talent/my-interviews'
+      fullPath: '/api/talent/my-interviews'
+      preLoaderRoute: typeof ApiTalentMyInterviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/talent/my-profile': {
       id: '/api/talent/my-profile'
       path: '/api/talent/my-profile'
       fullPath: '/api/talent/my-profile'
       preLoaderRoute: typeof ApiTalentMyProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/talent/my-rank': {
+      id: '/api/talent/my-rank'
+      path: '/api/talent/my-rank'
+      fullPath: '/api/talent/my-rank'
+      preLoaderRoute: typeof ApiTalentMyRankRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/talent/purchased': {
@@ -2020,13 +2232,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateIndividualIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/private/individual/daily-questions': {
-      id: '/private/individual/daily-questions'
-      path: '/private/individual/daily-questions'
-      fullPath: '/private/individual/daily-questions'
-      preLoaderRoute: typeof PrivateIndividualDailyQuestionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/private/individual/documents': {
       id: '/private/individual/documents'
       path: '/private/individual/documents'
@@ -2102,13 +2307,6 @@ declare module '@tanstack/react-router' {
       path: '/private/student'
       fullPath: '/private/student/'
       preLoaderRoute: typeof PrivateStudentIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/private/student/daily-questions': {
-      id: '/private/student/daily-questions'
-      path: '/private/student/daily-questions'
-      fullPath: '/private/student/daily-questions'
-      preLoaderRoute: typeof PrivateStudentDailyQuestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/private/student/documents': {
@@ -2230,6 +2428,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ScreeningRoute: ScreeningRoute,
   TermsRoute: TermsRoute,
+  TiktokRoute: TiktokRoute,
   TokushoRoute: TokushoRoute,
   ActorInterviewTokenRoute: ActorInterviewTokenRoute,
   ApiActorInterviewTurnRoute: ApiActorInterviewTurnRoute,
@@ -2244,13 +2443,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCreatePracticeSessionRoute: ApiCreatePracticeSessionRoute,
   ApiCreateSubscriptionRoute: ApiCreateSubscriptionRoute,
   ApiCustomerPortalRoute: ApiCustomerPortalRoute,
-  ApiDailyQuestionRoute: ApiDailyQuestionRoute,
   ApiDeleteAccountRoute: ApiDeleteAccountRoute,
   ApiExtractTemplateFieldsRoute: ApiExtractTemplateFieldsRoute,
   ApiGenerateDocumentRoute: ApiGenerateDocumentRoute,
   ApiGenerateSelfAnalysisRoute: ApiGenerateSelfAnalysisRoute,
   ApiInterviewTurnRoute: ApiInterviewTurnRoute,
+  ApiPointsRoute: ApiPointsRoute,
   ApiPredictTicketSalesRoute: ApiPredictTicketSalesRoute,
+  ApiReferralRoute: ApiReferralRoute,
   ApiRefineDocumentRoute: ApiRefineDocumentRoute,
   ApiRegisterDeviceRoute: ApiRegisterDeviceRoute,
   ApiResearchActorRoute: ApiResearchActorRoute,
@@ -2262,25 +2462,34 @@ const rootRouteChildren: RootRouteChildren = {
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiTiktokVideosRoute: ApiTiktokVideosRoute,
   ApiWhisperTranscribeRoute: ApiWhisperTranscribeRoute,
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
+  EmbedAdRoute: EmbedAdRoute,
   InterviewTokenRoute: InterviewTokenRoute,
   PrivateAdminRoute: PrivateAdminRoute,
+  PrivateInviteRoute: PrivateInviteRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
   ScreeningHistoryRoute: ScreeningHistoryRoute,
+  StudioTiktokRoute: StudioTiktokRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   PrivateIndexRoute: PrivateIndexRoute,
   ApiJobsApplicantsRoute: ApiJobsApplicantsRoute,
   ApiJobsApplyRoute: ApiJobsApplyRoute,
   ApiJobsPublicRoute: ApiJobsPublicRoute,
+  ApiNotificationsPeekRoute: ApiNotificationsPeekRoute,
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
-  ApiTalentAdminStatsRoute: ApiTalentAdminStatsRoute,
+  ApiStudioJobRoute: ApiStudioJobRoute,
+  ApiStudioUploadRoute: ApiStudioUploadRoute,
+  ApiTalentCoinsRoute: ApiTalentCoinsRoute,
   ApiTalentContactsRoute: ApiTalentContactsRoute,
   ApiTalentDetailRoute: ApiTalentDetailRoute,
   ApiTalentMessagesRoute: ApiTalentMessagesRoute,
+  ApiTalentMyInterviewsRoute: ApiTalentMyInterviewsRoute,
   ApiTalentMyProfileRoute: ApiTalentMyProfileRoute,
+  ApiTalentMyRankRoute: ApiTalentMyRankRoute,
   ApiTalentPurchasedRoute: ApiTalentPurchasedRoute,
   ApiTalentRecordingRoute: ApiTalentRecordingRoute,
   ApiTalentSearchRoute: ApiTalentSearchRoute,
@@ -2296,7 +2505,6 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyScreeningRoute: BusinessCompanyScreeningRoute,
   BusinessCompanySettingsRoute: BusinessCompanySettingsRoute,
   BusinessSchoolStudentsRoute: BusinessSchoolStudentsRoute,
-  PrivateIndividualDailyQuestionsRoute: PrivateIndividualDailyQuestionsRoute,
   PrivateIndividualDocumentsRoute: PrivateIndividualDocumentsRoute,
   PrivateIndividualHistoryRoute: PrivateIndividualHistoryRoute,
   PrivateIndividualOffersRoute: PrivateIndividualOffersRoute,
@@ -2307,7 +2515,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateIndividualResearchRoute: PrivateIndividualResearchRoute,
   PrivateIndividualSelfAnalysisRoute: PrivateIndividualSelfAnalysisRoute,
   PrivateIndividualTalentRoute: PrivateIndividualTalentRoute,
-  PrivateStudentDailyQuestionsRoute: PrivateStudentDailyQuestionsRoute,
   PrivateStudentDocumentsRoute: PrivateStudentDocumentsRoute,
   PrivateStudentHistoryRoute: PrivateStudentHistoryRoute,
   PrivateStudentOnboardingRoute: PrivateStudentOnboardingRoute,
@@ -2316,6 +2523,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateStudentResearchRoute: PrivateStudentResearchRoute,
   PrivateStudentSelfAnalysisRoute: PrivateStudentSelfAnalysisRoute,
   PrivateStudentStatementRoute: PrivateStudentStatementRoute,
+  ApiNotificationsIndexRoute: ApiNotificationsIndexRoute,
   BusinessActorIndexRoute: BusinessActorIndexRoute,
   BusinessCompanyIndexRoute: BusinessCompanyIndexRoute,
   BusinessSchoolIndexRoute: BusinessSchoolIndexRoute,

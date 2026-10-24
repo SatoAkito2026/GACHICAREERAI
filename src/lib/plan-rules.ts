@@ -74,8 +74,12 @@ export function startOfMonthJst(now = new Date()): string {
   return new Date(jst.getTime() - JST_OFFSET_MS).toISOString();
 }
 
+/** 職種を選ばなかったときの仮の名前。職種の数には数えない */
+const PLACEHOLDER_JOB_TYPES = ["模擬面接", "受験"];
+
 export function normalizeJobType(s: string | null | undefined): string {
-  return (s ?? "").trim();
+  const v = (s ?? "").trim();
+  return PLACEHOLDER_JOB_TYPES.includes(v) ? "" : v;
 }
 
 /**
@@ -83,3 +87,24 @@ export function normalizeJobType(s: string | null | undefined): string {
  * 実際の請求額は Stripe の従量課金の Price（create-subscription.ts の PRICE_IDS.company_metered）で決まる。ここは表示用。
  */
 export const COMPANY_INTERVIEW_PRICE_JPY = 5500;
+
+/** 書類生成AI（履歴書・職務経歴書・志望理由書など）の回数。種類は全プランで同じ */
+export const DOCUMENT_RULES: Record<IndividualPlanKey, { perDay: number; perMonth: number }> = {
+  free: { perDay: 1, perMonth: 3 },
+  individual_light: { perDay: 2, perMonth: 5 },
+  individual_pro: { perDay: 3, perMonth: 15 },
+};
+
+export function documentRule(plan: string | null | undefined) {
+  return DOCUMENT_RULES[toIndividualPlan(plan)];
+}
+
+/** 企業研究AI（志望校研究AI）はプロだけ。月の回数 */
+export const RESEARCH_PER_MONTH_PRO = 5;
+
+/** 自己分析レポートの月の回数（基本と詳細の合計）。詳細はプロだけ */
+export const SELF_ANALYSIS_PER_MONTH: Record<IndividualPlanKey, number> = {
+  free: 1,
+  individual_light: 3,
+  individual_pro: 10,
+};

@@ -33,15 +33,15 @@ const DOC_OPTIONS_BY_MODE: Record<
   individual: [
     { value: "resume", label: "履歴書生成", needsReviewText: false },
     { value: "work_history_resume", label: "職務経歴書生成", needsReviewText: false },
-    { value: "resume_review", label: "履歴書添削（プロ限定）", needsReviewText: true },
-    { value: "work_history_review", label: "職務経歴書添削（プロ限定）", needsReviewText: true },
-    { value: "motivation_letter", label: "志望動機書（プロ限定）", needsReviewText: false },
-    { value: "self_pr", label: "自己PR（プロ限定）", needsReviewText: false },
-    { value: "es_review", label: "ES改稿・完成版作成（プロ限定）", needsReviewText: true },
+    { value: "resume_review", label: "履歴書添削", needsReviewText: true },
+    { value: "work_history_review", label: "職務経歴書添削", needsReviewText: true },
+    { value: "motivation_letter", label: "志望動機書", needsReviewText: false },
+    { value: "self_pr", label: "自己PR", needsReviewText: false },
+    { value: "es_review", label: "ES改稿・完成版作成", needsReviewText: true },
   ],
   student: [
     { value: "statement_of_purpose", label: "志望理由書", needsReviewText: false },
-    { value: "essay_review", label: "小論文改稿・完成版作成（プロ限定）", needsReviewText: true },
+    { value: "essay_review", label: "小論文改稿・完成版作成", needsReviewText: true },
   ],
 };
 
@@ -176,6 +176,19 @@ export function DocumentsContent({
   const [exportTarget, setExportTarget] = useState<SavedDoc | null>(null);
   const [exporting, setExporting] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
+  // 書類生成AIの残り回数（プランで決まる）
+  const [docUsage, setDocUsage] = useState<{
+    rule: { perDay: number; perMonth: number };
+    usage: { today: number; month: number };
+  } | null>(null);
+  const loadDocUsage = async () => {
+    if (!session) return;
+    const res = await fetch("/api/generate-document", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      cache: "no-store",
+    });
+    if (res.ok) setDocUsage(await res.json());
+  };
 
   useEffect(() => {
     if (!session) return;
@@ -189,6 +202,7 @@ export function DocumentsContent({
       setCareerProfile(data ?? null);
     })();
     void loadCustomTemplates();
+    void loadDocUsage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
@@ -376,6 +390,7 @@ export function DocumentsContent({
       setResult(data.content);
       toast.success("生成しました");
       void loadSavedDocs();
+      void loadDocUsage();
     } catch (e) {
       console.error(e);
       toast.error("生成に失敗しました。もう一度お試しください");
@@ -411,6 +426,15 @@ export function DocumentsContent({
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
           プロフィール情報をもとに、AIが下書きを作成します。
         </p>
+        {docUsage && (
+          <p
+            className="mt-3 inline-block rounded-lg px-3 py-1.5 text-[12px]"
+            style={{ background: "#16200A", border: "1px solid #3A4A12", color: "#E6F7B0" }}
+          >
+            今日あと {Math.max(0, docUsage.rule.perDay - docUsage.usage.today)}回 ・ 今月あと{" "}
+            {Math.max(0, docUsage.rule.perMonth - docUsage.usage.month)}回
+          </p>
+        )}
 
         {mode === "student" && (
           <>

@@ -9,7 +9,7 @@
 
 ## 設定
 - [ ] Supabase で `supabase/migrations/20260928000000_talent_marketplace.sql` を実行する
-- [ ] チケットの値段を決める（`wrangler.jsonc` の `TALENT_TICKET_PRICE_JPY`。いまは仮で 10,000円）
+- [x] 企業の料金：コイン制に決定（パック・人材ごとの値段は `src/lib/coins.ts`）
 - [ ] （任意）Stripe の Webhook に `payment_intent.succeeded` を追加する（なくても購入は動く。通信が切れたときの保険）
 
 ## 動作確認（プレビューURLで）

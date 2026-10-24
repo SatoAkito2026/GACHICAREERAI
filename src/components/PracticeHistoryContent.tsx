@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Radar,
   RadarChart,
@@ -14,6 +15,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { PrivateShell } from "@/components/ModeShell";
 import { usePlan } from "@/hooks/use-plan";
 import { practiceRule } from "@/lib/plan-rules";
+import { talentApi } from "@/components/talent/TalentUI";
+import { ShareResultButton } from "@/components/ShareResultButton";
+import type { SpeechStats } from "@/lib/speech-stats";
+import type { DeliveryStats } from "@/lib/delivery-tracker";
+import {
+  DeliveryCard,
+  SpeechStatsCard,
+  VerdictCard,
+  competencyAvg,
+} from "@/components/talent/ResultExtras";
 
 type PracticeFeedback = {
   overall_impression?: string;
@@ -31,7 +42,9 @@ type PracticeFeedback = {
     reason: string;
     evidence: string[];
   }[];
-  /** 企業（採用担当）向けの見立て。プロフィールを公開して、チケットを買った企業にだけ見える */
+  speech_stats?: SpeechStats | null;
+  delivery?: DeliveryStats | null;
+  /** 企業（採用担当）向けの見立て。プロフィールを公開して、コインで見た企業にだけ見える */
   recruiter_view?: {
     summary: string;
     strengths: { point: string; evidence: string[] }[];
@@ -46,6 +59,8 @@ type HistoryRow = {
   job_type: string | null;
   created_at: string;
   feedback: PracticeFeedback | null;
+  /** 録画（本人が「録画を残す」を選んだ練習だけ。新しいものから3本まで） */
+  recordingUrl?: string | null;
 };
 
 export function PracticeHistoryContent({
@@ -98,20 +113,33 @@ export function PracticeHistoryContent({
         ).map((s) => [s.interview_id, s.practice_feedback]),
       );
 
+      // 録画はサーバーで見られるURLを作ってもらう（個人の練習だけ）
+      const recordings = new Map<string, string | null>();
+      if (mode === "individual") {
+        const r = await talentApi<{ interviews: { id: string; recordingUrl: string | null }[] }>(
+          "/api/talent/my-interviews",
+        );
+        if (r.ok) for (const iv of r.data.interviews) recordings.set(iv.id, iv.recordingUrl);
+      }
+
       setRows(
         list.map((i) => ({
           id: i.id,
           job_type: i.job_type,
           created_at: i.created_at,
           feedback: feedbackMap.get(i.id) ?? null,
+          recordingUrl: recordings.get(i.id) ?? null,
         })),
       );
     })();
   }, [session, mode]);
 
   const handleDelete = async (id: string) => {
-    await supabase.from("interviews").delete().eq("id", id);
-    setRows((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
+    if (!window.confirm("この練習の結果を削除しますか？（録画も消え、元に戻せません）")) return;
+    // 録画の削除・人物まとめの作り直しもサーバーで行う
+    const r = await talentApi("/api/talent/my-interviews", { action: "delete", id });
+    if (!r.ok) return void toast.error(r.data.error ?? "削除に失敗しました");
+    setRows((prev) => (prev ? prev.filter((row) => row.id !== id) : prev));
   };
 
   if (loading || planLoading || rows === null) {
@@ -156,6 +184,12 @@ export function PracticeHistoryContent({
           </p>
         )}
 
+        {rows.length > 0 && (
+          <div className="mt-5">
+            <RankBanner mode={mode} />
+          </div>
+        )}
+
         <div className="mt-6 space-y-3">
           {visibleRows.map((r) => (
             <details key={r.id} className="rounded-2xl p-4" style={cardStyle}>
@@ -170,10 +204,24 @@ export function PracticeHistoryContent({
                   </span>
                 </span>
                 <span className="flex items-center gap-3">
-                  {r.feedback?.readiness_score != null && (
-                    <span style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}>
-                      {r.feedback.readiness_score}点
+                  {r.recordingUrl && (
+                    <span
+                      className="rounded px-1.5 py-0.5 text-[10px]"
+                      style={{ background: "#3A1515", color: "#FF8A8A" }}
+                    >
+                      録画あり
                     </span>
+                  )}
+                  {competencyAvg(r.feedback?.competencies) != null ? (
+                    <span style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}>
+                      {competencyAvg(r.feedback?.competencies)!.toFixed(1)} / 5
+                    </span>
+                  ) : (
+                    r.feedback?.readiness_score != null && (
+                      <span style={{ color: "#C8FF00", fontSize: 13, fontWeight: 700 }}>
+                        {r.feedback.readiness_score}点
+                      </span>
+                    )
                   )}
                   <button
                     onClick={(e) => {
@@ -187,8 +235,52 @@ export function PracticeHistoryContent({
                 </span>
               </summary>
 
+              {r.recordingUrl && (
+                <video
+                  src={r.recordingUrl}
+                  controls
+                  preload="metadata"
+                  className="mt-4 w-full rounded-xl"
+                  style={{ background: "#000", maxHeight: 360 }}
+                />
+              )}
+              {r.feedback && (
+                <div className="mt-4 flex justify-end">
+                  <ShareResultButton
+                    jobType={r.job_type}
+                    date={r.created_at}
+                    score={r.feedback.readiness_score ?? null}
+                    competencies={(r.feedback.competencies ?? []).map((c) => ({
+                      label: c.label,
+                      score: c.score,
+                    }))}
+                  />
+                </div>
+              )}
               {r.feedback ? (
                 <div className="mt-4 space-y-4">
+                  {competencyAvg(r.feedback.competencies) != null && (
+                    <VerdictCard avg={competencyAvg(r.feedback.competencies)!} />
+                  )}
+                  {r.feedback.improvement_points && r.feedback.improvement_points.length > 0 && (
+                    <div
+                      className="rounded-2xl p-4"
+                      style={{ background: "#1F1A0A", border: "1px solid #4A3A12" }}
+                    >
+                      <p
+                        style={{ color: "#FFB84D", fontSize: 13, fontWeight: 800, marginBottom: 6 }}
+                      >
+                        次の練習で直すこと
+                      </p>
+                      <ol className="list-decimal pl-5">
+                        {r.feedback.improvement_points.map((g, i) => (
+                          <li key={i} style={{ color: "#E8E0CC", fontSize: 13, lineHeight: 1.75 }}>
+                            {g}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
                   {r.feedback.overall_impression && (
                     <div>
                       <p
@@ -202,12 +294,16 @@ export function PracticeHistoryContent({
                     </div>
                   )}
                   {r.feedback.score_breakdown && r.feedback.score_breakdown.length > 0 && (
-                    <div>
-                      <p
-                        style={{ color: "#F0F0F0", fontSize: 12, fontWeight: 700, marginBottom: 6 }}
+                    <details
+                      className="rounded-lg p-3"
+                      style={{ background: "#141414", border: "1px solid #232323" }}
+                    >
+                      <summary
+                        className="cursor-pointer"
+                        style={{ color: "#CCCCCC", fontSize: 12, fontWeight: 700 }}
                       >
-                        スコア内訳
-                      </p>
+                        練習の点数の内訳（100点満点・{r.feedback.readiness_score ?? "—"}点）
+                      </summary>
                       <div style={{ width: "100%", height: 220 }}>
                         <ResponsiveContainer>
                           <RadarChart data={r.feedback.score_breakdown} outerRadius="70%">
@@ -247,7 +343,7 @@ export function PracticeHistoryContent({
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </details>
                   )}
                   {mode === "individual" && r.feedback.recruiter_view && (
                     <RecruiterViewPreview view={r.feedback.recruiter_view} />
@@ -257,7 +353,7 @@ export function PracticeHistoryContent({
                       <p
                         style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700, marginBottom: 4 }}
                       >
-                        能力の評価（あなたの発言が根拠）
+                        7つの評価（あなたの発言が根拠）
                       </p>
                       <div className="flex flex-col gap-2">
                         {r.feedback.competencies.map((c) => (
@@ -347,6 +443,8 @@ export function PracticeHistoryContent({
                       </p>
                     </div>
                   )}
+                  {r.feedback.speech_stats && <SpeechStatsCard stats={r.feedback.speech_stats} />}
+                  {r.feedback.delivery && <DeliveryCard d={r.feedback.delivery} />}
                   {r.feedback.good_points && r.feedback.good_points.length > 0 && (
                     <div>
                       <p
@@ -356,22 +454,6 @@ export function PracticeHistoryContent({
                       </p>
                       <ul className="list-disc pl-5">
                         {r.feedback.good_points.map((g, i) => (
-                          <li key={i} style={{ color: "#CCCCCC", fontSize: 12, lineHeight: 1.7 }}>
-                            {g}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {r.feedback.improvement_points && r.feedback.improvement_points.length > 0 && (
-                    <div>
-                      <p
-                        style={{ color: "#FFB84D", fontSize: 12, fontWeight: 700, marginBottom: 4 }}
-                      >
-                        改善するとよい点
-                      </p>
-                      <ul className="list-disc pl-5">
-                        {r.feedback.improvement_points.map((g, i) => (
                           <li key={i} style={{ color: "#CCCCCC", fontSize: 12, lineHeight: 1.7 }}>
                             {g}
                           </li>
@@ -443,6 +525,57 @@ export function PracticeHistoryContent({
 }
 
 /** 企業に見える見立てを、本人も同じ内容で確認できるようにする */
+/** いちばん新しい練習の点数が、練習した人の中で上位何%か */
+function RankBanner({ mode }: { mode: "individual" | "student" }) {
+  const [rank, setRank] = useState<{
+    score: number | null;
+    total?: number;
+    rank?: number;
+    percent?: number;
+    notEnough?: boolean;
+  } | null>(null);
+  useEffect(() => {
+    void talentApi<NonNullable<typeof rank>>(`/api/talent/my-rank?mode=${mode}`).then((r) => {
+      if (r.ok) setRank(r.data);
+    });
+  }, [mode]);
+  if (!rank || rank.score == null) return null;
+  return (
+    <div
+      className="mb-4 flex items-center gap-4 rounded-2xl p-4"
+      style={{
+        background: "linear-gradient(135deg, #1F2A08 0%, #141414 70%)",
+        border: "1px solid #3A4A12",
+      }}
+    >
+      <div
+        className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl"
+        style={{ background: "#C8FF00", color: "#0F0F0F" }}
+      >
+        <span style={{ fontSize: 10, fontWeight: 700 }}>上位</span>
+        <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
+          {rank.percent != null ? `${rank.percent}%` : "—"}
+        </span>
+      </div>
+      <div className="min-w-0">
+        <p style={{ color: "#888", fontSize: 11 }}>前回の練習 {rank.score}点</p>
+        {rank.percent != null ? (
+          <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700, lineHeight: 1.5 }}>
+            練習した{rank.total!.toLocaleString()}人の中で {rank.rank!.toLocaleString()}位
+          </p>
+        ) : (
+          <p style={{ color: "#CCCCCC", fontSize: 13, lineHeight: 1.6 }}>
+            練習した人が集まると、あなたが上位何%か表示されます
+          </p>
+        )}
+        <p style={{ color: "#888", fontSize: 11, marginTop: 2 }}>
+          1人につき一番良い点数で比べています
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function RecruiterViewPreview({ view }: { view: NonNullable<PracticeFeedback["recruiter_view"]> }) {
   return (
     <details
@@ -450,7 +583,7 @@ function RecruiterViewPreview({ view }: { view: NonNullable<PracticeFeedback["re
       style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
     >
       <summary style={{ color: "#AAAAAA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-        企業に表示される内容（プロフィール公開中に、チケットを買った企業だけが見られます）
+        企業に表示される内容（この結果を公開していて、企業があなたの結果を見る手続きをしたときに見えます）
       </summary>
       <div
         className="mt-2 flex flex-col gap-2 text-[12px]"

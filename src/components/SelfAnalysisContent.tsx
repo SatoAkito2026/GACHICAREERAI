@@ -29,6 +29,20 @@ export function SelfAnalysisContent({
   const [generating, setGenerating] = useState<"basic" | "detailed" | null>(null);
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [fetchingReports, setFetchingReports] = useState(true);
+  // 今月の回数（基本と詳細の合計）と、詳細分析が使えるか（プロだけ）
+  const [quota, setQuota] = useState<{
+    perMonth: number;
+    usedThisMonth: number;
+    detailedAllowed: boolean;
+  } | null>(null);
+  const loadQuota = async () => {
+    if (!session) return;
+    const res = await fetch("/api/generate-self-analysis", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      cache: "no-store",
+    });
+    if (res.ok) setQuota(await res.json());
+  };
 
   const loadReports = async () => {
     if (!session) return;
@@ -46,6 +60,7 @@ export function SelfAnalysisContent({
 
   useEffect(() => {
     void loadReports();
+    void loadQuota();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
@@ -75,7 +90,7 @@ export function SelfAnalysisContent({
         cache: "no-store",
         body: JSON.stringify({ reportType }),
       });
-      if (res.status === 429) {
+      if (res.status === 429 || res.status === 403) {
         const errBody = (await res.json().catch(() => null)) as { message?: string } | null;
         toast.error(errBody?.message ?? "利用上限に達しました");
         return;
@@ -83,6 +98,7 @@ export function SelfAnalysisContent({
       if (!res.ok) throw new Error(`status ${res.status}`);
       toast.success("自己分析レポートを生成しました");
       void loadReports();
+      void loadQuota();
     } catch (e) {
       console.error(e);
       toast.error("生成に失敗しました。もう一度お試しください");
@@ -112,8 +128,17 @@ export function SelfAnalysisContent({
           自己分析レポート
         </h1>
         <p className="mt-2 text-[13px]" style={{ color: "#999999" }}>
-          プロフィールと「今日の質問」の回答をもとに、AIが自己分析をまとめます。
+          模擬面接の結果（評価と、根拠になったあなたの発言）とプロフィールをもとに、AIが自己分析をまとめます。練習するほど正確になります。
         </p>
+        {quota && (
+          <p
+            className="mt-3 inline-block rounded-lg px-3 py-1.5 text-[12px]"
+            style={{ background: "#16200A", border: "1px solid #3A4A12", color: "#E6F7B0" }}
+          >
+            今月あと {Math.max(0, quota.perMonth - quota.usedThisMonth)}回（月{quota.perMonth}
+            回まで・基本と詳細の合計）
+          </p>
+        )}
 
         <div className="mt-6 flex gap-3">
           <button
@@ -123,19 +148,21 @@ export function SelfAnalysisContent({
             style={cardStyle}
           >
             <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700 }}>基本分析</p>
-            <p style={{ color: "#888888", fontSize: 12, marginTop: 4 }}>無料（月3回まで）</p>
+            <p style={{ color: "#888888", fontSize: 12, marginTop: 4 }}>全プラン</p>
             <p style={{ color: "#C8FF00", fontSize: 12, marginTop: 8 }}>
               {generating === "basic" ? "生成中..." : "生成する →"}
             </p>
           </button>
           <button
             onClick={() => handleGenerate("detailed")}
-            disabled={generating !== null}
+            disabled={generating !== null || (quota !== null && !quota.detailedAllowed)}
             className="flex-1 rounded-2xl p-4 text-left transition-opacity hover:opacity-90 disabled:opacity-50"
             style={cardStyle}
           >
             <p style={{ color: "#F0F0F0", fontSize: 14, fontWeight: 700 }}>詳細分析</p>
-            <p style={{ color: "#888888", fontSize: 12, marginTop: 4 }}>プロ限定・無制限</p>
+            <p style={{ color: "#888888", fontSize: 12, marginTop: 4 }}>
+              プロプラン（面接での発言を引用して深く分析）
+            </p>
             <p style={{ color: "#C8FF00", fontSize: 12, marginTop: 8 }}>
               {generating === "detailed" ? "生成中..." : "生成する →"}
             </p>

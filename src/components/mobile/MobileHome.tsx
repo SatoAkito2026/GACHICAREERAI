@@ -1,5 +1,5 @@
 /**
- * スマホ・タブレット用のホーム画面（個人）。パソコンのカード一覧とは別の、アプリらしい形にする。
+ * 個人のホーム画面（スマホ・パソコン共通）。はじめての人には使い方のスライドを出す。
  * - 下のメニューと同じリンクを並べるのではなく、「次にやること」と「今の状況」を出す
  * - 練習・評価・公開・オファーへの移動は下のメニューに任せる
  */
@@ -11,16 +11,19 @@ import {
   ChevronRight,
   Compass,
   FileText,
+  Gift,
   Globe,
+  GraduationCap,
   IdCard,
   Mail,
-  MessageCircleQuestion,
   Mic,
   Search,
   TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { talentApi } from "@/components/talent/TalentUI";
+import { supabase } from "@/integrations/supabase/client";
+import { useWelcomeTour } from "@/components/WelcomeTour";
 
 type Summary = {
   practiceCount: number;
@@ -29,6 +32,22 @@ type Summary = {
 };
 
 type OfferInfo = { pending: number; unread: number };
+
+type HomeLink =
+  | "/private/individual/history"
+  | "/private/individual/talent"
+  | "/private/individual/offers"
+  | "/private/individual/jobs"
+  | "/private/individual/documents"
+  | "/private/individual/research"
+  | "/private/individual/self-analysis"
+  | "/private/individual/profile"
+  | "/private/student/history"
+  | "/private/student/documents"
+  | "/private/student/research"
+  | "/private/student/self-analysis"
+  | "/private/student/profile"
+  | "/private/invite";
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -68,18 +87,12 @@ export function MobileHome() {
   const latest = summary?.latest ?? null;
   const isPublic = !!summary?.profile?.is_public;
   const offerBadge = (offers?.pending ?? 0) + (offers?.unread ?? 0);
+  const tour = useWelcomeTour("individual");
 
   return (
-    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5">
-      <div>
-        <p className="text-[13px]" style={{ color: "#888888" }}>
-          {greeting()}
-          {name ? `、${name}さん` : ""}
-        </p>
-        <h1 className="mt-0.5 text-[22px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
-          今日も1回、練習しよう
-        </h1>
-      </div>
+    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5 lg:pt-8">
+      {tour.node}
+      <HomeHeader title="今日も1回、練習しよう" name={name} onTour={tour.open} />
 
       {/* 次にやること：いちばん大きく */}
       <Link
@@ -137,6 +150,9 @@ export function MobileHome() {
       {/* 次の一歩のヒント（状況に合わせて1つだけ） */}
       {summary && <NextStep summary={summary} pendingOffers={offers?.pending ?? 0} />}
 
+      {/* 進め方（何をすればいいか一目で分かるように） */}
+      <HowItWorks />
+
       {/* そのほかのツール：アプリの設定画面のような一覧 */}
       <section>
         <h2 className="mb-2 px-1 text-[12px]" style={{ color: "#888888", fontWeight: 600 }}>
@@ -151,12 +167,6 @@ export function MobileHome() {
             icon={<Briefcase size={19} />}
             title="求人を探す"
             desc="掲載中の求人を見て、そのまま応募"
-          />
-          <ToolRow
-            to="/private/individual/daily-questions"
-            icon={<MessageCircleQuestion size={19} />}
-            title="今日の質問"
-            desc="1日5問。答えるほど練習の精度が上がる"
           />
           <ToolRow
             to="/private/individual/documents"
@@ -181,6 +191,12 @@ export function MobileHome() {
             icon={<IdCard size={19} />}
             title="経歴・希望条件"
             desc="AIが質問を考えるときに使います"
+          />
+          <ToolRow
+            to="/private/invite"
+            icon={<Gift size={19} />}
+            title="友だちを招待"
+            desc="友だちと自分に練習のボーナス+3回"
             last
           />
         </div>
@@ -194,6 +210,70 @@ export function MobileHome() {
   );
 }
 
+function HomeHeader({ title, name, onTour }: { title: string; name: string; onTour: () => void }) {
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <div>
+        <p className="text-[13px]" style={{ color: "#888888" }}>
+          {greeting()}
+          {name ? `、${name}さん` : ""}
+        </p>
+        <h1 className="mt-0.5 text-[22px]" style={{ color: "#F0F0F0", fontWeight: 800 }}>
+          {title}
+        </h1>
+      </div>
+      <button
+        onClick={onTour}
+        className="shrink-0 rounded-full px-3 py-1.5 text-[12px]"
+        style={{ background: "#1A1A1A", border: "1px solid #2A2A2A", color: "#CCCCCC" }}
+      >
+        ？ 使い方
+      </button>
+    </div>
+  );
+}
+
+/** 練習 → 評価 → 公開 → 申し込み の流れ。評価が上がるほど企業に見つけてもらいやすいことも伝える */
+function HowItWorks() {
+  const steps = [
+    { n: "1", t: "練習する", d: "AIの面接官と話す" },
+    { n: "2", t: "評価を見る", d: "発言を根拠に採点" },
+    { n: "3", t: "結果を公開", d: "名前は伏せて表示" },
+    { n: "4", t: "申し込みが届く", d: "企業から面談の依頼" },
+  ];
+  return (
+    <section
+      className="rounded-2xl p-4"
+      style={{ background: "#141414", border: "1px solid #262626" }}
+    >
+      <h2 className="text-[13px]" style={{ color: "#F0F0F0", fontWeight: 700 }}>
+        ガチキャリAIの進め方
+      </h2>
+      <div className="mt-3 grid grid-cols-4 gap-1.5">
+        {steps.map((s) => (
+          <div key={s.n} className="flex flex-col items-center text-center">
+            <span
+              className="flex h-8 w-8 items-center justify-center rounded-full text-[13px]"
+              style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 900 }}
+            >
+              {s.n}
+            </span>
+            <span className="mt-1.5 text-[11.5px]" style={{ color: "#F0F0F0", fontWeight: 700 }}>
+              {s.t}
+            </span>
+            <span className="mt-0.5 text-[10px] leading-tight" style={{ color: "#888" }}>
+              {s.d}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11.5px] leading-relaxed" style={{ color: "#AAB4A0" }}>
+        企業は評価で絞り込んで人を探します。練習して評価が上がるほど、見つけてもらいやすくなります。
+      </p>
+    </section>
+  );
+}
+
 function StatTile({
   to,
   icon,
@@ -203,7 +283,7 @@ function StatTile({
   accent,
   badge,
 }: {
-  to: "/private/individual/history" | "/private/individual/talent" | "/private/individual/offers";
+  to: HomeLink;
   icon: React.ReactNode;
   label: string;
   value: string;
@@ -292,13 +372,7 @@ function ToolRow({
   desc,
   last,
 }: {
-  to:
-    | "/private/individual/jobs"
-    | "/private/individual/daily-questions"
-    | "/private/individual/documents"
-    | "/private/individual/research"
-    | "/private/individual/self-analysis"
-    | "/private/individual/profile";
+  to: HomeLink;
   icon: React.ReactNode;
   title: string;
   desc: string;
@@ -326,5 +400,153 @@ function ToolRow({
       </span>
       <ChevronRight size={18} color="#555" />
     </Link>
+  );
+}
+
+/**
+ * スマホ・タブレット用のホーム画面（受験生）。個人と同じ形で、「次にやること」と「今の状況」を出す。
+ */
+export function StudentMobileHome() {
+  const { user } = useAuth();
+  const [latest, setLatest] = useState<{
+    score: number | null;
+    date: string;
+    school: string | null;
+  } | null>(null);
+  const [monthCount, setMonthCount] = useState<number | null>(null);
+  const [bonus, setBonus] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const { data: rows } = await supabase
+        .from("interviews")
+        .select("id, created_at, job_type")
+        .eq("user_id", user.id)
+        .eq("mode", "student")
+        .order("created_at", { ascending: false })
+        .limit(60);
+      const list = rows ?? [];
+      setMonthCount(list.filter((r) => new Date(r.created_at) >= monthStart).length);
+      if (list[0]) {
+        const { data: fb } = await supabase
+          .from("interview_summaries")
+          .select("practice_feedback")
+          .eq("interview_id", list[0].id)
+          .maybeSingle();
+        const score = (fb?.practice_feedback as { readiness_score?: number } | null)
+          ?.readiness_score;
+        setLatest({ score: score ?? null, date: list[0].created_at, school: list[0].job_type });
+      }
+    })();
+    void talentApi<{ bonus: number }>("/api/referral").then((r) => {
+      if (r.ok) setBonus(r.data.bonus);
+    });
+  }, [user]);
+
+  const name = (user?.user_metadata?.full_name as string | undefined) ?? "";
+  const tour = useWelcomeTour("student");
+
+  return (
+    <main className="mx-auto flex max-w-[640px] flex-col gap-4 px-4 pb-6 pt-5 lg:pt-8">
+      {tour.node}
+      <HomeHeader title="合格に向けて、今日も1回" name={name} onTour={tour.open} />
+
+      <Link
+        to="/private/student/practice"
+        className="relative overflow-hidden rounded-3xl p-5 active:scale-[0.99]"
+        style={{ background: "#C8FF00", color: "#0F0F0F" }}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl"
+            style={{ background: "#0F0F0F" }}
+          >
+            <Mic size={28} color="#C8FF00" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[19px] leading-tight" style={{ fontWeight: 800 }}>
+              入試面接の練習をはじめる
+            </p>
+            <p className="mt-1 text-[12.5px]" style={{ opacity: 0.75 }}>
+              {latest
+                ? `前回 ${shortDate(latest.date)}${latest.school && latest.school !== "受験" ? `・${latest.school}` : ""}`
+                : "AIの面接官と、まずは1回やってみよう"}
+            </p>
+          </div>
+          <ChevronRight size={24} />
+        </div>
+      </Link>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        <StatTile
+          to="/private/student/history"
+          icon={<TrendingUp size={18} />}
+          label="前回の点数"
+          value={latest?.score != null ? `${latest.score}` : "—"}
+          unit={latest?.score != null ? "点" : ""}
+        />
+        <StatTile
+          to="/private/student/history"
+          icon={<GraduationCap size={18} />}
+          label="今月の練習"
+          value={monthCount != null ? `${monthCount}` : "—"}
+          unit={monthCount != null ? "回" : ""}
+        />
+        <StatTile
+          to="/private/invite"
+          icon={<Gift size={18} />}
+          label="ボーナス"
+          value={bonus != null ? `${bonus}` : "—"}
+          unit={bonus != null ? "回" : ""}
+          accent={!!bonus}
+        />
+      </div>
+
+      <section>
+        <h2 className="mb-2 px-1 text-[12px]" style={{ color: "#888888", fontWeight: 600 }}>
+          ツール
+        </h2>
+        <div
+          className="overflow-hidden rounded-2xl"
+          style={{ background: "#1A1A1A", border: "1px solid #262626" }}
+        >
+          <ToolRow
+            to="/private/student/documents"
+            icon={<FileText size={19} />}
+            title="書類生成AI"
+            desc="志望理由書・小論文の添削"
+          />
+          <ToolRow
+            to="/private/student/research"
+            icon={<Search size={19} />}
+            title="志望校研究AI"
+            desc="志望校の想定質問（プロ）"
+          />
+          <ToolRow
+            to="/private/student/self-analysis"
+            icon={<Compass size={19} />}
+            title="自己分析レポート"
+            desc="強み・弱み・向いている学校の傾向"
+          />
+          <ToolRow
+            to="/private/student/profile"
+            icon={<IdCard size={19} />}
+            title="プロフィール"
+            desc="学歴・資格・志望校など"
+          />
+          <ToolRow
+            to="/private/invite"
+            icon={<Gift size={19} />}
+            title="友だちを招待"
+            desc="友だちと自分に練習のボーナス+3回"
+            last
+          />
+        </div>
+      </section>
+    </main>
   );
 }

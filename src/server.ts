@@ -2,8 +2,8 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { runDailyReminderJob } from "./lib/daily-reminders";
 import { runTalentSummaryJob } from "./lib/talent";
+import { runPracticeReminderJob } from "./lib/notify";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -68,8 +68,23 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+// 旧URLから新しいURL（gachicareer-ai.akitogroup.jp）へ転送する。
+// API（Stripe の通知・送信済みの面接URLから呼ばれるもの）は転送せず、旧URLでもそのまま動かす。
+const OLD_HOST = "interview-copilot-ai.akitogroup.jp";
+const NEW_ORIGIN = "https://gachicareer-ai.akitogroup.jp";
+
+function redirectFromOldHost(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (url.hostname !== OLD_HOST) return null;
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+  if (url.pathname.startsWith("/api/")) return null;
+  return Response.redirect(`${NEW_ORIGIN}${url.pathname}${url.search}`, 301);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const redirect = redirectFromOldHost(request);
+    if (redirect) return redirect;
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
@@ -94,7 +109,7 @@ export default {
         process.env[key] = value;
       }
     }
-    ctx.waitUntil(runDailyReminderJob());
     ctx.waitUntil(runTalentSummaryJob());
+    ctx.waitUntil(runPracticeReminderJob());
   },
 };

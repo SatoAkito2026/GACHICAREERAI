@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PrivateShell } from "@/components/ModeShell";
+import { PointsCard } from "@/components/PointsCard";
+import { MyInterviewCards } from "@/components/talent/MyPublicPreview";
 import {
   Button,
   C,
@@ -10,7 +12,6 @@ import {
   Field,
   Loading,
   PageFrame,
-  SummaryView,
   Tag,
   inputStyle,
   talentApi,
@@ -57,7 +58,7 @@ function TalentProfilePage() {
   const [unlockCount, setUnlockCount] = useState(0);
   const [form, setForm] = useState(EMPTY);
   const [consent, setConsent] = useState(false);
-  const [saving, setSaving] = useState<"" | "save" | "publish" | "refresh">("");
+  const [saving, setSaving] = useState<"" | "save" | "publish">("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -110,18 +111,6 @@ function TalentProfilePage() {
     );
   };
 
-  const refresh = async () => {
-    setSaving("refresh");
-    setError("");
-    const r = await talentApi<{ summary: TalentSummary | null }>("/api/talent/my-profile", {
-      action: "refresh",
-    });
-    setSaving("");
-    if (!r.ok) return setError(r.data.error ?? "更新に失敗しました");
-    setProfile((p) => (p ? { ...p, summary: r.data.summary } : p));
-    setNotice("人物まとめを更新しました");
-  };
-
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -131,7 +120,7 @@ function TalentProfilePage() {
         title="公開プロフィール"
         subtitle={
           <>
-            模擬面接の評価をもとにした「人物まとめ」を企業に公開できます。企業は名前を伏せた状態で見て、気になった人だけチケットを購入し、名前・詳しい評価・録画（許可した場合）を見ます。
+            選んだ模擬面接の結果を、1つずつ企業に公開できます。企業は名前を伏せた状態で結果を見て、気になった結果だけコインで買い、詳しい評価・会話・録画（許可した場合）と名前を見ます。結果が買われるたびに、その料金の1/4があなたにポイントで入ります。
             <br />
             公開・非公開はいつでも切り替えられます。
           </>
@@ -141,6 +130,7 @@ function TalentProfilePage() {
           <Loading />
         ) : (
           <>
+            <PointsCard />
             <Card
               title="公開の状態"
               right={
@@ -151,10 +141,9 @@ function TalentProfilePage() {
                 )
               }
             >
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-2 gap-3 text-center">
                 <Stat label="模擬面接（個人）" value={`${practiceCount}回`} />
                 <Stat label="詳しく見た企業" value={`${unlockCount}社`} />
-                <Stat label="人物まとめ" value={profile?.summary ? "作成済み" : "未作成"} />
               </div>
               {practiceCount === 0 && (
                 <p className="mt-4 text-[13px]" style={{ color: C.sub }}>
@@ -170,7 +159,7 @@ function TalentProfilePage() {
               <div className="flex flex-col gap-4">
                 <Field
                   label="お名前"
-                  hint="チケットを購入した企業と、面談を申し込んだ企業にだけ表示されます"
+                  hint="コインで見た企業と、面談を申し込んだ企業にだけ表示されます"
                 >
                   <input
                     value={form.display_name}
@@ -246,24 +235,17 @@ function TalentProfilePage() {
                 </Field>
 
                 <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: C.card2 }}>
-                  <Toggle
-                    checked={form.record_practice}
-                    onChange={(v) =>
-                      setForm((f) => ({
-                        ...f,
-                        record_practice: v,
-                        show_recording: v ? f.show_recording : false,
-                      }))
-                    }
-                    label="これからの模擬面接（個人）をカメラで録画して残す"
-                    hint="新しいものから3回分まで残ります"
-                  />
+                  <p className="text-[13px]" style={{ color: C.text, fontWeight: 700 }}>
+                    🎥 練習の録画
+                  </p>
+                  <p className="text-[12px]" style={{ color: C.sub, lineHeight: 1.7 }}>
+                    録画する・しないは、模擬面接の前に毎回選びます。録画は新しいものから3回分まで残り、練習履歴で見返せます。
+                  </p>
                   <Toggle
                     checked={form.show_recording}
-                    disabled={!form.record_practice}
                     onChange={(v) => setForm((f) => ({ ...f, show_recording: v }))}
-                    label="録画を、チケットを購入した企業に見せる"
-                    hint="オフにすると企業には録画が見えません"
+                    label="録画を企業にも見せる"
+                    hint="オンにすると、あなたの面接結果を見た企業（結果を購入した企業・応募先の企業）が録画も見られます。オフなら企業には見えません"
                   />
                 </div>
 
@@ -279,7 +261,7 @@ function TalentProfilePage() {
               {profile?.is_public ? (
                 <div className="flex flex-col gap-3">
                   <p className="text-[14px]" style={{ color: C.sub }}>
-                    非公開にすると、企業の検索に表示されなくなり、新しい面談の申し込みも届かなくなります（すでにチケットを購入した企業は、購入時点の内容を引き続き見られます）。
+                    非公開にすると、企業の検索に表示されなくなり、新しい面談の申し込みも届かなくなります（すでにコインで見た企業は、購入時点の内容を引き続き見られます）。
                   </p>
                   <div>
                     <Button
@@ -298,10 +280,10 @@ function TalentProfilePage() {
                     style={{ color: C.sub, lineHeight: 1.9 }}
                   >
                     <li>
-                      名前を伏せた状態で企業に見えるもの：ひとこと・いまの状況・希望職種・希望勤務地・自己PR・人物まとめ（強みと根拠になった発言の一部、能力の評価）
+                      名前を伏せた状態で企業に見えるもの：ひとこと・いまの状況・希望職種・希望勤務地・自己PR・公開中の面接結果ごとの要約（7つの評価の点数・強み）
                     </li>
                     <li>
-                      チケットを購入した企業にだけ見えるもの：お名前・面接ごとの詳しい評価・面接の会話・録画（許可した場合）
+                      コインで結果を買った企業にだけ見えるもの：お名前・買った結果の詳しい評価・会話・録画（許可した場合）
                     </li>
                     <li>メールアドレス・電話番号・住所・生年月日は企業に見せません</li>
                     <li>企業からの面談の申し込みは、承諾するか辞退するかを自分で選べます</li>
@@ -329,36 +311,7 @@ function TalentProfilePage() {
               )}
             </Card>
 
-            <Card
-              title="企業に見える人物まとめ"
-              right={
-                profile ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() => void refresh()}
-                    loading={saving === "refresh"}
-                  >
-                    最新の面接で更新
-                  </Button>
-                ) : undefined
-              }
-            >
-              {!profile ? (
-                <p className="text-[14px]" style={{ color: C.muted }}>
-                  プロフィールを保存すると、ここに企業から見える人物まとめが表示されます。
-                </p>
-              ) : (
-                <>
-                  <SummaryView summary={profile.summary} />
-                  {profile.summary_updated_at && (
-                    <p className="mt-4 text-[11px]" style={{ color: C.muted }}>
-                      最終更新：{new Date(profile.summary_updated_at).toLocaleString("ja-JP")}
-                      （模擬面接を受けると、1時間以内に自動で更新されます）
-                    </p>
-                  )}
-                </>
-              )}
-            </Card>
+            <MyInterviewCards />
 
             <ErrorText>{error}</ErrorText>
             {notice && (

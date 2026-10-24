@@ -10,6 +10,7 @@
  * practice_mode を設定することで interview-turn.ts / save-interview.ts が
  * 企業面接とは別の質問方針・総評フォーマットで動作する。
  */
+import { getBonusBalance } from "@/lib/referral";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -147,20 +148,25 @@ export const Route = createFileRoute("/api/create-practice-session")({
 
         const usage = await getPracticeUsage(supabase, userId);
         const upgradeHint = tier === "individual_pro" ? "" : "プランを上げると回数が増えます。";
-        if (rule.perDay != null && usage.today >= rule.perDay) {
+        // 上限を超えていても、友だち紹介のボーナスが残っていれば1回使って練習できる
+        const overDay = rule.perDay != null && usage.today >= rule.perDay;
+        const overMonth = rule.perMonth != null && usage.month >= rule.perMonth;
+        const useBonus = (overDay || overMonth) && (await getBonusBalance(supabase, userId)) > 0;
+        const inviteHint = "友だちを招待すると、練習の回数がふえます。";
+        if (overDay && !useBonus) {
           return json(
             {
               error: "daily_limit",
-              message: `今日の練習は${rule.perDay}回までです。明日またどうぞ。${upgradeHint}`,
+              message: `今日の練習は${rule.perDay}回までです。明日またどうぞ。${upgradeHint}${inviteHint}`,
             },
             429,
           );
         }
-        if (rule.perMonth != null && usage.month >= rule.perMonth) {
+        if (overMonth && !useBonus) {
           return json(
             {
               error: "monthly_limit",
-              message: `今月の練習は${rule.perMonth}回までです。来月1日にリセットされます。${upgradeHint}`,
+              message: `今月の練習は${rule.perMonth}回までです。来月1日にリセットされます。${upgradeHint}${inviteHint}`,
             },
             429,
           );
@@ -176,6 +182,13 @@ export const Route = createFileRoute("/api/create-practice-session")({
         const basicInfo = (careerProfile?.basic_info ?? {}) as Record<string, string>;
         const candidateName = basicInfo.name || "practice_user";
 
+        // 職種（学校）の選択は全プラン。それ以外の任意設定（会社名・学部・聞いてほしい質問・プロフィール優先）はプロだけ
+        if (!isPro) {
+          preferences.desired_company_name = undefined;
+          preferences.desired_faculty = undefined;
+          preferences.custom_questions = undefined;
+          preferences.prioritize_profile = false;
+        }
         const prioritizeProfile = !!preferences.prioritize_profile;
 
         // 面接AIへの文脈として、プロフィール情報を丸ごと渡す
@@ -283,8 +296,13 @@ export const Route = createFileRoute("/api/create-practice-session")({
           console.error("[create-practice-session] failed", error);
           return json({ error: "failed_to_create" }, 500);
         }
+        if (useBonus) {
+          await supabase
+            .from("practice_bonus_ledger")
+            .insert({ user_id: userId, amount: -1, reason: "used", ref_id: created.token });
+        }
 
-        return json({ token: created.token });
+        return json({ token: created.token, usedBonus: useBonus });
       },
     },
   },

@@ -6,10 +6,14 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { COIN_EXPIRY_MONTHS, COIN_PACKS, priceCoins } from "@/lib/coins";
 import {
   COMPANY_INTERVIEW_PRICE_JPY,
+  DOCUMENT_RULES,
   limitText,
   PRACTICE_RULES,
+  RESEARCH_PER_MONTH_PRO,
+  SELF_ANALYSIS_PER_MONTH,
   type IndividualPlanKey,
 } from "@/lib/plan-rules";
 
@@ -40,6 +44,8 @@ function individualFeatures(key: IndividualPlanKey): string[] {
     `1回の長さ：${limitText(r.maxMinutes, "分")}`,
     `練習できる職種：${r.jobTypes == null ? "無制限" : `月${r.jobTypes}つまで`}`,
     `保存できる結果：${r.results == null ? "無制限" : `新しい${r.results}件`}`,
+    `書類生成AI：1日${DOCUMENT_RULES[key].perDay}回・月${DOCUMENT_RULES[key].perMonth}回まで`,
+    `自己分析レポート：月${SELF_ANALYSIS_PER_MONTH[key]}回まで${key === "individual_pro" ? "（詳細分析も可）" : ""}`,
     "根拠つきの評価・プロフィール公開・オファー：全プラン同じ",
   ];
 }
@@ -63,7 +69,11 @@ const INDIVIDUAL_PLANS: PlanCard[] = [
     key: "individual_pro",
     name: "プロプラン",
     price: PLAN_PRICES.individual_pro,
-    features: [...individualFeatures("individual_pro"), "書類アップロードして面接：可"],
+    features: [
+      ...individualFeatures("individual_pro"),
+      "練習の任意設定（応募先の会社・聞いてほしい質問など）・書類アップロード：可",
+      `企業研究AI：月${RESEARCH_PER_MONTH_PRO}回まで`,
+    ],
     highlight: true,
   },
 ];
@@ -216,17 +226,17 @@ function PricingPage() {
   );
 }
 
-/** 企業向け：月額プランはなし。人材の閲覧はチケット、求人掲載は今は無料 */
+/** 企業向け：月額プランはなし。人材の閲覧はコイン、求人掲載は今は無料 */
 function CompanyPricing() {
   const items: { name: string; price: string; features: string[] }[] = [
     {
-      name: "人材の閲覧チケット",
-      price: "¥10,000／1人（税込）",
+      name: "ガチキャリコイン",
+      price: COIN_PACKS.map((p) => `${p.coins}コイン ¥${p.priceJpy.toLocaleString()}`).join("／"),
       features: [
         "人材を探す・匿名の人物まとめを見る：無料",
-        "チケットで名前・面接ごとの採用担当者向け評価・会話・録画（本人が許可した場合）を閲覧",
-        "チケットを買った人に面談を申し込み、承諾されたらメッセージ",
-        "採用が決まっても成功報酬はかかりません",
+        `人材の閲覧：1人 ${priceCoins(null, 0)}〜${priceCoins(5, 999)}コイン（評価が高い人・多くの企業に見られている人ほど高くなります）`,
+        "名前・面接ごとの採用担当者向け評価・会話・録画（本人が許可した場合）を閲覧し、面談を申し込めます",
+        `コインの有効期限は購入日から${COIN_EXPIRY_MONTHS}か月。採用が決まっても成功報酬はかかりません`,
       ],
     },
     {

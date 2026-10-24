@@ -12,9 +12,9 @@
     "SUPABASE_URL": "https://lcqpihitxmqaygriuhao.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM",
     "SUPABASE_PROJECT_ID": "lcqpihitxmqaygriuhao",
-    "APP_URL": "https://interview-copilot-ai.akitogroup.jp",
-    // 企業が1人分のプロフィール（録画・名前・詳しい評価）を見るチケットの値段（円・税込）
-    "TALENT_TICKET_PRICE_JPY": "10000",
+    "APP_URL": "https://gachicareer-ai.akitogroup.jp",
+    // プッシュ通知の公開鍵（秘密鍵 VAPID_PRIVATE_KEY は wrangler secret で登録）
+    "VAPID_PUBLIC_KEY": "BIH_khBdzXW564fmnngXmuEW_ckzV8Fv8jTu-2__5kQzCvtPuvLOI_PYgbndRl1Yftgv0y6L-JpeJCU1Ij0F3KI",
   },
   // 試し用URL（プレビュー）で使う公開値。本番と同じ Supabase につながる。
   // プレビューでは Cron は動かない（本番と二重にメールなどを送らないため、それでよい）
@@ -23,11 +23,11 @@
       "SUPABASE_URL": "https://lcqpihitxmqaygriuhao.supabase.co",
       "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM",
       "SUPABASE_PROJECT_ID": "lcqpihitxmqaygriuhao",
-      "APP_URL": "https://interview-copilot-ai.akitogroup.jp",
-      "TALENT_TICKET_PRICE_JPY": "10000",
+      "APP_URL": "https://gachicareer-ai.akitogroup.jp",
+      "VAPID_PUBLIC_KEY": "BIH_khBdzXW564fmnngXmuEW_ckzV8Fv8jTu-2__5kQzCvtPuvLOI_PYgbndRl1Yftgv0y6L-JpeJCU1Ij0F3KI",
     },
   },
-  // 毎時: デイリーリマインダー + 俳優データ更新（src/server.ts の scheduled）
+  // 毎時: 人物まとめの作り直し + 練習のリマインド（日本時間19時台だけ送る）（src/server.ts の scheduled）
   "triggers": {
     "crons": ["0 * * * *"],
   },

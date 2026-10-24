@@ -107,9 +107,6 @@ export function ProfileContent({
   const [saving, setSaving] = useState(false);
 
   const [name, setName] = useState("");
-  const [reminderEnabled, setReminderEnabled] = useState(true);
-  const [reminderHour, setReminderHour] = useState(20);
-  const [reminderSaving, setReminderSaving] = useState(false);
   const [furigana, setFurigana] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("");
@@ -144,21 +141,6 @@ export function ProfileContent({
   const [activities, setActivities] = useState<string[]>([]);
   const [mockExams, setMockExams] = useState<MockExam[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
-
-  useEffect(() => {
-    if (!session) return;
-    (async () => {
-      const { data } = await (supabase
-        .from("daily_reminder_preferences")
-        .select("enabled, send_hour")
-        .eq("user_id", session.user.id)
-        .maybeSingle() as any);
-      if (data) {
-        setReminderEnabled(data.enabled);
-        setReminderHour(data.send_hour);
-      }
-    })();
-  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -228,23 +210,6 @@ export function ProfileContent({
     );
   }
   if (!session) return <SafeNavigate to="/login" />;
-
-  const handleSaveReminder = async (nextEnabled: boolean, nextHour: number) => {
-    if (!session) return;
-    setReminderSaving(true);
-    try {
-      await (supabase
-        .from("daily_reminder_preferences")
-        .upsert({ user_id: session.user.id, enabled: nextEnabled, send_hour: nextHour } as any, {
-          onConflict: "user_id",
-        }) as any);
-    } catch (e) {
-      console.error(e);
-      toast.error("リマインド設定の保存に失敗しました");
-    } finally {
-      setReminderSaving(false);
-    }
-  };
 
   const addSkill = () => {
     const v = skillInput.trim();

@@ -1,6 +1,7 @@
 /**
  * 人材プロフィール（公開プロフィール・企業の人材検索）で共通に使う表示部品
  */
+import { toJapaneseError } from "@/lib/error-messages";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Loader2, Quote, Send } from "lucide-react";
 import { getAuthHeaders } from "@/lib/chat-api";
@@ -69,6 +70,13 @@ export async function talentApi<T = any>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
+    if (!res.ok && data && typeof data === "object") {
+      (data as { error?: string }).error = toJapaneseError(
+        (data as { error?: string; message?: string }).error ??
+          (data as { message?: string }).message ??
+          `status ${res.status}`,
+      );
+    }
     return { ok: res.ok, status: res.status, data };
   } catch {
     return { ok: false, status: 0, data: { error: "通信に失敗しました" } as any };
@@ -327,7 +335,7 @@ export function SummaryView({ summary }: { summary: TalentSummary | null }) {
 
       <div>
         <h3 className="mb-3 text-[14px]" style={{ color: C.muted, fontWeight: 600 }}>
-          能力の評価（{summary.interview_count}回の面接から）
+          7つの評価（{summary.interview_count}回の面接から）
         </h3>
         <CompetencyBars competencies={summary.competencies} />
       </div>

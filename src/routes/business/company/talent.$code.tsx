@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { CheckCircle2, Lock, X } from "lucide-react";
+import { CheckCircle2, Lock, Video } from "lucide-react";
 import { BusinessShell } from "@/components/ModeShell";
-import { stripePromise } from "@/components/CheckoutModal";
+import { CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 import {
   Button,
   C,
@@ -13,20 +12,38 @@ import {
   Loading,
   PageFrame,
   StatusBadge,
-  SummaryView,
+  Tag,
   inputStyle,
   talentApi,
-  type TalentSummary,
 } from "@/components/talent/TalentUI";
 import {
   CompanyInterviewBlock,
   type CompanyInterview,
 } from "@/components/talent/CompanyInterviewBlock";
+import { AVATAR_STYLE_LABELS } from "@/lib/career-options";
 
 export const Route = createFileRoute("/business/company/talent/$code")({
-  head: () => ({ meta: [{ title: "人材の詳細｜ガチキャリAI Business" }] }),
+  head: () => ({ meta: [{ title: "面接結果の詳細｜ガチキャリAI Business" }] }),
+  validateSearch: (s: Record<string, unknown>): { iv?: string } =>
+    typeof s.iv === "string" ? { iv: s.iv } : {},
   component: TalentDetailPage,
 });
+
+/** 公開中の面接の結果1つ分。買った結果だけ detail（詳しい評価・会話・録画）がつく */
+type Result = {
+  id: string;
+  date: string;
+  jobType: string | null;
+  avatarStyle: string | null;
+  overview: string;
+  strengths: string[];
+  competencies: { key: string; label: string; score: number | null }[];
+  average: number | null;
+  hasRecording: boolean;
+  priceCoins: number;
+  unlocked: boolean;
+  detail: CompanyInterview | null;
+};
 
 type Detail = {
   code: string;
@@ -35,22 +52,23 @@ type Detail = {
   desiredJobs: string | null;
   desiredLocations: string | null;
   selfPr: string | null;
-  summary: TalentSummary | null;
-  interviewCount: number;
-  hasRecording: boolean;
-  ticketPrice: number;
+  coins: CoinBalance;
   unlocked: boolean;
   contact: { id: string; status: string; created_at: string } | null;
+  results: Result[];
   displayName?: string;
   unlockedAt?: string;
-  interviews?: CompanyInterview[];
 };
 
 function TalentDetailPage() {
   const { code } = Route.useParams();
+  const { iv } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [d, setD] = useState<Detail | null>(null);
   const [error, setError] = useState("");
   const [buying, setBuying] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState("");
 
   const load = useCallback(async () => {
     const r = await talentApi<Detail>(`/api/talent/detail?code=${encodeURIComponent(code)}`);
@@ -61,6 +79,31 @@ function TalentDetailPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const selected = d ? (d.results.find((r) => r.id === iv) ?? d.results[0] ?? null) : null;
+  const others = d && selected ? d.results.filter((r) => r.id !== selected.id) : [];
+
+  const unlock = async () => {
+    if (!d || !selected) return;
+    if (d.coins.balance < selected.priceCoins) return setBuying(true);
+    if (!window.confirm(`${selected.priceCoins}コインを使って、この面接結果を詳しく見ますか？`))
+      return;
+    setUnlocking(true);
+    setUnlockError("");
+    const r = await talentApi<{ priceCoins?: number }>("/api/talent/unlock", {
+      code: d.code,
+      interviewId: selected.id,
+      expectedCoins: selected.priceCoins,
+    });
+    setUnlocking(false);
+    if (r.status === 402) return setBuying(true);
+    if (!r.ok) {
+      setUnlockError(r.data.error ?? "失敗しました");
+      if (r.status === 409) void load();
+      return;
+    }
+    void load();
+  };
 
   return (
     <BusinessShell>
@@ -74,7 +117,7 @@ function TalentDetailPage() {
           className="self-start text-[13px]"
           style={{ color: C.muted }}
         >
-          ← 人材一覧へ戻る
+          ← 一覧へ戻る
         </Link>
         {!d ? (
           error ? (
@@ -85,60 +128,85 @@ function TalentDetailPage() {
         ) : (
           <>
             <Card>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-col gap-1.5 text-[13px]" style={{ color: C.sub }}>
-                  <span>状況：{d.careerStage ? CAREER_STAGE_LABELS[d.careerStage] : "未登録"}</span>
-                  {d.desiredJobs && <span>希望職種：{d.desiredJobs}</span>}
-                  {d.desiredLocations && <span>希望勤務地：{d.desiredLocations}</span>}
-                  <span>
-                    模擬面接 {d.interviewCount}回 ・ 録画 {d.hasRecording ? "あり" : "なし"}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p style={{ color: C.accent, fontSize: 34, fontWeight: 800, lineHeight: 1 }}>
-                    {competencyAverage(d.summary)?.toFixed(1) ?? "-"}
-                  </p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>
-                    力の平均（5点満点）
-                  </p>
-                </div>
+              <div className="flex flex-col gap-1.5 text-[13px]" style={{ color: C.sub }}>
+                <span>状況：{d.careerStage ? CAREER_STAGE_LABELS[d.careerStage] : "未登録"}</span>
+                {d.desiredJobs && <span>希望職種：{d.desiredJobs}</span>}
+                {d.desiredLocations && <span>希望勤務地：{d.desiredLocations}</span>}
+                <span>公開中の面接結果 {d.results.length}件（結果ごとに評価・値段が別です）</span>
               </div>
             </Card>
 
-            {d.unlocked ? (
-              <ContactCard d={d} onChanged={() => void load()} />
-            ) : (
+            {!selected ? (
               <Card>
-                <div className="flex flex-col gap-3">
-                  <p
-                    className="flex items-center gap-2"
-                    style={{ color: C.text, fontSize: 15, fontWeight: 700 }}
-                  >
-                    <Lock size={16} color={C.accent} /> チケットで詳しく見る
-                  </p>
-                  <ul
-                    className="list-disc pl-5 text-[13px]"
-                    style={{ color: C.sub, lineHeight: 1.9 }}
-                  >
-                    <li>お名前</li>
-                    <li>面接ごとの詳しい評価と、面接の会話すべて</li>
-                    <li>
-                      {d.hasRecording ? "面接の録画" : "録画（この方は録画を公開していません）"}
-                    </li>
-                    <li>面談の申し込み（承諾されると直接メッセージでやり取りできます）</li>
-                  </ul>
-                  <p className="text-[12px]" style={{ color: C.muted }}>
-                    1人分 {d.ticketPrice.toLocaleString()}
-                    円（税込）・買い切り。採用の成否にかかわらず追加の料金はかかりません。
-                  </p>
-                  <div>
-                    <Button onClick={() => setBuying(true)}>
-                      チケットを購入する（{d.ticketPrice.toLocaleString()}円）
-                    </Button>
+                <p className="text-[14px]" style={{ color: C.muted }}>
+                  公開中の面接結果がありません。
+                </p>
+              </Card>
+            ) : (
+              <Card
+                title={`${selected.jobType || "職種指定なし"}の面接（${new Date(selected.date).toLocaleDateString("ja-JP")}）`}
+                right={
+                  <div className="text-right">
+                    <p style={{ color: C.accent, fontSize: 30, fontWeight: 800, lineHeight: 1 }}>
+                      {selected.average?.toFixed(1) ?? "-"}
+                    </p>
+                    <p className="text-[11px]" style={{ color: C.muted }}>
+                      評価の平均（5点満点）
+                    </p>
                   </div>
-                </div>
+                }
+              >
+                {selected.unlocked && selected.detail ? (
+                  <CompanyInterviewBlock key={selected.id} iv={selected.detail} defaultOpen />
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <ResultPreview r={selected} />
+                    <div
+                      className="flex flex-col gap-3 rounded-xl p-4"
+                      style={{ background: C.card2 }}
+                    >
+                      <p
+                        className="flex items-center gap-2"
+                        style={{ color: C.text, fontSize: 15, fontWeight: 700 }}
+                      >
+                        <Lock size={16} color={C.accent} /> コインでこの結果を詳しく見る
+                      </p>
+                      <ul
+                        className="list-disc pl-5 text-[13px]"
+                        style={{ color: C.sub, lineHeight: 1.9 }}
+                      >
+                        <li>7つの評価の理由と、根拠になった発言</li>
+                        <li>採用担当者向けの見立て・確認したい点</li>
+                        <li>この面接の会話すべて</li>
+                        <li>
+                          {selected.hasRecording
+                            ? "この面接の録画"
+                            : "録画（この結果にはありません）"}
+                        </li>
+                        <li>お名前と、面談の申し込み（どれか1つ買えば開きます）</li>
+                      </ul>
+                      <p className="text-[12px]" style={{ color: C.muted }}>
+                        この結果は <b style={{ color: C.accent }}>{selected.priceCoins}コイン</b>
+                        。同じ人のほかの結果は、それぞれ別に買います。買い切りで、採用の成否にかかわらず追加の料金はかかりません。
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button onClick={() => void unlock()} loading={unlocking}>
+                          {d.coins.balance >= selected.priceCoins
+                            ? `${selected.priceCoins}コインで詳しく見る`
+                            : `コインを買って見る（${selected.priceCoins}コイン）`}
+                        </Button>
+                        <span className="text-[12px]" style={{ color: C.muted }}>
+                          残り {d.coins.balance.toLocaleString()}コイン
+                        </span>
+                      </div>
+                      <ErrorText>{unlockError}</ErrorText>
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
+
+            {d.unlocked && <ContactCard d={d} onChanged={() => void load()} />}
 
             {d.selfPr && (
               <Card title="自己PR（本人が記入）">
@@ -148,36 +216,68 @@ function TalentDetailPage() {
               </Card>
             )}
 
-            <Card title="人物まとめ">
-              <SummaryView summary={d.summary} />
-            </Card>
-
-            {d.unlocked && d.interviews && (
-              <Card title="面接ごとの評価">
-                {d.interviews.length === 0 ? (
-                  <p className="text-[14px]" style={{ color: C.muted }}>
-                    面接の記録がありません。
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {d.interviews.map((iv, i) => (
-                      <CompanyInterviewBlock key={iv.id} iv={iv} defaultOpen={i === 0} />
-                    ))}
-                  </div>
-                )}
+            {others.length > 0 && (
+              <Card title="この人のほかの面接結果">
+                <div className="grid gap-3 md:grid-cols-2">
+                  {others.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => {
+                        setUnlockError("");
+                        void navigate({ search: { iv: r.id } });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="flex flex-col gap-2 rounded-xl p-4 text-left"
+                      style={{ background: C.bg, border: `1px solid ${C.border}` }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>
+                            {r.jobType || "職種指定なし"}
+                          </p>
+                          <p className="mt-0.5 text-[12px]" style={{ color: C.muted }}>
+                            {new Date(r.date).toLocaleDateString("ja-JP")}
+                            {r.avatarStyle &&
+                              ` ・ 面接官：${AVATAR_STYLE_LABELS[r.avatarStyle] ?? ""}`}
+                          </p>
+                        </div>
+                        <p
+                          style={{ color: C.accent, fontSize: 20, fontWeight: 800, lineHeight: 1 }}
+                        >
+                          {r.average?.toFixed(1) ?? "-"}
+                        </p>
+                      </div>
+                      <span className="flex items-center gap-2">
+                        {r.hasRecording && (
+                          <span
+                            className="flex items-center gap-1 text-[12px]"
+                            style={{ color: C.muted }}
+                          >
+                            <Video size={12} /> 録画あり
+                          </span>
+                        )}
+                        {r.unlocked ? (
+                          <Tag color={C.accent}>購入済み</Tag>
+                        ) : (
+                          <Tag color={C.accent}>{r.priceCoins}コイン</Tag>
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </Card>
             )}
           </>
         )}
       </PageFrame>
-      {buying && d && (
-        <PurchaseModal
-          code={d.code}
-          price={d.ticketPrice}
+      {buying && d && selected && (
+        <CoinShopModal
+          needCoins={Math.max(0, selected.priceCoins - d.coins.balance) || selected.priceCoins}
           onClose={() => setBuying(false)}
-          onDone={() => {
+          onDone={(coins) => {
             setBuying(false);
-            void load();
+            setD((prev) => (prev ? { ...prev, coins } : prev));
           }}
         />
       )}
@@ -185,17 +285,70 @@ function TalentDetailPage() {
   );
 }
 
+/** 買う前に見える、その結果の要約（7つの評価の点数・見立ての要約・強み） */
+function ResultPreview({ r }: { r: Result }) {
+  const style = r.avatarStyle ? AVATAR_STYLE_LABELS[r.avatarStyle] : null;
+  return (
+    <div className="flex flex-col gap-3">
+      {style && (
+        <p className="text-[12px]" style={{ color: C.muted }}>
+          面接官：{style}
+        </p>
+      )}
+      {r.overview && <p style={{ color: C.sub, fontSize: 14, lineHeight: 1.8 }}>{r.overview}</p>}
+      {r.strengths.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {r.strengths.map((s) => (
+            <Tag key={s} color={C.accent}>
+              {s}
+            </Tag>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-col gap-2">
+        {r.competencies.map((c) => (
+          <div key={c.key} className="flex items-center gap-3 text-[13px]">
+            <span className="w-24 shrink-0" style={{ color: C.sub }}>
+              {c.label}
+            </span>
+            <div className="h-2 flex-1 rounded-full" style={{ background: C.bg }}>
+              <div
+                className="h-2 rounded-full"
+                style={{
+                  width: `${((c.score ?? 0) / 5) * 100}%`,
+                  background: C.accent,
+                }}
+              />
+            </div>
+            <span className="w-10 text-right" style={{ color: C.text, fontWeight: 700 }}>
+              {c.score?.toFixed(1) ?? "-"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const CONTACT_TEMPLATE = `はじめまして。模擬面接の結果を拝見し、ぜひ一度お話ししたいと思いご連絡しました。
+弊社で募集している仕事についてご説明し、あなたのご希望もお聞きできればうれしいです。
+まずはオンラインで30分ほど、面談のお時間をいただけないでしょうか。`;
+
 function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [needsCompany, setNeedsCompany] = useState(false);
 
   const send = async () => {
     setSending(true);
     setError("");
     const r = await talentApi("/api/talent/contacts", { action: "request", code: d.code, message });
     setSending(false);
-    if (!r.ok) return setError(r.data.error ?? "送信に失敗しました");
+    if (!r.ok) {
+      setNeedsCompany(!!r.data.needsCompany);
+      return setError(r.data.error ?? "送信に失敗しました");
+    }
     onChanged();
   };
 
@@ -249,9 +402,19 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
     <Card title="面談を申し込む">
       <div className="flex flex-col gap-3">
         <p className="flex items-center gap-2 text-[13px]" style={{ color: C.accent }}>
-          <CheckCircle2 size={15} /> チケット購入済み（
+          <CheckCircle2 size={15} /> 閲覧済み（
           {d.unlockedAt ? new Date(d.unlockedAt).toLocaleDateString("ja-JP") : ""}）
         </p>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setMessage(CONTACT_TEMPLATE)}
+            className="text-[12px]"
+            style={{ color: C.accent }}
+          >
+            例文を入れる
+          </button>
+        </div>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -265,7 +428,12 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
           会社名・業種・所在地・募集職種など、設定画面に登録した会社情報も一緒に表示されます。
         </p>
         <ErrorText>{error}</ErrorText>
-        <div>
+        {needsCompany && (
+          <Link to="/business/company/settings" style={{ color: C.accent, fontSize: 13 }}>
+            設定画面で会社名を登録する →
+          </Link>
+        )}
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={() => void send()}
             loading={sending}
@@ -273,143 +441,13 @@ function ContactCard({ d, onChanged }: { d: Detail; onChanged: () => void }) {
           >
             面談を申し込む
           </Button>
+          {message.trim().length < 10 && (
+            <span className="text-[12px]" style={{ color: C.muted }}>
+              メッセージをあと{10 - message.trim().length}文字以上書くと申し込めます
+            </span>
+          )}
         </div>
       </div>
     </Card>
   );
-}
-
-const CARD_OPTIONS = {
-  hidePostalCode: true,
-  style: {
-    base: { color: "#F0F0F0", fontSize: "15px", "::placeholder": { color: "#888888" } },
-    invalid: { color: "#FF5C5C" },
-  },
-};
-
-function PurchaseForm({
-  code,
-  price,
-  onDone,
-}: {
-  code: string;
-  price: number;
-  onDone: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [agree, setAgree] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const pay = async () => {
-    if (!stripe || !elements) return;
-    const card = elements.getElement(CardElement);
-    if (!card) return;
-    setLoading(true);
-    setError("");
-    const intent = await talentApi<{
-      clientSecret?: string;
-      paymentIntentId?: string;
-      alreadyUnlocked?: boolean;
-    }>("/api/talent/unlock", { action: "intent", code });
-    if (!intent.ok) {
-      setLoading(false);
-      return setError(intent.data.error ?? "決済の準備に失敗しました");
-    }
-    if (intent.data.alreadyUnlocked) return onDone();
-    const result = await stripe.confirmCardPayment(intent.data.clientSecret!, {
-      payment_method: { card },
-    });
-    if (result.error) {
-      setLoading(false);
-      return setError(result.error.message ?? "決済に失敗しました");
-    }
-    const confirm = await talentApi("/api/talent/unlock", {
-      action: "confirm",
-      paymentIntentId: result.paymentIntent?.id ?? intent.data.paymentIntentId,
-    });
-    setLoading(false);
-    if (!confirm.ok) {
-      return setError(
-        (confirm.data.error ?? "確認に失敗しました") +
-          "（決済済みの場合は、数分後にページを開き直すと反映されます）",
-      );
-    }
-    onDone();
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-lg p-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-        <CardElement options={CARD_OPTIONS} />
-      </div>
-      <label className="flex items-start gap-2 text-[12px]" style={{ color: C.sub }}>
-        <input
-          type="checkbox"
-          checked={agree}
-          onChange={(e) => setAgree(e.target.checked)}
-          className="mt-0.5"
-        />
-        <span>
-          閲覧した個人情報は採用の検討・連絡のためだけに使い、第三者に渡さないことに同意します。チケットは購入後のキャンセル・返金はできません。
-        </span>
-      </label>
-      <ErrorText>{error}</ErrorText>
-      <Button onClick={() => void pay()} loading={loading} disabled={!stripe || !agree}>
-        {price.toLocaleString()}円を支払う
-      </Button>
-    </div>
-  );
-}
-
-function PurchaseModal({
-  code,
-  price,
-  onClose,
-  onDone,
-}: {
-  code: string;
-  price: number;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl p-6"
-        style={{ background: C.card2, border: `1.5px solid ${C.border}` }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 style={{ color: C.text, fontSize: 17, fontWeight: 700 }}>チケットを購入</h2>
-          <button type="button" onClick={onClose} aria-label="閉じる">
-            <X size={20} color={C.muted} />
-          </button>
-        </div>
-        <p className="mb-4 text-[13px]" style={{ color: C.sub }}>
-          No.{code.slice(0, 6).toUpperCase()}{" "}
-          の方の名前・詳しい評価・録画の閲覧と、面談の申し込みができるようになります。
-          <br />
-          <b style={{ color: C.accent, fontSize: 18 }}>{price.toLocaleString()}円</b>（税込）
-        </p>
-        <Elements stripe={stripePromise}>
-          <PurchaseForm code={code} price={price} onDone={onDone} />
-        </Elements>
-      </div>
-    </div>
-  );
-}
-
-/** 企業向けの点数は「7つの力」の平均（本人向けの練習の点数は使わない） */
-function competencyAverage(summary: TalentSummary | null): number | null {
-  const scores = (summary?.competencies ?? [])
-    .map((c) => c.score)
-    .filter((n): n is number => typeof n === "number");
-  if (scores.length === 0) return null;
-  return scores.reduce((a, b) => a + b, 0) / scores.length;
 }

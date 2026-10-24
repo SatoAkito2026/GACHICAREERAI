@@ -5,7 +5,6 @@ import { BusinessShell } from "@/components/ModeShell";
 import {
   C,
   CAREER_STAGE_LABELS,
-  COMPETENCY_LABELS,
   ErrorText,
   Loading,
   PageFrame,
@@ -13,27 +12,32 @@ import {
   Tag,
   inputStyle,
   talentApi,
-  type SummaryCompetency,
 } from "@/components/talent/TalentUI";
+import { AVATAR_STYLE_LABELS, INDUSTRY_OPTIONS, PREFECTURE_OPTIONS } from "@/lib/career-options";
+import { CoinBadge, CoinShopModal, type CoinBalance } from "@/components/talent/CoinShop";
 
 export const Route = createFileRoute("/business/company/talent/")({
   head: () => ({ meta: [{ title: "人材を探す｜ガチキャリAI Business" }] }),
   component: TalentSearchPage,
 });
 
-type Candidate = {
+/** 公開中の面接の結果1つ分（同じ人でも結果ごとに別のカード・別の評価・別の値段） */
+type Result = {
+  id: string;
   code: string;
   headline: string | null;
   careerStage: string | null;
   desiredJobs: string | null;
   desiredLocations: string | null;
+  date: string;
+  jobType: string | null;
+  avatarStyle: string | null;
   overview: string;
   strengths: string[];
-  competencies: SummaryCompetency[];
-  interviewCount: number;
+  competencies: { key: string; label: string; score: number | null }[];
   competencyAverage: number | null;
+  priceCoins: number;
   hasRecording: boolean;
-  updatedAt: string | null;
   unlocked: boolean;
   contactStatus: string | null;
 };
@@ -43,27 +47,28 @@ function TalentSearchPage() {
   const [stage, setStage] = useState("");
   const [minScore, setMinScore] = useState("");
   const [sort, setSort] = useState("recent");
-  const [list, setList] = useState<Candidate[] | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+  const [job, setJob] = useState("");
+  const [area, setArea] = useState("");
+  const [list, setList] = useState<Result[] | null>(null);
+  const [coins, setCoins] = useState<CoinBalance | null>(null);
+  const [shopOpen, setShopOpen] = useState(false);
   const [error, setError] = useState("");
   const [needsCompany, setNeedsCompany] = useState(false);
 
   const load = useCallback(async () => {
     setList(null);
-    const q = new URLSearchParams({ keyword, stage, minScore, sort });
-    const r = await talentApi<{ candidates: Candidate[]; ticketPrice: number }>(
-      `/api/talent/search?${q}`,
-    );
+    const q = new URLSearchParams({ keyword, stage, minScore, sort, job, area });
+    const r = await talentApi<{ results: Result[]; coins: CoinBalance }>(`/api/talent/search?${q}`);
     if (r.ok) {
-      setList(r.data.candidates);
-      setPrice(r.data.ticketPrice);
+      setList(r.data.results);
+      setCoins(r.data.coins);
       setError("");
     } else {
       setList([]);
       setError(r.data.error ?? "読み込みに失敗しました");
       setNeedsCompany(!!r.data.needsCompany);
     }
-  }, [keyword, stage, minScore, sort]);
+  }, [keyword, stage, minScore, sort, job, area]);
 
   useEffect(() => {
     const t = setTimeout(() => void load(), keyword ? 400 : 0);
@@ -77,21 +82,28 @@ function TalentSearchPage() {
         title="人材を探す"
         subtitle={
           <>
-            AI模擬面接を受け、プロフィールの公開に同意した人たちです。名前は伏せて表示しています。
-            {price !== null && (
-              <>
-                気になる人は、チケット（1人 {price.toLocaleString()}
-                円・税込）で名前・面接ごとの詳しい評価・録画を見て、面談を申し込めます。
-              </>
-            )}
+            AI模擬面接を受け、公開に同意した人の面接結果です。名前は伏せ、結果を1つずつ表示しています（同じ人の結果が複数並ぶこともあります）。
+            気になる結果は、コインで詳しい評価・会話・録画を見られます。1つ買うと名前を見て面談を申し込めます（評価が高い結果・多くの企業に見られている人ほど必要なコインが多くなります）。
           </>
         }
       >
+        <div className="flex justify-end">
+          <CoinBadge coins={coins} onBuy={() => setShopOpen(true)} />
+        </div>
+        {shopOpen && (
+          <CoinShopModal
+            onClose={() => setShopOpen(false)}
+            onDone={(c) => {
+              setCoins(c);
+              setShopOpen(false);
+            }}
+          />
+        )}
         <div className="grid gap-3 md:grid-cols-4">
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="キーワード（職種・強みなど）"
+            placeholder="キーワード（職種・強み・希望など）"
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none md:col-span-2"
             style={inputStyle}
           />
@@ -109,18 +121,39 @@ function TalentSearchPage() {
             ))}
           </select>
           <select
+            value={job}
+            onChange={(e) => setJob(e.target.value)}
+            className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+            style={inputStyle}
+          >
+            <option value="">すべての職種</option>
+            {INDUSTRY_OPTIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+            style={inputStyle}
+          >
+            <option value="">すべてのエリア</option>
+            {PREFECTURE_OPTIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
             style={inputStyle}
           >
             <option value="recent">新しい順</option>
-            <option value="score">力の平均が高い順</option>
-            {Object.entries(COMPETENCY_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                「{v}」が高い順
-              </option>
-            ))}
+            <option value="score">評価の平均が高い順</option>
           </select>
           <select
             value={minScore}
@@ -128,10 +161,10 @@ function TalentSearchPage() {
             className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
             style={inputStyle}
           >
-            <option value="">力の平均：指定なし</option>
+            <option value="">評価の平均：指定なし</option>
             {[3, 3.5, 4].map((n) => (
               <option key={n} value={n}>
-                力の平均 {n.toFixed(1)}以上
+                評価の平均 {n.toFixed(1)}以上
               </option>
             ))}
           </select>
@@ -153,12 +186,12 @@ function TalentSearchPage() {
           </div>
         ) : list.length === 0 ? (
           <p className="py-8 text-center text-[14px]" style={{ color: C.muted }}>
-            条件に合う人がまだいません。条件を変えてお試しください。
+            条件に合う結果がまだありません。条件を変えてお試しください。
           </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {list.map((c) => (
-              <CandidateCard key={c.code} c={c} />
+              <ResultCard key={c.id} c={c} />
             ))}
           </div>
         )}
@@ -167,26 +200,28 @@ function TalentSearchPage() {
   );
 }
 
-function CandidateCard({ c }: { c: Candidate }) {
+function ResultCard({ c }: { c: Result }) {
   const top = [...c.competencies]
     .filter((x) => x.score !== null)
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .slice(0, 3);
+  const style = c.avatarStyle ? AVATAR_STYLE_LABELS[c.avatarStyle] : null;
   return (
     <Link
       to="/business/company/talent/$code"
       params={{ code: c.code }}
+      search={{ iv: c.id }}
       className="flex flex-col gap-3 rounded-2xl p-5 transition-colors hover:border-[#C8FF00]"
       style={{ background: C.card, border: `1px solid ${C.border}` }}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p style={{ color: C.text, fontSize: 15, fontWeight: 700 }}>
-            {c.headline || "（ひとこと未登録）"}
+            {c.jobType || "職種指定なし"}の面接
           </p>
           <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
-            No.{c.code.slice(0, 6).toUpperCase()} ・{" "}
-            {c.careerStage ? CAREER_STAGE_LABELS[c.careerStage] : "状況未登録"}
+            {new Date(c.date).toLocaleDateString("ja-JP")}
+            {style && ` ・ 面接官：${style}`}
           </p>
         </div>
         <div className="text-right">
@@ -194,10 +229,14 @@ function CandidateCard({ c }: { c: Candidate }) {
             {c.competencyAverage?.toFixed(1) ?? "-"}
           </p>
           <p className="text-[10px]" style={{ color: C.muted }}>
-            力の平均（5点満点）
+            評価の平均（5点満点）
           </p>
         </div>
       </div>
+      <p className="text-[12px]" style={{ color: C.sub }}>
+        {c.headline || "（ひとこと未登録）"} ・ No.{c.code.slice(0, 6).toUpperCase()} ・{" "}
+        {c.careerStage ? CAREER_STAGE_LABELS[c.careerStage] : "状況未登録"}
+      </p>
       {c.overview && (
         <p className="line-clamp-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
           {c.overview}
@@ -221,7 +260,6 @@ function CandidateCard({ c }: { c: Candidate }) {
       </div>
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-[12px]" style={{ color: C.muted }}>
-          面接 {c.interviewCount}回
           {c.hasRecording && (
             <span className="flex items-center gap-1">
               <Video size={12} /> 録画あり
@@ -229,7 +267,11 @@ function CandidateCard({ c }: { c: Candidate }) {
           )}
         </span>
         <span className="flex items-center gap-2">
-          {c.unlocked && <Tag color={C.accent}>購入済み</Tag>}
+          {c.unlocked ? (
+            <Tag color={C.accent}>購入済み</Tag>
+          ) : (
+            <Tag color={C.accent}>{c.priceCoins}コイン</Tag>
+          )}
           <StatusBadge status={c.contactStatus} />
         </span>
       </div>

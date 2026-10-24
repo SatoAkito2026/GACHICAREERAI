@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { DeliveryTracker } from "@/lib/delivery-tracker";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { InterviewerAvatar } from "@/components/InterviewerAvatar";
@@ -394,7 +395,27 @@ function PrepScreen({
     };
   }, []);
 
-  const handleEnter = () => {
+  // 個人の練習は、録画する・しないを入室の前に必ず選んでもらう
+  const needsRecordChoice = invitation.practice_mode === "individual";
+  const [recordChoice, setRecordChoice] = useState<boolean | null>(null);
+  const [savingChoice, setSavingChoice] = useState(false);
+  const canEnter = !needsRecordChoice || recordChoice !== null;
+
+  const handleEnter = async () => {
+    if (!canEnter) return;
+    if (needsRecordChoice) {
+      setSavingChoice(true);
+      try {
+        await fetch("/api/talent/recording", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, action: "choose", record: recordChoice }),
+        });
+      } catch {
+        // 保存できなくても面接は始められる（そのときは前回の設定のまま）
+      }
+      setSavingChoice(false);
+    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     onEnter();
   };
@@ -696,7 +717,7 @@ function PrepScreen({
             >
               {[
                 invitation.practice_mode
-                  ? "練習の録画は、公開プロフィールで「録画を残す」にしている場合だけ残ります"
+                  ? "AIの面接官が話している間は話さず、話し終わってから答えてください"
                   : "面接中は画面全体が録画されます（パソコンの場合）",
                 "静かな場所でご参加ください",
                 "途中退出は面接無効となる場合があります",
@@ -738,6 +759,9 @@ function PrepScreen({
             : {}),
         }}
       >
+        {needsRecordChoice && (
+          <RecordChoice value={recordChoice} onChange={setRecordChoice} compact={compact} />
+        )}
         <div
           style={{
             display: "flex",
@@ -755,10 +779,11 @@ function PrepScreen({
             に同意したものとみなします
           </p>
           <button
-            onClick={handleEnter}
+            onClick={() => void handleEnter()}
+            disabled={!canEnter || savingChoice}
             style={{
-              background: "#C8FF00",
-              color: "#0F0F0F",
+              background: canEnter ? "#C8FF00" : "#333",
+              color: canEnter ? "#0F0F0F" : "#888",
               border: "none",
               borderRadius: 9,
               padding: compact ? "14px 16px" : "12px 32px",
@@ -771,9 +796,82 @@ function PrepScreen({
               touchAction: "manipulation",
             }}
           >
-            面接ルームに入室する →
+            {canEnter ? "面接ルームに入室する →" : "録画するか選んでください"}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** 入室の前に必ず選ぶ：この練習を録画するか */
+function RecordChoice({
+  value,
+  onChange,
+  compact,
+}: {
+  value: boolean | null;
+  onChange: (v: boolean) => void;
+  compact: boolean;
+}) {
+  const option = (v: boolean, title: string, desc: string) => {
+    const active = value === v;
+    return (
+      <button
+        type="button"
+        onClick={() => onChange(v)}
+        style={{
+          flex: 1,
+          textAlign: "left",
+          background: active ? "#1F2A08" : "#161616",
+          border: `2px solid ${active ? "#C8FF00" : "#2A2A2A"}`,
+          borderRadius: 12,
+          padding: "12px 14px",
+          cursor: "pointer",
+          touchAction: "manipulation",
+        }}
+      >
+        <div style={{ fontSize: 16, fontWeight: 800, color: active ? "#C8FF00" : "#F0F0F0" }}>
+          {active ? "● " : "○ "}
+          {title}
+        </div>
+        <div style={{ fontSize: 12, color: "#999", marginTop: 4, lineHeight: 1.6 }}>{desc}</div>
+      </button>
+    );
+  };
+  return (
+    <div
+      style={{
+        background: "#111",
+        border: `1px solid ${value === null ? "#FFB800" : "#2A2A2A"}`,
+        borderRadius: 14,
+        padding: 14,
+      }}
+    >
+      <div style={{ fontSize: 16, fontWeight: 800, color: "#F0F0F0" }}>
+        🎥 この練習を録画しますか？
+        {value === null && (
+          <span style={{ fontSize: 12, color: "#FFB800", marginLeft: 8 }}>必ず選んでください</span>
+        )}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: compact ? "column" : "row",
+          gap: 10,
+          marginTop: 10,
+        }}
+      >
+        {option(
+          true,
+          "録画する",
+          "自分の話し方を練習履歴で見返せます（新しいもの3回分）。企業に見せるかは、公開プロフィールで別に選べます",
+        )}
+        {option(
+          false,
+          "録画しない",
+          "映像は残りません。評価や間・目線のチェックはいつもどおり行います",
+        )}
       </div>
     </div>
   );
@@ -818,6 +916,35 @@ function LiveScreen({
   const [isRecording, setIsRecording] = useState(false);
   const compact = useCompactLayout();
   const analyserRef = useRef<AnalyserNode | null>(null);
+  // 練習の「話し方・態度」（間・声の波・目線）を測る。数字だけを結果に残す
+  const trackerRef = useRef<DeliveryTracker | null>(null);
+  if (!trackerRef.current) trackerRef.current = new DeliveryTracker();
+  const isListeningRef = useRef(false);
+  const isCameraOffRef = useRef(false);
+  const silenceHintRef = useRef(false);
+  const [silenceHint, setSilenceHint] = useState(false);
+  useEffect(() => {
+    isListeningRef.current = isListening;
+    if (!isListening && silenceHintRef.current) {
+      silenceHintRef.current = false;
+      setSilenceHint(false);
+    }
+  }, [isListening]);
+  useEffect(() => {
+    isCameraOffRef.current = isCameraOff;
+  }, [isCameraOff]);
+  // AIが話し終えた時刻（答え始めるまでの間を測る）
+  useEffect(() => {
+    if (!isAiSpeaking) trackerRef.current?.aiEnded();
+  }, [isAiSpeaking]);
+  // 練習ではカメラの映像で目線を測る（カメラがない・読み込めないときは測らない）
+  useEffect(() => {
+    if (!streamReady || !invitation.practice_mode) return;
+    const v = videoRef.current;
+    if (!v || !mediaStreamRef.current?.getVideoTracks().length) return;
+    void trackerRef.current?.startGaze(v, () => isListeningRef.current && !isCameraOffRef.current);
+  }, [streamReady, invitation.practice_mode]);
+  useEffect(() => () => trackerRef.current?.stop(), []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -858,32 +985,36 @@ function LiveScreen({
 
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     const THRESHOLD = 30;
-    let silenceTimer: ReturnType<typeof setTimeout> | null = null;
+    const tracker = trackerRef.current!;
+    let stopping = false;
 
     const check = () => {
       analyser.getByteFrequencyData(dataArray);
       const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+      tracker.sample(avg, isListening);
 
       if (avg > THRESHOLD && !isListening && !isProcessing && !isAiSpeaking) {
         startListening();
-        if (silenceTimer) clearTimeout(silenceTimer);
-      } else if (avg <= THRESHOLD && isListening) {
-        if (!silenceTimer) {
-          silenceTimer = setTimeout(() => {
-            stopListening();
-            silenceTimer = null;
-          }, 1500);
+      } else if (isListening && !stopping) {
+        // 少し考えて黙っただけで回答を締めないよう、待つ長さを変える。
+        // 話し始めたばかり（声が4秒未満）は3秒、しっかり話したあとは2.3秒黙ったら回答を送る
+        const silent = tracker.silentMs;
+        const wait = tracker.answerVoicedMs < 4000 ? 3000 : 2300;
+        const hint = silent >= 1000;
+        if (hint !== silenceHintRef.current) {
+          silenceHintRef.current = hint;
+          setSilenceHint(hint);
         }
-      } else if (avg > THRESHOLD && silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
+        if (silent >= wait) {
+          stopping = true;
+          void stopListening();
+        }
       }
     };
 
     const interval = setInterval(check, 100);
     return () => {
       clearInterval(interval);
-      if (silenceTimer) clearTimeout(silenceTimer);
       source.disconnect();
       analyser.disconnect();
     };
@@ -1066,11 +1197,13 @@ function LiveScreen({
     recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
     recorder.start();
     mediaRecorderRef.current = recorder;
+    trackerRef.current?.answerStarted();
     setIsListening(true);
   }, [isListening, isAiSpeaking, isProcessing]);
 
   const stopListening = useCallback(async () => {
     if (!mediaRecorderRef.current || !isListening) return;
+    trackerRef.current?.answerEnded();
     setIsListening(false);
     setIsProcessing(true);
     mediaRecorderRef.current.stop();
@@ -1142,6 +1275,8 @@ function LiveScreen({
           jobType: invitation.job_type,
           companyName: invitation.company_name ?? null,
           isAbandoned,
+          // 練習だけ：間・声の波・目線の数字（音や映像は送らない）
+          delivery: invitation.practice_mode ? trackerRef.current?.summary() : undefined,
         }),
       });
 
@@ -1167,11 +1302,18 @@ function LiveScreen({
             });
             const up = (await urlRes.json()) as { path?: string; uploadToken?: string };
             if (up.path && up.uploadToken) {
-              await supabase.storage
+              const { error: upError } = await supabase.storage
                 .from("interview-recordings")
                 .uploadToSignedUrl(up.path, up.uploadToken, blob, {
                   contentType: blob.type || "video/webm",
                 });
+              if (upError) throw upError;
+              // アップロードできたことをサーバーで確かめてから「録画あり」にする
+              await fetch("/api/talent/recording", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, interviewId: saved.interviewId, action: "done" }),
+              });
             }
           }
         } catch (e) {
@@ -1211,12 +1353,14 @@ function LiveScreen({
   };
 
   const statusText = isAiSpeaking
-    ? "AIが話しています..."
+    ? "AIが話しています。終わるまで話さずにお待ちください"
     : isProcessing
       ? "処理中..."
       : isListening
-        ? "聞いています..."
-        : "話しかけてください（自動で検出します）";
+        ? silenceHint
+          ? "このまま黙っていると回答を送ります（続けて話してOK）"
+          : "聞いています...（話し終えたら少し待つと送信）"
+        : "あなたの番です。話し始めると自動で聞き取ります";
   const statusColor = isAiSpeaking
     ? "#FFB800"
     : isProcessing
@@ -1328,6 +1472,34 @@ function LiveScreen({
     >
       {nameTag("AI面接官")}
       <InterviewerAvatar voice={voice} onReady={() => setAvatarReady(true)} />
+      {/* いま話してよいかを、面接官の映像の上に大きく出す（スマホで特に分かりやすく） */}
+      {avatarReady && (isAiSpeaking || (!isProcessing && streamReady)) && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: 12,
+            transform: "translateX(-50%)",
+            maxWidth: "92%",
+            background: isAiSpeaking ? "rgba(40,28,0,.9)" : "rgba(22,32,8,.9)",
+            border: `1px solid ${isAiSpeaking ? "#FFB800" : "#C8FF00"}`,
+            color: isAiSpeaking ? "#FFD25C" : "#C8FF00",
+            borderRadius: 999,
+            padding: compact ? "8px 14px" : "10px 18px",
+            fontSize: compact ? 14 : 16,
+            fontWeight: 800,
+            whiteSpace: "nowrap",
+            zIndex: 3,
+            pointerEvents: "none",
+          }}
+        >
+          {isAiSpeaking
+            ? "🔇 面接官が話しています。終わるまでお待ちください"
+            : isListening
+              ? "🎤 聞いています。どうぞ続けてください"
+              : "🎤 あなたの番です。どうぞ話してください"}
+        </div>
+      )}
       {!avatarReady && (
         <div
           style={{
@@ -1469,7 +1641,7 @@ function LiveScreen({
             </div>
             {isAiSpeaking && (
               <div style={{ fontSize: "clamp(9px,1.2vw,11px)", color: "#444" }}>
-                ℹ️ AIが話している間は発言をお控えください。
+                ℹ️ 話している途中に声を出すと、うまく聞き取れないことがあります
               </div>
             )}
           </div>
