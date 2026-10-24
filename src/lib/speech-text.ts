@@ -19,4 +19,4 @@ export function toSpeechText(text: string): string {
 
 /** AI面接官の声の話し方（OpenAI の gpt-4o-mini-tts に渡す） */
 export const INTERVIEWER_VOICE_STYLE =
-  "日本の企業の面接官。落ち着いた丁寧な標準語で、一語ずつはっきり、なめらかに話す。";
+  "日本の企業の若い女性の面接官。明るくやわらかい、かわいらしい声で、にこやかに親しみやすく話す。丁寧な標準語で、一語ずつはっきり、なめらかに話す。";
