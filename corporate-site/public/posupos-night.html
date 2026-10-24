@@ -397,6 +397,17 @@ body.night .logo img{border-radius:8px}
 @media (max-width:719px){.offer{grid-template-columns:auto minmax(0,1fr)}.offer .btn{grid-column:1/-1;justify-content:center}}
 .offer-pill{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:999px;background:#FFF3D6;border:1px solid #F0C36B;color:#6B4200;margin-top:14px;text-decoration:none}
 .offer-pill b{color:#D92D20}
+.camp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:640px;margin:0 0 18px;padding:10px 16px;border-radius:16px;background:linear-gradient(135deg,#FF4D3D,#FF8A1F);color:#fff;text-decoration:none;box-shadow:0 14px 30px -18px rgba(217,45,32,.9);transition:transform .3s}
+.camp-bar:hover{transform:translateY(-2px)}
+.camp-bar .cb-tag{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#D92D20;font-weight:900;font-size:13px;border-radius:999px;padding:3px 12px;white-space:nowrap}
+.camp-bar .cb-tag i{width:8px;height:8px;border-radius:50%;background:#D92D20;animation:cbp 1.4s ease-in-out infinite}
+@keyframes cbp{50%{opacity:.25}}
+.camp-bar .cb-txt{flex:1;min-width:0;font-size:14px;font-weight:700;line-height:1.6}
+.camp-bar .cb-txt b{font-size:17px;font-weight:900}
+.camp-bar .cb-txt em{font-style:normal;font-weight:900;color:#FFF3B0}
+@media (max-width:599px){.camp-bar{padding:12px 14px}.camp-bar .cb-tag{order:-1}.camp-bar .cb-txt{flex-basis:100%;order:1;font-size:13.5px}.camp-bar .cb-go{order:0;margin-left:auto}}
+.camp-bar .cb-go{font-weight:900;font-size:18px}
+@media (prefers-reduced-motion:reduce){.camp-bar .cb-tag i{animation:none}}
 .final .offer{max-width:760px;margin:6px auto 0}
 
 /* ===== 夜のお店のページ：紺地と金 ===== */
@@ -749,6 +760,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   <section class="hero">
     <div class="wrap">
       <div>
+        <a class="camp-bar" href="#plan-std"><span class="cb-tag"><i aria-hidden="true"></i>キャンペーン実施中</span><span class="cb-txt">スタンダードが<b>月額33,000円</b>（通常価格40,000円）<br><em>毎月7,000円おトク</em>・今お申し込みならずっとこの価格</span><span class="cb-go" aria-hidden="true">→</span></a>
 
 
         <p class="eyebrow">POSPOS for night</p>
