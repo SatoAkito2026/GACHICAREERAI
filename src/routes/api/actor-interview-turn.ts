@@ -5,6 +5,7 @@
  *   body: { token, candidateText, conversationHistory }
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { INTERVIEWER_VOICE_STYLE } from "@/lib/speech-text";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { createClient } from "@supabase/supabase-js";
@@ -168,11 +169,12 @@ ${actorContext ? JSON.stringify(actorContext, null, 2) : "（データベース�
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "tts-1",
+              // 聞き取りやすい声。速さは画面側で声の高さを変えずに1.5倍にする（練習の面接と同じ）
+              model: "gpt-4o-mini-tts",
               input: aiText,
               voice: "shimmer",
+              instructions: INTERVIEWER_VOICE_STYLE,
               response_format: "pcm",
-              speed: 1.3,
             }),
           });
 

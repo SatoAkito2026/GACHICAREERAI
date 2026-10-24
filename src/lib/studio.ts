@@ -10,7 +10,7 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
-import { toSpeechText } from "@/lib/speech-text";
+import { INTERVIEWER_VOICE_STYLE, toSpeechText } from "@/lib/speech-text";
 
 export const STUDIO_BUCKET = "tiktok-videos";
 
@@ -232,7 +232,7 @@ const CANDIDATE_VOICES = ["coral", "sage", "verse", "ballad", "echo"];
 // ナレーション：面接官とはっきり違う声と話し方で、最初の1秒で引きつける
 const NARRATOR_VOICE = "ash";
 const NARRATOR_STYLE =
-  "TikTokの人気ナレーター。最初の一言で視聴者の手を止める。早口で畳みかけるように、強く短く言い切る。間を空けない。驚きと危機感を込めて。";
+  "テンション高めの人気TikTokナレーター。明るく元気いっぱい、声を張ってワクワクした感じで。最初の一言で視聴者の手を止める。早口で畳みかけるように、強く短く言い切る。間を空けない。語尾まで勢いよく。";
 const CANDIDATE_STYLE =
   "日本の就職活動の面接を受けている20代の受験者。自然な日本語で、よどみなくスラスラと、はきはき話す。間延びさせず、少し速めのテンポで。おふざけのせりふは明るく、真面目なせりふは落ち着いて。";
 
@@ -273,8 +273,7 @@ export async function speakLines(
                 model: "gpt-4o-mini-tts",
                 input: toSpeechText(line.text),
                 voice: "shimmer",
-                instructions:
-                  "日本の企業の面接官。落ち着いた丁寧な標準語で、一語ずつはっきり、自然な速さで話す。",
+                instructions: INTERVIEWER_VOICE_STYLE,
                 response_format: "pcm",
               }
             : interviewer
