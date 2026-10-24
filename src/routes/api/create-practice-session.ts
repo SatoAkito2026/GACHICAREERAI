@@ -41,14 +41,28 @@ function json(body: unknown, status = 200) {
 async function getActivePlan(supabase: SupabaseClient, userId: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("user_mode, plan, plan_expires_at")
+    .select("user_mode, plan, plan_expires_at, is_admin")
     .eq("id", userId)
     .maybeSingle();
   const isExpired = profile?.plan_expires_at
     ? new Date(profile.plan_expires_at).getTime() < Date.now()
     : false;
-  const plan = profile?.plan && !isExpired ? (profile.plan as string) : "free";
-  return { profile, plan };
+  // 管理者（本部のアカウント）はプロ扱いで、回数・時間・職種の上限なし
+  const isAdmin = !!(profile as { is_admin?: boolean } | null)?.is_admin;
+  const plan = isAdmin
+    ? "individual_pro"
+    : profile?.plan && !isExpired
+      ? (profile.plan as string)
+      : "free";
+  return { profile, plan, isAdmin };
+}
+
+/** 管理者は上限をなくす */
+function ruleFor(plan: string, isAdmin: boolean) {
+  const rule = practiceRule(plan);
+  return isAdmin
+    ? { ...rule, perDay: null, perMonth: null, maxMinutes: null, jobTypes: null, results: null }
+    : rule;
 }
 
 /**
@@ -86,9 +100,9 @@ export const Route = createFileRoute("/api/create-practice-session")({
         const serviceKey = getServiceRoleKey();
         if (!serviceKey) return json({ error: "Supabase config missing" }, 500);
         const supabase = createClient(getSupabaseUrl(), serviceKey);
-        const { plan } = await getActivePlan(supabase, auth.userId);
+        const { plan, isAdmin } = await getActivePlan(supabase, auth.userId);
         const usage = await getPracticeUsage(supabase, auth.userId);
-        return json({ plan: toIndividualPlan(plan), rule: practiceRule(plan), usage });
+        return json({ plan: toIndividualPlan(plan), rule: ruleFor(plan, isAdmin), usage });
       },
 
       POST: async ({ request }) => {
@@ -127,11 +141,11 @@ export const Route = createFileRoute("/api/create-practice-session")({
           : "general";
         const preferences = body?.preferences ?? {};
 
-        const { profile, plan } = await getActivePlan(supabase, userId);
+        const { profile, plan, isAdmin } = await getActivePlan(supabase, userId);
         const dbMode: "individual" | "student" =
           profile?.user_mode === "private_student" ? "student" : "individual";
         const isPro = plan === "individual_pro" || plan === "company_pro" || plan === "pro";
-        const rule = practiceRule(plan);
+        const rule = ruleFor(plan, isAdmin);
 
         // 深掘り度は plan_practice_config テーブルで調整できる（行が無ければプランの既定値）。
         // 回数・時間・職種の上限は src/lib/plan-rules.ts で決める。
