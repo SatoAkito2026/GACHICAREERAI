@@ -437,8 +437,8 @@ function Features() {
 function Pricing() {
   const plans = [
     { key: "free" as const, name: "無料", note: "まずはお試し" },
-    { key: "individual_light" as const, name: "ライト", note: "週3〜4回の練習に" },
-    { key: "individual_pro" as const, name: "プロ", note: "本番前に集中して", hot: true },
+    { key: "individual_light" as const, name: "ライト", note: "週3〜4回の練習に", hot: true },
+    { key: "individual_pro" as const, name: "プロ", note: "本番前に集中して" },
   ];
   return (
     <section className="mx-auto max-w-[1080px] px-4 py-14">

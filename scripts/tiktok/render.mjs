@@ -76,7 +76,7 @@ async function main() {
   // FORMAT=ad のときは広告（決まった台本）を作る
   const query =
     process.env.FORMAT === "ad"
-      ? "?format=ad"
+      ? `?format=ad&platform=${process.env.PLATFORM === "instagram" ? "instagram" : "tiktok"}`
       : process.env.ONLY_IF_NONE_TODAY
         ? "?onlyIfNoneToday=1"
         : "";
@@ -91,8 +91,10 @@ async function main() {
     const browser = await chromium.launch({
       args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
     });
+    // Instagram のフィード・広告用の広告は 4:5（540×675）、それ以外は 9:16
+    const height = job.format === "ad" && job.aspect === "4x5" ? 675 : 960;
     const page = await browser.newPage({
-      viewport: { width: 540, height: 960 },
+      viewport: { width: 540, height },
       deviceScaleFactor: 2,
     });
     page.on("console", (m) => m.type() === "error" && console.log("[page]", m.text()));

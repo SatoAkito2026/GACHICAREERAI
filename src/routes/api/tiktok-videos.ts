@@ -1,7 +1,7 @@
 /**
  * 管理者：TikTok 用に作った動画の一覧（profiles.is_admin = true のユーザーだけ）
  *
- * GET  /api/tiktok-videos                         → 新しい順に20本（見る・保存する用の期限つきURLつき）
+ * GET  /api/tiktok-videos?platform=tiktok|instagram → 新しい順に20本（見る・保存する用の期限つきURLつき）
  *                                                   ＋プロフィールのリンク（/tiktok）が押された回数
  * POST /api/tiktok-videos { action: "posted", id } → 投稿済みにする
  * POST /api/tiktok-videos { action: "delete", id } → 消す
@@ -61,6 +61,12 @@ export const Route = createFileRoute("/api/tiktok-videos")({
           .from("tiktok_videos")
           .select(
             "id, theme, title, caption, status, storage_path, duration_sec, error, created_at, posted_at, script, views, likes",
+          )
+          .eq(
+            "platform",
+            new URL(request.url).searchParams.get("platform") === "instagram"
+              ? "instagram"
+              : "tiktok",
           )
           .order("created_at", { ascending: false })
           .limit(20);

@@ -17,6 +17,12 @@ on:
         default: daily
         type: choice
         options: [daily, ad]
+      platform:
+        description: "広告の出し先（tiktok＝9:16、instagram＝4:5）"
+        required: false
+        default: tiktok
+        type: choice
+        options: [tiktok, instagram]
 
 permissions:
   contents: write
@@ -47,9 +53,10 @@ jobs:
           STUDIO_SECRET: ${{ secrets.STUDIO_SECRET }}
           ONLY_IF_NONE_TODAY: ${{ github.event_name == 'schedule' && '1' || '' }}
           FORMAT: ${{ inputs.format || 'daily' }}
+          PLATFORM: ${{ inputs.platform || 'tiktok' }}
         run: node render.mjs
       - name: 広告のときは、サイトに載せる動画として保存する（public/videos/ad.mp4 と表紙の画像）
-        if: success() && inputs.format == 'ad'
+        if: success() && inputs.format == 'ad' && inputs.platform != 'instagram'
         run: |
           mkdir -p public/videos
           cp scripts/tiktok/.tiktok-work/out.mp4 public/videos/ad.mp4

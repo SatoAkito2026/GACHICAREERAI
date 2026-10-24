@@ -109,6 +109,7 @@ const SECTIONS = [
   { id: "company", label: "企業" },
   { id: "points", label: "ポイント" },
   { id: "tiktok", label: "TikTok" },
+  { id: "instagram", label: "Instagram" },
 ] as const;
 
 function AdminDashboard() {
@@ -432,7 +433,16 @@ function AdminDashboard() {
           <p className="mb-3 text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
             投稿したら「投稿済みにする」を押し、数日後に再生数といいねを入れてください。伸びたテーマやタイトルを、次からの台本づくりで参考にします。
           </p>
-          <TiktokVideos token={session?.access_token ?? ""} />
+          <TiktokVideos token={session?.access_token ?? ""} platform="tiktok" />
+        </Section>
+
+        {/* ---- Instagram ---- */}
+        <Section id="instagram" title="Instagram用の動画">
+          <p className="mb-3 text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+            広告は 4:5（フィード・広告枠用）で作ります。リール・ストーリーズには TikTok
+            タブの縦長（9:16）の動画をそのまま使えます。ストーリーズでは「プロフィールのリンクから」の代わりにリンクスタンプを置いてください。
+          </p>
+          <TiktokVideos token={session?.access_token ?? ""} platform="instagram" />
         </Section>
       </main>
     </div>
@@ -463,13 +473,13 @@ const VIDEO_STATUS: Record<TiktokVideo["status"], string> = {
   failed: "失敗",
 };
 
-function TiktokVideos({ token }: { token: string }) {
+function TiktokVideos({ token, platform }: { token: string; platform: "tiktok" | "instagram" }) {
   const [videos, setVideos] = useState<TiktokVideo[] | null>(null);
   const [clicks, setClicks] = useState<{ today: number; week: number; total: number } | null>(null);
 
   const call = useCallback(
     async (body?: unknown) => {
-      const res = await fetch("/api/tiktok-videos", {
+      const res = await fetch(`/api/tiktok-videos${body ? "" : `?platform=${platform}`}`, {
         method: body ? "POST" : "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -480,7 +490,7 @@ function TiktokVideos({ token }: { token: string }) {
       });
       return res.ok ? res.json() : null;
     },
-    [token],
+    [token, platform],
   );
   const load = useCallback(async () => {
     const d = (await call()) as {
@@ -505,32 +515,34 @@ function TiktokVideos({ token }: { token: string }) {
   };
 
   if (!videos) return <p style={{ color: T.muted, fontSize: 13 }}>読み込み中...</p>;
-  const clickPanel = (
-    <Panel>
-      <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
-        プロフィールのリンク（{TIKTOK_LINK}）が押された回数
-      </p>
-      <div className="mt-2 flex gap-6 text-[13px]" style={{ color: T.sub }}>
-        <span>
-          今日 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.today ?? 0}</b>
-        </span>
-        <span>
-          7日間 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.week ?? 0}</b>
-        </span>
-        <span>
-          全部 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.total ?? 0}</b>
-        </span>
-      </div>
-    </Panel>
-  );
+  const clickPanel =
+    platform !== "tiktok" ? null : (
+      <Panel>
+        <p className="text-[12px]" style={{ color: T.muted, lineHeight: 1.7 }}>
+          プロフィールのリンク（{TIKTOK_LINK}）が押された回数
+        </p>
+        <div className="mt-2 flex gap-6 text-[13px]" style={{ color: T.sub }}>
+          <span>
+            今日 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.today ?? 0}</b>
+          </span>
+          <span>
+            7日間 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.week ?? 0}</b>
+          </span>
+          <span>
+            全部 <b style={{ color: T.text, fontSize: 20 }}>{clicks?.total ?? 0}</b>
+          </span>
+        </div>
+      </Panel>
+    );
   if (videos.length === 0) {
     return (
       <div className="flex flex-col gap-4">
         {clickPanel}
         <Panel>
           <p className="text-[13px]" style={{ color: T.muted, lineHeight: 1.8 }}>
-            まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok
-            video」から、今すぐ作ることもできます）。
+            {platform === "tiktok"
+              ? "まだ動画はありません。毎日17時に自動で作られます（GitHub の Actions の「TikTok video」から、今すぐ作ることもできます）。"
+              : "まだ動画はありません。GitHub の Actions の「TikTok video」で format を ad、platform を instagram にして動かすと作れます。"}
           </p>
         </Panel>
       </div>
