@@ -9,7 +9,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse, serviceClient } from "@/lib/talent";
 import {
   adScript,
-  INTERVIEWER_RATE,
   STUDIO_SAMPLE_RATE,
   isStudioRequest,
   lineTempo,
@@ -67,7 +66,8 @@ export const Route = createFileRoute("/api/studio/job")({
               audio,
               sampleRate: STUDIO_SAMPLE_RATE,
               tempos: script.lines.map((l) =>
-                l.speaker === "interviewer" ? 1 : lineTempo(l.speaker),
+                // 面接官は声の高さを変えずに1.5倍（アプリの面接と同じ速さ）
+                l.speaker === "interviewer" ? 1.5 : lineTempo(l.speaker),
               ),
               interviewerRate: 1,
             });
@@ -96,6 +96,8 @@ export const Route = createFileRoute("/api/studio/job")({
                   ? "日本の面接で、自信を持ってはきはき、よどみなく自然に話す受験者。少し速めのテンポで。"
                   : null,
             ),
+            // 面接官はアプリの面接と同じ、はっきりした声（速さは下の tempos で1.5倍）
+            { clearInterviewer: true },
           );
           const { data: row, error } = await supabase
             .from("tiktok_videos")
@@ -115,8 +117,10 @@ export const Route = createFileRoute("/api/studio/job")({
             audio,
             sampleRate: STUDIO_SAMPLE_RATE,
             // 音の高さを変えずに速くする倍率（撮影側の ffmpeg の atempo と、画面の時刻表の両方で使う）
-            tempos: script.lines.map((l) => lineTempo(l.speaker)),
-            interviewerRate: INTERVIEWER_RATE,
+            tempos: script.lines.map((l) =>
+              l.speaker === "interviewer" ? 1.5 : lineTempo(l.speaker),
+            ),
+            interviewerRate: 1,
           });
         } catch (e) {
           console.error("[studio/job]", e);

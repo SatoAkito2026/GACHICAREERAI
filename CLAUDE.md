@@ -9,7 +9,7 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - **実行環境**: Cloudflare Workers（`@cloudflare/vite-plugin`、設定は `wrangler.jsonc`）
 - **DB / 認証**: Supabase（プロジェクト `lcqpihitxmqaygriuhao`）。スキーマは `supabase/migrations/`
 - **UI**: Tailwind CSS v4（画面部品は各コンポーネントに直接書く。通知は `sonner`（`src/components/ui/sonner.tsx`）、グラフは `recharts`、アイコンは `lucide-react`）
-- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。写真（`public/avatar/base.webp`）の顔に478点の網目（リグ `public/avatar/rig.json`）を入れて WebGL で変形させる。口は音声から母音（あいうえお）を判定した口の形（`src/lib/lipsync.ts`、再生は `src/lib/avatar-voice.ts`）に合わせ、参考動画から学習した「口を開けた・横に広げたときの顔全体の動き」で網目を動かす。首の傾き・位置は参考動画の動きの数値。口の中は `mouth-inside.webp`。まばたきは目のまわりだけを `eyes-closed.webp` に0.14秒で切り替える。リグは `scripts/avatar/build_rig.py` で作る。`/avatar-lab` は録音した声で口の動きを確かめる試作ページ
+- **AI**: Anthropic（`@anthropic-ai/sdk`、会話・生成全般）、OpenAI（Whisper 文字起こし・TTS）。面接官アバターは外部サービスを使わない自前実装（`src/components/InterviewerAvatar.tsx`）。写真（`public/avatar/base.webp`）の顔に478点の網目（リグ `public/avatar/rig.json`）を入れて WebGL で変形させる。声は OpenAI の gpt-4o-mini-tts（はっきり話す指示 `INTERVIEWER_VOICE_STYLE`）で作り、画面側で声の高さを変えずに1.5倍にする（`src/lib/time-stretch.ts`、WSOLA）。口は音声から母音（あいうえお）を判定した口の形（`src/lib/lipsync.ts`、再生は `src/lib/avatar-voice.ts`）に合わせ、参考動画から学習した「口を開けた・横に広げたときの顔全体の動き」で網目を動かす。首の傾き・位置は参考動画の動きの数値。口の中は `mouth-inside.webp`。まばたきは目のまわりだけを `eyes-closed.webp` に0.14秒で切り替える。リグは `scripts/avatar/build_rig.py` で作る。`/avatar-lab` は録音した声で口の動きを確かめる試作ページ
 - **決済**: Stripe / **メール**: Resend
 
 ## 人材プロフィール（求人メディア型）

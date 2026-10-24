@@ -16,3 +16,7 @@ const READINGS: [RegExp, string][] = [
 export function toSpeechText(text: string): string {
   return READINGS.reduce((t, [re, to]) => t.replace(re, to), text);
 }
+
+/** AI面接官の声の話し方（OpenAI の gpt-4o-mini-tts に渡す） */
+export const INTERVIEWER_VOICE_STYLE =
+  "日本の企業の面接官。落ち着いた丁寧な標準語で、一語ずつはっきり、なめらかに話す。";

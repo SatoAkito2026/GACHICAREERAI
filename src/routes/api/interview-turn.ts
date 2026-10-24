@@ -1,4 +1,4 @@
-import { toSpeechText } from "@/lib/speech-text";
+import { INTERVIEWER_VOICE_STYLE, toSpeechText } from "@/lib/speech-text";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
@@ -449,12 +449,13 @@ ${companyContext || "（企業情報未設定）"}
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "tts-1",
+              // 聞き取りやすい声（はっきり・自然な速さ）。速さは画面側で声の高さを変えずに1.5倍にする
+              model: "gpt-4o-mini-tts",
               // 御社・弊社などを読み間違えないよう、声にするときだけひらがなにする
               input: toSpeechText(aiText),
               voice: "shimmer",
+              instructions: INTERVIEWER_VOICE_STYLE,
               response_format: "pcm",
-              speed: 1.3,
             }),
           });
 
