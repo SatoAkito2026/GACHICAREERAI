@@ -418,12 +418,16 @@ ${companyContext || "（企業情報未設定）"}
             { role: "user" as const, content: body.candidateText },
           ];
 
-          const aiResponse = await anthropic.messages.create({
-            model: "claude-sonnet-4-6",
-            max_tokens: 300,
-            system: systemPrompt,
-            messages,
-          });
+          // 時間がかかりすぎると面接画面が「処理中」のまま止まるので、待つ時間に上限をつける
+          const aiResponse = await anthropic.messages.create(
+            {
+              model: "claude-sonnet-4-6",
+              max_tokens: 300,
+              system: systemPrompt,
+              messages,
+            },
+            { timeout: 25000, maxRetries: 1 },
+          );
 
           const aiText =
             aiResponse.content[0].type === "text"
@@ -441,32 +445,40 @@ ${companyContext || "（企業情報未設定）"}
             aiText.includes("終了とさせていただきます") ||
             aiText.includes("面接を終わらせていただきます");
 
-          // OpenAI TTSで音声合成（日本語対応・自然な発音）
-          const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${openaiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              // 聞き取りやすい声（はっきり・自然な速さ）。速さは画面側で声の高さを変えずに1.5倍にする
-              model: "gpt-4o-mini-tts",
-              // 御社・弊社などを読み間違えないよう、声にするときだけひらがなにする
-              input: toSpeechText(aiText),
-              voice: "shimmer",
-              instructions: INTERVIEWER_VOICE_STYLE,
-              response_format: "pcm",
-            }),
-          });
-
-          if (!ttsRes.ok) {
-            const errText = await ttsRes.text();
-            console.error("OpenAI TTS status:", ttsRes.status);
-            console.error("OpenAI TTS error:", errText);
-            return json({ aiText, audioBase64: null, isEnded }, 200);
+          // OpenAI TTSで音声合成。聞き取りやすい gpt-4o-mini-tts を使い、遅い・失敗したときは速い tts-1 に切り替える
+          // （速さは画面側で声の高さを変えずに1.5倍にする）
+          const speak = async (model: "gpt-4o-mini-tts" | "tts-1", timeoutMs: number) => {
+            const res = await fetch("https://api.openai.com/v1/audio/speech", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${openaiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model,
+                // 御社・弊社などを読み間違えないよう、声にするときだけひらがなにする
+                input: toSpeechText(aiText),
+                voice: "shimmer",
+                ...(model === "gpt-4o-mini-tts" ? { instructions: INTERVIEWER_VOICE_STYLE } : {}),
+                response_format: "pcm",
+              }),
+              signal: AbortSignal.timeout(timeoutMs),
+            });
+            if (!res.ok) throw new Error(`tts ${model} ${res.status}: ${await res.text()}`);
+            return res.arrayBuffer();
+          };
+          let audioBuffer: ArrayBuffer | null = null;
+          try {
+            audioBuffer = await speak("gpt-4o-mini-tts", 12000);
+          } catch (e) {
+            console.error("OpenAI TTS (gpt-4o-mini-tts) failed, falling back:", e);
+            try {
+              audioBuffer = await speak("tts-1", 10000);
+            } catch (e2) {
+              console.error("OpenAI TTS (tts-1) failed:", e2);
+            }
           }
-
-          const audioBuffer = await ttsRes.arrayBuffer();
+          if (!audioBuffer) return json({ aiText, audioBase64: null, isEnded }, 200);
           const audioBase64 = Buffer.from(audioBuffer).toString("base64");
 
           // Supabaseに会話を保存
