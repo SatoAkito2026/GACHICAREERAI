@@ -179,7 +179,7 @@ def main():
     # 検索エンジン向けの sitemap.xml と robots.txt
     import datetime
     today = datetime.date.today().isoformat()
-    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names() + posupos_shop_names()
+    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names() + posupos_shop_names() + ["posupos-monitor"]
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index' else n}</loc><lastmod>{today}</lastmod></url>" for n in names)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n", encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
@@ -200,6 +200,9 @@ def main():
             for sub in sorted((SRC / "posupos" / "pages").glob("*.html")):
                 write_posupos_sub(sub, html, mode, other, word)
             write_posupos_shops(html, mode, other, word)
+            mon = SRC / "posupos" / "monitor.html"
+            if mode == "day" and mon.exists():
+                wrap_posupos(mon.read_text(encoding="utf-8"), html, mode, other, word, "posupos-monitor")
 
 
 def write_posupos_shops(lp_html, mode, other, word):
@@ -294,7 +297,7 @@ def wrap_posupos(text, lp_html, mode, other, word, slug, name=None, shop=None):
     ld = "".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>" for d in data)
     tail = re.sub(r'<script type="application/ld\+json">.*?</script>', "", tail, flags=re.S)
     tail = tail.replace('<script src="assets/posupos-voice.js"', ld + '<script src="assets/posupos-voice.js"', 1)
-    (OUT / f"{slug}.html").write_text(head + "<main>\n" + body + "\n" + tail, encoding="utf-8")
+    (OUT / f"{slug}.html").write_text(shop_fill(head + "<main>\n" + body + "\n" + tail, mode), encoding="utf-8")
     print("wrote", f"public/{slug}.html")
 
 

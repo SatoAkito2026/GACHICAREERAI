@@ -11,5 +11,8 @@
     "not_found_handling": "404-page",
     "run_worker_first": true
   },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // 毎日 9:05（日本時間）にモニターの「契約が切れる前のお知らせ」を送る
+  "triggers": { "crons": ["5 0 * * *"] },
+  "vars": { "SUPABASE_URL": "https://lcqpihitxmqaygriuhao.supabase.co" }
 }
