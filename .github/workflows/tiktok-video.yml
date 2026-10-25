@@ -12,11 +12,11 @@ on:
   workflow_dispatch:
     inputs:
       format:
-        description: "作る動画（daily＝毎日の動画、ad＝広告）"
+        description: "作る動画（daily＝毎日の型からランダム、rewrite＝言い換え型、ranking＝ランキング型、ad＝広告）"
         required: false
         default: daily
         type: choice
-        options: [daily, ad]
+        options: [daily, rewrite, ranking, ad]
       platform:
         description: "広告の出し先（tiktok＝9:16、instagram＝4:5）"
         required: false
@@ -36,10 +36,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: 日本語のフォントと ffmpeg を入れる
+      - name: 日本語・絵文字のフォントと ffmpeg を入れる
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk ffmpeg
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji ffmpeg
       - name: 撮影用のブラウザを入れる
         working-directory: scripts/tiktok
         run: |

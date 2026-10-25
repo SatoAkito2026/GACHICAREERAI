@@ -4,6 +4,7 @@
  * POST /api/studio/job → { id, title, lines, result, audio[], sampleRate, interviewerRate, ... }
  * POST /api/studio/job?onlyIfNoneToday=1 → 今日の動画がもうあれば { skipped: true }
  * POST /api/studio/job?format=ad&platform=tiktok|instagram → 広告（決まった台本。instagram は 4:5）
+ * POST /api/studio/job?format=rewrite|ranking → 型を決めて作る（指定がなければ、毎日の型からランダム）
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse, serviceClient } from "@/lib/talent";
@@ -12,9 +13,14 @@ import {
   STUDIO_SAMPLE_RATE,
   isStudioRequest,
   lineTempo,
+  RANKING_COMMENT_STYLE,
   speakLines,
+  writeRankingScript,
   writeRewriteScript,
 } from "@/lib/studio";
+
+/** 毎日の動画の型（ランダムに選ぶ） */
+const DAILY_FORMATS = ["rewrite", "ranking"] as const;
 
 export const Route = createFileRoute("/api/studio/job")({
   server: {
@@ -81,8 +87,46 @@ export const Route = createFileRoute("/api/studio/job")({
           .neq("status", "failed")
           .order("created_at", { ascending: false })
           .limit(40);
+        // 型：指定がなければ、毎日の型からランダムに選ぶ（前の寸劇の型は writeScript に残している）
+        const asked = params.get("format");
+        const format =
+          DAILY_FORMATS.find((f) => f === asked) ??
+          DAILY_FORMATS[Math.floor(Math.random() * DAILY_FORMATS.length)];
+        if (format === "ranking") {
+          try {
+            // ランキング型：面接AIを出さない話題。タイトルとランキングはナレーター、書き込みは別の声で早口に
+            const script = await writeRankingScript(history ?? []);
+            const audio = await speakLines(
+              script.lines,
+              script.roles.map((r) => (r === "comment" ? RANKING_COMMENT_STYLE : null)),
+            );
+            const { data: row, error } = await supabase
+              .from("tiktok_videos")
+              .insert({
+                theme: script.theme,
+                title: script.title.join(""),
+                caption: script.caption,
+                script: script as never,
+                status: "rendering",
+              })
+              .select("id")
+              .single();
+            if (error || !row) throw error ?? new Error("insert failed");
+            return jsonResponse({
+              id: row.id,
+              ...script,
+              audio,
+              sampleRate: STUDIO_SAMPLE_RATE,
+              tempos: script.lines.map((l) => lineTempo(l.speaker)),
+              interviewerRate: 1,
+            });
+          } catch (e) {
+            console.error("[studio/job ranking]", e);
+            return jsonResponse({ error: String((e as Error)?.message ?? e) }, 500);
+          }
+        }
         try {
-          // 今は「言い換え型」（◯◯と聞かれた時の最高な答え方）で作る。前の寸劇の型は writeScript に残している
+          // 言い換え型（◯◯と聞かれた時の最高な答え方）
           const script = await writeRewriteScript(history ?? []);
           const audio = await speakLines(
             script.lines,
