@@ -91,7 +91,7 @@ p{margin:0}
 .hero-logo img{display:block;width:clamp(240px,34vw,360px);height:auto}
 .hero-logo span{font-family:var(--ff-mono);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);padding-bottom:6px}
 .head nav{display:none;gap:22px;margin-left:auto;font-size:14px;font-weight:700}
-.head nav a{text-decoration:none;color:var(--ink-2)}
+.head nav a{text-decoration:none;color:var(--ink-2);white-space:nowrap}
 .head nav a:hover{color:var(--blue)}
 .head-cta{margin-left:auto;min-height:42px;padding:0 18px;font-size:14px}
 @media (min-width:1080px){.head nav{display:flex}.head-cta{margin-left:0}}
@@ -315,6 +315,7 @@ p{margin:0}
 .plan .night-h{display:flex;align-items:center;gap:8px}
 .plan-more{display:none}
 .plan.open li.plan-more,.plan.open ul.plan-more{display:grid}.plan.open p.plan-more{display:flex}
+.plan a.toggle{display:block;text-align:center;text-decoration:none}
 .plan .toggle{appearance:none;border:1px solid var(--line);background:var(--white);border-radius:999px;font:inherit;font-weight:700;font-size:14px;padding:10px;cursor:pointer;color:var(--blue)}
 .plan-note{margin-top:20px;font-size:13.5px;color:var(--ink-2)}
 .plan .price .cp{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:2px}
@@ -799,9 +800,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     <a class="logo" href="#top" aria-label="ポスポス トップへ"><img class="lk" src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150"></a>
     <nav aria-label="ページ内">
       <a href="#can">できること</a>
-      <a href="#day">お店の1日</a>
-
-      <a href="#screens">画面と機能</a>
+      <a href="/posupos-night-features">画面と機能</a>
+      <a href="/posupos-night-ai-interview">AI面接</a>
       <a href="#plans">プラン</a>
       <a href="#faq">よくある質問</a>
     </nav>
@@ -1099,228 +1099,15 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
 
 
-  <!-- 5. 画面ごとの機能 -->
+  <!-- 5. 画面ごとの機能（くわしくは別ページ） -->
   <section class="sec tint" id="screens">
     <div class="wrap">
       <div class="sec-head rv">
         <p class="eyebrow">Screens</p>
         <h2>画面ごとの機能</h2>
-        <p>ポスポスのすべての画面です。カードを押すと、くわしい中身が開きます。</p>
+        <p>本部の画面・お客さまの画面・お店に置く端末。ポスポスのすべての画面と、くわしい機能をまとめました。</p>
       </div>
-
-      <div class="gallery">
-
-
-<figure class="shot rv span2" data-shot="salary"><div class="v" data-v="cabaret"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>さくら</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>あかり</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>れな</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>みゆ</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ゆい</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ひな</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><div class="v" data-v="host"><div class="ap ap-night"><div class="ap-top"><span class="lg">CLUB ORION</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>レン</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ミナト</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>カイ</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>リツ</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ハル</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ソウ</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><div class="v" data-v="girlsbar"><div class="ap ap-night"><div class="ap-top"><span class="lg">MINT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>まな</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>りこ</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ゆず</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>のあ</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ひより</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>もも</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><div class="v" data-v="concafe"><div class="ap ap-night"><div class="ap-top"><span class="lg">MELTY CAT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>うさみ</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ねこた</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ぴよ</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>くまこ</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>みるく</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ここあ</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><div class="v" data-v="snack"><div class="ap ap-night"><div class="ap-top"><span class="lg">SNACK AKARI</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>ゆかり</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>あけみ</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>ちえ</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>なお</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>さき</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>まゆ</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><div class="v" data-v="lounge"><div class="ap ap-night"><div class="ap-top"><span class="lg">LOUNGE SERA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span class="on">給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span>項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main">
-<div class="sub3"><span class="on">日払い</span><span>週払い</span><span>月払い</span><span>← 前の期間</span><b>10/16（金）</b><span>給料日 10/16（金）その日に支払い</span><span class="pay">渡す金額の合計 <b class="n">63,225円</b></span></div>
-<div class="ac tbw"><table class="tbs"><tr><th>名前</th><th>出勤</th><th>働いた時間</th><th>売上</th><th>リク1</th><th>時給の分</th><th>バック・手当</th><th>引く分</th><th>渡す金額・いまの状態</th></tr>
-<tr><td>玲奈</td><td>1日</td><td>5時間00分</td><td class="n">21,000円</td><td>1本</td><td class="n">10,000円</td><td class="n">8,900円</td><td class="n">−1,890円</td><td><span class="big n">17,010円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>美月</td><td>1日</td><td>5時間00分</td><td>—</td><td>—</td><td class="n">7,500円</td><td class="n">4,500円</td><td class="n">−1,200円</td><td><span class="big n">10,800円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>沙耶</td><td>1日</td><td>5時間31分</td><td class="n">9,500円</td><td>1本</td><td class="n">8,290円</td><td class="n">4,700円</td><td class="n">−1,299円</td><td><span class="big n">11,691円</span><span class="st2 ok">渡した</span><span class="st2 ch">決めた後に変更あり</span><small>いま計算すると 12,180円</small></td></tr>
-<tr><td>杏奈</td><td>1日</td><td>6時間00分</td><td>—</td><td>—</td><td class="n">9,000円</td><td class="n">3,200円</td><td class="n">−1,220円</td><td><span class="big n">10,980円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>真央</td><td>1日</td><td>4時間01分</td><td class="n">42,000円</td><td>3本</td><td class="n">8,060円</td><td class="n">6,100円</td><td class="n">−1,416円</td><td><span class="big n">12,744円</span><span class="st2 ok">渡した</span></td></tr>
-<tr><td>彩花</td><td>0日</td><td>0時間00分</td><td>—</td><td>—</td><td>0円</td><td>0円</td><td>−0円</td><td><span class="big n">0円</span><span class="st2 no">まだ決めていない</span></td></tr></table></div>
-</div></div></div><figcaption>給料：日払い・週払い・月払い。金額を決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ</figcaption></figure>
-<figure class="shot rv" data-shot="back"><div class="v" data-v="cabaret"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">ショット <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><div class="v" data-v="host"><div class="ap ap-night"><div class="ap-top"><span class="lg">CLUB ORION</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">ショット <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><div class="v" data-v="girlsbar"><div class="ap ap-night"><div class="ap-top"><span class="lg">MINT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">テキーラ <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><div class="v" data-v="concafe"><div class="ap ap-night"><div class="ap-top"><span class="lg">MELTY CAT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">チェキ <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><div class="v" data-v="snack"><div class="ap ap-night"><div class="ap-top"><span class="lg">SNACK AKARI</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">ボトル <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><div class="v" data-v="lounge"><div class="ap ap-night"><div class="ap-top"><span class="lg">LOUNGE SERA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>勤怠</span><span>送り</span><span>給料</span><span>前借り</span><span>シフト</span><span>アカウント</span><span>従業員</span><span>給与プラン</span><span class="on">項目マスタ</span><span>打刻端末</span><span>設定</span></div><div class="ap-main"><div class="ac" style="display:grid;gap:6px"><h5>バック項目</h5><small style="color:#6A6F7E;font-size:9.5px">ジャンルごとに決めると全商品に付く。商品ごとに変えたいときはジャンルを開いて商品を押す</small>
-<div class="bq"><span class="h">ドリンク <small>（ジャンル全体・商品 8）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">300</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div><div class="ex">▼ 商品ごとに変える（8品・2品は商品だけの設定）</div></div>
-<div class="bq"><span class="h">シャンパン <small>（ジャンル全体・商品 6）</small></span><div class="lk"><span>シャンパンバック<em>連動：シャンパン（ジャンル全体）</em></span><b>20%</b></div><div class="ex">▼ 商品ごとに変える（6品）</div></div>
-<div class="bq"><span class="h">ショット <small>（ジャンル全体・商品 12）</small></span><div class="row"><span>1つあたりの円 ▾</span><span class="n">200</span>円 いつから <span>2026/10/01</span><span class="p">決める</span></div></div>
-</div></div></div></div><figcaption>バック項目：ジャンルごとに円か％で一括。商品ごとの上書きも、いつからの日付つき</figcaption></figure>
-<figure class="shot rv" data-shot="money-night"><div class="v" data-v="cabaret"><div class="ap ap-night"><div class="ap-top"><span class="lg">LUNÉA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（LUNÉA）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><div class="v" data-v="host"><div class="ap ap-night"><div class="ap-top"><span class="lg">CLUB ORION</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（CLUB ORION）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><div class="v" data-v="girlsbar"><div class="ap ap-night"><div class="ap-top"><span class="lg">MINT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（MINT）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><div class="v" data-v="concafe"><div class="ap ap-night"><div class="ap-top"><span class="lg">MELTY CAT</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（MELTY CAT）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><div class="v" data-v="snack"><div class="ap ap-night"><div class="ap-top"><span class="lg">SNACK AKARI</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（SNACK AKARI）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><div class="v" data-v="lounge"><div class="ap ap-night"><div class="ap-top"><span class="lg">LOUNGE SERA</span><span class="rt"><span>店内モード</span><span>キャスト画面へ</span>ログアウト</span></div><div class="ap-tabs"><span>ホーム</span><span>店内</span><span>付け回し</span><span>伝票</span><span>遠隔</span><span>チャット</span><span>カレンダー</span><span class="on">お金</span><span>経費</span><span>日報・月報</span><span>売掛</span><span>ランキング</span><span>顧客</span></div><div class="ap-main">
-<div class="wal"><div><small>今お財布にある現金（LOUNGE SERA）</small><b class="n">182,400円</b></div><div class="bt"><span class="p">数えた金額を入れる</span><span>＋入金</span><span>−出金</span></div></div>
-<div class="k4"><div class="kc"><span>売上（税込）</span><b class="n">2,184,600円</b><small>伝票 112件</small></div><div class="kc"><span>利益</span><b class="n" style="color:#2E7D32">846,610円</b><small>利益率 39%</small></div><div class="kc"><span>給料（この月）</span><b class="n">872,400円</b></div><div class="kc"><span>経費</span><b class="n">85,000円</b></div></div>
-<div class="ac"><h5>払い方ごと（現金・カードなど）</h5><table class="pt"><tr><th>支払い方法</th><th>件数</th><th>払った額</th><th>手数料</th><th>店に入る額</th></tr>
-<tr><td>現金</td><td>98</td><td class="n">1,962,300</td><td>—</td><td class="n">1,962,300</td></tr>
-<tr><td>QRコード決済</td><td>3</td><td class="n">32,600</td><td class="n">−1,075</td><td class="n">31,525</td></tr>
-<tr><td>クレジットカード</td><td>11</td><td class="n">189,700</td><td class="n">−12,915</td><td class="n">176,785</td></tr>
-<tr><td>売掛（ツケ）</td><td>0</td><td>0</td><td>—</td><td>0</td></tr></table></div>
-</div></div></div><figcaption>お金：レジの現金・今月の利益・払い方ごとの手数料。お金の明細は Excel にも出せます</figcaption></figure>
-
-      </div>
-
-      <div class="tabs-g">
-        <div class="rv">
-          <h3>本部の画面 <small>パソコン・タブレット</small></h3>
-          <div class="tcards">
-            <details class="tc"><summary><b>ホーム</b><span>今日の売上・出勤・未打刻、今月の利益</span></summary><ul><li>今日の売上・出勤・未打刻</li><li>今月の利益・売上・客数・客単価・経費・バックの合計</li><li>日別の売上グラフ</li><li>今日の来客予定、期限の近いボトル</li></ul></details>
-
-
-            <details class="tc"><summary><b>店内</b><span>ホールで卓の受付 → 注文 → 延長 → 会計</span></summary><ul><li>ホール：卓のタイルに人数・残り時間・合計。もうすぐ終わる卓を赤で知らせる・自動延長</li><li>配置図：卓を自由に置ける・1階／2階のタブ</li><li>卓を開く（人数・指名・同伴）→ 注文（誰の分か・折半・オプション）→ 延長 → 会計</li><li>会計：消費税・サービス料・繰り上げ／値引き・分けて払う・分けて会計・ポイント／クーポン・Square の読み取り機</li><li>概算伝票・お会計の明細・レシート・領収書の印刷</li></ul></details>
-
-            <details class="tc"><summary><b>伝票</b><span>日ごとの伝票と修正、売上の内わけ</span></summary><ul><li>日ごとの伝票、支払い方法ごとのタブ</li><li>直すとき・消すときは理由が必須。あとから見られる</li><li>伝票ごとの売上・バック・利益の内わけ</li><li>その日の人件費</li></ul></details>
-
-            <details class="tc"><summary><b>付け回し</b><span>どのキャストをどの卓に何分</span></summary><ul><li>卓 → キャスト（何人でも）→ 付け方（フリー・場内指名・本指名・ヘルプ・送り）→ 何分、を選ぶだけ</li><li>先の時刻を入れると「予定」（点線）で入る</li><li>付けたキャストのスマホに「今の席・あと何分」</li><li>タイムテーブル（卓ごと／キャストごと、区切りは1時間〜10分）</li><li>月の集計（回数と席にいた時間）</li></ul></details>
-            <details class="tc"><summary><b>遠隔</b><span>お店にいないキャストへの差し入れ</span></summary><ul><li>お店にいないキャストへの差し入れ</li><li>BASE などで先に払ってもらった注文に対応</li></ul></details>
-
-            <details class="tc"><summary><b>チャット</b><span>1対1・グループ・全体のお知らせ</span></summary><ul><li>1対1・グループ・全体のお知らせ</li><li>写真・既読</li><li>スマホへの通知</li></ul></details>
-            <details class="tc"><summary><b>カレンダー</b><span>月・週・日で売上・出勤・イベント</span></summary><ul><li>月・週・日の表示</li><li>売上・出勤・イベントをまとめて確認</li></ul></details>
-            <details class="tc"><summary><b>お金</b><span>利益・原価率・レジの現金</span></summary><ul><li>利益（売上－手数料－人件費－仕入れ－経費）</li><li>原価率</li><li>お財布（レジの現金）・お金の明細</li><li>会計ソフト用の CSV（freee・マネーフォワード・弥生）</li></ul></details>
-            <details class="tc"><summary><b>経費</b><span>家賃・水道光熱費などを記録</span></summary><ul><li>家賃・水道光熱費などの経費を記録</li><li>利益の計算に自動で反映</li></ul></details>
-            <details class="tc"><summary><b>日報・月報</b><span>売上・客数・客単価・人件費（印刷できる）</span></summary><ul><li>売上・客数・組数・客単価</li><li>支払い方法ごと・人件費</li><li>よく出た商品・入店の時間</li><li>印刷できる</li></ul></details>
-            <details class="tc"><summary><b>タグ</b><span>案内所・新規・リピートなどの件数と売上</span></summary><ul><li>案内所・新規・リピートなどのタグ</li><li>タグごとの件数と売上</li></ul></details>
-            <details class="tc"><summary><b>売掛</b><span>ツケの一覧と回収</span></summary><ul><li>お会計で「売掛（ツケ）」を選ぶと一覧に入る</li><li>回収の記録（一部回収も）</li></ul></details>
-            <details class="tc"><summary><b>クーポン</b><span>円引き・％引き・期間・回数</span></summary><ul><li>円引き・％引き・◯円以上</li><li>期間・回数・1人1回</li></ul></details>
-            <details class="tc"><summary><b>出数・在庫</b><span>よく出たメニュー・在庫・原価</span></summary><ul><li>よく出たメニューのランキング</li><li>ジャンルごとの出数（前月と比べる）</li><li>在庫・入荷・原価</li><li>氷・おしぼりなど在庫だけのもの</li></ul></details>
-
-            <details class="tc"><summary><b>ランキング・イベント</b><span>売上・指名・同伴・杯数・バック</span></summary><ul><li>売上・指名・同伴・杯数・バックのランキング</li><li>名前を押すと日ごと・卓ごとの中身</li><li>イベントの決まりで集計</li></ul></details>
-            <details class="tc"><summary><b>コールのオークション <span class="tag-h">ホスト</span></b><span>ラストオーダーの枠を金額で競る</span></summary><ul><li>ラストオーダーの枠を、キャストが金額で競る</li><li>当選・落選はキャストのスマホにも</li></ul></details>
-
-            <details class="tc"><summary><b>顧客</b><span>顧客カルテ・来店の記録・ポイント</span></summary><ul><li>顧客カルテ（呼び名・氏名・ふりがな・メモ）</li><li>来店の記録</li><li>会員番号・ポイント</li></ul></details>
-
-            <details class="tc"><summary><b>ボトル</b><span>ボトルキープの残り・期限・延長</span></summary><ul><li>ボトルキープ（残り・期限・延長）</li><li>期限の近いボトルはホームに表示</li></ul></details>
-
-            <details class="tc"><summary><b>勤怠</b><span>打刻の一覧・直し・修正申請の承認</span></summary><ul><li>打刻の一覧・直し・再出勤</li><li>修正申請の承認</li></ul></details>
-
-            <details class="tc"><summary><b>送り</b><span>ドライバーと送った人数、手当を給料に</span></summary><ul><li>ドライバーと送った人数</li><li>手当を給料に自動で反映</li></ul></details>
-
-            <details class="tc"><summary><b>給料</b><span>時給・バック・手当・控除、Excel 出力</span></summary><ul><li>日払い・週払い・月払い</li><li>期間ごとの給料（時給・バック・手当・控除）</li><li>金額を決める → 渡したら「渡した」</li><li>決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ</li><li>Excel 出力</li></ul></details>
-
-            <details class="tc"><summary><b>源泉徴収</b><span>ホステス等の報酬の源泉徴収</span></summary><ul><li>給料から自動で計算して差し引き</li><li>毎月の納付額の一覧</li><li>支払調書の印刷</li></ul></details>
-            <details class="tc"><summary><b>深夜時給</b><span>時間を決めて時給を上乗せ</span></summary><ul><li>22時〜翌5時など、時間を決められる</li><li>時給を％増し・金額を上乗せ・決めた金額に</li></ul></details>
-
-
-            <details class="tc"><summary><b>交通費</b><span>1日いくら・月の上限を人ごとに</span></summary><ul><li>1日いくら</li><li>月の上限</li><li>人ごとに決められる</li></ul></details>
-            <details class="tc"><summary><b>深夜料金（お会計）</b><span>決めた時刻からの注文に％を上乗せ</span></summary><ul><li>決めた時刻からの注文に％を上乗せ</li></ul></details>
-            <details class="tc"><summary><b>お店の確定申告の準備</b><span>青色申告決算書の数字と消費税の目安</span></summary><ul><li>1年の売上・仕入れ・経費・給料を集める</li><li>青色申告決算書の数字を出す</li><li>消費税の目安を出す</li></ul></details>
-            <details class="tc"><summary><b>前借り</b><span>記録と、次の給料からの自動の差し引き</span></summary><ul><li>前借りの記録</li><li>次の給料から自動で差し引き</li></ul></details>
-            <details class="tc"><summary><b>シフト</b><span>希望の締め切り・決めたシフト</span></summary><ul><li>希望の締め切り</li><li>決めたシフト</li><li>臨時営業／休業</li></ul></details>
-            <details class="tc"><summary><b>アカウント</b><span>キャストのログインと権限</span></summary><ul><li>キャストのログイン（メールアドレス＋パスワード）</li><li>アカウントごとの権限</li></ul></details>
-            <details class="tc"><summary><b>従業員</b><span>雇用の形・給与プラン・IC カード</span></summary><ul><li>名前・雇用の形</li><li>給与プラン・IC カード</li><li>時給保証</li></ul></details>
-            <details class="tc"><summary><b>給与プラン</b><span>時給・日給・バック・歩合</span></summary><ul><li>時給・日給・バック・控除</li><li>売上や指名で変わる時給・歩合</li></ul></details>
-            <details class="tc"><summary><b>項目マスタ</b><span>メニュー・値段・写真・飲み放題</span></summary><ul><li>メニュー・値段（適用開始日つきで変えられる。過去の売上は当時の値段のまま）・写真・ジャンル</li><li>リクエスト（売上はリクエストした子へ）・本指名数・同伴数の数え方を項目ごとに</li><li>ジャンルごとの杯数・本数ランキング</li><li>オプション（トッピング・セット）・飲み放題／食べ放題</li><li>バック・控除・おすすめ</li><li>厨房の持ち場</li></ul></details>
-            <details class="tc"><summary><b>打刻端末</b><span>お店の端末を打刻専用に</span></summary><ul><li>お店の端末を打刻専用にする</li><li>IC カード（Suica など）でタッチ</li></ul></details>
-            <details class="tc"><summary><b>Excel 取り込み</b><span>今までの Excel の実績を取り込む</span></summary><ul><li>今までの Excel の実績を取り込める</li></ul></details>
-            <details class="tc"><summary><b>設定</b><span>使う機能・支払い方法・見た目など</span></summary><ul><li>使う機能、支払い方法・手数料、Square</li><li>お客さまの注文・厨房、レシート</li><li>営業時間、給料日、呼び名、見た目（色・メニューの並び）</li><li>店内モード：お店に置く端末を「店内と伝票だけ」に</li></ul></details>
-            <details class="tc"><summary><b>変更の記録</b><span>だれが・いつ・何を変えたか</span></summary><ul><li>だれが・いつ・何を変えたか</li><li>改ざんチェックつき</li></ul></details>
-            <details class="tc"><summary><b>ご契約・お支払い</b><span>プラン・お試し・グループ店・年間契約</span></summary><ul><li>プラン・お試し・カード登録</li><li>グループ店（5店舗まで・料金は1店舗ごと）</li><li>年間契約（前払い）</li><li>プランの比べ表</li></ul></details>
-            <details class="tc"><summary><b>お問い合わせ</b><span>運営への問い合わせ・LINE</span></summary><ul><li>運営への問い合わせ・LINE</li></ul></details>
-          </div>
-        </div>
-
-        <div class="rv">
-          <h3>お客さまの画面 <small>ログインなし</small></h3>
-          <div class="tcards">
-            <details class="tc"><summary><b>卓のタブレット・スマホの QR</b><span>写真つきメニューで注文・店員を呼ぶ</span></summary><ul><li>写真つきメニュー・オプション</li><li>飲み放題の残り時間・注文履歴</li><li>店員を呼ぶ・お会計</li><li>人数（大人・20歳未満・お子さま）、20歳未満の飲酒・飲酒運転の注意</li></ul></details>
-            <details class="tc"><summary><b>会員証</b><span>QR・会員番号・ポイント・クーポン</span></summary><ul><li>会員証の QR・会員番号</li><li>ポイント・使えるクーポン</li><li>ホーム画面に追加できる</li><li>名前や電話番号を聞かずに使える</li></ul></details>
-          </div>
-        </div>
-
-        <div class="rv">
-          <h3>お店に置く端末</h3>
-          <div class="tcards">
-            <details class="tc"><summary><b>厨房</b><span>注文が卓ごとに・作り始める → できた</span></summary><ul><li>注文が卓ごとにまとまる</li><li>作り始める → できた・取り消し</li><li>料理／ドリンクの持ち場を分けられる</li><li>大きな音・自動印刷・呼び出しのタブ</li></ul></details>
-
-            <details class="tc"><summary><b>打刻</b><span>IC カード（Suica など）でタッチ</span></summary><ul><li>IC カード（Suica など）でタッチして打刻</li></ul></details>
-            <details class="tc"><summary><b>卓のタブレット</b><span>その卓のお客さまの注文画面</span></summary><ul><li>その卓のお客さまの注文画面</li></ul></details>
-            <details class="tc"><summary><b>レシート・領収書</b><span>会員番号の QR つきレシート</span></summary><ul><li>レシート・領収書の印刷</li><li>会員番号の QR つき</li></ul></details>
-          </div>
-        </div>
-      </div>
+      <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-night-features">すべての画面と機能を見る <span class="arr" aria-hidden="true">→</span></a><span>会計・延長・指名・付け回し・売掛・バック・給料・源泉徴収・顧客・ボトル・ランキング</span></div>
     </div>
   </section>
 
@@ -1418,7 +1205,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
             <li class="plan-more"><span>「こちらもいかがですか」<small>注文のあとにおすすめのメニュー</small></span></li>
             <li class="plan-more"><span>アカウントごとの権限・変更の記録<small>改ざんチェックつき</small></span></li>
           </ul>
-          <button type="button" class="toggle" aria-expanded="false" data-plan="plan-std">すべての機能を見る</button>
+          <a class="toggle" href="/posupos-night-pricing#plan-std">すべての機能を見る →</a>
         </article>
 
         <article class="plan cus rv" id="plan-cus">
@@ -1443,22 +1230,11 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
             <li class="plan-more"><span>複数ブランド・多店舗の本部の画面<small>グループ全体の売上を見る</small></span></li>
             <li class="plan-more"><span>お店のロゴ・色に合わせた見た目<small>季節の飾り（ハロウィンなど）も</small></span></li>
           </ul>
-          <button type="button" class="toggle" aria-expanded="false" data-plan="plan-cus">すべての例を見る</button>
+          <a class="toggle" href="/posupos-night-pricing#plan-cus">すべての例を見る →</a>
         </article>
       </div>
       <p class="plan-note rv">※ どのプランも、パソコン・タブレット・スマホのブラウザで動きます（アプリのインストールは不要。ホーム画面に追加もできます）。</p>
-      <p class="plan-note rv">※ グループ店は5店舗まで。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。キャストのスマホでは、5店舗まで切りかえて使えます。</p>
-      <div class="annual rv" id="annual">
-        <h3>年間契約（前払い）</h3>
-        <p class="lead2">1年分以上をまとめて前払いすると、月額で払うよりおトクになります。</p>
-        <div class="disc"><div><small>1年契約</small><b>1か月分おトク</b></div><div><small>2年契約</small><b>3か月分おトク</b></div><div><small>3年契約</small><b>5か月分おトク</b></div></div>
-        <ul>
-          <li>前払いのお支払いです（Stripe。領収書が出ます）。</li>
-          <li>自動では更新しません。期間が終わる1か月前に、画面でお知らせします。</li>
-          <li>途中でおやめになっても、残りの期間のお金はお返しできません。</li>
-          <li>グループ店は、1店舗の金額 × 店舗の数です。</li>
-        </ul>
-      </div>
+      <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-night-pricing">料金をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>すべての機能の比べ方・グループ店（5店舗まで）・年間契約（最大5か月分おトク）</span></div>
     </div>
   </section>
 
@@ -1565,7 +1341,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   }
 
   // プランの「すべての機能を見る」
-  document.querySelectorAll('.plan .toggle').forEach(function(btn){
+  document.querySelectorAll('.plan button.toggle').forEach(function(btn){
     var label=btn.textContent;
     btn.addEventListener('click',function(){
       var p=$(btn.dataset.plan),open=!p.classList.contains('open');

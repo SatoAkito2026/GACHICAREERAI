@@ -91,7 +91,7 @@ p{margin:0}
 .hero-logo img{display:block;width:clamp(240px,34vw,360px);height:auto}
 .hero-logo span{font-family:var(--ff-mono);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);padding-bottom:6px}
 .head nav{display:none;gap:22px;margin-left:auto;font-size:14px;font-weight:700}
-.head nav a{text-decoration:none;color:var(--ink-2)}
+.head nav a{text-decoration:none;color:var(--ink-2);white-space:nowrap}
 .head nav a:hover{color:var(--blue)}
 .head-cta{margin-left:auto;min-height:42px;padding:0 18px;font-size:14px}
 @media (min-width:1080px){.head nav{display:flex}.head-cta{margin-left:0}}
@@ -315,6 +315,7 @@ p{margin:0}
 .plan .night-h{display:flex;align-items:center;gap:8px}
 .plan-more{display:none}
 .plan.open li.plan-more,.plan.open ul.plan-more{display:grid}.plan.open p.plan-more{display:flex}
+.plan a.toggle{display:block;text-align:center;text-decoration:none}
 .plan .toggle{appearance:none;border:1px solid var(--line);background:var(--white);border-radius:999px;font:inherit;font-weight:700;font-size:14px;padding:10px;cursor:pointer;color:var(--blue)}
 .plan-note{margin-top:20px;font-size:13.5px;color:var(--ink-2)}
 .plan .price .cp{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:2px}
@@ -799,9 +800,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     <a class="logo" href="/posupos-night-ai-interview" aria-label="ポスポス トップへ"><img class="lk" src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150"></a>
     <nav aria-label="ページ内">
       <a href="/posupos-night#can">できること</a>
-      <a href="/posupos-night#day">お店の1日</a>
-
-      <a href="/posupos-night#screens">画面と機能</a>
+      <a href="/posupos-night-features">画面と機能</a>
+      <a href="/posupos-night-ai-interview">AI面接</a>
       <a href="/posupos-night#plans">プラン</a>
       <a href="/posupos-night#faq">よくある質問</a>
     </nav>
@@ -1043,7 +1043,7 @@ body.night .msg{background:#F4F7FB}
   }
 
   // プランの「すべての機能を見る」
-  document.querySelectorAll('.plan .toggle').forEach(function(btn){
+  document.querySelectorAll('.plan button.toggle').forEach(function(btn){
     var label=btn.textContent;
     btn.addEventListener('click',function(){
       var p=$(btn.dataset.plan),open=!p.classList.contains('open');

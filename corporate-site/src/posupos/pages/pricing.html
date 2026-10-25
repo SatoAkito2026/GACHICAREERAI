@@ -1,0 +1,149 @@
+<!--
+title: {{#day}}料金・プラン｜ポスポス（飲食店のクラウドPOSレジ）月額11,000円〜{{/day}}{{#night}}料金・プラン｜ポスポス（夜のお店のPOSシステム）月額11,000円〜{{/night}}
+description: ポスポスの料金。ライトプラン月額11,000円、スタンダードプランはキャンペーン価格{{#day}}22,000円（通常33,000円）{{/day}}{{#night}}33,000円（通常40,000円）{{/night}}、個別プラン55,000円〜（税込・1店舗ごと）。初期費用0円・1か月無料。グループ店・年間契約もご案内します。
+crumb: 料金・プラン
+-->
+<style>
+.sub-hero{padding-block:clamp(28px,5vw,56px) clamp(28px,4vw,44px)}
+.sub-hero .wrap{display:block}
+.crumbs{font-size:13px;color:var(--ink-2);margin:0 0 12px}
+.crumbs a{color:inherit}
+.sub-hero h1{font-size:clamp(28px,5vw,44px);line-height:1.3;margin-top:8px}
+.sub-hero .lead{margin-top:14px;max-width:46em}
+.back{margin-top:30px}
+</style>
+
+  <section class="hero sub-hero">
+    <div class="wrap">
+      <p class="crumbs"><a href="posupos-{{mode}}.html">ポスポス</a> ／ 料金・プラン</p>
+      <h1>料金・プラン</h1>
+      <p class="lead">ライト・スタンダード・個別の3つのプランと、グループ店・年間契約の料金です。スタンダードプランは今キャンペーン中で、AI面接も追加料金なしでついてきます。</p>
+    </div>
+  </section>
+
+  <section class="sec" id="plans">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Plans</p>
+        <h2>3つのプラン</h2>
+        <p>お店の大きさや、やりたいことに合わせて選べます。初期費用は0円。1か月無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。</p>
+      </div>
+      <div class="offer"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9.5 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 14.5 8 12 8z"/></svg></span><div><small>このページからのお申し込み特典</small><b>商品・写真・{{w}}の登録代行が<em>無料</em></b><span>通常は別途お見積もりの登録作業を、まるごとお任せいただけます。無料お試しのお申し込みと一緒にどうぞ。</span></div><a class="btn btn-blue" href="contact.html#pos-offer">特典つきで申し込む <span class="arr" aria-hidden="true">→</span></a></div>
+      <div class="plans stagger">
+        <article class="plan open rv">
+          <h3>ライトプラン</h3>
+          <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
+          <p class="price"><span class="py">月額 <b class="n">11,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円</span></p>
+          <ul>
+            <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
+            <li><span>店内<small>{{#day}}卓の配置図、受付・注文・会計（フロアも分けられる）{{/day}}{{#night}}ホール・配置図、卓の受付・注文・会計{{/night}}</small></span></li>
+{{#night}}            <li><span>セット料金・延長</span></li>{{/night}}
+            <li><span>伝票<small>一覧・修正・取り消し、支払い方法ごとの集計</small></span></li>
+            <li><span>項目マスタ<small>メニュー・値段・写真・オプション・飲み放題{{#day}}／食べ放題{{/day}}</small></span></li>
+            <li><span>設定<small>お店の情報、支払い方法と手数料、レシート、見た目</small></span></li>
+            <li><span>店内モード<small>お店の端末を「店内と伝票だけ」に</small></span></li>
+            <li><span>お客さまの注文<small>卓の QR から注文、店員の呼び出し、お会計の目安</small></span></li>
+            <li><span>{{#day}}券売機・{{/day}}厨房の画面<small>料理／ドリンクの持ち場を分けられる</small></span></li>
+            <li><span>ポイント・会員証（QR）<small>名前や電話番号を聞かずにポイント</small></span></li>
+            <li><span>Square の読み取り機・レシート／領収書の印刷{{#day}}<small>お持ち帰りの軽減税率にも対応</small>{{/day}}</span></li>
+          </ul>
+        </article>
+
+        <article class="plan std open rv" id="plan-std">
+          <span class="badge">おすすめ</span>
+          <h3>スタンダードプラン</h3>
+          <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
+          {{#day}}<p class="price"><span class="cp">作りたてキャンペーン価格</span><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="reg">（通常価格 月額33,000円・税込）</span><span class="save">通常価格より<b>毎月11,000円</b>おトク</span><span class="save2">1年で132,000円、3年で396,000円の差</span><span class="pn">1店舗ごと・初期費用 0円</span></p>{{/day}}{{#night}}<p class="price"><span class="cp">作りたてキャンペーン価格</span><span class="py">月額 <b class="n">33,000</b>円<small>（税込）</small></span><span class="reg">（通常価格 月額40,000円・税込）</span><span class="save">通常価格より<b>毎月7,000円</b>おトク</span><span class="save2">1年で84,000円、3年で252,000円の差</span><span class="pn">1店舗ごと・初期費用 0円</span></p>{{/night}}
+          <p class="camp"><b>今お申し込みのお店は、ずっとこの価格。</b>キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。</p>
+          <p class="plus">ライトプランの機能 ＋</p>
+          <ul>
+            <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>応募者の一次面接・録画つき。追加料金なし</small></span></li>
+{{#night}}
+            <li><span>指名（本指名・場内指名・同伴）・キャストバック</span></li>
+            <li><span>売上・指名で変わる時給・歩合</span></li>
+            <li><span>付け回し・来客予定</span></li>
+            <li><span>売掛（ツケ）・ボトルキープ</span></li>
+            <li><span>ランキング・イベント・コールのオークション</span></li>
+            <li><span>送り（ドライバー）・遠隔（差し入れ）</span></li>
+            <li><span>源泉徴収（ホステス等の報酬）<small>給料から自動で計算して差し引き、毎月の納付額の一覧、支払調書の印刷</small></span></li>
+            <li><span>深夜時給<small>22時〜翌5時など、時間を決めて時給を％増し・金額を上乗せ・決めた金額に</small></span></li>
+            <li><span>交通費<small>1日いくら・月の上限を人ごとに決められる</small></span></li>
+            <li><span>深夜料金（お会計）<small>決めた時刻からの注文に％を上乗せ</small></span></li>
+            <li><span>お店の確定申告の準備<small>1年の売上・仕入れ・経費・給料を集めて、青色申告決算書の数字と消費税の目安を出す（帳簿は会計ソフトへ CSV で）</small></span></li>
+            <li><span>キャストの確定申告<small>1画面ずつ、順番に案内</small></span></li>
+{{/night}}
+{{#day}}
+            <li><span>深夜料金（お会計）<small>22時からの注文に10%など</small></span></li>
+            <li><span>深夜時給<small>22時〜翌5時のスタッフの時給を25%増しなど</small></span></li>
+            <li><span>交通費<small>1日いくら・月の上限を人ごとに決められる</small></span></li>
+            <li><span>お店の確定申告の準備<small>1年の売上・仕入れ・経費・給料を集めて、青色申告決算書の数字と消費税の目安を出す（帳簿は会計ソフトへ CSV で）</small></span></li>
+{{/day}}
+            <li><span>グループ店<small>5店舗まで（お店の切りかえ）。料金は1店舗ごと</small></span></li>
+            <li><span>キャストモード<small>{{w}}がスマホでシフト・給料・{{#night}}成績・{{/night}}チャット</small></span></li>
+            <li><span>打刻・シフト・給料<small>IC カード打刻、シフトの希望→決定、給料の計算・給料日・前借り</small></span></li>
+            <li{{#night}} class="plan-more"{{/night}}><span>顧客カルテ・クーポン・ボトルキープ・タグ<small>{{#day}}新規・リピートなど{{/day}}{{#night}}新規・リピート・案内所など{{/night}}</small></span></li>
+            <li{{#night}} class="plan-more"{{/night}}><span>お金<small>利益・レジの現金・経費・明細、freee・マネーフォワード・弥生へ書き出し</small></span></li>
+            <li{{#night}} class="plan-more"{{/night}}><span>日報・月報<small>売上・客数・客単価・人件費・よく出た商品</small></span></li>
+            <li class="plan-more"><span>出数・在庫<small>ランキング・在庫・仕入れ・原価率</small></span></li>
+            <li class="plan-more"><span>カレンダー・チャット・スマホへの通知<small>1対1・グループ・お知らせ</small></span></li>
+            <li class="plan-more"><span>「こちらもいかがですか」<small>注文のあとにおすすめのメニュー</small></span></li>
+            <li class="plan-more"><span>アカウントごとの権限・変更の記録<small>改ざんチェックつき</small></span></li>
+          </ul>
+        </article>
+
+        <article class="plan cus open rv" id="plan-cus">
+          <h3>個別プラン</h3>
+          <p class="who">お店のやり方に、アプリを合わせたいお店に（1店舗ごと）。</p>
+          <p class="price"><span class="py">月額 <b class="n">55,000〜</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
+          <p class="plus">ライト＋スタンダードの機能 ＋</p>
+          <ul>
+            <li class="ai-li"><span>AI面接<small>応募者の一次面接・録画つき</small></span></li>
+            <li><span>お店専用の URL<small>お店の名前.akitogroup.jp</small></span></li>
+{{#day}}            <li><span>どの機能でも使える<small>昼のお店でも指名・バックなど、お店の種類に関係なく</small></span></li>{{/day}}
+{{#night}}            <li><span>どの機能でも使える<small>お店の種類に関係なく、すべての機能を</small></span></li>{{/night}}
+          </ul>
+          <p class="sub-h">お店ごとに付けられる機能の例</p>
+          <ul>
+            <li><span>お店独自の給料の決め方・{{#night}}バックの計算{{/night}}{{#day}}手当の計算{{/day}}<small>Excel で今やっている計算をそのまま</small></span></li>
+            <li><span>今までの Excel・ほかのレジのデータの取り込み</span></li>
+            <li><span>お店独自の帳票・日報・印刷の形</span></li>
+{{#night}}            <li class="plan-more"><span>お店独自のランキング・イベントの決まり</span></li>{{/night}}
+            <li class="plan-more"><span>予約の受付、LINE とのつなぎ込み</span></li>
+            <li class="plan-more"><span>釣銭機・キャッシュドロア・プリンターとのつなぎ込み</span></li>
+            <li class="plan-more"><span>複数ブランド・多店舗の本部の画面<small>グループ全体の売上を見る</small></span></li>
+            <li class="plan-more"><span>お店のロゴ・色に合わせた見た目<small>季節の飾り（ハロウィンなど）も</small></span></li>
+          </ul>
+        </article>
+      </div>
+      <p class="plan-note rv">※ どのプランも、パソコン・タブレット・スマホのブラウザで動きます（アプリのインストールは不要。ホーム画面に追加もできます）。</p>
+      <p class="plan-note rv">※ グループ店は5店舗まで。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。{{w}}のスマホでは、5店舗まで切りかえて使えます。</p>
+      <div class="annual rv" id="annual">
+        <h3>年間契約（前払い）</h3>
+        <p class="lead2">1年分以上をまとめて前払いすると、月額で払うよりおトクになります。</p>
+        <div class="disc"><div><small>1年契約</small><b>1か月分おトク</b></div><div><small>2年契約</small><b>3か月分おトク</b></div><div><small>3年契約</small><b>5か月分おトク</b></div></div>
+        <ul>
+          <li>前払いのお支払いです（Stripe。領収書が出ます）。</li>
+          <li>自動では更新しません。期間が終わる1か月前に、画面でお知らせします。</li>
+          <li>途中でおやめになっても、残りの期間のお金はお返しできません。</li>
+          <li>グループ店は、1店舗の金額 × 店舗の数です。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec tint" id="faq">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>料金のよくある質問</h2></div>
+      <div class="faq rv">
+        <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 {{#day}}22,000円（通常価格 33,000円。毎月11,000円おトク）{{/day}}{{#night}}33,000円（通常価格 40,000円。毎月7,000円おトク）{{/night}}、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。</p></details>
+        <details><summary>グループ店（2店舗以上）の料金は？</summary><p>グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。{{w}}のスマホでは、5店舗まで切りかえて使えます。</p></details>
+        <details><summary>年間契約はありますか？</summary><p>あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。</p></details>
+        <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
+        <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。</p></details>
+      </div>
+      <p class="back"><a class="btn btn-line" href="posupos-{{mode}}.html">← ポスポスのページへ戻る</a></p>
+    </div>
+  </section>
+
+{{final}}
