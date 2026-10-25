@@ -254,6 +254,8 @@ def main():
             email, page = s["email"], f"https://www.openstreetmap.org/{s['osm']}"
         if refused:
             stats["営業お断り"] += 1
+        elif email and any(r["メール"] == email for r in rows):
+            pass  # 同じアドレス（同じ会社の別のお店など）は1回だけ
         elif email:
             stats["メールあり"] += 1
             rows.append({"店名": s["name"], "種類": s["type"], "都道府県": s["pref"], "メール": email, "見つけたページ": page,
