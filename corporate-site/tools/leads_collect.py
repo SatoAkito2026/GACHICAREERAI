@@ -46,6 +46,8 @@ NIGHT_WORDS = re.compile(r"キャバ|ホスト|スナック|ラウンジ|ガー�
 CONTACT_WORDS = re.compile(r"contact|inquiry|toiawase|otoiawase|company|about|profile|access|shop|info|gaiyou|gaiyo|tokushoho|law|お問い?合わせ|お問合せ|会社概要|店舗情報|店舗案内|アクセス|特定商取引", re.I)
 REFUSE = re.compile(r"(広告|営業|セールス|勧誘|売り込み|DM).{0,10}(お断り|禁止|ご遠慮|固くお断り|不要|拒否|お控え)")
 EMAIL = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")
+# お店の人に届かない・営業の連絡先ではないアドレス（サイトの管理用・お客様窓口・採用・広報など）
+ROLE_EMAIL = re.compile(r"^(webmaster|postmaster|hostmaster|admin|root|noreply|no-reply|support|cs|customer|recruit|saiyo|saiyou|jinji|press|pr|ir|privacy|abuse|security)[-_.@]|-cs@|-support@", re.I)
 BAD_EMAIL = re.compile(r"\.(png|jpe?g|gif|webp|svg|css|js)$|@(example|sentry|wixpress|sentry-next|domain|email|yourdomain)\.|^(xxx|sample|test|your|name|info@example)", re.I)
 TYPES = {"ramen": "ラーメン", "japanese": "和食", "sushi": "寿司", "soba": "そば・うどん", "udon": "そば・うどん", "yakiniku": "焼肉", "yakitori": "焼き鳥",
          "italian": "イタリアン", "pizza": "イタリアン", "french": "フレンチ・ビストロ", "chinese": "中華料理", "korean": "韓国料理", "curry": "カレー・インド料理",
@@ -198,7 +200,7 @@ class Crawler:
             mails = re.findall(r'mailto:([^"\'?>\s]+)', txt, re.I) + EMAIL.findall(plain.replace("＠", "@").replace("[at]", "@").replace("(at)", "@"))
             for m in mails:
                 m = urllib.parse.unquote(m).strip(".,;:").lower()
-                if EMAIL.fullmatch(m) and not BAD_EMAIL.search(m):
+                if EMAIL.fullmatch(m) and not BAD_EMAIL.search(m) and not ROLE_EMAIL.search(m):
                     found.append((m, url))
         if not found:
             return None, None, refused
