@@ -75,12 +75,18 @@ out tags;'''
     data = urllib.parse.urlencode({"data": q}).encode()
     last = None
     for ep in OVERPASS:
+        host = urllib.parse.urlparse(ep).netloc
+        print(f"{area}: OpenStreetMap（{host}）に問い合わせています…（混んでいると1〜2分かかります）", flush=True)
+        t0 = time.time()
         try:
             req = urllib.request.Request(ep, data=data, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=180) as r:
-                return json.loads(r.read().decode())["elements"]
+            with urllib.request.urlopen(req, timeout=100) as r:
+                els = json.loads(r.read().decode())["elements"]
+                print(f"  → 返事がきました（{time.time() - t0:.0f}秒）", flush=True)
+                return els
         except Exception as e:  # 混んでいたら次のサーバーへ
             last = e
+            print(f"  → うまくいきませんでした（{e}）。別のサーバーで試します", flush=True)
             time.sleep(3)
     sys.exit(f"OpenStreetMap から取れませんでした（{last}）。少し時間をおいてもう一度試してください。")
 
@@ -195,6 +201,8 @@ def main():
     if a.limit:
         shops = shops[:a.limit]
     cr, rows, stats = Crawler(a.delay), [], {"メールあり": 0, "見つからない": 0, "営業お断り": 0}
+    if shops:
+        print(f"{len(shops)} 軒のホームページを順番に見ます（1軒あたり数秒。止めるときは control + C）", flush=True)
     for i, s in enumerate(shops, 1):
         email, page, refused = s["email"], (f"https://www.openstreetmap.org/{s['osm']}" if s["email"] else ""), False
         if s["site"]:
@@ -210,7 +218,7 @@ def main():
                          "メモ": f"OSM {s['osm']}（{s['area']}）"})
         else:
             stats["見つからない"] += 1
-        print(f"\r{i}/{len(shops)} 軒を確認（メールあり {stats['メールあり']}・営業お断り {stats['営業お断り']}）", end="", flush=True)
+        print(f"\r{i}/{len(shops)} 軒のホームページを確認（メールあり {stats['メールあり']}・営業お断り {stats['営業お断り']}）", end="", flush=True)
     print()
     with open(a.out, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["店名", "種類", "都道府県", "メール", "見つけたページ", "メモ"])
