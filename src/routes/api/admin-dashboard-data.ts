@@ -105,6 +105,47 @@ function daily(dates: string[]) {
   return out;
 }
 
+/** 直近12週の週ごとの件数（日本時間の月曜はじまり。ラベルは週の初日） */
+function weekly(dates: string[]) {
+  const weekStart = (key: string) => {
+    const d = new Date(`${key}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  };
+  const m = new Map<string, number>();
+  for (const d of dates) {
+    const k = weekStart(jstDate(d));
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  const thisWeek = new Date(`${weekStart(jstDate(new Date()))}T00:00:00Z`);
+  const out: { date: string; count: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const key = new Date(thisWeek.getTime() - i * 7 * DAY).toISOString().slice(0, 10);
+    out.push({ date: `${key.slice(5).replace("-", "/")}〜`, count: m.get(key) ?? 0 });
+  }
+  return out;
+}
+
+/** 直近12か月の月ごとの件数（日本時間） */
+function monthly(dates: string[]) {
+  const m = new Map<string, number>();
+  for (const d of dates) {
+    const k = jstDate(d).slice(0, 7);
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  const j = new Date(Date.now() + JST);
+  const out: { date: string; count: number }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(Date.UTC(j.getUTCFullYear(), j.getUTCMonth() - i, 1));
+    const key = d.toISOString().slice(0, 7);
+    out.push({
+      date: `${d.getUTCFullYear() % 100}/${d.getUTCMonth() + 1}月`,
+      count: m.get(key) ?? 0,
+    });
+  }
+  return out;
+}
+
 export const Route = createFileRoute("/api/admin-dashboard-data")({
   server: {
     handlers: {
@@ -375,6 +416,8 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
             signupsDaily: daily(
               profiles.filter((p) => p.created_at >= since30).map((p) => p.created_at),
             ),
+            signupsWeekly: weekly(profiles.map((p) => p.created_at)),
+            signupsMonthly: monthly(profiles.map((p) => p.created_at)),
             practicesDaily: daily(
               practices.filter((p) => p.created_at >= since30).map((p) => p.created_at),
             ),
