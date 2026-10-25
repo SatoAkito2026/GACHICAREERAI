@@ -27,7 +27,10 @@ import csv
 import html
 import json
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -35,7 +38,7 @@ import urllib.request
 import urllib.robotparser
 
 UA = "AKITOgroup-POSPOS-leads/1.0 (+https://akitogroup.jp/privacy; pospos@akitogroup.jp)"
-OVERPASS = ["https://overpass.osm.jp/api/interpreter", "https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
+OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
 SKIP_HOSTS = ("tabelog.com", "hotpepper.jp", "gnavi.co.jp", "retty.me", "instagram.com", "facebook.com", "twitter.com", "x.com", "tiktok.com",
               "line.me", "lin.ee", "google.com", "goo.gl", "g.page", "youtube.com", "ameblo.jp", "ikyu.com", "ozmall.co.jp", "ekiten.jp", "itp.ne.jp")
 SKIP_WORDS = ("yelp.", "tripadvisor.", "pocketpara", "caba-club", "hostlove", "nightwork", "fuzoku")
@@ -51,17 +54,44 @@ TYPES = {"ramen": "ラーメン", "japanese": "和食", "sushi": "寿司", "soba
          "cake": "ケーキ・スイーツ", "bakery": "パン屋・ベーカリー", "western": "洋食レストラン"}
 
 
+CURL = shutil.which("curl")
+
+
+def fetch(url, data=None, timeout=12, limit=600_000):
+    """(状態コード, Content-Type, 最後のURL, 中身) を返す。Mac の古い Python は新しい暗号化に対応していないので curl を使う"""
+    if CURL:
+        with tempfile.NamedTemporaryFile() as body, tempfile.NamedTemporaryFile("w+") as form:
+            cmd = [CURL, "-sS", "-L", "--max-redirs", "5", "--max-time", str(timeout), "--max-filesize", str(limit * 4), "-A", UA,
+                   "-H", "Accept-Language: ja,en;q=0.5", "-o", body.name, "-w", "%{http_code}\n%{content_type}\n%{url_effective}"]
+            if data is not None:
+                form.write(data.decode()); form.flush()
+                cmd += ["--data-binary", "@" + form.name]
+            r = subprocess.run(cmd + [url], capture_output=True, text=True)
+            if r.returncode not in (0, 63):
+                raise OSError((r.stderr or "curl error").strip()[:200])
+            code, ctype, final = (r.stdout.split("\n") + ["", "", url])[:3]
+            with open(body.name, "rb") as f:
+                return int(code or 0), ctype, final or url, f.read(limit)
+    req = urllib.request.Request(url, data=data, headers={"User-Agent": UA, "Accept-Language": "ja,en;q=0.5"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status, r.headers.get("Content-Type") or "", r.geturl(), r.read(limit)
+    except urllib.error.HTTPError as e:
+        return e.code, "", url, b""
+
+
 def http_get(url, timeout=12, limit=600_000):
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "ja,en;q=0.5"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        if "html" not in (r.headers.get("Content-Type") or "html"):
-            return "", r.geturl()
-        raw = r.read(limit)
-        cs = r.headers.get_content_charset() or (re.search(rb'charset=["\']?([\w-]+)', raw[:3000]) or [None, b"utf-8"])[1].decode()
-        try:
-            return raw.decode(cs, "replace"), r.geturl()
-        except LookupError:
-            return raw.decode("utf-8", "replace"), r.geturl()
+    code, ctype, final, raw = fetch(url, timeout=timeout, limit=limit)
+    if code >= 400:
+        raise OSError(f"HTTP {code}")
+    if "html" not in (ctype or "html"):
+        return "", final
+    m = re.search(r"charset=([\w-]+)", ctype or "") or re.search(rb'charset=["\']?([\w-]+)', raw[:3000])
+    cs = (m.group(1).decode() if isinstance(m.group(1), bytes) else m.group(1)) if m else "utf-8"
+    try:
+        return raw.decode(cs, "replace"), final
+    except LookupError:
+        return raw.decode("utf-8", "replace"), final
 
 
 def overpass(area, kind):
@@ -81,11 +111,12 @@ out tags;'''
         print(f"{area}: OpenStreetMap（{host}）に問い合わせています…（混んでいると1〜2分かかります）", flush=True)
         t0 = time.time()
         try:
-            req = urllib.request.Request(ep, data=data, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=100) as r:
-                els = json.loads(r.read().decode())["elements"]
-                print(f"  → 返事がきました（{time.time() - t0:.0f}秒）", flush=True)
-                return els
+            code, _, _, raw = fetch(ep, data=data, timeout=100, limit=50_000_000)
+            if code != 200:
+                raise OSError(f"HTTP {code}")
+            els = json.loads(raw.decode())["elements"]
+            print(f"  → 返事がきました（{time.time() - t0:.0f}秒）", flush=True)
+            return els
         except Exception as e:  # 混んでいたら次のサーバーへ
             last = e
             print(f"  → うまくいきませんでした（{e}）。別のサーバーで試します", flush=True)
@@ -120,11 +151,13 @@ class Crawler:
         if base not in self.robots:
             rp = urllib.robotparser.RobotFileParser()
             try:
-                req = urllib.request.Request(base + "/robots.txt", headers={"User-Agent": UA})
-                with urllib.request.urlopen(req, timeout=8) as r:
-                    rp.parse(r.read(100_000).decode("utf-8", "replace").splitlines())
-            except urllib.error.HTTPError as e:
-                rp.parse(["User-agent: *", "Disallow: /"] if e.code in (401, 403) else [])  # 見せないと言っているなら開かない
+                code, _, _, raw = fetch(base + "/robots.txt", timeout=8, limit=100_000)
+                if code in (401, 403):
+                    rp.parse(["User-agent: *", "Disallow: /"])  # 見せないと言っているなら開かない
+                elif code == 200:
+                    rp.parse(raw.decode("utf-8", "replace").splitlines())
+                else:
+                    rp.parse([])
             except Exception:
                 rp.parse([])
             self.robots[base] = rp
