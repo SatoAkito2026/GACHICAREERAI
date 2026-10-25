@@ -36,11 +36,12 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 
 POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が、アルバイト・キャストの応募者に AI の一次面接をしてもらう機能。ガチキャリAI の練習・企業の AI 面接・人材プロフィール・課金とは**完全に別物**（表は `partner_interviews` だけ。candidate_profiles・7つの力・recruiter_view・人材の公開・Stripe のメーターには一切つながない）。
 
-- 中身は `src/lib/partner-interview.ts`（質問・AI への指示・まとめ・90日で消す処理 `runPartnerInterviewJob`）
-- POSPOS のサーバーからの入口：`/api/partner/pospos/interviews`（POST で URL を作る・GET で一覧）、`/api/partner/pospos/interviews/<id>?storeId=`（GET で中身・DELETE で消す）。認証は `Authorization: Bearer <POSPOS_PARTNER_SECRET>`（Cloudflare の secret）。どの入口も `storeId` で絞り込み、違うお店は 404。入力は zod で確かめる。1店あたり日本時間の1か月で100回まで（消したものも数える）
+- 中身は `src/lib/partner-interview.ts`（選ぶ質問 `screeningQuestions`・`validateScreening`、AI への指示・まとめ・90日で消す処理 `runPartnerInterviewJob`）
+- 流れ：同意とカメラの確認 → **選ぶ質問**（日数・曜日・時間帯・いつから・通勤・経験＋職種ごと。夜のお店は「18歳以上で高校生ではない」のチェックが必須。年齢そのものは聞かない。サーバーで選べる答えかを確かめて `partner_interviews.screening` に保存）→ AI と1〜2分の会話（自己紹介・やってみたい理由・夜のキャスト／ホストは好きなこと・お店の質問は3つまで。3分で締め、+1分で AI を呼ばずに終える）→ 終わりの画面。会話は screening を保存してからだけ始められる
+- POSPOS のサーバーからの入口：`/api/partner/pospos/interviews`（POST で URL を作る・GET で一覧）、`/api/partner/pospos/interviews/<id>?storeId=`（GET で中身＝選ぶ質問の答え `answers`・まとめ・会話・写真・録画、DELETE で消す）。認証は `Authorization: Bearer <POSPOS_PARTNER_SECRET>`（Cloudflare の secret）。どの入口も `storeId` で絞り込み、違うお店は 404。入力は zod で確かめる。1店あたり日本時間の1か月で100回まで（消したものも数える）
 - 応募者の画面：`/partner-interview/<合言葉>`（`PartnerInterviewPage`、会員登録なし）。API は `/api/partner-interview`（session・start・turn・media-url・media-done・finish）と `/api/partner-interview/transcribe`。合言葉は1回きり・14日。答えはじめてから閉じたら expired（まだ答えていなければやり直せる）
-- 録画（はじめの60秒）と顔の写真3枚（はじめ・4分後・おわり）は必須（同意しないと受けられない、カメラがないと受けられない）。非公開バケット `partner-interviews` の `pospos/<storeId>/<面接id>/` にブラウザから直接送る。お店には1時間の期限つき URL だけ
-- AI の呼び出しは「会話の受け答え」と「終わったあとの雰囲気のまとめ1回」だけ（最初のあいさつは決まった文）。応募者には評価を見せず、終わりの画面は決まった文だけ。90日たったら録画・写真・会話・まとめを毎時の Cron で消す
+- 会話の録画（はじめから終わりまで・4分まで）と顔の写真3枚（はじめ・30秒後・おわり）は必須（同意しないと受けられない、カメラがないと受けられない）。非公開バケット `partner-interviews` の `pospos/<storeId>/<面接id>/` にブラウザから直接送る。お店には1時間の期限つき URL だけ
+- AI の呼び出しは「会話の受け答え（3〜5回）」と「終わったあとの雰囲気のまとめ1回」だけ（最初のあいさつは決まった文）。まとめの availability は AI に書かせず、選ぶ質問の答えをつなぐ。見た目については AI は何も書かない。応募者には評価を見せず、終わりの画面は決まった文だけ。90日たったら録画・写真・会話・まとめを毎時の Cron で消す
 
 ## 個人プランの上限
 

@@ -4,8 +4,10 @@
  * ガチキャリAI の練習・企業の AI 面接・人材プロフィールとは完全に別物：
  * - 表は partner_interviews だけ（candidate_profiles・7つの力の評価・人材の公開・課金には一切つながない）
  * - 応募者は会員登録なしで URL を開くだけ。評価・点数は応募者に見せない
- * - AI の呼び出しは「会話の受け答え」と「終わったあとのまとめ1回」だけ（原価をおさえる）
- * - 録画（はじめの60秒）と顔の写真3枚は非公開バケット partner-interviews に置き、お店には期限つき URL だけ渡す
+ * - 流れ：短い答えで済む質問は画面で選んでもらう（選ぶ質問・screening）→ AI と1〜2分だけ会話する
+ * - AI の呼び出しは「会話の受け答え（3〜5回）」と「終わったあとのまとめ1回」だけ（原価をおさえる）
+ * - 会話の録画（はじめから終わりまで・4分まで）と顔の写真3枚は非公開バケット partner-interviews に置き、
+ *   お店には期限つき URL だけ渡す
  * - 90日たったら、録画・写真・会話・まとめを自動で消す（毎時の Cron）
  *
  * POSPOS のサーバーからの入口：/api/partner/pospos/interviews（認証は POSPOS_PARTNER_SECRET）
@@ -23,16 +25,16 @@ export const PARTNER_EXPIRES_DAYS = 14;
 export const PARTNER_MONTHLY_LIMIT = 100;
 /** 録画・写真・会話を残す日数 */
 export const PARTNER_RETENTION_DAYS = 90;
-/** 面接の長さ：この分数で締めてもらい、+3分で AI を呼ばずに終える */
-export const PARTNER_MAX_MINUTES = 15;
+/** 会話の長さ：この分数で締めてもらい、+1分で AI を呼ばずに終える */
+export const PARTNER_MAX_MINUTES = 3;
 /** 始めてからこの分数たっても終わっていない面接は「途中でやめた」扱い */
-const PARTNER_STALE_MINUTES = 40;
+const PARTNER_STALE_MINUTES = 20;
 /** 1回の面接で受け付ける答えの数の上限（AI の使いすぎを防ぐ） */
-export const PARTNER_MAX_ANSWERS = 40;
+export const PARTNER_MAX_ANSWERS = 10;
 /** 写真の枚数（はじめ・まん中・おわり） */
 export const PARTNER_PHOTO_COUNT = 3;
-/** 録画の長さ（秒） */
-export const PARTNER_VIDEO_SECONDS = 60;
+/** 録画の長さの上限（秒）。会話のはじめから終わりまで撮る */
+export const PARTNER_VIDEO_SECONDS = 240;
 
 const DAY = 24 * 60 * 60 * 1000;
 const JST = 9 * 60 * 60 * 1000;
@@ -67,6 +69,8 @@ export type PartnerInterviewRow = {
   answered_count: number;
   transcript: TranscriptLine[];
   summary: PartnerSummary | null;
+  /** 選ぶ質問の答え（[{ key, label, value }]。いくつでも選ぶ質問は「、」でつなぐ） */
+  screening: ScreeningAnswer[];
   photo_paths: string[];
   video_path: string | null;
   consent_agreed_at: string | null;
@@ -89,34 +93,159 @@ export const JOB_LABELS: Record<PartnerJobType, string> = {
   other: "スタッフ",
 };
 
-/** 職種ごとに必ず聞く質問（お店が質問を入れていなくても面接になるように） */
-const COMMON_QUESTIONS = [
-  "簡単な自己紹介",
-  "週に何日くらい、どの曜日・時間帯に入れるか",
-  "いつから働けるか",
-  "お店までの通勤の方法",
-  "これまでの仕事・アルバイトの経験",
-];
-const JOB_QUESTIONS: Record<PartnerJobType, string[]> = {
-  cast: [
-    "接客の経験",
-    "お酒は飲めるか（飲めなくても大丈夫な聞き方で）",
-    "お客さまと話すときに気をつけていること",
-    "働くうえでの目標（稼ぎたい額など）",
-  ],
-  host: [
-    "接客の経験",
-    "お酒は飲めるか（飲めなくても大丈夫な聞き方で）",
-    "お客さまと話すときに気をつけていること",
-    "働くうえでの目標（稼ぎたい額など）",
-  ],
-  staff: ["夜おそくまで働けるか", "体力を使う仕事は大丈夫か", "接客・お店の運営の経験"],
-  driver: ["運転免許の種類と運転歴", "夜おそくまで働けるか", "道に詳しい地域"],
-  hall: ["飲食の接客の経験", "忙しいときにどう動くか"],
-  kitchen: ["調理の経験", "得意な料理・作業"],
-  manager: ["人をまとめた経験", "売上やシフトを管理した経験"],
-  other: [],
-};
+// ---- 選ぶ質問（短い答えで済む質問は、声ではなく画面で選んでもらう） ----
+
+export type ScreeningAnswer = { key: string; label: string; value: string };
+export type ScreeningQuestion =
+  | { key: string; label: string; kind: "one" | "many"; options: string[]; note?: string }
+  /** チェックしないと進めない確認（夜のお店の18歳以上の確認） */
+  | { key: string; label: string; kind: "check"; text: string; savedLabel: string };
+
+/**
+ * その職種・お店の種類で出す選ぶ質問（この順に画面に出し、この順に保存する）。
+ * 年齢・性別・家族・出身地・健康など、採用の判断に使ってはいけないことは入れない
+ */
+export function screeningQuestions(
+  businessType: PartnerBusinessType,
+  jobType: PartnerJobType,
+): ScreeningQuestion[] {
+  const night = businessType === "night";
+  const qs: ScreeningQuestion[] = [];
+  if (night)
+    // 風営法で18歳未満は働けないため、お店に必要な確認。年齢・生年月日そのものは聞かない
+    qs.push({
+      key: "adult",
+      label: "確認",
+      kind: "check",
+      text: "18歳以上で、高校生ではありません",
+      savedLabel: "18歳以上・高校生ではない",
+    });
+  qs.push(
+    {
+      key: "days",
+      label: "週に何日くらい入れますか",
+      kind: "one",
+      options: ["1日", "2日", "3日", "4日", "5日以上", "まだわからない"],
+    },
+    {
+      key: "weekdays",
+      label: "入れる曜日",
+      kind: "many",
+      options: ["月", "火", "水", "木", "金", "土", "日"],
+    },
+    {
+      key: "hours",
+      label: "入れる時間帯",
+      kind: "many",
+      options: night
+        ? ["19時ごろから", "21時ごろから", "23時ごろから", "深夜・朝まで"]
+        : ["朝", "昼", "夕方", "夜"],
+    },
+    {
+      key: "start",
+      label: "いつから働けますか",
+      kind: "one",
+      options: ["すぐ", "1週間以内", "1か月以内", "相談したい"],
+    },
+    {
+      key: "commute",
+      label: "お店までの通勤",
+      kind: "many",
+      options: [
+        "電車",
+        "バス",
+        "車",
+        "バイク",
+        "自転車",
+        "歩き",
+        ...(night ? ["送りがほしい"] : []),
+      ],
+    },
+    { key: "experience", label: "この仕事の経験", kind: "one", options: ["あり", "なし"] },
+  );
+  if (jobType === "cast" || jobType === "host")
+    qs.push({
+      key: "alcohol",
+      label: "お酒は飲めますか",
+      kind: "one",
+      options: ["飲める", "少しなら", "飲めない"],
+      note: "飲めなくても大丈夫です",
+    });
+  if (jobType === "staff")
+    qs.push({
+      key: "late",
+      label: "夜おそくまで働けますか",
+      kind: "one",
+      options: ["閉店まで大丈夫", "終電まで"],
+    });
+  if (jobType === "driver")
+    qs.push(
+      {
+        key: "license",
+        label: "持っている運転免許",
+        kind: "many",
+        options: ["普通（AT限定）", "普通（MT）", "中型以上", "二種"],
+      },
+      { key: "car", label: "自分の車はありますか", kind: "one", options: ["ある", "ない"] },
+    );
+  if (jobType === "kitchen")
+    qs.push({
+      key: "cooking",
+      label: "調理の経験",
+      kind: "one",
+      options: ["お店で作っていた", "家で作るくらい", "ほとんどない"],
+    });
+  if (jobType === "manager")
+    qs.push({ key: "lead", label: "人をまとめた経験", kind: "one", options: ["ある", "ない"] });
+  return qs;
+}
+
+/**
+ * 画面から送られた答えを確かめて、保存する形にする。
+ * その職種・お店の種類の質問だけを受け付け、答えが選べる答えの中にあるかを確かめる（ラベルはサーバーの文を使う）。
+ * 足りない・おかしい答えがあれば null
+ */
+export function validateScreening(
+  answers: Record<string, unknown>,
+  businessType: PartnerBusinessType,
+  jobType: PartnerJobType,
+): ScreeningAnswer[] | null {
+  const qs = screeningQuestions(businessType, jobType);
+  const known = new Set(qs.map((q) => q.key));
+  if (Object.keys(answers).some((k) => !known.has(k))) return null;
+  const out: ScreeningAnswer[] = [];
+  for (const q of qs) {
+    const a = answers[q.key];
+    if (q.kind === "check") {
+      if (a !== true) return null;
+      out.push({ key: q.key, label: q.savedLabel, value: "はい" });
+    } else if (q.kind === "one") {
+      if (typeof a !== "string" || !q.options.includes(a)) return null;
+      out.push({ key: q.key, label: q.label, value: a });
+    } else {
+      if (!Array.isArray(a) || a.length === 0 || a.length > q.options.length) return null;
+      if (a.some((v) => typeof v !== "string" || !q.options.includes(v))) return null;
+      // 画面の順番にそろえ、重なりを除く
+      const picked = q.options.filter((o) => a.includes(o));
+      out.push({ key: q.key, label: q.label, value: picked.join("、") });
+    }
+  }
+  return out;
+}
+
+/** 入れる日・時間帯・いつから（選ぶ質問の答えをつないだもの。まとめの availability に入れる） */
+export function availabilityText(screening: ScreeningAnswer[]): string {
+  const v = (key: string) => screening.find((a) => a.key === key)?.value ?? "";
+  const days = v("days");
+  return [
+    days && (days === "まだわからない" ? "日数はまだわからない" : `週${days}`),
+    v("weekdays"),
+    v("hours"),
+    v("start"),
+  ]
+    .filter(Boolean)
+    .join("・");
+}
 
 /** 時間が一定の比べ方で、POSPOS からの呼び出しかを確かめる（Authorization: Bearer <POSPOS_PARTNER_SECRET>） */
 export function verifyPartnerSecret(request: Request): boolean {
@@ -182,46 +311,48 @@ export function publicFields(row: PartnerInterviewRow) {
 }
 
 /** 最初のあいさつ（決まった文。AI を呼ばない） */
-export function partnerGreeting(row: Pick<PartnerInterviewRow, "store_name" | "job_type">): string {
-  return `こんにちは。${row.store_name}の、${JOB_LABELS[row.job_type]}の面接を担当するAIです。今日はよろしくお願いします。リラックスして、思ったとおりに話してくださいね。それでは、まず簡単に自己紹介をお願いします。`;
+export function partnerGreeting(row: Pick<PartnerInterviewRow, "store_name">): string {
+  return `こんにちは。${row.store_name}の面接を担当するAIです。少しだけお話を聞かせてください。まず、かんたんに自己紹介をお願いします。`;
 }
 
 /** 面接の終わりに AI が必ず言う言葉（これで終わりを判定する） */
 const END_PHRASE = "面接は以上です";
 
 export function partnerSystemPrompt(row: PartnerInterviewRow, elapsedMin: number): string {
-  const jobQs = [...COMMON_QUESTIONS, ...JOB_QUESTIONS[row.job_type]];
-  const custom = (row.custom_questions ?? []).filter((q) => q.trim());
+  const custom = (row.custom_questions ?? []).filter((q) => q.trim()).slice(0, 3);
   const place =
     row.business_type === "night" ? "夜のお店（キャバクラ・ラウンジ・バーなど）" : "飲食店";
-  let prompt = `あなたは「${row.store_name}」（${place}）の、${JOB_LABELS[row.job_type]}の応募者に一次面接をするAIの面接官です。
-オンラインで、応募者と1対1で話しています。やさしく、話しやすい雰囲気で進めてください。
+  const talker =
+    row.business_type === "night" && (row.job_type === "cast" || row.job_type === "host");
+  const steps = [
+    "あいさつと自己紹介のお願い（もう済んでいます）",
+    "「このお仕事をやってみたいと思った理由を教えてください」と聞く",
+    ...(talker ? ["「好きなことや、最近はまっていることを教えてください」と聞く"] : []),
+    ...custom.map((q) => `お店からの質問「${q}」を聞く`),
+    `終わりのあいさつ：「${END_PHRASE}。おつかれさまでした。お店の担当者からの連絡をお待ちください。」と言う（この文を必ずそのまま入れる）`,
+  ];
+  let prompt = `あなたは「${row.store_name}」（${place}）の、${JOB_LABELS[row.job_type]}の応募者と話すAIの面接官です。
+オンラインで、応募者と1対1で話しています。全部で1〜2分の短い会話です。やさしく、話しやすい雰囲気で進めてください。
+（日数・曜日・時間帯・いつから・通勤・経験・お酒・免許などは、応募者がもう画面で選んで答えています）
 
-【順番】
-1. あいさつ（もう済んでいます。最初の質問「自己紹介」から続けてください）
-2. 職種の質問（下の「必ず聞く質問」を、すべて1つずつ聞く）
-3. お店からの質問（下の「お店からの質問」があれば、すべて聞く）
-4. 「最後に、何か聞きたいことはありますか？」と聞く
-5. 終わりのあいさつ：「${END_PHRASE}。おつかれさまでした。お店の担当者からの連絡をお待ちください。」と言う（この文を必ずそのまま入れる）
+【順番（この順に、1つずつ）】
+${steps.map((t, i) => `${i + 1}. ${t}`).join("\n")}
 
-【必ず聞く質問】
-${jobQs.map((q, i) => `${i + 1}. ${q}`).join("\n")}
-${custom.length ? `\n【お店からの質問（すべて聞く）】\n${custom.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n` : ""}
 【話し方のルール】
-- 1回の返事は短く（1〜2文）。相づちを打ってから、次の質問を1つだけ聞く
-- 返事がとても短いときだけ、軽く1つ聞き直してよい。深掘り・圧迫はしない
-- すでに答えてもらったことは聞かない
-- 全体で10〜15分ほどで終わるようにする
+- 1回の返事は、相づちのひとことと次の質問だけ（短く）
+- 深掘り・聞き直しはしない。答えが聞き取れなかった・空だったときだけ、1回だけ「もう一度お願いします」と言ってよい
+- 画面で選んでもらったこと（日数・曜日・時間帯・いつから・通勤・経験・お酒・免許など）は聞かない
+- 上の順番にない質問はしない
 
 【絶対に言わない・聞かないこと】
-- 合否・評価・感想（「いいですね」程度の相づちはよいが、点数や合否につながることは言わない）
+- 合否・評価・感想（点数や合否につながることは言わない）
 - 給料・時給・待遇の約束、お店の内部のこと
-- 年齢・生年月日・性別・家族・結婚・恋人の有無・出身地・本籍・住んでいる場所の詳しいこと・宗教・支持政党・健康・病気・持病・身長体重など、採用の判断に使ってはいけないこと
-- 応募者からお店のこと（給料・時間・待遇など）を聞かれたら、「お店の担当者から改めてお伝えします」とだけ答えて、次へ進む
+- 年齢・生年月日・性別・家族・結婚・恋人の有無・出身地・住んでいる場所の詳しいこと・宗教・支持政党・健康・病気・身長体重など、採用の判断に使ってはいけないこと
+- 応募者からお店のこと（給料など）を聞かれたら、「お店の担当者から改めてお伝えします」とだけ答えて、次へ進む
 
 日本語で話してください。`;
   if (elapsedMin >= PARTNER_MAX_MINUTES) {
-    prompt += `\n\n【重要】時間になりました。今回の返事で、答えにひとことお礼を言ってから、終わりのあいさつ（「${END_PHRASE}。おつかれさまでした。お店の担当者からの連絡をお待ちください。」）を言って締めてください。新しい質問はしないでください。`;
+    prompt += `\n\n【重要】時間になりました。今回の返事で、ひとことお礼を言ってから、終わりのあいさつ（「${END_PHRASE}。おつかれさまでした。お店の担当者からの連絡をお待ちください。」）を言って締めてください。新しい質問はしないでください。`;
   }
   return prompt;
 }
@@ -281,40 +412,40 @@ export function toClaudeMessages(transcript: TranscriptLine[]) {
 
 /** 雰囲気のまとめを作る（点数はつけない・本人が話したことだけ）。AI を1回だけ呼ぶ */
 export async function writePartnerSummary(row: PartnerInterviewRow): Promise<PartnerSummary> {
+  // 入れる日・時間帯・いつからは、AI に書かせず、選ぶ質問の答えをそのまま入れる
+  const availability = availabilityText(row.screening ?? []);
   const answered = row.transcript.some((l) => l.role === "candidate" && l.text.trim());
-  if (!answered)
-    return { impression: "応募者の回答はありませんでした。", notes: "", availability: "" };
+  if (!answered) return { impression: "応募者の回答はありませんでした。", notes: "", availability };
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY missing");
   const convo = row.transcript
     .map((l) => `${l.role === "interviewer" ? "面接官" : "応募者"}：${l.text}`)
     .join("\n");
-  const prompt = `次は、${row.store_name}の${JOB_LABELS[row.job_type]}の応募者とAI面接官の一次面接の会話です（応募者の発言は音声の書き起こし）。
-お店の採用担当者が、面接を見る前にざっと読むための「雰囲気のまとめ」を作ってください。
+  const prompt = `次は、${row.store_name}の${JOB_LABELS[row.job_type]}の応募者とAI面接官の1〜2分の会話です（応募者の発言は音声の書き起こし）。
+お店の採用担当者が、録画を見る前にざっと読むための「雰囲気のまとめ」を作ってください。
 
 【ルール】
 - 点数・合否・ランクはつけない。やさしい言葉で、事実に近い書き方にする
-- 本人が話していないことは書かない（推測しない）
-- 年齢・性別・見た目・顔立ちのよしあしは書かない
-- impression：話し方・受け答え・印象を3行ほど（改行で区切る）
-- notes：気になった点を1行（なければ空の文字）
-- availability：入れる日・時間帯・いつから働けるか（本人が話した内容だけ。話していなければ「話していません」）
+- 会話の文字から分かることだけを書く。本人が話していないことは書かない（推測しない）
+- 見た目（顔・顔立ち・体型・服装など）・年齢・性別については、何も書かない・評価しない（見た目はお店の人が録画と写真で判断する）
+- impression：話し方・声の感じ・受け答えの様子を2〜3文で（例：「はきはきと話し、質問にまっすぐ答えていた」「緊張している様子だったが、自分の言葉で理由を話していた」）
+- notes：気になった受け答えがあれば1文（なければ空の文字）
 
 【会話】
 ${convo}
 
 次のJSONだけを返してください：
-{"impression": "...", "notes": "...", "availability": "..."}`;
+{"impression": "...", "notes": "..."}`;
   const anthropic = new Anthropic({ apiKey });
   const res = await anthropic.messages.create(
-    { model: "claude-sonnet-4-6", max_tokens: 800, messages: [{ role: "user", content: prompt }] },
+    { model: "claude-sonnet-4-6", max_tokens: 600, messages: [{ role: "user", content: prompt }] },
     { timeout: 40000, maxRetries: 1 },
   );
   const raw = extractJson(lastTextBlock(res.content)) as Partial<PartnerSummary> | null;
   return {
     impression: String(raw?.impression ?? "").slice(0, 600),
     notes: String(raw?.notes ?? "").slice(0, 300),
-    availability: String(raw?.availability ?? "").slice(0, 300),
+    availability,
   };
 }
 
@@ -342,6 +473,7 @@ export async function wipePartnerInterview(
     .update({
       transcript: [],
       summary: null,
+      screening: [],
       photo_paths: [],
       video_path: null,
       custom_questions: [],

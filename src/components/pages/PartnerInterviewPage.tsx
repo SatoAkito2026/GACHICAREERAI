@@ -1,8 +1,8 @@
 /**
  * 提携先（POSPOS）のお店の AI 一次面接：応募者が開く画面。会員登録・ログインなしで受けられる。
- * 準備（カメラ・マイクの確認と録画への同意）→ 面接 → 終わりの画面。
+ * 準備（カメラ・マイクの確認と録画への同意）→ 選ぶ質問（画面で選ぶ。録画しない）→ AI との1〜2分の会話 → 終わりの画面。
  * ガチキャリAI の練習・評価とは別物：応募者には評価・点数・改善点を一切見せず、ガチキャリAI の案内・宣伝も出さない。
- * 録画（はじめの60秒）と顔の写真3枚（はじめ・まん中・おわり）は必ず撮り、Storage へ直接送る。
+ * 会話の録画（はじめから終わりまで・4分まで）と顔の写真3枚（はじめ・まん中・おわり）は必ず撮り、Storage へ直接送る。
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InterviewerAvatar } from "@/components/InterviewerAvatar";
@@ -11,9 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompactLayout } from "@/hooks/use-compact-layout";
 
 const BUCKET = "partner-interviews";
-const VIDEO_SECONDS = 60;
+/** 録画の長さの上限（秒）。会話のはじめから終わりまで撮る */
+const VIDEO_SECONDS = 240;
 /** まん中の写真を撮る時刻（秒）。それより早く終わったときは、終わりに撮る */
-const MIDDLE_PHOTO_AT = 240;
+const MIDDLE_PHOTO_AT = 30;
 
 const C = {
   bg: "#F6F7F9",
@@ -26,7 +27,13 @@ const C = {
   warnBg: "#FEF3F2",
 };
 
-type Session = { available: true; storeName: string; jobLabel: string } | { available: false };
+type Question =
+  | { key: string; label: string; kind: "one" | "many"; options: string[]; note?: string }
+  | { key: string; label: string; kind: "check"; text: string };
+type Session =
+  | { available: true; storeName: string; jobLabel: string; questions: Question[] }
+  | { available: false };
+type Greeting = { aiText: string; audioBase64: string | null };
 
 async function api<T>(body: Record<string, unknown>, timeoutMs = 45000): Promise<T> {
   const res = await fetch("/api/partner-interview", {
@@ -56,11 +63,9 @@ function pickMime(kind: "audio" | "video"): string {
 
 export function PartnerInterviewPage({ token }: { token: string }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [phase, setPhase] = useState<"prep" | "live" | "done">("prep");
+  const [phase, setPhase] = useState<"prep" | "screening" | "live" | "done">("prep");
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [greeting, setGreeting] = useState<{ aiText: string; audioBase64: string | null } | null>(
-    null,
-  );
+  const [greeting, setGreeting] = useState<Greeting | null>(null);
 
   useEffect(() => {
     api<Session>({ action: "session", token })
@@ -90,17 +95,30 @@ export function PartnerInterviewPage({ token }: { token: string }) {
         onUnavailable={() => setSession({ available: false })}
       />
     );
+  if (phase === "screening" && stream)
+    return (
+      <ScreeningScreen
+        token={token}
+        storeName={session.storeName}
+        questions={session.questions}
+        onStart={(g) => {
+          setGreeting(g);
+          setPhase("live");
+        }}
+        onUnavailable={() => {
+          stream.getTracks().forEach((t) => t.stop());
+          setSession({ available: false });
+        }}
+      />
+    );
   return (
     <PrepScreen
-      token={token}
       storeName={session.storeName}
       jobLabel={session.jobLabel}
-      onStart={(s, g) => {
+      onNext={(s) => {
         setStream(s);
-        setGreeting(g);
-        setPhase("live");
+        setPhase("screening");
       }}
-      onUnavailable={() => setSession({ available: false })}
     />
   );
 }
@@ -132,24 +150,18 @@ function Header({ storeName }: { storeName: string }) {
 }
 
 function PrepScreen({
-  token,
   storeName,
   jobLabel,
-  onStart,
-  onUnavailable,
+  onNext,
 }: {
-  token: string;
   storeName: string;
   jobLabel: string;
-  onStart: (stream: MediaStream, greeting: { aiText: string; audioBase64: string | null }) => void;
-  onUnavailable: () => void;
+  onNext: (stream: MediaStream) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [camera, setCamera] = useState<"checking" | "ok" | "error">("checking");
   const [agreed, setAgreed] = useState(false);
-  const [starting, setStarting] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const media = navigator.mediaDevices;
@@ -178,28 +190,8 @@ function PrepScreen({
     };
   }, []);
 
-  const start = async () => {
-    if (!streamRef.current || !agreed || starting) return;
-    setStarting(true);
-    setError("");
-    // スマホで声を出せるよう、ボタンを押した中で音声の再生を許可しておく
-    await getAvatarVoice().unlock();
-    try {
-      const r = await api<{ available: boolean; aiText?: string; audioBase64?: string | null }>({
-        action: "start",
-        token,
-        consent: true,
-      });
-      if (!r.available || !r.aiText) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        onUnavailable();
-        return;
-      }
-      onStart(streamRef.current, { aiText: r.aiText, audioBase64: r.audioBase64 ?? null });
-    } catch {
-      setError("通信がうまくいきませんでした。もう一度押してください。");
-      setStarting(false);
-    }
+  const next = () => {
+    if (streamRef.current && agreed) onNext(streamRef.current);
   };
 
   if (camera === "error")
@@ -221,7 +213,7 @@ function PrepScreen({
           {jobLabel}の面接
         </h1>
         <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.sub }}>
-          AIの面接官と、声で話す10〜15分ほどの面接です。静かな場所で、顔が映るようにしてください。
+          AIの面接官と、声で話す1〜2分ほどの面接です。静かな場所で、顔が映るようにしてください。
         </p>
 
         <div
@@ -249,7 +241,7 @@ function PrepScreen({
             この面接は録画されます（必須）。
           </p>
           <p className="mt-2">
-            はじめの1分の録画と、面接中の顔の写真3枚を、応募先のお店の採用担当者が見ます。
+            AIとの会話の録画と、会話中の顔の写真3枚を、応募先のお店の採用担当者が見ます。
           </p>
           <p className="mt-2">
             録画・写真・会話の内容は、このお店の採用の判断だけに使い、90日たったら自動で消します。
@@ -270,13 +262,179 @@ function PrepScreen({
         </label>
 
         <button
-          onClick={start}
-          disabled={!agreed || camera !== "ok" || starting}
+          onClick={next}
+          disabled={!agreed || camera !== "ok"}
           className="mt-4 h-12 w-full rounded-xl text-[16px] text-white disabled:opacity-40"
           style={{ background: C.accent, fontWeight: 800 }}
         >
-          {starting ? "はじめています…" : "面接をはじめる"}
+          次へ
         </button>
+      </div>
+    </main>
+  );
+}
+
+/** 選ぶ質問（短い答えで済む質問は、声ではなく画面で選んでもらう。ここではまだ録画しない） */
+function ScreeningScreen({
+  token,
+  storeName,
+  questions,
+  onStart,
+  onUnavailable,
+}: {
+  token: string;
+  storeName: string;
+  questions: Question[];
+  onStart: (greeting: Greeting) => void;
+  onUnavailable: () => void;
+}) {
+  const [answers, setAnswers] = useState<Record<string, string | string[] | true>>({});
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  const done = (q: Question) => {
+    const a = answers[q.key];
+    if (q.kind === "check") return a === true;
+    if (q.kind === "one") return typeof a === "string";
+    return Array.isArray(a) && a.length > 0;
+  };
+  const complete = questions.every(done);
+
+  const pick = (q: Question, option: string) => {
+    setAnswers((prev) => {
+      if (q.kind === "one") return { ...prev, [q.key]: option };
+      const cur = Array.isArray(prev[q.key]) ? (prev[q.key] as string[]) : [];
+      return {
+        ...prev,
+        [q.key]: cur.includes(option) ? cur.filter((o) => o !== option) : [...cur, option],
+      };
+    });
+  };
+
+  const submit = async () => {
+    if (!complete || sending) return;
+    setSending(true);
+    setError("");
+    // スマホで声を出せるよう、ボタンを押した中で音声の再生を許可しておく
+    await getAvatarVoice().unlock();
+    try {
+      // 選んだ答えをサーバーに保存してから、会話をはじめる
+      const saved = await api<{ ok?: boolean; available?: boolean }>({
+        action: "screening",
+        token,
+        answers,
+      });
+      if (saved.available === false) return onUnavailable();
+      if (!saved.ok) throw new Error("not saved");
+      const r = await api<{ available?: boolean; aiText?: string; audioBase64?: string | null }>({
+        action: "start",
+        token,
+        consent: true,
+      });
+      if (r.available === false) return onUnavailable();
+      if (!r.aiText) throw new Error("not started");
+      onStart({ aiText: r.aiText, audioBase64: r.audioBase64 ?? null });
+    } catch {
+      setError("通信がうまくいきませんでした。もう一度押してください。");
+      setSending(false);
+    }
+  };
+
+  return (
+    <main className="min-h-[100svh] pb-10" style={{ background: C.bg, color: C.text }}>
+      <Header storeName={storeName} />
+      <div className="mx-auto max-w-[560px] px-4">
+        <h1 className="text-[20px]" style={{ fontWeight: 800 }}>
+          かんたんな質問
+        </h1>
+        <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.sub }}>
+          あてはまるものを押してください。全部答えると、AIの面接官との会話に進みます。
+        </p>
+        <div className="mt-4 flex flex-col gap-4">
+          {questions.map((q) => (
+            <section
+              key={q.key}
+              className="rounded-2xl p-4"
+              style={{ background: C.card, border: `1px solid ${C.border}` }}
+            >
+              {q.kind === "check" ? (
+                <button
+                  onClick={() =>
+                    setAnswers((prev) => {
+                      const nextAnswers = { ...prev };
+                      if (prev[q.key] === true) delete nextAnswers[q.key];
+                      else nextAnswers[q.key] = true;
+                      return nextAnswers;
+                    })
+                  }
+                  className="flex w-full items-center gap-3 text-left text-[16px]"
+                  style={{ fontWeight: 800 }}
+                >
+                  <span
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[18px] text-white"
+                    style={{
+                      background: answers[q.key] === true ? C.accent : "#fff",
+                      border: `2px solid ${answers[q.key] === true ? C.accent : "#9AA3AE"}`,
+                    }}
+                  >
+                    {answers[q.key] === true ? "✓" : ""}
+                  </span>
+                  {q.text}
+                </button>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[16px]" style={{ fontWeight: 800 }}>
+                      {q.label}
+                    </p>
+                    <span className="shrink-0 text-[12px]" style={{ color: C.sub }}>
+                      {q.kind === "one" ? "1つ選ぶ" : "いくつでも選ぶ"}
+                    </span>
+                  </div>
+                  {q.note && (
+                    <p className="mt-1 text-[12px]" style={{ color: C.sub }}>
+                      {q.note}
+                    </p>
+                  )}
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {q.options.map((o) => {
+                      const a = answers[q.key];
+                      const on = q.kind === "one" ? a === o : Array.isArray(a) && a.includes(o);
+                      return (
+                        <button
+                          key={o}
+                          onClick={() => pick(q, o)}
+                          className="min-h-12 rounded-xl px-2 py-2 text-[15px]"
+                          style={{
+                            background: on ? C.accent : "#fff",
+                            color: on ? "#fff" : C.text,
+                            border: `2px solid ${on ? C.accent : C.border}`,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {o}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
+          ))}
+        </div>
+        <button
+          onClick={submit}
+          disabled={!complete || sending}
+          className="mt-5 h-12 w-full rounded-xl text-[16px] text-white disabled:opacity-40"
+          style={{ background: C.accent, fontWeight: 800 }}
+        >
+          {sending ? "はじめています…" : "次へ（AIの面接官と話す）"}
+        </button>
+        {!complete && (
+          <p className="mt-2 text-center text-[12px]" style={{ color: C.sub }}>
+            すべての質問に答えると押せます
+          </p>
+        )}
         {error && (
           <p className="mt-2 text-[13px]" style={{ color: C.warn }}>
             {error}
@@ -298,7 +456,7 @@ function LiveScreen({
   token: string;
   storeName: string;
   stream: MediaStream;
-  greeting: { aiText: string; audioBase64: string | null };
+  greeting: Greeting;
   onEnd: () => void;
   onUnavailable: () => void;
 }) {
@@ -370,7 +528,7 @@ function LiveScreen({
     [upload],
   );
 
-  // はじめの60秒だけ録画する（面接官の声と本人のマイクを混ぜて、両方の声を残す）
+  // 会話のはじめから終わりまで録画する（4分まで。面接官の声と本人のマイクを混ぜて、両方の声を残す）
   useEffect(() => {
     const mime = pickMime("video");
     let recStream = stream;
@@ -401,7 +559,7 @@ function LiveScreen({
     const stopTimer = setTimeout(() => {
       if (recorderRef.current?.state === "recording") recorderRef.current.stop();
     }, VIDEO_SECONDS * 1000);
-    // 写真：はじめ（5秒後）・まん中（4分後）
+    // 写真：はじめ（5秒後）・まん中（30秒後）
     const first = setTimeout(() => takePhoto(0), 5000);
     const middle = setTimeout(() => takePhoto(1), MIDDLE_PHOTO_AT * 1000);
     return () => {
