@@ -271,6 +271,39 @@ async function sendCampaign(env) {
   }
 }
 
+
+// 一斉送信のリンクを開いたのに、3日たっても申し込んでいない人に、フォローのメールを1回だけ送る
+async function sendFollowups(env) {
+  if (!Number(env.CAMPAIGN_DAILY || 0) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY) return;
+  const before = new Date(Date.now() - 3 * 86400000).toISOString();
+  const r = await sb(env, `posupos_leads?select=id,shop_name,email,stop_token&status=eq.sent&stopped_at=is.null&followup_at=is.null&clicked_at=lte.${before}&limit=50`);
+  if (!r.ok) { console.error("supabase followup select failed", r.status, await r.text()); return; }
+  for (const lead of await r.json()) {
+    const url = `${SITE}/posupos-monitor?l=${lead.stop_token}`;
+    const stopUrl = `${SITE}/api/lead/stop?t=${lead.stop_token}`;
+    const text = `${lead.shop_name} ご担当者様
+
+先日はポスポスのモニター募集のご案内をご覧いただき、ありがとうございました。
+
+「今のレジと並行して使えるの？」「どのくらい手間がかかるの？」など、気になる点があれば、このメールにそのままご返信ください。お電話でのご説明も承ります（TEL 080-2420-4900）。
+
+・2か月無料（カードの登録はいりません）
+・登録の作業はこちらで代わりに行います
+・アルバイト・キャストの面接も AI におまかせできます
+
+お申し込みはこちら（1分ほどで終わります）：
+${url}` + footerText(stopUrl).replace("今後このご案内が不要な場合は、こちらから止められます：", "今後このようなご案内が不要な場合は、こちらから止められます（ワンクリック）：");
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: env.CAMPAIGN_FROM || POS_FROM, to: [lead.email], reply_to: POS_TO, subject: "【ポスポス】モニターのご案内について（ご質問だけでもどうぞ）", text,
+        headers: { "List-Unsubscribe": `<${stopUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } }),
+    });
+    if (res.ok) await sb(env, `posupos_leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ followup_at: new Date().toISOString() }) });
+    else console.error("followup failed", res.status, await res.text());
+  }
+}
+
 async function handleLeadStop(request, url, env) {
   const t = url.searchParams.get("t") || "";
   const page = (msg) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ポスポス</title><body style="font-family:sans-serif;max-width:560px;margin:60px auto;padding:0 20px;line-height:1.8"><h1 style="font-size:22px">ポスポス</h1><p>${msg}</p><p><a href="/posupos">ポスポスのページへ</a></p></body>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -315,8 +348,13 @@ function oldUrlRedirect(url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // 一斉送信のメールのリンク（/posupos-monitor?l=…）から来たら「開いた」を記録する
+    const lt = url.searchParams.get("l");
+    if (url.pathname.replace(/\.html$/, "") === "/posupos-monitor" && lt && /^[0-9a-f-]{36}$/.test(lt) && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY && ctx) {
+      ctx.waitUntil(sb(env, `posupos_leads?stop_token=eq.${lt}&clicked_at=is.null`, { method: "PATCH", body: JSON.stringify({ clicked_at: new Date().toISOString() }) }));
+    }
     const moved = oldUrlRedirect(url);
     if (moved) return moved;
     if (url.pathname === "/api/monitor") {
@@ -332,6 +370,6 @@ export default {
     return env.ASSETS.fetch(request);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(Promise.all([sendContractReminders(env), sendCampaign(env)]));
+    ctx.waitUntil(Promise.all([sendContractReminders(env), sendCampaign(env), sendFollowups(env)]));
   },
 };
