@@ -14,5 +14,6 @@
   "observability": { "enabled": true },
   // 毎日 9:05（日本時間）にモニターの「契約が切れる前のお知らせ」を送る。SUPABASE_URL はポスポス用のプロジェクト（pospos・東京）
   "triggers": { "crons": ["5 0 * * *"] },
-  "vars": { "SUPABASE_URL": "https://adzoyzslrjaokovqhxol.supabase.co" }
+  // CAMPAIGN_DAILY：モニター募集の一斉送信で、毎朝送る件数（0 のあいだは送らない）
+  "vars": { "SUPABASE_URL": "https://adzoyzslrjaokovqhxol.supabase.co", "CAMPAIGN_DAILY": "0" }
 }

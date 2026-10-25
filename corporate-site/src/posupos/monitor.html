@@ -106,6 +106,7 @@ crumb: モニター募集
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)){show(false,'メールアドレスの形をご確認ください。');return}
     if(!d.agree){show(false,'モニターの内容への同意にチェックしてください。');return}
     d.remind_ok=!!d.remind_ok;
+    try{var l=new URLSearchParams(location.search).get('l');if(l)d.l=l}catch(err){}
     var b=f.querySelector('button[type=submit]');b.disabled=true;b.textContent='送信しています…';
     fetch('/api/monitor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
       .then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,j:j}})})

@@ -156,6 +156,9 @@ async function handleMonitor(request, env) {
       current_pos: f.current_pos || null, contract_end: contractEnd, contract_note: f.contract_note || null, remind_ok: remindOk, message: f.message || null };
     const r = await sb(env, "posupos_monitors", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(row) });
     if (r.ok) stopToken = (await r.json())[0]?.stop_token || null;
+    if (typeof data.l === "string" && /^[0-9a-f-]{36}$/.test(data.l)) {
+      await sb(env, `posupos_leads?stop_token=eq.${data.l}`, { method: "PATCH", body: JSON.stringify({ status: "applied" }) });
+    }
     else console.error("supabase insert failed", r.status, await r.text());
   }
 
@@ -204,6 +207,81 @@ async function sendContractReminders(env) {
   }
 }
 
+
+// ===== モニター募集の一斉送信（posupos_leads に入れた送り先に、毎朝 CAMPAIGN_DAILY 件ずつ） =====
+// CAMPAIGN_DAILY が 0 のあいだは送らない。送り先は tools/leads_import.py で入れる（公開されている仕事用のアドレスだけ）
+// 特定電子メール法の表示：差出人・住所・連絡先・配信停止の窓口をメールに必ず入れる
+function campaignMail(lead) {
+  const url = `${SITE}/posupos-monitor?l=${lead.stop_token}`;
+  const stopUrl = `${SITE}/api/lead/stop?t=${lead.stop_token}`;
+  const subject = "【モニター募集】今のレジはそのままで、AI面接つきPOSレジを2か月無料でお試しください";
+  const text = `${lead.shop_name} ご担当者様
+
+突然のご連絡失礼いたします。
+合同会社AKITOグループで、クラウドPOSレジ「ポスポス」を運営しております。
+
+ただいま、実際のお店でポスポスを使っていただけるモニター店舗を募集しています。
+
+■ モニターの内容
+・2か月無料（カードの登録はいりません。勝手に請求されることはありません）
+・今お使いのレジ・決済はそのまま。ポスポスを並行してお使いいただけます
+・登録の作業は、こちらで代わりに行います（無料）
+・お願いは、使ってみた感想をお聞かせいただくことだけです
+
+■ ポスポスでできること
+・注文・会計・厨房の画面・QR注文
+・打刻・シフト・給料の計算（深夜時給・交通費・前借りなど）
+・アルバイトやキャストの一次面接を AI におまかせ
+　応募者に URL を送るだけ。応募者は条件をボタンで選んで、AI と1分ほど話します。
+　お店には、話している姿の録画と答えが届きます。
+
+くわしい内容とお申し込みはこちら（1分ほどで終わります）：
+${url}
+
+今のレジの契約が切れる時期を教えていただければ、切りかえを考える時期にご案内することもできます。
+ご不要でしたら、お手数ですがこのメールは破棄してください。` + footerText(stopUrl).replace("今後このご案内が不要な場合は、こちらから止められます：", "今後このようなご案内が不要な場合は、こちらから止められます（ワンクリック）：");
+  return { subject, text, stopUrl };
+}
+
+async function sendCampaign(env) {
+  const n = Math.min(Number(env.CAMPAIGN_DAILY || 0), 200);
+  if (!n || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY) return;
+  const r = await sb(env, `posupos_leads?select=id,shop_name,shop_type,email,stop_token&status=eq.new&stopped_at=is.null&order=created_at.asc&limit=${n}`);
+  if (!r.ok) { console.error("supabase leads select failed", r.status, await r.text()); return; }
+  const leads = await r.json();
+  if (!leads.length) return;
+  // すでにモニターに申し込んだ人には送らない
+  const q = leads.map((l) => `"${l.email.replace(/"/g, "")}"`).join(",");
+  const m = await sb(env, `posupos_monitors?select=email&email=in.(${encodeURIComponent(q)})`);
+  const applied = new Set(m.ok ? (await m.json()).map((x) => x.email.toLowerCase()) : []);
+  for (const lead of leads) {
+    if (applied.has(lead.email.toLowerCase())) {
+      await sb(env, `posupos_leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify({ status: "applied" }) });
+      continue;
+    }
+    const { subject, text, stopUrl } = campaignMail(lead);
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: env.CAMPAIGN_FROM || POS_FROM, to: [lead.email], reply_to: POS_TO, subject, text,
+        headers: { "List-Unsubscribe": `<${stopUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } }),
+    });
+    const patch = res.ok ? { status: "sent", sent_at: new Date().toISOString(), error: null } : { status: "failed", error: (await res.text()).slice(0, 500) };
+    await sb(env, `posupos_leads?id=eq.${lead.id}`, { method: "PATCH", body: JSON.stringify(patch) });
+  }
+}
+
+async function handleLeadStop(request, url, env) {
+  const t = url.searchParams.get("t") || "";
+  const page = (msg) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ポスポス</title><body style="font-family:sans-serif;max-width:560px;margin:60px auto;padding:0 20px;line-height:1.8"><h1 style="font-size:22px">ポスポス</h1><p>${msg}</p><p><a href="/posupos">ポスポスのページへ</a></p></body>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  if (!/^[0-9a-f-]{36}$/.test(t) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return page("このリンクは使えません。お手数ですが pospos@akitogroup.jp へご連絡ください。");
+  const r = await sb(env, `posupos_leads?stop_token=eq.${t}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ stopped_at: new Date().toISOString(), status: "stopped" }) });
+  if (!r.ok) console.error("supabase lead stop failed", r.status, await r.text());
+  const rows = r.ok ? await r.json() : [];
+  if (request.method === "POST") return new Response("ok");  // メールソフトの「配信停止」ボタン（ワンクリック）
+  return page(rows.length ? "今後のご案内を止めました。ご迷惑をおかけしました。" : "このリンクは使えません。お手数ですが pospos@akitogroup.jp へご連絡ください。");
+}
+
 // WordPress 時代のURL → 新しいページ（検索結果や古いリンクから来た人のため）
 const OLD_URLS = {
   "/about-company": "/about",
@@ -246,6 +324,7 @@ export default {
       return handleMonitor(request, env);
     }
     if (url.pathname === "/api/monitor/stop") return handleMonitorStop(url, env);
+    if (url.pathname === "/api/lead/stop") return handleLeadStop(request, url, env);
     if (url.pathname === "/api/contact") {
       if (request.method !== "POST") return json({ error: "POST で送ってください。" }, 405);
       return handleContact(request, env);
@@ -253,6 +332,6 @@ export default {
     return env.ASSETS.fetch(request);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(sendContractReminders(env));
+    ctx.waitUntil(Promise.all([sendContractReminders(env), sendCampaign(env)]));
   },
 };
