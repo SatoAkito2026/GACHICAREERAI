@@ -480,6 +480,17 @@ body.night .ai-hero{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-pt b{font-size:17px;display:flex;align-items:center;gap:10px}
 .ai-pt b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
 .ai-pt span{font-size:14.5px;color:var(--ink-2)}
+.ai-save{margin:0 0 30px;border-radius:26px;padding:clamp(20px,3vw,30px);background:linear-gradient(135deg,#0E1F4D,#1557D6 70%,#2A8CFF);color:#fff;box-shadow:0 30px 60px -36px rgba(21,87,214,.85)}
+body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB0);box-shadow:0 30px 60px -36px rgba(122,63,176,.85)}
+.ai-save .as-h{margin:0 0 16px;font-weight:900;font-size:clamp(19px,2.6vw,24px)}
+.ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ai-save .as-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;display:grid;gap:6px;align-content:start}
+.ai-save .as-c small{justify-self:start;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
+.ai-save .as-c b{font-size:19px;font-weight:900;line-height:1.4}
+.ai-save .as-c em{font-style:normal;color:#FFE58A;font-size:1.25em}
+.ai-save .as-c span{font-size:13.5px;line-height:1.7;opacity:.92}
 .ai-more{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;margin-top:28px}
 .ai-more span{font-size:14px;color:var(--ink-2)}
 .ai-note{margin-top:18px;font-size:13px;color:var(--ink-2);line-height:1.8}
@@ -885,11 +896,14 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
         <p class="hero-logo"><img src="assets/img/posupos-lockup.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for restaurants</span></p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
-        <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>スタンダードプランに、追加料金なしでついてきます</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
+        <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>応募者は30秒〜1分で面接スタート。日程調整も待ちぼうけもなくなります（スタンダードに追加料金なし）</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
         <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div><details class="sb-more"><summary><span class="sm-l">ほかのお店（全28種類）</span></summary><div class="sm-p"><div class="sm-g"><b>和食</b><div><button type="button" role="tab" data-shop="washoku" aria-selected="false">和食レストラン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="soba" aria-selected="false">そば・うどん</button><button type="button" role="tab" data-shop="teishoku" aria-selected="false">定食・食堂</button><button type="button" role="tab" data-shop="donburi" aria-selected="false">丼もの・牛丼</button><button type="button" role="tab" data-shop="tonkatsu" aria-selected="false">とんかつ・揚げ物</button></div></div><div class="sm-g"><b>居酒屋・焼き鳥・お酒</b><div><button type="button" role="tab" data-shop="izakaya" aria-selected="false">居酒屋</button><button type="button" role="tab" data-shop="yakitori" aria-selected="false">焼き鳥</button><button type="button" role="tab" data-shop="bar" aria-selected="false">バー・バル（キャストなし）</button></div></div><div class="sm-g"><b>肉・鉄板・鍋</b><div><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="steak" aria-selected="false">ステーキ・鉄板焼き</button><button type="button" role="tab" data-shop="okonomiyaki" aria-selected="false">お好み焼き・もんじゃ</button><button type="button" role="tab" data-shop="shabu" aria-selected="false">しゃぶしゃぶ・鍋</button></div></div><div class="sm-g"><b>麺・中華・アジア</b><div><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン・つけ麺</button><button type="button" role="tab" data-shop="chuka" aria-selected="false">中華料理</button><button type="button" role="tab" data-shop="korean" aria-selected="false">韓国料理</button><button type="button" role="tab" data-shop="curry" aria-selected="false">カレー・インド料理</button><button type="button" role="tab" data-shop="ethnic" aria-selected="false">エスニック（タイ・ベトナムなど）</button></div></div><div class="sm-g"><b>洋食</b><div><button type="button" role="tab" data-shop="yoshoku" aria-selected="false">洋食レストラン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="french" aria-selected="false">フレンチ・ビストロ</button><button type="button" role="tab" data-shop="burger" aria-selected="false">ハンバーガー</button></div></div><div class="sm-g"><b>カフェ・パン・スイーツ</b><div><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button><button type="button" role="tab" data-shop="bakery" aria-selected="false">パン屋・ベーカリー</button><button type="button" role="tab" data-shop="sweets" aria-selected="false">ケーキ・スイーツ</button></div></div><div class="sm-g"><b>テイクアウト・食べ放題</b><div><button type="button" role="tab" data-shop="takeout" aria-selected="false">お弁当・テイクアウト・キッチンカー</button><button type="button" role="tab" data-shop="buffet" aria-selected="false">ビュッフェ・食べ放題</button></div></div><div class="sm-g"><b>そのほか</b><div><button type="button" role="tab" data-shop="other-food" aria-selected="false">そのほかの飲食店</button></div></div><p class="sm-n">画面は、近いお店のイメージで表示します。</p></div></details></div>
         <p class="lead">和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど、28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房に、打刻・シフト・給料・顧客の管理までくっついた、店舗管理アプリです。</p>
 
-
+待ちぼうけもなくなります（スタンダードに追加料金なし）</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
+        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホストクラブ</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="boysbar" aria-selected="false">ボーイズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンセプトカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button></div></div>
+        <p class="lead">ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
+{{/night}}
         <div class="btns" style="margin-top:28px">
           <a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="/contact#pos">お問い合わせ</a>
@@ -1015,6 +1029,15 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <h2>アルバイトの面接、AIにおまかせ。</h2>
         <p>応募が来たら、URL を LINE で送るだけ。AI の面接官が、ホール・キッチン・店長候補の一次面接をします。シフトの日・時間・経験もAIが聞いてくれるので、忙しいランチやディナーの合間に面接の時間をとる必要がありません。</p>
 
+      </div>
+      <div class="ai-save rv">
+        <p class="as-h">AI面接で、ここまで減らせます</p>
+        <div class="as-g">
+          <div class="as-c"><small>応募者</small><b><em>30秒〜1分</em>で面接スタート</b><span>URL を開くだけで、すぐに面接をはじめられます。お店に行く手間も、移動の時間もいりません（面接は10〜15分）。</span></div>
+          <div class="as-c"><small>面接官</small><b>日程調整が<em>いらない</em></b><span>面接の日を決める電話やメッセージのやりとりがなくなります。応募者は都合のいいときに受けられます。</span></div>
+          <div class="as-c"><small>お店</small><b>面接する時間を<em>減らせる</em></b><span>一次面接は AI が。お店は届いたまとめ・録画・会話を見て、会う人だけに時間を使えます。</span></div>
+          <div class="as-c"><small>お店</small><b>ドタキャンの<em>待ちぼうけ</em>なし</b><span>面接の予定を入れないので、来ない人を待って空けた時間がむだになりません。</span></div>
+        </div>
       </div>
       <div class="ai-shots rv">
         <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-day.webp" width="1100" height="905" loading="lazy" decoding="async" alt="AI面接で応募者がAIの面接官と話している画面の見本（録画中・面接官の質問）"></div><figcaption>応募者の画面：AI の面接官と声で話す（10〜15分）</figcaption></figure>
