@@ -486,6 +486,22 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-flow{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:900px){.ai-flow{grid-template-columns:minmax(0,.72fr) 34px minmax(0,.72fr) 34px minmax(0,1.6fr)}}
+.ai-flow>li{display:grid;gap:10px;justify-items:center;text-align:center}
+.ai-flow .af-l{display:inline-block;background:var(--blue);color:var(--on-blue);font-weight:900;font-size:14px;border-radius:999px;padding:3px 16px}
+.ai-flow p{margin:0;font-size:13.5px;color:var(--ink-2);font-weight:700}
+.ai-flow .af-ar{align-self:center;font-size:26px;font-weight:900;color:var(--blue);transform:rotate(90deg)}
+@media (min-width:900px){.ai-flow .af-ar{transform:none;margin-top:120px}}
+.ai-flow .bf{width:100%}
+.pf{margin:0;width:min(100%,240px);border:8px solid #13234A;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 24px 44px -28px rgba(19,35,74,.6);aspect-ratio:9/15}
+.pf img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.ai-steps4{list-style:none;margin:26px 0 30px;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);counter-reset:s4}
+@media (min-width:768px){.ai-steps4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ai-steps4 li{counter-increment:s4;background:var(--mist);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.ai-steps4 b{display:flex;align-items:center;gap:8px;font-size:15px}
+.ai-steps4 b::before{content:counter(s4);flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:13px;font-weight:900}
+.ai-steps4 span{font-size:13px;color:var(--ink-2)}
 .ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
 .ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
 .ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
@@ -916,7 +932,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
         <p class="hero-logo"><img src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for night</span></p>
         <h1><span class="ln">延長も、バックも。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
-        <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>お店がほしい人か、会う前にわかる。お店の面接は30秒〜1分、URL は1秒で送れて、結果は自動で届きます（スタンダードに追加料金なし）</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
+        <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。応募者は条件をボタンで選んで、AI の面接官と1分ほど話します。話している姿の録画と答えがお店に届きます。<small>お店が見るのは1分の録画。URL は1秒で送れて、結果は自動で届きます（スタンダードに追加料金なし）</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
         <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホストクラブ</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="boysbar" aria-selected="false">ボーイズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンセプトカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button></div></div>
         <p class="lead">ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
 
@@ -1031,15 +1047,34 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <p class="eyebrow">AI interview</p>
         <p class="ai-first"><b>世界初<sup>※</sup></b>面接を自動化した、POSシステム</p>
 
-        <h2>面接も、AIにまかせる。</h2>
-        <p>応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・黒服・ドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。体入の前に会う人をしぼれるので、体入費のむだも減らせます。</p>
+        <h2>会う前に、話している姿が見られる。</h2>
+        <p>応募が来たら、URL を LINE で送るだけ。応募者は、出勤できる日や時間をボタンで選んで、AI の面接官と1分ほど話します。お店には、話している姿の録画と写真、選んだ答えが届きます。面接の日を決める前に、雰囲気や話し方がわかります。</p>
       </div>
+      <ol class="ai-flow rv">
+        <li><span class="af-l">選ぶ</span><figure class="pf"><img src="assets/img/pos-ai-choose.webp" width="600" height="920" loading="lazy" decoding="async" alt="応募者が出勤できる日数・曜日・時間帯・勤務開始をボタンで選ぶ画面"></figure><p>出勤日数・曜日・時間帯などをボタンで選ぶ（1分ほど）</p></li>
+        <li class="af-ar" aria-hidden="true">→</li>
+        <li><span class="af-l">話す</span><figure class="pf"><img src="assets/img/pos-ai-talk-night.webp" width="600" height="963" loading="lazy" decoding="async" alt="応募者がスマホでAIの面接官と話している画面の見本（録画中）"></figure><p>AI の面接官と1分ほど話す（ここを録画）</p></li>
+        <li class="af-ar" aria-hidden="true">→</li>
+        <li><span class="af-l">届く</span><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-result-night.webp" width="1100" height="658" loading="lazy" decoding="async" alt="お店に届いたAI面接の結果の見本。話している姿の録画・写真・選んだ答えの一覧・話し方の雰囲気のまとめ"></div></figure><p>録画・写真・選んだ答えがお店に届く（画面は見本です）</p></li>
+      </ol>
+      <div class="ai-pts stagger">
+        <div class="ai-pt rv"><b>LINEで送るだけ</b><span>URL を作って送るだけ。応募者は登録なしで、スマホからすぐ受けられます。</span></div>
+
+        <div class="ai-pt rv"><b>条件はボタンで、すぐわかる</b><span>出勤日数・曜日・時間帯・通勤・経験・お酒など。選んだ答えが一覧で届きます。</span></div>
+        <div class="ai-pt rv"><b>1分の録画で、雰囲気がわかる</b><span>話している姿の録画と顔の写真。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>
+      </div>
+      <ol class="ai-steps4 rv">
+        <li><b>職種を選んで URL を作る</b><span>キャスト・黒服などを選ぶだけ</span></li>
+        <li><b>LINE で応募者に送る</b><span>送る文はアプリが作ります</span></li>
+        <li><b>応募者がスマホで答える</b><span>質問をボタンで選んで、AI と1分ほど話す</span></li>
+        <li><b>録画と答えを見て分ける</b><span>合格・二次面接へ・検討・不合格</span></li>
+      </ol>
       <div class="ai-save rv">
         <p class="as-h">AI面接で、ここまで減らせます</p>
         <div class="as-g">
-          <div class="as-c"><small>面接</small><b>お店の面接は<em>30秒〜1分</em></b><span>一次面接は AI が。お店は届いたまとめ・録画・会話を見て決めるだけで、対面で面接する時間がいりません。</span></div>
+          <div class="as-c"><small>面接</small><b>お店が見るのは<em>1分の録画</em></b><span>応募者はボタンで選んで1分、AI と話して1分ほど。お店は届いた録画と答えを見て決めるだけで、対面の面接の時間がいりません。</span></div>
           <div class="as-c"><small>送る</small><b>URL は<em>1秒</em>で送れる</b><span>ボタンを押すだけで LINE が開き、送る文もアプリが作ります。</span></div>
-          <div class="as-c"><small>結果</small><b>結果は<em>自動で</em>届く</b><span>応募者が受け終わると、雰囲気のまとめ・入れる日と時間・写真・録画・会話がお店の画面に届きます。</span></div>
+          <div class="as-c"><small>結果</small><b>結果は<em>自動で</em>届く</b><span>受け終わると、話している姿の録画・写真・選んだ答えの一覧・話し方の雰囲気のまとめが届きます。</span></div>
           <div class="as-c"><small>日程</small><b>日程調整が<em>いらない</em></b><span>面接の日を決めるやりとりがなくなります。応募者もお店に来る必要がなく、都合のいいときに受けられます。</span></div>
           <div class="as-c"><small>お金</small><b><em>体入費</em>を節約</b><span>体入（体験入店）の前に会う人をしぼれるので、合わない人の体入が減り、体入の時給・日払いのむだを減らせます。</span></div>
         </div>
@@ -1047,34 +1082,23 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <div class="ai-ps rv">
         <p class="ps-h">こんなお店の悩みを、AI面接で解決</p>
         <ul>
-          <li><b>応募が来すぎて、面接が追いつかない</b><span>何人来ても、URL を送るだけ。AI が全員の一次面接をして、お店は届いた結果を見て、会う人を選ぶだけです。</span></li>
+          <li><b>応募が来すぎて、面接が追いつかない</b><span>何人来ても、URL を送るだけ。全員の答えと録画が届くので、お店は見て、会う人を選ぶだけです。</span></li>
           <li><b>忙しくて、応募の返事が遅れる</b><span>URL は1秒で送れるので、営業中でもすぐ返せます。返事が遅れて、ほかのお店に決まってしまうのを防げます。</span></li>
           <li><b>面接の日を決めても来ない</b><span>面接の予定を入れないので、来ない人を待つ時間がむだになりません。受けた人の結果だけが届きます。</span></li>
-          <li><b>体入してみたら、合わなかった</b><span>体入の前に、入れる日・時間や雰囲気がわかります。体入してもらう人をしぼって、体入費のむだを減らせます。</span></li>
+          <li><b>体入してみたら、合わなかった</b><span>体入の前に、出勤できる日・時間や話している姿がわかります。体入してもらう人をしぼって、体入費のむだを減らせます。</span></li>
         </ul>
       </div>
       <div class="ai-fit rv">
         <p class="fit-h">あなたのお店が<em>ほしい人</em>か、会う前にわかる</p>
         <div class="fit-g">
-          <div><b>お店の基準で聞ける</b><span>「体入はいつ来られますか？」「接客の経験は？」など、ほしい人の条件に合わせた質問を10個まで足せます。「いつもの質問」に保存すれば、毎回そのまま聞きます。</span></div>
-          <div><b>全員に同じ質問で、比べやすい</b><span>職種の質問のあとに、お店の質問を全部聞きます。面接する人によって聞くことがばらつかないので、応募者どうしを比べやすくなります。</span></div>
-          <div><b>答え方と雰囲気まで見える</b><span>入れる日と時間、気になった点のまとめに加えて、写真・はじめの1分の録画・会話の全部。会う前に、お店に合いそうかがわかります。</span></div>
+          <div><b>条件が一覧でわかる</b><span>出勤日数・曜日・時間帯・勤務開始・通勤・経験・お酒を、全員が同じボタンで答えます。選んだ答えが一覧で届くので、比べやすくなります。</span></div>
+          <div><b>お店の質問も聞ける</b><span>「体入はいつ来られますか？」など、お店から聞きたいことを3つまで足せます。AI の面接官が会話の中で聞きます。</span></div>
+          <div><b>話している姿が見える</b><span>自己紹介と、このお仕事をやってみたい理由を話す姿の録画と顔の写真。雰囲気・話し方・表情を、会う前に見られます。</span></div>
         </div>
-        <p class="fit-n">AI は合否を決めません。届いた内容を見て、会うかどうか・採用するかどうかはお店が決めます。</p>
+        <p class="fit-n">AI は合否を決めません。見た目についても AI は何も言いません。録画と写真を見て、お店の方が決めてください。</p>
       </div>
-      <div class="ai-shots rv">
-        <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-night.webp" width="1100" height="905" loading="lazy" decoding="async" alt="AI面接で応募者がAIの面接官と話している画面の見本（録画中・面接官の質問）"></div><figcaption>応募者の画面：AI の面接官と声で話す（10〜15分）</figcaption></figure>
-        <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-result-night.webp" width="1100" height="765" loading="lazy" decoding="async" alt="お店に届いたAI面接の結果の画面の見本（雰囲気のまとめ・入れる日と時間・気になった点・録画と写真・合格や検討に分けるボタン）"></div><figcaption>お店に届く結果：雰囲気のまとめ・録画・写真（画面は見本です）</figcaption></figure>
-      </div>
-      <div class="ai-pts stagger">
-        <div class="ai-pt rv"><b>LINEで送るだけ</b><span>URL を作って送るだけ。応募者は登録なしで、スマホからすぐ受けられます。</span></div>
-
-        <div class="ai-pt rv"><b>職種に合わせて質問</b><span>キャスト・ホスト・黒服・送りのドライバー。お店が聞きたいことも足せます。</span></div>
-        <div class="ai-pt rv"><b>会う前にわかる</b><span>雰囲気のまとめ・顔の写真・録画・会話。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>
-        <div class="ai-pt rv"><b>体入費のむだを減らす</b><span>体入の前に一次面接をすませるので、シフトや雰囲気が合わない人の体入が減り、体入の時給・日払い（体入費）のむだを減らせます。</span></div>
-      </div>
-      <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-night-ai-interview">AI面接をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>使い方の5ステップ・届くもの・録画のあつかい・よくある質問</span></div>
-      <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。お店の画面からいつでも消せて、ほかのお店からは見えません。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+      <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-night-ai-interview">AI面接をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>選ぶ質問・AI と話す内容・届くもの・録画のあつかい・よくある質問</span></div>
+      <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
     </div>
   </section>
 
@@ -1300,7 +1324,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <p class="camp"><b>今お申し込みのお店は、ずっとこの価格。</b>キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。</p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
-            <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>応募者の一次面接・録画つき。追加料金なし</small></span></li>
+            <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
 
             <li><span>指名（本指名・場内指名・同伴）・キャストバック</span></li>
             <li><span>売上・指名で変わる時給・歩合</span></li>
@@ -1336,7 +1360,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <p class="price"><span class="py">月額 <b class="n">55,000〜</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
-            <li class="ai-li"><span>AI面接<small>応募者の一次面接・録画つき</small></span></li>
+            <li class="ai-li"><span>AI面接<small>選ぶ質問＋1分の録画面接</small></span></li>
             <li><span>お店専用の URL<small>お店の名前.akitogroup.jp</small></span></li>
 
             <li><span>どの機能でも使える<small>お店の種類に関係なく、すべての機能を</small></span></li>
@@ -1371,7 +1395,8 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。</p></details>
         <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
         <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。</p></details>
-        <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。</p></details>
+        <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。</p></details>
+        <details><summary>面接は何分くらいですか？</summary><p>かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。</p></details>
         <details><summary>古い iPad でも使えますか？</summary><p>ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。</p></details>
         <details><summary>今使っている Excel やレジのデータは引っ越せますか？</summary><p>今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。</p></details>
       </div>
@@ -1495,6 +1520,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "33000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "33000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

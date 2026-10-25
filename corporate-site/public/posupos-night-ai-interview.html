@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 
-<title>AI面接｜キャスト・黒服の一次面接をAIにおまかせ ポスポス（夜のお店のPOSレジ）</title>
-<meta name="description" content="ポスポスのAI面接は、応募者にURLをLINEで送るだけで、AIの面接官がキャスト・ホスト・黒服・ドライバーの一次面接をします。雰囲気のまとめ・写真・録画・会話がお店に届きます。録画は同意制・90日で自動で消えます。スタンダードプランに追加料金なし。">
-<meta property="og:title" content="AI面接｜キャスト・黒服の一次面接をAIにおまかせ ポスポス（夜のお店のPOSレジ）">
+<title>AI面接｜会う前に、話している姿が見られる ポスポス（夜のお店のPOSシステム）</title>
+<meta name="description" content="ポスポスのAI面接は、応募者にURLをLINEで送るだけ。応募者は出勤できる日や時間をボタンで選んで、AIの面接官と1分ほど話します。お店には話している姿の録画・写真・選んだ答えが届きます。録画は同意制・90日で自動で消えます。スタンダードプランに追加料金なし。">
+<meta property="og:title" content="AI面接｜会う前に、話している姿が見られる ポスポス（夜のお店のPOSシステム）">
 <meta property="og:url" content="https://akitogroup.jp/posupos-night-ai-interview">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-night-ai-interview">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="ポスポスのAI面接は、応募者にURLをLINEで送るだけで、AIの面接官がキャスト・ホスト・黒服・ドライバーの一次面接をします。雰囲気のまとめ・写真・録画・会話がお店に届きます。録画は同意制・90日で自動で消えます。スタンダードプランに追加料金なし。">
+<meta property="og:description" content="ポスポスのAI面接は、応募者にURLをLINEで送るだけ。応募者は出勤できる日や時間をボタンで選んで、AIの面接官と1分ほど話します。お店には話している姿の録画・写真・選んだ答えが届きます。録画は同意制・90日で自動で消えます。スタンダードプランに追加料金なし。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -486,6 +486,22 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-flow{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:900px){.ai-flow{grid-template-columns:minmax(0,.72fr) 34px minmax(0,.72fr) 34px minmax(0,1.6fr)}}
+.ai-flow>li{display:grid;gap:10px;justify-items:center;text-align:center}
+.ai-flow .af-l{display:inline-block;background:var(--blue);color:var(--on-blue);font-weight:900;font-size:14px;border-radius:999px;padding:3px 16px}
+.ai-flow p{margin:0;font-size:13.5px;color:var(--ink-2);font-weight:700}
+.ai-flow .af-ar{align-self:center;font-size:26px;font-weight:900;color:var(--blue);transform:rotate(90deg)}
+@media (min-width:900px){.ai-flow .af-ar{transform:none;margin-top:120px}}
+.ai-flow .bf{width:100%}
+.pf{margin:0;width:min(100%,240px);border:8px solid #13234A;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 24px 44px -28px rgba(19,35,74,.6);aspect-ratio:9/15}
+.pf img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.ai-steps4{list-style:none;margin:26px 0 30px;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);counter-reset:s4}
+@media (min-width:768px){.ai-steps4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ai-steps4 li{counter-increment:s4;background:var(--mist);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.ai-steps4 b{display:flex;align-items:center;gap:8px;font-size:15px}
+.ai-steps4 b::before{content:counter(s4);flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:13px;font-weight:900}
+.ai-steps4 span{font-size:13px;color:var(--ink-2)}
 .ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
 .ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
 .ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
@@ -908,76 +924,26 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
 <main>
 <style>
-.sub-hero{padding-bottom:clamp(40px,6vw,72px)}
-.crumbs{font-size:13px;color:var(--ink-2);margin:0 0 14px}
-.crumbs a{color:inherit}
+.aih .wrap{display:grid;gap:30px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.aih .wrap{grid-template-columns:minmax(0,1fr) 260px;gap:48px;align-items:center}}
 .sub-hero h1{font-size:clamp(28px,5vw,46px);line-height:1.3;margin-top:12px}
-.sub-hero .lead{margin-top:16px}
-.ai-first{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0;font-size:clamp(16px,2vw,19px);font-weight:900;color:var(--navy)}
-.ai-first b{background:linear-gradient(135deg,#FFE58A,#FFB547);color:#3A2200;border-radius:999px;padding:3px 16px;font-size:.9em}
-.ai-first sup{font-size:10px}
-.ai-note{margin-top:18px;font-size:12.5px;color:var(--ink-2);line-height:1.8}
-.bf{margin:0;display:grid;gap:10px}
-.bf .fr{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 26px 50px -34px rgba(19,35,74,.55)}
-.bf .fr::before{content:"";display:block;height:22px;background-color:#EEF2F8;border-bottom:1px solid #DCE4F2;background-image:radial-gradient(circle at 14px 11px,#FF6159 4px,transparent 4.5px),radial-gradient(circle at 28px 11px,#FFBD2E 4px,transparent 4.5px),radial-gradient(circle at 42px 11px,#28C840 4px,transparent 4.5px)}
-.bf img{display:block;width:100%;height:auto}
-.bf figcaption{font-size:13.5px;color:var(--ink-2);font-weight:700}
-.st{display:grid;gap:22px}
-.st>li{list-style:none;display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:center;background:var(--white);border:1px solid var(--line);border-radius:24px;padding:22px}
-@media (min-width:900px){.st>li{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);padding:28px 30px}}
-.st{counter-reset:st;padding:0;margin:0}
-.st h3{display:flex;align-items:center;gap:12px;font-size:20px;margin:0 0 8px}
-.st h3::before{counter-increment:st;content:counter(st);flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:16px;font-weight:900}
-.st p{margin:0;color:var(--ink-2);font-size:15px}
-.st p+p{margin-top:8px}
-.msg{background:#F4F7FB;border:1px solid #DCE4F2;border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.8;color:#13234A}
-.msg .ln{display:inline-block;margin-top:8px;background:#06C755;color:#fff;border-radius:999px;padding:3px 12px;font-weight:700;font-size:12.5px}
-.cards{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1024px){.cards.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.cards.c3{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 22px;display:grid;gap:6px;align-content:start}
-.card b{font-size:17px;display:flex;align-items:center;gap:10px}
-.card b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
-.card span{font-size:14.5px;color:var(--ink-2)}
-.card.ng b::before{background:var(--alert)}
-.two{display:grid;gap:26px;grid-template-columns:minmax(0,1fr);align-items:start}
-@media (min-width:960px){.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-.qlist{margin:0;padding-left:1.2em;display:grid;gap:6px;color:var(--navy)}
-.lead2{color:var(--ink-2);margin:0 0 22px;max-width:44em}
-.sec h3.mt{margin:30px 0 14px;font-size:19px}
-.back{margin-top:30px}
-body.night .msg{background:#F4F7FB}
-.ai-save{margin:0 0 30px;border-radius:26px;padding:clamp(20px,3vw,30px);background:linear-gradient(135deg,#0E1F4D,#1557D6 70%,#2A8CFF);color:#fff;box-shadow:0 30px 60px -36px rgba(21,87,214,.85)}
-body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB0);box-shadow:0 30px 60px -36px rgba(122,63,176,.85)}
-.ai-save .as-h{margin:0 0 16px;font-weight:900;font-size:clamp(19px,2.6vw,24px)}
-.ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
-.ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
-.ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
-.ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
-.ai-fit .fit-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:900px){.ai-fit .fit-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.ai-fit .fit-g>div{background:#fff;border-radius:16px;padding:16px 18px;display:grid;gap:6px;align-content:start;box-shadow:0 10px 24px -18px rgba(120,80,0,.5)}
-.ai-fit .fit-g b{font-size:16.5px;color:#2A1A00}
-.ai-fit .fit-g span{font-size:14px;line-height:1.7;color:#5A4520}
-.ai-fit .fit-n{margin:12px 0 0;font-size:12.5px;color:#6A5530}
-.ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
-.ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
-.ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:900px){.ai-ps ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.ai-ps li{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:var(--mist)}
-.ai-ps li b{font-size:16px;color:var(--navy);display:flex;gap:8px;align-items:flex-start}
-.ai-ps li b::before{content:"悩み";flex:none;font-size:11px;font-weight:900;background:var(--alert);color:#fff;border-radius:6px;padding:2px 6px;margin-top:2px}
-.ai-ps li span{font-size:14px;color:var(--ink-2);padding-left:44px;position:relative}
-.ai-ps li span::before{content:"解決";position:absolute;left:0;top:2px;font-size:11px;font-weight:900;background:var(--blue);color:var(--on-blue);border-radius:6px;padding:2px 6px}
-
-.ai-save .as-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;display:grid;gap:6px;align-content:start}
-.ai-save .as-c small{justify-self:start;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
-.ai-save .as-c b{font-size:19px;font-weight:900;line-height:1.4}
-.ai-save .as-c em{font-style:normal;color:#FFE58A;font-size:1.25em}
-.ai-save .as-c span{font-size:13.5px;line-height:1.7;opacity:.92}
-
+.ai-hero-note{margin-top:18px;font-size:12.5px;color:var(--ink-2);line-height:1.8}
+.talk-g{display:grid;gap:22px;grid-template-columns:minmax(0,1fr);align-items:center}
+@media (min-width:900px){.talk-g{grid-template-columns:260px minmax(0,1fr)}}
+.talk-g .pf{justify-self:center}
+.ql{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.ql{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ql>div{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.ql b{display:block;font-size:16px;margin-bottom:6px}
+.ql span{font-size:14px;color:var(--ink-2)}
+.choose-g{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:900px){.choose-g{grid-template-columns:240px 240px minmax(0,1fr)}}
+.choose-g .pf{justify-self:center}
+.talk-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:ts}
+.talk-steps li{counter-increment:ts;display:flex;gap:12px;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.talk-steps li::before{content:counter(ts);flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-weight:900}
+.talk-steps b{display:block;font-size:16px}
+.talk-steps span{font-size:14px;color:var(--ink-2)}
 .taiiri{margin-top:22px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);background:var(--white);border:2px solid var(--blue);border-radius:22px;padding:22px}
 @media (min-width:900px){.taiiri{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}}
 .taiiri b{font-size:19px}
@@ -989,156 +955,153 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .taiiri small{grid-column:1/-1;font-size:12px;color:var(--ink-2)}
 </style>
 
-  <section class="hero sub-hero">
+  <section class="hero sub-hero aih">
     <div class="wrap">
       <div>
         <p class="crumbs"><a href="/posupos-night">ポスポス</a> ／ AI面接</p>
         <p class="ai-first"><b>世界初<sup>※</sup></b>面接を自動化した、POSシステム</p>
 
-        <h1>キャスト・黒服の面接も、<br>AIにまかせる。</h1>
-        <p class="lead">応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・ホスト・黒服・送りのドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。体入の前に会う人をしぼれるので、体入費のむだも減らせます。</p>
+        <h1>会う前に、<br>話している姿が見られる。</h1>
+        <p class="lead">応募が来たら、URL を LINE で送るだけ。応募者は、出勤できる日や時間をボタンで選んで、AI の面接官と1分ほど話します。お店には、話している姿の録画と写真、選んだ答えが届きます。面接の日を決める前に、雰囲気や話し方がわかります。</p>
         <div class="btns" style="margin-top:26px">
           <a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="#flow">使い方を見る</a>
         </div>
-        <p class="ai-note">スタンダードプラン・個別プランで、追加料金なしで使えます（ライトプランでは使えません）。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+        <p class="ai-hero-note">スタンダードプラン・個別カスタムで、追加料金なしで使えます（ライトプランでは使えません）。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
       </div>
-      <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-night.webp" width="1100" height="905" alt="AI面接で、応募者がAIの面接官と話している画面の見本" fetchpriority="high"></div><figcaption>応募者の画面：AI の面接官と声で話す（画面は見本です）</figcaption></figure>
-    </div>
-  </section>
-
-  <section class="sec" id="save">
-    <div class="wrap">
-      <div class="ai-save rv" style="margin:0">
-        <p class="as-h">AI面接で、ここまで減らせます</p>
-        <div class="as-g">
-          <div class="as-c"><small>面接</small><b>お店の面接は<em>30秒〜1分</em></b><span>一次面接は AI が。お店は届いたまとめ・録画・会話を見て決めるだけで、対面で面接する時間がいりません。</span></div>
-          <div class="as-c"><small>送る</small><b>URL は<em>1秒</em>で送れる</b><span>ボタンを押すだけで LINE が開き、送る文もアプリが作ります。</span></div>
-          <div class="as-c"><small>結果</small><b>結果は<em>自動で</em>届く</b><span>応募者が受け終わると、雰囲気のまとめ・入れる日と時間・写真・録画・会話がお店の画面に届きます。</span></div>
-          <div class="as-c"><small>日程</small><b>日程調整が<em>いらない</em></b><span>面接の日を決めるやりとりがなくなります。応募者もお店に来る必要がなく、都合のいいときに受けられます。</span></div>
-          <div class="as-c"><small>お金</small><b><em>体入費</em>を節約</b><span>体入（体験入店）の前に会う人をしぼれるので、合わない人の体入が減り、体入の時給・日払いのむだを減らせます。</span></div>
-        </div>
-      </div>
-      <div class="ai-ps rv">
-        <p class="ps-h">こんなお店の悩みを、AI面接で解決</p>
-        <ul>
-          <li><b>応募が来すぎて、面接が追いつかない</b><span>何人来ても、URL を送るだけ。AI が全員の一次面接をして、お店は届いた結果を見て、会う人を選ぶだけです。</span></li>
-          <li><b>忙しくて、応募の返事が遅れる</b><span>URL は1秒で送れるので、営業中でもすぐ返せます。返事が遅れて、ほかのお店に決まってしまうのを防げます。</span></li>
-          <li><b>面接の日を決めても来ない</b><span>面接の予定を入れないので、来ない人を待つ時間がむだになりません。受けた人の結果だけが届きます。</span></li>
-          <li><b>体入してみたら、合わなかった</b><span>体入の前に、入れる日・時間や雰囲気がわかります。体入してもらう人をしぼって、体入費のむだを減らせます。</span></li>
-        </ul>
-      </div>
-      <div class="ai-fit rv">
-        <p class="fit-h">あなたのお店が<em>ほしい人</em>か、会う前にわかる</p>
-        <div class="fit-g">
-          <div><b>お店の基準で聞ける</b><span>「体入はいつ来られますか？」「接客の経験は？」など、ほしい人の条件に合わせた質問を10個まで足せます。「いつもの質問」に保存すれば、毎回そのまま聞きます。</span></div>
-          <div><b>全員に同じ質問で、比べやすい</b><span>職種の質問のあとに、お店の質問を全部聞きます。面接する人によって聞くことがばらつかないので、応募者どうしを比べやすくなります。</span></div>
-          <div><b>答え方と雰囲気まで見える</b><span>入れる日と時間、気になった点のまとめに加えて、写真・はじめの1分の録画・会話の全部。会う前に、お店に合いそうかがわかります。</span></div>
-        </div>
-        <p class="fit-n">AI は合否を決めません。届いた内容を見て、会うかどうか・採用するかどうかはお店が決めます。</p>
-      </div>
+      <figure class="pf" style="justify-self:center"><img src="assets/img/pos-ai-talk-night.webp" width="600" height="963" alt="応募者がスマホでAIの面接官と話している画面の見本（録画中）" fetchpriority="high"></figure>
     </div>
   </section>
 
   <section class="sec tint" id="flow">
     <div class="wrap">
-      <div class="sec-head rv">
-        <p class="eyebrow">How it works</p>
-        <h2>使い方は、5つのステップ</h2>
-        <p>ポスポスの本部の画面「AI面接」から使います。中では、同じ AKITOグループの AI面接サービス「ガチキャリAI」が面接をします。</p>
-      </div>
-      <ol class="st">
-        <li class="rv"><div><h3>職種を選んで URL を作る</h3><p>キャスト・ホスト・黒服・ドライバーなど、職種を選ぶだけ。その職種でいつも聞く質問を AI が聞きます。</p><p>お店が聞きたいことは10個まで足せて、「いつもの質問」として保存すれば、次からはじめから入ります。応募者の名前は、一覧で見分けるためのもので、空でもかまいません。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-url.webp" width="1100" height="517" loading="lazy" decoding="async" alt="ポスポスの本部の画面で、職種を選んで面接のURLを作る画面"></div></figure></li>
-        <li class="rv"><div><h3>LINE で応募者に送る</h3><p>送る文はアプリが作ります。「文をコピー」か「LINE で送る」を押すだけ。URL は1回だけ使えて、14日まで有効です。</p></div><div class="msg">このたびはご応募ありがとうございます。<br>下のURLから、AIによる面接（10〜15分ほど）を受けてください。<br>カメラとマイクを使います。静かで明るい場所でお願いします。<br>（URL・期限・1回だけ受けられます）<br><span class="ln">LINE で送る</span></div></li>
-        <li class="rv"><div><h3>応募者がスマホで AI と面接</h3><p>URL を開くだけで、会員登録はいりません。録画されることに同意してから、AI の面接官と声で10〜15分話します。応募者の画面には、お店の名前が出ます。</p><p>終わりの画面は「お店の担当者からの連絡をお待ちください」だけ。評価は応募者に見せません。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-night.webp" width="1100" height="905" loading="lazy" decoding="async" alt="AI面接で、応募者がAIの面接官と話している画面の見本"></div></figure></li>
-        <li class="rv"><div><h3>お店に結果が届く</h3><p>雰囲気のまとめ（受け答えの様子・入れる日と時間・気になった点）、顔の写真3枚、はじめの1分の録画、会話の全部の文字が届きます。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-result-night.webp" width="1100" height="765" loading="lazy" decoding="async" alt="お店に届いたAI面接の結果の画面の見本"></div></figure></li>
-        <li class="rv"><div><h3>お店が分けて、会う人を決める</h3><p>届いた面接を、合格・二次面接へ・検討・不合格に分けて、メモ（二次面接の日・連絡したことなど）を残せます。分けたことは応募者には知らせません。</p><p>採用するかどうかは、お店の人が会って決めます。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-list.webp" width="1100" height="224" loading="lazy" decoding="async" alt="AI面接の一覧の画面。受け終わった面接と、合格・検討などの分け方"></div></figure></li>
+      <div class="sec-head rv"><p class="eyebrow">How it works</p><h2>選ぶ → 話す → 届く</h2><p>応募者は、かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほど。お店には結果が自動で届きます。</p></div>
+      <ol class="ai-flow rv">
+        <li><span class="af-l">選ぶ</span><figure class="pf"><img src="assets/img/pos-ai-choose.webp" width="600" height="920" loading="lazy" decoding="async" alt="応募者が出勤できる日数・曜日・時間帯・勤務開始をボタンで選ぶ画面"></figure><p>条件をボタンで選ぶ（1分ほど）</p></li>
+        <li class="af-ar" aria-hidden="true">→</li>
+        <li><span class="af-l">話す</span><figure class="pf"><img src="assets/img/pos-ai-talk-night.webp" width="600" height="963" loading="lazy" decoding="async" alt="応募者がAIの面接官と話している画面の見本"></figure><p>AI の面接官と1分ほど話す（ここを録画）</p></li>
+        <li class="af-ar" aria-hidden="true">→</li>
+        <li><span class="af-l">届く</span><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-result-night.webp" width="1100" height="658" loading="lazy" decoding="async" alt="お店に届いた結果の見本。録画・写真・選んだ答え・話し方の雰囲気のまとめ"></div></figure><p>録画・写真・選んだ答えが届く（画面は見本です）</p></li>
       </ol>
+      <h3 class="rv" style="margin:34px 0 14px;font-size:20px">使い方は4ステップ</h3>
+      <ol class="sp-steps rv">
+        <li><b>URL を作る</b><span>職種（キャスト・ホスト・黒服・ドライバーなど）を選ぶだけ。URL は1回だけ使えて、14日まで有効です。</span></li>
+        <li><b>LINE で送る</b><span>送る文はアプリが作ります。「文をコピー」か「LINE で送る」を押すだけ。</span></li>
+        <li><b>応募者が答える</b><span>スマホで、かんたんな質問をボタンで選んで、AI の面接官と1分ほど話します。会員登録はいりません。</span></li>
+        <li><b>見て、分ける</b><span>録画と答えを見て、合格・二次面接へ・検討・不合格に分け、メモを残せます。応募者には知らせません。</span></li>
+      </ol>
+      <div class="rv" style="display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:22px">
+        <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-url.webp" width="1100" height="517" loading="lazy" decoding="async" alt="ポスポスの本部の画面で、職種を選んで面接のURLを作り、LINEで送る画面"></div><figcaption>URL を作って、LINE で送る</figcaption></figure>
+        <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-list.webp" width="1100" height="224" loading="lazy" decoding="async" alt="AI面接の一覧の画面。受け終わった面接と、合格・検討などの分け方"></div><figcaption>受け終わった面接は一覧で。分けて管理できます</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="choose">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Step 1</p><h2>かんたんな質問を、ボタンで選ぶ</h2><p>声は使いません。あてはまるものを押すだけです。全員が同じ質問に答えるので、選んだ答えを一覧で比べられます。</p></div>
+      <div class="choose-g rv">
+        <figure class="pf"><img src="assets/img/pos-ai-choose.webp" width="600" height="920" loading="lazy" decoding="async" alt="希望の出勤日数・曜日・時間帯・勤務開始をボタンで選ぶ画面"></figure>
+        <figure class="pf"><img src="assets/img/pos-ai-choose2.webp" width="600" height="962" loading="lazy" decoding="async" alt="通勤手段・通勤時間・この仕事の経験をボタンで選ぶ画面"></figure>
+        <div class="ql">
+          <div><b>出勤</b><span>希望の出勤日数・曜日・時間帯（○時から○時まで）・勤務開始</span></div>
+          <div><b>通勤</b><span>通勤手段（電車・バス・車・バイク・自転車・徒歩）・通勤時間（片道○分）</span></div>
+          <div><b>経験</b><span>この仕事の経験（あり・なし）</span></div>
+          <div><b>職種ごとの質問</b><span>キャスト・ホストはお酒、ドライバーは運転免許と車など、職種に合わせた質問が入ります。</span></div>
+          <div><b>年齢の確認</b><span>「18歳以上で、高校生ではありません」の確認があります。</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec tint" id="talk">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Step 2</p><h2>AI の面接官と、1分ほど話す</h2><p>ここを録画します。お店は、話している姿の録画で、雰囲気・話し方・表情を見られます。</p></div>
+      <div class="talk-g rv">
+        <figure class="pf"><img src="assets/img/pos-ai-talk-night.webp" width="600" height="963" loading="lazy" decoding="async" alt="AIの面接官と話している画面の見本"></figure>
+        <ol class="talk-steps">
+          <li><div><b>自己紹介</b><span>名前と、かんたんな自己紹介。</span></div></li>
+          <li><div><b>このお仕事をやってみたい理由</b><span>自分の言葉で話してもらいます。</span></div></li>
+          <li><div><b>お店からの質問（3つまで）</b><span>「体入はいつ来られますか？」など、お店が聞きたいことを AI の面接官が会話の中で聞きます。「いつもの質問」に保存すれば、毎回そのまま聞きます。</span></div></li>
+        </ol>
+      </div>
     </div>
   </section>
 
   <section class="sec" id="deliver">
     <div class="wrap">
-      <div class="sec-head rv">
-        <p class="eyebrow">What you get</p>
-        <h2>会う前に、ここまでわかる</h2>
-      </div>
-      <div class="cards c4 stagger">
-        <div class="card rv"><b>雰囲気のまとめ</b><span>受け答えの様子を、AI が短くまとめます（参考）。</span></div>
-        <div class="card rv"><b>入れる日・時間</b><span>週に何日、何曜日の何時から、いつから働けるか。シフトに入れるかがすぐわかります。</span></div>
-        <div class="card rv"><b>気になった点</b><span>「終電を気にしていた」など、会う前に知っておきたいこと。</span></div>
-        <div class="card rv"><b>写真・録画・会話</b><span>顔の写真3枚、はじめの1分の録画、会話の全部の文字。</span></div>
+      <div class="sec-head rv"><p class="eyebrow">What you get</p><h2>お店に届くもの</h2></div>
+      <figure class="bf rv" style="max-width:900px;margin:0 auto 22px"><div class="fr"><img src="assets/img/pos-ai-result-night.webp" width="1100" height="658" loading="lazy" decoding="async" alt="お店に届いた結果の見本"></div><figcaption>画面は見本です（お店・応募者は架空）</figcaption></figure>
+      <div class="sp-cards c3 stagger">
+        <div class="sp-card rv"><b>話している姿の録画</b><span>自己紹介とやってみたい理由を話す、1分ほどの録画。</span></div>
+        <div class="sp-card rv"><b>顔の写真3枚</b><span>面接中の写真が3枚届きます。</span></div>
+        <div class="sp-card rv"><b>選んだ答えの一覧</b><span>出勤日数・曜日・時間帯・勤務開始・通勤・経験・お酒など。</span></div>
+        <div class="sp-card rv"><b>話し方の雰囲気のまとめ</b><span>AI が話し方の雰囲気を短くまとめます（参考）。見た目や合否については何も言いません。</span></div>
+        <div class="sp-card rv"><b>会話の文字</b><span>AI の面接官との会話を、全部文字で読めます。</span></div>
+        <div class="sp-card rv"><b>分けて管理</b><span>合格・二次面接へ・検討・不合格に分けて、メモ（二次面接の日・連絡したことなど）を残せます。</span></div>
       </div>
       <div class="taiiri rv">
-        <div><b>体入費のむだを減らす</b><p>体入（体験入店）の時給や日払いは、合わなかった人にも払うお金です。体入の前に AI面接で入れる日・時間や雰囲気を確かめておけば、合わない人の体入が減り、そのぶんの体入費を減らせます。</p></div>
+        <div><b>体入費のむだを減らす</b><p>体入（体験入店）の時給や日払いは、合わなかった人にも払うお金です。体入の前に、出勤できる日・時間や話している姿を見ておけば、合わない人の体入が減り、そのぶんの体入費を減らせます。</p></div>
         <table><tr><th>体入の時給 3,000円 × 4時間</th><td>12,000円 / 1人</td></tr><tr><th>合わなかった体入が 月に5人</th><td>× 5人</td></tr><tr class="sum"><th>1か月に出ていく体入費</th><td>60,000円</td></tr></table>
         <small>※ 説明のための架空の例です。体入の条件はお店ごとに違います。</small>
       </div>
-      <h3 class="mt rv">AI が聞くことの例</h3>
-      <div class="two rv">
-        <ul class="qlist">
-          <li>自己紹介</li>
-          <li>週に何日・何曜日の何時から入れるか</li>
-          <li>いつから働けるか</li>
-          <li>お店までの通い方（終電・送りが必要か）</li>
-          <li>これまでの仕事やアルバイトの経験</li>
-          <li>応募者からの質問（給料など、お店から伝えることは「お店の担当者から改めてお伝えします」と答えます）</li>
-        </ul>
-        <div class="card"><b>お店の質問も足せる</b><span>「体験入店はいつ来られますか？」「送りは必要ですか？」など、職種の質問のあとに全部聞きます（10個まで）。</span></div>
+    </div>
+  </section>
+
+  <section class="sec tint" id="save">
+    <div class="wrap">
+      <div class="ai-save rv" style="margin:0">
+        <p class="as-h">AI面接で、ここまで減らせます</p>
+        <div class="as-g">
+          <div class="as-c"><small>面接</small><b>お店が見るのは<em>1分の録画</em></b><span>応募者はボタンで選んで1分、AI と話して1分ほど。お店は届いた録画と答えを見て決めるだけです。</span></div>
+          <div class="as-c"><small>送る</small><b>URL は<em>1秒</em>で送れる</b><span>ボタンを押すだけで LINE が開き、送る文もアプリが作ります。</span></div>
+          <div class="as-c"><small>結果</small><b>結果は<em>自動で</em>届く</b><span>受け終わると、録画・写真・選んだ答え・話し方の雰囲気のまとめが届きます。</span></div>
+          <div class="as-c"><small>日程</small><b>日程調整が<em>いらない</em></b><span>応募者は都合のいいときに受けられて、お店に来る必要もありません。</span></div>
+          <div class="as-c"><small>お金</small><b><em>体入費</em>を節約</b><span>体入の前に会う人をしぼれるので、合わない人の体入費が減ります。</span></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="sec tint" id="security">
+  <section class="sec" id="security">
     <div class="wrap">
-      <div class="sec-head rv">
-        <p class="eyebrow">Privacy &amp; security</p>
-        <h2>録画・写真のあつかい</h2>
-        <p>応募者が安心して受けられて、お店も安心して使えるように決めています。</p>
-      </div>
-      <div class="cards c3 stagger">
-        <div class="card rv"><b>録画は同意してから</b><span>応募者は、録画されることに同意してから面接を受けます。同意しないと受けられません。</span></div>
-        <div class="card rv"><b>採用の判断だけに使う</b><span>録画・写真・会話は、そのお店の採用の判断だけに使います。ほかの人に渡さないでください。</span></div>
-        <div class="card rv"><b>90日で自動で消える</b><span>録画・写真・会話は90日たつと自動で消えます。いらなくなったら「消す」でいつでも消せます。</span></div>
-        <div class="card rv"><b>ほかのお店からは見えない</b><span>面接の結果は、そのお店の画面だけで見られます。</span></div>
-        <div class="card rv"><b>URL は1回だけ・14日まで</b><span>面接の URL は1回だけ受けられて、14日で使えなくなります。</span></div>
-        <div class="card rv"><b>AI は合否を決めない</b><span>AI のまとめは参考です。採用するかどうかは、お店の人が会って決めます。評価は応募者に見せません。</span></div>
+      <div class="sec-head rv"><p class="eyebrow">Privacy &amp; security</p><h2>録画・写真のあつかい</h2><p>応募者が安心して受けられて、お店も安心して使えるように決めています。</p></div>
+      <div class="sp-cards c3 stagger">
+        <div class="sp-card rv"><b>録画は同意してから</b><span>応募者は、録画されることに同意してから面接を受けます。同意しないと受けられません。</span></div>
+        <div class="sp-card rv"><b>採用の判断だけに使う</b><span>録画・写真・会話は、そのお店の採用の判断だけに使います。ほかの人に渡さないでください。</span></div>
+        <div class="sp-card rv"><b>90日で自動で消える</b><span>録画・写真・会話は90日たつと自動で消えます。いらなくなったら「消す」でいつでも消せます。</span></div>
+        <div class="sp-card rv"><b>ほかのお店からは見えない</b><span>面接の結果は、そのお店の画面だけで見られます。</span></div>
+        <div class="sp-card rv"><b>URL は1回だけ・14日まで</b><span>面接の URL は1回だけ受けられて、14日で使えなくなります。</span></div>
+        <div class="sp-card rv"><b>AI は合否を決めない</b><span>AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の人が決めます。</span></div>
       </div>
     </div>
   </section>
 
-  <section class="sec" id="rules">
+  <section class="sec tint" id="rules">
     <div class="wrap">
-      <div class="sec-head rv">
-        <p class="eyebrow">Rules</p>
-        <h2>お店の質問を足すときの注意</h2>
-        <p>面接の質問は、AI でも人でも同じルールです。厚生労働省の「公正な採用選考」の考え方にそって、仕事をする力と関係のないことは聞かないようにします。</p>
+      <div class="sec-head rv"><p class="eyebrow">Rules</p><h2>お店の質問を足すときの注意</h2><p>面接の質問は、AI でも人でも同じルールです。厚生労働省の「公正な採用選考」の考え方にそって、仕事をする力と関係のないことは聞かないようにします。</p></div>
+      <div class="sp-cards c3 stagger">
+        <div class="sp-card rv"><b>聞いてよいこと</b><span>入れる曜日と時間、いつから働けるか、通い方、経験、仕事のうえで確認しておきたいこと。</span></div>
+        <div class="sp-card rv"><b>聞かないこと①</b><span>本籍・出生地、家族のこと（職業・収入など）、住まいの状況、生まれ育った環境など、本人に責任のないこと。</span></div>
+        <div class="sp-card rv"><b>聞かないこと②</b><span>宗教、支持する政党、人生観・生活信条、尊敬する人物、思想、労働組合のこと、購読している新聞や愛読書など。</span></div>
       </div>
-      <div class="cards c3 stagger">
-        <div class="card rv"><b>聞いてよいこと</b><span>入れる曜日と時間、いつから働けるか、通い方、経験、仕事のうえで確認しておきたいこと。</span></div>
-        <div class="card ng rv"><b>聞かないこと①</b><span>本籍・出生地、家族のこと（職業・収入など）、住まいの状況、生まれ育った環境など、本人に責任のないこと。</span></div>
-        <div class="card ng rv"><b>聞かないこと②</b><span>宗教、支持する政党、人生観・生活信条、尊敬する人物、思想、労働組合のこと、購読している新聞や愛読書など。</span></div>
-      </div>
-      <div class="card rv" style="margin-top:14px"><b>年齢と本人の確認は、必ずお店で</b><span>風営法では、18歳未満の人にお客さまの接待をさせることや、午後10時から翌日午前6時までお客さまに接する仕事をさせることが禁止されています。接客をする従業者の生年月日などは、身分証で確認して記録しておくことが求められています。この確認は AI面接ではできないので、体験入店や採用の前に、必ずお店で行ってください。</span></div>
-      <p class="ai-note rv">くわしくは、記事「<a href="/news-night-recruit">キャバクラ・ホストの求人面接を効率化</a>」もご覧ください。</p>
+      <div class="sp-card rv" style="margin-top:14px"><b>年齢と本人の確認は、必ずお店で</b><span>AI面接には「18歳以上で、高校生ではありません」の確認がありますが、これは本人が答えるものです。風営法では、18歳未満の人にお客さまの接待をさせることや、午後10時から翌日午前6時までお客さまに接する仕事をさせることが禁止されていて、接客をする従業者の生年月日などは身分証で確認して記録しておくことが求められています。体入や採用の前に、必ずお店で身分証を見て確認してください。</span></div>
+      <p class="ai-hero-note rv">くわしくは、記事「<a href="/news-night-recruit">キャバクラ・ホストの求人面接を効率化</a>」もご覧ください。</p>
     </div>
   </section>
 
-  <section class="sec tint" id="faq">
+  <section class="sec" id="faq">
     <div class="wrap">
-      <div class="sec-head rv">
-        <p class="eyebrow">FAQ</p>
-        <h2>AI面接のよくある質問</h2>
-      </div>
+      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>AI面接のよくある質問</h2></div>
       <div class="faq rv">
-        <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。</p></details>
+        <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。</p></details>
+        <details><summary>面接は何分くらいですか？</summary><p>かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。</p></details>
         <details><summary>応募者は何か準備がいりますか？</summary><p>いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。</p></details>
+        <details><summary>お店から聞きたいことは足せますか？</summary><p>3つまで足せます。AI の面接官が会話の中で聞きます。</p></details>
         <details><summary>録画や写真はどうなりますか？</summary><p>応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。</p></details>
-        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。</p></details>
-        <details><summary>面接の URL は何回使えますか？</summary><p>1つの URL で受けられるのは1回だけで、14日たつと使えなくなります。応募者ごとに URL を作ってください。</p></details>
-        <details><summary>どの職種で使えますか？</summary><p>キャスト・ホスト・黒服・送りのドライバーなど、夜のお店の職種で使えます。職種ごとに、いつも聞く質問を AI が聞きます。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません。</p></details>
       </div>
-      <p class="back"><a class="btn btn-line" href="/posupos-night">← ポスポスのページへ戻る</a></p>
+      <p class="sp-back"><a class="btn btn-line" href="/posupos-night">← ポスポスのページへ戻る</a></p>
     </div>
   </section>
 
@@ -1258,6 +1221,6 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "AI面接", "item": "https://akitogroup.jp/posupos-night-ai-interview"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。"}}, {"@type": "Question", "name": "面接の URL は何回使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "1つの URL で受けられるのは1回だけで、14日たつと使えなくなります。応募者ごとに URL を作ってください。"}}, {"@type": "Question", "name": "どの職種で使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "キャスト・ホスト・黒服・送りのドライバーなど、夜のお店の職種で使えます。職種ごとに、いつも聞く質問を AI が聞きます。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "AI面接", "item": "https://akitogroup.jp/posupos-night-ai-interview"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "お店から聞きたいことは足せますか？", "acceptedAnswer": {"@type": "Answer", "text": "3つまで足せます。AI の面接官が会話の中で聞きます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

@@ -486,6 +486,22 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-flow{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:900px){.ai-flow{grid-template-columns:minmax(0,.72fr) 34px minmax(0,.72fr) 34px minmax(0,1.6fr)}}
+.ai-flow>li{display:grid;gap:10px;justify-items:center;text-align:center}
+.ai-flow .af-l{display:inline-block;background:var(--blue);color:var(--on-blue);font-weight:900;font-size:14px;border-radius:999px;padding:3px 16px}
+.ai-flow p{margin:0;font-size:13.5px;color:var(--ink-2);font-weight:700}
+.ai-flow .af-ar{align-self:center;font-size:26px;font-weight:900;color:var(--blue);transform:rotate(90deg)}
+@media (min-width:900px){.ai-flow .af-ar{transform:none;margin-top:120px}}
+.ai-flow .bf{width:100%}
+.pf{margin:0;width:min(100%,240px);border:8px solid #13234A;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 24px 44px -28px rgba(19,35,74,.6);aspect-ratio:9/15}
+.pf img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.ai-steps4{list-style:none;margin:26px 0 30px;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);counter-reset:s4}
+@media (min-width:768px){.ai-steps4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ai-steps4 li{counter-increment:s4;background:var(--mist);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.ai-steps4 b{display:flex;align-items:center;gap:8px;font-size:15px}
+.ai-steps4 b::before{content:counter(s4);flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:13px;font-weight:900}
+.ai-steps4 span{font-size:13px;color:var(--ink-2)}
 .ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
 .ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
 .ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}

@@ -486,6 +486,22 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-flow{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:900px){.ai-flow{grid-template-columns:minmax(0,.72fr) 34px minmax(0,.72fr) 34px minmax(0,1.6fr)}}
+.ai-flow>li{display:grid;gap:10px;justify-items:center;text-align:center}
+.ai-flow .af-l{display:inline-block;background:var(--blue);color:var(--on-blue);font-weight:900;font-size:14px;border-radius:999px;padding:3px 16px}
+.ai-flow p{margin:0;font-size:13.5px;color:var(--ink-2);font-weight:700}
+.ai-flow .af-ar{align-self:center;font-size:26px;font-weight:900;color:var(--blue);transform:rotate(90deg)}
+@media (min-width:900px){.ai-flow .af-ar{transform:none;margin-top:120px}}
+.ai-flow .bf{width:100%}
+.pf{margin:0;width:min(100%,240px);border:8px solid #13234A;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 24px 44px -28px rgba(19,35,74,.6);aspect-ratio:9/15}
+.pf img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.ai-steps4{list-style:none;margin:26px 0 30px;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr);counter-reset:s4}
+@media (min-width:768px){.ai-steps4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ai-steps4 li{counter-increment:s4;background:var(--mist);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.ai-steps4 b{display:flex;align-items:center;gap:8px;font-size:15px}
+.ai-steps4 b::before{content:counter(s4);flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:13px;font-weight:900}
+.ai-steps4 span{font-size:13px;color:var(--ink-2)}
 .ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
 .ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
 .ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
@@ -961,7 +977,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <p class="camp"><b>今お申し込みのお店は、ずっとこの価格。</b>キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。</p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
-            <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>応募者の一次面接・録画つき。追加料金なし</small></span></li>
+            <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
 
             <li><span>指名（本指名・場内指名・同伴）・キャストバック</span></li>
             <li><span>売上・指名で変わる時給・歩合</span></li>
@@ -996,7 +1012,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <p class="price"><span class="py">月額 <b class="n">55,000〜</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
-            <li class="ai-li"><span>AI面接<small>応募者の一次面接・録画つき</small></span></li>
+            <li class="ai-li"><span>AI面接<small>選ぶ質問＋1分の録画面接</small></span></li>
             <li><span>お店専用の URL<small>お店の名前.akitogroup.jp</small></span></li>
 
             <li><span>どの機能でも使える<small>お店の種類に関係なく、すべての機能を</small></span></li>
@@ -1039,7 +1055,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <details><summary>年間契約はありますか？</summary><p>あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。</p></details>
         <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
         <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。</p></details>
-        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません。</p></details>
       </div>
       <p class="back"><a class="btn btn-line" href="/posupos-night">← ポスポスのページへ戻る</a></p>
     </div>
@@ -1161,6 +1177,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "料金・プラン", "item": "https://akitogroup.jp/posupos-night-pricing"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。キャストのスマホでは、5店舗まで切りかえて使えます。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "料金・プラン", "item": "https://akitogroup.jp/posupos-night-pricing"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。キャストのスマホでは、5店舗まで切りかえて使えます。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>
