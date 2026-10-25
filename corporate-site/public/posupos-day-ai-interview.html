@@ -447,7 +447,7 @@ body.night .ai-hero{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .bf img{display:block;width:100%;height:auto}
 .bf figcaption{font-size:13.5px;color:var(--ink-2);font-weight:700}
 .ai-pts{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);margin-top:26px}
-@media (min-width:768px){.ai-pts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:768px){.ai-pts{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
 .ai-pt{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 22px;display:grid;gap:6px}
 .ai-pt b{font-size:17px;display:flex;align-items:center;gap:10px}
 .ai-pt b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
@@ -854,6 +854,15 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 .sec h3.mt{margin:30px 0 14px;font-size:19px}
 .back{margin-top:30px}
 body.night .msg{background:#F4F7FB}
+.taiiri{margin-top:22px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);background:var(--white);border:2px solid var(--blue);border-radius:22px;padding:22px}
+@media (min-width:900px){.taiiri{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}}
+.taiiri b{font-size:19px}
+.taiiri p{margin:6px 0 0;color:var(--ink-2);font-size:15px}
+.taiiri table{width:100%;border-collapse:collapse;font-size:14.5px}
+.taiiri th,.taiiri td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+.taiiri td{text-align:right;font-weight:700;white-space:nowrap}
+.taiiri tr.sum th,.taiiri tr.sum td{border-bottom:0;font-weight:900;color:var(--blue);font-size:16px}
+.taiiri small{grid-column:1/-1;font-size:12px;color:var(--ink-2)}
 </style>
 
   <section class="hero sub-hero">

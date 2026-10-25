@@ -447,7 +447,7 @@ body.night .ai-hero{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .bf img{display:block;width:100%;height:auto}
 .bf figcaption{font-size:13.5px;color:var(--ink-2);font-weight:700}
 .ai-pts{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);margin-top:26px}
-@media (min-width:768px){.ai-pts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:768px){.ai-pts{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}}
 .ai-pt{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 22px;display:grid;gap:6px}
 .ai-pt b{font-size:17px;display:flex;align-items:center;gap:10px}
 .ai-pt b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
@@ -939,7 +939,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <p class="ai-first"><b>世界初<sup>※</sup></b>面接を自動化した、POSシステム</p>
 
         <h2>面接も、AIにまかせる。</h2>
-        <p>応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・黒服・ドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。</p>
+        <p>応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・黒服・ドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。体入の前に会う人をしぼれるので、体入費のむだも減らせます。</p>
       </div>
       <div class="ai-shots rv">
         <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-night.webp" width="1100" height="905" loading="lazy" decoding="async" alt="AI面接で応募者がAIの面接官と話している画面の見本（録画中・面接官の質問）"></div><figcaption>応募者の画面：AI の面接官と声で話す（10〜15分）</figcaption></figure>
@@ -950,6 +950,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
         <div class="ai-pt rv"><b>職種に合わせて質問</b><span>キャスト・ホスト・黒服・送りのドライバー。お店が聞きたいことも足せます。</span></div>
         <div class="ai-pt rv"><b>会う前にわかる</b><span>雰囲気のまとめ・顔の写真・録画・会話。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>
+        <div class="ai-pt rv"><b>体入費のむだを減らす</b><span>体入の前に一次面接をすませるので、シフトや雰囲気が合わない人の体入が減り、体入の時給・日払い（体入費）のむだを減らせます。</span></div>
       </div>
       <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-night-ai-interview">AI面接をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>使い方の5ステップ・届くもの・録画のあつかい・よくある質問</span></div>
       <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。お店の画面からいつでも消せて、ほかのお店からは見えません。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
