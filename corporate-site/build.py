@@ -146,7 +146,7 @@ def main():
     # 検索エンジン向けの sitemap.xml と robots.txt
     import datetime
     today = datetime.date.today().isoformat()
-    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"]
+    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names()
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index' else n}</loc><lastmod>{today}</lastmod></url>" for n in names)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n", encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
@@ -163,6 +163,56 @@ def main():
             html = html.replace("<!--LDJSON-->", posupos_ld(html, mode))
             (OUT / f"posupos-{mode}.html").write_text(html, encoding="utf-8")
             print("wrote", f"public/posupos-{mode}.html")
+            for sub in sorted((SRC / "posupos" / "pages").glob("*.html")):
+                write_posupos_sub(sub, html, mode, other, word)
+
+
+def posupos_sub_names():
+    d = SRC / "posupos" / "pages"
+    return [f"posupos-{m}-{p.stem}" for p in sorted(d.glob("*.html")) for m in ("day", "night")] if d.exists() else []
+
+
+def write_posupos_sub(sub, lp_html, mode, other, word):
+    """ポスポスのくわしいページ（src/posupos/pages/名前.html）を、LPのヘッダー・フッター・見た目で包んで昼／夜の2ページにする。
+    先頭のコメントに title / description（{{#day}} なども使える）。本文の {{final}} はLPの最後の申し込み欄になる"""
+    import json, html as H
+    name = sub.stem
+    text = sub.read_text(encoding="utf-8")
+    text = re.sub(r"\{\{#" + other + r"\}\}.*?\{\{/" + other + r"\}\}", "", text, flags=re.S)
+    text = text.replace("{{#" + mode + "}}", "").replace("{{/" + mode + "}}", "").replace("{{w}}", word).replace("{{mode}}", mode)
+    meta, body = parse(text)
+    final = re.search(r'  <section class="sec final">.*?</section>', lp_html, re.S).group(0)
+    body = body.replace("{{final}}", final)
+    head = lp_html[:lp_html.index("<main>")]
+    tail = lp_html[lp_html.index("</main>"):]
+    slug = f"posupos-{mode}-{name}"
+    url = f"{SITE}/{slug}"
+    title = meta.get("title", "ポスポス")
+    desc = meta.get("description", "")
+    head = re.sub(r"<title>.*?</title>", f"<title>{title}</title>", head, flags=re.S)
+    head = re.sub(r'(<meta name="description" content=")[^"]*', lambda m: m.group(1) + desc, head)
+    head = re.sub(r'(<meta property="og:title" content=")[^"]*', lambda m: m.group(1) + title, head)
+    head = re.sub(r'(<meta property="og:description" content=")[^"]*', lambda m: m.group(1) + desc, head)
+    head = re.sub(r'(<meta property="og:url" content=")[^"]*', lambda m: m.group(1) + url, head)
+    head = re.sub(r'(<link rel="canonical" href=")[^"]*', lambda m: m.group(1) + url, head)
+    # ヘッダーのページ内リンクはLPへ、昼／夜の切りかえは同じくわしいページへ
+    head = re.sub(r'href="#(?!top")([^"]+)"', lambda m: f'href="posupos-{mode}.html#{m.group(1)}"', head)
+    head = head.replace('href="#top" aria-label="ポスポス トップへ"', f'href="posupos-{mode}.html" aria-label="ポスポス トップへ"')
+    head = head.replace('href="posupos-day.html"', 'href="posupos-day-' + name + '.html"').replace('href="posupos-night.html"', 'href="posupos-night-' + name + '.html"')
+    faq = re.search(r'id="faq".*?</section>', body, re.S)
+    qa = [(H.unescape(re.sub(r"<[^>]+>", "", q)).strip(), H.unescape(re.sub(r"<[^>]+>", "", a)).strip())
+          for q, a in re.findall(r"<summary>(.*?)</summary><p>(.*?)</p>", faq.group(0), re.S)] if faq else []
+    data = [{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "トップ", "item": f"{SITE}/"},
+        {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": f"{SITE}/posupos-{mode}"},
+        {"@type": "ListItem", "position": 3, "name": meta.get("crumb", title), "item": url}]}]
+    if qa:
+        data.append({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]})
+    ld = "".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>" for d in data)
+    tail = re.sub(r'<script type="application/ld\+json">.*?</script>', "", tail, flags=re.S)
+    tail = tail.replace('<script src="assets/posupos-voice.js"', ld + '<script src="assets/posupos-voice.js"', 1)
+    (OUT / f"{slug}.html").write_text(head + "<main>\n" + body + "\n" + tail, encoding="utf-8")
+    print("wrote", f"public/{slug}.html")
 
 
 def add_analytics():

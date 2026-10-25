@@ -1,0 +1,165 @@
+<!--
+title: {{#day}}AI面接｜アルバイトの一次面接をAIにおまかせ ポスポス（飲食店のPOSレジ）{{/day}}{{#night}}AI面接｜キャスト・黒服の一次面接をAIにおまかせ ポスポス（夜のお店のPOSレジ）{{/night}}
+description: {{#day}}ポスポスのAI面接は、応募者にURLをLINEで送るだけで、AIの面接官がホール・キッチン・店長候補の一次面接をします。{{/day}}{{#night}}ポスポスのAI面接は、応募者にURLをLINEで送るだけで、AIの面接官がキャスト・ホスト・黒服・ドライバーの一次面接をします。{{/night}}雰囲気のまとめ・写真・録画・会話がお店に届きます。録画は同意制・90日で自動で消えます。スタンダードプランに追加料金なし。
+crumb: AI面接
+-->
+<style>
+.sub-hero{padding-bottom:clamp(40px,6vw,72px)}
+.crumbs{font-size:13px;color:var(--ink-2);margin:0 0 14px}
+.crumbs a{color:inherit}
+.sub-hero h1{font-size:clamp(28px,5vw,46px);line-height:1.3;margin-top:12px}
+.sub-hero .lead{margin-top:16px}
+.ai-first{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0;font-size:clamp(16px,2vw,19px);font-weight:900;color:var(--navy)}
+.ai-first b{background:linear-gradient(135deg,#FFE58A,#FFB547);color:#3A2200;border-radius:999px;padding:3px 16px;font-size:.9em}
+.ai-first sup{font-size:10px}
+.ai-note{margin-top:18px;font-size:12.5px;color:var(--ink-2);line-height:1.8}
+.bf{margin:0;display:grid;gap:10px}
+.bf .fr{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 26px 50px -34px rgba(19,35,74,.55)}
+.bf .fr::before{content:"";display:block;height:22px;background-color:#EEF2F8;border-bottom:1px solid #DCE4F2;background-image:radial-gradient(circle at 14px 11px,#FF6159 4px,transparent 4.5px),radial-gradient(circle at 28px 11px,#FFBD2E 4px,transparent 4.5px),radial-gradient(circle at 42px 11px,#28C840 4px,transparent 4.5px)}
+.bf img{display:block;width:100%;height:auto}
+.bf figcaption{font-size:13.5px;color:var(--ink-2);font-weight:700}
+.st{display:grid;gap:22px}
+.st>li{list-style:none;display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:center;background:var(--white);border:1px solid var(--line);border-radius:24px;padding:22px}
+@media (min-width:900px){.st>li{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);padding:28px 30px}}
+.st{counter-reset:st;padding:0;margin:0}
+.st h3{display:flex;align-items:center;gap:12px;font-size:20px;margin:0 0 8px}
+.st h3::before{counter-increment:st;content:counter(st);flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:16px;font-weight:900}
+.st p{margin:0;color:var(--ink-2);font-size:15px}
+.st p+p{margin-top:8px}
+.msg{background:#F4F7FB;border:1px solid #DCE4F2;border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.8;color:#13234A}
+.msg .ln{display:inline-block;margin-top:8px;background:#06C755;color:#fff;border-radius:999px;padding:3px 12px;font-weight:700;font-size:12.5px}
+.cards{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.cards.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.cards.c3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 22px;display:grid;gap:6px;align-content:start}
+.card b{font-size:17px;display:flex;align-items:center;gap:10px}
+.card b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.card span{font-size:14.5px;color:var(--ink-2)}
+.card.ng b::before{background:var(--alert)}
+.two{display:grid;gap:26px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:960px){.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.qlist{margin:0;padding-left:1.2em;display:grid;gap:6px;color:var(--navy)}
+.lead2{color:var(--ink-2);margin:0 0 22px;max-width:44em}
+.sec h3.mt{margin:30px 0 14px;font-size:19px}
+.back{margin-top:30px}
+body.night .msg{background:#F4F7FB}
+</style>
+
+  <section class="hero sub-hero">
+    <div class="wrap">
+      <div>
+        <p class="crumbs"><a href="posupos-{{mode}}.html">ポスポス</a> ／ AI面接</p>
+        <p class="ai-first"><b>世界初<sup>※</sup></b>面接を自動化した、POSシステム</p>
+{{#day}}        <h1>アルバイトの面接、<br>AIにおまかせ。</h1>
+        <p class="lead">応募が来たら、URL を LINE で送るだけ。AI の面接官が、ホール・キッチン・店長候補の一次面接をします。入れる日・時間や経験も AI が聞いてまとめるので、忙しいランチやディナーの合間に面接の時間をとる必要がありません。</p>{{/day}}
+{{#night}}        <h1>キャスト・黒服の面接も、<br>AIにまかせる。</h1>
+        <p class="lead">応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・ホスト・黒服・送りのドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。</p>{{/night}}
+        <div class="btns" style="margin-top:26px">
+          <a class="btn btn-blue" href="contact.html#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-line" href="#flow">使い方を見る</a>
+        </div>
+        <p class="ai-note">スタンダードプラン・個別プランで、追加料金なしで使えます（ライトプランでは使えません）。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+      </div>
+      <figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-{{mode}}.webp" width="1100" height="905" alt="AI面接で、応募者がAIの面接官と話している画面の見本" fetchpriority="high"></div><figcaption>応募者の画面：AI の面接官と声で話す（画面は見本です）</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="sec tint" id="flow">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">How it works</p>
+        <h2>使い方は、5つのステップ</h2>
+        <p>ポスポスの本部の画面「AI面接」から使います。中では、同じ AKITOグループの AI面接サービス「ガチキャリAI」が面接をします。</p>
+      </div>
+      <ol class="st">
+        <li class="rv"><div><h3>職種を選んで URL を作る</h3><p>{{#day}}ホール・キッチン・店長候補など{{/day}}{{#night}}キャスト・ホスト・黒服・ドライバーなど{{/night}}、職種を選ぶだけ。その職種でいつも聞く質問を AI が聞きます。</p><p>お店が聞きたいことは10個まで足せて、「いつもの質問」として保存すれば、次からはじめから入ります。応募者の名前は、一覧で見分けるためのもので、空でもかまいません。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-url.webp" width="1100" height="517" loading="lazy" decoding="async" alt="ポスポスの本部の画面で、職種を選んで面接のURLを作る画面"></div></figure></li>
+        <li class="rv"><div><h3>LINE で応募者に送る</h3><p>送る文はアプリが作ります。「文をコピー」か「LINE で送る」を押すだけ。URL は1回だけ使えて、14日まで有効です。</p></div><div class="msg">このたびはご応募ありがとうございます。<br>下のURLから、AIによる面接（10〜15分ほど）を受けてください。<br>カメラとマイクを使います。静かで明るい場所でお願いします。<br>（URL・期限・1回だけ受けられます）<br><span class="ln">LINE で送る</span></div></li>
+        <li class="rv"><div><h3>応募者がスマホで AI と面接</h3><p>URL を開くだけで、会員登録はいりません。録画されることに同意してから、AI の面接官と声で10〜15分話します。応募者の画面には、お店の名前が出ます。</p><p>終わりの画面は「お店の担当者からの連絡をお待ちください」だけ。評価は応募者に見せません。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-interview-{{mode}}.webp" width="1100" height="905" loading="lazy" decoding="async" alt="AI面接で、応募者がAIの面接官と話している画面の見本"></div></figure></li>
+        <li class="rv"><div><h3>お店に結果が届く</h3><p>雰囲気のまとめ（受け答えの様子・入れる日と時間・気になった点）、顔の写真3枚、はじめの1分の録画、会話の全部の文字が届きます。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-result-{{mode}}.webp" width="1100" height="765" loading="lazy" decoding="async" alt="お店に届いたAI面接の結果の画面の見本"></div></figure></li>
+        <li class="rv"><div><h3>お店が分けて、会う人を決める</h3><p>届いた面接を、合格・二次面接へ・検討・不合格に分けて、メモ（二次面接の日・連絡したことなど）を残せます。分けたことは応募者には知らせません。</p><p>採用するかどうかは、お店の人が会って決めます。</p></div><figure class="bf"><div class="fr"><img src="assets/img/pos-ai-list.webp" width="1100" height="224" loading="lazy" decoding="async" alt="AI面接の一覧の画面。受け終わった面接と、合格・検討などの分け方"></div></figure></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="deliver">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">What you get</p>
+        <h2>会う前に、ここまでわかる</h2>
+      </div>
+      <div class="cards c4 stagger">
+        <div class="card rv"><b>雰囲気のまとめ</b><span>受け答えの様子を、AI が短くまとめます（参考）。</span></div>
+        <div class="card rv"><b>入れる日・時間</b><span>週に何日、何曜日の何時から、いつから働けるか。シフトに入れるかがすぐわかります。</span></div>
+        <div class="card rv"><b>気になった点</b><span>{{#day}}「飲食店の経験がない」など{{/day}}{{#night}}「終電を気にしていた」など{{/night}}、会う前に知っておきたいこと。</span></div>
+        <div class="card rv"><b>写真・録画・会話</b><span>顔の写真3枚、はじめの1分の録画、会話の全部の文字。</span></div>
+      </div>
+      <h3 class="mt rv">AI が聞くことの例{{#day}}（ホールの場合）{{/day}}</h3>
+      <div class="two rv">
+        <ul class="qlist">
+          <li>自己紹介</li>
+          <li>週に何日・何曜日の何時から入れるか</li>
+          <li>いつから働けるか</li>
+          <li>お店までの通い方{{#night}}（終電・送りが必要か）{{/night}}</li>
+          <li>これまでの仕事やアルバイトの経験</li>
+{{#day}}          <li>忙しいときの動き方</li>
+{{/day}}          <li>応募者からの質問（給料など、お店から伝えることは「お店の担当者から改めてお伝えします」と答えます）</li>
+        </ul>
+        <div class="card"><b>お店の質問も足せる</b><span>{{#day}}「土日も入れますか？」「まかないで食べられないものは？」{{/day}}{{#night}}「体験入店はいつ来られますか？」「送りは必要ですか？」{{/night}}など、職種の質問のあとに全部聞きます（10個まで）。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec tint" id="security">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Privacy &amp; security</p>
+        <h2>録画・写真のあつかい</h2>
+        <p>応募者が安心して受けられて、お店も安心して使えるように決めています。</p>
+      </div>
+      <div class="cards c3 stagger">
+        <div class="card rv"><b>録画は同意してから</b><span>応募者は、録画されることに同意してから面接を受けます。同意しないと受けられません。</span></div>
+        <div class="card rv"><b>採用の判断だけに使う</b><span>録画・写真・会話は、そのお店の採用の判断だけに使います。ほかの人に渡さないでください。</span></div>
+        <div class="card rv"><b>90日で自動で消える</b><span>録画・写真・会話は90日たつと自動で消えます。いらなくなったら「消す」でいつでも消せます。</span></div>
+        <div class="card rv"><b>ほかのお店からは見えない</b><span>面接の結果は、そのお店の画面だけで見られます。</span></div>
+        <div class="card rv"><b>URL は1回だけ・14日まで</b><span>面接の URL は1回だけ受けられて、14日で使えなくなります。</span></div>
+        <div class="card rv"><b>AI は合否を決めない</b><span>AI のまとめは参考です。採用するかどうかは、お店の人が会って決めます。評価は応募者に見せません。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="rules">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Rules</p>
+        <h2>お店の質問を足すときの注意</h2>
+        <p>面接の質問は、AI でも人でも同じルールです。厚生労働省の「公正な採用選考」の考え方にそって、仕事をする力と関係のないことは聞かないようにします。</p>
+      </div>
+      <div class="cards c3 stagger">
+        <div class="card rv"><b>聞いてよいこと</b><span>入れる曜日と時間、いつから働けるか、通い方、経験、仕事のうえで確認しておきたいこと。</span></div>
+        <div class="card ng rv"><b>聞かないこと①</b><span>本籍・出生地、家族のこと（職業・収入など）、住まいの状況、生まれ育った環境など、本人に責任のないこと。</span></div>
+        <div class="card ng rv"><b>聞かないこと②</b><span>宗教、支持する政党、人生観・生活信条、尊敬する人物、思想、労働組合のこと、購読している新聞や愛読書など。</span></div>
+      </div>
+{{#night}}      <div class="card rv" style="margin-top:14px"><b>年齢と本人の確認は、必ずお店で</b><span>風営法では、18歳未満の人にお客さまの接待をさせることや、午後10時から翌日午前6時までお客さまに接する仕事をさせることが禁止されています。接客をする従業者の生年月日などは、身分証で確認して記録しておくことが求められています。この確認は AI面接ではできないので、体験入店や採用の前に、必ずお店で行ってください。</span></div>
+{{/night}}      <p class="ai-note rv">くわしくは、記事「<a href="{{#day}}news-ai-interview-pos.html{{/day}}{{#night}}news-night-recruit.html{{/night}}">{{#day}}アルバイトの面接を自動化する方法{{/day}}{{#night}}キャバクラ・ホストの求人面接を効率化{{/night}}</a>」もご覧ください。</p>
+    </div>
+  </section>
+
+  <section class="sec tint" id="faq">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">FAQ</p>
+        <h2>AI面接のよくある質問</h2>
+      </div>
+      <div class="faq rv">
+        <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。</p></details>
+        <details><summary>応募者は何か準備がいりますか？</summary><p>いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。</p></details>
+        <details><summary>録画や写真はどうなりますか？</summary><p>応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。</p></details>
+        <details><summary>面接の URL は何回使えますか？</summary><p>1つの URL で受けられるのは1回だけで、14日たつと使えなくなります。応募者ごとに URL を作ってください。</p></details>
+        <details><summary>どの職種で使えますか？</summary><p>{{#day}}ホール・キッチン・店長候補など、飲食店の職種で使えます。{{/day}}{{#night}}キャスト・ホスト・黒服・送りのドライバーなど、夜のお店の職種で使えます。{{/night}}職種ごとに、いつも聞く質問を AI が聞きます。</p></details>
+      </div>
+      <p class="back"><a class="btn btn-line" href="posupos-{{mode}}.html">← ポスポスのページへ戻る</a></p>
+    </div>
+  </section>
+
+{{final}}

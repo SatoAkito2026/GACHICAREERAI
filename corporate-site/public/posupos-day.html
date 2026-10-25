@@ -451,6 +451,8 @@ body.night .ai-hero{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-pt b{font-size:17px;display:flex;align-items:center;gap:10px}
 .ai-pt b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
 .ai-pt span{font-size:14.5px;color:var(--ink-2)}
+.ai-more{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;margin-top:28px}
+.ai-more span{font-size:14px;color:var(--ink-2)}
 .ai-note{margin-top:18px;font-size:13px;color:var(--ink-2);line-height:1.8}
 .ai-steps{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);counter-reset:ais}
 @media (min-width:768px){.ai-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -962,12 +964,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <div class="ai-pt rv"><b>会う前にわかる</b><span>入れる日・時間、受け答えの雰囲気、顔の写真・録画・会話。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>
 
       </div>
-      <ol class="ai-steps stagger">
-        <li class="rv"><h3>職種を選んで URL を作る</h3><p>ホール・キッチンなど、職種を選ぶだけ。お店が聞きたいことは10個まで足せて、「いつもの質問」として保存できます。URL は1回だけ使えて、14日まで有効です。</p><div class="bf"><div class="fr"><img src="assets/img/pos-ai-url.webp" width="1100" height="517" loading="lazy" decoding="async" alt="ポスポスの本部の画面で、職種を選んで面接のURLを作る画面"></div></div></li>
-        <li class="rv"><h3>LINE で応募者に送る</h3><p>送る文はアプリが作ります。ボタン1つで LINE が開くので、そのまま送るだけ。</p><div class="ai-msg">このたびはご応募ありがとうございます。<br>下のURLから、AIによる面接（10〜15分ほど）を受けてください。<br>カメラとマイクを使います。静かで明るい場所でお願いします。<br><span class="ln">LINE で送る</span></div></li>
-        <li class="rv"><h3>応募者がスマホで AI と面接（10〜15分）</h3><p>URL を開くだけで、会員登録はいりません。録画されることに同意してから、AI の面接官と声で話します。</p><div class="ai-msg"><span class="end">面接は以上です。おつかれさまでした。<br>お店の担当者からの連絡をお待ちください。</span></div><p>応募者の終わりの画面はこれだけ。評価は応募者に見せません。</p></li>
-        <li class="rv"><h3>結果を見て、分ける</h3><p>届いた面接を、合格・二次面接へ・検討・不合格に分けて、メモを残せます（応募者には知らせません）。</p><div class="bf"><div class="fr"><img src="assets/img/pos-ai-list.webp" width="1100" height="224" loading="lazy" decoding="async" alt="AI面接の一覧の画面（受け終わった面接と、合格・検討などの分け方）"></div></div></li>
-      </ol>
+      <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-day-ai-interview">AI面接をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>使い方の5ステップ・届くもの・録画のあつかい・よくある質問</span></div>
       <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。お店の画面からいつでも消せて、ほかのお店からは見えません。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
     </div>
   </section>
