@@ -292,6 +292,81 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_interviews: {
+        Row: {
+          id: string;
+          partner: string;
+          store_id: string;
+          store_name: string;
+          business_type: string;
+          job_type: string;
+          custom_questions: Json;
+          candidate_name: string | null;
+          token: string;
+          status: string;
+          answered_count: number;
+          transcript: Json;
+          summary: Json | null;
+          photo_paths: string[];
+          video_path: string | null;
+          consent_agreed_at: string | null;
+          created_at: string;
+          started_at: string | null;
+          finished_at: string | null;
+          expires_at: string;
+          deleted_at: string | null;
+          purged_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          partner?: string;
+          store_id: string;
+          store_name: string;
+          business_type: string;
+          job_type: string;
+          custom_questions?: Json;
+          candidate_name?: string | null;
+          token: string;
+          status?: string;
+          answered_count?: number;
+          transcript?: Json;
+          summary?: Json | null;
+          photo_paths?: string[];
+          video_path?: string | null;
+          consent_agreed_at?: string | null;
+          created_at?: string;
+          started_at?: string | null;
+          finished_at?: string | null;
+          expires_at: string;
+          deleted_at?: string | null;
+          purged_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          partner?: string;
+          store_id?: string;
+          store_name?: string;
+          business_type?: string;
+          job_type?: string;
+          custom_questions?: Json;
+          candidate_name?: string | null;
+          token?: string;
+          status?: string;
+          answered_count?: number;
+          transcript?: Json;
+          summary?: Json | null;
+          photo_paths?: string[];
+          video_path?: string | null;
+          consent_agreed_at?: string | null;
+          created_at?: string;
+          started_at?: string | null;
+          finished_at?: string | null;
+          expires_at?: string;
+          deleted_at?: string | null;
+          purged_at?: string | null;
+        };
+        Relationships: [];
+      };
       tiktok_videos: {
         Row: {
           caption: string;

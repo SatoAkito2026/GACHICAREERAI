@@ -32,6 +32,16 @@ Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援�
 - 学校・塾：生徒の練習管理だけ（`/business/school/students`）。生徒がマイページで招待コード（`companies.join_code`）を入力すると `school_memberships` に入り、先生が練習結果を見られる
 - 年齢・性別での絞り込みはしない。学校・塾／芸能の入口は隠している（`login.tsx` の `SHOW_SCHOOL_AND_ACTOR`）
 
+## 提携先（POSPOS）の AI 一次面接
+
+POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が、アルバイト・キャストの応募者に AI の一次面接をしてもらう機能。ガチキャリAI の練習・企業の AI 面接・人材プロフィール・課金とは**完全に別物**（表は `partner_interviews` だけ。candidate_profiles・7つの力・recruiter_view・人材の公開・Stripe のメーターには一切つながない）。
+
+- 中身は `src/lib/partner-interview.ts`（質問・AI への指示・まとめ・90日で消す処理 `runPartnerInterviewJob`）
+- POSPOS のサーバーからの入口：`/api/partner/pospos/interviews`（POST で URL を作る・GET で一覧）、`/api/partner/pospos/interviews/<id>?storeId=`（GET で中身・DELETE で消す）。認証は `Authorization: Bearer <POSPOS_PARTNER_SECRET>`（Cloudflare の secret）。どの入口も `storeId` で絞り込み、違うお店は 404。入力は zod で確かめる。1店あたり日本時間の1か月で100回まで（消したものも数える）
+- 応募者の画面：`/partner-interview/<合言葉>`（`PartnerInterviewPage`、会員登録なし）。API は `/api/partner-interview`（session・start・turn・media-url・media-done・finish）と `/api/partner-interview/transcribe`。合言葉は1回きり・14日。答えはじめてから閉じたら expired（まだ答えていなければやり直せる）
+- 録画（はじめの60秒）と顔の写真3枚（はじめ・4分後・おわり）は必須（同意しないと受けられない、カメラがないと受けられない）。非公開バケット `partner-interviews` の `pospos/<storeId>/<面接id>/` にブラウザから直接送る。お店には1時間の期限つき URL だけ
+- AI の呼び出しは「会話の受け答え」と「終わったあとの雰囲気のまとめ1回」だけ（最初のあいさつは決まった文）。応募者には評価を見せず、終わりの画面は決まった文だけ。90日たったら録画・写真・会話・まとめを毎時の Cron で消す
+
 ## 個人プランの上限
 
 - 数字はすべて `src/lib/plan-rules.ts`（`PRACTICE_RULES`）。無料 ¥0（月5回）／ライト ¥980（月15回）／プロ ¥2,980（月30回）。評価の中身・公開・オファーは全プラン同じで、変わるのは回数・時間・職種・結果の数だけ
