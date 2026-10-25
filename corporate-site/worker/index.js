@@ -82,7 +82,7 @@ async function handleContact(request, env) {
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: FROM,
-      to: [TO],
+      to: [data.topic === "pos" ? POS_TO : TO],
       reply_to: f.email,
       subject: oneLine(`【HP問い合わせ／${topic}】${f.subject}`),
       html,
@@ -104,14 +104,17 @@ async function handleContact(request, env) {
 // 秘密鍵: SUPABASE_SERVICE_ROLE_KEY（そのプロジェクトの service_role。wrangler secret put SUPABASE_SERVICE_ROLE_KEY）。SUPABASE_URL は wrangler.jsonc の vars
 const SITE = "https://akitogroup.jp";
 const SENDER = "合同会社AKITOグループ（ポスポス）";
-const SENDER_ADDR = "東京都豊島区東池袋";
+const SENDER_ADDR = "〒170-0013 東京都豊島区東池袋2丁目62番8号 BIGオフィスプラザ池袋1206";
+// ポスポスの窓口（モニターの通知の届け先・返信先・差出人）
+const POS_TO = "pospos@akitogroup.jp";
+const POS_FROM = "ポスポス（合同会社AKITOグループ） <pospos@akitogroup.jp>";
 const MON_LIMITS = { shop_name: 100, shop_type: 60, stores: 30, prefecture: 20, name: 100, email: 200, tel: 30, current_pos: 100, contract_end: 7, contract_note: 30, message: 2000 };
 
 async function sendMail(env, msg) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM, ...msg }),
+    body: JSON.stringify({ from: POS_FROM, ...msg }),
   });
   if (!res.ok) console.error("resend failed", res.status, await res.text());
   return res.ok;
@@ -125,7 +128,7 @@ function sb(env, path, init = {}) {
 }
 
 const footerText = (stopUrl) =>
-  `\n\n――――――――\n${SENDER}\n${SENDER_ADDR}\nTEL 080-2420-4900 ／ info@akitogroup.jp\n${stopUrl ? `今後このご案内が不要な場合は、こちらから止められます：${stopUrl}\n` : ""}`;
+  `\n\n――――――――\n${SENDER}\n${SENDER_ADDR}\nTEL 080-2420-4900 ／ pospos@akitogroup.jp\n${stopUrl ? `今後このご案内が不要な場合は、こちらから止められます：${stopUrl}\n` : ""}`;
 
 async function handleMonitor(request, env) {
   const origin = request.headers.get("Origin");
@@ -159,12 +162,12 @@ async function handleMonitor(request, env) {
   const rows = [["お店の名前", f.shop_name], ["お店の種類", f.shop_type], ["都道府県", f.prefecture], ["店舗数", f.stores], ["お名前", f.name], ["メール", f.email], ["電話番号", f.tel],
     ["今のレジ", f.current_pos], ["契約が切れる時期", f.contract_end || f.contract_note], ["切れる前の案内", remindOk ? "受け取る" : "受け取らない"], ["保存", stopToken ? "Supabase に保存済み" : "保存なし（このメールだけ）"]];
   const text = rows.map(([k, v]) => `${k}: ${v || "（なし）"}`).join("\n") + `\n\n${f.message || ""}`;
-  const ok = await sendMail(env, { to: [TO], reply_to: f.email, subject: oneLine(`【ポスポス モニター申し込み】${f.shop_name}（${f.shop_type || "種類未選択"}）`), text });
+  const ok = await sendMail(env, { to: [POS_TO], reply_to: f.email, subject: oneLine(`【ポスポス モニター申し込み】${f.shop_name}（${f.shop_type || "種類未選択"}）`), text });
   if (!ok) return json({ error: "送信できませんでした。お手数ですが、お電話でご連絡ください。" }, 502);
 
   const stopUrl = remindOk && stopToken ? `${SITE}/api/monitor/stop?t=${stopToken}` : "";
   await sendMail(env, {
-    to: [f.email], reply_to: TO,
+    to: [f.email], reply_to: POS_TO,
     subject: "【ポスポス】モニターのお申し込みを受け付けました",
     text: `${f.name} 様\n\nポスポスのモニターにお申し込みいただき、ありがとうございます。\n担当者から、メールかお電話でご連絡します（${f.shop_name}）。\n\n・モニター期間：2か月（無料。カードの登録はいりません）\n・今お使いのレジ・決済と並行してお使いいただけます\n・お願い：使ってみた感想をお聞かせください\n` +
       (remindOk ? `\n今のレジの契約が切れる前（${f.contract_end.replace("-", "年")}月の前）に、ポスポスのご案内をお送りします。\n` : "") + footerText(stopUrl),
@@ -175,11 +178,11 @@ async function handleMonitor(request, env) {
 async function handleMonitorStop(url, env) {
   const t = url.searchParams.get("t") || "";
   const page = (msg) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ポスポス</title><body style="font-family:sans-serif;max-width:560px;margin:60px auto;padding:0 20px;line-height:1.8"><h1 style="font-size:22px">ポスポス</h1><p>${msg}</p><p><a href="/posupos">ポスポスのページへ</a></p></body>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
-  if (!/^[0-9a-f-]{36}$/.test(t) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return page("このリンクは使えません。お手数ですが info@akitogroup.jp へご連絡ください。");
+  if (!/^[0-9a-f-]{36}$/.test(t) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return page("このリンクは使えません。お手数ですが pospos@akitogroup.jp へご連絡ください。");
   const r = await sb(env, `posupos_monitors?stop_token=eq.${t}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ stopped_at: new Date().toISOString() }) });
   if (!r.ok) console.error("supabase stop failed", r.status, await r.text());
   const rows = r.ok ? await r.json() : [];
-  return page(rows.length ? "ご案内のメールを止めました。これまでありがとうございました。" : "このリンクは使えません（すでに止めたか、期限が切れています）。お手数ですが info@akitogroup.jp へご連絡ください。");
+  return page(rows.length ? "ご案内のメールを止めました。これまでありがとうございました。" : "このリンクは使えません（すでに止めたか、期限が切れています）。お手数ですが pospos@akitogroup.jp へご連絡ください。");
 }
 
 // 毎日：契約が切れる3か月前になった人に、1回だけご案内を送る（本人が同意した人だけ）
@@ -193,7 +196,7 @@ async function sendContractReminders(env) {
   for (const m of await r.json()) {
     const ym = m.contract_end.slice(0, 7).replace("-", "年") + "月";
     const sent = await sendMail(env, {
-      to: [m.email], reply_to: TO,
+      to: [m.email], reply_to: POS_TO,
       subject: `【ポスポス】今のレジの契約（${ym}）が近づいてきました`,
       text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・スタンダードプランはキャンペーン価格（予告なく終了する場合があります）\n・初期費用0円・登録の作業はこちらで代わりに行います\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
     });
