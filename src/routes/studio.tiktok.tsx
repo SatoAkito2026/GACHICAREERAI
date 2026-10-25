@@ -7,6 +7,11 @@ import {
   type RewriteJobData,
 } from "@/components/studio/RewriteScene";
 import { AdScene, buildAdTimeline, type AdJobData } from "@/components/studio/AdScene";
+import {
+  RankingScene,
+  buildRankingTimeline,
+  type RankingJobData,
+} from "@/components/studio/RankingScene";
 
 // TikTok 動画の撮影用の画面。台本は撮影側（scripts/tiktok/render.mjs）が window.__STUDIO_JOB__ に入れる
 export const Route = createFileRoute("/studio/tiktok")({
@@ -16,7 +21,7 @@ export const Route = createFileRoute("/studio/tiktok")({
   component: StudioPage,
 });
 
-type AnyJob = StudioJobData | RewriteJobData | AdJobData;
+type AnyJob = StudioJobData | RewriteJobData | AdJobData | RankingJobData;
 type StudioWindow = Window & {
   __STUDIO_JOB__?: AnyJob;
   __studioReady?: boolean;
@@ -30,6 +35,8 @@ type StudioWindow = Window & {
 const isRewrite = (job: AnyJob): job is RewriteJobData =>
   (job as RewriteJobData).format === "rewrite";
 const isAd = (job: AnyJob): job is AdJobData => (job as AdJobData).format === "ad";
+const isRanking = (job: AnyJob): job is RankingJobData =>
+  (job as RankingJobData).format === "ranking";
 
 function StudioPage() {
   const [job, setJob] = useState<AnyJob | null>(null);
@@ -39,11 +46,13 @@ function StudioPage() {
     const j = w.__STUDIO_JOB__;
     if (!j) return;
     // 撮影側は、この時刻表どおりに音声を並べる
-    w.__studioTimeline = isAd(j)
-      ? buildAdTimeline(j)
-      : isRewrite(j)
-        ? buildRewriteTimeline(j)
-        : buildTimeline(j);
+    w.__studioTimeline = isRanking(j)
+      ? buildRankingTimeline(j)
+      : isAd(j)
+        ? buildAdTimeline(j)
+        : isRewrite(j)
+          ? buildRewriteTimeline(j)
+          : buildTimeline(j);
     setJob(j);
   }, []);
 
@@ -63,7 +72,9 @@ function StudioPage() {
   };
   return (
     <div style={{ background: "#000", minHeight: "100vh" }}>
-      {isAd(job) ? (
+      {isRanking(job) ? (
+        <RankingScene job={job} onReady={onReady} />
+      ) : isAd(job) ? (
         <AdScene job={job} onReady={onReady} />
       ) : isRewrite(job) ? (
         <RewriteScene job={job} onReady={onReady} />

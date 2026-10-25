@@ -588,3 +588,149 @@ export function adScript(platform: AdPlatform = "tiktok"): AdScript {
     roles: parts.map(([, , role]) => role),
   };
 }
+
+// ---- ランキング型（掲示板風）：面接AIを出さない、就活・転職の役に立つ話題のランキング ----
+// 伸びている「短期間で取れるけどクソ有能な神資格」のような動画の型。暗い背景に大きなタイトル、
+// 「第5位」→ 名前 → 掲示板の書き込み風のひとこと2つ、を早口でテンポよく進める。最後にさりげなくガチキャリAI
+
+const RANKING_TOPICS = [
+  { key: "shikaku", topic: "短期間で取れるのに、就活・転職で評価される資格" },
+  { key: "ochiru", topic: "面接で落ちる人がやりがちなこと" },
+  { key: "mensetsukan", topic: "面接官が実は一番見ているところ" },
+  { key: "white", topic: "未経験からでも目指しやすい仕事" },
+  { key: "kokai", topic: "新卒が入社してから後悔しやすいポイント" },
+  { key: "gyaku", topic: "面接の逆質問で評価が上がる質問" },
+  { key: "ng-kotoba", topic: "面接で言うと印象が下がる口ぐせ" },
+  { key: "jikoPR", topic: "自己PRで使える強み" },
+  { key: "tenshoku", topic: "転職して良かったと感じやすい理由" },
+  { key: "skill", topic: "どの業界でも重宝されるスキル" },
+  { key: "shukatsu-aruaru", topic: "就活生がやりがちな失敗" },
+  { key: "mail", topic: "就活メールでやりがちなマナー違反" },
+] as const;
+
+export type RankingItem = {
+  /** 名前（例：MOS） */
+  name: string;
+  /** 画面に大きく出す絵文字1つ */
+  emoji: string;
+  /** 掲示板の書き込み風のひとこと（2つ） */
+  comments: [string, string];
+};
+
+export type RankingScript = {
+  format: "ranking";
+  theme: string;
+  themeLabel: string;
+  /** 最初に大きく出すタイトル（2行。1行目は前置き、2行目が目玉） */
+  title: [string, string];
+  items: RankingItem[];
+  caption: string;
+  lines: StudioLine[];
+  roles: ("hook" | "rank" | "comment" | "cta")[];
+  /** lines のそれぞれが、何番目の項目のものか（なければ -1） */
+  itemIndex: number[];
+};
+
+const RANKING_SIZE = 5;
+/** 締めのひとこと（さりげなく。約束になる言い方はしない） */
+const RANKING_CTA = "面接の練習は、ガチキャリAIで。";
+
+export async function writeRankingScript(history: StudioHistory[]): Promise<RankingScript> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY missing");
+  const used = new Set(history.slice(0, 10).map((h) => h.theme));
+  const pool = RANKING_TOPICS.filter((t) => !used.has(`ranking:${t.key}`));
+  const list = pool.length ? pool : RANKING_TOPICS;
+  const topic = list[Math.floor(Math.random() * list.length)];
+
+  const prompt = `あなたはTikTokで伸びている「掲示板風ランキング動画」の構成作家です。
+（例：「短期間で取れるけどクソ有能な神資格」第10位 食品衛生責任者「講習受けてテスト受ければ最短1日で取得できる」「食品業界で必須やし持ってて損は無いぞ」…）
+
+【今回の話題】${topic.topic}
+就活生・転職を考えている人が「保存しておこう」と思う、役に立つランキングを作ってください。
+
+【型（必ず守る）】
+- タイトルは2行。1行目は前置き（12文字以内、例「短期間で取れるけど」）、2行目が目玉（10文字以内、例「クソ有能な神資格」）。思わず手が止まる強い言葉にする
+- ランキングは${RANKING_SIZE}個（第${RANKING_SIZE}位から第1位の順。後ろほど意外で役に立つものにして、最後まで見たくなるように）
+- それぞれ：name（12文字以内）、emoji（内容に合う絵文字1つ）、comments（掲示板の書き込み風のひとこと2つ。くだけた話し言葉で、それぞれ28文字以内。1つ目は特徴、2つ目はなぜ役立つか）
+- 投稿の文（caption）：中身が分かる1文＋「あなたは何位が気になった？」＋ハッシュタグ4〜6個（#就活 #転職 を必ず入れる）
+
+【ルール】
+- 事実として間違いのない内容だけにする。取得日数・合格率・年収などの数字は、確実なもの以外は書かない
+- 実在の会社・人物の名前は出さない（資格名・職種名などの一般的な名前はよい）
+- 下品・差別・政治・宗教の話はしない。誰かを強くけなさない
+${learnedExamples(history)}
+次のJSONだけを返してください（items は第${RANKING_SIZE}位→第1位の順）：
+{
+  "title": ["1行目", "2行目"],
+  "items": [{"name": "...", "emoji": "...", "comments": ["...", "..."]}],
+  "caption": "..."
+}`;
+  const anthropic = new Anthropic({ apiKey });
+  const res = await anthropic.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 2000,
+    messages: [{ role: "user", content: prompt }],
+  });
+  const raw = extractJson(lastTextBlock(res.content)) as {
+    title?: unknown;
+    items?: { name?: unknown; emoji?: unknown; comments?: unknown }[];
+    caption?: unknown;
+  } | null;
+  const items: RankingItem[] = (Array.isArray(raw?.items) ? raw.items : [])
+    .filter((it) => it && it.name && Array.isArray(it.comments) && it.comments.length >= 2)
+    .slice(0, RANKING_SIZE)
+    .map((it) => ({
+      name: String(it.name).slice(0, 16),
+      emoji: [...String(it.emoji ?? "✨")].slice(0, 2).join("") || "✨",
+      comments: [
+        String((it.comments as unknown[])[0]).slice(0, 36),
+        String((it.comments as unknown[])[1]).slice(0, 36),
+      ],
+    }));
+  if (items.length < 3) throw new Error("ranking script parse failed");
+  const t = Array.isArray(raw?.title) ? raw.title : [];
+  const title: [string, string] = [
+    String(t[0] ?? "知らないと損する").slice(0, 14),
+    String(t[1] ?? topic.topic).slice(0, 14),
+  ];
+  let caption = String(raw?.caption ?? "").slice(0, 300);
+  for (const tag of ["#就活", "#転職"]) if (!caption.includes(tag)) caption += ` ${tag}`;
+
+  const lines: StudioLine[] = [];
+  const roles: RankingScript["roles"] = [];
+  const itemIndex: number[] = [];
+  const push = (
+    speaker: StudioLine["speaker"],
+    text: string,
+    role: RankingScript["roles"][number],
+    i = -1,
+  ) => {
+    lines.push({ speaker, text });
+    roles.push(role);
+    itemIndex.push(i);
+  };
+  push("narrator", `${title[0]}${title[1]}`, "hook");
+  items.forEach((it, i) => {
+    push("narrator", `第${items.length - i}位、${it.name}`, "rank", i);
+    push("candidate", it.comments[0], "comment", i);
+    push("candidate", it.comments[1], "comment", i);
+  });
+  push("narrator", RANKING_CTA, "cta");
+
+  return {
+    format: "ranking",
+    theme: `ranking:${topic.key}`,
+    themeLabel: "ランキング型",
+    title,
+    items,
+    caption,
+    lines,
+    roles,
+    itemIndex,
+  };
+}
+
+/** ランキングの書き込みを読む声（掲示板の書き込みを、早口でテンポよく読む） */
+export const RANKING_COMMENT_STYLE =
+  "掲示板の書き込みを読み上げる、ノリのいい20代。くだけた話し言葉で、早口でテンポよく、楽しそうに。間を空けない。";
