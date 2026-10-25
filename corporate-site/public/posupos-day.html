@@ -1549,7 +1549,12 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       document.body.setAttribute('data-shop',k);
       shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
+      // お問い合わせへのリンクに、いま見ているお店の種類をつける（フォームで最初から選ばれる）
+      document.querySelectorAll('a[href*="contact"]').forEach(function(a){
+        try{var u=new URL(a.getAttribute('href'),location.href);if(!/contact/.test(u.pathname))return;u.searchParams.set('shop',k);a.setAttribute('href',u.pathname+u.search+u.hash)}catch(e){}
+      });
     };
+    var first=shopBar.querySelector('[aria-selected="true"]')||shopBar.querySelector('button');if(first)setShop(first.dataset.shop,false);
     try{var saved=localStorage.getItem('posupos-shop');if(saved&&shopBar.querySelector('[data-shop="'+saved+'"]'))setShop(saved,false)}catch(e){}
     var hs=decodeURIComponent((location.hash||'').slice(1));if(hs&&shopBar.querySelector('[data-shop="'+hs+'"]'))setShop(hs,false);
     shopBar.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){setShop(b.dataset.shop,true)})});

@@ -27,6 +27,7 @@ CF_BEACON_TOKEN = ""
 NAV = [
     ("about", "about.html", "会社概要", "Company"),
     ("services", "./#services", "事業内容", "Services"),
+    ("posupos", "posupos.html", "ポスポス", "POSPOS"),
     ("gachicareer-ai", "https://gachicareer-ai.akitogroup.jp/", "ガチキャリAI", "Gachi Career AI"),
     ("gachicareer", "gachicareer.html", "ガチキャリ", "Gachi Career"),
     ("news", "news.html", "お知らせ", "News"),

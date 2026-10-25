@@ -33,6 +33,7 @@
     <nav class="nav" id="nav" aria-label="メインメニュー">
       <a href="/about">会社概要</a>
       <a href="./#services">事業内容</a>
+      <a href="/posupos">ポスポス</a>
       <a href="https://gachicareer-ai.akitogroup.jp/">ガチキャリAI</a>
       <a href="/gachicareer">ガチキャリ</a>
       <a href="/news">お知らせ</a>
@@ -46,6 +47,7 @@
   <nav>
     <a href="/about">会社概要<small>Company</small></a>
     <a href="./#services">事業内容<small>Services</small></a>
+    <a href="/posupos">ポスポス<small>POSPOS</small></a>
     <a href="https://gachicareer-ai.akitogroup.jp/">ガチキャリAI<small>Gachi Career AI</small></a>
     <a href="/gachicareer">ガチキャリ<small>Gachi Career</small></a>
     <a href="/news">お知らせ<small>News</small></a>
@@ -227,6 +229,16 @@
   if(h==='pos-trial'||h==='pos-offer'){pick('pos',true);setWant('無料で1か月ためしたい')}
   else if(h==='pos-price'){pick('pos',true);setWant('料金を知りたい')}
   else if(h)pick(h,true);
+  // ポスポスのページで見ていたお店の種類を、最初から選んでおく（?shop=host など。なければ見ていたページで決める）
+  (function(){
+    var SHOP={izakaya:'居酒屋',ramen:'ラーメン',italian:'イタリアン',sushi:'寿司',yakiniku:'焼肉',cafe:'カフェ',cabaret:'キャバクラ',host:'ホスト',girlsbar:'ガールズバー',concafe:'コンカフェ',snack:'スナック',lounge:'ラウンジ'};
+    var k='';try{k=new URLSearchParams(location.search).get('shop')||''}catch(e){}
+    var label=SHOP[k]||(/posupos-night/.test(from)?'キャバクラ':'');
+    if(!label)return;
+    var sel=document.getElementById('f-shop');
+    for(var i=0;i<sel.options.length;i++){if(sel.options[i].text===label){sel.selectedIndex=i;break}}
+    if(topic!=='pos')pick('pos',true);
+  })();
   syncPos();
 
   var show=function(ok,msg){status.hidden=false;status.className='status '+(ok?'ok':'ng');status.textContent=msg};
