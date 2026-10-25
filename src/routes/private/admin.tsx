@@ -44,6 +44,8 @@ type DashboardData = {
     proCount: number;
     paidRate: number;
     signupsDaily: Daily;
+    signupsWeekly?: Daily;
+    signupsMonthly?: Daily;
     practicesDaily: Daily;
   };
   individual: {
@@ -301,7 +303,7 @@ function AdminDashboard() {
             <Stat label="登録企業" value={`${num(growth.companies)}社`} />
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <TrendChart title="新規登録（直近30日・人）" data={growth.signupsDaily} unit="人" />
+            <SignupChart growth={growth} />
             <TrendChart
               title="模擬面接の回数（直近30日・回）"
               data={growth.practicesDaily}
@@ -914,10 +916,76 @@ function Funnel({ steps }: { steps: NameCount[] }) {
   );
 }
 
-function TrendChart({ title, data, unit }: { title: string; data: Daily; unit: string }) {
+/** 新規登録の人数を、日ごと（直近30日）・週ごと（直近12週）・月ごと（直近12か月）で切り替えて見る */
+function SignupChart({ growth }: { growth: DashboardData["growth"] }) {
+  const [range, setRange] = useState<"day" | "week" | "month">("day");
+  const views = {
+    day: {
+      label: "日ごと",
+      title: "新規登録（直近30日・人）",
+      data: growth.signupsDaily,
+      interval: 6,
+    },
+    week: {
+      label: "週ごと",
+      title: "新規登録（直近12週・人）",
+      data: growth.signupsWeekly ?? [],
+      interval: 1,
+    },
+    month: {
+      label: "月ごと",
+      title: "新規登録（直近12か月・人）",
+      data: growth.signupsMonthly ?? [],
+      interval: 1,
+    },
+  } as const;
+  const v = views[range];
+  return (
+    <TrendChart
+      title={v.title}
+      data={v.data}
+      unit="人"
+      interval={v.interval}
+      tabs={
+        <div className="flex gap-1">
+          {(Object.keys(views) as (keyof typeof views)[]).map((k) => (
+            <button
+              key={k}
+              onClick={() => setRange(k)}
+              className="rounded-md px-2 py-0.5 text-[11px]"
+              style={{
+                background: range === k ? T.accent : "transparent",
+                color: range === k ? "#0F0F0F" : T.muted,
+                border: `1px solid ${range === k ? T.accent : T.border}`,
+                fontWeight: 700,
+              }}
+            >
+              {views[k].label}
+            </button>
+          ))}
+        </div>
+      }
+    />
+  );
+}
+
+function TrendChart({
+  title,
+  data,
+  unit,
+  interval = 6,
+  tabs,
+}: {
+  title: string;
+  data: Daily;
+  unit: string;
+  interval?: number;
+  tabs?: ReactNode;
+}) {
   const total = data.reduce((a, d) => a + d.count, 0);
   return (
     <Panel>
+      {tabs && <div className="mb-2 flex justify-end">{tabs}</div>}
       <div className="mb-3 flex items-baseline justify-between">
         <p className="text-[13px]" style={{ color: T.sub, fontWeight: 600 }}>
           {title}
@@ -942,7 +1010,7 @@ function TrendChart({ title, data, unit }: { title: string; data: Daily; unit: s
               tick={{ fill: T.muted, fontSize: 10 }}
               tickLine={false}
               axisLine={{ stroke: T.border }}
-              interval={6}
+              interval={interval}
             />
             <YAxis
               allowDecimals={false}
