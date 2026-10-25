@@ -154,8 +154,7 @@
           </div></div>
         <div class="field"><label for="f-shop">お店の種類</label>
           <select id="f-shop">
-            <optgroup label="昼のお店"><option selected>居酒屋</option><option>ラーメン</option><option>イタリアン</option><option>寿司</option><option>焼肉</option><option>カフェ</option><option>その他の飲食店</option></optgroup>
-            <optgroup label="夜のお店"><option>キャバクラ</option><option>ホスト</option><option>ガールズバー</option><option>コンカフェ</option><option>スナック</option><option>ラウンジ</option><option>その他の夜のお店</option></optgroup>
+            <optgroup label="飲食店：和食"><option>和食レストラン</option><option>寿司</option><option>そば・うどん</option><option>定食・食堂</option><option>丼もの・牛丼</option><option>とんかつ・揚げ物</option></optgroup><optgroup label="飲食店：居酒屋・焼き鳥・お酒"><option selected>居酒屋</option><option>焼き鳥</option><option>バー・バル（キャストなし）</option></optgroup><optgroup label="飲食店：肉・鉄板・鍋"><option>焼肉</option><option>ステーキ・鉄板焼き</option><option>お好み焼き・もんじゃ</option><option>しゃぶしゃぶ・鍋</option></optgroup><optgroup label="飲食店：麺・中華・アジア"><option>ラーメン・つけ麺</option><option>中華料理</option><option>韓国料理</option><option>カレー・インド料理</option><option>エスニック（タイ・ベトナムなど）</option></optgroup><optgroup label="飲食店：洋食"><option>洋食レストラン</option><option>イタリアン</option><option>フレンチ・ビストロ</option><option>ハンバーガー</option></optgroup><optgroup label="飲食店：カフェ・パン・スイーツ"><option>カフェ</option><option>パン屋・ベーカリー</option><option>ケーキ・スイーツ</option></optgroup><optgroup label="飲食店：テイクアウト・食べ放題"><option>お弁当・テイクアウト・キッチンカー</option><option>ビュッフェ・食べ放題</option></optgroup><optgroup label="飲食店：そのほか"><option>そのほかの飲食店</option></optgroup><optgroup label="夜のお店"><option>ホストクラブ</option><option>キャバクラ</option><option>ガールズバー</option><option>ボーイズバー</option><option>コンセプトカフェ</option><option>スナック</option><option>ラウンジ</option></optgroup>
           </select></div>
         <div class="field"><label for="f-stores">店舗数</label>
           <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
@@ -231,7 +230,7 @@
   else if(h)pick(h,true);
   // ポスポスのページで見ていたお店の種類を、最初から選んでおく（?shop=host など。なければ見ていたページで決める）
   (function(){
-    var SHOP={izakaya:'居酒屋',ramen:'ラーメン',italian:'イタリアン',sushi:'寿司',yakiniku:'焼肉',cafe:'カフェ',cabaret:'キャバクラ',host:'ホスト',girlsbar:'ガールズバー',concafe:'コンカフェ',snack:'スナック',lounge:'ラウンジ'};
+    var SHOP={"washoku": "和食レストラン", "sushi": "寿司", "soba": "そば・うどん", "teishoku": "定食・食堂", "donburi": "丼もの・牛丼", "tonkatsu": "とんかつ・揚げ物", "izakaya": "居酒屋", "yakitori": "焼き鳥", "bar": "バー・バル（キャストなし）", "yakiniku": "焼肉", "steak": "ステーキ・鉄板焼き", "okonomiyaki": "お好み焼き・もんじゃ", "shabu": "しゃぶしゃぶ・鍋", "ramen": "ラーメン・つけ麺", "chuka": "中華料理", "korean": "韓国料理", "curry": "カレー・インド料理", "ethnic": "エスニック（タイ・ベトナムなど）", "yoshoku": "洋食レストラン", "italian": "イタリアン", "french": "フレンチ・ビストロ", "burger": "ハンバーガー", "cafe": "カフェ", "bakery": "パン屋・ベーカリー", "sweets": "ケーキ・スイーツ", "takeout": "お弁当・テイクアウト・キッチンカー", "buffet": "ビュッフェ・食べ放題", "other-food": "そのほかの飲食店", "host": "ホストクラブ", "cabaret": "キャバクラ", "girlsbar": "ガールズバー", "boysbar": "ボーイズバー", "concafe": "コンセプトカフェ", "snack": "スナック", "lounge": "ラウンジ"};
     var k='';try{k=new URLSearchParams(location.search).get('shop')||''}catch(e){}
     var label=SHOP[k]||(/posupos-night/.test(from)?'キャバクラ':'');
     if(!label)return;

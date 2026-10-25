@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 <title>ポスポス｜AI面接つき飲食店のクラウドPOSレジ（居酒屋・ラーメン・カフェ）勤怠・シフト・給料も 月額11,000円〜</title>
-<meta name="description" content="ポスポス（POSPOS）は、ラーメン・居酒屋・カフェ・焼肉・寿司など昼の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。">
+<meta name="description" content="ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。">
 <meta property="og:title" content="ポスポス｜飲食店のクラウドPOSレジ 月額11,000円〜・初期費用0円">
 <meta property="og:url" content="https://akitogroup.jp/posupos-day">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
@@ -810,10 +810,45 @@ body[data-shop="girlsbar"] .v[data-v="girlsbar"]{display:block}
 body[data-shop="concafe"] .v[data-v="concafe"]{display:block}
 body[data-shop="snack"] .v[data-v="snack"]{display:block}
 body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
+body[data-shop="washoku"] .v[data-v="sushi"]{display:block}
+body[data-shop="soba"] .v[data-v="ramen"]{display:block}
+body[data-shop="teishoku"] .v[data-v="izakaya"]{display:block}
+body[data-shop="donburi"] .v[data-v="ramen"]{display:block}
+body[data-shop="tonkatsu"] .v[data-v="izakaya"]{display:block}
+body[data-shop="yakitori"] .v[data-v="izakaya"]{display:block}
+body[data-shop="bar"] .v[data-v="izakaya"]{display:block}
+body[data-shop="steak"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="okonomiyaki"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="shabu"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="chuka"] .v[data-v="ramen"]{display:block}
+body[data-shop="korean"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="curry"] .v[data-v="ramen"]{display:block}
+body[data-shop="ethnic"] .v[data-v="ramen"]{display:block}
+body[data-shop="yoshoku"] .v[data-v="italian"]{display:block}
+body[data-shop="french"] .v[data-v="italian"]{display:block}
+body[data-shop="burger"] .v[data-v="cafe"]{display:block}
+body[data-shop="bakery"] .v[data-v="cafe"]{display:block}
+body[data-shop="sweets"] .v[data-v="cafe"]{display:block}
+body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
+body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
+body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
 .shopbar .sb{display:flex;gap:6px;flex-wrap:wrap}
+.sb-more{border:1.5px dashed var(--line);border-radius:18px;background:var(--white)}
+.sb-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;font-weight:700;font-size:14.5px;color:var(--blue)}
+.sb-more summary::-webkit-details-marker{display:none}
+.sb-more summary::after{content:"＋";font-weight:900}
+.sb-more[open] summary::after{content:"−"}
+.sb-more.on{border-style:solid;border-color:var(--blue)}
+.sm-p{display:grid;gap:12px;padding:0 16px 14px;max-height:340px;overflow:auto}
+.sm-g{display:grid;gap:6px}
+.sm-g>b{font-size:12.5px;color:var(--ink-2)}
+.sm-g>div{display:flex;flex-wrap:wrap;gap:6px}
+.sm-g button{min-height:36px;font-size:13.5px;padding:0 12px}
+.sm-n{margin:0;font-size:12px;color:var(--ink-2)}
 .shopbar button{appearance:none;font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
 .shopbar button:hover{border-color:var(--blue)}
 .shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
@@ -851,8 +886,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <p class="hero-logo"><img src="assets/img/posupos-lockup.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for restaurants</span></p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
         <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>スタンダードプランに、追加料金なしでついてきます</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
-        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div></div>
-        <p class="lead">居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェなど、昼の飲食店のためのクラウドPOSレジ。注文・会計・厨房に、打刻・シフト・給料・顧客の管理までくっついた、店舗管理アプリです。</p>
+        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div><details class="sb-more"><summary><span class="sm-l">ほかのお店（全28種類）</span></summary><div class="sm-p"><div class="sm-g"><b>和食</b><div><button type="button" role="tab" data-shop="washoku" aria-selected="false">和食レストラン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="soba" aria-selected="false">そば・うどん</button><button type="button" role="tab" data-shop="teishoku" aria-selected="false">定食・食堂</button><button type="button" role="tab" data-shop="donburi" aria-selected="false">丼もの・牛丼</button><button type="button" role="tab" data-shop="tonkatsu" aria-selected="false">とんかつ・揚げ物</button></div></div><div class="sm-g"><b>居酒屋・焼き鳥・お酒</b><div><button type="button" role="tab" data-shop="izakaya" aria-selected="false">居酒屋</button><button type="button" role="tab" data-shop="yakitori" aria-selected="false">焼き鳥</button><button type="button" role="tab" data-shop="bar" aria-selected="false">バー・バル（キャストなし）</button></div></div><div class="sm-g"><b>肉・鉄板・鍋</b><div><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="steak" aria-selected="false">ステーキ・鉄板焼き</button><button type="button" role="tab" data-shop="okonomiyaki" aria-selected="false">お好み焼き・もんじゃ</button><button type="button" role="tab" data-shop="shabu" aria-selected="false">しゃぶしゃぶ・鍋</button></div></div><div class="sm-g"><b>麺・中華・アジア</b><div><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン・つけ麺</button><button type="button" role="tab" data-shop="chuka" aria-selected="false">中華料理</button><button type="button" role="tab" data-shop="korean" aria-selected="false">韓国料理</button><button type="button" role="tab" data-shop="curry" aria-selected="false">カレー・インド料理</button><button type="button" role="tab" data-shop="ethnic" aria-selected="false">エスニック（タイ・ベトナムなど）</button></div></div><div class="sm-g"><b>洋食</b><div><button type="button" role="tab" data-shop="yoshoku" aria-selected="false">洋食レストラン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="french" aria-selected="false">フレンチ・ビストロ</button><button type="button" role="tab" data-shop="burger" aria-selected="false">ハンバーガー</button></div></div><div class="sm-g"><b>カフェ・パン・スイーツ</b><div><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button><button type="button" role="tab" data-shop="bakery" aria-selected="false">パン屋・ベーカリー</button><button type="button" role="tab" data-shop="sweets" aria-selected="false">ケーキ・スイーツ</button></div></div><div class="sm-g"><b>テイクアウト・食べ放題</b><div><button type="button" role="tab" data-shop="takeout" aria-selected="false">お弁当・テイクアウト・キッチンカー</button><button type="button" role="tab" data-shop="buffet" aria-selected="false">ビュッフェ・食べ放題</button></div></div><div class="sm-g"><b>そのほか</b><div><button type="button" role="tab" data-shop="other-food" aria-selected="false">そのほかの飲食店</button></div></div><p class="sm-n">画面は、近いお店のイメージで表示します。</p></div></details></div>
+        <p class="lead">和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど、28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房に、打刻・シフト・給料・顧客の管理までくっついた、店舗管理アプリです。</p>
 
 
         <div class="btns" style="margin-top:28px">
@@ -1336,11 +1371,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <a href="/posupos-day-security">セキュリティ</a>
       <a href="/posupos-day-faq">よくある質問</a>
       <a href="/posupos-izakaya">居酒屋のPOSレジ</a>
-      <a href="/posupos-ramen">ラーメン屋のPOSレジ</a>
-      <a href="/posupos-italian">イタリアンのPOSレジ</a>
+      <a href="/posupos-washoku">和食のPOSレジ</a>
       <a href="/posupos-sushi">寿司屋のPOSレジ</a>
       <a href="/posupos-yakiniku">焼肉店のPOSレジ</a>
+      <a href="/posupos-ramen">ラーメン屋のPOSレジ</a>
+      <a href="/posupos-italian">イタリアンのPOSレジ</a>
       <a href="/posupos-cafe">カフェのPOSレジ</a>
+      <a href="/posupos-takeout">テイクアウト・食べ放題のPOSレジ</a>
       <a href="/news-pos-ranking-day">飲食店のPOSレジの選び方</a>
       <a href="/news-izakaya-qr">居酒屋のQR注文の始め方</a>
       <a href="/news-restaurant-shift">飲食店のシフト管理と給料計算</a>
@@ -1380,6 +1417,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     var setShop=function(k,save){
       document.body.setAttribute('data-shop',k);
       shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      var more=shopBar.querySelector('.sb-more');if(more){var hit=more.querySelector('[data-shop="'+k+'"]'),inTop=shopBar.querySelector('.sb [data-shop="'+k+'"]');more.classList.toggle('on',!!hit&&!inTop);more.querySelector('.sm-l').textContent=(hit&&!inTop)?'選択中：'+hit.textContent:more.querySelector('.sm-l').dataset.l||(more.querySelector('.sm-l').dataset.l=more.querySelector('.sm-l').textContent);}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
       // お問い合わせへのリンクに、いま見ているお店の種類をつける（フォームで最初から選ばれる）
       document.querySelectorAll('a[href*="contact"]').forEach(function(a){
@@ -1422,6 +1460,6 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ラーメン・居酒屋・カフェ・焼肉・寿司など昼の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "22000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 22,000円（通常価格 33,000円。毎月11,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "22000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 22,000円（通常価格 33,000円。毎月11,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

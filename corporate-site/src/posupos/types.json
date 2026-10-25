@@ -1,0 +1,249 @@
+[
+ {
+  "mode": "day",
+  "id": "washoku",
+  "name": "和食",
+  "demo": "washoku",
+  "types": [
+   {
+    "id": "washoku",
+    "label": "和食レストラン",
+    "demo": "sushi"
+   },
+   {
+    "id": "sushi",
+    "label": "寿司",
+    "demo": "sushi"
+   },
+   {
+    "id": "soba",
+    "label": "そば・うどん",
+    "demo": "ramen"
+   },
+   {
+    "id": "teishoku",
+    "label": "定食・食堂",
+    "demo": "izakaya"
+   },
+   {
+    "id": "donburi",
+    "label": "丼もの・牛丼",
+    "demo": "ramen"
+   },
+   {
+    "id": "tonkatsu",
+    "label": "とんかつ・揚げ物",
+    "demo": "izakaya"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "sakaba",
+  "name": "居酒屋・焼き鳥・お酒",
+  "demo": "izakaya",
+  "types": [
+   {
+    "id": "izakaya",
+    "label": "居酒屋",
+    "demo": "izakaya"
+   },
+   {
+    "id": "yakitori",
+    "label": "焼き鳥",
+    "demo": "izakaya"
+   },
+   {
+    "id": "bar",
+    "label": "バー・バル（キャストなし）",
+    "demo": "izakaya"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "niku",
+  "name": "肉・鉄板・鍋",
+  "demo": "yakiniku",
+  "types": [
+   {
+    "id": "yakiniku",
+    "label": "焼肉",
+    "demo": "yakiniku"
+   },
+   {
+    "id": "steak",
+    "label": "ステーキ・鉄板焼き",
+    "demo": "yakiniku"
+   },
+   {
+    "id": "okonomiyaki",
+    "label": "お好み焼き・もんじゃ",
+    "demo": "yakiniku"
+   },
+   {
+    "id": "shabu",
+    "label": "しゃぶしゃぶ・鍋",
+    "demo": "yakiniku"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "noodle",
+  "name": "麺・中華・アジア",
+  "demo": "ramen",
+  "types": [
+   {
+    "id": "ramen",
+    "label": "ラーメン・つけ麺",
+    "demo": "ramen"
+   },
+   {
+    "id": "chuka",
+    "label": "中華料理",
+    "demo": "ramen"
+   },
+   {
+    "id": "korean",
+    "label": "韓国料理",
+    "demo": "yakiniku"
+   },
+   {
+    "id": "curry",
+    "label": "カレー・インド料理",
+    "demo": "ramen"
+   },
+   {
+    "id": "ethnic",
+    "label": "エスニック（タイ・ベトナムなど）",
+    "demo": "ramen"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "yoshoku",
+  "name": "洋食",
+  "demo": "italian",
+  "types": [
+   {
+    "id": "yoshoku",
+    "label": "洋食レストラン",
+    "demo": "italian"
+   },
+   {
+    "id": "italian",
+    "label": "イタリアン",
+    "demo": "italian"
+   },
+   {
+    "id": "french",
+    "label": "フレンチ・ビストロ",
+    "demo": "italian"
+   },
+   {
+    "id": "burger",
+    "label": "ハンバーガー",
+    "demo": "cafe"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "cafe-bakery",
+  "name": "カフェ・パン・スイーツ",
+  "demo": "cafe",
+  "types": [
+   {
+    "id": "cafe",
+    "label": "カフェ",
+    "demo": "cafe"
+   },
+   {
+    "id": "bakery",
+    "label": "パン屋・ベーカリー",
+    "demo": "cafe"
+   },
+   {
+    "id": "sweets",
+    "label": "ケーキ・スイーツ",
+    "demo": "cafe"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "takeout",
+  "name": "テイクアウト・食べ放題",
+  "demo": "cafe",
+  "types": [
+   {
+    "id": "takeout",
+    "label": "お弁当・テイクアウト・キッチンカー",
+    "demo": "cafe"
+   },
+   {
+    "id": "buffet",
+    "label": "ビュッフェ・食べ放題",
+    "demo": "yakiniku"
+   }
+  ]
+ },
+ {
+  "mode": "day",
+  "id": "other",
+  "name": "そのほか",
+  "demo": "izakaya",
+  "types": [
+   {
+    "id": "other-food",
+    "label": "そのほかの飲食店",
+    "demo": "izakaya"
+   }
+  ]
+ },
+ {
+  "mode": "night",
+  "id": "night",
+  "name": "夜のお店",
+  "demo": "cabaret",
+  "types": [
+   {
+    "id": "host",
+    "label": "ホストクラブ",
+    "demo": "host"
+   },
+   {
+    "id": "cabaret",
+    "label": "キャバクラ",
+    "demo": "cabaret"
+   },
+   {
+    "id": "girlsbar",
+    "label": "ガールズバー",
+    "demo": "girlsbar"
+   },
+   {
+    "id": "boysbar",
+    "label": "ボーイズバー",
+    "demo": "girlsbar"
+   },
+   {
+    "id": "concafe",
+    "label": "コンセプトカフェ",
+    "demo": "concafe"
+   },
+   {
+    "id": "snack",
+    "label": "スナック",
+    "demo": "snack"
+   },
+   {
+    "id": "lounge",
+    "label": "ラウンジ",
+    "demo": "lounge"
+   }
+  ]
+ }
+]

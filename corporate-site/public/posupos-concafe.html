@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 
-<title>コンカフェのPOSレジ｜チェキバック・イベント・ランキング ポスポス（AI面接つき）</title>
-<meta name="description" content="コンカフェ向けのクラウドPOSレジ「ポスポス」。チェキやドリンクなど商品ごとのバック、イベントの決まりでの集計とランキング、キャストのシフト・給料まで。 キャスト・スタッフの一次面接も AI におまかせ。月額11,000円〜・初期費用0円・1か月無料。">
-<meta property="og:title" content="コンカフェのPOSレジ｜チェキバック・イベント・ランキング ポスポス（AI面接つき）">
+<title>コンセプトカフェのPOSレジ｜チェキバック・イベント・ランキング ポスポス（AI面接つき）</title>
+<meta name="description" content="コンセプトカフェ向けのクラウドPOSレジ「ポスポス」。チェキやドリンクなど商品ごとのバック、イベントの決まりでの集計とランキング、キャストのシフト・給料まで。 キャスト・スタッフの一次面接も AI におまかせ。月額11,000円〜・初期費用0円・1か月無料。">
+<meta property="og:title" content="コンセプトカフェのPOSレジ｜チェキバック・イベント・ランキング ポスポス（AI面接つき）">
 <meta property="og:url" content="https://akitogroup.jp/posupos-concafe">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-concafe">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="コンカフェ向けのクラウドPOSレジ「ポスポス」。チェキやドリンクなど商品ごとのバック、イベントの決まりでの集計とランキング、キャストのシフト・給料まで。 キャスト・スタッフの一次面接も AI におまかせ。月額11,000円〜・初期費用0円・1か月無料。">
+<meta property="og:description" content="コンセプトカフェ向けのクラウドPOSレジ「ポスポス」。チェキやドリンクなど商品ごとのバック、イベントの決まりでの集計とランキング、キャストのシフト・給料まで。 キャスト・スタッフの一次面接も AI におまかせ。月額11,000円〜・初期費用0円・1か月無料。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -810,10 +810,45 @@ body[data-shop="girlsbar"] .v[data-v="girlsbar"]{display:block}
 body[data-shop="concafe"] .v[data-v="concafe"]{display:block}
 body[data-shop="snack"] .v[data-v="snack"]{display:block}
 body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
+body[data-shop="washoku"] .v[data-v="sushi"]{display:block}
+body[data-shop="soba"] .v[data-v="ramen"]{display:block}
+body[data-shop="teishoku"] .v[data-v="izakaya"]{display:block}
+body[data-shop="donburi"] .v[data-v="ramen"]{display:block}
+body[data-shop="tonkatsu"] .v[data-v="izakaya"]{display:block}
+body[data-shop="yakitori"] .v[data-v="izakaya"]{display:block}
+body[data-shop="bar"] .v[data-v="izakaya"]{display:block}
+body[data-shop="steak"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="okonomiyaki"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="shabu"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="chuka"] .v[data-v="ramen"]{display:block}
+body[data-shop="korean"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="curry"] .v[data-v="ramen"]{display:block}
+body[data-shop="ethnic"] .v[data-v="ramen"]{display:block}
+body[data-shop="yoshoku"] .v[data-v="italian"]{display:block}
+body[data-shop="french"] .v[data-v="italian"]{display:block}
+body[data-shop="burger"] .v[data-v="cafe"]{display:block}
+body[data-shop="bakery"] .v[data-v="cafe"]{display:block}
+body[data-shop="sweets"] .v[data-v="cafe"]{display:block}
+body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
+body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
+body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
 .shopbar .sb{display:flex;gap:6px;flex-wrap:wrap}
+.sb-more{border:1.5px dashed var(--line);border-radius:18px;background:var(--white)}
+.sb-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;font-weight:700;font-size:14.5px;color:var(--blue)}
+.sb-more summary::-webkit-details-marker{display:none}
+.sb-more summary::after{content:"＋";font-weight:900}
+.sb-more[open] summary::after{content:"−"}
+.sb-more.on{border-style:solid;border-color:var(--blue)}
+.sm-p{display:grid;gap:12px;padding:0 16px 14px;max-height:340px;overflow:auto}
+.sm-g{display:grid;gap:6px}
+.sm-g>b{font-size:12.5px;color:var(--ink-2)}
+.sm-g>div{display:flex;flex-wrap:wrap;gap:6px}
+.sm-g button{min-height:36px;font-size:13.5px;padding:0 12px}
+.sm-n{margin:0;font-size:12px;color:var(--ink-2)}
 .shopbar button{appearance:none;font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
 .shopbar button:hover{border-color:var(--blue)}
 .shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
@@ -855,13 +890,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   <section class="hero sub-hero shop-hero">
     <div class="wrap">
       <div>
-        <p class="crumbs"><a href="/posupos-night">ポスポス</a> ／ コンカフェ</p>
-        <h1>コンカフェのバックもイベントも、<br>ポスポスひとつで。</h1>
+        <p class="crumbs"><a href="/posupos-night">ポスポス</a> ／ コンセプトカフェ</p>
+        <h1>コンセプトカフェのバックもイベントも、<br>ポスポスひとつで。</h1>
         <p class="lead">チェキやドリンクなど商品ごとのバック、イベントの決まりでの集計とランキング、キャストのシフト・給料まで。</p>
         <p class="ai-first"><b>世界初<sup>※</sup></b>キャスト・黒服の一次面接も AI におまかせ</p>
         <div class="btns" style="margin-top:24px">
           <a class="btn btn-blue" href="/contact?shop=concafe#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
-          <a class="btn btn-line" href="/posupos-night#concafe">コンカフェの画面をもっと見る</a>
+          <a class="btn btn-line" href="/posupos-night#concafe">コンセプトカフェの画面をもっと見る</a>
         </div>
         <p class="shop-note">月額11,000円〜・初期費用0円・1か月無料。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
       </div>
@@ -905,16 +940,17 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     </div>
   </section>
 
+
   <section class="sec tint" id="pains">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">Before</p><h2>コンカフェで、こんなことに困っていませんか？</h2></div>
+      <div class="sec-head rv"><p class="eyebrow">Before</p><h2>コンセプトカフェで、こんなことに困っていませんか？</h2></div>
       <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>チェキバックの集計</b><span>チェキやドリンクのバックを、閉店後に伝票から数えている。</span></div><div class="sp-card rv"><b>イベントの集計</b><span>生誕祭などのイベントの売上やランキングを、手で集計している。</span></div><div class="sp-card rv"><b>給料の問い合わせ</b><span>キャストから給料や成績をよく聞かれる。</span></div></div>
     </div>
   </section>
 
   <section class="sec" id="features">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">Features</p><h2>コンカフェで使いやすい機能</h2><p>ポスポスは、注文・会計からキャストの給料まで、ひとつのアプリで管理できるクラウドPOSレジです。</p></div>
+      <div class="sec-head rv"><p class="eyebrow">Features</p><h2>コンセプトカフェで使いやすい機能</h2><p>ポスポスは、注文・会計からキャストの給料まで、ひとつのアプリで管理できるクラウドPOSレジです。</p></div>
       <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>商品ごとのバック</b><span>チェキ・ドリンク・シャンパンなど、商品ごとにバックを決められます。</span></div><div class="sp-card rv"><b>ランキング・イベント</b><span>売上・指名・杯数・バックのランキング。イベントの決まりで集計できます。</span></div><div class="sp-card rv"><b>遠隔（差し入れ）</b><span>お店にいないキャストへの差し入れ。BASE などで先に払ってもらった注文にも対応。</span></div><div class="sp-card rv"><b>QR 注文</b><span>卓の QR から、写真つきメニューで注文できます。</span></div><div class="sp-card rv"><b>シフト・給料</b><span>シフトの希望集めから、時給・バック・前借りを入れた給料の計算まで。</span></div><div class="sp-card rv"><b>キャストモード</b><span>キャストは自分のスマホで、シフト・給料・成績を確認できます。</span></div></div>
       <p class="sp-links rv"><a href="/posupos-night-register">会計・指名のくわしい機能 →</a><a href="/posupos-night-payroll">給料・バックのくわしい機能 →</a><a href="/posupos-night-features">すべての画面と機能 →</a></p>
     </div>
@@ -934,14 +970,14 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
   <section class="sec" id="read">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">Read more</p><h2>コンカフェ向けの記事</h2></div>
+      <div class="sec-head rv"><p class="eyebrow">Read more</p><h2>コンセプトカフェ向けの記事</h2></div>
       <p class="sp-links rv"><a href="/news-girlsbar-back">ガールズバー・コンカフェのバック計算 →</a><a href="/news-night-recruit">夜のお店の求人面接をAIで効率化 →</a><a href="/posupos-night-pricing">料金・プラン →</a></p>
     </div>
   </section>
 
   <section class="sec tint" id="faq">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>コンカフェのよくある質問</h2></div>
+      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>コンセプトカフェのよくある質問</h2></div>
       <div class="faq rv"><details><summary>イベントごとの集計はできますか？</summary><p>はい。ランキング・イベントの画面で、イベントの決まりにそって売上や杯数を集計できます。</p></details><details><summary>Square は使えますか？</summary><p>はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。</p></details><details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。AI は合否を決めず、採用はお店が決めます。</p></details></div>
       <p class="sp-back"><a class="btn btn-line" href="/posupos-night">← ポスポスのページへ戻る</a> <a class="btn btn-line" href="/posupos-night-faq">よくある質問をすべて見る</a></p>
     </div>
@@ -975,10 +1011,11 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <a href="/posupos-night-pricing">料金・プラン</a>
       <a href="/posupos-night-security">セキュリティ</a>
       <a href="/posupos-night-faq">よくある質問</a>
-      <a href="/posupos-cabaret">キャバクラのPOSシステム</a>
       <a href="/posupos-host">ホストクラブのPOSシステム</a>
+      <a href="/posupos-cabaret">キャバクラのPOSシステム</a>
       <a href="/posupos-girlsbar">ガールズバーのPOSシステム</a>
-      <a href="/posupos-concafe">コンカフェのPOSシステム</a>
+      <a href="/posupos-boysbar">ボーイズバーのPOSシステム</a>
+      <a href="/posupos-concafe">コンセプトカフェのPOSシステム</a>
       <a href="/posupos-snack">スナックのPOSシステム</a>
       <a href="/posupos-lounge">ラウンジのPOSシステム</a>
       <a href="/news-pos-ranking">夜のお店のPOSシステムの選び方</a>
@@ -1019,6 +1056,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     var setShop=function(k,save){
       document.body.setAttribute('data-shop',k);
       shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      var more=shopBar.querySelector('.sb-more');if(more){var hit=more.querySelector('[data-shop="'+k+'"]'),inTop=shopBar.querySelector('.sb [data-shop="'+k+'"]');more.classList.toggle('on',!!hit&&!inTop);more.querySelector('.sm-l').textContent=(hit&&!inTop)?'選択中：'+hit.textContent:more.querySelector('.sm-l').dataset.l||(more.querySelector('.sm-l').dataset.l=more.querySelector('.sm-l').textContent);}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
       // お問い合わせへのリンクに、いま見ているお店の種類をつける（フォームで最初から選ばれる）
       document.querySelectorAll('a[href*="contact"]').forEach(function(a){
@@ -1061,6 +1099,6 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "コンカフェ", "item": "https://akitogroup.jp/posupos-concafe"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "イベントごとの集計はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。ランキング・イベントの画面で、イベントの決まりにそって売上や杯数を集計できます。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。AI は合否を決めず、採用はお店が決めます。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-night"}, {"@type": "ListItem", "position": 3, "name": "コンセプトカフェ", "item": "https://akitogroup.jp/posupos-concafe"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "イベントごとの集計はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。ランキング・イベントの画面で、イベントの決まりにそって売上や杯数を集計できます。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。AI は合否を決めず、採用はお店が決めます。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

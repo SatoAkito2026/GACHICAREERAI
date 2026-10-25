@@ -810,10 +810,45 @@ body[data-shop="girlsbar"] .v[data-v="girlsbar"]{display:block}
 body[data-shop="concafe"] .v[data-v="concafe"]{display:block}
 body[data-shop="snack"] .v[data-v="snack"]{display:block}
 body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
+body[data-shop="washoku"] .v[data-v="sushi"]{display:block}
+body[data-shop="soba"] .v[data-v="ramen"]{display:block}
+body[data-shop="teishoku"] .v[data-v="izakaya"]{display:block}
+body[data-shop="donburi"] .v[data-v="ramen"]{display:block}
+body[data-shop="tonkatsu"] .v[data-v="izakaya"]{display:block}
+body[data-shop="yakitori"] .v[data-v="izakaya"]{display:block}
+body[data-shop="bar"] .v[data-v="izakaya"]{display:block}
+body[data-shop="steak"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="okonomiyaki"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="shabu"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="chuka"] .v[data-v="ramen"]{display:block}
+body[data-shop="korean"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="curry"] .v[data-v="ramen"]{display:block}
+body[data-shop="ethnic"] .v[data-v="ramen"]{display:block}
+body[data-shop="yoshoku"] .v[data-v="italian"]{display:block}
+body[data-shop="french"] .v[data-v="italian"]{display:block}
+body[data-shop="burger"] .v[data-v="cafe"]{display:block}
+body[data-shop="bakery"] .v[data-v="cafe"]{display:block}
+body[data-shop="sweets"] .v[data-v="cafe"]{display:block}
+body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
+body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
+body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
 .shopbar .sb{display:flex;gap:6px;flex-wrap:wrap}
+.sb-more{border:1.5px dashed var(--line);border-radius:18px;background:var(--white)}
+.sb-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;font-weight:700;font-size:14.5px;color:var(--blue)}
+.sb-more summary::-webkit-details-marker{display:none}
+.sb-more summary::after{content:"＋";font-weight:900}
+.sb-more[open] summary::after{content:"−"}
+.sb-more.on{border-style:solid;border-color:var(--blue)}
+.sm-p{display:grid;gap:12px;padding:0 16px 14px;max-height:340px;overflow:auto}
+.sm-g{display:grid;gap:6px}
+.sm-g>b{font-size:12.5px;color:var(--ink-2)}
+.sm-g>div{display:flex;flex-wrap:wrap;gap:6px}
+.sm-g button{min-height:36px;font-size:13.5px;padding:0 12px}
+.sm-n{margin:0;font-size:12px;color:var(--ink-2)}
 .shopbar button{appearance:none;font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
 .shopbar button:hover{border-color:var(--blue)}
 .shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
@@ -905,6 +940,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     </div>
   </section>
 
+
   <section class="sec tint" id="pains">
     <div class="wrap">
       <div class="sec-head rv"><p class="eyebrow">Before</p><h2>スナックで、こんなことに困っていませんか？</h2></div>
@@ -975,10 +1011,11 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <a href="/posupos-night-pricing">料金・プラン</a>
       <a href="/posupos-night-security">セキュリティ</a>
       <a href="/posupos-night-faq">よくある質問</a>
-      <a href="/posupos-cabaret">キャバクラのPOSシステム</a>
       <a href="/posupos-host">ホストクラブのPOSシステム</a>
+      <a href="/posupos-cabaret">キャバクラのPOSシステム</a>
       <a href="/posupos-girlsbar">ガールズバーのPOSシステム</a>
-      <a href="/posupos-concafe">コンカフェのPOSシステム</a>
+      <a href="/posupos-boysbar">ボーイズバーのPOSシステム</a>
+      <a href="/posupos-concafe">コンセプトカフェのPOSシステム</a>
       <a href="/posupos-snack">スナックのPOSシステム</a>
       <a href="/posupos-lounge">ラウンジのPOSシステム</a>
       <a href="/news-pos-ranking">夜のお店のPOSシステムの選び方</a>
@@ -1019,6 +1056,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     var setShop=function(k,save){
       document.body.setAttribute('data-shop',k);
       shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      var more=shopBar.querySelector('.sb-more');if(more){var hit=more.querySelector('[data-shop="'+k+'"]'),inTop=shopBar.querySelector('.sb [data-shop="'+k+'"]');more.classList.toggle('on',!!hit&&!inTop);more.querySelector('.sm-l').textContent=(hit&&!inTop)?'選択中：'+hit.textContent:more.querySelector('.sm-l').dataset.l||(more.querySelector('.sm-l').dataset.l=more.querySelector('.sm-l').textContent);}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
       // お問い合わせへのリンクに、いま見ているお店の種類をつける（フォームで最初から選ばれる）
       document.querySelectorAll('a[href*="contact"]').forEach(function(a){

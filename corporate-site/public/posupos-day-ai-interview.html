@@ -810,10 +810,45 @@ body[data-shop="girlsbar"] .v[data-v="girlsbar"]{display:block}
 body[data-shop="concafe"] .v[data-v="concafe"]{display:block}
 body[data-shop="snack"] .v[data-v="snack"]{display:block}
 body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
+body[data-shop="washoku"] .v[data-v="sushi"]{display:block}
+body[data-shop="soba"] .v[data-v="ramen"]{display:block}
+body[data-shop="teishoku"] .v[data-v="izakaya"]{display:block}
+body[data-shop="donburi"] .v[data-v="ramen"]{display:block}
+body[data-shop="tonkatsu"] .v[data-v="izakaya"]{display:block}
+body[data-shop="yakitori"] .v[data-v="izakaya"]{display:block}
+body[data-shop="bar"] .v[data-v="izakaya"]{display:block}
+body[data-shop="steak"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="okonomiyaki"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="shabu"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="chuka"] .v[data-v="ramen"]{display:block}
+body[data-shop="korean"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="curry"] .v[data-v="ramen"]{display:block}
+body[data-shop="ethnic"] .v[data-v="ramen"]{display:block}
+body[data-shop="yoshoku"] .v[data-v="italian"]{display:block}
+body[data-shop="french"] .v[data-v="italian"]{display:block}
+body[data-shop="burger"] .v[data-v="cafe"]{display:block}
+body[data-shop="bakery"] .v[data-v="cafe"]{display:block}
+body[data-shop="sweets"] .v[data-v="cafe"]{display:block}
+body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
+body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
+body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
+body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
 .shopbar .sb{display:flex;gap:6px;flex-wrap:wrap}
+.sb-more{border:1.5px dashed var(--line);border-radius:18px;background:var(--white)}
+.sb-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;font-weight:700;font-size:14.5px;color:var(--blue)}
+.sb-more summary::-webkit-details-marker{display:none}
+.sb-more summary::after{content:"＋";font-weight:900}
+.sb-more[open] summary::after{content:"−"}
+.sb-more.on{border-style:solid;border-color:var(--blue)}
+.sm-p{display:grid;gap:12px;padding:0 16px 14px;max-height:340px;overflow:auto}
+.sm-g{display:grid;gap:6px}
+.sm-g>b{font-size:12.5px;color:var(--ink-2)}
+.sm-g>div{display:flex;flex-wrap:wrap;gap:6px}
+.sm-g button{min-height:36px;font-size:13.5px;padding:0 12px}
+.sm-n{margin:0;font-size:12px;color:var(--ink-2)}
 .shopbar button{appearance:none;font:inherit;font-weight:700;font-size:15px;border:1.5px solid var(--line);background:var(--white);color:var(--navy);border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
 .shopbar button:hover{border-color:var(--blue)}
 .shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
@@ -1037,11 +1072,13 @@ body.night .msg{background:#F4F7FB}
       <a href="/posupos-day-security">セキュリティ</a>
       <a href="/posupos-day-faq">よくある質問</a>
       <a href="/posupos-izakaya">居酒屋のPOSレジ</a>
-      <a href="/posupos-ramen">ラーメン屋のPOSレジ</a>
-      <a href="/posupos-italian">イタリアンのPOSレジ</a>
+      <a href="/posupos-washoku">和食のPOSレジ</a>
       <a href="/posupos-sushi">寿司屋のPOSレジ</a>
       <a href="/posupos-yakiniku">焼肉店のPOSレジ</a>
+      <a href="/posupos-ramen">ラーメン屋のPOSレジ</a>
+      <a href="/posupos-italian">イタリアンのPOSレジ</a>
       <a href="/posupos-cafe">カフェのPOSレジ</a>
+      <a href="/posupos-takeout">テイクアウト・食べ放題のPOSレジ</a>
       <a href="/news-pos-ranking-day">飲食店のPOSレジの選び方</a>
       <a href="/news-izakaya-qr">居酒屋のQR注文の始め方</a>
       <a href="/news-restaurant-shift">飲食店のシフト管理と給料計算</a>
@@ -1081,6 +1118,7 @@ body.night .msg{background:#F4F7FB}
     var setShop=function(k,save){
       document.body.setAttribute('data-shop',k);
       shopBar.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.shop===k?'true':'false')});
+      var more=shopBar.querySelector('.sb-more');if(more){var hit=more.querySelector('[data-shop="'+k+'"]'),inTop=shopBar.querySelector('.sb [data-shop="'+k+'"]');more.classList.toggle('on',!!hit&&!inTop);more.querySelector('.sm-l').textContent=(hit&&!inTop)?'選択中：'+hit.textContent:more.querySelector('.sm-l').dataset.l||(more.querySelector('.sm-l').dataset.l=more.querySelector('.sm-l').textContent);}
       if(save){try{localStorage.setItem('posupos-shop',k)}catch(e){}}
       // お問い合わせへのリンクに、いま見ているお店の種類をつける（フォームで最初から選ばれる）
       document.querySelectorAll('a[href*="contact"]').forEach(function(a){

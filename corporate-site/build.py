@@ -88,6 +88,39 @@ def page_ld(name, title, meta, body, url):
     return "".join('<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False) + "</script>" for d in out)
 
 
+def shop_types():
+    """お店の種類（src/posupos/types.json）。LPの種類えらび・お問い合わせの選択肢・業種ページで使う"""
+    import json
+    f = SRC / "posupos" / "types.json"
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else []
+
+
+def shop_fill(html, mode=None):
+    """{{shopcss}} {{shopmore}} {{shopoptions}} {{shopmap}} を、お店の種類の一覧から作って入れる"""
+    import json
+    groups = shop_types()
+    if "{{shopcss}}" in html:
+        rules = "".join(f'body[data-shop="{t["id"]}"] .v[data-v="{t["demo"]}"]{{display:block}}\n'
+                        for g in groups for t in g["types"] if t["id"] != t["demo"])
+        html = html.replace("{{shopcss}}", rules)
+    if "{{shopmore}}" in html and mode:
+        n = sum(len(g["types"]) for g in groups if g["mode"] == mode)
+        body = "".join(f'<div class="sm-g"><b>{g["name"]}</b><div>' + "".join(
+            f'<button type="button" role="tab" data-shop="{t["id"]}" aria-selected="false">{t["label"]}</button>' for t in g["types"]) + "</div></div>"
+            for g in groups if g["mode"] == mode)
+        html = html.replace("{{shopmore}}", f'<details class="sb-more"><summary><span class="sm-l">ほかのお店（全{n}種類）</span></summary><div class="sm-p">{body}<p class="sm-n">画面は、近いお店のイメージで表示します。</p></div></details>')
+    if "{{shopoptions}}" in html:
+        opts = ""
+        for g in groups:
+            lab = g["name"] if g["mode"] == "night" else "飲食店：" + g["name"]
+            opts += f'<optgroup label="{lab}">' + "".join(
+                f'<option{" selected" if t["id"] == "izakaya" else ""}>{t["label"]}</option>' for t in g["types"]) + "</optgroup>"
+        html = html.replace("{{shopoptions}}", opts)
+    if "{{shopmap}}" in html:
+        html = html.replace("{{shopmap}}", json.dumps({t["id"]: t["label"] for g in groups for t in g["types"]}, ensure_ascii=False))
+    return html
+
+
 def posupos_ld(html, mode):
     """ポスポスLPの構造化データ（サービスの説明・よくある質問・パンくず）"""
     import json, html as H
@@ -137,7 +170,7 @@ def main():
             .replace("{{content}}", body.strip())
             .replace("{{pageld}}", page_ld(name, title, meta, body, url))
         )
-        (OUT / f"{name}.html").write_text(html, encoding="utf-8")
+        (OUT / f"{name}.html").write_text(shop_fill(html), encoding="utf-8")
         print("wrote", f"public/{name}.html")
     # 独自のデザインで1枚完結のページ（ガチキャリAIのLPなど）は、そのままコピーする
     for page in sorted((SRC / "standalone").glob("*.html")):
@@ -160,6 +193,7 @@ def main():
             html = re.sub(r"\{\{#" + other + r"\}\}.*?\{\{/" + other + r"\}\}", "", text, flags=re.S)
             html = html.replace("{{#" + mode + "}}", "").replace("{{/" + mode + "}}", "")
             html = html.replace("{{w}}", word).replace("{{mode}}", mode)
+            html = shop_fill(html, mode)
             html = html.replace("<!--LDJSON-->", posupos_ld(html, mode))
             (OUT / f"posupos-{mode}.html").write_text(html, encoding="utf-8")
             print("wrote", f"public/posupos-{mode}.html")
@@ -182,10 +216,23 @@ def write_posupos_shops(lp_html, mode, other, word):
         t = tpl
         for k in ("key", "name", "title", "desc", "h1", "lead", "jobs", "aiq"):
             t = t.replace("{{" + k + "}}", d.get(k, ""))
+        t = t.replace("{{demo}}", d.get("demo", d["key"])).replace("{{param}}", d.get("param", d["key"]))
+        tb = ""
+        if d.get("types"):
+            chips = "".join(f'<li>{x}</li>' for x in d["types"])
+            tb = f'''  <section class="sec" id="types">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Shop types</p><h2>{d["name"]}で使えるお店</h2></div>
+      <ul class="sp-chips rv">{chips}</ul>
+      {d.get("more", "")}
+    </div>
+  </section>
+'''
+        t = t.replace("{{typesblock}}", tb)
         t = t.replace("{{pains}}", li(d["pains"])).replace("{{feats}}", li(d["feats"]))
         t = t.replace("{{articles}}", "".join(f'<a href="{h}">{a} →</a>' for a, h in d.get("articles", [])))
         t = t.replace("{{faqs}}", "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in d["faqs"]))
-        wrap_posupos(t, lp_html, mode, other, word, f"posupos-{d['key']}", None, d["key"])
+        wrap_posupos(t, lp_html, mode, other, word, f"posupos-{d['key']}", None, d.get("demo", d["key"]))
 
 
 def posupos_shop_names():

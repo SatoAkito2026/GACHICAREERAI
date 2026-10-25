@@ -96,8 +96,7 @@ cta: no
           </div></div>
         <div class="field"><label for="f-shop">お店の種類</label>
           <select id="f-shop">
-            <optgroup label="昼のお店"><option selected>居酒屋</option><option>ラーメン</option><option>イタリアン</option><option>寿司</option><option>焼肉</option><option>カフェ</option><option>その他の飲食店</option></optgroup>
-            <optgroup label="夜のお店"><option>キャバクラ</option><option>ホスト</option><option>ガールズバー</option><option>コンカフェ</option><option>スナック</option><option>ラウンジ</option><option>その他の夜のお店</option></optgroup>
+            {{shopoptions}}
           </select></div>
         <div class="field"><label for="f-stores">店舗数</label>
           <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
@@ -173,7 +172,7 @@ cta: no
   else if(h)pick(h,true);
   // ポスポスのページで見ていたお店の種類を、最初から選んでおく（?shop=host など。なければ見ていたページで決める）
   (function(){
-    var SHOP={izakaya:'居酒屋',ramen:'ラーメン',italian:'イタリアン',sushi:'寿司',yakiniku:'焼肉',cafe:'カフェ',cabaret:'キャバクラ',host:'ホスト',girlsbar:'ガールズバー',concafe:'コンカフェ',snack:'スナック',lounge:'ラウンジ'};
+    var SHOP={{shopmap}};
     var k='';try{k=new URLSearchParams(location.search).get('shop')||''}catch(e){}
     var label=SHOP[k]||(/posupos-night/.test(from)?'キャバクラ':'');
     if(!label)return;
