@@ -126,7 +126,7 @@ out tags;'''
 
 def shop_type(t):
     name = t.get("name", "")
-    if t.get("amenity") == "nightclub" or NIGHT_WORDS.search(name):
+    if t.get("amenity") == "nightclub" or (t.get("amenity") in ("bar", "pub") and NIGHT_WORDS.search(name)):
         for w, lab in (("キャバ", "キャバクラ"), ("ホスト", "ホストクラブ"), ("スナック", "スナック"), ("ラウンジ", "ラウンジ"), ("ガールズ", "ガールズバー"), ("ボーイズ", "ボーイズバー"), ("コンカフェ", "コンセプトカフェ"), ("コンセプトカフェ", "コンセプトカフェ")):
             if w in name:
                 return lab
@@ -215,6 +215,7 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="試しに集める最大の軒数")
     ap.add_argument("--delay", type=float, default=1.5, help="ページごとに待つ秒数")
     ap.add_argument("--include-chains", action="store_true")
+    ap.add_argument("--allow-osm-email", action="store_true", help="OpenStreetMap にあるだけのアドレスも使う（お店が公開したとは限らないので、ふだんは使わない）")
     a = ap.parse_args()
     seen, shops = set(), []
     for area in a.areas:
@@ -229,22 +230,28 @@ def main():
                 continue
             seen.add(key)
             pref = t.get("addr:province") or t.get("addr:state") or (area if area.endswith(("都", "道", "府", "県")) else "")
+            if not (t.get("website") or t.get("contact:website") or t.get("url")) and not a.allow_osm_email:
+                continue
             shops.append({"osm": key, "name": t["name"], "type": shop_type(t), "pref": pref,
                           "site": t.get("website") or t.get("contact:website") or t.get("url") or "",
                           "email": (t.get("email") or t.get("contact:email") or "").split(";")[0].strip().lower(), "area": area})
-        print(f"{area}: OpenStreetMap でホームページかメールがあるお店 {len(shops) - n0} 軒")
+        print(f"{area}: OpenStreetMap でホームページがあるお店 {len(shops) - n0} 軒")
     if a.limit:
         shops = shops[:a.limit]
     cr, rows, stats = Crawler(a.delay), [], {"メールあり": 0, "見つからない": 0, "営業お断り": 0}
     if shops:
         print(f"{len(shops)} 軒のホームページを順番に見ます（1軒あたり数秒。止めるときは control + C）", flush=True)
     for i, s in enumerate(shops, 1):
-        email, page, refused = s["email"], (f"https://www.openstreetmap.org/{s['osm']}" if s["email"] else ""), False
+        # 送ってよいのは、お店自身がホームページで公開しているアドレスだけ。
+        # OpenStreetMap は誰でも書きこめるので、そこにあるだけのアドレスは使わない（--allow-osm-email のときだけ使う）
+        email, page, refused = "", "", False
         if s["site"]:
             site = s["site"] if s["site"].startswith("http") else "http://" + s["site"]
             m, p, refused = cr.find(site)
-            if m and not email:
+            if m:
                 email, page = m, p
+        if not email and s["email"] and a.allow_osm_email:
+            email, page = s["email"], f"https://www.openstreetmap.org/{s['osm']}"
         if refused:
             stats["営業お断り"] += 1
         elif email:
