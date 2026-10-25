@@ -486,6 +486,15 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
+.ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
+.ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
+.ai-fit .fit-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.ai-fit .fit-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ai-fit .fit-g>div{background:#fff;border-radius:16px;padding:16px 18px;display:grid;gap:6px;align-content:start;box-shadow:0 10px 24px -18px rgba(120,80,0,.5)}
+.ai-fit .fit-g b{font-size:16.5px;color:#2A1A00}
+.ai-fit .fit-g span{font-size:14px;line-height:1.7;color:#5A4520}
+.ai-fit .fit-n{margin:12px 0 0;font-size:12.5px;color:#6A5530}
 .ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
 .ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
 .ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
@@ -944,6 +953,15 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-fit{margin:0 0 30px;border-radius:24px;padding:clamp(18px,3vw,26px);background:linear-gradient(135deg,#FFF7E0,#FFEBC2);color:#3A2200;border:1px solid #F2C46B}
+.ai-fit .fit-h{margin:0 0 14px;font-weight:900;font-size:clamp(19px,2.6vw,24px);color:#2A1A00}
+.ai-fit .fit-h em{font-style:normal;background:linear-gradient(transparent 60%,#FFD66B 60%)}
+.ai-fit .fit-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.ai-fit .fit-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ai-fit .fit-g>div{background:#fff;border-radius:16px;padding:16px 18px;display:grid;gap:6px;align-content:start;box-shadow:0 10px 24px -18px rgba(120,80,0,.5)}
+.ai-fit .fit-g b{font-size:16.5px;color:#2A1A00}
+.ai-fit .fit-g span{font-size:14px;line-height:1.7;color:#5A4520}
+.ai-fit .fit-n{margin:12px 0 0;font-size:12.5px;color:#6A5530}
 .ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
 .ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
 .ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
@@ -1009,6 +1027,15 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
           <li><b>面接の日を決めても来ない</b><span>面接の予定を入れないので、来ない人を待つ時間がむだになりません。受けた人の結果だけが届きます。</span></li>
           <li><b>体入してみたら、合わなかった</b><span>体入の前に、入れる日・時間や雰囲気がわかります。体入してもらう人をしぼって、体入費のむだを減らせます。</span></li>
         </ul>
+      </div>
+      <div class="ai-fit rv">
+        <p class="fit-h">あなたのお店が<em>ほしい人</em>か、会う前にわかる</p>
+        <div class="fit-g">
+          <div><b>お店の基準で聞ける</b><span>「体入はいつ来られますか？」「接客の経験は？」など、ほしい人の条件に合わせた質問を10個まで足せます。「いつもの質問」に保存すれば、毎回そのまま聞きます。</span></div>
+          <div><b>全員に同じ質問で、比べやすい</b><span>職種の質問のあとに、お店の質問を全部聞きます。面接する人によって聞くことがばらつかないので、応募者どうしを比べやすくなります。</span></div>
+          <div><b>答え方と雰囲気まで見える</b><span>入れる日と時間、気になった点のまとめに加えて、写真・はじめの1分の録画・会話の全部。会う前に、お店に合いそうかがわかります。</span></div>
+        </div>
+        <p class="fit-n">AI は合否を決めません。届いた内容を見て、会うかどうか・採用するかどうかはお店が決めます。</p>
       </div>
     </div>
   </section>
