@@ -35,7 +35,7 @@ import urllib.request
 import urllib.robotparser
 
 UA = "AKITOgroup-POSPOS-leads/1.0 (+https://akitogroup.jp/privacy; pospos@akitogroup.jp)"
-OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
+OVERPASS = ["https://overpass.osm.jp/api/interpreter", "https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter", "https://overpass.private.coffee/api/interpreter"]
 SKIP_HOSTS = ("tabelog.com", "hotpepper.jp", "gnavi.co.jp", "retty.me", "instagram.com", "facebook.com", "twitter.com", "x.com", "tiktok.com",
               "line.me", "lin.ee", "google.com", "goo.gl", "g.page", "youtube.com", "ameblo.jp", "ikyu.com", "ozmall.co.jp", "ekiten.jp", "itp.ne.jp")
 SKIP_WORDS = ("yelp.", "tripadvisor.", "pocketpara", "caba-club", "hostlove", "nightwork", "fuzoku")
@@ -67,10 +67,12 @@ def http_get(url, timeout=12, limit=600_000):
 def overpass(area, kind):
     amen = {"day": "restaurant|cafe|fast_food|food_court|ice_cream|pub|bar|biergarten",
             "night": "bar|pub|nightclub", "all": "restaurant|cafe|fast_food|food_court|ice_cream|pub|bar|biergarten|nightclub"}[kind]
-    q = f'''[out:json][timeout:120];
+    keys = ("website", "contact:website", "url", "email", "contact:email")
+    parts = "".join(f'nwr["amenity"~"^({amen})$"]["{k}"](area.a);' for k in keys)
+    parts += "".join(f'nwr["shop"~"^(bakery|confectionery|pastry)$"]["{k}"](area.a);' for k in ("website", "contact:website", "email")) if kind != "night" else ""
+    q = f'''[out:json][timeout:90];
 area["name"="{area}"]["boundary"="administrative"]->.a;
-(nwr["amenity"~"^({amen})$"][~"^(website|contact:website|url|email|contact:email)$"~"."](area.a);
- nwr["shop"~"^(bakery|confectionery|pastry)$"][~"^(website|contact:website|email|contact:email)$"~"."](area.a););
+({parts});
 out tags;'''
     data = urllib.parse.urlencode({"data": q}).encode()
     last = None
