@@ -100,6 +100,8 @@ export type ScreeningQuestion =
   | { key: string; label: string; kind: "one" | "many"; options: string[]; note?: string }
   /** 何時から何時まで（[から, まで] で答える。までは、からより後） */
   | { key: string; label: string; kind: "time"; from: string[]; to: string[] }
+  /** 分を自分で入力する（通勤時間） */
+  | { key: string; label: string; kind: "minutes"; min: number; max: number }
   /** チェックしないと進めない確認（夜のお店の18歳以上の確認） */
   | { key: string; label: string; kind: "check"; text: string; savedLabel: string };
 
@@ -154,9 +156,9 @@ export function screeningQuestions(
       key: "hours",
       label: "希望の時間帯",
       kind: "time",
-      // 夜のお店：17時〜24時から、21時〜翌5時・ラストまで ／ 飲食店：6時〜22時から、9時〜24時・ラストまで
-      from: night ? hourRange(17, 24) : hourRange(6, 22),
-      to: night ? [...hourRange(21, 29), LAST] : [...hourRange(9, 24), LAST],
+      // 24時間どこからでも：出勤は0時〜23時、退勤は1時〜翌12時・ラストまで（日をまたぐ働き方も選べる）
+      from: hourRange(0, 23),
+      to: [...hourRange(1, 36), LAST],
     },
     {
       key: "start",
@@ -173,8 +175,9 @@ export function screeningQuestions(
     {
       key: "commuteTime",
       label: "通勤時間（片道）",
-      kind: "one",
-      options: ["15分以内", "30分以内", "45分以内", "1時間以内", "1時間以上"],
+      kind: "minutes",
+      min: 1,
+      max: 300,
     },
     { key: "experience", label: "この仕事の経験", kind: "one", options: ["あり", "なし"] },
   );
@@ -241,6 +244,10 @@ export function validateScreening(
       if (!q.from.includes(from) || !q.to.includes(to)) return null;
       if (hourValue(to) <= hourValue(from)) return null;
       out.push({ key: q.key, label: q.label, value: `${from}〜${to}` });
+    } else if (q.kind === "minutes") {
+      const n = typeof a === "string" && /^\d{1,3}$/.test(a) ? Number(a) : NaN;
+      if (!(n >= q.min && n <= q.max)) return null;
+      out.push({ key: q.key, label: q.label, value: `${n}分` });
     } else if (q.kind === "one") {
       if (typeof a !== "string" || !q.options.includes(a)) return null;
       out.push({ key: q.key, label: q.label, value: a });
