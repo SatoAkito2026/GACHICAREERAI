@@ -91,6 +91,11 @@ p{margin:0}
 .head .wrap{display:flex;align-items:center;gap:20px;height:64px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;font-size:21px;color:var(--navy)}
 .logo img{width:34px;height:34px}
+.logo img.lk{width:auto;height:42px}
+@media (max-width:420px){.logo img.lk{height:36px}}
+.hero-logo{margin:4px 0 0;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hero-logo img{display:block;width:clamp(240px,34vw,360px);height:auto}
+.hero-logo span{font-family:var(--ff-mono);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);padding-bottom:6px}
 .head nav{display:none;gap:22px;margin-left:auto;font-size:14px;font-weight:700}
 .head nav a{text-decoration:none;color:var(--ink-2)}
 .head nav a:hover{color:var(--blue)}
@@ -383,7 +388,7 @@ p{margin:0}
 .mode-tabs a{min-height:44px;font-size:16px;padding:0 18px}
 @media (max-width:479px){.mode-tabs .full{display:none}.mode-tabs a{padding:0 16px;font-size:17px}}
 @media (min-width:1080px) and (max-width:1239px){.mode-tabs .full{display:none}}
-body.night .logo img{border-radius:8px}
+body.night .logo img:not(.lk){border-radius:8px}
 .head .wrap{gap:14px}
 .head nav{margin-left:0}
 @media (min-width:1080px){.head nav{margin-left:auto}.mode-tabs{margin-left:0}}
@@ -795,7 +800,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
 <header class="head" id="top">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="ポスポス トップへ"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</a>
+    <a class="logo" href="#top" aria-label="ポスポス トップへ"><img class="lk" src="assets/img/posupos-lockup{{#night}}-night{{/night}}.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150"></a>
     <nav aria-label="ページ内">
       <a href="#can">できること</a>
       <a href="#day">お店の1日</a>
@@ -820,18 +825,16 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <div>
         <a class="camp-bar" href="#plan-std"><span class="cb-tag"><i aria-hidden="true"></i>キャンペーン実施中</span><span class="cb-txt">スタンダードが<b>{{#day}}月額22,000円{{/day}}{{#night}}月額33,000円{{/night}}</b>（通常価格{{#day}}33,000円{{/day}}{{#night}}40,000円{{/night}}）<br><em>毎月{{#day}}11,000円{{/day}}{{#night}}7,000円{{/night}}おトク</em>・今お申し込みならずっとこの価格</span><span class="cb-go" aria-hidden="true">→</span></a>
 {{#day}}
-        <p class="eyebrow">POSPOS for restaurants</p>
+        <p class="hero-logo"><img src="assets/img/posupos-lockup.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for restaurants</span></p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
         <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>スタンダードプランに、追加料金なしでついてきます</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
-        <p class="tag">面接ができる、最強のPOSレジ。</p>
         <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="izakaya" aria-selected="true">居酒屋</button><button type="button" role="tab" data-shop="ramen" aria-selected="false">ラーメン</button><button type="button" role="tab" data-shop="italian" aria-selected="false">イタリアン</button><button type="button" role="tab" data-shop="sushi" aria-selected="false">寿司</button><button type="button" role="tab" data-shop="yakiniku" aria-selected="false">焼肉</button><button type="button" role="tab" data-shop="cafe" aria-selected="false">カフェ</button></div></div>
         <p class="lead">居酒屋・ラーメン・イタリアン・寿司・焼肉・カフェなど、昼の飲食店のためのクラウドPOSレジ。注文・会計・厨房に、打刻・シフト・給料・顧客の管理までくっついた、店舗管理アプリです。</p>
 {{/day}}
 {{#night}}
-        <p class="eyebrow">POSPOS for night</p>
+        <p class="hero-logo"><img src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for night</span></p>
         <h1><span class="ln">延長も、バックも。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
         <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>スタンダードプランに、追加料金なしでついてきます</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
-        <p class="tag">面接ができる、最強のPOSレジ。</p>
         <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホスト</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button></div></div>
         <p class="lead">キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
 {{/night}}
@@ -1873,7 +1876,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
 <footer class="foot">
   <div class="wrap">
-    <a class="logo" href="#top"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</a>
+    <a class="logo" href="#top"><img class="lk" src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150"></a>
     <nav aria-label="リンク">
       <a href="posupos-day.html">昼のお店</a>
       <a href="posupos-night.html">夜のお店</a>
