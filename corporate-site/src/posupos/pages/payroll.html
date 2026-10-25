@@ -1,0 +1,62 @@
+<!--
+title: {{#day}}打刻・シフト・給料計算｜ポスポス（飲食店のクラウドPOSレジ）{{/day}}{{#night}}キャストの給料・バック・源泉徴収｜ポスポス（夜のお店のPOSシステム）{{/night}}
+description: {{#day}}ポスポスの打刻・シフト・給料の機能。ICカードで打刻、シフトの希望集め、時給・手当・深夜時給・交通費・前借りを入れた給料の計算、Excel出力、スタッフのスマホで給料確認まで。{{/day}}{{#night}}ポスポスのキャストの給料の機能。売上や指名で変わる時給・歩合、バック、深夜時給、交通費、前借り、送りの手当、ホステス報酬の源泉徴収、キャストの確定申告の案内まで。{{/night}}
+crumb: {{#day}}打刻・シフト・給料{{/day}}{{#night}}給料・バック{{/night}}
+-->
+  <section class="hero sub-hero">
+    <div class="wrap">
+      <p class="crumbs"><a href="posupos-{{mode}}.html">ポスポス</a> ／ {{#day}}打刻・シフト・給料{{/day}}{{#night}}給料・バック{{/night}}</p>
+      <h1>{{#day}}打刻・シフト・給料計算{{/day}}{{#night}}キャストの給料・バック・源泉徴収{{/night}}</h1>
+      <p class="lead">{{#day}}IC カードでタッチして打刻。シフトの希望集めから、深夜時給・交通費を入れた給料の計算、前借りの差し引きまで自動です。スタッフは自分のスマホで給料を確認できます。{{/day}}{{#night}}伝票から指名・同伴・ドリンクのバックを自動で集計し、売上や指名で変わる時給・歩合、前借り、送りの手当、源泉徴収までキャストごとに計算します。{{/night}}</p>
+    </div>
+  </section>
+  <section class="sec" id="clock">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Time clock</p><h2>打刻と勤怠</h2></div>
+      <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>IC カードで打刻</b><span>Suica などの IC カードでタッチして打刻。お店の端末を打刻専用にもできます。</span></div><div class="sp-card rv"><b>打刻の直し</b><span>打刻の一覧・直し・再出勤。{{w}}からの修正申請を承認できます。</span></div><div class="sp-card rv"><b>時給保証</b><span>従業員ごとに、雇用の形・給与プラン・IC カード・時給保証を決められます。</span></div></div>
+    </div>
+  </section>
+  <section class="sec tint" id="shift">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Shift</p><h2>シフト</h2></div>
+      <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>希望を集める</b><span>{{w}}が自分のスマホからシフトの希望を出せます。締め切りも決められます。</span></div><div class="sp-card rv"><b>決めたシフト</b><span>決めたシフトは{{w}}のスマホで見られます。</span></div><div class="sp-card rv"><b>臨時営業・休業</b><span>臨時営業／休業の日も入れられます。</span></div></div>
+    </div>
+  </section>
+  <section class="sec" id="pay">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Payroll</p><h2>給料の計算</h2></div>
+      <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>日払い・週払い・月払い</b><span>期間ごとの給料を、時給・{{#night}}バック・{{/night}}手当・控除から計算します。</span></div><div class="sp-card rv"><b>給与プラン</b><span>{{#day}}時給・日給・手当・控除。{{/day}}{{#night}}時給・日給・バック・控除、売上や指名で変わる時給・歩合。{{/night}}</span></div><div class="sp-card rv"><b>深夜時給</b><span>{{#day}}22時〜翌5時のスタッフの時給を25%増しなど。{{/day}}{{#night}}22時〜翌5時など時間を決めて、％増し・金額の上乗せ・決めた金額に。{{/night}}</span></div><div class="sp-card rv"><b>交通費</b><span>1日いくら・月の上限を、人ごとに決められます。</span></div><div class="sp-card rv"><b>前借り</b><span>前借りを記録して、次の給料から自動で差し引きます。</span></div><div class="sp-card rv"><b>決めたあとの変更もわかる</b><span>金額を決める → 渡したら「渡した」。決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ。Excel にも出せます。</span></div></div>
+    </div>
+  </section>
+{{#night}}  <section class="sec tint" id="back">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Back & tax</p><h2>バック・送り・源泉徴収</h2></div>
+      <div class="sp-cards c2 stagger"><div class="sp-card rv"><b>バックは注文した時点で</b><span>注文ごとにキャストを選べば、指名・同伴・ドリンクなどのバックが自動で付きます。</span></div><div class="sp-card rv"><b>送りの手当</b><span>ドライバーと送った人数を記録し、手当を給料に自動で反映します。</span></div><div class="sp-card rv"><b>源泉徴収（ホステス等の報酬）</b><span>給料から自動で計算して差し引き。毎月の納付額の一覧、支払調書の印刷も。</span></div><div class="sp-card rv"><b>キャストの確定申告</b><span>キャストのスマホで、確定申告を1画面ずつ順番に案内します。</span></div></div>
+    </div>
+  </section>
+{{/night}}  <section class="sec" id="phone">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Staff phone</p><h2>{{w}}のスマホでできること</h2></div>
+      <ul class="sp-chips rv">{{#day}}<li>シフトの希望を出す</li><li>決まったシフト</li><li>給料・日別の明細</li><li>前借り</li><li>チャット・通知</li><li>打刻の直しの申請</li>{{/day}}{{#night}}<li>シフトの希望を出す</li><li>給料・日別の明細</li><li>成績・ランキング</li><li>自分のお客さま・来店の記録</li><li>来客予定を入れる</li><li>確定申告の案内</li>{{/night}}<li>グループ店は5店舗まで切りかえ</li></ul>
+      <p class="sp-links rv"><a href="{{#day}}news-restaurant-shift.html{{/day}}{{#night}}news-cabaret-payroll.html{{/night}}">{{#day}}記事：飲食店のシフト管理と給料計算{{/day}}{{#night}}記事：キャバクラの売上集計と給料計算{{/night}} →</a><a href="posupos-{{mode}}-features.html">すべての画面と機能 →</a></p>
+    </div>
+  </section>
+  <section class="sec tint" id="tax">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Tax</p><h2>お店の確定申告の準備</h2></div>
+      <div class="sp-cards c3 stagger"><div class="sp-card rv"><b>1年の数字を集める</b><span>1年の売上・仕入れ・経費・給料を集めます。</span></div><div class="sp-card rv"><b>青色申告決算書の数字</b><span>青色申告決算書の数字と、消費税の目安を出します。</span></div><div class="sp-card rv"><b>会計ソフトへ</b><span>freee・マネーフォワード・弥生用の CSV に書き出せます。帳簿の本体は会計ソフトが受け持ちます。</span></div></div>
+    </div>
+  </section>
+  <section class="sec tint" id="faq">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>給料のよくある質問</h2></div>
+      <div class="faq rv">
+        {{#night}}<details><summary>うちのお店のバックや給料の決め方でも使えますか？</summary><p>時給・日給・バック・控除、売上や指名で変わる時給・歩合を給与プランで設定できます。お店独自の計算は、個別プランで今の Excel の計算をそのまま組み込めます。</p></details>{{/night}}
+        <details><summary>今使っている Excel やレジのデータは引っ越せますか？</summary><p>今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。</p></details>
+        <details><summary>会計ソフト（freee・マネーフォワード・弥生）とは何がちがいますか？</summary><p>ポスポスは、お店の現場で注文・会計・打刻・給料を回すクラウドPOSレジです。会計ソフトは、帳簿をつけて決算や確定申告の書類を作るためのもので、経理の方や税理士さんが使います。ポスポスは、売上・経費・給料の記録を会計ソフト用の CSV に書き出せる「会計ソフトに数字を渡す側」です。お店の確定申告の準備も、数字を集めて目安を出すところまでで、帳簿の本体は会計ソフトが受け持ちます。</p></details>
+      </div>
+      <p class="sp-back"><a class="btn btn-line" href="posupos-{{mode}}.html">← ポスポスのページへ戻る</a> <a class="btn btn-line" href="posupos-{{mode}}-faq.html">よくある質問をすべて見る</a></p>
+    </div>
+  </section>
+
+{{final}}

@@ -416,6 +416,34 @@ body.night .logo img:not(.lk){border-radius:8px}
 @media (prefers-reduced-motion:reduce){.camp-bar .cb-tag i{animation:none}}
 .final .offer{max-width:760px;margin:6px auto 0}
 
+/* ===== くわしいページ（src/posupos/pages）の共通部品 ===== */
+.sub-hero{padding-block:clamp(28px,5vw,56px) clamp(28px,4vw,44px)}
+.sub-hero .wrap{display:block}
+.crumbs{font-size:13px;color:var(--ink-2);margin:0 0 12px}
+.crumbs a{color:inherit}
+.sub-hero h1{font-size:clamp(28px,5vw,44px);line-height:1.3;margin-top:8px}
+.sub-hero .lead{margin-top:14px;max-width:46em}
+.sp-cards{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.sp-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.sp-cards.c3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sp-card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 22px;display:grid;gap:6px;align-content:start}
+.sp-card b{font-size:17px;display:flex;align-items:center;gap:10px}
+.sp-card b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.sp-card span{font-size:14.5px;color:var(--ink-2)}
+.sp-steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr);counter-reset:sps}
+@media (min-width:900px){.sp-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sp-steps li{counter-increment:sps;background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;gap:6px;align-content:start}
+.sp-steps b{display:flex;align-items:center;gap:10px;font-size:17px}
+.sp-steps b::before{content:counter(sps);flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-size:15px;font-weight:900}
+.sp-steps span{font-size:14.5px;color:var(--ink-2)}
+.sp-chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.sp-chips li{background:var(--white);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:700;font-size:14.5px}
+.sp-links{display:flex;flex-wrap:wrap;gap:10px 22px;margin:22px 0 0;font-weight:700}
+.sp-links a{color:var(--blue)}
+.sp-back{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.can-more{font-size:14px;font-weight:700;color:var(--blue);text-decoration:none;margin-top:2px}
+.can-more:hover{text-decoration:underline}
+
 /* ===== AI面接（スタンダード・個別） ===== */
 .ai-hero{display:flex;align-items:center;gap:16px;max-width:640px;margin:6px 0 4px;padding:16px 18px;border-radius:22px;background:linear-gradient(135deg,#0E1F4D,#1557D6 70%,#2A8CFF);color:#fff;text-decoration:none;box-shadow:0 22px 44px -24px rgba(21,87,214,.9);transition:transform .3s}
 .ai-hero:hover{transform:translateY(-2px)}
@@ -965,6 +993,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     <nav aria-label="リンク">
       <a href="/posupos-day">昼のお店</a>
       <a href="/posupos-night">夜のお店</a>
+      <a href="/posupos-day-ai-interview">AI面接</a>
+      <a href="/posupos-day-register">注文・会計</a>
+      <a href="/posupos-day-payroll">打刻・シフト・給料</a>
+      <a href="/posupos-day-features">画面と機能</a>
+      <a href="/posupos-day-pricing">料金・プラン</a>
+      <a href="/posupos-day-security">セキュリティ</a>
+      <a href="/posupos-day-faq">よくある質問</a>
       <a href="/news-pos-ranking-day">飲食店のPOSレジの選び方</a>
       <a href="/news-izakaya-qr">居酒屋のQR注文の始め方</a>
       <a href="/news-restaurant-shift">飲食店のシフト管理と給料計算</a>
