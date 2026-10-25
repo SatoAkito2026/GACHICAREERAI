@@ -107,7 +107,7 @@ const SENDER = "合同会社AKITOグループ（ポスポス）";
 const SENDER_ADDR = "〒170-0013 東京都豊島区東池袋2丁目62番8号 BIGオフィスプラザ池袋1206";
 // ポスポスの窓口（モニターの通知の届け先・返信先・差出人）
 const POS_TO = "pospos@akitogroup.jp";
-const POS_FROM = "ポスポス（合同会社AKITOグループ） <pospos@akitogroup.jp>";
+const POS_FROM = "ポスポス <pospos@akitogroup.jp>";
 const MON_LIMITS = { shop_name: 100, shop_type: 60, stores: 30, prefecture: 20, name: 100, email: 200, tel: 30, current_pos: 100, contract_end: 7, contract_note: 30, message: 2000 };
 
 async function sendMail(env, msg) {
