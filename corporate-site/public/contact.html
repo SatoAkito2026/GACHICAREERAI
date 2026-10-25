@@ -151,8 +151,8 @@
             <button type="button" data-v="画面を見ながら相談したい" aria-pressed="false">画面を見ながら相談したい</button>
           </div></div>
         <div class="field"><label for="f-shop">お店の種類</label>
-          <select id="f-shop"><option value="">選んでください</option>
-            <optgroup label="昼のお店"><option>居酒屋</option><option>ラーメン</option><option>イタリアン</option><option>寿司</option><option>焼肉</option><option>カフェ</option><option>その他の飲食店</option></optgroup>
+          <select id="f-shop">
+            <optgroup label="昼のお店"><option selected>居酒屋</option><option>ラーメン</option><option>イタリアン</option><option>寿司</option><option>焼肉</option><option>カフェ</option><option>その他の飲食店</option></optgroup>
             <optgroup label="夜のお店"><option>キャバクラ</option><option>ホスト</option><option>ガールズバー</option><option>コンカフェ</option><option>スナック</option><option>ラウンジ</option><option>その他の夜のお店</option></optgroup>
           </select></div>
         <div class="field"><label for="f-stores">店舗数</label>
@@ -219,7 +219,6 @@
   wantBtns.forEach(function(b){b.addEventListener('click',function(){setWant(b.dataset.v)})});
   var syncPos=function(){var on=topic==='pos';posBox.hidden=!on;msg.required=!on};
   document.querySelectorAll('#topics button').forEach(function(b){b.addEventListener('click',syncPos)});
-  try{var SHOP={izakaya:'居酒屋',ramen:'ラーメン',italian:'イタリアン',sushi:'寿司',yakiniku:'焼肉',cafe:'カフェ',cabaret:'キャバクラ',host:'ホスト',girlsbar:'ガールズバー',concafe:'コンカフェ',snack:'スナック',lounge:'ラウンジ'};var sv=SHOP[localStorage.getItem('posupos-shop')];if(sv)document.getElementById('f-shop').value=sv}catch(e){}
   var from=(function(){try{var r=new URL(document.referrer);return r.host===location.host?r.pathname:''}catch(e){return ''}})();
   var h=(location.hash||'').slice(1);
   // LP・記事から来た人には「登録代行 無料」の特典を付ける（再読み込みしても残す）
