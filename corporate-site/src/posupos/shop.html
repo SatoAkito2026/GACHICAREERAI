@@ -1,0 +1,75 @@
+<!--
+title: {{title}}
+description: {{desc}}
+crumb: {{name}}
+-->
+<style>
+.shop-hero .wrap{display:grid;gap:36px;grid-template-columns:minmax(0,1fr);align-items:center}
+@media (min-width:960px){.shop-hero .wrap{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:48px}}
+.shop-hero .sp-links{margin-top:18px}
+.ai-first{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:14px 0 0;font-size:15px;font-weight:900;color:var(--navy)}
+.ai-first b{background:linear-gradient(135deg,#FFE58A,#FFB547);color:#3A2200;border-radius:999px;padding:3px 14px;font-size:.92em}
+.ai-first sup{font-size:9px}
+.shop-note{margin-top:14px;font-size:12px;color:var(--ink-2)}
+</style>
+
+  <section class="hero sub-hero shop-hero">
+    <div class="wrap">
+      <div>
+        <p class="crumbs"><a href="posupos-{{mode}}.html">ポスポス</a> ／ {{name}}</p>
+        <h1>{{h1}}</h1>
+        <p class="lead">{{lead}}</p>
+        <p class="ai-first"><b>世界初<sup>※</sup></b>{{jobs}}の一次面接も AI におまかせ</p>
+        <div class="btns" style="margin-top:24px">
+          <a class="btn btn-blue" href="/contact?shop={{key}}#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-line" href="posupos-{{mode}}.html#{{key}}">{{name}}の画面をもっと見る</a>
+        </div>
+        <p class="shop-note">月額11,000円〜・初期費用0円・1か月無料。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+      </div>
+{{herofig}}
+    </div>
+  </section>
+
+  <section class="sec tint" id="pains">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Before</p><h2>{{name}}で、こんなことに困っていませんか？</h2></div>
+      <div class="sp-cards c3 stagger">{{pains}}</div>
+    </div>
+  </section>
+
+  <section class="sec" id="features">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Features</p><h2>{{name}}で使いやすい機能</h2><p>ポスポスは、注文・会計から{{w}}の給料まで、ひとつのアプリで管理できるクラウドPOSレジです。</p></div>
+      <div class="sp-cards c3 stagger">{{feats}}</div>
+      <p class="sp-links rv"><a href="posupos-{{mode}}-register.html">{{#day}}注文・会計{{/day}}{{#night}}会計・指名{{/night}}のくわしい機能 →</a><a href="posupos-{{mode}}-payroll.html">{{#day}}打刻・シフト・給料{{/day}}{{#night}}給料・バック{{/night}}のくわしい機能 →</a><a href="posupos-{{mode}}-features.html">すべての画面と機能 →</a></p>
+    </div>
+  </section>
+
+  <section class="sec tint" id="ai">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">AI interview</p><h2>{{jobs}}の面接も、AIにおまかせ</h2><p>応募が来たら、URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・入れる日と時間・写真・はじめの1分の録画・会話がお店に届きます。{{aiq}}</p></div>
+      <div class="sp-cards c3 stagger">
+        <div class="sp-card rv"><b>LINEで送るだけ</b><span>URL を作って送るだけ。応募者は登録なしで、スマホからすぐ受けられます。</span></div>
+        <div class="sp-card rv"><b>会う前にわかる</b><span>雰囲気のまとめ・入れる日と時間・気になった点。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>
+        <div class="sp-card rv"><b>{{#day}}追加料金なし{{/day}}{{#night}}体入費のむだを減らす{{/night}}</b><span>{{#day}}スタンダードプラン・個別プランの料金の中で使えます。AI は合否を決めず、採用はお店が決めます。{{/day}}{{#night}}体入の前に一次面接をすませるので、合わない人の体入が減り、体入費のむだを減らせます。追加料金なし。{{/night}}</span></div>
+      </div>
+      <p class="sp-links rv"><a href="posupos-{{mode}}-ai-interview.html">AI面接をくわしく見る →</a></p>
+    </div>
+  </section>
+
+  <section class="sec" id="read">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">Read more</p><h2>{{name}}向けの記事</h2></div>
+      <p class="sp-links rv">{{articles}}<a href="posupos-{{mode}}-pricing.html">料金・プラン →</a></p>
+    </div>
+  </section>
+
+  <section class="sec tint" id="faq">
+    <div class="wrap">
+      <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>{{name}}のよくある質問</h2></div>
+      <div class="faq rv">{{faqs}}</div>
+      <p class="sp-back"><a class="btn btn-line" href="posupos-{{mode}}.html">← ポスポスのページへ戻る</a> <a class="btn btn-line" href="posupos-{{mode}}-faq.html">よくある質問をすべて見る</a></p>
+    </div>
+  </section>
+
+{{final}}

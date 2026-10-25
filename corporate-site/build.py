@@ -146,7 +146,7 @@ def main():
     # 検索エンジン向けの sitemap.xml と robots.txt
     import datetime
     today = datetime.date.today().isoformat()
-    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names()
+    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names() + posupos_shop_names()
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index' else n}</loc><lastmod>{today}</lastmod></url>" for n in names)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n", encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
@@ -165,6 +165,33 @@ def main():
             print("wrote", f"public/posupos-{mode}.html")
             for sub in sorted((SRC / "posupos" / "pages").glob("*.html")):
                 write_posupos_sub(sub, html, mode, other, word)
+            write_posupos_shops(html, mode, other, word)
+
+
+def write_posupos_shops(lp_html, mode, other, word):
+    """業種ごとの入口ページ（src/posupos/shops.json と shop.html）。その業種のお店のモードだけ作る"""
+    import json
+    data_f, tpl_f = SRC / "posupos" / "shops.json", SRC / "posupos" / "shop.html"
+    if not data_f.exists():
+        return
+    tpl = tpl_f.read_text(encoding="utf-8")
+    li = lambda items: "".join(f'<div class="sp-card rv"><b>{a}</b><span>{b}</span></div>' for a, b in items)
+    for d in json.loads(data_f.read_text(encoding="utf-8")):
+        if d["mode"] != mode:
+            continue
+        t = tpl
+        for k in ("key", "name", "title", "desc", "h1", "lead", "jobs", "aiq"):
+            t = t.replace("{{" + k + "}}", d.get(k, ""))
+        t = t.replace("{{pains}}", li(d["pains"])).replace("{{feats}}", li(d["feats"]))
+        t = t.replace("{{articles}}", "".join(f'<a href="{h}">{a} →</a>' for a, h in d.get("articles", [])))
+        t = t.replace("{{faqs}}", "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in d["faqs"]))
+        wrap_posupos(t, lp_html, mode, other, word, f"posupos-{d['key']}", None, d["key"])
+
+
+def posupos_shop_names():
+    f = SRC / "posupos" / "shops.json"
+    import json
+    return [f"posupos-{d['key']}" for d in json.loads(f.read_text(encoding="utf-8"))] if f.exists() else []
 
 
 def posupos_sub_names():
@@ -176,16 +203,24 @@ def write_posupos_sub(sub, lp_html, mode, other, word):
     """ポスポスのくわしいページ（src/posupos/pages/名前.html）を、LPのヘッダー・フッター・見た目で包んで昼／夜の2ページにする。
     先頭のコメントに title / description（{{#day}} なども使える）。本文の {{final}} はLPの最後の申し込み欄になる"""
     import json, html as H
-    name = sub.stem
-    text = sub.read_text(encoding="utf-8")
+    wrap_posupos(sub.read_text(encoding="utf-8"), lp_html, mode, other, word, f"posupos-{mode}-{sub.stem}", sub.stem)
+
+
+def wrap_posupos(text, lp_html, mode, other, word, slug, name=None, shop=None):
+    """ポスポスのLPのヘッダー・フッター・見た目で本文を包んで public/{slug}.html に書く。
+    name があれば昼／夜の切りかえは同じ名前のくわしいページへ、なければLPへ。shop は画面イメージの業種"""
+    import json, html as H
     text = re.sub(r"\{\{#" + other + r"\}\}.*?\{\{/" + other + r"\}\}", "", text, flags=re.S)
     text = text.replace("{{#" + mode + "}}", "").replace("{{/" + mode + "}}", "").replace("{{w}}", word).replace("{{mode}}", mode)
     meta, body = parse(text)
     final = re.search(r'  <section class="sec final">.*?</section>', lp_html, re.S).group(0)
     body = body.replace("{{final}}", final)
+    fig = re.search(r'      <figure class="shot " data-shot="(?:home|ranking)">.*?</figure>', lp_html, re.S)
+    body = body.replace("{{herofig}}", fig.group(0) if fig else "")
     head = lp_html[:lp_html.index("<main>")]
+    if shop:
+        head = re.sub(r'<body class="(\w+)" data-shop="\w+">', lambda m: f'<body class="{m.group(1)}" data-shop="{shop}">', head)
     tail = lp_html[lp_html.index("</main>"):]
-    slug = f"posupos-{mode}-{name}"
     url = f"{SITE}/{slug}"
     title = meta.get("title", "ポスポス")
     desc = meta.get("description", "")
@@ -198,7 +233,8 @@ def write_posupos_sub(sub, lp_html, mode, other, word):
     # ヘッダーのページ内リンクはLPへ、昼／夜の切りかえは同じくわしいページへ
     head = re.sub(r'href="#(?!top")([^"]+)"', lambda m: f'href="posupos-{mode}.html#{m.group(1)}"', head)
     head = head.replace('href="#top" aria-label="ポスポス トップへ"', f'href="posupos-{mode}.html" aria-label="ポスポス トップへ"')
-    head = head.replace('href="posupos-day.html"', 'href="posupos-day-' + name + '.html"').replace('href="posupos-night.html"', 'href="posupos-night-' + name + '.html"')
+    if name:
+        head = head.replace('href="posupos-day.html"', 'href="posupos-day-' + name + '.html"').replace('href="posupos-night.html"', 'href="posupos-night-' + name + '.html"')
     faq = re.search(r'id="faq".*?</section>', body, re.S)
     qa = [(H.unescape(re.sub(r"<[^>]+>", "", q)).strip(), H.unescape(re.sub(r"<[^>]+>", "", a)).strip())
           for q, a in re.findall(r"<summary>(.*?)</summary><p>(.*?)</p>", faq.group(0), re.S)] if faq else []
