@@ -485,7 +485,17 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-h{margin:0 0 16px;font-weight:900;font-size:clamp(19px,2.6vw,24px)}
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
+.ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
+.ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.ai-ps ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ai-ps li{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:var(--mist)}
+.ai-ps li b{font-size:16px;color:var(--navy);display:flex;gap:8px;align-items:flex-start}
+.ai-ps li b::before{content:"悩み";flex:none;font-size:11px;font-weight:900;background:var(--alert);color:#fff;border-radius:6px;padding:2px 6px;margin-top:2px}
+.ai-ps li span{font-size:14px;color:var(--ink-2);padding-left:44px;position:relative}
+.ai-ps li span::before{content:"解決";position:absolute;left:0;top:2px;font-size:11px;font-weight:900;background:var(--blue);color:var(--on-blue);border-radius:6px;padding:2px 6px}
+
 .ai-save .as-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;display:grid;gap:6px;align-content:start}
 .ai-save .as-c small{justify-self:start;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
 .ai-save .as-c b{font-size:19px;font-weight:900;line-height:1.4}
@@ -988,7 +998,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
   <section class="sec tint" id="ai">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">AI interview</p><h2>ホール・キッチンの面接も、AIにおまかせ</h2><p>応募が来たら、URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・入れる日と時間・写真・はじめの1分の録画・会話がお店に届きます。<b>応募者は30秒〜1分で面接スタート。お店は日程調整も、一次面接の時間もいりません。</b></p></div>
+      <div class="sec-head rv"><p class="eyebrow">AI interview</p><h2>ホール・キッチンの面接も、AIにおまかせ</h2><p>応募が来たら、URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・入れる日と時間・写真・はじめの1分の録画・会話がお店に届きます。<b>お店の面接は30秒〜1分。URL は1秒で送れて、結果は自動で届きます。応募が来すぎて面接が追いつかないお店でも、AI が全員の一次面接をします。</b></p></div>
       <div class="sp-cards c3 stagger">
         <div class="sp-card rv"><b>LINEで送るだけ</b><span>URL を作って送るだけ。応募者は登録なしで、スマホからすぐ受けられます。</span></div>
         <div class="sp-card rv"><b>会う前にわかる</b><span>雰囲気のまとめ・入れる日と時間・気になった点。合格・二次面接へ・検討・不合格に分けて管理できます。</span></div>

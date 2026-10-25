@@ -485,7 +485,17 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-h{margin:0 0 16px;font-weight:900;font-size:clamp(19px,2.6vw,24px)}
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
+.ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
+.ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.ai-ps ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ai-ps li{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:var(--mist)}
+.ai-ps li b{font-size:16px;color:var(--navy);display:flex;gap:8px;align-items:flex-start}
+.ai-ps li b::before{content:"悩み";flex:none;font-size:11px;font-weight:900;background:var(--alert);color:#fff;border-radius:6px;padding:2px 6px;margin-top:2px}
+.ai-ps li span{font-size:14px;color:var(--ink-2);padding-left:44px;position:relative}
+.ai-ps li span::before{content:"解決";position:absolute;left:0;top:2px;font-size:11px;font-weight:900;background:var(--blue);color:var(--on-blue);border-radius:6px;padding:2px 6px}
+
 .ai-save .as-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;display:grid;gap:6px;align-content:start}
 .ai-save .as-c small{justify-self:start;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
 .ai-save .as-c b{font-size:19px;font-weight:900;line-height:1.4}
@@ -933,7 +943,17 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
 .ai-save .as-h{margin:0 0 16px;font-weight:900;font-size:clamp(19px,2.6vw,24px)}
 .ai-save .as-g{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.ai-save .as-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1100px){.ai-save .as-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ai-ps{margin:0 0 30px;border:2px solid var(--blue);border-radius:24px;background:var(--white);padding:clamp(18px,3vw,26px)}
+.ai-ps .ps-h{margin:0 0 12px;font-weight:900;font-size:clamp(18px,2.4vw,22px);color:var(--navy)}
+.ai-ps ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.ai-ps ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ai-ps li{display:grid;gap:4px;padding:12px 14px;border-radius:14px;background:var(--mist)}
+.ai-ps li b{font-size:16px;color:var(--navy);display:flex;gap:8px;align-items:flex-start}
+.ai-ps li b::before{content:"悩み";flex:none;font-size:11px;font-weight:900;background:var(--alert);color:#fff;border-radius:6px;padding:2px 6px;margin-top:2px}
+.ai-ps li span{font-size:14px;color:var(--ink-2);padding-left:44px;position:relative}
+.ai-ps li span::before{content:"解決";position:absolute;left:0;top:2px;font-size:11px;font-weight:900;background:var(--blue);color:var(--on-blue);border-radius:6px;padding:2px 6px}
+
 .ai-save .as-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 18px;display:grid;gap:6px;align-content:start}
 .ai-save .as-c small{justify-self:start;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
 .ai-save .as-c b{font-size:19px;font-weight:900;line-height:1.4}
@@ -974,11 +994,21 @@ body.night .ai-save{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB
       <div class="ai-save rv" style="margin:0">
         <p class="as-h">AI面接で、ここまで減らせます</p>
         <div class="as-g">
-          <div class="as-c"><small>応募者</small><b><em>30秒〜1分</em>で面接スタート</b><span>URL を開くだけで、すぐに面接をはじめられます。お店に行く手間も、移動の時間もいりません（面接は10〜15分）。</span></div>
-          <div class="as-c"><small>面接官</small><b>日程調整が<em>いらない</em></b><span>面接の日を決める電話やメッセージのやりとりがなくなります。応募者は都合のいいときに受けられます。</span></div>
-          <div class="as-c"><small>お店</small><b>面接する時間を<em>減らせる</em></b><span>一次面接は AI が。お店は届いたまとめ・録画・会話を見て、会う人だけに時間を使えます。</span></div>
-          <div class="as-c"><small>お金</small><b><em>体入費</em>を節約</b><span>体入（体験入店）の前に一次面接で会う人をしぼれるので、合わない人の体入が減り、体入の時給・日払いのむだを減らせます。</span></div>
+          <div class="as-c"><small>面接</small><b>お店の面接は<em>30秒〜1分</em></b><span>一次面接は AI が。お店は届いたまとめ・録画・会話を見て決めるだけで、対面で面接する時間がいりません。</span></div>
+          <div class="as-c"><small>送る</small><b>URL は<em>1秒</em>で送れる</b><span>ボタンを押すだけで LINE が開き、送る文もアプリが作ります。</span></div>
+          <div class="as-c"><small>結果</small><b>結果は<em>自動で</em>届く</b><span>応募者が受け終わると、雰囲気のまとめ・入れる日と時間・写真・録画・会話がお店の画面に届きます。</span></div>
+          <div class="as-c"><small>日程</small><b>日程調整が<em>いらない</em></b><span>面接の日を決めるやりとりがなくなります。応募者もお店に来る必要がなく、都合のいいときに受けられます。</span></div>
+          <div class="as-c"><small>お金</small><b><em>体入費</em>を節約</b><span>体入（体験入店）の前に会う人をしぼれるので、合わない人の体入が減り、体入の時給・日払いのむだを減らせます。</span></div>
         </div>
+      </div>
+      <div class="ai-ps rv">
+        <p class="ps-h">こんなお店の悩みを、AI面接で解決</p>
+        <ul>
+          <li><b>応募が来すぎて、面接が追いつかない</b><span>何人来ても、URL を送るだけ。AI が全員の一次面接をして、お店は届いた結果を見て、会う人を選ぶだけです。</span></li>
+          <li><b>忙しくて、応募の返事が遅れる</b><span>URL は1秒で送れるので、営業中でもすぐ返せます。返事が遅れて、ほかのお店に決まってしまうのを防げます。</span></li>
+          <li><b>面接の日を決めても来ない</b><span>面接の予定を入れないので、来ない人を待つ時間がむだになりません。受けた人の結果だけが届きます。</span></li>
+          <li><b>体入してみたら、合わなかった</b><span>体入の前に、入れる日・時間や雰囲気がわかります。体入してもらう人をしぼって、体入費のむだを減らせます。</span></li>
+        </ul>
       </div>
     </div>
   </section>
