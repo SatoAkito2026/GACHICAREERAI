@@ -219,7 +219,7 @@ def write_posupos_shops(lp_html, mode, other, word):
         t = tpl
         for k in ("key", "name", "title", "desc", "h1", "lead", "jobs", "aiq"):
             t = t.replace("{{" + k + "}}", d.get(k, ""))
-        t = t.replace("{{demo}}", d.get("demo", d["key"])).replace("{{param}}", d.get("param", d["key"]))
+        t = t.replace("{{stdprice}}", "22,000" if mode == "day" else "33,000").replace("{{demo}}", d.get("demo", d["key"])).replace("{{param}}", d.get("param", d["key"]))
         tb = ""
         if d.get("types"):
             chips = "".join(f'<li>{x}</li>' for x in d["types"])
