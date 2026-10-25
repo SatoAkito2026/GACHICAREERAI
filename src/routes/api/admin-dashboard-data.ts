@@ -105,6 +105,36 @@ function daily(dates: string[]) {
   return out;
 }
 
+/** 直近24時間の1時間ごとの件数（日本時間。ラベルは「14時」） */
+function hourly(dates: string[]) {
+  const HOUR = 60 * 60 * 1000;
+  const hourKey = (ms: number) => Math.floor(ms / HOUR);
+  const m = new Map<number, number>();
+  for (const d of dates) {
+    const k = hourKey(new Date(d).getTime());
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  const now = hourKey(Date.now());
+  const out: { date: string; count: number }[] = [];
+  for (let i = 23; i >= 0; i--) {
+    const k = now - i;
+    out.push({ date: `${new Date(k * HOUR + JST).getUTCHours()}時`, count: m.get(k) ?? 0 });
+  }
+  return out;
+}
+
+/** 時間ごと（直近24時間）・日ごと（30日）・週ごと（12週）・月ごと（12か月）の件数をまとめて作る */
+function series(dates: string[]) {
+  const since30 = new Date(Date.now() - 30 * DAY).toISOString();
+  const since24h = new Date(Date.now() - DAY).toISOString();
+  return {
+    hour: hourly(dates.filter((d) => d >= since24h)),
+    day: daily(dates.filter((d) => d >= since30)),
+    week: weekly(dates),
+    month: monthly(dates),
+  };
+}
+
 /** 直近12週の週ごとの件数（日本時間の月曜はじまり。ラベルは週の初日） */
 function weekly(dates: string[]) {
   const weekStart = (key: string) => {
@@ -197,7 +227,8 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
             supabase,
             "interviews",
             "user_id, created_at, job_type, mode",
-            (q) => q.in("mode", ["individual", "student"]).gte("created_at", prevMonthStart),
+            // 月ごとのグラフ（直近12か月）のために、1年分を取る
+            (q) => q.in("mode", ["individual", "student"]).gte("created_at", jstMonthStart(-11)),
           ),
           all<{
             company_user_id: string;
@@ -416,8 +447,8 @@ export const Route = createFileRoute("/api/admin-dashboard-data")({
             signupsDaily: daily(
               profiles.filter((p) => p.created_at >= since30).map((p) => p.created_at),
             ),
-            signupsWeekly: weekly(profiles.map((p) => p.created_at)),
-            signupsMonthly: monthly(profiles.map((p) => p.created_at)),
+            signups: series(profiles.map((p) => p.created_at)),
+            practices: series(practices.map((p) => p.created_at)),
             practicesDaily: daily(
               practices.filter((p) => p.created_at >= since30).map((p) => p.created_at),
             ),

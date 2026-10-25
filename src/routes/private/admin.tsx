@@ -16,6 +16,7 @@ import { AdminModeSwitch } from "@/components/AdminModeSwitch";
 
 type NameCount = { name: string; count: number };
 type Daily = { date: string; count: number }[];
+type Series = { hour: Daily; day: Daily; week: Daily; month: Daily };
 
 type DashboardData = {
   generatedAt: string;
@@ -44,8 +45,9 @@ type DashboardData = {
     proCount: number;
     paidRate: number;
     signupsDaily: Daily;
-    signupsWeekly?: Daily;
-    signupsMonthly?: Daily;
+    /** 時間ごと・日ごと・週ごと・月ごと */
+    signups?: Series;
+    practices?: Series;
     practicesDaily: Daily;
   };
   individual: {
@@ -303,11 +305,17 @@ function AdminDashboard() {
             <Stat label="登録企業" value={`${num(growth.companies)}社`} />
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <SignupChart growth={growth} />
-            <TrendChart
-              title="模擬面接の回数（直近30日・回）"
-              data={growth.practicesDaily}
+            <RangeChart
+              name="新規登録"
+              unit="人"
+              series={growth.signups}
+              fallback={growth.signupsDaily}
+            />
+            <RangeChart
+              name="模擬面接の回数"
               unit="回"
+              series={growth.practices}
+              fallback={growth.practicesDaily}
             />
           </div>
         </Section>
@@ -916,39 +924,37 @@ function Funnel({ steps }: { steps: NameCount[] }) {
   );
 }
 
-/** 新規登録の人数を、日ごと（直近30日）・週ごと（直近12週）・月ごと（直近12か月）で切り替えて見る */
-function SignupChart({ growth }: { growth: DashboardData["growth"] }) {
-  const [range, setRange] = useState<"day" | "week" | "month">("day");
-  const views = {
-    day: {
-      label: "日ごと",
-      title: "新規登録（直近30日・人）",
-      data: growth.signupsDaily,
-      interval: 6,
-    },
-    week: {
-      label: "週ごと",
-      title: "新規登録（直近12週・人）",
-      data: growth.signupsWeekly ?? [],
-      interval: 1,
-    },
-    month: {
-      label: "月ごと",
-      title: "新規登録（直近12か月・人）",
-      data: growth.signupsMonthly ?? [],
-      interval: 1,
-    },
-  } as const;
+/** 件数を、時間ごと（直近24時間）・日ごと（直近30日）・週ごと（直近12週）・月ごと（直近12か月）で切り替えて見る */
+function RangeChart({
+  name,
+  unit,
+  series,
+  fallback,
+}: {
+  name: string;
+  unit: string;
+  series?: Series;
+  /** サーバーが古いとき（日ごとだけ）の表示 */
+  fallback: Daily;
+}) {
+  const [range, setRange] = useState<keyof Series>("day");
+  const views: Record<keyof Series, { label: string; span: string; interval: number }> = {
+    hour: { label: "時間ごと", span: "直近24時間", interval: 3 },
+    day: { label: "日ごと", span: "直近30日", interval: 6 },
+    week: { label: "週ごと", span: "直近12週", interval: 1 },
+    month: { label: "月ごと", span: "直近12か月", interval: 1 },
+  };
   const v = views[range];
+  const data = series ? series[range] : range === "day" ? fallback : [];
   return (
     <TrendChart
-      title={v.title}
-      data={v.data}
-      unit="人"
+      title={`${name}（${v.span}・${unit}）`}
+      data={data}
+      unit={unit}
       interval={v.interval}
       tabs={
         <div className="flex gap-1">
-          {(Object.keys(views) as (keyof typeof views)[]).map((k) => (
+          {(Object.keys(views) as (keyof Series)[]).map((k) => (
             <button
               key={k}
               onClick={() => setRange(k)}
