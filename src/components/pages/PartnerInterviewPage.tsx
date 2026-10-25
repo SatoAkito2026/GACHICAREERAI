@@ -222,7 +222,7 @@ function PrepScreen({
           {jobLabel}の面接
         </h1>
         <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.sub }}>
-          AIの面接官と、声で話す2〜3分ほどの面接です。静かな場所で、顔が映るようにしてください。
+          AIの面接官と、声で話す1分ほどの面接です。静かな場所で、顔が映るようにしてください。
         </p>
 
         <div
