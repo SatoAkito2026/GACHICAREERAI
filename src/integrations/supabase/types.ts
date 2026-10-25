@@ -307,6 +307,7 @@ export type Database = {
           answered_count: number;
           transcript: Json;
           summary: Json | null;
+          screening: Json;
           photo_paths: string[];
           video_path: string | null;
           consent_agreed_at: string | null;
@@ -331,6 +332,7 @@ export type Database = {
           answered_count?: number;
           transcript?: Json;
           summary?: Json | null;
+          screening?: Json;
           photo_paths?: string[];
           video_path?: string | null;
           consent_agreed_at?: string | null;
@@ -355,6 +357,7 @@ export type Database = {
           answered_count?: number;
           transcript?: Json;
           summary?: Json | null;
+          screening?: Json;
           photo_paths?: string[];
           video_path?: string | null;
           consent_agreed_at?: string | null;

@@ -3,8 +3,9 @@
  * 合言葉に結びついた面接の分だけ読み書きし、ほかの応募者・ほかのお店の情報は返さない。
  *
  * POST /api/partner-interview { token, action, ... }
- *   session                     → 受けられるか・お店の名前（途中で閉じた面接は、ここで「使えない」にする）
- *   start { consent: true }     → 録画への同意を残して面接をはじめる。最初のあいさつ（決まった文）と声を返す
+ *   session                     → 受けられるか・お店の名前・選ぶ質問（会話で答えたあとに閉じた面接は、ここで「使えない」にする）
+ *   screening { answers }       → 選ぶ質問の答えを確かめて保存する（その職種・お店の種類の質問・選べる答えだけ受け付ける）
+ *   start { consent: true }     → 録画への同意を残して会話をはじめる（選ぶ質問の答えを保存してから）。最初のあいさつと声を返す
  *   turn { candidateText }      → 応募者の答えを受けて、面接官の返事と声を返す（会話はサーバーに残す）
  *   media-url { kind, index, ext } → 写真・録画を Storage へ直接送るための署名つき URL
  *   media-done { kind, index, ext } → 送れたかを確かめて記録する
@@ -30,12 +31,22 @@ import {
   partnerGreeting,
   partnerSpeak,
   partnerSystemPrompt,
+  screeningQuestions,
   toClaudeMessages,
+  validateScreening,
   writePartnerSummary,
 } from "@/lib/partner-interview";
 
 const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("session"), token: z.string().min(20).max(100) }),
+  z.object({
+    action: z.literal("screening"),
+    token: z.string().min(20).max(100),
+    answers: z.record(
+      z.string().max(30),
+      z.union([z.string().max(30), z.array(z.string().max(30)).max(10), z.literal(true)]),
+    ),
+  }),
   z.object({
     action: z.literal("start"),
     token: z.string().min(20).max(100),
@@ -117,7 +128,26 @@ export const Route = createFileRoute("/api/partner-interview/")({
             available: true,
             storeName: row.store_name,
             jobLabel: JOB_LABELS[row.job_type],
+            questions: screeningQuestions(row.business_type, row.job_type),
           });
+        }
+
+        // ---- 選ぶ質問の答え（会話で答える前なら、何度でも選び直せる） ----
+        if (body.action === "screening") {
+          const canAnswer =
+            status === "waiting" || (status === "in_progress" && row.answered_count === 0);
+          if (!canAnswer) return jsonResponse(UNAVAILABLE);
+          const screening = validateScreening(body.answers, row.business_type, row.job_type);
+          if (!screening) return jsonResponse({ error: "invalid answers" }, 400);
+          const { data: saved } = await supabase
+            .from("partner_interviews")
+            .update({ screening })
+            .eq("id", row.id)
+            .in("status", ["waiting", "in_progress"])
+            .eq("answered_count", 0)
+            .select("id");
+          if (!saved?.length) return jsonResponse(UNAVAILABLE);
+          return jsonResponse({ ok: true });
         }
 
         // ---- はじめる（まだ1つも答えていなければ、はじめからやり直せる） ----
@@ -125,6 +155,9 @@ export const Route = createFileRoute("/api/partner-interview/")({
           const canStart =
             status === "waiting" || (status === "in_progress" && row.answered_count === 0);
           if (!canStart) return jsonResponse(UNAVAILABLE);
+          // 選ぶ質問の答えを保存してからでないと、会話は始められない
+          if (!Array.isArray(row.screening) || row.screening.length === 0)
+            return jsonResponse({ error: "screening required" }, 409);
           if (row.photo_paths.length || row.video_path) {
             // やり直し：前に撮った写真・録画は消す
             const folder = mediaFolder(row);
@@ -170,7 +203,7 @@ export const Route = createFileRoute("/api/partner-interview/")({
           const elapsedMin = (Date.now() - new Date(row.started_at).getTime()) / 60000;
           let aiText: string;
           if (
-            elapsedMin >= PARTNER_MAX_MINUTES + 3 ||
+            elapsedMin >= PARTNER_MAX_MINUTES + 1 ||
             row.answered_count + 1 >= PARTNER_MAX_ANSWERS
           ) {
             // 時間・回数を大きく過ぎたら、AI を呼ばずに締める

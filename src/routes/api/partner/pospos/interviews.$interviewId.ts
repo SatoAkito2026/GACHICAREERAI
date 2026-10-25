@@ -2,7 +2,7 @@
  * POSPOS のサーバーから呼ぶ入口：AI 一次面接1件の中身を見る・消す。
  * 認証は Authorization: Bearer <POSPOS_PARTNER_SECRET>。storeId が違う面接は「見つからない」（404）。
  *
- * GET    /api/partner/pospos/interviews/<interviewId>?storeId= → 中身（まとめ・会話・写真と録画の期限つき URL）
+ * GET    /api/partner/pospos/interviews/<interviewId>?storeId= → 中身（選ぶ質問の答え・まとめ・会話・写真と録画の期限つき URL）
  * DELETE /api/partner/pospos/interviews/<interviewId>?storeId= → 録画・写真・会話もすべて消す
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -58,6 +58,8 @@ export const Route = createFileRoute("/api/partner/pospos/interviews/$interviewI
         const videoUrl = row.video_path ? await sign(row.video_path) : null;
         return jsonResponse({
           ...publicFields(row),
+          // 選ぶ質問の答え（保存した順。古い面接は []）
+          answers: (row.screening ?? []).map((a) => ({ label: a.label, value: a.value })),
           summary: row.summary ?? null,
           transcript: (row.transcript ?? []).map((l) => ({ role: l.role, text: l.text })),
           photos,
