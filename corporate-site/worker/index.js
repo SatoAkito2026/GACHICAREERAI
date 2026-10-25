@@ -175,8 +175,10 @@ async function handleMonitorStop(url, env) {
   const t = url.searchParams.get("t") || "";
   const page = (msg) => new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ポスポス</title><body style="font-family:sans-serif;max-width:560px;margin:60px auto;padding:0 20px;line-height:1.8"><h1 style="font-size:22px">ポスポス</h1><p>${msg}</p><p><a href="/posupos">ポスポスのページへ</a></p></body>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   if (!/^[0-9a-f-]{36}$/.test(t) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return page("このリンクは使えません。お手数ですが info@akitogroup.jp へご連絡ください。");
-  const r = await sb(env, `posupos_monitors?stop_token=eq.${t}`, { method: "PATCH", body: JSON.stringify({ stopped_at: new Date().toISOString() }) });
-  return page(r.ok ? "ご案内のメールを止めました。これまでありがとうございました。" : "うまく止められませんでした。お手数ですが info@akitogroup.jp へご連絡ください。");
+  const r = await sb(env, `posupos_monitors?stop_token=eq.${t}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ stopped_at: new Date().toISOString() }) });
+  if (!r.ok) console.error("supabase stop failed", r.status, await r.text());
+  const rows = r.ok ? await r.json() : [];
+  return page(rows.length ? "ご案内のメールを止めました。これまでありがとうございました。" : "このリンクは使えません（すでに止めたか、期限が切れています）。お手数ですが info@akitogroup.jp へご連絡ください。");
 }
 
 // 毎日：契約が切れる3か月前になった人に、1回だけご案内を送る（本人が同意した人だけ）
