@@ -1,8 +1,8 @@
 /**
  * 提携先（POSPOS）のお店の AI 一次面接：応募者が開く画面。会員登録・ログインなしで受けられる。
- * 準備（カメラ・マイクの確認と録画への同意）→ 選ぶ質問（画面で選ぶ。録画しない）→ AI との1〜2分の会話 → 終わりの画面。
+ * 準備（カメラ・マイクの確認と録画への同意）→ 選ぶ質問（画面で選ぶ。録画しない）→ AI との2〜3分の会話 → 終わりの画面。
  * ガチキャリAI の練習・評価とは別物：応募者には評価・点数・改善点を一切見せず、ガチキャリAI の案内・宣伝も出さない。
- * 会話の録画（はじめから終わりまで・4分まで）と顔の写真3枚（はじめ・まん中・おわり）は必ず撮り、Storage へ直接送る。
+ * 会話の録画（はじめから終わりまで・5分まで）と顔の写真3枚（はじめ・まん中・おわり）は必ず撮り、Storage へ直接送る。
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InterviewerAvatar } from "@/components/InterviewerAvatar";
@@ -12,7 +12,7 @@ import { useCompactLayout } from "@/hooks/use-compact-layout";
 
 const BUCKET = "partner-interviews";
 /** 録画の長さの上限（秒）。会話のはじめから終わりまで撮る */
-const VIDEO_SECONDS = 240;
+const VIDEO_SECONDS = 300;
 /** まん中の写真を撮る時刻（秒）。それより早く終わったときは、終わりに撮る */
 const MIDDLE_PHOTO_AT = 30;
 
@@ -29,7 +29,15 @@ const C = {
 
 type Question =
   | { key: string; label: string; kind: "one" | "many"; options: string[]; note?: string }
+  | { key: string; label: string; kind: "time"; from: string[]; to: string[] }
   | { key: string; label: string; kind: "check"; text: string };
+
+/** 時刻を並べて比べるための数（「翌2時」→ 26、「ラストまで」→ いちばん後）。サーバーと同じ決まり */
+function hourValue(label: string): number {
+  if (label === "ラストまで") return 99;
+  const m = /^(翌)?(\d+)時$/.exec(label);
+  return m ? Number(m[2]) + (m[1] ? 24 : 0) : NaN;
+}
 type Session =
   | { available: true; storeName: string; jobLabel: string; questions: Question[] }
   | { available: false };
@@ -213,7 +221,7 @@ function PrepScreen({
           {jobLabel}の面接
         </h1>
         <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.sub }}>
-          AIの面接官と、声で話す1〜2分ほどの面接です。静かな場所で、顔が映るようにしてください。
+          AIの面接官と、声で話す2〜3分ほどの面接です。静かな場所で、顔が映るようにしてください。
         </p>
 
         <div
@@ -295,6 +303,8 @@ function ScreeningScreen({
   const done = (q: Question) => {
     const a = answers[q.key];
     if (q.kind === "check") return a === true;
+    if (q.kind === "time")
+      return Array.isArray(a) && !!a[0] && !!a[1] && hourValue(a[1]) > hourValue(a[0]);
     if (q.kind === "one") return typeof a === "string";
     return Array.isArray(a) && a.length > 0;
   };
@@ -381,6 +391,12 @@ function ScreeningScreen({
                   </span>
                   {q.text}
                 </button>
+              ) : q.kind === "time" ? (
+                <TimeRange
+                  q={q}
+                  value={Array.isArray(answers[q.key]) ? (answers[q.key] as string[]) : ["", ""]}
+                  onChange={(v) => setAnswers((prev) => ({ ...prev, [q.key]: v }))}
+                />
               ) : (
                 <>
                   <div className="flex items-baseline justify-between gap-2">
@@ -442,6 +458,70 @@ function ScreeningScreen({
         )}
       </div>
     </main>
+  );
+}
+
+/** 希望の時間帯（何時から・何時まで）。「まで」は「から」より後の時刻だけ選べる */
+function TimeRange({
+  q,
+  value,
+  onChange,
+}: {
+  q: Extract<Question, { kind: "time" }>;
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const [from, to] = value;
+  const selectStyle = {
+    border: `2px solid ${C.border}`,
+    background: "#fff",
+    color: C.text,
+    fontWeight: 700,
+  } as const;
+  return (
+    <>
+      <p className="text-[16px]" style={{ fontWeight: 800 }}>
+        {q.label}
+      </p>
+      <div className="mt-3 flex items-center gap-2 text-[15px]" style={{ fontWeight: 700 }}>
+        <select
+          aria-label="何時から"
+          value={from}
+          onChange={(e) => {
+            const f = e.target.value;
+            // 「まで」が「から」より前になったら、選び直してもらう
+            onChange([f, to && hourValue(to) > hourValue(f) ? to : ""]);
+          }}
+          className="h-12 min-w-0 flex-1 rounded-xl px-3 text-[16px]"
+          style={selectStyle}
+        >
+          <option value="">選ぶ</option>
+          {q.from.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+        <span className="shrink-0">から</span>
+        <select
+          aria-label="何時まで"
+          value={to}
+          onChange={(e) => onChange([from, e.target.value])}
+          className="h-12 min-w-0 flex-1 rounded-xl px-3 text-[16px]"
+          style={selectStyle}
+        >
+          <option value="">選ぶ</option>
+          {q.to
+            .filter((o) => !from || hourValue(o) > hourValue(from))
+            .map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+        </select>
+        <span className="shrink-0">まで</span>
+      </div>
+    </>
   );
 }
 
@@ -528,7 +608,7 @@ function LiveScreen({
     [upload],
   );
 
-  // 会話のはじめから終わりまで録画する（4分まで。面接官の声と本人のマイクを混ぜて、両方の声を残す）
+  // 会話のはじめから終わりまで録画する（5分まで。面接官の声と本人のマイクを混ぜて、両方の声を残す）
   useEffect(() => {
     const mime = pickMime("video");
     let recStream = stream;
