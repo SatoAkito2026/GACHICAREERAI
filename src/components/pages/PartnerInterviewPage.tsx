@@ -30,6 +30,7 @@ const C = {
 type Question =
   | { key: string; label: string; kind: "one" | "many"; options: string[]; note?: string }
   | { key: string; label: string; kind: "time"; from: string[]; to: string[] }
+  | { key: string; label: string; kind: "minutes"; min: number; max: number }
   | { key: string; label: string; kind: "check"; text: string };
 
 /** 時刻を並べて比べるための数（「翌2時」→ 26、「ラストまで」→ いちばん後）。サーバーと同じ決まり */
@@ -221,7 +222,7 @@ function PrepScreen({
           {jobLabel}の面接
         </h1>
         <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.sub }}>
-          AIの面接官と、声で話す2〜3分ほどの面接です。静かな場所で、顔が映るようにしてください。
+          AIの面接官と、声で話す1分ほどの面接です。静かな場所で、顔が映るようにしてください。
         </p>
 
         <div
@@ -305,6 +306,10 @@ function ScreeningScreen({
     if (q.kind === "check") return a === true;
     if (q.kind === "time")
       return Array.isArray(a) && !!a[0] && !!a[1] && hourValue(a[1]) > hourValue(a[0]);
+    if (q.kind === "minutes") {
+      const n = typeof a === "string" && /^\d{1,3}$/.test(a) ? Number(a) : NaN;
+      return n >= q.min && n <= q.max;
+    }
     if (q.kind === "one") return typeof a === "string";
     return Array.isArray(a) && a.length > 0;
   };
@@ -391,6 +396,38 @@ function ScreeningScreen({
                   </span>
                   {q.text}
                 </button>
+              ) : q.kind === "minutes" ? (
+                <>
+                  <p className="text-[16px]" style={{ fontWeight: 800 }}>
+                    {q.label}
+                  </p>
+                  <div
+                    className="mt-3 flex items-center gap-2 text-[15px]"
+                    style={{ fontWeight: 700 }}
+                  >
+                    <span className="shrink-0">片道</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={3}
+                      placeholder="例：30"
+                      aria-label={q.label}
+                      value={typeof answers[q.key] === "string" ? (answers[q.key] as string) : ""}
+                      onChange={(e) => {
+                        // 数字だけにする（全角の数字は半角に直す）
+                        const v = e.target.value
+                          .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                          .replace(/\D/g, "")
+                          .slice(0, 3);
+                        setAnswers((prev) => ({ ...prev, [q.key]: v }));
+                      }}
+                      className="h-12 w-28 rounded-xl px-3 text-[18px]"
+                      style={{ border: `2px solid ${C.border}`, fontWeight: 700 }}
+                    />
+                    <span className="shrink-0">分くらい</span>
+                  </div>
+                </>
               ) : q.kind === "time" ? (
                 <TimeRange
                   q={q}
