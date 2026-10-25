@@ -59,6 +59,7 @@ import { Route as BusinessIndexRouteImport } from './routes/business/index'
 import { Route as ChatInterviewTokenRouteImport } from './routes/chat-interview/$token'
 import { Route as EmbedAdRouteImport } from './routes/embed.ad'
 import { Route as InterviewTokenRouteImport } from './routes/interview/$token'
+import { Route as PartnerInterviewTokenRouteImport } from './routes/partner-interview.$token'
 import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateInviteRouteImport } from './routes/private/invite'
@@ -70,6 +71,8 @@ import { Route as ApiJobsApplyRouteImport } from './routes/api/jobs/apply'
 import { Route as ApiJobsPublicRouteImport } from './routes/api/jobs/public'
 import { Route as ApiNotificationsIndexRouteImport } from './routes/api/notifications/index'
 import { Route as ApiNotificationsPeekRouteImport } from './routes/api/notifications/peek'
+import { Route as ApiPartnerInterviewIndexRouteImport } from './routes/api/partner-interview/index'
+import { Route as ApiPartnerInterviewTranscribeRouteImport } from './routes/api/partner-interview/transcribe'
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
@@ -120,6 +123,7 @@ import { Route as PrivateStudentProfileRouteImport } from './routes/private/stud
 import { Route as PrivateStudentResearchRouteImport } from './routes/private/student/research'
 import { Route as PrivateStudentSelfAnalysisRouteImport } from './routes/private/student/self-analysis'
 import { Route as PrivateStudentStatementRouteImport } from './routes/private/student/statement'
+import { Route as ApiPartnerPosposInterviewsRouteImport } from './routes/api/partner/pospos/interviews'
 import { Route as BusinessActorScreeningHistoryRouteImport } from './routes/business/actor/screening_/history'
 import { Route as BusinessCompanyScreeningHistoryRouteImport } from './routes/business/company/screening_.history'
 import { Route as BusinessCompanyTalentIndexRouteImport } from './routes/business/company/talent.index'
@@ -127,6 +131,7 @@ import { Route as BusinessCompanyTalentCodeRouteImport } from './routes/business
 import { Route as BusinessSchoolStudentsIdRouteImport } from './routes/business/school/students_.$id'
 import { Route as PrivateIndividualJobsIndexRouteImport } from './routes/private/individual/jobs.index'
 import { Route as PrivateIndividualJobsIdRouteImport } from './routes/private/individual/jobs.$id'
+import { Route as ApiPartnerPosposInterviewsInterviewIdRouteImport } from './routes/api/partner/pospos/interviews.$interviewId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -382,6 +387,11 @@ const InterviewTokenRoute = InterviewTokenRouteImport.update({
   path: '/interview/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PartnerInterviewTokenRoute = PartnerInterviewTokenRouteImport.update({
+  id: '/partner-interview/$token',
+  path: '/partner-interview/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateIndexRoute = PrivateIndexRouteImport.update({
   id: '/private/',
   path: '/private/',
@@ -437,6 +447,18 @@ const ApiNotificationsPeekRoute = ApiNotificationsPeekRouteImport.update({
   path: '/api/notifications/peek',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPartnerInterviewIndexRoute =
+  ApiPartnerInterviewIndexRouteImport.update({
+    id: '/api/partner-interview/',
+    path: '/api/partner-interview/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPartnerInterviewTranscribeRoute =
+  ApiPartnerInterviewTranscribeRouteImport.update({
+    id: '/api/partner-interview/transcribe',
+    path: '/api/partner-interview/transcribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiSchoolJoinRoute = ApiSchoolJoinRouteImport.update({
   id: '/api/school/join',
   path: '/api/school/join',
@@ -699,6 +721,12 @@ const PrivateStudentStatementRoute = PrivateStudentStatementRouteImport.update({
   path: '/private/student/statement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPartnerPosposInterviewsRoute =
+  ApiPartnerPosposInterviewsRouteImport.update({
+    id: '/api/partner/pospos/interviews',
+    path: '/api/partner/pospos/interviews',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BusinessActorScreeningHistoryRoute =
   BusinessActorScreeningHistoryRouteImport.update({
     id: '/business/actor/screening_/history',
@@ -740,6 +768,12 @@ const PrivateIndividualJobsIdRoute = PrivateIndividualJobsIdRouteImport.update({
   path: '/private/individual/jobs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPartnerPosposInterviewsInterviewIdRoute =
+  ApiPartnerPosposInterviewsInterviewIdRouteImport.update({
+    id: '/$interviewId',
+    path: '/$interviewId',
+    getParentRoute: () => ApiPartnerPosposInterviewsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -791,6 +825,7 @@ export interface FileRoutesByFullPath {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
+  '/partner-interview/$token': typeof PartnerInterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
@@ -802,6 +837,7 @@ export interface FileRoutesByFullPath {
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
+  '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -848,11 +884,13 @@ export interface FileRoutesByFullPath {
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
   '/api/notifications/': typeof ApiNotificationsIndexRoute
+  '/api/partner-interview/': typeof ApiPartnerInterviewIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
   '/private/individual/': typeof PrivateIndividualIndexRoute
   '/private/student/': typeof PrivateStudentIndexRoute
+  '/api/partner/pospos/interviews': typeof ApiPartnerPosposInterviewsRouteWithChildren
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
@@ -860,6 +898,7 @@ export interface FileRoutesByFullPath {
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
+  '/api/partner/pospos/interviews/$interviewId': typeof ApiPartnerPosposInterviewsInterviewIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -911,6 +950,7 @@ export interface FileRoutesByTo {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
+  '/partner-interview/$token': typeof PartnerInterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
@@ -922,6 +962,7 @@ export interface FileRoutesByTo {
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
+  '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -968,11 +1009,13 @@ export interface FileRoutesByTo {
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
   '/api/notifications': typeof ApiNotificationsIndexRoute
+  '/api/partner-interview': typeof ApiPartnerInterviewIndexRoute
   '/business/actor': typeof BusinessActorIndexRoute
   '/business/company': typeof BusinessCompanyIndexRoute
   '/business/school': typeof BusinessSchoolIndexRoute
   '/private/individual': typeof PrivateIndividualIndexRoute
   '/private/student': typeof PrivateStudentIndexRoute
+  '/api/partner/pospos/interviews': typeof ApiPartnerPosposInterviewsRouteWithChildren
   '/business/actor/screening/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
@@ -980,6 +1023,7 @@ export interface FileRoutesByTo {
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs': typeof PrivateIndividualJobsIndexRoute
+  '/api/partner/pospos/interviews/$interviewId': typeof ApiPartnerPosposInterviewsInterviewIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1032,6 +1076,7 @@ export interface FileRoutesById {
   '/chat-interview/$token': typeof ChatInterviewTokenRoute
   '/embed/ad': typeof EmbedAdRoute
   '/interview/$token': typeof InterviewTokenRoute
+  '/partner-interview/$token': typeof PartnerInterviewTokenRoute
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
@@ -1043,6 +1088,7 @@ export interface FileRoutesById {
   '/api/jobs/apply': typeof ApiJobsApplyRoute
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
+  '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -1089,11 +1135,13 @@ export interface FileRoutesById {
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
   '/api/notifications/': typeof ApiNotificationsIndexRoute
+  '/api/partner-interview/': typeof ApiPartnerInterviewIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
   '/business/company/': typeof BusinessCompanyIndexRoute
   '/business/school/': typeof BusinessSchoolIndexRoute
   '/private/individual/': typeof PrivateIndividualIndexRoute
   '/private/student/': typeof PrivateStudentIndexRoute
+  '/api/partner/pospos/interviews': typeof ApiPartnerPosposInterviewsRouteWithChildren
   '/business/actor/screening_/history': typeof BusinessActorScreeningHistoryRoute
   '/business/company/screening_/history': typeof BusinessCompanyScreeningHistoryRoute
   '/business/company/talent/$code': typeof BusinessCompanyTalentCodeRoute
@@ -1101,6 +1149,7 @@ export interface FileRoutesById {
   '/private/individual/jobs/$id': typeof PrivateIndividualJobsIdRoute
   '/business/company/talent/': typeof BusinessCompanyTalentIndexRoute
   '/private/individual/jobs/': typeof PrivateIndividualJobsIndexRoute
+  '/api/partner/pospos/interviews/$interviewId': typeof ApiPartnerPosposInterviewsInterviewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1154,6 +1203,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/embed/ad'
     | '/interview/$token'
+    | '/partner-interview/$token'
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
@@ -1165,6 +1215,7 @@ export interface FileRouteTypes {
     | '/api/jobs/apply'
     | '/api/jobs/public'
     | '/api/notifications/peek'
+    | '/api/partner-interview/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1211,11 +1262,13 @@ export interface FileRouteTypes {
     | '/private/student/self-analysis'
     | '/private/student/statement'
     | '/api/notifications/'
+    | '/api/partner-interview/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
     | '/private/individual/'
     | '/private/student/'
+    | '/api/partner/pospos/interviews'
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
@@ -1223,6 +1276,7 @@ export interface FileRouteTypes {
     | '/private/individual/jobs/$id'
     | '/business/company/talent/'
     | '/private/individual/jobs/'
+    | '/api/partner/pospos/interviews/$interviewId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1274,6 +1328,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/embed/ad'
     | '/interview/$token'
+    | '/partner-interview/$token'
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
@@ -1285,6 +1340,7 @@ export interface FileRouteTypes {
     | '/api/jobs/apply'
     | '/api/jobs/public'
     | '/api/notifications/peek'
+    | '/api/partner-interview/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1331,11 +1387,13 @@ export interface FileRouteTypes {
     | '/private/student/self-analysis'
     | '/private/student/statement'
     | '/api/notifications'
+    | '/api/partner-interview'
     | '/business/actor'
     | '/business/company'
     | '/business/school'
     | '/private/individual'
     | '/private/student'
+    | '/api/partner/pospos/interviews'
     | '/business/actor/screening/history'
     | '/business/company/screening/history'
     | '/business/company/talent/$code'
@@ -1343,6 +1401,7 @@ export interface FileRouteTypes {
     | '/private/individual/jobs/$id'
     | '/business/company/talent'
     | '/private/individual/jobs'
+    | '/api/partner/pospos/interviews/$interviewId'
   id:
     | '__root__'
     | '/'
@@ -1394,6 +1453,7 @@ export interface FileRouteTypes {
     | '/chat-interview/$token'
     | '/embed/ad'
     | '/interview/$token'
+    | '/partner-interview/$token'
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
@@ -1405,6 +1465,7 @@ export interface FileRouteTypes {
     | '/api/jobs/apply'
     | '/api/jobs/public'
     | '/api/notifications/peek'
+    | '/api/partner-interview/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1451,11 +1512,13 @@ export interface FileRouteTypes {
     | '/private/student/self-analysis'
     | '/private/student/statement'
     | '/api/notifications/'
+    | '/api/partner-interview/'
     | '/business/actor/'
     | '/business/company/'
     | '/business/school/'
     | '/private/individual/'
     | '/private/student/'
+    | '/api/partner/pospos/interviews'
     | '/business/actor/screening_/history'
     | '/business/company/screening_/history'
     | '/business/company/talent/$code'
@@ -1463,6 +1526,7 @@ export interface FileRouteTypes {
     | '/private/individual/jobs/$id'
     | '/business/company/talent/'
     | '/private/individual/jobs/'
+    | '/api/partner/pospos/interviews/$interviewId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1515,6 +1579,7 @@ export interface RootRouteChildren {
   ChatInterviewTokenRoute: typeof ChatInterviewTokenRoute
   EmbedAdRoute: typeof EmbedAdRoute
   InterviewTokenRoute: typeof InterviewTokenRoute
+  PartnerInterviewTokenRoute: typeof PartnerInterviewTokenRoute
   PrivateAdminRoute: typeof PrivateAdminRoute
   PrivateInviteRoute: typeof PrivateInviteRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
@@ -1526,6 +1591,7 @@ export interface RootRouteChildren {
   ApiJobsApplyRoute: typeof ApiJobsApplyRoute
   ApiJobsPublicRoute: typeof ApiJobsPublicRoute
   ApiNotificationsPeekRoute: typeof ApiNotificationsPeekRoute
+  ApiPartnerInterviewTranscribeRoute: typeof ApiPartnerInterviewTranscribeRoute
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
@@ -1572,11 +1638,13 @@ export interface RootRouteChildren {
   PrivateStudentSelfAnalysisRoute: typeof PrivateStudentSelfAnalysisRoute
   PrivateStudentStatementRoute: typeof PrivateStudentStatementRoute
   ApiNotificationsIndexRoute: typeof ApiNotificationsIndexRoute
+  ApiPartnerInterviewIndexRoute: typeof ApiPartnerInterviewIndexRoute
   BusinessActorIndexRoute: typeof BusinessActorIndexRoute
   BusinessCompanyIndexRoute: typeof BusinessCompanyIndexRoute
   BusinessSchoolIndexRoute: typeof BusinessSchoolIndexRoute
   PrivateIndividualIndexRoute: typeof PrivateIndividualIndexRoute
   PrivateStudentIndexRoute: typeof PrivateStudentIndexRoute
+  ApiPartnerPosposInterviewsRoute: typeof ApiPartnerPosposInterviewsRouteWithChildren
   BusinessActorScreeningHistoryRoute: typeof BusinessActorScreeningHistoryRoute
   BusinessCompanyScreeningHistoryRoute: typeof BusinessCompanyScreeningHistoryRoute
   BusinessCompanyTalentCodeRoute: typeof BusinessCompanyTalentCodeRoute
@@ -1938,6 +2006,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InterviewTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/partner-interview/$token': {
+      id: '/partner-interview/$token'
+      path: '/partner-interview/$token'
+      fullPath: '/partner-interview/$token'
+      preLoaderRoute: typeof PartnerInterviewTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/private/': {
       id: '/private/'
       path: '/private'
@@ -2013,6 +2088,20 @@ declare module '@tanstack/react-router' {
       path: '/api/notifications/peek'
       fullPath: '/api/notifications/peek'
       preLoaderRoute: typeof ApiNotificationsPeekRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/partner-interview/': {
+      id: '/api/partner-interview/'
+      path: '/api/partner-interview'
+      fullPath: '/api/partner-interview/'
+      preLoaderRoute: typeof ApiPartnerInterviewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/partner-interview/transcribe': {
+      id: '/api/partner-interview/transcribe'
+      path: '/api/partner-interview/transcribe'
+      fullPath: '/api/partner-interview/transcribe'
+      preLoaderRoute: typeof ApiPartnerInterviewTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/school/join': {
@@ -2365,6 +2454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateStudentStatementRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/partner/pospos/interviews': {
+      id: '/api/partner/pospos/interviews'
+      path: '/api/partner/pospos/interviews'
+      fullPath: '/api/partner/pospos/interviews'
+      preLoaderRoute: typeof ApiPartnerPosposInterviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/actor/screening_/history': {
       id: '/business/actor/screening_/history'
       path: '/business/actor/screening/history'
@@ -2414,8 +2510,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateIndividualJobsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/partner/pospos/interviews/$interviewId': {
+      id: '/api/partner/pospos/interviews/$interviewId'
+      path: '/$interviewId'
+      fullPath: '/api/partner/pospos/interviews/$interviewId'
+      preLoaderRoute: typeof ApiPartnerPosposInterviewsInterviewIdRouteImport
+      parentRoute: typeof ApiPartnerPosposInterviewsRoute
+    }
   }
 }
+
+interface ApiPartnerPosposInterviewsRouteChildren {
+  ApiPartnerPosposInterviewsInterviewIdRoute: typeof ApiPartnerPosposInterviewsInterviewIdRoute
+}
+
+const ApiPartnerPosposInterviewsRouteChildren: ApiPartnerPosposInterviewsRouteChildren =
+  {
+    ApiPartnerPosposInterviewsInterviewIdRoute:
+      ApiPartnerPosposInterviewsInterviewIdRoute,
+  }
+
+const ApiPartnerPosposInterviewsRouteWithChildren =
+  ApiPartnerPosposInterviewsRoute._addFileChildren(
+    ApiPartnerPosposInterviewsRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -2467,6 +2585,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatInterviewTokenRoute: ChatInterviewTokenRoute,
   EmbedAdRoute: EmbedAdRoute,
   InterviewTokenRoute: InterviewTokenRoute,
+  PartnerInterviewTokenRoute: PartnerInterviewTokenRoute,
   PrivateAdminRoute: PrivateAdminRoute,
   PrivateInviteRoute: PrivateInviteRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
@@ -2478,6 +2597,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiJobsApplyRoute: ApiJobsApplyRoute,
   ApiJobsPublicRoute: ApiJobsPublicRoute,
   ApiNotificationsPeekRoute: ApiNotificationsPeekRoute,
+  ApiPartnerInterviewTranscribeRoute: ApiPartnerInterviewTranscribeRoute,
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
@@ -2524,11 +2644,13 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateStudentSelfAnalysisRoute: PrivateStudentSelfAnalysisRoute,
   PrivateStudentStatementRoute: PrivateStudentStatementRoute,
   ApiNotificationsIndexRoute: ApiNotificationsIndexRoute,
+  ApiPartnerInterviewIndexRoute: ApiPartnerInterviewIndexRoute,
   BusinessActorIndexRoute: BusinessActorIndexRoute,
   BusinessCompanyIndexRoute: BusinessCompanyIndexRoute,
   BusinessSchoolIndexRoute: BusinessSchoolIndexRoute,
   PrivateIndividualIndexRoute: PrivateIndividualIndexRoute,
   PrivateStudentIndexRoute: PrivateStudentIndexRoute,
+  ApiPartnerPosposInterviewsRoute: ApiPartnerPosposInterviewsRouteWithChildren,
   BusinessActorScreeningHistoryRoute: BusinessActorScreeningHistoryRoute,
   BusinessCompanyScreeningHistoryRoute: BusinessCompanyScreeningHistoryRoute,
   BusinessCompanyTalentCodeRoute: BusinessCompanyTalentCodeRoute,

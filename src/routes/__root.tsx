@@ -167,7 +167,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
   // 面接画面は画面いっぱいに使うので、下のフッターを出さない
-  const isInterviewPage = /^\/(interview|chat-interview|actor-interview)\//.test(location.pathname);
+  const isInterviewPage = /^\/(interview|chat-interview|actor-interview|partner-interview)\//.test(
+    location.pathname,
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
