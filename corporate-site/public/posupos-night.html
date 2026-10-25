@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 
-<title>ポスポス｜キャバクラ・ホスト・ガールズバーのPOSレジ キャストの給料・バックまで 月額11,000円〜</title>
-<meta name="description" content="ポスポス（POSPOS）は、キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。">
+<title>ポスポス｜AI面接つき キャバクラ・ホスト・ガールズバーのPOSレジ キャストの給料・バックまで 月額11,000円〜</title>
+<meta name="description" content="ポスポス（POSPOS）は、キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。">
 <meta property="og:title" content="ポスポス｜夜のお店のPOSシステム 月額11,000円〜・初期費用0円">
 <meta property="og:url" content="https://akitogroup.jp/posupos-night">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="かんたん、つながる、クラウドPOSレジ。レジ・勤怠・シフト・給料・顧客がひとつになった、店舗管理アプリ。">
+<meta property="og:description" content="面接ができる、最強のPOSレジ。AI が応募者の一次面接までしてくれる。レジ・勤怠・シフト・給料・顧客がひとつになった、店舗管理アプリ。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -411,6 +411,24 @@ body.night .logo img{border-radius:8px}
 .final .offer{max-width:760px;margin:6px auto 0}
 
 /* ===== AI面接（スタンダード・個別） ===== */
+.ai-hero{display:flex;align-items:center;gap:16px;max-width:640px;margin:6px 0 4px;padding:16px 18px;border-radius:22px;background:linear-gradient(135deg,#0E1F4D,#1557D6 70%,#2A8CFF);color:#fff;text-decoration:none;box-shadow:0 22px 44px -24px rgba(21,87,214,.9);transition:transform .3s}
+.ai-hero:hover{transform:translateY(-2px)}
+.ai-hero img{flex:none;width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #FFD66B;box-shadow:0 0 0 5px rgba(255,214,107,.25)}
+.ai-hero .ah-tx{flex:1;min-width:0;display:grid;gap:4px}
+.ai-hero .ah-top{display:flex;align-items:center;gap:8px}
+.ai-hero .ah-1{background:linear-gradient(135deg,#FFE58A,#FFB547);color:#3A2200;font-weight:900;font-size:15px;border-radius:999px;padding:2px 14px;letter-spacing:.06em}
+.ai-hero .ah-1 sup{font-size:10px}
+.ai-hero .ah-new{font-size:11px;font-weight:900;border:1px solid rgba(255,255,255,.6);border-radius:999px;padding:1px 8px}
+.ai-hero .ah-h{font-size:clamp(19px,2.4vw,24px);font-weight:900;line-height:1.35}
+.ai-hero .ah-sub{font-size:13.5px;line-height:1.7;opacity:.92}
+.ai-hero .ah-sub small{display:block;font-weight:700;color:#FFE58A;font-size:12.5px}
+.ai-hero .ah-go{font-weight:900;font-size:20px}
+@media (max-width:599px){.ai-hero{align-items:flex-start;padding:14px}.ai-hero img{width:60px;height:60px}.ai-hero .ah-go{display:none}}
+body.night .ai-hero{background:linear-gradient(135deg,#1A1240,#3A1F6B 60%,#7A3FB0);box-shadow:0 22px 44px -24px rgba(122,63,176,.9)}
+.ah-note{margin:10px 0 12px;font-size:11.5px;color:var(--ink-2)}
+.ai-first{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0;font-size:clamp(17px,2.2vw,21px);font-weight:900;color:var(--navy)}
+.ai-first b{background:linear-gradient(135deg,#FFE58A,#FFB547);color:#3A2200;border-radius:999px;padding:3px 16px;font-size:.9em}
+.ai-first sup{font-size:10px}
 .ai-badge{display:inline-flex;align-items:center;gap:8px;margin:2px 0 0;padding:5px 14px 5px 6px;border-radius:999px;background:var(--mist);border:1px solid var(--line);color:var(--navy);font-size:13.5px;font-weight:700;text-decoration:none}
 .ai-badge b{background:var(--blue);color:var(--on-blue);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:900}
 .ai-badge:hover{border-color:var(--blue)}
@@ -798,8 +816,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 
         <p class="eyebrow">POSPOS for night</p>
         <h1><span class="ln">延長も、バックも。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
-        <a class="ai-badge" href="#ai-interview"><b>NEW</b>AI面接つき（スタンダード）</a>
-        <p class="tag">かんたん、つながる、クラウドPOSレジ。</p>
+        <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。AI の面接官が一次面接をして、雰囲気のまとめ・録画・会話がお店に届きます。<small>スタンダードプランに、追加料金なしでついてきます</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
+        <p class="tag">面接ができる、最強のPOSレジ。</p>
         <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホスト</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button></div></div>
         <p class="lead">キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
 
@@ -809,11 +827,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         </div>
         <ul class="hero-pts">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>月額11,000円〜・初期費用0円</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>AI がキャスト・黒服の一次面接</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>インストール不要</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>パソコン・タブレット・スマホ</li>
 
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>キャストはスマホで給料確認</li>
         </ul>
+        <p class="ah-note">※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
         <a class="offer-pill" href="#plans">このページからのお申し込みで、登録代行が<b>無料</b> →</a><br>
 
         <p class="mode-note">昼の飲食店の方は <a href="/posupos-day">昼のお店のページへ →</a></p>
@@ -910,6 +930,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     <div class="wrap">
       <div class="sec-head rv">
         <p class="eyebrow">AI interview</p>
+        <p class="ai-first"><b>世界初<sup>※</sup></b>面接を自動化した、POSシステム</p>
 
         <h2>面接も、AIにまかせる。</h2>
         <p>応募が来たら、URL を LINE で送るだけ。AI の面接官が、キャスト・黒服・ドライバーの一次面接をします。お店に届くのは、雰囲気のまとめ・顔の写真・はじめの1分の録画・会話の全部。営業中でも、面接の時間をとられません。</p>
@@ -930,7 +951,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <li class="rv"><h3>応募者がスマホで AI と面接（10〜15分）</h3><p>URL を開くだけで、会員登録はいりません。録画されることに同意してから、AI の面接官と声で話します。</p><div class="ai-msg"><span class="end">面接は以上です。おつかれさまでした。<br>お店の担当者からの連絡をお待ちください。</span></div><p>応募者の終わりの画面はこれだけ。評価は応募者に見せません。</p></li>
         <li class="rv"><h3>結果を見て、分ける</h3><p>届いた面接を、合格・二次面接へ・検討・不合格に分けて、メモを残せます（応募者には知らせません）。</p><div class="bf"><div class="fr"><img src="assets/img/pos-ai-list.webp" width="1100" height="224" loading="lazy" decoding="async" alt="AI面接の一覧の画面（受け終わった面接と、合格・検討などの分け方）"></div></div></li>
       </ol>
-      <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。お店の画面からいつでも消せて、ほかのお店からは見えません。※ 面接は、AKITOグループのガチキャリAIが行います。</p>
+      <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。お店の画面からいつでも消せて、ほかのお店からは見えません。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
     </div>
   </section>
 
@@ -1566,6 +1587,6 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "33000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "うちのお店のバックや給料の決め方でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "時給・日給・バック・控除、売上や指名で変わる時給・歩合を給与プランで設定できます。お店独自の計算は、個別プランで今の Excel の計算をそのまま組み込めます。"}}, {"@type": "Question", "name": "売掛（ツケ）やボトルキープも管理できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。売掛の一覧と回収（一部回収も）、ボトルキープの残り・期限・延長を管理できます。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "解約はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "ご契約の内容や解約の方法は、お問い合わせのときにご案内します。"}}, {"@type": "Question", "name": "会計ソフト（freee・マネーフォワード・弥生）とは何がちがいますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスは、お店の現場で注文・会計・打刻・給料を回すクラウドPOSレジです。会計ソフトは、帳簿をつけて決算や確定申告の書類を作るためのもので、経理の方や税理士さんが使います。ポスポスは、売上・経費・給料の記録を会計ソフト用の CSV に書き出せる「会計ソフトに数字を渡す側」です。お店の確定申告の準備も、数字を集めて目安を出すところまでで、帳簿の本体は会計ソフトが受け持ちます。"}}, {"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。キャストのスマホでは、5店舗まで切りかえて使えます。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、キャバクラ・ホスト・ガールズバー・コンカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": [{"@type": "Offer", "name": "ライトプラン（月額・税込）", "price": "11000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", "price": "33000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}, {"@type": "Offer", "name": "個別プラン（月額・税込）〜", "price": "55000", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "Square は使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Square の読み取り機で、クレジットカード・交通系 IC・QR 決済を受け付けられます。"}}, {"@type": "Question", "name": "うちのお店のバックや給料の決め方でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "時給・日給・バック・控除、売上や指名で変わる時給・歩合を給与プランで設定できます。お店独自の計算は、個別プランで今の Excel の計算をそのまま組み込めます。"}}, {"@type": "Question", "name": "売掛（ツケ）やボトルキープも管理できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。売掛の一覧と回収（一部回収も）、ボトルキープの残り・期限・延長を管理できます。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は受け答えの雰囲気をまとめるだけです。採用するかどうかは、録画や会話を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません（個別プランでも使えます。ライトプランでは使えません）。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "初期費用はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。"}}, {"@type": "Question", "name": "解約はできますか？", "acceptedAnswer": {"@type": "Answer", "text": "ご契約の内容や解約の方法は、お問い合わせのときにご案内します。"}}, {"@type": "Question", "name": "会計ソフト（freee・マネーフォワード・弥生）とは何がちがいますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスは、お店の現場で注文・会計・打刻・給料を回すクラウドPOSレジです。会計ソフトは、帳簿をつけて決算や確定申告の書類を作るためのもので、経理の方や税理士さんが使います。ポスポスは、売上・経費・給料の記録を会計ソフト用の CSV に書き出せる「会計ソフトに数字を渡す側」です。お店の確定申告の準備も、数字を集めて目安を出すところまでで、帳簿の本体は会計ソフトが受け持ちます。"}}, {"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 33,000円（通常価格 40,000円。毎月7,000円おトク）、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は5店舗まで使えます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。キャストのスマホでは、5店舗まで切りかえて使えます。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "あります。1年分をまとめて前払いすると1か月分、2年で3か月分、3年で5か月分おトクです。お支払いは前払い（Stripe。領収書が出ます）で、自動では更新しません。期間が終わる1か月前に画面でお知らせします。途中でおやめになっても、残りの期間のお金はお返しできません。グループ店は、1店舗の金額 × 店舗の数です。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>
