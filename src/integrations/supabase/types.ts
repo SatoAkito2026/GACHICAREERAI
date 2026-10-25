@@ -292,69 +292,6 @@ export type Database = {
         }
         Relationships: []
       }
-      posupos_monitors: {
-        Row: {
-          contract_end: string | null
-          contract_note: string | null
-          created_at: string
-          current_pos: string | null
-          email: string
-          id: string
-          message: string | null
-          name: string
-          prefecture: string | null
-          remind_ok: boolean
-          reminded_at: string | null
-          shop_name: string
-          shop_type: string | null
-          status: string
-          stop_token: string
-          stopped_at: string | null
-          stores: string | null
-          tel: string | null
-        }
-        Insert: {
-          contract_end?: string | null
-          contract_note?: string | null
-          created_at?: string
-          current_pos?: string | null
-          email: string
-          id?: string
-          message?: string | null
-          name: string
-          prefecture?: string | null
-          remind_ok?: boolean
-          reminded_at?: string | null
-          shop_name: string
-          shop_type?: string | null
-          status?: string
-          stop_token?: string
-          stopped_at?: string | null
-          stores?: string | null
-          tel?: string | null
-        }
-        Update: {
-          contract_end?: string | null
-          contract_note?: string | null
-          created_at?: string
-          current_pos?: string | null
-          email?: string
-          id?: string
-          message?: string | null
-          name?: string
-          prefecture?: string | null
-          remind_ok?: boolean
-          reminded_at?: string | null
-          shop_name?: string
-          shop_type?: string | null
-          status?: string
-          stop_token?: string
-          stopped_at?: string | null
-          stores?: string | null
-          tel?: string | null
-        }
-        Relationships: []
-      }
       tiktok_videos: {
         Row: {
           caption: string;

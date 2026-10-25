@@ -100,7 +100,8 @@ async function handleContact(request, env) {
 // ===== ポスポスのモニター募集（POST /api/monitor） =====
 // 申し込みを Supabase の posupos_monitors に入れて、info@ に知らせ、申し込んだ人に確認のメールを送る。
 // 契約が切れる前のお知らせは scheduled（毎日）で送る。本人が「案内してよい」にチェックした人だけ。
-// 秘密鍵: SUPABASE_SERVICE_ROLE_KEY（wrangler secret put SUPABASE_SERVICE_ROLE_KEY）。SUPABASE_URL は wrangler.jsonc の vars
+// 保存先はポスポス用の Supabase プロジェクト（pospos・東京。表は corporate-site/supabase/posupos_monitors.sql）。
+// 秘密鍵: SUPABASE_SERVICE_ROLE_KEY（そのプロジェクトの service_role。wrangler secret put SUPABASE_SERVICE_ROLE_KEY）。SUPABASE_URL は wrangler.jsonc の vars
 const SITE = "https://akitogroup.jp";
 const SENDER = "合同会社AKITOグループ（ポスポス）";
 const SENDER_ADDR = "東京都豊島区東池袋";

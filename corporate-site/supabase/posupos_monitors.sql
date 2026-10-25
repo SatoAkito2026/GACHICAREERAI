@@ -1,3 +1,4 @@
+-- ポスポス用の Supabase プロジェクト（pospos・東京）で実行する。ガチキャリAIのプロジェクトとは別
 -- ポスポスのモニター募集（akitogroup.jp/posupos-monitor のフォーム）
 -- 申し込みは会社ホームページの Worker が service role で入れる。契約が切れる前のお知らせも Worker の Cron が送る
 create table if not exists public.posupos_monitors (
