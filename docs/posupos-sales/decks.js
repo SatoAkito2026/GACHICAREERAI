@@ -144,6 +144,60 @@ function closeSlide(pres, big, steps) {
   return s;
 }
 
+
+// ---------- POSの機能（くわしく） ----------
+function shotImg(s, n, x, y, w, maxH) {
+  const sz = { floor: [590, 427], checkout: [541, 501], kitchen: [590, 267], money: [1104, 342], "staff-home": [250, 486], slip: [590, 449], tsukemawashi: [590, 553], salary: [1104, 351], back: [541, 397], "cast-home": [250, 486] }[n];
+  let h = w * sz[1] / sz[0]; if (maxH && h > maxH) { h = maxH; w = h * sz[0] / sz[1]; }
+  img(s, "m-" + n, x, y, w, h); return { w, h };
+}
+function bulletsBox(s, items, x, y, w, h, size = 14.5) {
+  T(s, items.map(([a, b], j) => ({ text: a + (b ? "：" : ""), options: { bold: true, bullet: true, breakLine: !b && j < items.length - 1 } })).flatMap((r, j) => {
+    const b = items[j][1]; return b ? [r, { text: b, options: { breakLine: j < items.length - 1, color: K.ink2 } }] : [r];
+  }), { x, y, w, h, fontSize: size, paraSpaceAfter: 7, lineSpacingMultiple: 1.1 });
+}
+function posDetail(pres, keys) {
+  const add = {
+    order: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "注文から会計まで（昼のお店）");
+      shotImg(s, "floor", 0.65, 1.65, 6.1);
+      const st = [["卓を開く", "配置図で卓を選んで人数を入れる。1階／2階のタブも"], ["注文", "オプション・飲み放題／食べ放題・折半。注文は厨房の画面へ"], ["お会計", "分け払い・分けて会計・ポイント／クーポン・Square"], ["レシート", "明細・レシート・領収書を印刷。会員番号のQRつき"]];
+      st.forEach(([t, b], i) => { const y = 1.6 + i * 1.18; card(s, 7.15, y, 5.55, 1.0); num(s, 7.4, y + 0.25, i + 1); T(s, t, { x: 8.1, y: y + 0.1, w: 4.4, h: 0.4, bold: true, fontSize: 16 }); T(s, b, { x: 8.1, y: y + 0.5, w: 4.45, h: 0.45, fontSize: 13, color: K.ink2 }); });
+      foot(s, "画面は見本です（店名・数字は架空）。"); },
+    checkout: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "お会計でできること");
+      shotImg(s, "checkout", 0.65, 1.65, 4.9);
+      cardsGrid(s, [["分けて払う・分けて会計", "現金＋カードなど払い方を分けたり、1つの卓を分けて会計したり。"], ["消費税・軽減税率", "店内／お持ち帰りを選んで、お持ち帰りは軽減税率で計算。"], ["深夜料金・サービス料", "22時からの注文に10%など。夜はサービス料も会計でそのまま。"], ["ポイント・クーポン", "会員証のQRでポイント。円引き・％引き・期間・回数のクーポン。"], ["Square・売掛", "カード・交通系IC・QR決済はSquareで。夜は売掛（ツケ）も。"], ["伝票の直しは理由つき", "直す・消すときは理由が必須。あとから見られます。"]],
+        { x: 6.0, y: 1.6, w: 6.7, cols: 2, h: 1.45, gap: 0.2, titleSize: 15, bodySize: 12.5 });
+      foot(s, "画面は見本です（店名・数字は架空）。"); },
+    kitchen: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "厨房の画面・QR注文・券売機");
+      shotImg(s, "kitchen", 0.65, 1.65, 7.0);
+      cardsGrid(s, [["厨房の画面", "注文が卓ごとにまとまり、作り始める→できた。料理／ドリンクの持ち場を分けられ、大きな音・自動印刷も。"], ["QR注文", "お客さまのスマホや卓のタブレットから、写真つきメニューで注文。飲み放題の残り時間・店員の呼び出しも。ログインなし。"], ["券売機", "お店の端末を券売機に。お金を入れてメニューを選び、食券を印刷できます。"]],
+        { x: 8.05, y: 1.6, w: 4.65, cols: 1, h: 1.5, gap: 0.2, titleSize: 15.5, bodySize: 12.5 });
+      T(s, "注文の伝えもれ・聞きまちがいを減らし、ホールは配膳と接客に集中できます。", { x: 0.65, y: 5.15, w: 7.0, h: 0.8, fontSize: 16, bold: true, color: K.blue });
+      foot(s, "画面は見本です（店名・数字は架空）。"); },
+    night: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "夜のお店：伝票・延長・指名・付け回し");
+      shotImg(s, "slip", 0.65, 1.65, 4.1); shotImg(s, "tsukemawashi", 5.0, 1.65, 3.55);
+      bulletsBox(s, [["ホール・延長", "卓ごとに人数・残り時間・合計。もうすぐ終わる卓は赤、自動延長も"], ["指名・同伴", "本指名・場内指名・同伴を記録。リクエストの売上は指名した子へ"], ["付け回し", "卓→キャスト→付け方→何分を選ぶだけ。キャストのスマホに「今の席・あと何分」"], ["伝票の内わけ", "お店・キャスト・利益の内わけ。直したときは理由つきで記録"], ["売掛・ボトル", "ツケの一覧と回収、ボトルキープの残り・期限"]], 8.9, 1.6, 3.8, 4.8, 13);
+      foot(s, "画面は見本です（店名・名前・数字は架空）。"); },
+    pay: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "打刻・シフト・給料を自動で");
+      shotImg(s, "salary", 0.65, 1.65, 7.4);
+      shotImg(s, "back", 0.65, 4.3, 3.1, 2.1);
+      bulletsBox(s, [["打刻", "ICカード（Suicaなど）でタッチ。打刻の直し・修正申請の承認"], ["シフト", "スタッフがスマホで希望を出す。締め切り・決めたシフト・臨時休業"], ["給料", "日払い・週払い・月払い。時給・手当・控除、深夜時給・交通費・前借りの差し引き"], ["夜のお店", "商品ごとのバック、売上や指名で変わる時給・歩合、送りの手当、源泉徴収"], ["決めたあとも安心", "決めたあとに打刻や伝票を直すと「決めた後に変更あり」とお知らせ。Excel出力も"]], 8.4, 1.6, 4.3, 4.9, 13);
+      foot(s, "画面は見本です（名前・数字は架空）。"); },
+    money: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "お金・日報・在庫・顧客もひとつに");
+      shotImg(s, "money", 1.67, 1.6, 10.0);
+      cardsGrid(s, [["お金", "利益（売上−手数料−人件費−仕入れ−経費）・原価率・レジの現金・明細。"], ["日報・月報", "売上・客数・客単価・支払い方法ごと・人件費・よく出た商品。印刷も。"], ["出数・在庫", "よく出たメニュー、在庫・入荷・原価。氷・おしぼりなども。"], ["顧客・会計ソフトへ", "顧客カルテ・来店の記録。freee・マネーフォワード・弥生用のCSV。"]],
+        { x: 0.6, y: 5.0, w: 12.1, cols: 4, h: 1.6, gap: 0.2, titleSize: 15, bodySize: 12.5 });
+      foot(s, "画面は見本です（店名・数字は架空）。"); },
+    phone: () => { const s = pres.addSlide({ masterName: "LIGHT" }); title(s, "スタッフ・キャストは自分のスマホで");
+      shotImg(s, "staff-home", 0.9, 1.6, 2.4, 4.8); shotImg(s, "cast-home", 3.7, 1.6, 2.4, 4.8);
+      cardsGrid(s, [["シフト", "希望を出す・決まったシフトを見る。"], ["給料・明細", "いくらもらえるか、日別の明細。前借りも。"], ["チャット・通知", "1対1・グループ・お知らせ。写真・既読。"], ["夜は成績・お客さま", "成績・ランキング、自分のお客さま、来客予定、確定申告の案内。"]],
+        { x: 6.8, y: 1.6, w: 5.9, cols: 2, h: 2.05, gap: 0.25, titleSize: 15.5, bodySize: 13 });
+      T(s, "「給料いくら？」「シフトどうなった？」の問い合わせが減ります。", { x: 6.8, y: 6.0, w: 5.9, h: 0.7, fontSize: 14, bold: true, color: K.blue });
+      foot(s, "画面は見本です（名前・数字は架空）。"); },
+  };
+  keys.forEach((k) => add[k]());
+}
+
 // =================== 資料請求用 ===================
 async function brochure() {
   const pres = setup("ポスポス サービス資料");
@@ -199,6 +253,7 @@ async function brochure() {
   const bl = (a) => a.map((p, j) => ({ text: p, options: { bullet: true, breakLine: j < a.length - 1 } }));
   T(s, bl(day), { x: 0.9, y: 2.5, w: 5.3, h: 3.8, fontSize: 14.5, paraSpaceAfter: 8 });
   T(s, bl(ngt), { x: 7.1, y: 2.5, w: 5.3, h: 3.8, fontSize: 14.5, paraSpaceAfter: 8 });
+  posDetail(pres, ["order", "checkout", "kitchen", "night", "pay", "money", "phone"]);
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "対応しているお店（飲食店28種類・夜のお店7種類）");
   const groups = [["和食", "和食レストラン・寿司・そば・うどん・定食・食堂・丼もの・牛丼・とんかつ・揚げ物"], ["居酒屋・焼き鳥・お酒", "居酒屋・焼き鳥・バー・バル（キャストなし）"], ["肉・鉄板・鍋", "焼肉・ステーキ・鉄板焼き・お好み焼き・もんじゃ・しゃぶしゃぶ・鍋"], ["麺・中華・アジア", "ラーメン・つけ麺・中華料理・韓国料理・カレー・インド料理・エスニック"],
@@ -276,6 +331,7 @@ async function sales() {
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "そして、レジ・給料・シフトもひとつに");
   cardsGrid(s, [["注文・会計", "QR注文・厨房の画面・券売機・Square。夜はセット・延長・指名・付け回し・売掛まで。"], ["打刻・シフト・給料", "ICカードで打刻。深夜時給・交通費・前借り、夜はバック・歩合・源泉徴収まで自動で計算。"], ["お金・日報・顧客", "利益・原価率・日報、顧客カルテ・ポイント・ボトル。会計ソフト用のCSVにも。"]], { y: 1.65, h: 2.6, numbered: true, shadow: true });
   T(s, "採用から給料まで、同じアプリで。いくつものアプリに同じことを入れる手間もなくなります。", { x: 0.6, y: 4.7, w: 12.1, h: 0.6, fontSize: 18, bold: true, color: K.blue });
+  posDetail(pres, ["order", "checkout", "night", "pay", "money", "phone"]);
 
   priceSlide(pres, "AI面接は、スタンダードの料金にふくまれています", true);
 
