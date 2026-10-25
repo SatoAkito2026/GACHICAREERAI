@@ -73,9 +73,9 @@ function coverSlide(pres, kicker, big, sub) {
 function savesSlide(pres, night, ttl) {
   const s = pres.addSlide({ masterName: "LIGHT" });
   title(s, ttl);
-  const items = [["お店の面接", "30秒〜1分", "届いたまとめ・録画・会話を見て決めるだけ。対面の面接はいりません"],
+  const items = [["お店が見るのは", "1分の録画", "届いた録画と選んだ答えを見て決めるだけ。対面の面接はいりません"],
     ["URLを送る", "1秒", "ボタンを押すとLINEが開き、送る文もアプリが作ります"],
-    ["結果", "自動で届く", "受け終わると、まとめ・入れる日と時間・写真・録画・会話が届きます"],
+    ["結果", "自動で届く", "受け終わると、録画・写真・選んだ答えの一覧・話し方の雰囲気のまとめが届きます"],
     ["日程調整", "いらない", "面接の日を決めるやりとりがなくなります。応募者もお店に来なくてOK"],
     night ? ["体入費", "節約", "体入の前に会う人をしぼれるので、合わない人の体入費が減ります"] : ["ドタキャン", "待ちぼうけなし", "面接の予定を入れないので、来ない人を待つ時間がむだになりません"]];
   const cw = 2.26, gap = 0.2;
@@ -86,19 +86,19 @@ function savesSlide(pres, night, ttl) {
     T(s, big, { x: x + 0.2, y: y + 0.95, w: cw - 0.4, h: 1.3, bold: true, fontSize: big.length <= 3 ? 32 : big.length <= 5 ? 24 : 20, color: K.goldL, valign: "middle" });
     T(s, body, { x: x + 0.25, y: y + 2.4, w: cw - 0.5, h: 2.0, fontSize: 14, color: "DCE4F7", lineSpacingMultiple: 1.2 });
   });
-  foot(s, "応募者がAIと話す時間は10〜15分です。AIは合否を決めません。採用はお店が決めます。");
+  foot(s, "応募者は、ボタンで選ぶのに1分ほど・AIと話すのが1分ほど。AIは合否を決めません。採用はお店が決めます。");
   return s;
 }
 function fitSlide(pres, ttl) {
   const s = pres.addSlide({ masterName: "LIGHT" });
   title(s, ttl);
-  img(s, "pos-ai-result-day", 7.05, 1.7, 5.6, 3.9);
-  cardsGrid(s, [["お店の基準で聞ける", "ほしい人の条件に合わせた質問を10個まで足せます。「いつもの質問」に保存すれば毎回そのまま。"],
-    ["全員に同じ質問で、比べやすい", "職種の質問のあとに、お店の質問を全部聞きます。面接する人による聞きもれがありません。"],
-    ["答え方と雰囲気まで見える", "入れる日と時間・気になった点のまとめ、写真・はじめの1分の録画・会話の全部。"]],
+  img(s, "pos-ai-result-day", 7.05, 1.9, 5.6, 3.35);
+  cardsGrid(s, [["条件が一覧でわかる", "出勤日数・曜日・時間帯・勤務開始・通勤・経験を、全員が同じボタンで答えます。選んだ答えが一覧で届きます。"],
+    ["お店の質問も聞ける", "お店から聞きたいことを3つまで。AIの面接官が会話の中で聞きます。"],
+    ["話している姿が見える", "自己紹介とやってみたい理由を話す姿の録画と顔の写真。雰囲気・話し方・表情がわかります。"]],
     { x: 0.6, y: 1.6, w: 6.0, cols: 1, h: 1.45, gap: 0.2, titleSize: 17, bodySize: 13.5 });
-  T(s, "画面は見本です（お店・応募者は架空）", { x: 7.05, y: 5.75, w: 5.6, h: 0.3, fontSize: 10, color: K.ink2 });
-  foot(s, "AIは合否を決めません。届いた内容を見て、会うかどうか・採用するかどうかはお店が決めます。");
+  T(s, "画面は見本です（お店・応募者は架空）", { x: 7.05, y: 5.4, w: 5.6, h: 0.3, fontSize: 10, color: K.ink2 });
+  foot(s, "AIは合否を決めません。見た目についてもAIは何も言いません。録画と写真を見て、お店が決めます。");
   return s;
 }
 function priceSlide(pres, ttl, sales) {
@@ -214,23 +214,23 @@ async function brochure() {
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "ポスポスとは：レジと店舗管理に、AI面接がついたPOSレジ");
   cardsGrid(s, [["レジ・注文・会計", "配置図で卓を開いて注文から会計まで。QR注文・厨房の画面・券売機・Square。夜はセット・延長・指名・付け回し・売掛も。"],
     ["打刻・シフト・給料", "ICカードで打刻。シフトの希望集めから、深夜時給・交通費・前借り、夜はバック・歩合・源泉徴収まで自動で計算。"],
-    ["AI面接（世界初※）", "応募者にURLを送るだけで、AIの面接官が一次面接。雰囲気のまとめ・写真・録画・会話がお店に届きます。"]], { y: 1.65, h: 3.0, numbered: true, shadow: true });
+    ["AI面接（世界初※）", "URLを送るだけ。応募者は条件をボタンで選んで、AIの面接官と1分ほど話します。録画と答えがお店に届きます。"]], { y: 1.65, h: 3.0, numbered: true, shadow: true });
   T(s, "パソコン・タブレット・スマホのブラウザで動くので、インストールはいりません。飲食店28種類・夜のお店7種類で使えます。", { x: 0.6, y: 5.0, w: 12.1, h: 0.6, fontSize: 15, color: K.ink2 });
   foot(s, NOTE_FIRST);
 
-  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "AI面接：URLを送るだけで、AIが一次面接");
-  img(s, "pos-ai-interview-day", 0.65, 1.65, 5.6, 4.6);
+  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "AI面接：ボタンで選んで、1分話す");
+  img(s, "pos-ai-choose", 0.75, 1.65, 2.75, 4.2); img(s, "pos-ai-talk-day", 3.75, 1.65, 2.62, 4.2);
   cardsGrid(s, [["LINEで送るだけ", "職種を選んでURLを作り、LINEで送るだけ。応募者は登録なしでスマホから受けられます。"],
-    ["職種に合わせて質問", "ホール・キッチン、キャスト・黒服など職種ごとの質問に加えて、お店の質問も10個まで。"],
-    ["会う前にわかる", "雰囲気のまとめ・入れる日と時間・気になった点・写真・はじめの1分の録画・会話の全部。"]],
+    ["条件はボタンで選ぶ", "出勤日数・曜日・時間帯・勤務開始・通勤・経験。夜のお店はお酒・年齢の確認も（1分ほど）。"],
+    ["AIと1分ほど話す", "自己紹介・やってみたい理由・お店からの質問（3つまで）。話している姿を録画します。"]],
     { x: 6.75, y: 1.6, w: 5.95, cols: 1, h: 1.45, gap: 0.2, bodySize: 13.5 });
-  foot(s, "画面は見本です（お店・応募者は架空）。応募者がAIと話す時間は10〜15分。");
+  foot(s, "画面は見本です（お店・応募者は架空）。届くもの：録画・顔の写真3枚・選んだ答えの一覧・話し方の雰囲気のまとめ・会話の文字。");
 
   savesSlide(pres, true, "AI面接で、ここまで減らせます");
   fitSlide(pres, "あなたのお店がほしい人か、会う前にわかる");
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "使い方は、5つのステップ");
-  const st = [["URLを作る", "職種を選ぶだけ。URLは1回だけ・14日まで"], ["LINEで送る", "送る文はアプリが作る。ボタン1つ"], ["AIと面接", "応募者がスマホで10〜15分"], ["結果が届く", "まとめ・写真・録画・会話が自動で"], ["お店が分ける", "合格・二次面接へ・検討・不合格"]];
+  const st = [["URLを作る", "職種を選ぶだけ。URLは1回だけ・14日まで"], ["LINEで送る", "送る文はアプリが作る。ボタン1つ"], ["答える", "ボタンで選んで、AIと1分ほど話す"], ["結果が届く", "録画・写真・選んだ答えが自動で"], ["お店が分ける", "合格・二次面接へ・検討・不合格"]];
   st.forEach(([t, b], i) => { const x = 0.6 + i * 2.46; card(s, x, 1.6, 2.26, 2.0); num(s, x + 0.25, 1.8, i + 1); T(s, t, { x: x + 0.85, y: 1.8, w: 1.35, h: 0.5, bold: true, fontSize: 16, valign: "middle" }); T(s, b, { x: x + 0.25, y: 2.45, w: 1.8, h: 1.05, fontSize: 13, color: K.ink2 }); });
   img(s, "pos-ai-url", 0.65, 4.0, 5.1, 2.4);
   img(s, "pos-ai-list", 6.3, 4.35, 6.35, 1.3);
@@ -279,7 +279,7 @@ async function brochure() {
 // =================== 営業プレゼン用 ===================
 async function sales() {
   const pres = setup("ポスポス ご提案資料");
-  let s = coverSlide(pres, "ご提案資料　2026年10月", "面接の時間を、\nお店の時間に。", "応募が来たらURLを送るだけ。\nAIが一次面接をして、お店の面接は30秒〜1分。");
+  let s = coverSlide(pres, "ご提案資料　2026年10月", "面接の時間を、\nお店の時間に。", "応募が来たらURLを送るだけ。\nAIが一次面接をして、お店は1分の録画を見るだけ。");
   s.addNotes("あいさつ。今日は「採用にかかっている時間とお金」と、それをレジと一緒に減らす方法のお話です。");
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "店長の時間、面接に何時間使っていますか？");
@@ -296,9 +296,9 @@ async function sales() {
   T(s, "約9時間", { x: 3.4, y: 4.7, w: 4.0, h: 1.0, fontSize: 34, bold: true, color: K.goldL, align: "right", valign: "middle" });
   shadowCard(s, 8.1, 1.75, 4.6, 3.95);
   T(s, "ポスポスなら", { x: 8.45, y: 2.0, w: 4, h: 0.5, bold: true, fontSize: 18, color: K.blue });
-  T(s, [{ text: "URLを送る：1人1秒", options: { breakLine: true } }, { text: "お店の面接：1人30秒〜1分", options: { breakLine: true } }, { text: "日程調整・待ちぼうけ：なし", options: {} }], { x: 8.45, y: 2.6, w: 4.0, h: 1.7, fontSize: 16, paraSpaceAfter: 8 });
+  T(s, [{ text: "URLを送る：1人1秒", options: { breakLine: true } }, { text: "お店が見る録画：1人1分ほど", options: { breakLine: true } }, { text: "日程調整・待ちぼうけ：なし", options: {} }], { x: 8.45, y: 2.6, w: 4.0, h: 1.7, fontSize: 16, paraSpaceAfter: 8 });
   T(s, "→ 月10分ほど", { x: 8.45, y: 4.5, w: 4.0, h: 0.8, fontSize: 28, bold: true, color: K.blue });
-  foot(s, "説明のための架空の例です（応募10人・ドタキャン3人の場合）。応募者がAIと話す時間（10〜15分）は、お店の時間には入りません。");
+  foot(s, "説明のための架空の例です（応募10人・ドタキャン3人の場合）。応募者が答える時間（選ぶ1分＋話す1分ほど）は、お店の時間には入りません。");
   s.addNotes("さっき聞いた相手の数字で計算しなおして見せると効く。");
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "夜のお店なら、体入費のむだも");
@@ -309,19 +309,19 @@ async function sales() {
   T(s, "60,000円", { x: 4.2, y: 4.0, w: 3.2, h: 1.2, fontSize: 36, bold: true, color: K.goldL, align: "right", valign: "middle" });
   shadowCard(s, 8.1, 1.8, 4.6, 3.4);
   T(s, "体入の前にAI面接", { x: 8.45, y: 2.05, w: 4, h: 0.5, bold: true, fontSize: 18, color: "5A2FA0" });
-  T(s, "入れる日・時間、話し方、雰囲気を体入の前に確認。体入してもらう人をしぼれるので、合わない人の体入費が減ります。", { x: 8.45, y: 2.65, w: 3.95, h: 2.3, fontSize: 15.5, color: K.navy, lineSpacingMultiple: 1.25 });
+  T(s, "出勤できる日・時間をボタンで、話している姿を1分の録画で、体入の前に確認。体入してもらう人をしぼれるので、合わない人の体入費が減ります。", { x: 8.45, y: 2.65, w: 3.95, h: 2.3, fontSize: 15.5, color: K.navy, lineSpacingMultiple: 1.25 });
   foot(s, "説明のための架空の例です。体入の条件はお店ごとに違います。");
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "解決：ポスポスのAI面接（世界初※）");
-  img(s, "pos-ai-interview-night", 0.65, 1.65, 5.4, 4.45);
-  img(s, "pos-ai-result-day", 6.6, 1.65, 6.05, 4.2);
+  img(s, "pos-ai-choose", 0.75, 1.75, 2.6, 3.98); img(s, "pos-ai-talk-night", 3.6, 1.75, 2.48, 3.98); img(s, "pos-ai-result-night", 6.45, 2.0, 6.2, 3.71);
+  T(s, "選ぶ → 話す → 届く", { x: 0.75, y: 5.9, w: 11.9, h: 0.5, fontSize: 18, bold: true, color: K.blue });
   foot(s, "画面は見本です（お店・応募者は架空）。" + NOTE_FIRST);
   s.addNotes("ここで実際の画面を見せる（デモ）。可能なら、その場で面接のURLを作ってLINEで送ってみせる。");
 
   savesSlide(pres, true, "お店の手間は、ここまで減ります");
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "いまのやり方と、ポスポス");
-  const comp = [["応募への返事", "営業のあとに折り返し", "URLを1秒で送る"], ["面接の日程", "電話で何度もやりとり", "いらない（応募者の都合で受ける）"], ["一次面接", "対面で30分", "AIが受け持つ。お店は30秒〜1分"], ["ドタキャン", "待ちぼうけ", "受けた人の結果だけ届く"], ["比べ方", "面接する人でばらつく", "全員に同じ質問・録画と会話で比べる"]];
+  const comp = [["応募への返事", "営業のあとに折り返し", "URLを1秒で送る"], ["面接の日程", "電話で何度もやりとり", "いらない（応募者の都合で受ける）"], ["一次面接", "対面で30分", "選ぶ質問＋1分の録画。お店は見るだけ"], ["ドタキャン", "待ちぼうけ", "受けた人の結果だけ届く"], ["比べ方", "面接する人でばらつく", "全員同じボタンの答えと録画で比べる"]];
   const rowsT = [[{ text: "", options: { fill: { color: K.white } } }, { text: "いまのやり方", options: { bold: true, color: K.ink2, fill: { color: K.mist }, align: "center" } }, { text: "ポスポス", options: { bold: true, color: K.white, fill: { color: K.blue }, align: "center" } }]]
     .concat(comp.map(([a, b, c]) => [{ text: a, options: { bold: true } }, { text: b, options: { color: K.ink2, align: "center" } }, { text: c, options: { bold: true, color: K.blue, align: "center" } }]));
   s.addTable(rowsT, { x: 0.6, y: 1.6, w: 12.1, colW: [2.8, 4.3, 5.0], rowH: 0.78, fontFace: F, fontSize: 16, color: K.navy, valign: "middle", border: { type: "solid", pt: 1, color: K.line } });
