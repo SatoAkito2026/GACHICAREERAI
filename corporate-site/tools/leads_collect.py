@@ -96,24 +96,30 @@ def http_get(url, timeout=12, limit=600_000):
         return raw.decode("utf-8", "replace"), final
 
 
-def overpass(area, kind):
+def overpass(area, kind, pref="東京都"):
     amen = {"day": "restaurant|cafe|fast_food|food_court|ice_cream|pub|bar|biergarten",
             "night": "bar|pub|nightclub", "all": "restaurant|cafe|fast_food|food_court|ice_cream|pub|bar|biergarten|nightclub"}[kind]
     keys = ("website", "contact:website", "url", "email", "contact:email")
     parts = "".join(f'nwr["amenity"~"^({amen})$"]["{k}"](area.a);' for k in keys)
     parts += "".join(f'nwr["shop"~"^(bakery|confectionery|pastry)$"]["{k}"](area.a);' for k in ("website", "contact:website", "email")) if kind != "night" else ""
-    q = f'''[out:json][timeout:90];
-area["name"="{area}"]["boundary"="administrative"]->.a;
+    # 同じ名前の区・市がほかの県にもある（北区・中央区・港区など）ので、都道府県の中だけで探す
+    inpref = f'rel["name"="{pref}"]["admin_level"="4"];map_to_area->.p;rel(area.p)["name"="{area}"]["boundary"="administrative"];map_to_area->.a;' if pref and area != pref \
+        else f'area["name"="{area}"]["boundary"="administrative"]->.a;'
+    q = f'''[out:json][timeout:180];
+{inpref}
 ({parts});
 out tags;'''
     data = urllib.parse.urlencode({"data": q}).encode()
     last = None
-    for ep in OVERPASS:
+    for ep in OVERPASS + OVERPASS:  # 全部だめなら、少し待ってもう1周
+        if ep is OVERPASS[0] and last is not None:
+            print("  → どのサーバーも混んでいます。60秒待ってからもう1周試します", flush=True)
+            time.sleep(60)
         host = urllib.parse.urlparse(ep).netloc
         print(f"{area}: OpenStreetMap（{host}）に問い合わせています…（混んでいると1〜2分かかります）", flush=True)
         t0 = time.time()
         try:
-            code, _, _, raw = fetch(ep, data=data, timeout=100, limit=50_000_000)
+            code, _, _, raw = fetch(ep, data=data, timeout=190, limit=50_000_000)
             if code != 200:
                 raise OSError(f"HTTP {code}")
             els = json.loads(raw.decode())["elements"]
@@ -213,6 +219,7 @@ class Crawler:
 def main():
     ap = argparse.ArgumentParser(description="モニター募集の送り先を自動で集める")
     ap.add_argument("areas", nargs="+", help="市区町村や都道府県の名前（例：豊島区 新宿区 大阪市）")
+    ap.add_argument("--pref", default="東京都", help="探す都道府県（同じ名前の区・市を区別するため。例：--pref 大阪府）")
     ap.add_argument("--kind", choices=["all", "day", "night"], default="all")
     ap.add_argument("--out", default="leads.csv")
     ap.add_argument("--limit", type=int, default=0, help="試しに集める最大の軒数")
@@ -222,7 +229,7 @@ def main():
     a = ap.parse_args()
     seen, shops = set(), []
     for area in a.areas:
-        els = overpass(area, a.kind)
+        els = overpass(area, a.kind, a.pref)
         n0 = len(shops)
         for e in els:
             t = e.get("tags", {})
@@ -232,7 +239,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            pref = t.get("addr:province") or t.get("addr:state") or (area if area.endswith(("都", "道", "府", "県")) else "")
+            pref = t.get("addr:province") or t.get("addr:state") or (area if area.endswith(("都", "道", "府", "県")) else a.pref or "")
             if not (t.get("website") or t.get("contact:website") or t.get("url")) and not a.allow_osm_email:
                 continue
             typ = shop_type(t)
