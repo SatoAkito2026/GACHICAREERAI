@@ -482,7 +482,10 @@ ${companyContext || "（企業情報未設定）"}
           const audioBase64 = Buffer.from(audioBuffer).toString("base64");
 
           // Supabaseに会話を保存
-          if (supabase && body.token) {
+          // 練習は、本人が1回でも答えてから「始めた」にする（回数に数える）。
+          // 最初のあいさつだけで数えると、マイクの設定などで画面を離れて戻っただけで1回分使ってしまうため
+          const isGreeting = body.candidateText === "（面接開始）";
+          if (supabase && body.token && !(practiceMode && isGreeting && !isEnded)) {
             await supabase
               .from("interview_invitations")
               .update({
