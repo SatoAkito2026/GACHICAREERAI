@@ -113,7 +113,11 @@ export function SalesCompanyPage() {
   const [saving, setSaving] = useState(false);
   const [reading, setReading] = useState(false);
   // ZIP などで一度に読み込んだ複数のファイル（まとめて追加する）
-  const [batch, setBatch] = useState<{ name: string; text: string; kind: MaterialKind }[]>([]);
+  const [batch, setBatch] = useState<
+    { name: string; text: string; kind: MaterialKind; use: boolean }[]
+  >([]);
+  // 消すために選んだ資料
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     const r = await talentApi<CompanyData>("/api/sales/company");
@@ -151,7 +155,7 @@ export function SalesCompanyPage() {
       if (found.length > 1) {
         // ファイル名から種類を当てる（スクリプト・教え）。ほかは上で選んだ種類（スクリプトを選んでいたら「商品・料金」）
         const fallback: MaterialKind = kind === "script" || kind === "training" ? "product" : kind;
-        setBatch(found.map((f) => ({ ...f, kind: guessKind(f.name) ?? fallback })));
+        setBatch(found.map((f) => ({ ...f, kind: guessKind(f.name) ?? fallback, use: true })));
         return;
       }
       const { name, text } = found[0];
@@ -169,8 +173,10 @@ export function SalesCompanyPage() {
 
   const addBatch = async () => {
     const max = data?.maxMaterials ?? null;
-    const room = max === null ? batch.length : Math.max(0, max - (data?.materials.length ?? 0));
-    const items = batch.slice(0, room);
+    const chosen = batch.filter((m) => m.use);
+    if (chosen.length === 0) return void toast.error("追加するファイルを選んでください");
+    const room = max === null ? chosen.length : Math.max(0, max - (data?.materials.length ?? 0));
+    const items = chosen.slice(0, room);
     if (items.length === 0)
       return void toast.error(`資料は${max}件までです。古いものを消してください`);
     setSaving(true);
@@ -188,9 +194,25 @@ export function SalesCompanyPage() {
     setSaving(false);
     setBatch([]);
     toast.success(
-      `${added}件の資料を追加しました${batch.length > items.length ? `（${max}件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
+      `${added}件の資料を追加しました${chosen.length > items.length ? `（${max}件の上限のため ${chosen.length - items.length}件は入れていません）` : ""}`,
     );
     void load();
+  };
+
+  const deleteSelected = async () => {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    if (!window.confirm(`選んだ資料を${ids.length}件消します。`)) return;
+    const r = await post({ action: "deleteMaterials", ids });
+    if (r.ok) {
+      setSelected(new Set());
+      void load();
+    }
+  };
+
+  const changeKind = async (id: string, k: MaterialKind) => {
+    const r = await post({ action: "updateMaterial", id, kind: k });
+    if (r.ok) void load();
   };
 
   const addMaterial = async () => {
@@ -358,8 +380,21 @@ export function SalesCompanyPage() {
                       {batch.length}件のファイルを読み込みました
                     </p>
                     <p className="mt-1 text-[12px]" style={{ color: C.sub }}>
-                      ファイルごとに1件ずつ追加します（名前はファイル名、使う場面は上で選んだもの）。種類はファイル名から当てているので、違うものは右で直してください。
+                      チェックしたファイルを1件ずつ追加します（名前はファイル名、使う場面は上で選んだもの）。種類はファイル名から当てているので、違うものは右で選び直してください。
                     </p>
+                    <label
+                      className="mt-2 flex items-center gap-2 text-[12px]"
+                      style={{ color: C.sub }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={batch.every((m) => m.use)}
+                        onChange={(e) =>
+                          setBatch((b) => b.map((x) => ({ ...x, use: e.target.checked })))
+                        }
+                      />
+                      すべて選ぶ
+                    </label>
                     <ul className="mt-2 flex max-h-72 flex-col gap-1.5 overflow-y-auto text-[12px]">
                       {batch.map((m, i) => (
                         <li
@@ -367,7 +402,22 @@ export function SalesCompanyPage() {
                           className="flex items-center justify-between gap-2"
                           style={{ color: C.text }}
                         >
-                          <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                          <input
+                            type="checkbox"
+                            className="shrink-0"
+                            checked={m.use}
+                            onChange={(e) =>
+                              setBatch((b) =>
+                                b.map((x, j) => (j === i ? { ...x, use: e.target.checked } : x)),
+                              )
+                            }
+                          />
+                          <span
+                            className="min-w-0 flex-1 truncate"
+                            style={{ color: m.use ? C.text : C.muted }}
+                          >
+                            {m.name}
+                          </span>
                           <span className="shrink-0" style={{ color: C.muted }}>
                             {Math.min(m.text.length, 20000).toLocaleString()}文字
                           </span>
@@ -394,7 +444,7 @@ export function SalesCompanyPage() {
                     </ul>
                     <div className="mt-3 flex gap-2">
                       <Button onClick={() => void addBatch()} loading={saving}>
-                        まとめて追加（{batch.length}件）
+                        まとめて追加（{batch.filter((m) => m.use).length}件）
                       </Button>
                       <Button variant="ghost" onClick={() => setBatch([])}>
                         やめる
@@ -403,21 +453,44 @@ export function SalesCompanyPage() {
                   </div>
                 )}
               </div>
-              {data.materials.length > 1 && (
-                <div className="mt-4 flex items-center justify-between text-[12px]">
-                  <span style={{ color: C.muted }}>{data.materials.length}件</span>
-                  <button
-                    style={{ color: C.danger }}
-                    onClick={() => {
-                      if (!window.confirm(`資料を${data.materials.length}件すべて消します。`))
-                        return;
-                      void post({ action: "deleteAllMaterials" }).then((r) => {
-                        if (r.ok) void load();
-                      });
-                    }}
-                  >
-                    すべて消す
-                  </button>
+              {data.materials.length > 0 && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[12px]">
+                  <label className="flex items-center gap-2" style={{ color: C.sub }}>
+                    <input
+                      type="checkbox"
+                      checked={selected.size > 0 && selected.size === data.materials.length}
+                      onChange={(e) =>
+                        setSelected(
+                          e.target.checked ? new Set(data.materials.map((m) => m.id)) : new Set(),
+                        )
+                      }
+                    />
+                    すべて選ぶ（{data.materials.length}件）
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      disabled={selected.size === 0}
+                      style={{ color: selected.size === 0 ? C.muted : C.danger }}
+                      onClick={() => void deleteSelected()}
+                    >
+                      選んだものを消す（{selected.size}件）
+                    </button>
+                    <button
+                      style={{ color: C.danger }}
+                      onClick={() => {
+                        if (!window.confirm(`資料を${data.materials.length}件すべて消します。`))
+                          return;
+                        void post({ action: "deleteAllMaterials" }).then((r) => {
+                          if (r.ok) {
+                            setSelected(new Set());
+                            void load();
+                          }
+                        });
+                      }}
+                    >
+                      すべて消す
+                    </button>
+                  </div>
                 </div>
               )}
               {data.materials.length > 0 && (
@@ -426,20 +499,43 @@ export function SalesCompanyPage() {
                     <li
                       key={m.id}
                       className="flex items-start justify-between gap-3 rounded-xl p-3"
-                      style={{ background: C.card2, border: `1px solid ${C.border}` }}
+                      style={{
+                        background: C.card2,
+                        border: `1px solid ${selected.has(m.id) ? C.danger : C.border}`,
+                      }}
                     >
-                      <div className="min-w-0">
+                      <input
+                        type="checkbox"
+                        className="mt-1 shrink-0"
+                        checked={selected.has(m.id)}
+                        onChange={(e) =>
+                          setSelected((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(m.id);
+                            else next.delete(m.id);
+                            return next;
+                          })
+                        }
+                      />
+                      <div className="min-w-0 flex-1">
                         <p className="text-[14px]" style={{ color: C.text, fontWeight: 700 }}>
-                          <span
-                            className="mr-2 rounded px-1.5 py-0.5 text-[11px]"
+                          <select
+                            aria-label="種類"
+                            value={m.kind}
+                            onChange={(e) => void changeKind(m.id, e.target.value as MaterialKind)}
+                            className="mr-2 rounded px-1.5 py-0.5 text-[11px] outline-none"
                             style={{
                               background: m.kind === "script" ? C.accent : C.card,
                               color: m.kind === "script" ? "#000" : C.sub,
                               border: `1px solid ${C.border}`,
                             }}
                           >
-                            {KIND_OPTIONS.find((k) => k.key === m.kind)?.label ?? "そのほか"}
-                          </span>
+                            {KIND_OPTIONS.map((k) => (
+                              <option key={k.key} value={k.key}>
+                                {k.label}
+                              </option>
+                            ))}
+                          </select>
                           {m.title}
                         </p>
                         <p className="mt-1 truncate text-[12px]" style={{ color: C.muted }}>

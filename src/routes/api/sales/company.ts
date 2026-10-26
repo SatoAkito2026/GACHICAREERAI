@@ -6,6 +6,8 @@
  * POST /api/sales/company { action: "addMaterial", title, content } → 資料を足す（文字だけ）
  * POST /api/sales/company { action: "deleteMaterial", id }         → 資料を消す
  * POST /api/sales/company { action: "deleteAllMaterials" }         → 資料をすべて消す
+ * POST /api/sales/company { action: "deleteMaterials", ids }       → 選んだ資料を消す
+ * POST /api/sales/company { action: "updateMaterial", id, kind }   → 資料の種類を変える
  * POST /api/sales/company { action: "removeMember", userId }       → 社員を外す
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -31,6 +33,15 @@ const Body = z.discriminatedUnion("action", [
   }),
   z.object({ action: z.literal("deleteMaterial"), id: z.string().uuid() }),
   z.object({ action: z.literal("deleteAllMaterials") }),
+  z.object({
+    action: z.literal("deleteMaterials"),
+    ids: z.array(z.string().uuid()).min(1).max(500),
+  }),
+  z.object({
+    action: z.literal("updateMaterial"),
+    id: z.string().uuid(),
+    kind: z.enum(["script", "training", "product", "minutes", "other"]),
+  }),
   z.object({ action: z.literal("removeMember"), userId: z.string().uuid() }),
 ]);
 
@@ -149,6 +160,22 @@ export const Route = createFileRoute("/api/sales/company")({
             content: b.content,
           });
           if (error) return jsonResponse({ error: "保存に失敗しました" }, 500);
+          return jsonResponse({ ok: true });
+        }
+        if (b.action === "deleteMaterials") {
+          await supabase
+            .from("sales_materials")
+            .delete()
+            .in("id", b.ids)
+            .eq("company_id", company.id);
+          return jsonResponse({ ok: true });
+        }
+        if (b.action === "updateMaterial") {
+          await supabase
+            .from("sales_materials")
+            .update({ kind: b.kind })
+            .eq("id", b.id)
+            .eq("company_id", company.id);
           return jsonResponse({ ok: true });
         }
         if (b.action === "deleteAllMaterials") {
