@@ -81,6 +81,7 @@ function score(v: number | null | undefined): string {
 type CompanyData = {
   company: { name: string; joinCode: string };
   maxMaterials: number | null;
+  screenRules: { keep: string[]; remove: string[] };
   members: {
     userId: string;
     name: string;
@@ -125,13 +126,20 @@ export function SalesCompanyPage() {
     { name: string; text: string; kind: MaterialKind; use: boolean }[]
   >([]);
   const [progress, setProgress] = useState("");
+  // 手数料の見分けルール（1行に1つ）
+  const [keepText, setKeepText] = useState("");
+  const [removeText, setRemoveText] = useState("");
+  const [savingRules, setSavingRules] = useState(false);
   // 消すために選んだ資料
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     const r = await talentApi<CompanyData>("/api/sales/company");
-    if (r.ok) setData(r.data);
-    else setError(r.data.error ?? "読み込みに失敗しました");
+    if (r.ok) {
+      setData(r.data);
+      setKeepText(r.data.screenRules.keep.join("\n"));
+      setRemoveText(r.data.screenRules.remove.join("\n"));
+    } else setError(r.data.error ?? "読み込みに失敗しました");
   }, []);
   useEffect(() => {
     void load();
@@ -229,6 +237,29 @@ export function SalesCompanyPage() {
     void load();
   };
 
+  const saveRules = async () => {
+    const lines = (t: string) =>
+      t
+        .split(/[\n、,]/)
+        .map((x) => x.trim().slice(0, 30))
+        .filter(Boolean)
+        .slice(0, 50);
+    setSavingRules(true);
+    const r = await post({
+      action: "setScreenRules",
+      keep: lines(keepText),
+      remove: lines(removeText),
+    });
+    setSavingRules(false);
+    if (r.ok) {
+      const removed = (r.data as { removed?: number }).removed ?? 0;
+      toast.success(
+        removed > 0 ? `保存しました（今ある資料から${removed}か所を消しました）` : "保存しました",
+      );
+      void load();
+    }
+  };
+
   const deleteSelected = async () => {
     const ids = [...selected];
     if (ids.length === 0) return;
@@ -316,6 +347,47 @@ export function SalesCompanyPage() {
                     <RefreshCw size={14} /> 作り直す
                   </Button>
                 </div>
+              </div>
+            </Card>
+
+            <Card title="手数料の見分けルール">
+              <p className="mb-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
+                資料を入れると、AI
+                が「そのお金は誰が誰に払うか」で見分けて、会社に入る手数料・成果報酬・獲得単価などを取り除きます（お客さんが払う手数料・もらうキャッシュバックは残します）。名前だけではまぎらわしい言葉は、ここに書くと
+                AI より優先します。1行に1つずつ書いてください。
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field
+                  label="お客さんの費用として必ず残す言葉"
+                  hint="例：契約事務手数料／初期工事費"
+                >
+                  <textarea
+                    value={keepText}
+                    onChange={(e) => setKeepText(e.target.value)}
+                    rows={4}
+                    placeholder={"契約事務手数料\n初期工事費"}
+                    className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+                    style={inputStyle}
+                  />
+                </Field>
+                <Field
+                  label="社内の情報として必ず消す言葉"
+                  hint="例：開通手数料／獲得単価（消す言葉は、今ある資料からもすぐ消します）"
+                >
+                  <textarea
+                    value={removeText}
+                    onChange={(e) => setRemoveText(e.target.value)}
+                    rows={4}
+                    placeholder={"開通手数料\n獲得単価"}
+                    className="rounded-lg px-3 py-2.5 text-[14px] outline-none"
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
+              <div className="mt-3">
+                <Button onClick={() => void saveRules()} loading={savingRules}>
+                  ルールを保存
+                </Button>
               </div>
             </Card>
 

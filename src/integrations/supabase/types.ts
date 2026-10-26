@@ -914,6 +914,8 @@ export type Database = {
           id: string;
           join_code: string | null;
           sales_join_code: string | null;
+          sales_keep_terms: string[];
+          sales_remove_terms: string[];
           name: string;
           owner_id: string | null;
           plan: string;
@@ -927,6 +929,8 @@ export type Database = {
           id?: string;
           join_code?: string | null;
           sales_join_code?: string | null;
+          sales_keep_terms?: string[];
+          sales_remove_terms?: string[];
           name: string;
           owner_id?: string | null;
           plan?: string;
@@ -940,6 +944,8 @@ export type Database = {
           id?: string;
           join_code?: string | null;
           sales_join_code?: string | null;
+          sales_keep_terms?: string[];
+          sales_remove_terms?: string[];
           name?: string;
           owner_id?: string | null;
           plan?: string;
