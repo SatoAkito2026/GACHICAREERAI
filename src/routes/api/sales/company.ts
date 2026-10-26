@@ -11,7 +11,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyApiUser } from "@/lib/api-auth";
 import { jsonResponse, serviceClient } from "@/lib/talent";
-import { SCENARIOS, getSalesCompany, issueSalesJoinCode } from "@/lib/sales-roleplay";
+import {
+  SALES_MATERIALS_MAX,
+  SCENARIOS,
+  getSalesCompany,
+  isSalesUnlimited,
+  issueSalesJoinCode,
+} from "@/lib/sales-roleplay";
 
 const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("newCode") }),
@@ -60,8 +66,14 @@ export const Route = createFileRoute("/api/sales/company")({
         const done = (plays ?? []).filter((p) => p.status === "done" && memberIds.has(p.user_id));
         const avg = (p: (typeof done)[number]) =>
           (p.evaluation as { average?: number } | null)?.average ?? null;
+        const unlimited = await isSalesUnlimited(supabase, {
+          userId: auth.userId,
+          companyId: company.id,
+        });
         return jsonResponse({
           company: { name: company.name, joinCode },
+          // 資料の数の上限（運営の会社は null＝上限なし）
+          maxMaterials: unlimited ? null : SALES_MATERIALS_MAX,
           members: (members ?? []).map((m) => {
             const mine = done.filter((p) => p.user_id === m.user_id);
             const scores = mine.map(avg).filter((v): v is number => typeof v === "number");
@@ -116,9 +128,15 @@ export const Route = createFileRoute("/api/sales/company")({
             .from("sales_materials")
             .select("id", { count: "exact", head: true })
             .eq("company_id", company.id);
-          if ((count ?? 0) >= 30)
+          const unlimited = await isSalesUnlimited(supabase, {
+            userId: auth.userId,
+            companyId: company.id,
+          });
+          if (!unlimited && (count ?? 0) >= SALES_MATERIALS_MAX)
             return jsonResponse(
-              { error: "資料は30件までです。古いものを消してから足してください" },
+              {
+                error: `資料は${SALES_MATERIALS_MAX}件までです。古いものを消してから足してください`,
+              },
               400,
             );
           const { error } = await supabase.from("sales_materials").insert({

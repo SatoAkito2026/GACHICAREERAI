@@ -27,6 +27,7 @@ import {
   customerTurn,
   evaluateRoleplay,
   getSalesMembership,
+  isSalesUnlimited,
   jstStarts,
   loadMaterials,
   makePersona,
@@ -84,9 +85,16 @@ export const Route = createFileRoute("/api/sales/roleplay")({
           .select("id", { count: "exact", head: true })
           .eq("user_id", auth.userId)
           .gte("started_at", jstStarts().day);
+        const unlimited = membership
+          ? await isSalesUnlimited(supabase, {
+              userId: auth.userId,
+              companyId: membership.companyId,
+            })
+          : false;
         return jsonResponse({
           membership,
-          remainingToday: Math.max(0, SALES_PER_USER_DAY - (count ?? 0)),
+          // 運営は上限なし（null）
+          remainingToday: unlimited ? null : Math.max(0, SALES_PER_USER_DAY - (count ?? 0)),
           list: (data ?? [])
             .filter((r) => r.status === "done")
             .map((r) => ({
@@ -111,6 +119,10 @@ export const Route = createFileRoute("/api/sales/roleplay")({
         const membership = await getSalesMembership(supabase, auth.userId);
         if (!membership)
           return jsonResponse({ error: "会社の招待コードを入れて参加してから使えます" }, 403);
+        const unlimited = await isSalesUnlimited(supabase, {
+          userId: auth.userId,
+          companyId: membership.companyId,
+        });
 
         // ---- 始める ----
         if (b.action === "start") {
@@ -127,12 +139,12 @@ export const Route = createFileRoute("/api/sales/roleplay")({
               .eq("company_id", membership.companyId)
               .gte("started_at", starts.month),
           ]);
-          if ((today ?? 0) >= SALES_PER_USER_DAY)
+          if (!unlimited && (today ?? 0) >= SALES_PER_USER_DAY)
             return jsonResponse(
               { error: `ロープレは1日${SALES_PER_USER_DAY}回までです。明日またどうぞ` },
               429,
             );
-          if ((month ?? 0) >= SALES_PER_COMPANY_MONTH)
+          if (!unlimited && (month ?? 0) >= SALES_PER_COMPANY_MONTH)
             return jsonResponse(
               {
                 error: `会社の今月の無料分（${SALES_PER_COMPANY_MONTH}回）を使い切りました。会社の担当者にお問い合わせください`,
@@ -201,7 +213,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
               difficulty: row.difficulty,
               persona: row.persona,
               companyName: membership.companyName,
-              materials: await loadMaterials(supabase, row.company_id, row.scenario),
+              materials: await loadMaterials(supabase, row.company_id, row.scenario, unlimited),
               knowledge: await trainerKnowledge(supabase, row.scenario),
               transcript: row.transcript,
               outcome: row.outcome,
@@ -237,7 +249,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
             coachMode: row.coach_mode,
             persona: row.persona,
             companyName: membership.companyName,
-            materials: await loadMaterials(supabase, row.company_id, row.scenario),
+            materials: await loadMaterials(supabase, row.company_id, row.scenario, unlimited),
             knowledge: await trainerKnowledge(supabase, row.scenario),
             transcript,
             elapsedMin,

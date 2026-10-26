@@ -259,6 +259,34 @@ export async function issueSalesJoinCode(
   throw new Error("could not issue join code");
 }
 
+/** 1社あたりの資料の数の上限（運営の会社は上限なし） */
+export const SALES_MATERIALS_MAX = 30;
+
+/**
+ * 運営（profiles.is_admin）が使うときは上限なし：本人が運営、または会社に運営のアカウントがある
+ * （回数・資料の数・AIに渡す資料の量）
+ */
+export async function isSalesUnlimited(
+  supabase: SupabaseClient,
+  args: { userId?: string; companyId: string },
+): Promise<boolean> {
+  if (args.userId) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", args.userId)
+      .maybeSingle();
+    if ((data as { is_admin?: boolean } | null)?.is_admin) return true;
+  }
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("company_id", args.companyId)
+    .eq("is_admin", true)
+    .limit(1);
+  return (data ?? []).length > 0;
+}
+
 /** 社員が参加している会社（1社だけ） */
 export async function getSalesMembership(
   supabase: SupabaseClient,
@@ -292,14 +320,18 @@ export async function loadMaterials(
   supabase: SupabaseClient,
   companyId: string,
   scenario: SalesScenario,
+  unlimited = false,
 ): Promise<SalesMaterials> {
+  // 運営の会社は資料を多く使えるようにする（AI に渡す量を増やす。キャッシュで使い回すので2回目からは安い）
+  const infoMax = unlimited ? 150000 : MATERIALS_MAX_CHARS;
+  const scriptMax = unlimited ? 60000 : SCRIPT_MAX_CHARS;
   const { data } = await supabase
     .from("sales_materials")
     .select("kind, scenario, title, content")
     .eq("company_id", companyId)
     .in("scenario", ["all", scenario])
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(unlimited ? 500 : SALES_MATERIALS_MAX);
   const join = (rows: { title: string; content: string }[], max: number) => {
     let out = "";
     for (const m of rows) {
@@ -317,8 +349,8 @@ export async function loadMaterials(
   const order = (a: { scenario: string }, b: { scenario: string }) =>
     (a.scenario === scenario ? 0 : 1) - (b.scenario === scenario ? 0 : 1);
   return {
-    script: join(rows.filter((r) => r.kind === "script").sort(order), SCRIPT_MAX_CHARS),
-    info: join(rows.filter((r) => r.kind !== "script").sort(order), MATERIALS_MAX_CHARS),
+    script: join(rows.filter((r) => r.kind === "script").sort(order), scriptMax),
+    info: join(rows.filter((r) => r.kind !== "script").sort(order), infoMax),
   };
 }
 

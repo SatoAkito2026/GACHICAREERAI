@@ -73,6 +73,7 @@ function score(v: number | null | undefined): string {
 
 type CompanyData = {
   company: { name: string; joinCode: string };
+  maxMaterials: number | null;
   members: {
     userId: string;
     name: string;
@@ -162,9 +163,11 @@ export function SalesCompanyPage() {
   };
 
   const addBatch = async () => {
-    const room = Math.max(0, 30 - (data?.materials.length ?? 0));
+    const max = data?.maxMaterials ?? null;
+    const room = max === null ? batch.length : Math.max(0, max - (data?.materials.length ?? 0));
     const items = batch.slice(0, room);
-    if (items.length === 0) return void toast.error("資料は30件までです。古いものを消してください");
+    if (items.length === 0)
+      return void toast.error(`資料は${max}件までです。古いものを消してください`);
     setSaving(true);
     let added = 0;
     for (const m of items) {
@@ -180,7 +183,7 @@ export function SalesCompanyPage() {
     setSaving(false);
     setBatch([]);
     toast.success(
-      `${added}件の資料を追加しました${batch.length > items.length ? `（30件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
+      `${added}件の資料を追加しました${batch.length > items.length ? `（${max}件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
     );
     void load();
   };
@@ -255,8 +258,10 @@ export function SalesCompanyPage() {
             <Card title="AIに覚えさせる資料">
               <p className="mb-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
                 トークスクリプトがある場合は「トークスクリプト」として入れてください。AI
-                の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。30件・1件2万文字まで）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から
-                AI に入っていて、週に1回ネットで最新のコツを調べて更新しています。
+                の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。1件2万文字まで
+                {data.maxMaterials !== null ? `・${data.maxMaterials}件まで` : "・件数の上限なし"}
+                ）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から AI
+                に入っていて、週に1回ネットで最新のコツを調べて更新しています。
               </p>
               <div className="flex flex-col gap-3">
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -529,7 +534,7 @@ export function SalesCompanyPage() {
 
 type MemberData = {
   membership: { companyName: string; displayName: string } | null;
-  remainingToday: number;
+  remainingToday: number | null;
   list: {
     id: string;
     scenarioLabel: string;
@@ -613,8 +618,10 @@ export function SalesMemberPage() {
         ) : (
           <>
             <p className="text-[13px]" style={{ color: C.muted }}>
-              {data.membership.companyName}（{data.membership.displayName} さん）・今日はあと
-              {data.remainingToday}回
+              {data.membership.companyName}（{data.membership.displayName} さん）・
+              {data.remainingToday === null
+                ? "回数の上限なし"
+                : `今日はあと${data.remainingToday}回`}
             </p>
             <Card title="1. 場面を選ぶ">
               <div className="grid gap-2 sm:grid-cols-2">
@@ -699,7 +706,7 @@ export function SalesMemberPage() {
               </div>
             </Card>
             <Button
-              disabled={data.remainingToday <= 0}
+              disabled={data.remainingToday !== null && data.remainingToday <= 0}
               onClick={() =>
                 void navigate({ to: "/sales/play", search: { scenario, difficulty, coach } })
               }
