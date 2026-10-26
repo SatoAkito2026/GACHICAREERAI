@@ -4,6 +4,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { runTalentSummaryJob } from "./lib/talent";
 import { runPracticeReminderJob } from "./lib/notify";
+import { runSalesKnowledgeJob } from "./lib/sales-knowledge";
 import { runPartnerInterviewJob } from "./lib/partner-interview";
 
 type ServerEntry = {
@@ -114,5 +115,7 @@ export default {
     ctx.waitUntil(runPracticeReminderJob());
     // 提携先（POSPOS）の AI 一次面接：90日たった録画・写真・会話を消す、期限切れにする、まとめを作り直す
     ctx.waitUntil(runPartnerInterviewJob());
+    // 営業ロープレ：週に1回、場面ごとの営業のコツをネットで調べて更新する
+    ctx.waitUntil(runSalesKnowledgeJob());
   },
 };

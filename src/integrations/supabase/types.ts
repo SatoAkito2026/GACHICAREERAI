@@ -145,6 +145,7 @@ export type Database = {
           created_at: string;
           id: string;
           kind: string;
+          scenario: string;
           link: string | null;
           read_at: string | null;
           title: string;
@@ -165,6 +166,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
+          scenario?: string;
           link?: string | null;
           read_at?: string | null;
           title?: string;
@@ -367,6 +369,127 @@ export type Database = {
           expires_at?: string;
           deleted_at?: string | null;
           purged_at?: string | null;
+        };
+        Relationships: [];
+      };
+      sales_memberships: {
+        Row: {
+          id: string;
+          company_id: string;
+          user_id: string;
+          display_name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          user_id: string;
+          display_name?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          user_id?: string;
+          display_name?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      sales_materials: {
+        Row: {
+          id: string;
+          company_id: string;
+          kind: string;
+          title: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          kind?: string;
+          scenario?: string;
+          title: string;
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          kind?: string;
+          title?: string;
+          content?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      sales_knowledge: {
+        Row: {
+          scenario: string;
+          content: string;
+          sources: Json;
+          updated_at: string;
+        };
+        Insert: {
+          scenario: string;
+          content: string;
+          sources?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          scenario?: string;
+          content?: string;
+          sources?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      sales_roleplays: {
+        Row: {
+          id: string;
+          company_id: string;
+          user_id: string;
+          scenario: string;
+          difficulty: string;
+          coach_mode: string;
+          persona: Json;
+          transcript: Json;
+          evaluation: Json | null;
+          status: string;
+          outcome: string | null;
+          started_at: string;
+          finished_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          user_id: string;
+          scenario: string;
+          difficulty?: string;
+          coach_mode?: string;
+          persona?: Json;
+          transcript?: Json;
+          evaluation?: Json | null;
+          status?: string;
+          outcome?: string | null;
+          started_at?: string;
+          finished_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          user_id?: string;
+          scenario?: string;
+          difficulty?: string;
+          coach_mode?: string;
+          persona?: Json;
+          transcript?: Json;
+          evaluation?: Json | null;
+          status?: string;
+          outcome?: string | null;
+          started_at?: string;
+          finished_at?: string | null;
         };
         Relationships: [];
       };
@@ -784,6 +907,7 @@ export type Database = {
           created_at: string | null;
           id: string;
           join_code: string | null;
+          sales_join_code: string | null;
           name: string;
           owner_id: string | null;
           plan: string;
@@ -796,6 +920,7 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           join_code?: string | null;
+          sales_join_code?: string | null;
           name: string;
           owner_id?: string | null;
           plan?: string;
@@ -808,6 +933,7 @@ export type Database = {
           created_at?: string | null;
           id?: string;
           join_code?: string | null;
+          sales_join_code?: string | null;
           name?: string;
           owner_id?: string | null;
           plan?: string;
