@@ -20,7 +20,7 @@ import {
   inputStyle,
   talentApi,
 } from "@/components/talent/TalentUI";
-import { MATERIAL_ACCEPT, readMaterialFile, type MaterialText } from "@/lib/material-files";
+import { MATERIAL_ACCEPT, guessKind, materialTitle, readMaterialFile } from "@/lib/material-files";
 
 const SCENARIO_OPTIONS = [
   {
@@ -113,7 +113,7 @@ export function SalesCompanyPage() {
   const [saving, setSaving] = useState(false);
   const [reading, setReading] = useState(false);
   // ZIP などで一度に読み込んだ複数のファイル（まとめて追加する）
-  const [batch, setBatch] = useState<MaterialText[]>([]);
+  const [batch, setBatch] = useState<{ name: string; text: string; kind: MaterialKind }[]>([]);
 
   const load = useCallback(async () => {
     const r = await talentApi<CompanyData>("/api/sales/company");
@@ -149,12 +149,16 @@ export function SalesCompanyPage() {
         return;
       }
       if (found.length > 1) {
-        setBatch(found);
+        // ファイル名から種類を当てる（スクリプト・教え）。ほかは上で選んだ種類（スクリプトを選んでいたら「商品・料金」）
+        const fallback: MaterialKind = kind === "script" || kind === "training" ? "product" : kind;
+        setBatch(found.map((f) => ({ ...f, kind: guessKind(f.name) ?? fallback })));
         return;
       }
       const { name, text } = found[0];
       setContent(text.slice(0, 20000));
-      if (!title) setTitle(name.replace(/\.[^.]+$/, "").slice(0, 80));
+      if (!title) setTitle(materialTitle(name));
+      const guessed = guessKind(name);
+      if (guessed) setKind(guessed);
       if (text.length > 20000) toast.message("長いので、はじめの2万文字だけ使います");
     } catch {
       toast.error("ファイルを読み込めませんでした");
@@ -174,9 +178,9 @@ export function SalesCompanyPage() {
     for (const m of items) {
       const r = await talentApi("/api/sales/company", {
         action: "addMaterial",
-        kind,
+        kind: m.kind,
         scenario: matScenario,
-        title: m.name.replace(/\.[^.]+$/, "").slice(0, 80) || "資料",
+        title: materialTitle(m.name),
         content: m.text.slice(0, 20000),
       });
       if (r.ok) added++;
@@ -354,19 +358,37 @@ export function SalesCompanyPage() {
                       {batch.length}件のファイルを読み込みました
                     </p>
                     <p className="mt-1 text-[12px]" style={{ color: C.sub }}>
-                      上で選んだ「種類」「使う場面」で、ファイルごとに1件ずつ追加します（名前はファイル名）。
+                      ファイルごとに1件ずつ追加します（名前はファイル名、使う場面は上で選んだもの）。種類はファイル名から当てているので、違うものは右で直してください。
                     </p>
-                    <ul className="mt-2 flex max-h-48 flex-col gap-1 overflow-y-auto text-[12px]">
+                    <ul className="mt-2 flex max-h-72 flex-col gap-1.5 overflow-y-auto text-[12px]">
                       {batch.map((m, i) => (
                         <li
                           key={i}
-                          className="flex justify-between gap-2"
+                          className="flex items-center justify-between gap-2"
                           style={{ color: C.text }}
                         >
-                          <span className="truncate">{m.name}</span>
+                          <span className="min-w-0 flex-1 truncate">{m.name}</span>
                           <span className="shrink-0" style={{ color: C.muted }}>
                             {Math.min(m.text.length, 20000).toLocaleString()}文字
                           </span>
+                          <select
+                            value={m.kind}
+                            onChange={(e) =>
+                              setBatch((b) =>
+                                b.map((x, j) =>
+                                  j === i ? { ...x, kind: e.target.value as MaterialKind } : x,
+                                ),
+                              )
+                            }
+                            className="shrink-0 rounded px-1 py-0.5 text-[12px] outline-none"
+                            style={inputStyle}
+                          >
+                            {KIND_OPTIONS.map((k) => (
+                              <option key={k.key} value={k.key}>
+                                {k.label}
+                              </option>
+                            ))}
+                          </select>
                         </li>
                       ))}
                     </ul>
@@ -381,8 +403,25 @@ export function SalesCompanyPage() {
                   </div>
                 )}
               </div>
+              {data.materials.length > 1 && (
+                <div className="mt-4 flex items-center justify-between text-[12px]">
+                  <span style={{ color: C.muted }}>{data.materials.length}件</span>
+                  <button
+                    style={{ color: C.danger }}
+                    onClick={() => {
+                      if (!window.confirm(`資料を${data.materials.length}件すべて消します。`))
+                        return;
+                      void post({ action: "deleteAllMaterials" }).then((r) => {
+                        if (r.ok) void load();
+                      });
+                    }}
+                  >
+                    すべて消す
+                  </button>
+                </div>
+              )}
               {data.materials.length > 0 && (
-                <ul className="mt-4 flex flex-col gap-2">
+                <ul className="mt-2 flex flex-col gap-2">
                   {data.materials.map((m) => (
                     <li
                       key={m.id}
