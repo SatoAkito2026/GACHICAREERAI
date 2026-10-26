@@ -11,6 +11,8 @@
   python3 tools/leads_collect.py 新宿区 渋谷区 --out leads.csv
   python3 tools/leads_collect.py 札幌市 --kind night            # 夜のお店だけ（day=飲食店だけ、all=両方）
   python3 tools/leads_collect.py 豊島区 --limit 50              # まず50軒だけ試す
+  python3 tools/leads_collect.py 東京都 --skip 豊島区 新宿区    # 都道府県まるごと（区市町村ごとに leads-東京都/ に保存。止まっても続きから）
+  python3 tools/leads_collect.py 大阪市 --pref 大阪府           # 東京都以外は --pref をつける
 そのあと:
   python3 tools/leads_import.py leads.csv            # 確認
   python3 tools/leads_import.py leads.csv --commit   # 取り込み
@@ -26,6 +28,7 @@ import argparse
 import csv
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -129,7 +132,28 @@ out tags;'''
             last = e
             print(f"  → うまくいきませんでした（{e}）。別のサーバーで試します", flush=True)
             time.sleep(3)
-    sys.exit(f"OpenStreetMap から取れませんでした（{last}）。少し時間をおいてもう一度試してください。")
+    raise RuntimeError(f"OpenStreetMap から取れませんでした（{last}）。少し時間をおいてもう一度試してください。")
+
+
+def municipalities(pref):
+    """都道府県の中の区市町村の名前の一覧。となりの県の市（境目を共有している）は、役所の場所で見分けて外す"""
+    base = f'rel["name"="{pref}"]["admin_level"="4"];map_to_area->.p;rel(area.p)["boundary"="administrative"]["admin_level"="7"]->.c;'
+    for q in (base + 'node(r.c:"admin_centre")(area.p)->.n;rel.c(bn.n:"admin_centre");out tags;', base + '.c out tags;'):
+        data = urllib.parse.urlencode({"data": "[out:json][timeout:120];" + q}).encode()
+        for ep in OVERPASS:
+            print(f"{pref}: 区市町村の一覧を問い合わせています（{urllib.parse.urlparse(ep).netloc}）…", flush=True)
+            try:
+                code, _, _, raw = fetch(ep, data=data, timeout=130, limit=20_000_000)
+                if code != 200:
+                    raise OSError(f"HTTP {code}")
+                names = sorted({e["tags"]["name"] for e in json.loads(raw.decode())["elements"] if e.get("tags", {}).get("name")})
+                if names:
+                    return names
+                break  # 0件なら、役所の場所で見分けない方法で取り直す
+            except Exception as e:
+                print(f"  → うまくいきませんでした（{e}）。別のサーバーで試します", flush=True)
+                time.sleep(3)
+    sys.exit(f"{pref} の区市町村の一覧が取れませんでした。少し時間をおいてもう一度試してください。")
 
 
 def shop_type(t):
@@ -216,19 +240,9 @@ class Crawler:
         return found[0][0], found[0][1], refused
 
 
-def main():
-    ap = argparse.ArgumentParser(description="モニター募集の送り先を自動で集める")
-    ap.add_argument("areas", nargs="+", help="市区町村や都道府県の名前（例：豊島区 新宿区 大阪市）")
-    ap.add_argument("--pref", default="東京都", help="探す都道府県（同じ名前の区・市を区別するため。例：--pref 大阪府）")
-    ap.add_argument("--kind", choices=["all", "day", "night"], default="all")
-    ap.add_argument("--out", default="leads.csv")
-    ap.add_argument("--limit", type=int, default=0, help="試しに集める最大の軒数")
-    ap.add_argument("--delay", type=float, default=1.5, help="ページごとに待つ秒数")
-    ap.add_argument("--include-chains", action="store_true")
-    ap.add_argument("--allow-osm-email", action="store_true", help="OpenStreetMap にあるだけのアドレスも使う（お店が公開したとは限らないので、ふだんは使わない）")
-    a = ap.parse_args()
+def collect(areas, a, out):
     seen, shops = set(), []
-    for area in a.areas:
+    for area in areas:
         els = overpass(area, a.kind, a.pref)
         n0 = len(shops)
         for e in els:
@@ -277,12 +291,56 @@ def main():
             stats["見つからない"] += 1
         print(f"\r{i}/{len(shops)} 軒のホームページを確認（メールあり {stats['メールあり']}・営業お断り {stats['営業お断り']}）", end="", flush=True)
     print()
-    with open(a.out, "w", encoding="utf-8-sig", newline="") as f:
+    with open(out, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["店名", "種類", "都道府県", "メール", "見つけたページ", "メモ"])
         w.writeheader()
         w.writerows(rows)
-    print(f"{a.out} に {len(rows)} 件を書きました（メールが見つからない {stats['見つからない']}・営業お断りで外した {stats['営業お断り']}）。")
-    print(f"次は: python3 tools/leads_import.py {a.out}")
+    print(f"{out} に {len(rows)} 件を書きました（メールが見つからない {stats['見つからない']}・営業お断りで外した {stats['営業お断り']}）。")
+    print(f"次は: python3 tools/leads_import.py {out}")
+
+    return len(rows)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="モニター募集の送り先を自動で集める")
+    ap.add_argument("areas", nargs="+", help="市区町村や都道府県の名前（例：豊島区 新宿区 大阪市）")
+    ap.add_argument("--pref", default="東京都", help="探す都道府県（同じ名前の区・市を区別するため。例：--pref 大阪府）")
+    ap.add_argument("--skip", nargs="*", default=[], help="都道府県まるごとのとき、飛ばす区市町村（例：--skip 豊島区 新宿区）")
+    ap.add_argument("--whole", action="store_true", help="都道府県を区市町村に分けずに1回で探す（重いので、ふだんは使わない）")
+    ap.add_argument("--kind", choices=["all", "day", "night"], default="all")
+    ap.add_argument("--out", default="leads.csv")
+    ap.add_argument("--limit", type=int, default=0, help="試しに集める最大の軒数")
+    ap.add_argument("--delay", type=float, default=1.5, help="ページごとに待つ秒数")
+    ap.add_argument("--include-chains", action="store_true")
+    ap.add_argument("--allow-osm-email", action="store_true", help="OpenStreetMap にあるだけのアドレスも使う（お店が公開したとは限らないので、ふだんは使わない）")
+    a = ap.parse_args()
+    PREFS = ("都", "道", "府", "県")
+    if len(a.areas) == 1 and a.areas[0].endswith(PREFS) and not a.whole:
+        # 都道府県まるごと：区市町村ごとに分けて、1つずつ CSV にする（止まっても、できた分は飛ばして続きから）
+        pref = a.areas[0]
+        outdir = a.out if a.out != "leads.csv" else f"leads-{pref}"
+        os.makedirs(outdir, exist_ok=True)
+        names = [n for n in municipalities(pref) if n not in a.skip]
+        print(f"{pref}: 区市町村 {len(names)} か所を順番に集めます（できた分は {outdir}/ に1つずつ保存）", flush=True)
+        total = 0
+        for i, name in enumerate(names, 1):
+            path = os.path.join(outdir, f"{name}.csv")
+            if os.path.exists(path):
+                print(f"[{i}/{len(names)}] {name}: もう集めてあるので飛ばします")
+                continue
+            print(f"\n[{i}/{len(names)}] {name}", flush=True)
+            a.pref = pref
+            try:
+                total += collect([name], a, path)
+            except RuntimeError as e:
+                print(f"{name}: {e} → 飛ばして次へ（もう一度同じコマンドを実行すると、ここから集め直します）")
+        print(f"\n{pref}: ぜんぶ終わりました（今回 {total} 件）。")
+        print(f"次は: cat {outdir}/*.csv  →  python3 tools/leads_import.py {outdir}/*.csv")
+        return
+    try:
+        collect(a.areas, a, a.out)
+    except RuntimeError as e:
+        sys.exit(str(e))
 
 
 if __name__ == "__main__":

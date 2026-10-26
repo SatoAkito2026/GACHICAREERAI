@@ -5,6 +5,7 @@
   export SUPABASE_SERVICE_ROLE_KEY=...   # ポスポスのプロジェクトの service_role の鍵
   python3 tools/leads_import.py 送り先.csv            # 確認だけ（入れない）
   python3 tools/leads_import.py 送り先.csv --commit   # 入れる
+  python3 tools/leads_import.py leads-東京都/*.csv --commit   # いくつものファイルをまとめて
 
 CSV の列（1行目に列の名前。日本語・英語どちらでもよい。足りない列は空でよい）:
   店名(shop_name) / 種類(shop_type) / 都道府県(prefecture) / メール(email) / 見つけたページ(source_url) / 広告お断り(ad_refused) / メモ(note)
@@ -63,27 +64,28 @@ def main():
     commit = "--commit" in sys.argv
     if not args:
         print(__doc__); sys.exit(1)
-    with open(args[0], encoding="utf-8-sig", newline="") as f:
-        reader = csv.DictReader(f)
-        head = {h.strip(): h for h in (reader.fieldnames or [])}
-        pick = {k: next((head[n] for n in names if n in head), None) for k, names in COLS.items()}
-        if not pick["email"]:
-            sys.exit(f"メールの列が見つかりません。列の名前: {list(head)}")
-        rows, skip = {}, {"形がちがう": 0, "重複": 0, "広告お断り": 0, "店名なし": 0}
-        for r in reader:
-            g = lambda k: (r.get(pick[k]) or "").strip() if pick[k] else ""
-            email = g("email").lower().strip("<>").replace("mailto:", "")
-            if not EMAIL.match(email):
-                skip["形がちがう"] += 1; continue
-            if g("ad_refused") or REFUSE.search(g("note")):
-                skip["広告お断り"] += 1; continue
-            if email in rows:
-                skip["重複"] += 1; continue
-            name = g("shop_name") or email.split("@")[1]
-            if not g("shop_name"):
-                skip["店名なし"] += 1
-            rows[email] = {"shop_name": name[:100], "shop_type": g("shop_type")[:60] or None, "prefecture": g("prefecture")[:20] or None,
-                           "email": email[:200], "source_url": g("source_url")[:500] or None, "note": g("note")[:500] or None}
+    rows, skip = {}, {"形がちがう": 0, "重複": 0, "広告お断り": 0, "店名なし": 0}
+    for path in args:
+        with open(path, encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            head = {h.strip(): h for h in (reader.fieldnames or [])}
+            pick = {k: next((head[n] for n in names if n in head), None) for k, names in COLS.items()}
+            if not pick["email"]:
+                sys.exit(f"{path}: メールの列が見つかりません。列の名前: {list(head)}")
+            for r in reader:
+                g = lambda k: (r.get(pick[k]) or "").strip() if pick[k] else ""
+                email = g("email").lower().strip("<>").replace("mailto:", "")
+                if not EMAIL.match(email):
+                    skip["形がちがう"] += 1; continue
+                if g("ad_refused") or REFUSE.search(g("note")):
+                    skip["広告お断り"] += 1; continue
+                if email in rows:
+                    skip["重複"] += 1; continue
+                name = g("shop_name") or email.split("@")[1]
+                if not g("shop_name"):
+                    skip["店名なし"] += 1
+                rows[email] = {"shop_name": name[:100], "shop_type": g("shop_type")[:60] or None, "prefecture": g("prefecture")[:20] or None,
+                               "email": email[:200], "source_url": g("source_url")[:500] or None, "note": g("note")[:500] or None}
     print(f"CSV から読んだ送り先: {len(rows)} 件（入れない: " + "・".join(f"{k} {v}" for k, v in skip.items() if v and k != "店名なし") + "）")
     if skip["店名なし"]:
         print(f"  ※ 店名が空の {skip['店名なし']} 件は、メールのドメインを店名のかわりにします")
