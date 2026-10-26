@@ -36,7 +36,7 @@ export type SalesPersona = {
 
 /** 1人あたり1日にできる回数・1社あたり1か月にできる回数（当面は無料なので、使いすぎを防ぐ） */
 export const SALES_PER_USER_DAY = 10;
-export const SALES_PER_COMPANY_MONTH = 600;
+export const SALES_PER_COMPANY_MONTH = 100;
 /** 1回のロープレの上限（社員の発言の回数・分） */
 export const SALES_MAX_TURNS = 40;
 export const SALES_MAX_MINUTES = 20;
@@ -334,8 +334,6 @@ function customerPrompt(args: {
   companyName: string;
   materials: SalesMaterials;
   knowledge: string;
-  coachUsed: number;
-  elapsedMin: number;
 }): string {
   const s = SCENARIOS[args.scenario];
   const d = DIFFICULTIES[args.difficulty];
@@ -361,14 +359,13 @@ ${customerHints(args.scenario)}
 - 簡単には決めない。決めるときは、納得できる理由があったとき
 - 研修だとは言わない。AI であることも言わない。お客さんとして話し続ける
 - 会話が自然に終わるとき（契約・約束をした／はっきり断って電話を切る・ドアを閉める／時間切れ）は、最後のせりふのあとに「${END_MARK}」と書く
-${args.elapsedMin >= SALES_MAX_MINUTES - 2 ? `- 【重要】時間がないので、今回の返事で話を終わらせる（決める・断る・あとで連絡する など）。最後に「${END_MARK}」と書く\n` : ""}
 ${
   args.coachMode === "coach"
     ? `【研修の先生としての役目（助言）】
 営業の人の今の一言が、このままだと商談がだめになりそうな、はっきりしたまずさのとき（例：いきなり売り込む・失礼・相手の話を無視・うそや強引な約束・断られたのに押し続ける）だけ、お客さんとしての返事のかわりに、研修の先生として短い助言を出す。
 - 助言は1〜2文で、何がまずいか＋どう言えばよいかの例（「〜のように言い直してみましょう」）
 - 助言は次の「営業の知識」と、会社のトークスクリプト（あれば）を基準にする。スクリプトの大事な流れ（名乗り・質問・切り返しなど）から大きく外れてまずいときは、スクリプトの言い方を例に出す
-- 細かいことでは止めない。このロープレで出せる助言はあと${Math.max(0, 3 - args.coachUsed)}回まで${args.coachUsed >= 3 ? "（もう出さない）" : ""}
+- 細かいことでは止めない。助言は1回のロープレで3回まで（残りの回数は最後に書く）
 
 【営業の知識（先生として使う。お客さんとしては知らないふりをする）】
 ${args.knowledge}
@@ -381,6 +378,36 @@ ${args.materials.script || "（なし）"}
 【返し方】次のJSONだけを返す：
 {"coach": null または "助言の文", "reply": "お客さんとしてのせりふ（助言を出すときは空の文字）", "outcome": null または "結果（例：アポ獲得／契約／次回また説明／検討すると言われた／断られた）"}
 outcome は会話が終わるとき（${END_MARK} を書くとき）だけ入れる。`;
+}
+
+/** その回だけ変わる指示（助言の残り・時間切れ） */
+function turnNotes(coachMode: SalesCoachMode, coachUsed: number, elapsedMin: number): string {
+  const notes: string[] = [];
+  if (coachMode === "coach")
+    notes.push(
+      coachUsed >= 3
+        ? "【助言の残り】0回。もう助言は出さず、お客さんとして返す（coach は null）"
+        : `【助言の残り】あと${3 - coachUsed}回`,
+    );
+  if (elapsedMin >= SALES_MAX_MINUTES - 2)
+    notes.push(
+      `【重要】時間がないので、今回の返事で話を終わらせる（決める・断る・あとで連絡する など）。最後に「${END_MARK}」と書く`,
+    );
+  return notes.join("\n") || "（追加の指示なし）";
+}
+
+/** 最後の発言に使い回しの印をつける（次の回は、ここまでの会話を安く読める） */
+function withHistoryCache(
+  messages: { role: "user" | "assistant"; content: string }[],
+): Anthropic.MessageParam[] {
+  return messages.map((m, i) =>
+    i === messages.length - 1
+      ? {
+          role: m.role,
+          content: [{ type: "text", text: m.content, cache_control: { type: "ephemeral" } }],
+        }
+      : m,
+  );
 }
 
 function toClaudeMessages(opener: string, transcript: SalesLine[]) {
@@ -424,8 +451,15 @@ export async function customerTurn(args: {
     {
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: customerPrompt({ ...args, coachUsed }),
-      messages: toClaudeMessages(SCENARIOS[args.scenario].opener, args.transcript),
+      // 資料・知識・スクリプトの入った長い指示は毎回同じなので、使い回し（キャッシュ）にする。
+      // 回数・時間で変わるところだけを後ろの別の段に置く。会話の履歴も、前回までの分を使い回す
+      system: [
+        { type: "text", text: customerPrompt(args), cache_control: { type: "ephemeral" } },
+        { type: "text", text: turnNotes(args.coachMode, coachUsed, args.elapsedMin) },
+      ],
+      messages: withHistoryCache(
+        toClaudeMessages(SCENARIOS[args.scenario].opener, args.transcript),
+      ),
     },
     { timeout: 25000, maxRetries: 1 },
   );
