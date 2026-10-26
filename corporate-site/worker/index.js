@@ -363,6 +363,8 @@ function oldUrlRedirect(url) {
   const to = OLD_URLS[path];
   // /contact はそのまま新しいページなので、末尾の / だけの違いは ASSETS に任せる
   if (to && to !== path) return Response.redirect(new URL(to, url).toString(), 301);
+  // 昔の WordPress の月別・日別の一覧（/2025/09/ など）も、お知らせの一覧へ
+  if (/^\/20\d\d(\/\d\d){0,2}$/.test(path)) return Response.redirect(new URL("/news", url).toString(), 301);
   if (/^\/(category|author|tag)\//.test(path)) return Response.redirect(new URL("/news", url).toString(), 301);
   if (path === "/feed" || path.startsWith("/wp-")) return Response.redirect(new URL("/", url).toString(), 301);
   return null;
