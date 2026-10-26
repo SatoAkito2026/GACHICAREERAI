@@ -105,11 +105,12 @@ def overpass(area, kind, pref="東京都"):
     keys = ("website", "contact:website", "url", "email", "contact:email")
     parts = "".join(f'nwr["amenity"~"^({amen})$"]["{k}"](area.a);' for k in keys)
     parts += "".join(f'nwr["shop"~"^(bakery|confectionery|pastry)$"]["{k}"](area.a);' for k in ("website", "contact:website", "email")) if kind != "night" else ""
-    # 同じ名前の区・市がほかの県にもある（北区・中央区・港区など）ので、都道府県の中だけで探す
-    inpref = f'rel["name"="{pref}"]["admin_level"="4"];map_to_area->.p;rel(area.p)["name"="{area}"]["boundary"="administrative"];map_to_area->.a;' if pref and area != pref \
-        else f'area["name"="{area}"]["boundary"="administrative"]->.a;'
+    # 同じ名前の区・市がほかの県にもある（北区・中央区・港区など）ので、都道府県の中にあるお店だけにする（軽い問い合わせ）
+    inpref = f'area["name"="{pref}"]["admin_level"="4"]->.p;' if pref and area != pref else ""
+    if inpref:
+        parts = parts.replace("(area.a);", "(area.a)(area.p);")
     q = f'''[out:json][timeout:180];
-{inpref}
+{inpref}area["name"="{area}"]["boundary"="administrative"]->.a;
 ({parts});
 out tags;'''
     data = urllib.parse.urlencode({"data": q}).encode()
@@ -135,8 +136,15 @@ out tags;'''
     raise RuntimeError(f"OpenStreetMap から取れませんでした（{last}）。少し時間をおいてもう一度試してください。")
 
 
+TOKYO = ("千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区 "
+         "八王子市 立川市 武蔵野市 三鷹市 青梅市 府中市 昭島市 調布市 町田市 小金井市 小平市 日野市 東村山市 国分寺市 国立市 福生市 狛江市 東大和市 清瀬市 東久留米市 "
+         "武蔵村山市 多摩市 稲城市 羽村市 あきる野市 西東京市 瑞穂町 日の出町 檜原村 奥多摩町 大島町 利島村 新島村 神津島村 三宅村 御蔵島村 八丈町 青ヶ島村 小笠原村").split()
+
+
 def municipalities(pref):
     """都道府県の中の区市町村の名前の一覧。となりの県の市（境目を共有している）は、役所の場所で見分けて外す"""
+    if pref == "東京都":
+        return list(TOKYO)  # 東京都は一覧を持っている（地図のサーバーに聞かない）
     base = f'rel["name"="{pref}"]["admin_level"="4"];map_to_area->.p;rel(area.p)["boundary"="administrative"]["admin_level"="7"]->.c;'
     for q in (base + 'node(r.c:"admin_centre")(area.p)->.n;rel.c(bn.n:"admin_centre");out tags;', base + '.c out tags;'):
         data = urllib.parse.urlencode({"data": "[out:json][timeout:120];" + q}).encode()
