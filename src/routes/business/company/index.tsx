@@ -44,7 +44,12 @@ function CompanyDashboard() {
             desc: "コインで見た人・応募してきた人の面接履歴と、採用担当者向けの評価",
             to: "/business/company/purchased",
           },
-
+          {
+            emoji: "🗣️",
+            title: "営業ロープレ（社員研修）",
+            desc: "社員がAIのお客さん相手に訪問販売・反響営業・テレアポ・商談を練習。結果と評価を確認（今は無料）",
+            to: "/business/company/sales",
+          },
           {
             emoji: "📢",
             title: "求人掲載",

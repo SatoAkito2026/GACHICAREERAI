@@ -372,6 +372,16 @@ function MyPage() {
             )}
 
             {!isBusiness && (
+              <SectionCard title="会社の営業ロープレ（社員研修）">
+                <Row
+                  label="営業ロープレをひらく（会社の招待コードで参加）"
+                  href="/private/individual/sales"
+                  arrow
+                />
+              </SectionCard>
+            )}
+
+            {!isBusiness && (
               <SectionCard title="学校・塾とつながる">
                 <SchoolLinkCard />
               </SectionCard>

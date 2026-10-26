@@ -64,6 +64,7 @@ import { Route as PrivateIndexRouteImport } from './routes/private/index'
 import { Route as PrivateAdminRouteImport } from './routes/private/admin'
 import { Route as PrivateInviteRouteImport } from './routes/private/invite'
 import { Route as PrivateWelcomeRouteImport } from './routes/private/welcome'
+import { Route as SalesPlayRouteImport } from './routes/sales/play'
 import { Route as ScreeningHistoryRouteImport } from './routes/screening_.history'
 import { Route as StudioTiktokRouteImport } from './routes/studio.tiktok'
 import { Route as ApiJobsApplicantsRouteImport } from './routes/api/jobs/applicants'
@@ -73,6 +74,11 @@ import { Route as ApiNotificationsIndexRouteImport } from './routes/api/notifica
 import { Route as ApiNotificationsPeekRouteImport } from './routes/api/notifications/peek'
 import { Route as ApiPartnerInterviewIndexRouteImport } from './routes/api/partner-interview/index'
 import { Route as ApiPartnerInterviewTranscribeRouteImport } from './routes/api/partner-interview/transcribe'
+import { Route as ApiSalesCompanyRouteImport } from './routes/api/sales/company'
+import { Route as ApiSalesJoinRouteImport } from './routes/api/sales/join'
+import { Route as ApiSalesResultRouteImport } from './routes/api/sales/result'
+import { Route as ApiSalesRoleplayRouteImport } from './routes/api/sales/roleplay'
+import { Route as ApiSalesTranscribeRouteImport } from './routes/api/sales/transcribe'
 import { Route as ApiSchoolJoinRouteImport } from './routes/api/school/join'
 import { Route as ApiSchoolStudentRouteImport } from './routes/api/school/student'
 import { Route as ApiSchoolStudentsRouteImport } from './routes/api/school/students'
@@ -99,6 +105,7 @@ import { Route as BusinessCompanyHistoryRouteImport } from './routes/business/co
 import { Route as BusinessCompanyJobsRouteImport } from './routes/business/company/jobs'
 import { Route as BusinessCompanyMessagesRouteImport } from './routes/business/company/messages'
 import { Route as BusinessCompanyPurchasedRouteImport } from './routes/business/company/purchased'
+import { Route as BusinessCompanySalesRouteImport } from './routes/business/company/sales'
 import { Route as BusinessCompanyScreeningRouteImport } from './routes/business/company/screening'
 import { Route as BusinessCompanySettingsRouteImport } from './routes/business/company/settings'
 import { Route as BusinessSchoolIndexRouteImport } from './routes/business/school/index'
@@ -112,6 +119,7 @@ import { Route as PrivateIndividualPracticeRouteImport } from './routes/private/
 import { Route as PrivateIndividualPrepRouteImport } from './routes/private/individual/prep'
 import { Route as PrivateIndividualProfileRouteImport } from './routes/private/individual/profile'
 import { Route as PrivateIndividualResearchRouteImport } from './routes/private/individual/research'
+import { Route as PrivateIndividualSalesRouteImport } from './routes/private/individual/sales'
 import { Route as PrivateIndividualSelfAnalysisRouteImport } from './routes/private/individual/self-analysis'
 import { Route as PrivateIndividualTalentRouteImport } from './routes/private/individual/talent'
 import { Route as PrivateStudentIndexRouteImport } from './routes/private/student/index'
@@ -123,6 +131,7 @@ import { Route as PrivateStudentProfileRouteImport } from './routes/private/stud
 import { Route as PrivateStudentResearchRouteImport } from './routes/private/student/research'
 import { Route as PrivateStudentSelfAnalysisRouteImport } from './routes/private/student/self-analysis'
 import { Route as PrivateStudentStatementRouteImport } from './routes/private/student/statement'
+import { Route as SalesResultIdRouteImport } from './routes/sales/result.$id'
 import { Route as ApiPartnerPosposInterviewsRouteImport } from './routes/api/partner/pospos/interviews'
 import { Route as BusinessActorScreeningHistoryRouteImport } from './routes/business/actor/screening_/history'
 import { Route as BusinessCompanyScreeningHistoryRouteImport } from './routes/business/company/screening_.history'
@@ -412,6 +421,11 @@ const PrivateWelcomeRoute = PrivateWelcomeRouteImport.update({
   path: '/private/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesPlayRoute = SalesPlayRouteImport.update({
+  id: '/sales/play',
+  path: '/sales/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScreeningHistoryRoute = ScreeningHistoryRouteImport.update({
   id: '/screening_/history',
   path: '/screening/history',
@@ -459,6 +473,31 @@ const ApiPartnerInterviewTranscribeRoute =
     path: '/api/partner-interview/transcribe',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiSalesCompanyRoute = ApiSalesCompanyRouteImport.update({
+  id: '/api/sales/company',
+  path: '/api/sales/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSalesJoinRoute = ApiSalesJoinRouteImport.update({
+  id: '/api/sales/join',
+  path: '/api/sales/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSalesResultRoute = ApiSalesResultRouteImport.update({
+  id: '/api/sales/result',
+  path: '/api/sales/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSalesRoleplayRoute = ApiSalesRoleplayRouteImport.update({
+  id: '/api/sales/roleplay',
+  path: '/api/sales/roleplay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSalesTranscribeRoute = ApiSalesTranscribeRouteImport.update({
+  id: '/api/sales/transcribe',
+  path: '/api/sales/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSchoolJoinRoute = ApiSchoolJoinRouteImport.update({
   id: '/api/school/join',
   path: '/api/school/join',
@@ -591,6 +630,11 @@ const BusinessCompanyPurchasedRoute =
     path: '/business/company/purchased',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BusinessCompanySalesRoute = BusinessCompanySalesRouteImport.update({
+  id: '/business/company/sales',
+  path: '/business/company/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessCompanyScreeningRoute =
   BusinessCompanyScreeningRouteImport.update({
     id: '/business/company/screening',
@@ -663,6 +707,11 @@ const PrivateIndividualResearchRoute =
     path: '/private/individual/research',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PrivateIndividualSalesRoute = PrivateIndividualSalesRouteImport.update({
+  id: '/private/individual/sales',
+  path: '/private/individual/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateIndividualSelfAnalysisRoute =
   PrivateIndividualSelfAnalysisRouteImport.update({
     id: '/private/individual/self-analysis',
@@ -719,6 +768,11 @@ const PrivateStudentSelfAnalysisRoute =
 const PrivateStudentStatementRoute = PrivateStudentStatementRouteImport.update({
   id: '/private/student/statement',
   path: '/private/student/statement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesResultIdRoute = SalesResultIdRouteImport.update({
+  id: '/sales/result/$id',
+  path: '/sales/result/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPartnerPosposInterviewsRoute =
@@ -829,6 +883,7 @@ export interface FileRoutesByFullPath {
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
+  '/sales/play': typeof SalesPlayRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
@@ -838,6 +893,11 @@ export interface FileRoutesByFullPath {
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
+  '/api/sales/company': typeof ApiSalesCompanyRoute
+  '/api/sales/join': typeof ApiSalesJoinRoute
+  '/api/sales/result': typeof ApiSalesResultRoute
+  '/api/sales/roleplay': typeof ApiSalesRoleplayRoute
+  '/api/sales/transcribe': typeof ApiSalesTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -862,6 +922,7 @@ export interface FileRoutesByFullPath {
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
   '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
+  '/business/company/sales': typeof BusinessCompanySalesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
@@ -873,6 +934,7 @@ export interface FileRoutesByFullPath {
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
+  '/private/individual/sales': typeof PrivateIndividualSalesRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
@@ -883,6 +945,7 @@ export interface FileRoutesByFullPath {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/sales/result/$id': typeof SalesResultIdRoute
   '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/api/partner-interview/': typeof ApiPartnerInterviewIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
@@ -954,6 +1017,7 @@ export interface FileRoutesByTo {
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
+  '/sales/play': typeof SalesPlayRoute
   '/screening/history': typeof ScreeningHistoryRoute
   '/studio/tiktok': typeof StudioTiktokRoute
   '/business': typeof BusinessIndexRoute
@@ -963,6 +1027,11 @@ export interface FileRoutesByTo {
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
+  '/api/sales/company': typeof ApiSalesCompanyRoute
+  '/api/sales/join': typeof ApiSalesJoinRoute
+  '/api/sales/result': typeof ApiSalesResultRoute
+  '/api/sales/roleplay': typeof ApiSalesRoleplayRoute
+  '/api/sales/transcribe': typeof ApiSalesTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -987,6 +1056,7 @@ export interface FileRoutesByTo {
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
   '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
+  '/business/company/sales': typeof BusinessCompanySalesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
@@ -998,6 +1068,7 @@ export interface FileRoutesByTo {
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
+  '/private/individual/sales': typeof PrivateIndividualSalesRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
@@ -1008,6 +1079,7 @@ export interface FileRoutesByTo {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/sales/result/$id': typeof SalesResultIdRoute
   '/api/notifications': typeof ApiNotificationsIndexRoute
   '/api/partner-interview': typeof ApiPartnerInterviewIndexRoute
   '/business/actor': typeof BusinessActorIndexRoute
@@ -1080,6 +1152,7 @@ export interface FileRoutesById {
   '/private/admin': typeof PrivateAdminRoute
   '/private/invite': typeof PrivateInviteRoute
   '/private/welcome': typeof PrivateWelcomeRoute
+  '/sales/play': typeof SalesPlayRoute
   '/screening_/history': typeof ScreeningHistoryRoute
   '/studio/tiktok': typeof StudioTiktokRoute
   '/business/': typeof BusinessIndexRoute
@@ -1089,6 +1162,11 @@ export interface FileRoutesById {
   '/api/jobs/public': typeof ApiJobsPublicRoute
   '/api/notifications/peek': typeof ApiNotificationsPeekRoute
   '/api/partner-interview/transcribe': typeof ApiPartnerInterviewTranscribeRoute
+  '/api/sales/company': typeof ApiSalesCompanyRoute
+  '/api/sales/join': typeof ApiSalesJoinRoute
+  '/api/sales/result': typeof ApiSalesResultRoute
+  '/api/sales/roleplay': typeof ApiSalesRoleplayRoute
+  '/api/sales/transcribe': typeof ApiSalesTranscribeRoute
   '/api/school/join': typeof ApiSchoolJoinRoute
   '/api/school/student': typeof ApiSchoolStudentRoute
   '/api/school/students': typeof ApiSchoolStudentsRoute
@@ -1113,6 +1191,7 @@ export interface FileRoutesById {
   '/business/company/jobs': typeof BusinessCompanyJobsRoute
   '/business/company/messages': typeof BusinessCompanyMessagesRoute
   '/business/company/purchased': typeof BusinessCompanyPurchasedRoute
+  '/business/company/sales': typeof BusinessCompanySalesRoute
   '/business/company/screening': typeof BusinessCompanyScreeningRoute
   '/business/company/settings': typeof BusinessCompanySettingsRoute
   '/business/school/students': typeof BusinessSchoolStudentsRoute
@@ -1124,6 +1203,7 @@ export interface FileRoutesById {
   '/private/individual/prep': typeof PrivateIndividualPrepRoute
   '/private/individual/profile': typeof PrivateIndividualProfileRoute
   '/private/individual/research': typeof PrivateIndividualResearchRoute
+  '/private/individual/sales': typeof PrivateIndividualSalesRoute
   '/private/individual/self-analysis': typeof PrivateIndividualSelfAnalysisRoute
   '/private/individual/talent': typeof PrivateIndividualTalentRoute
   '/private/student/documents': typeof PrivateStudentDocumentsRoute
@@ -1134,6 +1214,7 @@ export interface FileRoutesById {
   '/private/student/research': typeof PrivateStudentResearchRoute
   '/private/student/self-analysis': typeof PrivateStudentSelfAnalysisRoute
   '/private/student/statement': typeof PrivateStudentStatementRoute
+  '/sales/result/$id': typeof SalesResultIdRoute
   '/api/notifications/': typeof ApiNotificationsIndexRoute
   '/api/partner-interview/': typeof ApiPartnerInterviewIndexRoute
   '/business/actor/': typeof BusinessActorIndexRoute
@@ -1207,6 +1288,7 @@ export interface FileRouteTypes {
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
+    | '/sales/play'
     | '/screening/history'
     | '/studio/tiktok'
     | '/business/'
@@ -1216,6 +1298,11 @@ export interface FileRouteTypes {
     | '/api/jobs/public'
     | '/api/notifications/peek'
     | '/api/partner-interview/transcribe'
+    | '/api/sales/company'
+    | '/api/sales/join'
+    | '/api/sales/result'
+    | '/api/sales/roleplay'
+    | '/api/sales/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1240,6 +1327,7 @@ export interface FileRouteTypes {
     | '/business/company/jobs'
     | '/business/company/messages'
     | '/business/company/purchased'
+    | '/business/company/sales'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
@@ -1251,6 +1339,7 @@ export interface FileRouteTypes {
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
+    | '/private/individual/sales'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
     | '/private/student/documents'
@@ -1261,6 +1350,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/sales/result/$id'
     | '/api/notifications/'
     | '/api/partner-interview/'
     | '/business/actor/'
@@ -1332,6 +1422,7 @@ export interface FileRouteTypes {
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
+    | '/sales/play'
     | '/screening/history'
     | '/studio/tiktok'
     | '/business'
@@ -1341,6 +1432,11 @@ export interface FileRouteTypes {
     | '/api/jobs/public'
     | '/api/notifications/peek'
     | '/api/partner-interview/transcribe'
+    | '/api/sales/company'
+    | '/api/sales/join'
+    | '/api/sales/result'
+    | '/api/sales/roleplay'
+    | '/api/sales/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1365,6 +1461,7 @@ export interface FileRouteTypes {
     | '/business/company/jobs'
     | '/business/company/messages'
     | '/business/company/purchased'
+    | '/business/company/sales'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
@@ -1376,6 +1473,7 @@ export interface FileRouteTypes {
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
+    | '/private/individual/sales'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
     | '/private/student/documents'
@@ -1386,6 +1484,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/sales/result/$id'
     | '/api/notifications'
     | '/api/partner-interview'
     | '/business/actor'
@@ -1457,6 +1556,7 @@ export interface FileRouteTypes {
     | '/private/admin'
     | '/private/invite'
     | '/private/welcome'
+    | '/sales/play'
     | '/screening_/history'
     | '/studio/tiktok'
     | '/business/'
@@ -1466,6 +1566,11 @@ export interface FileRouteTypes {
     | '/api/jobs/public'
     | '/api/notifications/peek'
     | '/api/partner-interview/transcribe'
+    | '/api/sales/company'
+    | '/api/sales/join'
+    | '/api/sales/result'
+    | '/api/sales/roleplay'
+    | '/api/sales/transcribe'
     | '/api/school/join'
     | '/api/school/student'
     | '/api/school/students'
@@ -1490,6 +1595,7 @@ export interface FileRouteTypes {
     | '/business/company/jobs'
     | '/business/company/messages'
     | '/business/company/purchased'
+    | '/business/company/sales'
     | '/business/company/screening'
     | '/business/company/settings'
     | '/business/school/students'
@@ -1501,6 +1607,7 @@ export interface FileRouteTypes {
     | '/private/individual/prep'
     | '/private/individual/profile'
     | '/private/individual/research'
+    | '/private/individual/sales'
     | '/private/individual/self-analysis'
     | '/private/individual/talent'
     | '/private/student/documents'
@@ -1511,6 +1618,7 @@ export interface FileRouteTypes {
     | '/private/student/research'
     | '/private/student/self-analysis'
     | '/private/student/statement'
+    | '/sales/result/$id'
     | '/api/notifications/'
     | '/api/partner-interview/'
     | '/business/actor/'
@@ -1583,6 +1691,7 @@ export interface RootRouteChildren {
   PrivateAdminRoute: typeof PrivateAdminRoute
   PrivateInviteRoute: typeof PrivateInviteRoute
   PrivateWelcomeRoute: typeof PrivateWelcomeRoute
+  SalesPlayRoute: typeof SalesPlayRoute
   ScreeningHistoryRoute: typeof ScreeningHistoryRoute
   StudioTiktokRoute: typeof StudioTiktokRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
@@ -1592,6 +1701,11 @@ export interface RootRouteChildren {
   ApiJobsPublicRoute: typeof ApiJobsPublicRoute
   ApiNotificationsPeekRoute: typeof ApiNotificationsPeekRoute
   ApiPartnerInterviewTranscribeRoute: typeof ApiPartnerInterviewTranscribeRoute
+  ApiSalesCompanyRoute: typeof ApiSalesCompanyRoute
+  ApiSalesJoinRoute: typeof ApiSalesJoinRoute
+  ApiSalesResultRoute: typeof ApiSalesResultRoute
+  ApiSalesRoleplayRoute: typeof ApiSalesRoleplayRoute
+  ApiSalesTranscribeRoute: typeof ApiSalesTranscribeRoute
   ApiSchoolJoinRoute: typeof ApiSchoolJoinRoute
   ApiSchoolStudentRoute: typeof ApiSchoolStudentRoute
   ApiSchoolStudentsRoute: typeof ApiSchoolStudentsRoute
@@ -1616,6 +1730,7 @@ export interface RootRouteChildren {
   BusinessCompanyJobsRoute: typeof BusinessCompanyJobsRoute
   BusinessCompanyMessagesRoute: typeof BusinessCompanyMessagesRoute
   BusinessCompanyPurchasedRoute: typeof BusinessCompanyPurchasedRoute
+  BusinessCompanySalesRoute: typeof BusinessCompanySalesRoute
   BusinessCompanyScreeningRoute: typeof BusinessCompanyScreeningRoute
   BusinessCompanySettingsRoute: typeof BusinessCompanySettingsRoute
   BusinessSchoolStudentsRoute: typeof BusinessSchoolStudentsRoute
@@ -1627,6 +1742,7 @@ export interface RootRouteChildren {
   PrivateIndividualPrepRoute: typeof PrivateIndividualPrepRoute
   PrivateIndividualProfileRoute: typeof PrivateIndividualProfileRoute
   PrivateIndividualResearchRoute: typeof PrivateIndividualResearchRoute
+  PrivateIndividualSalesRoute: typeof PrivateIndividualSalesRoute
   PrivateIndividualSelfAnalysisRoute: typeof PrivateIndividualSelfAnalysisRoute
   PrivateIndividualTalentRoute: typeof PrivateIndividualTalentRoute
   PrivateStudentDocumentsRoute: typeof PrivateStudentDocumentsRoute
@@ -1637,6 +1753,7 @@ export interface RootRouteChildren {
   PrivateStudentResearchRoute: typeof PrivateStudentResearchRoute
   PrivateStudentSelfAnalysisRoute: typeof PrivateStudentSelfAnalysisRoute
   PrivateStudentStatementRoute: typeof PrivateStudentStatementRoute
+  SalesResultIdRoute: typeof SalesResultIdRoute
   ApiNotificationsIndexRoute: typeof ApiNotificationsIndexRoute
   ApiPartnerInterviewIndexRoute: typeof ApiPartnerInterviewIndexRoute
   BusinessActorIndexRoute: typeof BusinessActorIndexRoute
@@ -2041,6 +2158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateWelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales/play': {
+      id: '/sales/play'
+      path: '/sales/play'
+      fullPath: '/sales/play'
+      preLoaderRoute: typeof SalesPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/screening_/history': {
       id: '/screening_/history'
       path: '/screening/history'
@@ -2102,6 +2226,41 @@ declare module '@tanstack/react-router' {
       path: '/api/partner-interview/transcribe'
       fullPath: '/api/partner-interview/transcribe'
       preLoaderRoute: typeof ApiPartnerInterviewTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/company': {
+      id: '/api/sales/company'
+      path: '/api/sales/company'
+      fullPath: '/api/sales/company'
+      preLoaderRoute: typeof ApiSalesCompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/join': {
+      id: '/api/sales/join'
+      path: '/api/sales/join'
+      fullPath: '/api/sales/join'
+      preLoaderRoute: typeof ApiSalesJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/result': {
+      id: '/api/sales/result'
+      path: '/api/sales/result'
+      fullPath: '/api/sales/result'
+      preLoaderRoute: typeof ApiSalesResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/roleplay': {
+      id: '/api/sales/roleplay'
+      path: '/api/sales/roleplay'
+      fullPath: '/api/sales/roleplay'
+      preLoaderRoute: typeof ApiSalesRoleplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sales/transcribe': {
+      id: '/api/sales/transcribe'
+      path: '/api/sales/transcribe'
+      fullPath: '/api/sales/transcribe'
+      preLoaderRoute: typeof ApiSalesTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/school/join': {
@@ -2286,6 +2445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessCompanyPurchasedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/company/sales': {
+      id: '/business/company/sales'
+      path: '/business/company/sales'
+      fullPath: '/business/company/sales'
+      preLoaderRoute: typeof BusinessCompanySalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/company/screening': {
       id: '/business/company/screening'
       path: '/business/company/screening'
@@ -2377,6 +2543,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateIndividualResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/private/individual/sales': {
+      id: '/private/individual/sales'
+      path: '/private/individual/sales'
+      fullPath: '/private/individual/sales'
+      preLoaderRoute: typeof PrivateIndividualSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/private/individual/self-analysis': {
       id: '/private/individual/self-analysis'
       path: '/private/individual/self-analysis'
@@ -2452,6 +2625,13 @@ declare module '@tanstack/react-router' {
       path: '/private/student/statement'
       fullPath: '/private/student/statement'
       preLoaderRoute: typeof PrivateStudentStatementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales/result/$id': {
+      id: '/sales/result/$id'
+      path: '/sales/result/$id'
+      fullPath: '/sales/result/$id'
+      preLoaderRoute: typeof SalesResultIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/partner/pospos/interviews': {
@@ -2589,6 +2769,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateAdminRoute: PrivateAdminRoute,
   PrivateInviteRoute: PrivateInviteRoute,
   PrivateWelcomeRoute: PrivateWelcomeRoute,
+  SalesPlayRoute: SalesPlayRoute,
   ScreeningHistoryRoute: ScreeningHistoryRoute,
   StudioTiktokRoute: StudioTiktokRoute,
   BusinessIndexRoute: BusinessIndexRoute,
@@ -2598,6 +2779,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiJobsPublicRoute: ApiJobsPublicRoute,
   ApiNotificationsPeekRoute: ApiNotificationsPeekRoute,
   ApiPartnerInterviewTranscribeRoute: ApiPartnerInterviewTranscribeRoute,
+  ApiSalesCompanyRoute: ApiSalesCompanyRoute,
+  ApiSalesJoinRoute: ApiSalesJoinRoute,
+  ApiSalesResultRoute: ApiSalesResultRoute,
+  ApiSalesRoleplayRoute: ApiSalesRoleplayRoute,
+  ApiSalesTranscribeRoute: ApiSalesTranscribeRoute,
   ApiSchoolJoinRoute: ApiSchoolJoinRoute,
   ApiSchoolStudentRoute: ApiSchoolStudentRoute,
   ApiSchoolStudentsRoute: ApiSchoolStudentsRoute,
@@ -2622,6 +2808,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessCompanyJobsRoute: BusinessCompanyJobsRoute,
   BusinessCompanyMessagesRoute: BusinessCompanyMessagesRoute,
   BusinessCompanyPurchasedRoute: BusinessCompanyPurchasedRoute,
+  BusinessCompanySalesRoute: BusinessCompanySalesRoute,
   BusinessCompanyScreeningRoute: BusinessCompanyScreeningRoute,
   BusinessCompanySettingsRoute: BusinessCompanySettingsRoute,
   BusinessSchoolStudentsRoute: BusinessSchoolStudentsRoute,
@@ -2633,6 +2820,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateIndividualPrepRoute: PrivateIndividualPrepRoute,
   PrivateIndividualProfileRoute: PrivateIndividualProfileRoute,
   PrivateIndividualResearchRoute: PrivateIndividualResearchRoute,
+  PrivateIndividualSalesRoute: PrivateIndividualSalesRoute,
   PrivateIndividualSelfAnalysisRoute: PrivateIndividualSelfAnalysisRoute,
   PrivateIndividualTalentRoute: PrivateIndividualTalentRoute,
   PrivateStudentDocumentsRoute: PrivateStudentDocumentsRoute,
@@ -2643,6 +2831,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateStudentResearchRoute: PrivateStudentResearchRoute,
   PrivateStudentSelfAnalysisRoute: PrivateStudentSelfAnalysisRoute,
   PrivateStudentStatementRoute: PrivateStudentStatementRoute,
+  SalesResultIdRoute: SalesResultIdRoute,
   ApiNotificationsIndexRoute: ApiNotificationsIndexRoute,
   ApiPartnerInterviewIndexRoute: ApiPartnerInterviewIndexRoute,
   BusinessActorIndexRoute: BusinessActorIndexRoute,
