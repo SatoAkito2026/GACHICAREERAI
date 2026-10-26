@@ -126,7 +126,11 @@ out tags;'''
             code, _, _, raw = fetch(ep, data=data, timeout=190, limit=50_000_000)
             if code != 200:
                 raise OSError(f"HTTP {code}")
-            els = json.loads(raw.decode())["elements"]
+            res = json.loads(raw.decode())
+            # 混んでいて時間切れになると、HTTP 200 のまま「0件」で返ってくることがある（remark に runtime error）
+            if "error" in (res.get("remark") or "").lower():
+                raise OSError("サーバーの時間切れ: " + res["remark"][:80])
+            els = res["elements"]
             print(f"  → 返事がきました（{time.time() - t0:.0f}秒）", flush=True)
             return els
         except Exception as e:  # 混んでいたら次のサーバーへ
