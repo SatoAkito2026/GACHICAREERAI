@@ -6,6 +6,7 @@
  * POST /api/sales/company { action: "addMaterial", title, content } → 資料を足す（文字だけ。手数料など社内の情報は AI で取り除く）
  * POST /api/sales/company { action: "deleteMaterial", id }         → 資料を消す
  * POST /api/sales/company { action: "deleteAllMaterials" }         → 資料をすべて消す
+ * POST /api/sales/company { action: "setScreenRules", keep, remove } → 手数料の見分けルールを保存（消す言葉は今ある資料からも消す）
  * POST /api/sales/company { action: "deleteMaterials", ids }       → 選んだ資料を消す
  * POST /api/sales/company { action: "updateMaterial", id, kind }   → 資料の種類を変える
  * POST /api/sales/company { action: "removeMember", userId }       → 社員を外す
@@ -13,7 +14,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyApiUser } from "@/lib/api-auth";
-import { screenAndSave } from "@/lib/sales-screen";
+import { applyRemoveTerms, loadScreenRules, screenAndSave } from "@/lib/sales-screen";
 import { jsonResponse, serviceClient } from "@/lib/talent";
 import {
   SALES_MATERIALS_MAX,
@@ -34,6 +35,11 @@ const Body = z.discriminatedUnion("action", [
   }),
   z.object({ action: z.literal("deleteMaterial"), id: z.string().uuid() }),
   z.object({ action: z.literal("deleteAllMaterials") }),
+  z.object({
+    action: z.literal("setScreenRules"),
+    keep: z.array(z.string().trim().min(1).max(30)).max(50),
+    remove: z.array(z.string().trim().min(1).max(30)).max(50),
+  }),
   z.object({
     action: z.literal("deleteMaterials"),
     ids: z.array(z.string().uuid()).min(1).max(500),
@@ -88,6 +94,8 @@ export const Route = createFileRoute("/api/sales/company")({
           company: { name: company.name, joinCode },
           // 資料の数の上限（運営の会社は null＝上限なし）
           maxMaterials: unlimited ? null : SALES_MATERIALS_MAX,
+          // 手数料の見分けルール（必ず残す言葉・必ず消す言葉）
+          screenRules: await loadScreenRules(supabase, company.id),
           members: (members ?? []).map((m) => {
             const mine = done.filter((p) => p.user_id === m.user_id);
             const scores = mine.map(avg).filter((v): v is number => typeof v === "number");
@@ -164,7 +172,7 @@ export const Route = createFileRoute("/api/sales/company")({
               title: b.title,
               content: b.content,
             })
-            .select("id, title, content")
+            .select("id, company_id, title, content")
             .single();
           if (error || !row) return jsonResponse({ error: "保存に失敗しました" }, 500);
           // 手数料・成果報酬など社内だけの情報を AI で取り除いてから使う（失敗したら毎時の Cron でやり直す）
@@ -191,6 +199,36 @@ export const Route = createFileRoute("/api/sales/company")({
             .eq("id", b.id)
             .eq("company_id", company.id);
           return jsonResponse({ ok: true });
+        }
+        if (b.action === "setScreenRules") {
+          const keep = [...new Set(b.keep)];
+          const remove = [...new Set(b.remove)];
+          const { error } = await supabase
+            .from("companies")
+            .update({ sales_keep_terms: keep, sales_remove_terms: remove })
+            .eq("id", company.id);
+          if (error) return jsonResponse({ error: "保存に失敗しました" }, 500);
+          // 必ず消す言葉は、今ある資料からもすぐに消す（AI を呼ばずに言葉で消す）
+          let removed = 0;
+          if (remove.length) {
+            const { data: rows } = await supabase
+              .from("sales_materials")
+              .select("id, content, redacted")
+              .eq("company_id", company.id);
+            for (const r of rows ?? []) {
+              const out = applyRemoveTerms(r.content, remove);
+              if (out.removed === 0) continue;
+              removed += out.removed;
+              await supabase
+                .from("sales_materials")
+                .update({
+                  content: out.content,
+                  redacted: r.redacted < 0 ? r.redacted : r.redacted + out.removed,
+                })
+                .eq("id", r.id);
+            }
+          }
+          return jsonResponse({ ok: true, removed });
         }
         if (b.action === "deleteAllMaterials") {
           await supabase.from("sales_materials").delete().eq("company_id", company.id);
