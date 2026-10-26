@@ -50,7 +50,9 @@ POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が
 - 社員は個人で会員登録し、会社の招待コード（`companies.sales_join_code`、学校の `join_code` とは別）で参加（`sales_memberships`、1社だけ）。入口はマイページ →`/private/individual/sales`
 - 会社の画面 `/business/company/sales`：招待コード・資料・社員ごとの回数と評価・最近のロープレ。資料（`sales_materials`）は種類（トークスクリプト／商品・料金／議事録／そのほか）と使う場面を選ぶ。PDF・Word・テキストと、それらをまとめた ZIP から読み込める（ブラウザで文字だけ取り出す `src/lib/material-files.ts`。ZIP はファイルごとに1件）
 - 本番 `/sales/play`（`SalesPlayPage`）：お客さんが先に話す。進め方は「まずいところで止めて助言（3回まで、言い直す）」か「最後までやる」。電話の場面は電話の画面、それ以外は名札の画面（面接官の顔は使わない）。結果 `/sales/result/<id>` は本人と、参加中の会社の担当者が見られる
-- AI：お客さん役と助言は `customerTurn`、評価は `evaluateRoleplay`（6つの観点1〜5、根拠の引用が本人の発言にないものは捨てる）。お客さん役には商品資料とよくある断り文句だけを渡し、先生（助言・評価）にはトークスクリプトと営業の知識を渡す
+- AI：お客さん役と助言は `customerTurn`、評価は `evaluateRoleplay`（7つの観点1〜5。1つ目は「ピッチ」＝相づち・おうむ返し・話す速さ・雰囲気合わせ。根拠の引用が本人の発言にないものは捨てる）。お客さん役には商品資料・会社の教え（働きかけへの自然な反応用）・よくある断り文句を渡し、先生（助言・評価）にはさらにトークスクリプトと営業の知識を渡す
+- 資料の種類「営業の教え・考え方」（`kind=training`。ピッチ・5インパルス・羊の法則など会社で教えていること）は、助言・評価のいちばん大事な基準。評価では教えの項目ごとに「できた／まだ」を出す（`methods`）
+- 話す速さ：画面が営業の一言の秒数（話しはじめ〜最後に声が出たとき）を送り、お客さんの声は音声の長さから計る（`SalesLine.sec`、`charsPerSec`）。お客さん役と評価に1秒あたりの文字数で渡す
 - 営業の知識は `src/lib/sales-knowledge.ts`：場面ごとの型（流れ・技・NG・断り文句・特定商取引法など）を組み込み、毎時の Cron の `runSalesKnowledgeJob` が週に1回、場面ごとに AI のウェブ検索で最新のコツを調べて `sales_knowledge` に入れる
 - API：`src/routes/api/sales/*`（join・company・roleplay・result・transcribe）
 

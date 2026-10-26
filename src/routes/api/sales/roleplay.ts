@@ -31,6 +31,7 @@ import {
   jstStarts,
   loadMaterials,
   makePersona,
+  CUSTOMER_TEMPO,
 } from "@/lib/sales-roleplay";
 import { trainerKnowledge } from "@/lib/sales-knowledge";
 
@@ -45,6 +46,8 @@ const Body = z.discriminatedUnion("action", [
     action: z.literal("turn"),
     id: z.string().uuid(),
     text: z.string().trim().min(1).max(2000),
+    // 声が出ていた秒数（話す速さを見るため）
+    sec: z.number().min(0).max(300).optional(),
   }),
   z.object({ action: z.literal("finish"), id: z.string().uuid() }),
   z.object({ action: z.literal("abandon"), id: z.string().uuid() }),
@@ -64,6 +67,13 @@ type Row = {
   outcome: string | null;
   started_at: string;
 };
+
+/** お客さんの声の長さ（PCM 24kHz・16bit を、画面で1.15倍速にして流す） */
+function audioSec(audioBase64: string | null): number | undefined {
+  if (!audioBase64) return undefined;
+  const bytes = (audioBase64.length * 3) / 4;
+  return Math.round((bytes / 2 / 24000 / CUSTOMER_TEMPO) * 10) / 10;
+}
 
 export const Route = createFileRoute("/api/sales/roleplay")({
   server: {
@@ -153,6 +163,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
             );
           const persona = makePersona(b.scenario);
           const opener = SCENARIOS[b.scenario].opener;
+          const openerAudio = await customerSpeak(opener, persona, b.difficulty);
           const { data: row, error } = await supabase
             .from("sales_roleplays")
             .insert({
@@ -162,7 +173,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
               difficulty: b.difficulty,
               coach_mode: b.coachMode,
               persona,
-              transcript: [{ role: "customer", text: opener }],
+              transcript: [{ role: "customer", text: opener, sec: audioSec(openerAudio) }],
             })
             .select("id")
             .single();
@@ -172,7 +183,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
             persona: { name: persona.name, profile: persona.profile },
             phone: SCENARIOS[b.scenario].phone,
             reply: opener,
-            audioBase64: await customerSpeak(opener, persona, b.difficulty),
+            audioBase64: openerAudio,
           });
         }
 
@@ -240,7 +251,12 @@ export const Route = createFileRoute("/api/sales/roleplay")({
         const elapsedMin = (Date.now() - new Date(row.started_at).getTime()) / 60000;
         if (sellerTurns >= SALES_MAX_TURNS || elapsedMin >= SALES_MAX_MINUTES + 2)
           return jsonResponse({ reply: "", coach: null, ended: true, outcome: "時間切れ" });
-        const transcript: SalesLine[] = [...row.transcript, { role: "seller", text: b.text }];
+        const sellerLine: SalesLine = {
+          role: "seller",
+          text: b.text,
+          ...(b.sec ? { sec: Math.round(b.sec * 10) / 10 } : {}),
+        };
+        const transcript: SalesLine[] = [...row.transcript, sellerLine];
         let turn: Awaited<ReturnType<typeof customerTurn>>;
         try {
           turn = await customerTurn({
@@ -263,11 +279,14 @@ export const Route = createFileRoute("/api/sales/roleplay")({
         }
         if (turn.coach) {
           // 助言：今の一言はお客さんに聞こえなかったことにして、言い直してもらう
-          transcript[transcript.length - 1] = { role: "seller", text: b.text, retracted: true };
+          transcript[transcript.length - 1] = { ...sellerLine, retracted: true };
           transcript.push({ role: "coach", text: turn.coach });
-        } else {
-          transcript.push({ role: "customer", text: turn.reply });
         }
+        const audioBase64 = turn.coach
+          ? null
+          : await customerSpeak(turn.reply, row.persona, row.difficulty);
+        if (!turn.coach)
+          transcript.push({ role: "customer", text: turn.reply, sec: audioSec(audioBase64) });
         await supabase
           .from("sales_roleplays")
           .update({ transcript, ...(turn.ended ? { outcome: turn.outcome } : {}) })
@@ -278,9 +297,7 @@ export const Route = createFileRoute("/api/sales/roleplay")({
           coach: turn.coach,
           ended: turn.ended,
           outcome: turn.outcome,
-          audioBase64: turn.coach
-            ? null
-            : await customerSpeak(turn.reply, row.persona, row.difficulty),
+          audioBase64,
         });
       },
     },

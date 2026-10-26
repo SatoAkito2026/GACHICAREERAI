@@ -23,7 +23,7 @@ const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("newCode") }),
   z.object({
     action: z.literal("addMaterial"),
-    kind: z.enum(["script", "product", "minutes", "other"]),
+    kind: z.enum(["script", "training", "product", "minutes", "other"]),
     scenario: z.enum(["all", "door", "inbound", "teleapo", "b2b"]),
     title: z.string().trim().min(1).max(80),
     content: z.string().trim().min(1).max(20000),

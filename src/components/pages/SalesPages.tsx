@@ -50,6 +50,7 @@ const SCENARIO_OPTIONS = [
 ] as const;
 const KIND_OPTIONS = [
   { key: "script", label: "トークスクリプト" },
+  { key: "training", label: "営業の教え・考え方" },
   { key: "product", label: "商品・料金" },
   { key: "minutes", label: "商談の議事録" },
   { key: "other", label: "そのほか" },
@@ -257,7 +258,7 @@ export function SalesCompanyPage() {
 
             <Card title="AIに覚えさせる資料">
               <p className="mb-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-                トークスクリプトがある場合は「トークスクリプト」として入れてください。AI
+                トークスクリプトは「トークスクリプト」、会社で教えている営業の考え方・技（ピッチ、5インパルス、羊の法則、仮クロなど）は「営業の教え・考え方」として入れてください。教えは、助言・評価でいちばん大事な基準になり、お客さん役もその働きかけに自然に反応します。AI
                 の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。1件2万文字まで
                 {data.maxMaterials !== null ? `・${data.maxMaterials}件まで` : "・件数の上限なし"}
                 ）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から AI
@@ -790,6 +791,7 @@ type ResultData = {
     improvements: { point: string; example: string }[];
     summary: string;
     outcome: string;
+    methods?: { name: string; done: boolean; comment: string; quote: string | null }[];
   } | null;
 };
 
@@ -832,7 +834,7 @@ export function SalesResultPage({ id }: { id: string }) {
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[12px]" style={{ color: C.muted }}>
-                        6つの観点の平均
+                        観点の平均
                       </p>
                       <p
                         style={{ color: C.accent, fontSize: 40, fontWeight: 900, lineHeight: 1.1 }}
@@ -892,6 +894,45 @@ export function SalesResultPage({ id }: { id: string }) {
                     ))}
                   </ul>
                 </Card>
+                {(data.evaluation.methods?.length ?? 0) > 0 && (
+                  <Card title="会社の教えの実践">
+                    <ul className="flex flex-col gap-3">
+                      {data.evaluation.methods!.map((m, i) => (
+                        <li key={i}>
+                          <div
+                            className="flex items-center justify-between gap-2 text-[14px]"
+                            style={{ color: C.text }}
+                          >
+                            <span style={{ fontWeight: 700 }}>{m.name}</span>
+                            <span
+                              className="shrink-0 rounded-full px-2 py-0.5 text-[12px]"
+                              style={{
+                                background: m.done ? C.accent : C.card2,
+                                color: m.done ? "#000" : C.sub,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {m.done ? "できた" : "まだ"}
+                            </span>
+                          </div>
+                          {m.comment && (
+                            <p
+                              className="mt-1 text-[13px]"
+                              style={{ color: C.sub, lineHeight: 1.6 }}
+                            >
+                              {m.comment}
+                            </p>
+                          )}
+                          {m.quote && (
+                            <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
+                              根拠：「{m.quote}」
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
                 {data.evaluation.good.length > 0 && (
                   <Card title="よかったところ">
                     <ul
