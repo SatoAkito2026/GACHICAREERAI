@@ -50,6 +50,7 @@ const SCENARIO_OPTIONS = [
 ] as const;
 const KIND_OPTIONS = [
   { key: "script", label: "トークスクリプト" },
+  { key: "training", label: "営業の教え・考え方" },
   { key: "product", label: "商品・料金" },
   { key: "minutes", label: "商談の議事録" },
   { key: "other", label: "そのほか" },
@@ -73,6 +74,7 @@ function score(v: number | null | undefined): string {
 
 type CompanyData = {
   company: { name: string; joinCode: string };
+  maxMaterials: number | null;
   members: {
     userId: string;
     name: string;
@@ -162,9 +164,11 @@ export function SalesCompanyPage() {
   };
 
   const addBatch = async () => {
-    const room = Math.max(0, 30 - (data?.materials.length ?? 0));
+    const max = data?.maxMaterials ?? null;
+    const room = max === null ? batch.length : Math.max(0, max - (data?.materials.length ?? 0));
     const items = batch.slice(0, room);
-    if (items.length === 0) return void toast.error("資料は30件までです。古いものを消してください");
+    if (items.length === 0)
+      return void toast.error(`資料は${max}件までです。古いものを消してください`);
     setSaving(true);
     let added = 0;
     for (const m of items) {
@@ -180,7 +184,7 @@ export function SalesCompanyPage() {
     setSaving(false);
     setBatch([]);
     toast.success(
-      `${added}件の資料を追加しました${batch.length > items.length ? `（30件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
+      `${added}件の資料を追加しました${batch.length > items.length ? `（${max}件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
     );
     void load();
   };
@@ -254,9 +258,11 @@ export function SalesCompanyPage() {
 
             <Card title="AIに覚えさせる資料">
               <p className="mb-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-                トークスクリプトがある場合は「トークスクリプト」として入れてください。AI
-                の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。30件・1件2万文字まで）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から
-                AI に入っていて、週に1回ネットで最新のコツを調べて更新しています。
+                トークスクリプトは「トークスクリプト」、会社で教えている営業の考え方・技（ピッチ、5インパルス、羊の法則、仮クロなど）は「営業の教え・考え方」として入れてください。教えは、助言・評価でいちばん大事な基準になり、お客さん役もその働きかけに自然に反応します。AI
+                の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。1件2万文字まで
+                {data.maxMaterials !== null ? `・${data.maxMaterials}件まで` : "・件数の上限なし"}
+                ）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から AI
+                に入っていて、週に1回ネットで最新のコツを調べて更新しています。
               </p>
               <div className="flex flex-col gap-3">
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -529,7 +535,7 @@ export function SalesCompanyPage() {
 
 type MemberData = {
   membership: { companyName: string; displayName: string } | null;
-  remainingToday: number;
+  remainingToday: number | null;
   list: {
     id: string;
     scenarioLabel: string;
@@ -613,8 +619,10 @@ export function SalesMemberPage() {
         ) : (
           <>
             <p className="text-[13px]" style={{ color: C.muted }}>
-              {data.membership.companyName}（{data.membership.displayName} さん）・今日はあと
-              {data.remainingToday}回
+              {data.membership.companyName}（{data.membership.displayName} さん）・
+              {data.remainingToday === null
+                ? "回数の上限なし"
+                : `今日はあと${data.remainingToday}回`}
             </p>
             <Card title="1. 場面を選ぶ">
               <div className="grid gap-2 sm:grid-cols-2">
@@ -699,7 +707,7 @@ export function SalesMemberPage() {
               </div>
             </Card>
             <Button
-              disabled={data.remainingToday <= 0}
+              disabled={data.remainingToday !== null && data.remainingToday <= 0}
               onClick={() =>
                 void navigate({ to: "/sales/play", search: { scenario, difficulty, coach } })
               }
@@ -783,6 +791,7 @@ type ResultData = {
     improvements: { point: string; example: string }[];
     summary: string;
     outcome: string;
+    methods?: { name: string; done: boolean; comment: string; quote: string | null }[];
   } | null;
 };
 
@@ -825,7 +834,7 @@ export function SalesResultPage({ id }: { id: string }) {
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <p className="text-[12px]" style={{ color: C.muted }}>
-                        6つの観点の平均
+                        観点の平均
                       </p>
                       <p
                         style={{ color: C.accent, fontSize: 40, fontWeight: 900, lineHeight: 1.1 }}
@@ -885,6 +894,45 @@ export function SalesResultPage({ id }: { id: string }) {
                     ))}
                   </ul>
                 </Card>
+                {(data.evaluation.methods?.length ?? 0) > 0 && (
+                  <Card title="会社の教えの実践">
+                    <ul className="flex flex-col gap-3">
+                      {data.evaluation.methods!.map((m, i) => (
+                        <li key={i}>
+                          <div
+                            className="flex items-center justify-between gap-2 text-[14px]"
+                            style={{ color: C.text }}
+                          >
+                            <span style={{ fontWeight: 700 }}>{m.name}</span>
+                            <span
+                              className="shrink-0 rounded-full px-2 py-0.5 text-[12px]"
+                              style={{
+                                background: m.done ? C.accent : C.card2,
+                                color: m.done ? "#000" : C.sub,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {m.done ? "できた" : "まだ"}
+                            </span>
+                          </div>
+                          {m.comment && (
+                            <p
+                              className="mt-1 text-[13px]"
+                              style={{ color: C.sub, lineHeight: 1.6 }}
+                            >
+                              {m.comment}
+                            </p>
+                          )}
+                          {m.quote && (
+                            <p className="mt-1 text-[12px]" style={{ color: C.muted }}>
+                              根拠：「{m.quote}」
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
                 {data.evaluation.good.length > 0 && (
                   <Card title="よかったところ">
                     <ul

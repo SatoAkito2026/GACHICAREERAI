@@ -16,14 +16,15 @@ import { timeStretch } from "@/lib/time-stretch";
 type Scenario = "door" | "inbound" | "teleapo" | "b2b";
 type Line = { role: "seller" | "customer" | "coach"; text: string; retracted?: boolean };
 
+// お客さんの声は少しだけ速く（サーバーの CUSTOMER_TEMPO と同じ。声の長さから話す速さを計るのに使う）
+const CUSTOMER_TEMPO = 1.15;
+
 const SCENARIO_LABEL: Record<Scenario, string> = {
   door: "訪問販売",
   inbound: "反響営業",
   teleapo: "テレアポ",
   b2b: "法人営業（商談）",
 };
-// お客さんの声は少しだけ速く（面接官ほどは速くしない）
-const CUSTOMER_TEMPO = 1.15;
 
 function pickMime(): string {
   if (typeof MediaRecorder === "undefined") return "";
@@ -168,7 +169,7 @@ export function SalesPlayPage({
   };
 
   const send = useCallback(
-    async (blob: Blob, type: string) => {
+    async (blob: Blob, type: string, sec: number) => {
       if (!idRef.current) return;
       setProcessing(true);
       setNotice("");
@@ -192,7 +193,12 @@ export function SalesPlayPage({
           ended: boolean;
           outcome: string | null;
           audioBase64: string | null;
-        }>("/api/sales/roleplay", { action: "turn", id: idRef.current, text });
+        }>("/api/sales/roleplay", {
+          action: "turn",
+          id: idRef.current,
+          text,
+          sec,
+        });
         if (!r.ok) {
           setLines((l) => l.slice(0, -1));
           setNotice(r.data.error ?? "通信がうまくいきませんでした。もう一度話してください");
@@ -232,6 +238,7 @@ export function SalesPlayPage({
     let rec: MediaRecorder | null = null;
     let chunks: Blob[] = [];
     let stopping = false;
+    let recStartedAt = 0;
     const mime = pickMime();
     const tick = () => {
       analyser.getByteFrequencyData(data);
@@ -245,6 +252,7 @@ export function SalesPlayPage({
           chunks = [];
           rec.ondataavailable = (e) => chunks.push(e.data);
           rec.start();
+          recStartedAt = now;
           voicedMsRef.current = 0;
           silentSinceRef.current = now;
           setListening(true);
@@ -262,7 +270,9 @@ export function SalesPlayPage({
         const type = r.mimeType || mime || "audio/webm";
         r.onstop = () => {
           setListening(false);
-          void send(new Blob(chunks, { type }), type);
+          // 話しはじめから最後に声が出たときまでの時間（話す速さを見るため。終わりの無音は入れない）
+          const spoken = (silentSinceRef.current - recStartedAt) / 1000;
+          void send(new Blob(chunks, { type }), type, Math.max(0, spoken));
         };
         r.stop();
       }

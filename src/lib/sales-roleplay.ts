@@ -6,7 +6,7 @@
  * - 会社は資料（トークスクリプト・商品の説明・商談の議事録など）を入れておける（sales_materials）。AI はそれをもとにお客さんを演じ、
  *   先生（助言・評価）はスクリプトの流れと営業の知識（sales-knowledge.ts）を基準にする
  * - 進め方は「まずいところで止めて助言（coach）」か「最後までやる（full）」。助言のときは、まずい一言を言い直してもらう
- * - 終わったら営業用の評価（6つの観点を1〜5・根拠は本人の発言の引用・よかった点・直す点と言い換え例）
+ * - 終わったら営業用の評価（7つの観点を1〜5・根拠は本人の発言の引用・よかった点・直す点と言い換え例）
  * - 面接の練習・人材プロフィールとは別物（7つの力・人材検索にはつながない）。料金は当面なし（回数の上限だけ）
  */
 import Anthropic from "@anthropic-ai/sdk";
@@ -24,6 +24,8 @@ export type SalesLine = {
   text: string;
   /** 助言を受けて言い直した、前の一言（お客さんには聞こえなかったことにする） */
   retracted?: boolean;
+  /** 話していた秒数（話す速さ＝ピッチを見るため。営業は声が出ていた時間、お客さんは声の長さ） */
+  sec?: number;
 };
 export type SalesPersona = {
   name: string;
@@ -40,6 +42,8 @@ export const SALES_PER_COMPANY_MONTH = 100;
 /** 1回のロープレの上限（社員の発言の回数・分） */
 export const SALES_MAX_TURNS = 40;
 export const SALES_MAX_MINUTES = 20;
+/** お客さんの声の速さ（画面で、声の高さを変えずにこの倍率で流す） */
+export const CUSTOMER_TEMPO = 1.15;
 /** 資料をAIに渡すときの文字数の上限 */
 const MATERIALS_MAX_CHARS = 20000;
 const SCRIPT_MAX_CHARS = 12000;
@@ -110,8 +114,9 @@ export const DIFFICULTIES: Record<
   },
 };
 
-/** 評価の観点（6つ・1〜5） */
+/** 評価の観点（7つ・1〜5） */
 export const SALES_SKILLS = [
+  { key: "pitch", label: "ピッチ（相手に合わせる：相づち・おうむ返し・速さ・雰囲気）" },
   { key: "opening", label: "つかみ・第一印象" },
   { key: "hearing", label: "ヒアリング" },
   { key: "proposal", label: "提案・説明" },
@@ -121,13 +126,15 @@ export const SALES_SKILLS = [
 ] as const;
 
 export type SalesEvaluation = {
-  /** 6つの観点の平均（1〜5、小数1けた） */
+  /** 観点の平均（1〜5、小数1けた） */
   average: number;
   skills: { key: string; label: string; score: number; comment: string; quote: string | null }[];
   good: string[];
   improvements: { point: string; example: string }[];
   summary: string;
   outcome: string;
+  /** 会社の営業の教え（kind=training）を実践できたか。教えがないときは空 */
+  methods?: { name: string; done: boolean; comment: string; quote: string | null }[];
 };
 
 // ---- お客さんの設定（AI を呼ばずに決める） ----
@@ -259,6 +266,34 @@ export async function issueSalesJoinCode(
   throw new Error("could not issue join code");
 }
 
+/** 1社あたりの資料の数の上限（運営の会社は上限なし） */
+export const SALES_MATERIALS_MAX = 30;
+
+/**
+ * 運営（profiles.is_admin）が使うときは上限なし：本人が運営、または会社に運営のアカウントがある
+ * （回数・資料の数・AIに渡す資料の量）
+ */
+export async function isSalesUnlimited(
+  supabase: SupabaseClient,
+  args: { userId?: string; companyId: string },
+): Promise<boolean> {
+  if (args.userId) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", args.userId)
+      .maybeSingle();
+    if ((data as { is_admin?: boolean } | null)?.is_admin) return true;
+  }
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("company_id", args.companyId)
+    .eq("is_admin", true)
+    .limit(1);
+  return (data ?? []).length > 0;
+}
+
 /** 社員が参加している会社（1社だけ） */
 export async function getSalesMembership(
   supabase: SupabaseClient,
@@ -285,6 +320,8 @@ export type SalesMaterials = {
   script: string;
   /** 商品・料金・議事録など */
   info: string;
+  /** 会社の営業の教え・考え方（ピッチ・5インパルスなど。先生はこれを基準に助言・評価する） */
+  training: string;
 };
 
 /** 会社の資料（この場面用＋すべての場面用）。スクリプトとそれ以外に分け、それぞれ上限まで */
@@ -292,14 +329,18 @@ export async function loadMaterials(
   supabase: SupabaseClient,
   companyId: string,
   scenario: SalesScenario,
+  unlimited = false,
 ): Promise<SalesMaterials> {
+  // 運営の会社は資料を多く使えるようにする（AI に渡す量を増やす。キャッシュで使い回すので2回目からは安い）
+  const infoMax = unlimited ? 150000 : MATERIALS_MAX_CHARS;
+  const scriptMax = unlimited ? 60000 : SCRIPT_MAX_CHARS;
   const { data } = await supabase
     .from("sales_materials")
     .select("kind, scenario, title, content")
     .eq("company_id", companyId)
     .in("scenario", ["all", scenario])
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(unlimited ? 500 : SALES_MATERIALS_MAX);
   const join = (rows: { title: string; content: string }[], max: number) => {
     let out = "";
     for (const m of rows) {
@@ -317,8 +358,12 @@ export async function loadMaterials(
   const order = (a: { scenario: string }, b: { scenario: string }) =>
     (a.scenario === scenario ? 0 : 1) - (b.scenario === scenario ? 0 : 1);
   return {
-    script: join(rows.filter((r) => r.kind === "script").sort(order), SCRIPT_MAX_CHARS),
-    info: join(rows.filter((r) => r.kind !== "script").sort(order), MATERIALS_MAX_CHARS),
+    script: join(rows.filter((r) => r.kind === "script").sort(order), scriptMax),
+    training: join(rows.filter((r) => r.kind === "training").sort(order), scriptMax),
+    info: join(
+      rows.filter((r) => r.kind !== "script" && r.kind !== "training").sort(order),
+      infoMax,
+    ),
   };
 }
 
@@ -349,6 +394,9 @@ function customerPrompt(args: {
 【営業の人が売っている商品・サービスの資料】
 ${args.materials.info || "（資料はありません。営業の人の説明だけを聞いて判断してください。商品の中身を自分から作り話しない）"}
 
+【会社の営業の教え（あなたは知らないふりをする。働きかけへの自然な反応にだけ使う）】
+${args.materials.training || "（なし）"}
+
 【この場面でお客さんがよく言う断り文句（自然な流れで、手ごわさに合わせて使う）】
 ${customerHints(args.scenario)}
 
@@ -357,14 +405,16 @@ ${customerHints(args.scenario)}
 - 営業の人の質問に答えるが、聞かれていない本音は言わない。説明がよく分からなければ、聞き返したり疑問を言ったりする
 - 押しつけ・長すぎる説明・こちらの話を聞かないなどがあれば、気持ちが離れて断りに向かう。よい質問や共感があれば、少しずつ前向きになる
 - 簡単には決めない。決めるときは、納得できる理由があったとき
+- 相手に合わせた話し方（こちらの言葉をくり返す・自然な相づち・こちらの速さや雰囲気に合わせる）をされると、話しやすくなって心を開く。こちらより明らかに早口・一方的・テンションが合わないと、押されている感じがして警戒する（営業の人の発言の前に［話す速さ］がつくことがある。1秒あたりの文字数で、あなたの速さと比べられる）
+- 営業の人が下の「会社の営業の教え」にあるような働きかけをしたら、本物のお客さんがそう感じるように自然に反応する（うまくできていれば気持ちが動き、わざとらしかったり押しつけだったりすれば冷める）。教えの中身や名前は知らないふりをする
 - 研修だとは言わない。AI であることも言わない。お客さんとして話し続ける
 - 会話が自然に終わるとき（契約・約束をした／はっきり断って電話を切る・ドアを閉める／時間切れ）は、最後のせりふのあとに「${END_MARK}」と書く
 ${
   args.coachMode === "coach"
     ? `【研修の先生としての役目（助言）】
-営業の人の今の一言が、このままだと商談がだめになりそうな、はっきりしたまずさのとき（例：いきなり売り込む・失礼・相手の話を無視・うそや強引な約束・断られたのに押し続ける）だけ、お客さんとしての返事のかわりに、研修の先生として短い助言を出す。
+営業の人の今の一言が、このままだと商談がだめになりそうな、はっきりしたまずさのとき（例：いきなり売り込む・失礼・相手の話を無視・うそや強引な約束・断られたのに押し続ける・相手の速さや雰囲気をまったく無視して一方的に話す・会社の営業の教えから大きく外れている）だけ、お客さんとしての返事のかわりに、研修の先生として短い助言を出す。
 - 助言は1〜2文で、何がまずいか＋どう言えばよいかの例（「〜のように言い直してみましょう」）
-- 助言は次の「営業の知識」と、会社のトークスクリプト（あれば）を基準にする。スクリプトの大事な流れ（名乗り・質問・切り返しなど）から大きく外れてまずいときは、スクリプトの言い方を例に出す
+- 助言は「会社の営業の教え」（いちばん優先）、次の「営業の知識」、会社のトークスクリプト（あれば）を基準にする。教えにある言葉（例：仮クロ・羊の法則 など）を使って、社員がすぐわかるように言う。スクリプトの大事な流れ（名乗り・質問・切り返しなど）から大きく外れてまずいときは、スクリプトの言い方を例に出す
 - 細かいことでは止めない。助言は1回のロープレで3回まで（残りの回数は最後に書く）
 
 【営業の知識（先生として使う。お客さんとしては知らないふりをする）】
@@ -410,6 +460,26 @@ function withHistoryCache(
   );
 }
 
+/** 1秒あたりの文字数（秒がわからないときは null） */
+export function charsPerSec(line: SalesLine): number | null {
+  if (!line.sec || line.sec < 0.8) return null;
+  const n = line.text.replace(/[\s、。！？!?,.「」]/g, "").length;
+  return Math.round((n / line.sec) * 10) / 10;
+}
+
+/** 営業の一言につける、話す速さのメモ（直前のお客さんの速さと比べる） */
+function speedNote(line: SalesLine, transcript: SalesLine[]): string {
+  const mine = charsPerSec(line);
+  if (mine === null) return "";
+  const i = transcript.indexOf(line);
+  const prev = transcript
+    .slice(0, i)
+    .reverse()
+    .find((l) => l.role === "customer");
+  const theirs = prev ? charsPerSec(prev) : null;
+  return `［話す速さ：1秒に${mine}文字${theirs !== null ? `・あなたは${theirs}文字` : ""}］`;
+}
+
 function toClaudeMessages(opener: string, transcript: SalesLine[]) {
   // お客さんが最初に話す（営業の人が訪ねてきた・電話をかけた）ので、その前に合図を置く
   const messages: { role: "user" | "assistant"; content: string }[] = [
@@ -419,9 +489,10 @@ function toClaudeMessages(opener: string, transcript: SalesLine[]) {
   for (const line of transcript.slice(1)) {
     if (line.role === "coach" || line.retracted) continue;
     if (line.role === "seller") {
+      const text = `${speedNote(line, transcript)}${line.text}`;
       const last = messages[messages.length - 1];
-      if (last.role === "user") last.content += `\n${line.text}`;
-      else messages.push({ role: "user", content: line.text });
+      if (last.role === "user") last.content += `\n${text}`;
+      else messages.push({ role: "user", content: text });
     } else {
       messages.push({
         role: "assistant",
@@ -547,7 +618,7 @@ export async function evaluateRoleplay(args: {
     .map((l) =>
       l.role === "coach"
         ? `（先生の助言：${l.text}）`
-        : `${l.role === "seller" ? "営業" : "お客さん"}${l.retracted ? "（助言を受けて言い直す前）" : ""}：${l.text}`,
+        : `${l.role === "seller" ? "営業" : "お客さん"}${l.retracted ? "（助言を受けて言い直す前）" : ""}${charsPerSec(l) !== null ? `［1秒に${charsPerSec(l)}文字］` : ""}：${l.text}`,
     )
     .join("\n");
   const prompt = `あなたは営業研修のトレーナーです。次の営業ロープレを評価してください（営業の発言は音声の書き起こし）。
@@ -560,6 +631,9 @@ ${args.materials.script || "（なし）"}
 【会社の資料（商品・料金・議事録など。説明が正しいかの参考にする）】
 ${args.materials.info ? args.materials.info.slice(0, 8000) : "（なし）"}
 
+【会社の営業の教え（いちばん大事な評価の基準。社員はこれを教わっている）】
+${args.materials.training || "（なし）"}
+
 【営業の知識（評価の基準にする）】
 ${args.knowledge}
 
@@ -571,17 +645,19 @@ ${convo}
 - 観点：${SALES_SKILLS.map((k) => `${k.key}=${k.label}`).join("、")}
 - 手ごわさも考えて、公平に。うそ・強引な約束・失礼な言い方・法律に反するやり方（名乗らない・断られたのに勧誘を続ける等）は厳しく見る
 - スクリプトがあるときは、スクリプトの流れ・言い回しをうまく使えたかもコメントに入れる
-- improvements の example は、営業の知識やスクリプトにそった、そのまま使える言い方にする
+- pitch（ピッチ）は、お客さんとの雰囲気合わせを見る：相づち・おうむ返し（相手の言葉をくり返す）・相手の話す速さ（［1秒に〇文字］）や会話の温度に合わせられたか。相手より明らかに早口・一方的なら低く
+- 会社の営業の教えがあるときは、methods に教えの大事な項目（最大6つ。例：仮クロでyesを取る・羊の法則・5インパルス など、教えの言葉を使う）ごとに、できたか（done）・ひとこと（comment）・根拠の引用（quote、営業の発言そのまま。なければ null）を書く。コメントや improvements も教えの言葉で書く。教えがないときは methods は空の配列
+- improvements の example は、会社の営業の教え・営業の知識・スクリプトにそった、そのまま使える言い方にする
 - good：よかった点を2〜3個（具体的に）
 - improvements：直す点を2〜3個。それぞれ、そのときに言えばよかった言い方の例（example）をつける
 - summary：全体のひとこと（2文以内）
 - outcome：お客さんが最後にどうなったか（例：アポ獲得／契約／次回また説明／検討すると言われた／断られた／途中で終わった）
 
 次のJSONだけを返してください：
-{"skills": [{"key": "opening", "score": 3, "comment": "1文", "quote": "引用 または null"}, …], "good": ["…"], "improvements": [{"point": "…", "example": "…"}], "summary": "…", "outcome": "…"}`;
+{"skills": [{"key": "pitch", "score": 3, "comment": "1文", "quote": "引用 または null"}, …], "methods": [{"name": "教えの項目", "done": true, "comment": "1文", "quote": "引用 または null"}], "good": ["…"], "improvements": [{"point": "…", "example": "…"}], "summary": "…", "outcome": "…"}`;
   const anthropic = new Anthropic({ apiKey });
   const res = await anthropic.messages.create(
-    { model: "claude-sonnet-4-6", max_tokens: 2000, messages: [{ role: "user", content: prompt }] },
+    { model: "claude-sonnet-4-6", max_tokens: 3000, messages: [{ role: "user", content: prompt }] },
     { timeout: 60000, maxRetries: 1 },
   );
   let raw: {
@@ -590,6 +666,7 @@ ${convo}
     improvements?: { point?: unknown; example?: unknown }[];
     summary?: unknown;
     outcome?: unknown;
+    methods?: { name?: unknown; done?: unknown; comment?: unknown; quote?: unknown }[];
   } | null = null;
   try {
     raw = extractJson(lastTextBlock(res.content));
@@ -628,6 +705,22 @@ ${convo}
       .slice(0, 3),
     summary: String(raw?.summary ?? "").slice(0, 300),
     outcome: String(raw?.outcome ?? args.outcome ?? "").slice(0, 40),
+    methods: args.materials.training
+      ? (Array.isArray(raw?.methods) ? raw.methods : [])
+          .map((m) => {
+            let quote =
+              typeof m?.quote === "string" && m.quote.trim() ? m.quote.trim().slice(0, 120) : null;
+            if (quote && !quoteAppearsIn(quote, said)) quote = null;
+            return {
+              name: String(m?.name ?? "").slice(0, 40),
+              done: m?.done === true,
+              comment: String(m?.comment ?? "").slice(0, 200),
+              quote,
+            };
+          })
+          .filter((m) => m.name)
+          .slice(0, 6)
+      : [],
   };
 }
 
