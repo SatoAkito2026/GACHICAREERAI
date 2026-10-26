@@ -20,7 +20,13 @@ import {
   inputStyle,
   talentApi,
 } from "@/components/talent/TalentUI";
-import { MATERIAL_ACCEPT, guessKind, materialTitle, readMaterialFile } from "@/lib/material-files";
+import {
+  MATERIAL_ACCEPT,
+  guessKind,
+  looksInternal,
+  materialTitle,
+  readMaterialFile,
+} from "@/lib/material-files";
 
 const SCENARIO_OPTIONS = [
   {
@@ -92,6 +98,8 @@ type CompanyData = {
     length: number;
     preview: string;
     createdAt: string;
+    screened: boolean;
+    redacted: number;
   }[];
   recent: {
     id: string;
@@ -116,6 +124,7 @@ export function SalesCompanyPage() {
   const [batch, setBatch] = useState<
     { name: string; text: string; kind: MaterialKind; use: boolean }[]
   >([]);
+  const [progress, setProgress] = useState("");
   // 消すために選んだ資料
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -155,7 +164,14 @@ export function SalesCompanyPage() {
       if (found.length > 1) {
         // ファイル名から種類を当てる（スクリプト・教え）。ほかは上で選んだ種類（スクリプトを選んでいたら「商品・料金」）
         const fallback: MaterialKind = kind === "script" || kind === "training" ? "product" : kind;
-        setBatch(found.map((f) => ({ ...f, kind: guessKind(f.name) ?? fallback, use: true })));
+        // 手数料・報酬など社内向けらしいファイルは、はじめからチェックを外す
+        setBatch(
+          found.map((f) => ({
+            ...f,
+            kind: guessKind(f.name) ?? fallback,
+            use: !looksInternal(f.name),
+          })),
+        );
         return;
       }
       const { name, text } = found[0];
@@ -181,20 +197,34 @@ export function SalesCompanyPage() {
       return void toast.error(`資料は${max}件までです。古いものを消してください`);
     setSaving(true);
     let added = 0;
-    for (const m of items) {
-      const r = await talentApi("/api/sales/company", {
-        action: "addMaterial",
-        kind: m.kind,
-        scenario: matScenario,
-        title: materialTitle(m.name),
-        content: m.text.slice(0, 20000),
-      });
-      if (r.ok) added++;
-    }
+    let removed = 0;
+    let done = 0;
+    setProgress(`0 / ${items.length}`);
+    // 1件ごとに AI で社内の情報を確かめるので、4件ずつ並べて送る
+    const queue = [...items];
+    const worker = async () => {
+      for (let m = queue.shift(); m; m = queue.shift()) {
+        const r = await talentApi<{ removed?: number }>("/api/sales/company", {
+          action: "addMaterial",
+          kind: m.kind,
+          scenario: matScenario,
+          title: materialTitle(m.name),
+          content: m.text.slice(0, 20000),
+        });
+        if (r.ok) {
+          added++;
+          removed += r.data.removed ?? 0;
+        }
+        done++;
+        setProgress(`${done} / ${items.length}`);
+      }
+    };
+    await Promise.all(Array.from({ length: 4 }, worker));
     setSaving(false);
+    setProgress("");
     setBatch([]);
     toast.success(
-      `${added}件の資料を追加しました${chosen.length > items.length ? `（${max}件の上限のため ${chosen.length - items.length}件は入れていません）` : ""}`,
+      `${added}件の資料を追加しました${removed > 0 ? `（手数料など社内の情報を${removed}か所取り除きました）` : ""}${chosen.length > items.length ? `（${max}件の上限のため ${chosen.length - items.length}件は入れていません）` : ""}`,
     );
     void load();
   };
@@ -227,7 +257,14 @@ export function SalesCompanyPage() {
     });
     setSaving(false);
     if (r.ok) {
-      toast.success("資料を追加しました");
+      const d = r.data as { removed?: number; internalOnly?: boolean };
+      toast.success(
+        d.internalOnly
+          ? "追加しましたが、社内の情報だけの資料なので AI には使いません"
+          : d.removed
+            ? `資料を追加しました（手数料など社内の情報を${d.removed}か所取り除きました）`
+            : "資料を追加しました",
+      );
       setTitle("");
       setContent("");
       void load();
@@ -284,7 +321,8 @@ export function SalesCompanyPage() {
 
             <Card title="AIに覚えさせる資料">
               <p className="mb-3 text-[13px]" style={{ color: C.sub, lineHeight: 1.7 }}>
-                トークスクリプトは「トークスクリプト」、会社で教えている営業の考え方・技（ピッチ、5インパルス、羊の法則、仮クロなど）は「営業の教え・考え方」として入れてください。教えは、助言・評価でいちばん大事な基準になり、お客さん役もその働きかけに自然に反応します。AI
+                手数料・成果報酬・利益など社内だけの情報は、入れたときに AI が確かめて取り除き、AI
+                には覚えさせません（お客さんが払う値段・手数料は残します）。トークスクリプトは「トークスクリプト」、会社で教えている営業の考え方・技（ピッチ、5インパルス、羊の法則、仮クロなど）は「営業の教え・考え方」として入れてください。教えは、助言・評価でいちばん大事な基準になり、お客さん役もその働きかけに自然に反応します。AI
                 の先生がその流れを基準に助言・評価します。商品の説明・料金表・商談の議事録などを入れると、お客さん役がその商品の前提で話します（文字だけを保存します。1件2万文字まで
                 {data.maxMaterials !== null ? `・${data.maxMaterials}件まで` : "・件数の上限なし"}
                 ）。営業の基本の型（場面ごとの流れ・切り返し・特定商取引法など）は、最初から AI
@@ -380,7 +418,7 @@ export function SalesCompanyPage() {
                       {batch.length}件のファイルを読み込みました
                     </p>
                     <p className="mt-1 text-[12px]" style={{ color: C.sub }}>
-                      チェックしたファイルを1件ずつ追加します（名前はファイル名、使う場面は上で選んだもの）。種類はファイル名から当てているので、違うものは右で選び直してください。
+                      チェックしたファイルを1件ずつ追加します（名前はファイル名、使う場面は上で選んだもの）。種類はファイル名から当てているので、違うものは右で選び直してください。手数料・成果報酬など社内向けらしいファイルは、はじめからチェックを外しています。
                     </p>
                     <label
                       className="mt-2 flex items-center gap-2 text-[12px]"
@@ -418,6 +456,11 @@ export function SalesCompanyPage() {
                           >
                             {m.name}
                           </span>
+                          {looksInternal(m.name) && (
+                            <span className="shrink-0 text-[11px]" style={{ color: C.danger }}>
+                              社内向け？
+                            </span>
+                          )}
                           <span className="shrink-0" style={{ color: C.muted }}>
                             {Math.min(m.text.length, 20000).toLocaleString()}文字
                           </span>
@@ -444,7 +487,9 @@ export function SalesCompanyPage() {
                     </ul>
                     <div className="mt-3 flex gap-2">
                       <Button onClick={() => void addBatch()} loading={saving}>
-                        まとめて追加（{batch.filter((m) => m.use).length}件）
+                        {progress
+                          ? `追加中… ${progress}`
+                          : `まとめて追加（${batch.filter((m) => m.use).length}件）`}
                       </Button>
                       <Button variant="ghost" onClick={() => setBatch([])}>
                         やめる
@@ -543,6 +588,20 @@ export function SalesCompanyPage() {
                             ? "すべての場面"
                             : SCENARIO_OPTIONS.find((o) => o.key === m.scenario)?.label}
                           ・{m.length.toLocaleString()}文字・{date(m.createdAt)}・{m.preview}
+                        </p>
+                        <p
+                          className="mt-1 text-[11px]"
+                          style={{
+                            color: !m.screened ? C.muted : m.redacted !== 0 ? C.danger : C.sub,
+                          }}
+                        >
+                          {!m.screened
+                            ? "社内の情報がないか確認中（確認が終わるまで AI には使いません）"
+                            : m.redacted < 0
+                              ? "社内の情報だけの資料のため、AI には使いません"
+                              : m.redacted > 0
+                                ? `手数料など社内の情報を${m.redacted}か所取り除いて使っています`
+                                : "確認済み"}
                         </p>
                       </div>
                       <button

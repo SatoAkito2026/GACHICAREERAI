@@ -401,6 +401,8 @@ export type Database = {
           id: string;
           company_id: string;
           kind: string;
+          screened: boolean;
+          redacted: number;
           title: string;
           content: string;
           created_at: string;
@@ -409,6 +411,8 @@ export type Database = {
           id?: string;
           company_id: string;
           kind?: string;
+          screened?: boolean;
+          redacted?: number;
           scenario?: string;
           title: string;
           content: string;
@@ -418,6 +422,8 @@ export type Database = {
           id?: string;
           company_id?: string;
           kind?: string;
+          screened?: boolean;
+          redacted?: number;
           title?: string;
           content?: string;
           created_at?: string;

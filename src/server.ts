@@ -5,6 +5,7 @@ import { renderErrorPage } from "./lib/error-page";
 import { runTalentSummaryJob } from "./lib/talent";
 import { runPracticeReminderJob } from "./lib/notify";
 import { runSalesKnowledgeJob } from "./lib/sales-knowledge";
+import { runSalesScreenJob } from "./lib/sales-screen";
 import { runPartnerInterviewJob } from "./lib/partner-interview";
 
 type ServerEntry = {
@@ -117,5 +118,7 @@ export default {
     ctx.waitUntil(runPartnerInterviewJob());
     // 営業ロープレ：週に1回、場面ごとの営業のコツをネットで調べて更新する
     ctx.waitUntil(runSalesKnowledgeJob());
+    // 営業ロープレ：まだ確かめていない資料から、手数料など社内の情報を取り除く
+    ctx.waitUntil(runSalesScreenJob());
   },
 };

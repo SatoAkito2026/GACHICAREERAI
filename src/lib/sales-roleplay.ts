@@ -339,6 +339,8 @@ export async function loadMaterials(
     .select("kind, scenario, title, content")
     .eq("company_id", companyId)
     .in("scenario", ["all", scenario])
+    // 社内の情報（手数料など）を取り除き終わった資料だけ
+    .eq("screened", true)
     .order("created_at", { ascending: false })
     .limit(unlimited ? 500 : SALES_MATERIALS_MAX);
   const join = (rows: { title: string; content: string }[], max: number) => {
@@ -408,6 +410,7 @@ ${customerHints(args.scenario)}
 - 相手に合わせた話し方（こちらの言葉をくり返す・自然な相づち・こちらの速さや雰囲気に合わせる）をされると、話しやすくなって心を開く。こちらより明らかに早口・一方的・テンションが合わないと、押されている感じがして警戒する（営業の人の発言の前に［話す速さ］がつくことがある。1秒あたりの文字数で、あなたの速さと比べられる）
 - 営業の人が下の「会社の営業の教え」にあるような働きかけをしたら、本物のお客さんがそう感じるように自然に反応する（うまくできていれば気持ちが動き、わざとらしかったり押しつけだったりすれば冷める）。教えの中身や名前は知らないふりをする
 - 研修だとは言わない。AI であることも言わない。お客さんとして話し続ける
+- 販売する会社の手数料・成果報酬・利益など社内の話は、知らないし話題にしない（資料に「［社内情報のため省略］」とあっても触れない）
 - 会話が自然に終わるとき（契約・約束をした／はっきり断って電話を切る・ドアを閉める／時間切れ）は、最後のせりふのあとに「${END_MARK}」と書く
 ${
   args.coachMode === "coach"
