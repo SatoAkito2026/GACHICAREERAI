@@ -39,7 +39,7 @@ import urllib.robotparser
 
 UA = "AKITOgroup-POSPOS-leads/1.0 (+https://akitogroup.jp/privacy; pospos@akitogroup.jp)"
 OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
-SKIP_HOSTS = ("tabelog.com", "hotpepper.jp", "gnavi.co.jp", "retty.me", "instagram.com", "facebook.com", "twitter.com", "x.com", "tiktok.com",
+SKIP_HOSTS = ("camp-fire.jp", "tabelog.com", "hotpepper.jp", "gnavi.co.jp", "retty.me", "instagram.com", "facebook.com", "twitter.com", "x.com", "tiktok.com",
               "line.me", "lin.ee", "google.com", "goo.gl", "g.page", "youtube.com", "ameblo.jp", "ikyu.com", "ozmall.co.jp", "ekiten.jp", "itp.ne.jp")
 SKIP_WORDS = ("yelp.", "tripadvisor.", "pocketpara", "caba-club", "hostlove", "nightwork", "fuzoku")
 NIGHT_WORDS = re.compile(r"キャバ|ホスト|スナック|ラウンジ|ガールズ|ボーイズ|コンカフェ|コンセプトカフェ|クラブ|CLUB|Club|lounge|Lounge")
@@ -47,8 +47,8 @@ CONTACT_WORDS = re.compile(r"contact|inquiry|toiawase|otoiawase|company|about|pr
 REFUSE = re.compile(r"(広告|営業|セールス|勧誘|売り込み|DM).{0,10}(お断り|禁止|ご遠慮|固くお断り|不要|拒否|お控え)")
 EMAIL = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")
 # お店の人に届かない・営業の連絡先ではないアドレス（サイトの管理用・お客様窓口・採用・広報など）
-ROLE_EMAIL = re.compile(r"^(webmaster|postmaster|hostmaster|admin|root|noreply|no-reply|support|cs|customer|recruit|saiyo|saiyou|jinji|press|pr|ir|privacy|abuse|security)[-_.@]|-cs@|-support@", re.I)
-BAD_EMAIL = re.compile(r"\.(png|jpe?g|gif|webp|svg|css|js)$|@(example|sentry|wixpress|sentry-next|domain|email|yourdomain)\.|^(xxx|sample|test|your|name|info@example)", re.I)
+ROLE_EMAIL = re.compile(r"^(webmaster|postmaster|hostmaster|admin|root|noreply|no-reply|support|cs|customer|recruit|saiyo|saiyou|jinji|press|pr|ir|privacy|abuse|security|shuzai|webshop|online-shop|onlineshop|shop-online|ec)[-_.@]|-cs@|-support@", re.I)
+BAD_EMAIL = re.compile(r"\.(png|jpe?g|gif|webp|svg|css|js)$|@(example|sentry|wixpress|sentry-next|domain|email|yourdomain|mysite|akitogroup)\.|^(xxx|sample|test|your|name|info@example)", re.I)
 TYPES = {"ramen": "ラーメン", "japanese": "和食", "sushi": "寿司", "soba": "そば・うどん", "udon": "そば・うどん", "yakiniku": "焼肉", "yakitori": "焼き鳥",
          "italian": "イタリアン", "pizza": "イタリアン", "french": "フレンチ・ビストロ", "chinese": "中華料理", "korean": "韓国料理", "curry": "カレー・インド料理",
          "indian": "カレー・インド料理", "thai": "エスニック（タイ・ベトナムなど）", "vietnamese": "エスニック（タイ・ベトナムなど）", "burger": "ハンバーガー",
@@ -132,7 +132,8 @@ def shop_type(t):
         for w, lab in (("キャバ", "キャバクラ"), ("ホスト", "ホストクラブ"), ("スナック", "スナック"), ("ラウンジ", "ラウンジ"), ("ガールズ", "ガールズバー"), ("ボーイズ", "ボーイズバー"), ("コンカフェ", "コンセプトカフェ"), ("コンセプトカフェ", "コンセプトカフェ")):
             if w in name:
                 return lab
-        return "その他の夜のお店"
+        # キャストの言葉がない nightclub は、ほとんどがライブハウス・DJのクラブ（POSの相手ではない）
+        return None if t.get("amenity") == "nightclub" else "その他の夜のお店"
     for c in re.split(r"[;,]", t.get("cuisine", "")):
         if c.strip() in TYPES:
             return TYPES[c.strip()]
@@ -234,7 +235,10 @@ def main():
             pref = t.get("addr:province") or t.get("addr:state") or (area if area.endswith(("都", "道", "府", "県")) else "")
             if not (t.get("website") or t.get("contact:website") or t.get("url")) and not a.allow_osm_email:
                 continue
-            shops.append({"osm": key, "name": t["name"], "type": shop_type(t), "pref": pref,
+            typ = shop_type(t)
+            if typ is None:
+                continue
+            shops.append({"osm": key, "name": t["name"], "type": typ, "pref": pref,
                           "site": t.get("website") or t.get("contact:website") or t.get("url") or "",
                           "email": (t.get("email") or t.get("contact:email") or "").split(";")[0].strip().lower(), "area": area})
         print(f"{area}: OpenStreetMap でホームページがあるお店 {len(shops) - n0} 軒")
