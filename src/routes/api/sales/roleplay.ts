@@ -134,7 +134,9 @@ export const Route = createFileRoute("/api/sales/roleplay")({
             );
           if ((month ?? 0) >= SALES_PER_COMPANY_MONTH)
             return jsonResponse(
-              { error: "会社の今月の上限に届きました。会社の担当者にお問い合わせください" },
+              {
+                error: `会社の今月の無料分（${SALES_PER_COMPANY_MONTH}回）を使い切りました。会社の担当者にお問い合わせください`,
+              },
               429,
             );
           const persona = makePersona(b.scenario);

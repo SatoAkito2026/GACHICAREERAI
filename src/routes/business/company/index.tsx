@@ -47,7 +47,7 @@ function CompanyDashboard() {
           {
             emoji: "🗣️",
             title: "営業ロープレ（社員研修）",
-            desc: "社員がAIのお客さん相手に訪問販売・反響営業・テレアポ・商談を練習。結果と評価を確認（今は無料）",
+            desc: "社員がAIのお客さん相手に訪問販売・反響営業・テレアポ・商談を練習。結果と評価を確認（月100回まで無料）",
             to: "/business/company/sales",
           },
           {
