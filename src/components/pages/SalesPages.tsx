@@ -20,7 +20,7 @@ import {
   inputStyle,
   talentApi,
 } from "@/components/talent/TalentUI";
-import { extractPdfText } from "@/lib/pdf-text";
+import { MATERIAL_ACCEPT, readMaterialFile, type MaterialText } from "@/lib/material-files";
 
 const SCENARIO_OPTIONS = [
   {
@@ -110,6 +110,8 @@ export function SalesCompanyPage() {
   const [matScenario, setMatScenario] = useState<MaterialScenario>("all");
   const [saving, setSaving] = useState(false);
   const [reading, setReading] = useState(false);
+  // ZIP などで一度に読み込んだ複数のファイル（まとめて追加する）
+  const [batch, setBatch] = useState<MaterialText[]>([]);
 
   const load = useCallback(async () => {
     const r = await talentApi<CompanyData>("/api/sales/company");
@@ -139,20 +141,48 @@ export function SalesCompanyPage() {
   const readFile = async (file: File) => {
     setReading(true);
     try {
-      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-      const text = isPdf ? await extractPdfText(file) : await file.text();
-      if (!text.trim()) {
-        toast.error("ファイルから文字を読み取れませんでした");
+      const found = await readMaterialFile(file);
+      if (found.length === 0) {
+        toast.error("ファイルから文字を読み取れませんでした（PDF・Word・テキストに対応）");
         return;
       }
+      if (found.length > 1) {
+        setBatch(found);
+        return;
+      }
+      const { name, text } = found[0];
       setContent(text.slice(0, 20000));
-      if (!title) setTitle(file.name.replace(/\.[^.]+$/, "").slice(0, 80));
+      if (!title) setTitle(name.replace(/\.[^.]+$/, "").slice(0, 80));
       if (text.length > 20000) toast.message("長いので、はじめの2万文字だけ使います");
     } catch {
       toast.error("ファイルを読み込めませんでした");
     } finally {
       setReading(false);
     }
+  };
+
+  const addBatch = async () => {
+    const room = Math.max(0, 30 - (data?.materials.length ?? 0));
+    const items = batch.slice(0, room);
+    if (items.length === 0) return void toast.error("資料は30件までです。古いものを消してください");
+    setSaving(true);
+    let added = 0;
+    for (const m of items) {
+      const r = await talentApi("/api/sales/company", {
+        action: "addMaterial",
+        kind,
+        scenario: matScenario,
+        title: m.name.replace(/\.[^.]+$/, "").slice(0, 80) || "資料",
+        content: m.text.slice(0, 20000),
+      });
+      if (r.ok) added++;
+    }
+    setSaving(false);
+    setBatch([]);
+    toast.success(
+      `${added}件の資料を追加しました${batch.length > items.length ? `（30件の上限のため ${batch.length - items.length}件は入れていません）` : ""}`,
+    );
+    void load();
   };
 
   const addMaterial = async () => {
@@ -270,7 +300,7 @@ export function SalesCompanyPage() {
                     style={inputStyle}
                   />
                 </Field>
-                <Field label="中身" hint="PDF・テキストファイルからも読み込めます">
+                <Field label="中身" hint="PDF・Word・テキスト・ZIP（まとめて）から読み込めます">
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -286,10 +316,10 @@ export function SalesCompanyPage() {
                     className="cursor-pointer rounded-lg px-4 py-2.5 text-[14px]"
                     style={{ border: `1px solid ${C.border}`, color: C.text, fontWeight: 600 }}
                   >
-                    {reading ? "読み込み中…" : "ファイルを選ぶ（PDF・テキスト）"}
+                    {reading ? "読み込み中…" : "ファイルを選ぶ（PDF・Word・テキスト・ZIP）"}
                     <input
                       type="file"
-                      accept=".pdf,.txt,.md,.csv,application/pdf,text/plain"
+                      accept={MATERIAL_ACCEPT}
                       className="hidden"
                       onChange={(e) => {
                         const f = e.target.files?.[0];
@@ -309,6 +339,41 @@ export function SalesCompanyPage() {
                     {content.length.toLocaleString()} / 20,000文字
                   </span>
                 </div>
+                {batch.length > 0 && (
+                  <div
+                    className="rounded-xl p-3"
+                    style={{ background: C.card2, border: `1px solid ${C.accent}` }}
+                  >
+                    <p className="text-[14px]" style={{ color: C.text, fontWeight: 700 }}>
+                      {batch.length}件のファイルを読み込みました
+                    </p>
+                    <p className="mt-1 text-[12px]" style={{ color: C.sub }}>
+                      上で選んだ「種類」「使う場面」で、ファイルごとに1件ずつ追加します（名前はファイル名）。
+                    </p>
+                    <ul className="mt-2 flex max-h-48 flex-col gap-1 overflow-y-auto text-[12px]">
+                      {batch.map((m, i) => (
+                        <li
+                          key={i}
+                          className="flex justify-between gap-2"
+                          style={{ color: C.text }}
+                        >
+                          <span className="truncate">{m.name}</span>
+                          <span className="shrink-0" style={{ color: C.muted }}>
+                            {Math.min(m.text.length, 20000).toLocaleString()}文字
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 flex gap-2">
+                      <Button onClick={() => void addBatch()} loading={saving}>
+                        まとめて追加（{batch.length}件）
+                      </Button>
+                      <Button variant="ghost" onClick={() => setBatch([])}>
+                        やめる
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
               {data.materials.length > 0 && (
                 <ul className="mt-4 flex flex-col gap-2">
