@@ -8,6 +8,20 @@ import { extractPdfText } from "@/lib/pdf-text";
 
 export type MaterialText = { name: string; text: string };
 
+/** 資料の名前（拡張子を取り、長いときは後ろの80文字＝ファイル名に近いほうを残す） */
+export function materialTitle(name: string): string {
+  const t = name.replace(/\.[^./]+$/, "").trim();
+  return (t.length > 80 ? t.slice(-80) : t) || "資料";
+}
+
+/** ファイル名から資料の種類を当てる（トークスクリプト・営業の教え。わからなければ null） */
+export function guessKind(name: string): "script" | "training" | null {
+  const base = name.split("/").pop() ?? name;
+  if (/スクリプト|トーク|台本/i.test(base)) return "script";
+  if (/研修|マニュアル|教え|基本|心得|ロープレ/.test(base)) return "training";
+  return null;
+}
+
 const TEXT_EXT = ["txt", "md", "csv", "tsv"];
 export const MATERIAL_ACCEPT =
   ".pdf,.docx,.txt,.md,.csv,.tsv,.zip,application/pdf,application/zip,text/plain";
@@ -80,9 +94,14 @@ export async function readMaterialFile(file: File): Promise<MaterialText[]> {
       !f.name.split("/").pop()!.startsWith(".") &&
       ["pdf", "docx", ...TEXT_EXT].includes(ext(f.name)),
   });
+  const list = Object.entries(entries).map(([raw, data]) => ({ path: fixZipName(raw), data }));
+  // 全部が同じ1つのフォルダに入っているときは、そのフォルダ名は名前に入れない（中のフォルダ名は残す。
+  // 「戸建」「集合」など、同じファイル名でもフォルダで区別していることが多いため）
+  const tops = new Set(list.map((f) => (f.path.includes("/") ? f.path.split("/")[0] : "")));
+  const top = tops.size === 1 ? [...tops][0] : "";
   const out: MaterialText[] = [];
-  for (const [rawName, data] of Object.entries(entries)) {
-    const name = fixZipName(rawName).split("/").pop() ?? rawName;
+  for (const { path, data } of list) {
+    const name = top ? path.slice(top.length + 1) : path;
     try {
       const text = (await fromBytes(name, data)).trim();
       if (text) out.push({ name, text });
