@@ -106,7 +106,7 @@ function priceSlide(pres, ttl, sales) {
   title(s, ttl);
   const cols = [
     { n: "ライト", p: "11,000円", r: "", who: "お会計と売上を、まず楽に", pts: ["注文・会計・伝票", "QR注文・厨房の画面", "ポイント・会員証", "Square・レシート印刷"], ai: false },
-    { n: "スタンダード", p: "昼 22,000円\n夜 33,000円", r: "通常 昼33,000円／夜40,000円", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
+    { n: "スタンダード", p: "昼 22,000円\n夜 33,000円", r: "今申し込んだお店は、ずっとこの価格", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
     { n: "個別", p: "55,000円〜", r: "", who: "お店のやり方に合わせて", pts: ["ライト＋スタンダードの機能", "お店独自の給料の計算", "データの取り込み・帳票", "AI面接（追加料金なし）"], ai: true },
   ];
   const cw = 3.85, gap = 0.28;
@@ -266,7 +266,7 @@ async function brochure() {
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "グループ店・年間契約・導入の流れ");
   const stat = [["1か月分", "1年契約"], ["3か月分", "2年契約"], ["5か月分", "3年契約"]];
   stat.forEach(([b, l], i) => { const x = 0.6 + i * 2.05; card(s, x, 1.65, 1.85, 1.8, "FFF4DB"); T(s, l, { x: x + 0.2, y: 1.8, w: 1.5, h: 0.35, fontSize: 13, color: "6A5530", bold: true }); T(s, b, { x: x + 0.15, y: 2.2, w: 1.6, h: 0.6, fontSize: 24, bold: true, color: "B26B00" }); T(s, "おトク", { x: x + 0.2, y: 2.85, w: 1.5, h: 0.35, fontSize: 13, color: "6A5530" }); });
-  T(s, [{ text: "年間契約（前払い）", options: { bold: true, breakLine: true } }, { text: "自動では更新しません（終わる1か月前にお知らせ）。途中でやめても、残りの期間のお金はお返しできません。", options: { breakLine: true } }, { text: "グループ店", options: { bold: true, breakLine: true } }, { text: "5店舗まで。料金は1店舗ごと（足した日からの日割り）。" }], { x: 0.6, y: 3.7, w: 6.0, h: 2.6, fontSize: 14, paraSpaceAfter: 4, color: K.navy });
+  T(s, [{ text: "年間契約（前払い）", options: { bold: true, breakLine: true } }, { text: "自動では更新しません（終わる1か月前にお知らせ）。途中でやめても、残りの期間のお金はお返しできません。", options: { breakLine: true } }, { text: "グループ店", options: { bold: true, breakLine: true } }, { text: "何店舗でも。料金は1店舗ごと（足した日からの日割り）。" }], { x: 0.6, y: 3.7, w: 6.0, h: 2.6, fontSize: 14, paraSpaceAfter: 4, color: K.navy });
   const fl = [["お問い合わせ", "電話・フォーム"], ["1か月無料でお試し", "カード登録なしなら勝手に請求されません"], ["登録・設定", "ホームページからのお申し込みは登録代行が無料"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
   fl.forEach(([t, b], i) => { const y = 1.6 + i * 1.2; card(s, 7.0, y, 5.7, 1.0); num(s, 7.25, y + 0.25, i + 1); T(s, t, { x: 7.95, y: y + 0.12, w: 4.5, h: 0.4, bold: true, fontSize: 16 }); T(s, b, { x: 7.95, y: y + 0.52, w: 4.6, h: 0.4, fontSize: 13, color: K.ink2 }); });
 
