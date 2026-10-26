@@ -14,6 +14,13 @@ export function materialTitle(name: string): string {
   return (t.length > 80 ? t.slice(-80) : t) || "資料";
 }
 
+/** ファイル名から、社内向け（手数料・報酬・利益など）の資料らしいかを見る */
+export function looksInternal(name: string): boolean {
+  return /手数料記載|報酬|インセンティブ|コミッション|マージン|(?<!キャッシュ)バック|卸|粗利|社外秘|社内限|代理店向け/.test(
+    name,
+  );
+}
+
 /** ファイル名から資料の種類を当てる（トークスクリプト・営業の教え。わからなければ null） */
 export function guessKind(name: string): "script" | "training" | null {
   const base = name.split("/").pop() ?? name;

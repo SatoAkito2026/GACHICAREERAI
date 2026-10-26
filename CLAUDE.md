@@ -53,6 +53,7 @@ POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が
 - AI：お客さん役と助言は `customerTurn`、評価は `evaluateRoleplay`（7つの観点1〜5。1つ目は「ピッチ」＝相づち・おうむ返し・話す速さ・雰囲気合わせ。根拠の引用が本人の発言にないものは捨てる）。お客さん役には商品資料・会社の教え（働きかけへの自然な反応用）・よくある断り文句を渡し、先生（助言・評価）にはさらにトークスクリプトと営業の知識を渡す
 - 資料の種類「営業の教え・考え方」（`kind=training`。ピッチ・5インパルス・羊の法則など会社で教えていること）は、助言・評価のいちばん大事な基準。評価では教えの項目ごとに「できた／まだ」を出す（`methods`）
 - 話す速さ：画面が営業の一言の秒数（話しはじめ〜最後に声が出たとき）を送り、お客さんの声は音声の長さから計る（`SalesLine.sec`、`charsPerSec`）。お客さん役と評価に1秒あたりの文字数で渡す
+- 手数料・成果報酬・利益など社内だけの情報は AI に覚えさせない：資料を入れたときに `src/lib/sales-screen.ts` が AI（Haiku）で見つけて取り除いてから保存する（元の文は残さない。お客さんが払う値段・手数料は残す）。確かめ終わった資料（`sales_materials.screened`）だけをロープレの AI に渡し、確かめられなかったものは毎時の Cron（`runSalesScreenJob`）でやり直す。ZIP で社内向けらしいファイル名（`looksInternal`）は、はじめからチェックを外す
 - 営業の知識は `src/lib/sales-knowledge.ts`：場面ごとの型（流れ・技・NG・断り文句・特定商取引法など）を組み込み、毎時の Cron の `runSalesKnowledgeJob` が週に1回、場面ごとに AI のウェブ検索で最新のコツを調べて `sales_knowledge` に入れる
 - API：`src/routes/api/sales/*`（join・company・roleplay・result・transcribe）
 

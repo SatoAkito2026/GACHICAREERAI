@@ -3,7 +3,7 @@
  *
  * GET  /api/sales/company → 招待コード・社員ごとの練習の状況・資料・最近のロープレ
  * POST /api/sales/company { action: "newCode" }                    → 招待コードを作る（作り直す）
- * POST /api/sales/company { action: "addMaterial", title, content } → 資料を足す（文字だけ）
+ * POST /api/sales/company { action: "addMaterial", title, content } → 資料を足す（文字だけ。手数料など社内の情報は AI で取り除く）
  * POST /api/sales/company { action: "deleteMaterial", id }         → 資料を消す
  * POST /api/sales/company { action: "deleteAllMaterials" }         → 資料をすべて消す
  * POST /api/sales/company { action: "deleteMaterials", ids }       → 選んだ資料を消す
@@ -13,6 +13,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { verifyApiUser } from "@/lib/api-auth";
+import { screenAndSave } from "@/lib/sales-screen";
 import { jsonResponse, serviceClient } from "@/lib/talent";
 import {
   SALES_MATERIALS_MAX,
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/api/sales/company")({
             .order("created_at", { ascending: true }),
           supabase
             .from("sales_materials")
-            .select("id, kind, scenario, title, content, created_at")
+            .select("id, kind, scenario, title, content, screened, redacted, created_at")
             .eq("company_id", company.id)
             .order("created_at", { ascending: false }),
           supabase
@@ -106,6 +107,8 @@ export const Route = createFileRoute("/api/sales/company")({
             id: m.id,
             kind: m.kind,
             scenario: m.scenario,
+            screened: m.screened,
+            redacted: m.redacted,
             title: m.title,
             length: m.content.length,
             preview: m.content.slice(0, 120),
@@ -152,15 +155,26 @@ export const Route = createFileRoute("/api/sales/company")({
               },
               400,
             );
-          const { error } = await supabase.from("sales_materials").insert({
-            company_id: company.id,
-            kind: b.kind,
-            scenario: b.scenario,
-            title: b.title,
-            content: b.content,
+          const { data: row, error } = await supabase
+            .from("sales_materials")
+            .insert({
+              company_id: company.id,
+              kind: b.kind,
+              scenario: b.scenario,
+              title: b.title,
+              content: b.content,
+            })
+            .select("id, title, content")
+            .single();
+          if (error || !row) return jsonResponse({ error: "保存に失敗しました" }, 500);
+          // 手数料・成果報酬など社内だけの情報を AI で取り除いてから使う（失敗したら毎時の Cron でやり直す）
+          const screen = await screenAndSave(supabase, row);
+          return jsonResponse({
+            ok: true,
+            screened: !!screen,
+            removed: screen?.removed ?? 0,
+            internalOnly: screen?.internalOnly ?? false,
           });
-          if (error) return jsonResponse({ error: "保存に失敗しました" }, 500);
-          return jsonResponse({ ok: true });
         }
         if (b.action === "deleteMaterials") {
           await supabase
