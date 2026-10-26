@@ -368,6 +368,54 @@ function oldUrlRedirect(url) {
   return null;
 }
 
+// 毎朝、送ったあとに「きのうから今までの動き」を pospos@ にまとめて届ける
+async function countRows(env, path) {
+  const r = await sb(env, `${path}${path.includes("?") ? "&" : "?"}select=id&limit=1`, { headers: { Prefer: "count=exact" } });
+  const m = (r.headers.get("content-range") || "").match(/\/(\d+)$/);
+  return m ? Number(m[1]) : 0;
+}
+
+async function rows(env, path) {
+  const r = await sb(env, path);
+  return r.ok ? r.json() : [];
+}
+
+async function sendDailySummary(env) {
+  if (!Number(env.CAMPAIGN_DAILY || 0) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY) return;
+  const since = new Date(Date.now() - 24 * 3600000).toISOString();
+  const [sent, failed, clicked, applied, stopped, followed, left, totalSent, totalClicked, totalApplied] = await Promise.all([
+    countRows(env, `posupos_leads?sent_at=gte.${since}`),
+    rows(env, `posupos_leads?select=shop_name,email,error&status=eq.failed&order=created_at.desc&limit=20`),
+    rows(env, `posupos_leads?select=shop_name,shop_type,email&clicked_at=gte.${since}&order=clicked_at.desc`),
+    rows(env, `posupos_monitors?select=shop_name,shop_type,name,email,tel&created_at=gte.${since}&order=created_at.desc`),
+    rows(env, `posupos_leads?select=shop_name&stopped_at=gte.${since}`),
+    countRows(env, `posupos_leads?followup_at=gte.${since}`),
+    countRows(env, `posupos_leads?status=eq.new&stopped_at=is.null`),
+    countRows(env, `posupos_leads?sent_at=not.is.null`),
+    countRows(env, `posupos_leads?clicked_at=not.is.null`),
+    countRows(env, `posupos_leads?status=eq.applied`),
+  ]);
+  const list = (xs, f) => xs.length ? xs.map((x) => `　・${f(x)}`).join("\n") : "　なし";
+  const daily = Number(env.CAMPAIGN_DAILY);
+  const text = `ポスポス モニター募集の毎日のまとめ（きのうのこの時間から今まで）
+
+■ 送ったメール：${sent}件（もう一度のご案内：${followed}件）
+■ リンクを開いたお店：${clicked.length}件
+${list(clicked, (x) => `${x.shop_name}（${x.shop_type || "種類不明"}）${x.email}`)}
+■ モニターの申し込み：${applied.length}件
+${list(applied, (x) => `${x.shop_name}（${x.shop_type || "種類不明"}）${x.name} ${x.email}${x.tel ? " " + x.tel : ""}`)}
+■ 配信を止めたお店：${stopped.length}件
+${failed.length ? `■ 送れなかったお店（これまで）：${failed.length}件\n${list(failed, (x) => `${x.shop_name} ${x.email}：${(x.error || "").slice(0, 80)}`)}\n` : ""}
+■ これまでの合計：送った ${totalSent}件／開いた ${totalClicked}件／申し込み ${totalApplied}件
+■ まだ送っていない送り先：${left}件${left === 0 ? "（もうありません。新しい地域を集めて取り込んでください）" : left <= daily ? "（あした送ると、なくなります）" : `（あと約${Math.ceil(left / daily)}日分）`}
+
+見る場所
+・送り先の一覧（Supabase）：https://supabase.com/dashboard/project/adzoyzslrjaokovqhxol/editor
+・届いたかどうか（Resend）：https://resend.com/emails
+・申し込みのページ：${SITE}/posupos-monitor`;
+  await sendMail(env, { to: [POS_TO], subject: `【ポスポス】モニター募集のまとめ：送信${sent}件・開いた${clicked.length}件・申し込み${applied.length}件`, text });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -391,6 +439,10 @@ export default {
     return env.ASSETS.fetch(request);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(Promise.all([sendContractReminders(env), sendCampaign(env), sendFollowups(env)]));
+    ctx.waitUntil(Promise.all([
+      sendContractReminders(env),
+      // 送ってから、まとめを作る
+      Promise.all([sendCampaign(env), sendFollowups(env)]).then(() => sendDailySummary(env)),
+    ]));
   },
 };
