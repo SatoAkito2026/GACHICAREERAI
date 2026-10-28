@@ -388,7 +388,7 @@ const REWRITE_TOPICS = [
 ] as const;
 
 /** オファーの演出で、ナレーターが言うひとこと（約束にならない言い方にする） */
-const OFFER_NARRATION = "しかも練習するだけで、企業から申し込みが届くことも！";
+const OFFER_NARRATION = "練習するだけで、企業から申し込みも！";
 
 /** せりふごとの再生の速さ（ナレーションと受験者は少し速く。面接官はアプリと同じ） */
 /** 動画の話す速さ（全員同じ。声の高さは変えずに速くする） */
@@ -427,8 +427,6 @@ export type RewriteScript = {
   itemIndex: number[];
 };
 
-const ITEM_ORDINALS = ["1つ目", "2つ目", "3つ目"];
-
 export async function writeRewriteScript(history: StudioHistory[]): Promise<RewriteScript> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY missing");
@@ -446,9 +444,9 @@ export async function writeRewriteScript(history: StudioHistory[]): Promise<Rewr
 
 【型（必ず守る）】
 - タイトル：「『◯◯』と聞かれた時の最高な答え方」のように、一目で何の動画か分かる（28文字以内）
-- 前ふり（hook）：ナレーターが言う、見る人の手を止める強い一言。不安・危機感を突き、言い切る。例「これ言ったら即落ち」「9割がやるNG回答」（15文字以内）
-- よくある本音・状況を3パターン（label：例「給料が少なかった」15文字以内）
-- それぞれ、落ちる言い方（ng：ありがちな本音のまま、25文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。40文字以内）
+- 前ふり（hook）：ナレーターが最初の1秒で言う、見る人の手を止める強い一言。1つ目の落ちる言い方を指して、不安・危機感を突き、言い切る。例「この答え、即落ちです」「9割がやるNG回答」（12文字以内）
+- よくある本音・状況を2パターン（label：例「給料が少なかった」15文字以内）。1つ目は、いちばんやりがちで点数が低い落ちる言い方にする（動画の1コマ目に出す）
+- それぞれ、落ちる言い方（ng：ありがちな本音のまま、20文字以内）と、受かる言い方（ok：同じ事実を前向きに言い換えた、具体的で自然な話し言葉。35文字以内）。動画は25〜30秒なので短く
 - AI面接官の点数：ng は15〜45点、ok は78〜95点（100点満点）
 - 言い換えのポイント（point：20文字以内。例「不満ではなく、これからやりたいことを話す」）
 - オファーの演出（offer）：最後に「練習した結果を公開しておくと、企業から面談の申し込みが届く」ことを見せる。申し込んできた架空の会社の種類（companyType：例「IT企業」15文字以内）と、企業からのひとこと（message：30文字以内。この質問への受かる言い方を評価した内容）
@@ -477,7 +475,7 @@ ${learnedExamples(history)}
   const raw = extractJson(lastTextBlock(res.content)) as Partial<RewriteScript> | null;
   const items = (Array.isArray(raw?.items) ? raw.items : [])
     .filter((it) => it && it.ng && it.ok)
-    .slice(0, 3)
+    .slice(0, 2)
     .map((it) => ({
       label: String(it.label ?? "").slice(0, 20),
       ng: String(it.ng).slice(0, 40),
@@ -513,14 +511,13 @@ ${learnedExamples(history)}
     roles.push(role);
     itemIndex.push(i);
   };
+  // 25〜30秒に収めるため、読み上げは「前ふり・質問・落ちる／受かる・オファー・締め」だけ。
+  // 見出し（①〜）と言い換えのポイントは画面の文字だけで見せる
   push("narrator", hook, "hook");
   push("interviewer", topic.q, "question");
   items.forEach((it, i) => {
-    // 「①〜」の見出しもナレーターが読み上げる
-    if (it.label) push("narrator", `${ITEM_ORDINALS[i]}、${it.label}`, "label", i);
     push("candidate", it.ng, "ng", i);
     push("candidate", it.ok, "ok", i);
-    if (it.point) push("interviewer", it.point, "point", i);
   });
   push("narrator", OFFER_NARRATION, "offer");
   push("interviewer", cta, "cta");
