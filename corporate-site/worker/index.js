@@ -231,7 +231,10 @@ function campaignMail(lead) {
   const type = lead.shop_type || "";
   const night = NIGHT_TYPE.test(type);
   const typeLine = (TYPE_LINES.find(([re]) => re.test(type)) || [])[1];
-  const subject = "【モニター募集】今のレジはそのままで、AI面接つきPOSレジを2か月無料でお試しください";
+  // 件名は短く、お店の名前を入れる（一目で営業の一斉メールとわかる件名は開かれにくく、迷惑メールにも入りやすい）
+  const name = (lead.shop_name || "").trim();
+  const short = name.length > 20 ? name.slice(0, 20) + "…" : name;
+  const subject = `${short ? short + " 様｜" : ""}今のレジのまま、2か月無料でお試しいただけませんか（ポスポス）`;
   const text = `${lead.shop_name} ご担当者様
 
 突然のご連絡失礼いたします。
