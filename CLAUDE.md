@@ -84,6 +84,10 @@ POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が
 - ホーム画面に追加できる（PWA）：`public/manifest.webmanifest`・`public/icons/`・`public/sw.js`（画面はキャッシュせず、電波がないときだけ `offline.html`）。案内は `InstallAppPrompt`
 - ページは自動で分割して読み込む。ルートファイル（`src/routes/`）から `Route` 以外を export すると分割されなくなるので、共有する画面は `src/components/pages/` に置く
 
+## 待ち時間バトル（akitogroup.jp/play/）
+
+ガチキャリAI とは関係のない、ふたりでスマホ対戦するミニゲーム集（サッカー・ジャンプ走・軍団ラン・木こりタイクーン・すもう・クイズなど）。会社ホームページ側の `corporate-site/public/play/index.html` 1枚の静的ページで、ログイン・DB は使わない。招待コード（4ケタ、URL の `#1234`）が同じ人どうしを Supabase Realtime のブロードキャスト（公開キー）でつなぐ。相手がいなければコンピューターと遊べる。検索には出さない（noindex）・サイトからリンクしていない
+
 ## コマンド
 
 ```bash
