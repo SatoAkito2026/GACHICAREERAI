@@ -40,10 +40,10 @@ const GAP = 0.2;
 /** 面接官の質問のあと、答え始めるまでの間 */
 const QUESTION_GAP = 0.35;
 /** 点数を見せる間（NG・OK のあと） */
-const SCORE_HOLD = 0.8;
+const SCORE_HOLD = 0.7;
 /** オファーの通知を見せる間 */
 const OFFER_HOLD = 0.9;
-const END = 3;
+const END = 2;
 /** 点数が数字くるくるで上がっていく長さ（NG・OK） */
 const NG_COUNT = 0.5;
 const OK_COUNT = 0.6;
@@ -251,12 +251,12 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
             t={t}
             ng={lineOf("ng", itemNo)}
             ok={lineOf("ok", itemNo)}
-            point={lineOf("point", itemNo)}
           />
         )}
       </div>
 
-      {/* 最初の1秒：ナレーターの強い一言を、画面いっぱいに大きく */}
+      {/* 最初の1〜2秒：明るい画面に強い一言と、1つ目の「落ちる言い方」と低い点数を最初のコマから見せる
+          （暗い画面だと一覧で真っ黒に見え、2秒で離れられていたため） */}
       {inHook && hookLine && (
         <div
           style={{
@@ -265,30 +265,46 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
             right: 0,
             top: 176,
             bottom: 0,
-            background: "rgba(10,12,16,.92)",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            paddingTop: 120,
+            background: "#FFE45C",
+            padding: "34px 64px 0 22px",
           }}
         >
           <p
             style={{
-              margin: "0 30px",
               textAlign: "center",
-              fontSize: 38,
+              fontSize: 40,
               fontWeight: 900,
-              lineHeight: 1.3,
-              color: "#FFE45C",
-              WebkitTextStroke: "7px #000",
-              paintOrder: "stroke fill",
-              transform: `scale(${1.1 - 0.1 * ease((t - hookLine.start) / 0.18)}) rotate(-2deg)`,
+              lineHeight: 1.25,
+              color: "#111",
+              transform: `scale(${1.08 - 0.08 * ease((t - hookLine.start) / 0.18)}) rotate(-2deg)`,
               wordBreak: "keep-all",
               overflowWrap: "anywhere",
             }}
           >
             {job.hook}
           </p>
+          {job.items[0] && (
+            <div style={{ marginTop: 26 }}>
+              <AnswerCard
+                kind="ng"
+                text={job.items[0].ng}
+                score={job.items[0].ngScore}
+                appear={1}
+                reveal={1}
+              />
+              <p
+                style={{
+                  marginTop: 16,
+                  textAlign: "center",
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: "#111",
+                }}
+              >
+                どう言えば受かる？ ↓
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -350,17 +366,17 @@ function ItemPanel({
   t,
   ng,
   ok,
-  point,
 }: {
   no: number;
   item: RewriteJobData["items"][number];
   t: number;
   ng: PlacedLine;
   ok: PlacedLine;
-  point: PlacedLine;
 }) {
   const showOk = ok && t >= ok.start;
-  const showPoint = point && t >= point.start;
+  // ポイントは読み上げず、受かる言い方の点数が出たあとに文字で出す
+  const pointAt = ok ? ok.start + ok.dur + OK_COUNT : Infinity;
+  const showPoint = !!item.point && t >= pointAt;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <p style={{ fontSize: 25, fontWeight: 900 }}>
@@ -384,7 +400,7 @@ function ItemPanel({
           diff={item.okScore - item.ngScore}
         />
       )}
-      {showPoint && point && (
+      {showPoint && (
         <p
           style={{
             fontSize: 19,
@@ -393,7 +409,7 @@ function ItemPanel({
             background: ACCENT,
             borderRadius: 10,
             padding: "8px 12px",
-            opacity: ease((t - point.start) / 0.25),
+            opacity: ease((t - pointAt) / 0.25),
           }}
         >
           ポイント：{item.point}
