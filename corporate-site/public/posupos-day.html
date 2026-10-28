@@ -403,6 +403,7 @@ body.night .logo img:not(.lk){border-radius:8px}
 @media (max-width:719px){.offer{grid-template-columns:auto minmax(0,1fr)}.offer .btn{grid-column:1/-1;justify-content:center}}
 .offer-pill{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:999px;background:#FFF3D6;border:1px solid #F0C36B;color:#6B4200;margin-top:14px;text-decoration:none}
 .offer-pill b{color:#D92D20}
+.zero-note{font-size:12px;opacity:.8;margin-top:14px;max-width:44em;margin-inline:auto}
 .camp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:640px;margin:0 0 18px;padding:10px 16px;border-radius:16px;background:linear-gradient(135deg,#FF4D3D,#FF8A1F);color:#fff;text-decoration:none;box-shadow:0 14px 30px -18px rgba(217,45,32,.9);transition:transform .3s}
 .camp-bar:hover{transform:translateY(-2px)}
 .camp-bar .cb-tag{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#D92D20;font-weight:900;font-size:13px;border-radius:999px;padding:3px 12px;white-space:nowrap}
@@ -929,7 +930,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   <section class="hero">
     <div class="wrap">
       <div>
-        <a class="camp-bar" href="#plans"><span class="cb-tag"><i aria-hidden="true"></i>今なら</span><span class="cb-txt"><b>0円から始められる</b><sup>※</sup><br><em>最初の1か月は無料でお試し。合わなければ、そのままやめられます</em></span><span class="cb-go" aria-hidden="true">→</span></a>
 
         <p class="hero-logo"><img src="assets/img/posupos-lockup.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for restaurants</span></p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
@@ -939,20 +939,20 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
 
         <div class="btns" style="margin-top:28px">
-          <a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-blue" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="/contact#pos">お問い合わせ</a>
         </div>
         <p class="used-in" style="display:inline-flex;align-items:center;gap:8px;margin:18px 0 0;padding:6px 14px;border-radius:999px;background:rgba(20,108,67,.1);color:#146C43;font-weight:800;font-size:14.5px"><span aria-hidden="true">●</span>夜のお店2店で使われています（昼のお店はモニター募集中）</p>
         <ul class="hero-pts">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>0円から始められる<sup>※</sup>（最初の1か月は無料）</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>0円から始められる<sup>※</sup></li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>AI がアルバイトの一次面接</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>インストール不要</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>パソコン・タブレット・スマホ</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>QR で注文・券売機も</li>
 
         </ul>
-        <p class="ah-note">※ 最初の1か月は無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。2か月目からの料金は、プランとお店に合わせてお見積もりします。<br>※「世界初」は2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
-        <a class="offer-pill mo-pill" href="/posupos-monitor">モニター店舗 募集中：今のレジのまま<b>2か月無料</b> →</a><br>
+        <p class="ah-note">※「世界初」は2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+        <a class="offer-pill mo-pill" href="/posupos-monitor">モニター店舗 募集中：（別枠）今のレジのまま<b>2か月無料</b> →</a><br>
         <p class="mode-note">夜のお店の方は <a href="/posupos-night">夜のお店のページへ →</a></p>
 
       </div>
@@ -1113,7 +1113,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <p class="fit-n">AI は合否を決めません。見た目についても AI は何も言いません。録画と写真を見て、お店の方が決めてください。</p>
       </div>
       <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-day-ai-interview">AI面接をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>選ぶ質問・AI と話す内容・届くもの・録画のあつかい・よくある質問</span></div>
-      <p class="ai-note rv">※ スタンダードプラン・個別カスタムで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+      <p class="ai-note rv">※ スタンダードプラン・個別プランで使えます。※ AI は合否を決めません。採用はお店の方が決めてください。※ 応募者は録画に同意してから受けます。録画・写真は90日で自動で消えます。※ 面接は、AKITOグループのガチキャリAIが行います。※「世界初」は、2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
     </div>
   </section>
 
@@ -1326,13 +1326,12 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <div class="sec-head rv">
         <p class="eyebrow">Plans</p>
         <h2>プラン</h2>
-        <p>お店の大きさや、やりたいことに合わせて選べます。ライトプランとスタンダードプランは、最初の1か月は無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。料金は1店舗ごとで、お店に合わせてお見積もりします。</p>
+        <p>お店の大きさや、やりたいことに合わせて選べます。</p>
       </div>
       <div class="plans stagger">
         <article class="plan rv">
           <h3>ライトプラン</h3>
           <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
-          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">2か月目からの料金はお見積もり</span></p>
           <ul>
             <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
             <li><span>店内<small>卓の配置図、受付・注文・会計（フロアも分けられる）</small></span></li>
@@ -1352,7 +1351,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">1店舗ごと・2か月目からの料金はお見積もり</span></p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
@@ -1380,7 +1378,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <article class="plan cus rv" id="plan-cus">
           <h3>個別プラン</h3>
           <p class="who">お店のやり方に、アプリを合わせたいお店に（1店舗ごと）。</p>
-          <p class="price"><span class="py">お見積もり</span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<small>選ぶ質問＋1分の録画面接</small></span></li>
@@ -1415,8 +1412,8 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <h2>よくある質問</h2>
       </div>
       <div class="faq rv">
-        <details><summary>料金はいくらですか？</summary><p>料金は1店舗ごとで、プラン（ライト・スタンダード・個別）と、お店の大きさや使う機能に合わせてお見積もりします。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。くわしくはお問い合わせください。</p></details>
-        <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。</p></details>
+        <details><summary>お試しはできますか？</summary><p>はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
         <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。</p></details>
         <details><summary>面接は何分くらいですか？</summary><p>かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。</p></details>
         <details><summary>古い iPad でも使えますか？</summary><p>ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。</p></details>
@@ -1429,13 +1426,14 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   <!-- 9. お問い合わせ -->
   <section class="sec final">
     <div class="wrap rv">
-      <h2>まずは無料で、1か月。</h2>
-      <p>0円から始められます。最初の1か月は無料でお試し。料金はお店に合わせてお見積もりします。お試しのお申し込みは、お問い合わせフォームから。</p>
+      <h2>0円から、はじめられます。</h2>
+      <p>料金は、お店に合わせてお問い合わせのときにご案内します。お試しのお申し込みは、お問い合わせフォームから。</p>
       <div class="btns">
-        <a class="btn btn-w" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="/contact#pos">お問い合わせ</a>
       </div>
       <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
+      <p class="zero-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
     </div>
   </section>
 </main>
@@ -1478,7 +1476,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
 
 <script>
 (function(){
@@ -1545,6 +1543,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、プラン（ライト・スタンダード・個別）と、お店の大きさや使う機能に合わせてお見積もりします。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。くわしくはお問い合わせください。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-day#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

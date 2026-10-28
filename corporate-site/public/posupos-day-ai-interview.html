@@ -403,6 +403,7 @@ body.night .logo img:not(.lk){border-radius:8px}
 @media (max-width:719px){.offer{grid-template-columns:auto minmax(0,1fr)}.offer .btn{grid-column:1/-1;justify-content:center}}
 .offer-pill{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:999px;background:#FFF3D6;border:1px solid #F0C36B;color:#6B4200;margin-top:14px;text-decoration:none}
 .offer-pill b{color:#D92D20}
+.zero-note{font-size:12px;opacity:.8;margin-top:14px;max-width:44em;margin-inline:auto}
 .camp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:640px;margin:0 0 18px;padding:10px 16px;border-radius:16px;background:linear-gradient(135deg,#FF4D3D,#FF8A1F);color:#fff;text-decoration:none;box-shadow:0 14px 30px -18px rgba(217,45,32,.9);transition:transform .3s}
 .camp-bar:hover{transform:translateY(-2px)}
 .camp-bar .cb-tag{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#D92D20;font-weight:900;font-size:13px;border-radius:999px;padding:3px 12px;white-space:nowrap}
@@ -966,10 +967,10 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <p class="lead">応募が来たら、URL を LINE で送るだけ。応募者は、入れる日や時間・通勤をボタンで選んで、AI の面接官と1分ほど話します。お店には、話している姿の録画と写真、選んだ答えが届きます。忙しい営業の合間に、面接の時間をとる必要がありません。</p>
 
         <div class="btns" style="margin-top:26px">
-          <a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-blue" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="#flow">使い方を見る</a>
         </div>
-        <p class="ai-hero-note">スタンダードプラン・個別カスタムで、追加料金なしで使えます（ライトプランでは使えません）。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+        <p class="ai-hero-note">スタンダードプラン・個別プランで、追加料金なしで使えます（ライトプランでは使えません）。※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
       </div>
       <figure class="pf" style="justify-self:center"><img src="assets/img/pos-ai-talk-day.webp" width="600" height="963" alt="応募者がスマホでAIの面接官と話している画面の見本（録画中）" fetchpriority="high"></figure>
     </div>
@@ -1094,7 +1095,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <details><summary>応募者は何か準備がいりますか？</summary><p>いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。</p></details>
         <details><summary>お店から聞きたいことは足せますか？</summary><p>3つまで足せます。AI の面接官が会話の中で聞きます。</p></details>
         <details><summary>録画や写真はどうなりますか？</summary><p>応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。</p></details>
-        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランと個別プランの料金の中で使えます。追加の料金はかかりません（ライトプランでは使えません）。</p></details>
       </div>
       <p class="sp-back"><a class="btn btn-line" href="/posupos-day">← ポスポスのページへ戻る</a></p>
     </div>
@@ -1102,13 +1103,14 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
 
   <section class="sec final">
     <div class="wrap rv">
-      <h2>まずは無料で、1か月。</h2>
-      <p>0円から始められます。最初の1か月は無料でお試し。料金はお店に合わせてお見積もりします。お試しのお申し込みは、お問い合わせフォームから。</p>
+      <h2>0円から、はじめられます。</h2>
+      <p>料金は、お店に合わせてお問い合わせのときにご案内します。お試しのお申し込みは、お問い合わせフォームから。</p>
       <div class="btns">
-        <a class="btn btn-w" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="/contact#pos">お問い合わせ</a>
       </div>
       <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
+      <p class="zero-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
     </div>
   </section>
 
@@ -1152,7 +1154,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
 
 <script>
 (function(){
@@ -1219,6 +1221,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-day"}, {"@type": "ListItem", "position": 3, "name": "AI面接", "item": "https://akitogroup.jp/posupos-day-ai-interview"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "お店から聞きたいことは足せますか？", "acceptedAnswer": {"@type": "Answer", "text": "3つまで足せます。AI の面接官が会話の中で聞きます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-day"}, {"@type": "ListItem", "position": 3, "name": "AI面接", "item": "https://akitogroup.jp/posupos-day-ai-interview"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "応募者は何か準備がいりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いりません。送られた URL をスマホで開くだけです。カメラとマイクを使うので、静かで明るい場所で受けてもらいます。"}}, {"@type": "Question", "name": "お店から聞きたいことは足せますか？", "acceptedAnswer": {"@type": "Answer", "text": "3つまで足せます。AI の面接官が会話の中で聞きます。"}}, {"@type": "Question", "name": "録画や写真はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "応募者が録画に同意してから面接がはじまります。録画・写真・会話は90日で自動で消え、お店の画面からいつでも消せます。ほかのお店からは見えません。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランと個別プランの料金の中で使えます。追加の料金はかかりません（ライトプランでは使えません）。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

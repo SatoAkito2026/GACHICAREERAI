@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 <title>料金・プラン｜ポスポス（飲食店のクラウドPOSレジ）0円から始められる</title>
-<meta name="description" content="ポスポスのプランと料金の決まり。ライト・スタンダード・個別の3つのプランでできることの比べ表と、グループ店の料金のしくみ。どのプランも最初の1か月は無料で、0円から始められます。料金はお店に合わせてお見積もりします。">
+<meta name="description" content="ポスポスのプランと料金の決まり。ライト・スタンダード・個別の3つのプランでできることの比べ表と、グループ店の料金のしくみ。0円から始められます。料金はお問い合わせのときにご案内します。">
 <meta property="og:title" content="料金・プラン｜ポスポス（飲食店のクラウドPOSレジ）0円から始められる">
 <meta property="og:url" content="https://akitogroup.jp/posupos-day-pricing">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="ポスポスのプランと料金の決まり。ライト・スタンダード・個別の3つのプランでできることの比べ表と、グループ店の料金のしくみ。どのプランも最初の1か月は無料で、0円から始められます。料金はお店に合わせてお見積もりします。">
+<meta property="og:description" content="ポスポスのプランと料金の決まり。ライト・スタンダード・個別の3つのプランでできることの比べ表と、グループ店の料金のしくみ。0円から始められます。料金はお問い合わせのときにご案内します。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -403,6 +403,7 @@ body.night .logo img:not(.lk){border-radius:8px}
 @media (max-width:719px){.offer{grid-template-columns:auto minmax(0,1fr)}.offer .btn{grid-column:1/-1;justify-content:center}}
 .offer-pill{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:7px 14px;border-radius:999px;background:#FFF3D6;border:1px solid #F0C36B;color:#6B4200;margin-top:14px;text-decoration:none}
 .offer-pill b{color:#D92D20}
+.zero-note{font-size:12px;opacity:.8;margin-top:14px;max-width:44em;margin-inline:auto}
 .camp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:640px;margin:0 0 18px;padding:10px 16px;border-radius:16px;background:linear-gradient(135deg,#FF4D3D,#FF8A1F);color:#fff;text-decoration:none;box-shadow:0 14px 30px -18px rgba(217,45,32,.9);transition:transform .3s}
 .camp-bar:hover{transform:translateY(-2px)}
 .camp-bar .cb-tag{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#D92D20;font-weight:900;font-size:13px;border-radius:999px;padding:3px 12px;white-space:nowrap}
@@ -939,7 +940,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
     <div class="wrap">
       <p class="crumbs"><a href="/posupos-day">ポスポス</a> ／ 料金・プラン</p>
       <h1>料金・プラン</h1>
-      <p class="lead">ライト・スタンダード・個別の3つのプランで、できることを比べられます。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。スタンダードプランなら、AI面接も追加料金なしでついてきます。</p>
+      <p class="lead">ライト・スタンダード・個別の3つのプランで、できることを比べられます。スタンダードプランなら、AI面接も追加料金なしでついてきます。料金は、お店に合わせてお問い合わせのときにご案内します。</p>
     </div>
   </section>
 
@@ -948,13 +949,12 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <div class="sec-head rv">
         <p class="eyebrow">Plans</p>
         <h2>3つのプラン</h2>
-        <p>お店の大きさや、やりたいことに合わせて選べます。ライトプランとスタンダードプランは、最初の1か月は無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。料金は1店舗ごとで、お店に合わせてお見積もりします。</p>
+        <p>お店の大きさや、やりたいことに合わせて選べます。</p>
       </div>
       <div class="plans stagger">
         <article class="plan open rv">
           <h3>ライトプラン</h3>
           <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
-          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">2か月目からの料金はお見積もり</span></p>
           <ul>
             <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
             <li><span>店内<small>卓の配置図、受付・注文・会計（フロアも分けられる）</small></span></li>
@@ -974,7 +974,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">1店舗ごと・2か月目からの料金はお見積もり</span></p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
@@ -1001,7 +1000,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <article class="plan cus open rv" id="plan-cus">
           <h3>個別プラン</h3>
           <p class="who">お店のやり方に、アプリを合わせたいお店に（1店舗ごと）。</p>
-          <p class="price"><span class="py">お見積もり</span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<small>選ぶ質問＋1分の録画面接</small></span></li>
@@ -1031,24 +1029,26 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
     <div class="wrap">
       <div class="sec-head rv"><p class="eyebrow">FAQ</p><h2>料金のよくある質問</h2></div>
       <div class="faq rv">
-        <details><summary>料金はいくらですか？</summary><p>料金は1店舗ごとで、プラン（ライト・スタンダード・個別）と、お店の大きさや使う機能に合わせてお見積もりします。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。くわしくはお問い合わせください。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。</p></details>
         <details><summary>グループ店（2店舗以上）の料金は？</summary><p>グループ店は何店舗でも足せます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、お店を切りかえて使えます。</p></details>
-        <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
-        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランの料金の中で使えます。追加の料金はかかりません。</p></details>
+        <details><summary>お試しはできますか？</summary><p>はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
+        <details><summary>AI面接にお金はかかりますか？</summary><p>スタンダードプランと個別プランの料金の中で使えます。追加の料金はかかりません（ライトプランでは使えません）。</p></details>
       </div>
+      <p class="plan-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
       <p class="back"><a class="btn btn-line" href="/posupos-day">← ポスポスのページへ戻る</a></p>
     </div>
   </section>
 
   <section class="sec final">
     <div class="wrap rv">
-      <h2>まずは無料で、1か月。</h2>
-      <p>0円から始められます。最初の1か月は無料でお試し。料金はお店に合わせてお見積もりします。お試しのお申し込みは、お問い合わせフォームから。</p>
+      <h2>0円から、はじめられます。</h2>
+      <p>料金は、お店に合わせてお問い合わせのときにご案内します。お試しのお申し込みは、お問い合わせフォームから。</p>
       <div class="btns">
-        <a class="btn btn-w" href="/contact#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="/contact#pos">お問い合わせ</a>
       </div>
       <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
+      <p class="zero-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
     </div>
   </section>
 
@@ -1092,7 +1092,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料で1か月ためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
 
 <script>
 (function(){
@@ -1159,6 +1159,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-day"}, {"@type": "ListItem", "position": 3, "name": "料金・プラン", "item": "https://akitogroup.jp/posupos-day-pricing"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、プラン（ライト・スタンダード・個別）と、お店の大きさや使う機能に合わせてお見積もりします。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。くわしくはお問い合わせください。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は何店舗でも足せます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、お店を切りかえて使えます。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランの料金の中で使えます。追加の料金はかかりません。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos-day"}, {"@type": "ListItem", "position": 3, "name": "料金・プラン", "item": "https://akitogroup.jp/posupos-day-pricing"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。"}}, {"@type": "Question", "name": "グループ店（2店舗以上）の料金は？", "acceptedAnswer": {"@type": "Answer", "text": "グループ店は何店舗でも足せます。料金は1店舗ごとにかかります（例：2店舗なら2店舗分）。お店を足すと、次の引き落としから1店舗分増えます（足した日からの日割り）。スタッフのスマホでは、お店を切りかえて使えます。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI面接にお金はかかりますか？", "acceptedAnswer": {"@type": "Answer", "text": "スタンダードプランと個別プランの料金の中で使えます。追加の料金はかかりません（ライトプランでは使えません）。"}}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>
