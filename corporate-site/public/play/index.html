@@ -3,7 +3,14 @@
 <head>
 <!-- 待ち時間バトル（公開ページ）。ふたりのつながりは Supabase Realtime のブロードキャストだけを使う（公開キー・ログイン不要） -->
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="待ち時間バトル">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F0FA">
 <meta name="robots" content="noindex">
 <meta name="description" content="ふたりでスマホ対戦できるミニゲーム集。招待コードを送るだけで、登録なしで遊べます。">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -180,6 +187,29 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
 .gbtn:not(:disabled):active { transform: translateY(3px); box-shadow: none }
 .sec-title { display: flex; align-items: baseline; gap: 8px }
 .sec-title b { font-family: var(--display); font-weight: 400; font-size: 18px }
+
+/* ゲーム中：画面にぴったり収めて、ページはスクロールさせない（アプリのように） */
+button { -webkit-touch-callout: none }
+.howto-btn { display: none }
+html.playing, html.playing body { overflow: hidden; overscroll-behavior: none; height: 100% }
+html.playing body { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px) }
+html.playing .wrap { height: 100%; padding-block: 6px; gap: 0 }
+html.playing header { display: none }
+html.playing #app { flex: 1; min-height: 0; display: flex; flex-direction: column }
+html.playing #app > section { flex: 1; min-height: 0; gap: 6px !important }
+html.playing #app > section > .row:first-child .eyebrow { display: none }
+html.playing #app > section > .row:first-child h2 { font-size: 18px }
+html.playing .howto-btn { display: inline-flex }
+html.playing .card.act { flex: 1; min-height: 0; padding: 0 !important; border: 0; background: none; gap: 8px; position: relative }
+html.playing .card.act > p.muted { display: none }
+html.playing.howto .card.act > p.muted { display: block; position: absolute; inset: 0 0 auto 0; z-index: 5; max-height: 75%; overflow: auto; background: var(--surface);
+  color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.25) }
+html.playing #act-msg { position: absolute; left: 10px; right: 10px; top: 42%; transform: translateY(-50%); z-index: 4; padding: 14px; border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: 0 8px 30px rgba(0,0,0,.25) }
+html.playing .stick { width: 120px; height: 120px }
+html.playing .card.act > .ctrl, html.playing .card.act > .row, html.playing .card.act > .mash { margin-top: auto }
+html.playing .card.act > .row + .row { margin-top: 0 }
+html.playing .gbtn { padding-block: 20px }
 
 @media (prefers-reduced-motion: reduce) { .wait::after { animation: none } .game:active { transform: none } }
 </style>
@@ -410,6 +440,9 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
   };
 
   function render() {
+    const playing = !ui.renaming && !!ACTION[me.m.g];
+    document.documentElement.classList.toggle("playing", playing);
+    if (!playing) document.documentElement.classList.remove("howto");
     const active = document.activeElement;
     const focusId = active && active.id;
     const sel = active && active.selectionStart != null ? [active.selectionStart, active.selectionEnd] : null;
@@ -513,7 +546,7 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
 
   function topBar(title, sub) {
     return `<div class="row"><div class="grow"><p class="eyebrow">${esc(sub || "")}</p><h2>${esc(title)}</h2></div>
-      <button class="btn ghost small" data-act="menu">メニュー</button></div>`;
+      <button class="btn ghost small howto-btn" data-act="howto">遊び方</button><button class="btn ghost small" data-act="menu">メニュー</button></div>`;
   }
   function needOpp() { return opp() ? "" : `<div class="note">あいてがまだいません。相手がページを開くと始まります。</div>` }
   function progress(n, done, now) { let s = ""; for (let i = 0; i < n; i++) s += `<i class="${i < done ? "done" : i === now ? "now" : ""}"></i>`; return `<div class="progress">${s}</div>` }
@@ -767,9 +800,25 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
     requestAnimationFrame(f);
     return () => { alive = false };
   }
+  // ゲーム中は、ボタンなどを置いた残りの高さに収まる大きさにする
+  function availBox(cv) {
+    const box = cv.parentElement, cs = getComputedStyle(box);
+    let other = 0, n = 0;
+    for (const el of box.children) { if (el === cv) continue; const st = getComputedStyle(el); if (st.display === "none" || st.position === "absolute") continue; other += el.offsetHeight; n++ }
+    return { w: box.clientWidth || 300, h: box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - other - n * (parseFloat(cs.rowGap) || 0) };
+  }
+  const isPlaying = () => document.documentElement.classList.contains("playing");
+  function fitWidth(cv, ratio) {
+    let w = cv.parentElement.clientWidth || cv.clientWidth || 300;
+    if (isPlaying()) {
+      w = Math.max(150, Math.min(w, Math.floor(availBox(cv).h / ratio)));
+      cv.style.margin = "0 auto"; cv.style.flex = "none";
+    }
+    return w;
+  }
   function canvasFor(cv, ratio) {
-    const w = cv.clientWidth || 300, h = Math.round(w * ratio);
-    cv.style.height = h + "px";
+    const w = fitWidth(cv, ratio), h = Math.round(w * ratio);
+    cv._ratio = ratio; cv.style.width = w + "px"; cv.style.height = h + "px";
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1666,7 +1715,10 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
     },
     mount() {
       const host = isFirst();
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 1.2);
+      const cv = $("#cv");
+      // ゲーム中は画面の残りいっぱいに広げる（奥行きの画面は縦横の比がちがっても描ける）
+      const ab = isPlaying() ? availBox(cv) : null;
+      const { c, w, h } = canvasFor(cv, ab ? clamp(ab.h / ab.w, 1.05, 1.75) : 1.05);
       const TR = kartTrack(), NS = TR.length, sc = w / 330;
       const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
       const slot = (n) => { const i = NS - 8 - Math.floor(n / 2) * 14; const [nx, ny, tx, ty] = norm(i); const off = n % 2 ? 18 : -18; return { x: TR[i][0] + nx * off, y: TR[i][1] + ny * off, ang: Math.atan2(ty, tx), idx: i } };
@@ -1752,50 +1804,97 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
         if (r === "box") { kk.item = pickItem(kk, rankOf(kk, all), all.length); kk.useAt = raceT + 1 + Math.random() * 2.5 }
         if (kk.item && raceT > kk.useAt) useItem(kk, ownCpuIt);
       }
-      // 描画
-      function drawKart(kk, alpha) {
+      // 描画：カートの後ろから見た奥行きのある画面（床は真上から描いたコースの絵を、行ごとに遠近をつけて写す）
+      const TEX_W = 1650, TEX_H = 1350;
+      const tex = (() => {
+        const tc = document.createElement("canvas"); tc.width = TEX_W; tc.height = TEX_H; const t = tc.getContext("2d");
+        t.fillStyle = "#58B04A"; t.fillRect(0, 0, TEX_W, TEX_H);
+        t.fillStyle = "#4E9F42"; for (let gx = 0; gx < TEX_W; gx += 60) for (let gy = 0; gy < TEX_H; gy += 60) if (((gx + gy) / 60) % 2 === 0) t.fillRect(gx, gy, 60, 60);
+        const path = () => { t.beginPath(); t.moveTo(TR[0][0], TR[0][1]); for (let i = 1; i < NS; i++) t.lineTo(TR[i][0], TR[i][1]); t.closePath() };
+        t.lineJoin = "round";
+        path(); t.strokeStyle = "#fff"; t.lineWidth = KT_RW * 2 + 12; t.stroke();
+        path(); t.strokeStyle = "#E23B2E"; t.setLineDash([16, 16]); t.lineWidth = KT_RW * 2 + 12; t.stroke(); t.setLineDash([]);
+        path(); t.strokeStyle = "#76767F"; t.lineWidth = KT_RW * 2; t.stroke();
+        path(); t.strokeStyle = "rgba(255,255,255,.7)"; t.setLineDash([12, 20]); t.lineWidth = 2.5; t.stroke(); t.setLineDash([]);
+        const [nx, ny] = norm(0);
+        for (let j = -5; j < 5; j++) for (let r = 0; r < 3; r++) { t.fillStyle = (j + r) % 2 ? "#fff" : "#111"; t.save(); t.translate(TR[0][0] + nx * j * 9.2, TR[0][1] + ny * j * 9.2); t.rotate(Math.atan2(ny, nx)); t.fillRect(0, r * 5 - 7.5, 9.2, 5); t.restore() }
+        return new Uint32Array(t.getImageData(0, 0, TEX_W, TEX_H).data.buffer);
+      })();
+      const RW7 = 200, RH7 = Math.round(200 * (h / w)), HZ = Math.round(RH7 * 0.36), CAMH = 26, FOC = RW7 * 0.85, CAMD = 62;
+      const buf7 = document.createElement("canvas"); buf7.width = RW7; buf7.height = RH7;
+      const b7 = buf7.getContext("2d"), img7 = b7.createImageData(RW7, RH7), px7 = new Uint32Array(img7.data.buffer);
+      const le = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+      const rgba = (r, g, b) => (le ? (255 << 24) | (b << 16) | (g << 8) | r : (r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
+      const GRASS = rgba(88, 176, 74), FOG = [168, 214, 240];
+      const SC = w / RW7;
+      let cam = { x: 0, y: 0, dx: 1, dy: 0, rx: 0, ry: 1 };
+      function floor() {
+        const a = K.ang, dx = Math.cos(a), dy = Math.sin(a);
+        cam = { x: K.x - dx * CAMD, y: K.y - dy * CAMD, dx, dy, rx: -dy, ry: dx };
+        for (let y = 0; y < RH7; y++) {
+          if (y <= HZ) { const t = y / HZ; const col = rgba(110 + t * 58 | 0, 170 + t * 44 | 0, 235 + t * 5 | 0); px7.fill(col, y * RW7, y * RW7 + RW7); continue }
+          const z = (CAMH * FOC) / (y - HZ), k = z / FOC, fog = clamp((z - 260) / 500, 0, 1);
+          const bx = cam.x + dx * z - cam.rx * k * (RW7 / 2), by = cam.y + dy * z - cam.ry * k * (RW7 / 2), sx = cam.rx * k, sy = cam.ry * k;
+          let wx = bx, wy = by, o = y * RW7;
+          for (let x = 0; x < RW7; x++, wx += sx, wy += sy) {
+            const ix = wx | 0, iy = wy | 0;
+            let c0 = ix >= 0 && iy >= 0 && ix < TEX_W && iy < TEX_H ? tex[iy * TEX_W + ix] : GRASS;
+            if (fog > 0) { const r = c0 & 255, g = (c0 >>> 8) & 255, b = (c0 >>> 16) & 255; c0 = le ? rgba(r + (FOG[0] - r) * fog | 0, g + (FOG[1] - g) * fog | 0, b + (FOG[2] - b) * fog | 0) : c0 }
+            px7[o + x] = c0;
+          }
+        }
+        b7.putImageData(img7, 0, 0);
+        c.imageSmoothingEnabled = false; c.drawImage(buf7, 0, 0, w, h); c.imageSmoothingEnabled = true;
+      }
+      function proj(x, y) {
+        const vx = x - cam.x, vy = y - cam.y, z = vx * cam.dx + vy * cam.dy, lat = vx * cam.rx + vy * cam.ry;
+        if (z < 6) return null;
+        const s = FOC / z;
+        return { sx: (RW7 / 2 + lat * s) * SC, sy: (HZ + CAMH * s) * SC, s: s * SC, z };
+      }
+      function hills() {
+        const hy = HZ * SC, off = ((-K.ang / (Math.PI * 2)) * w * 3) % w;
+        c.fillStyle = "#8FB8D8";
+        for (let i = -1; i < 3; i++) { const bx = off + i * w; c.beginPath(); c.moveTo(bx, hy); c.lineTo(bx + w * 0.18, hy - h * 0.1); c.lineTo(bx + w * 0.34, hy - h * 0.04); c.lineTo(bx + w * 0.55, hy - h * 0.13); c.lineTo(bx + w * 0.78, hy - h * 0.03); c.lineTo(bx + w, hy); c.fill() }
+        const off2 = ((-K.ang / (Math.PI * 2)) * w * 5) % w;
+        c.fillStyle = "#3E9A4C";
+        for (let i = -1; i < 3; i++) { const bx = off2 + i * w; for (const [px, r] of [[0.1, 0.07], [0.32, 0.05], [0.5, 0.09], [0.76, 0.06]]) { c.beginPath(); c.arc(bx + w * px, hy, w * r, Math.PI, 0); c.fill() } }
+      }
+      function kartSprite(kk, p, isMe) {
         const [b1, b2] = KT_COLORS[kk.col] || KT_COLORS[0];
-        c.save(); c.globalAlpha = alpha; c.translate(kk.x, kk.y); c.rotate(kk.ang);
-        c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(-10, -6, 22, 14);
-        c.fillStyle = "#222"; c.fillRect(-9, -9, 6, 4); c.fillRect(-9, 5, 6, 4); c.fillRect(5, -8, 5, 3); c.fillRect(5, 5, 5, 3);
-        c.fillStyle = b2; c.fillRect(-10, -6, 21, 12); c.fillStyle = b1; c.fillRect(-8, -5, 17, 10);
-        c.fillStyle = "#EDBE8F"; c.beginPath(); c.arc(-2, 0, 4.2, 0, 7); c.fill(); c.fillStyle = b2; c.beginPath(); c.arc(-3, 0, 4.4, Math.PI / 2, Math.PI * 1.5); c.fill();
-        if (kk.star > 0) { c.strokeStyle = `hsl(${(performance.now() / 3) % 360},90%,60%)`; c.lineWidth = 3; c.strokeRect(-12, -8, 25, 16) }
-        c.restore();
+        const rel = (kk.ang || 0) - K.ang + (kk.spin > 0 ? performance.now() / 60 : 0), side = Math.abs(Math.sin(rel)), s = p.s;
+        const W = (18 + side * 8) * s, cx = p.sx + (isMe ? (L.down ? -3 : R.down ? 3 : 0) : 0), by = p.sy;
+        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(cx, by, W * 0.62, 3 * s, 0, 0, 7); c.fill();
+        c.fillStyle = "#1c1c1c"; c.fillRect(cx - W / 2, by - 6 * s, 5 * s, 6 * s); c.fillRect(cx + W / 2 - 5 * s, by - 6 * s, 5 * s, 6 * s);
+        c.fillStyle = b2; c.fillRect(cx - W / 2 + 3 * s, by - 9 * s, W - 6 * s, 6 * s);
+        c.fillStyle = b1; c.fillRect(cx - W / 2 + 4 * s, by - 12 * s, W - 8 * s, 4 * s);
+        c.fillStyle = "#333"; c.fillRect(cx - 4 * s, by - 6 * s, 8 * s, 2.5 * s);
+        c.fillStyle = "#EDBE8F"; c.beginPath(); c.arc(cx, by - 16 * s, 4.2 * s, 0, 7); c.fill();
+        c.fillStyle = b2; c.beginPath(); c.arc(cx, by - 17 * s, 4.6 * s, Math.PI, 0); c.fill(); c.fillRect(cx - 4.6 * s, by - 17.5 * s, 9.2 * s, 2.5 * s);
+        if (kk.star > 0) { c.strokeStyle = `hsl(${(performance.now() / 3) % 360},90%,60%)`; c.lineWidth = Math.max(2, 1.5 * s); c.strokeRect(cx - W / 2 - 2 * s, by - 22 * s, W + 4 * s, 23 * s) }
+        if (isMe && kk.driftT > 0) { c.fillStyle = kk.driftT > 0.9 ? "#FFB020" : "rgba(255,255,255,.8)"; for (const sgn of [-1, 1]) { c.beginPath(); c.arc(cx + sgn * W * 0.45, by - 1 * s, (1.5 + Math.random() * 1.5) * s, 0, 7); c.fill() } }
       }
       function draw(allKarts, items) {
-        c.fillStyle = "#58B04A"; c.fillRect(0, 0, w, h);
-        c.save();
-        c.translate(w / 2, h * 0.7); c.scale(sc, sc); c.rotate(-K.ang - Math.PI / 2); c.translate(-K.x, -K.y);
-        c.fillStyle = "#4E9F42"; for (let gx = Math.floor((K.x - 500) / 80) * 80; gx < K.x + 500; gx += 80) for (let gy = Math.floor((K.y - 500) / 80) * 80; gy < K.y + 500; gy += 80) if (((gx + gy) / 80) % 2 === 0) c.fillRect(gx, gy, 80, 80);
-        const path = () => { c.beginPath(); c.moveTo(TR[0][0], TR[0][1]); for (let i = 1; i < NS; i++) c.lineTo(TR[i][0], TR[i][1]); c.closePath() };
-        c.lineJoin = "round";
-        path(); c.strokeStyle = "#fff"; c.lineWidth = KT_RW * 2 + 10; c.stroke();
-        path(); c.strokeStyle = "#E23B2E"; c.setLineDash([18, 18]); c.lineWidth = KT_RW * 2 + 10; c.stroke(); c.setLineDash([]);
-        path(); c.strokeStyle = "#6E6E78"; c.lineWidth = KT_RW * 2; c.stroke();
-        path(); c.strokeStyle = "rgba(255,255,255,.55)"; c.setLineDash([14, 22]); c.lineWidth = 2; c.stroke(); c.setLineDash([]);
-        // スタートライン
-        { const [nx, ny] = norm(0); for (let j = -5; j < 5; j++) for (let r = 0; r < 2; r++) { c.fillStyle = (j + r) % 2 ? "#fff" : "#111"; const px = TR[0][0] + nx * j * 9.2, py = TR[0][1] + ny * j * 9.2; c.save(); c.translate(px, py); c.rotate(Math.atan2(ny, nx)); c.fillRect(0, r * 5 - 5, 9.2, 5); c.restore() } }
-        for (const b of BOXES) { if (b.re > 0) continue; c.save(); c.translate(b.x, b.y); c.rotate(performance.now() / 600); c.fillStyle = `hsl(${(performance.now() / 8 + b.x) % 360},85%,60%)`; c.fillRect(-7, -7, 14, 14); c.restore(); c.save(); c.translate(b.x, b.y); c.rotate(K.ang + Math.PI / 2); c.fillStyle = "#fff"; c.font = `bold 11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", 0, 1); c.restore() }
-        for (const p of items) { if (p.dead) continue; if (p.k === "b") { c.fillStyle = "#F4D03F"; c.beginPath(); c.ellipse(p.x, p.y, 7, 4, 0.6, 0, 7); c.fill(); c.strokeStyle = "#8a6d00"; c.lineWidth = 1; c.stroke() } else { c.fillStyle = "#2FA84F"; c.beginPath(); c.arc(p.x, p.y, 6, 0, 7); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(p.x, p.y, 3, 0, 7); c.fill() } }
-        allKarts.slice().sort((a, b) => (a === K) - (b === K)).forEach((kk) => drawKart(kk, 1));
-        c.restore();
+        floor(); hills();
+        const spr = [];
+        for (const b of BOXES) { if (b.re > 0) continue; const p = proj(b.x, b.y); if (p) spr.push({ z: p.z, f: () => { const sz = 11 * p.s, y0 = p.sy - 9 * p.s; c.save(); c.translate(p.sx, y0); c.fillStyle = `hsl(${(performance.now() / 8 + b.x) % 360},85%,60%)`; c.globalAlpha = 0.9; c.fillRect(-sz / 2, -sz / 2, sz, sz); c.globalAlpha = 1; c.strokeStyle = "#fff"; c.lineWidth = Math.max(1, p.s); c.strokeRect(-sz / 2, -sz / 2, sz, sz); c.fillStyle = "#fff"; c.font = `${Math.max(8, 8 * p.s) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", 0, 1); c.restore() } }) }
+        for (const it of items) { if (it.dead) continue; const p = proj(it.x, it.y); if (!p) continue; spr.push({ z: p.z, f: () => { if (it.k === "b") { c.fillStyle = "#F4D03F"; c.beginPath(); c.ellipse(p.sx, p.sy - 3 * p.s, 6 * p.s, 3.5 * p.s, 0, 0, 7); c.fill(); c.strokeStyle = "#8a6d00"; c.lineWidth = 1; c.stroke() } else { c.fillStyle = "#2FA84F"; c.beginPath(); c.arc(p.sx, p.sy - 5 * p.s, 5 * p.s, 0, 7); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(p.sx, p.sy - 5 * p.s, 2.4 * p.s, 0, 7); c.fill() } } }) }
+        for (const kk of allKarts) { const p = proj(kk.x, kk.y); if (p) spr.push({ z: p.z - (kk === K ? 0.01 : 0), f: () => kartSprite(kk, p, kk === K) }) }
+        spr.sort((a, b) => b.z - a.z).forEach((o) => o.f());
         // 小さい地図
         const mw = 86, mh = 70, mx = w - mw - 6, my = 6;
         c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(mx, my, mw, mh);
         const ms = Math.min((mw - 8) / 1300, (mh - 8) / 1050);
         c.strokeStyle = "#ddd"; c.lineWidth = 2; c.beginPath(); TR.forEach((p, i) => { const X = mx + 4 + (p[0] - 180) * ms, Y = my + 4 + (p[1] - 160) * ms; i ? c.lineTo(X, Y) : c.moveTo(X, Y) }); c.closePath(); c.stroke();
         for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(mx + 4 + (kk.x - 180) * ms, my + 4 + (kk.y - 160) * ms, kk === K ? 4 : 3, 0, 7); c.fill() }
-        // 表示
         const rk = rankOf(K, allKarts);
         c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 6, 96, 48);
         c.font = `22px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 12, 22);
         c.font = `13px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}周`, 12, 44);
         c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 58, 96, 24); c.font = `13px ${DISP}`; c.fillStyle = K.item ? "#7CF59A" : "#aaa"; c.fillText(K.item ? KT_ITEMS[K.item] : "アイテムなし", 12, 70);
-        if (K.driftT > 0.9) { c.fillStyle = "#FFB020"; c.fillRect(w / 2 - 30, h - 16, 60, 6) } else if (K.driftT > 0) { c.fillStyle = "rgba(255,255,255,.7)"; c.fillRect(w / 2 - 30, h - 16, 60 * (K.driftT / 0.9), 6) }
-        if (msg) bigText(c, msg.text, w / 2, h * 0.3, 24, msg.col);
-        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.4, 64, "#FFE14D");
-        if (K.fin) bigText(c, `${me.s.rk || rk}位でゴール！`, w / 2, h * 0.4, 34, "#FFE14D");
+        if (msg) bigText(c, msg.text, w / 2, h * 0.24, 24, msg.col);
+        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.3, 64, "#FFE14D");
+        if (K.fin) bigText(c, `${me.s.rk || rk}位でゴール！`, w / 2, h * 0.3, 34, "#FFE14D");
       }
       function frame(dt) {
         const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
@@ -2073,6 +2172,7 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
     else if (act === "rename-save") { const v = ($("#name-input").value || "").trim().slice(0, 12); if (v) { myName = v; ls.set("name", v) } ui.renaming = false; push(); render() }
     else if (act === "start") startMatch(t.dataset.g);
     else if (act === "menu") toMenu();
+    else if (act === "howto") document.documentElement.classList.toggle("howto");
     else if (act === "ishin-send") sendIshin();
     else if (act === "ishin-ok") setS({ ok: [...(me.s.ok || []), Number(t.dataset.i)] });
     else if (act === "quiz-pick") {
@@ -2109,6 +2209,12 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
   });
   // reflex needs the fastest possible signal
   document.addEventListener("pointerdown", (ev) => { if (ev.target.closest("#pad")) { ev.preventDefault(); reflexTap() } });
+  document.addEventListener("click", (ev) => { if (document.documentElement.classList.contains("howto") && ev.target.closest(".card.act > p.muted")) document.documentElement.classList.remove("howto") });
+  let refitT = null;
+  addEventListener("resize", () => {
+    clearTimeout(refitT);
+    refitT = setTimeout(() => { const cv = $("#cv"); if (!cv || !cv._ratio) return; const w = fitWidth(cv, cv._ratio); cv.style.width = w + "px"; cv.style.height = Math.round(w * cv._ratio) + "px" }, 150);
+  });
   document.addEventListener("input", (ev) => {
     if (ev.target.id === "ishin-input") ui.draft = ev.target.value;
     if (ev.target.id === "code-input") {
