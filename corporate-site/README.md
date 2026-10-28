@@ -41,6 +41,10 @@ npx wrangler secret put RESEND_API_KEY   # アプリと同じ Resend のキー�
 
 ## 公開（Cloudflare）
 
+Cloudflare の Workers Builds で GitHub とつないでいて、ブランチ `claude/dazzling-babbage-ikm2m6` に変更が入ると自動で反映される（Worker `akitogroup-site` の Settings → Builds。ルートディレクトリ `corporate-site`、ビルドコマンドなし、デプロイコマンド `npx wrangler deploy`）。`public/*.html` は反映のときに作り直さないので、`src/` を直したら `python3 build.py` の結果もコミットする。
+
+手元から反映するときは：
+
 ```bash
 cd corporate-site
 python3 build.py
