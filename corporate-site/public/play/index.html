@@ -212,6 +212,13 @@ html.playing .card.act > .row + .row { margin-top: 0 }
 html.playing .gbtn { padding-block: 20px }
 /* 全画面のゲーム（カート）：画面いっぱいに描いて、ボタンは下の両はしに半透明で重ねる */
 html.playing.full .wrap { padding: 0; max-width: none }
+html.ingame header { display: none }
+.kpad .wide { flex: 1; pointer-events: auto }
+.kbtn.big { width: 96px; height: 96px; font-size: 20px }
+.kbtn.pill { width: auto; height: 62px; border-radius: 31px; padding: 0 16px; font-size: 15px }
+.kpad .stick { background: rgba(20,18,42,.25); border-color: rgba(255,255,255,.55) }
+.kpad .knob { background: rgba(255,255,255,.75); box-shadow: none }
+.kpad .mash { width: 100%; height: 110px; opacity: .92 }
 html.playing.full #app > section > .row:first-child { position: fixed; z-index: 10; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); gap: 6px; flex-wrap: nowrap }
 html.playing.full #app > section > .row:first-child .grow { display: none }
 html.playing.full #app > section > .row:first-child .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px }
@@ -226,6 +233,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .kbtn.small { width: 62px; height: 62px; font-size: 12px }
 .kbtn:active { background: rgba(255,255,255,.35) }
 .kbtn:disabled { opacity: .4 }
+.steps { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 4px; font-size: 14px }
 .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
 .chipbtn { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 6px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer }
 .chipbtn.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, var(--surface)) }
@@ -462,6 +470,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     const playing = !ui.renaming && !!ACTION[me.m.g];
     document.documentElement.classList.toggle("playing", playing);
     document.documentElement.classList.toggle("full", playing && !!ACTION[me.m.g].full);
+    document.documentElement.classList.toggle("ingame", !ui.renaming && me.m.g !== "menu");
     if (!playing) document.documentElement.classList.remove("howto");
     const active = document.activeElement;
     const focusId = active && active.id;
@@ -494,6 +503,19 @@ html.playing.full .card.act canvas { border-radius: 0 }
     if (me.m.g === "reflex") reflexTick();
   }
 
+  // ---------- アプリとして入れる ----------
+  let installEvt = null;
+  const isStandalone = () => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true } catch (e) { return false } };
+  const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; render() });
+  addEventListener("appinstalled", () => { installEvt = null; ui.installHelp = false; render() });
+  function renderInstall() {
+    const help = !ui.installHelp ? "" : isIOS()
+      ? `<ol class="steps"><li>Safari の下にある<b>共有ボタン</b>（四角から矢印）を押す</li><li><b>「ホーム画面に追加」</b>を押す</li><li>右上の<b>「追加」</b>を押すと、ホーム画面にアイコンができます</li></ol><p class="muted">Safari 以外（LINE の中のブラウザなど）では追加できません。Safari で開き直してください。</p>`
+      : `<ol class="steps"><li>ブラウザの右上の<b>︙（メニュー）</b>を押す</li><li><b>「アプリをインストール」</b>か<b>「ホーム画面に追加」</b>を押す</li></ol><p class="muted">LINE などのアプリの中で開いているときは、Chrome で開き直してください。</p>`;
+    return `<section class="card" style="gap:10px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span><b>アプリとして入れる</b><br><span class="muted">ホーム画面のアイコンから、全画面で遊べます</span></span>
+      <button class="btn small" style="white-space:nowrap" data-act="install">${installEvt ? "インストール" : "やり方"}</button></div>${help}</section>`;
+  }
   function renderInvite() {
     if (inviteCode) {
       const real = realOppPeer();
@@ -550,6 +572,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     else if (!real) notice = `<div class="note">つながると上の「あいて」に名前が出ます。どちらかがゲームを選ぶと、ふたりとも同じゲームに切りかわります。</div>`;
     notice += cpuRow;
     if (lobby) notice = renderInvite() + notice;
+    if (SITE && !isStandalone()) notice = renderInstall() + notice;
     const cards = (grp) => Object.entries(GAMES).filter(([, g]) => (g.grp || "brain") === grp).map(([k, g], i) => `
       <button class="game ${i === 0 ? "wide" : ""}" style="--c:${g.c}" data-act="start" data-g="${k}">
         <span class="ico">${g.ico}</span><b>${g.name}</b><span>${g.desc}</span>
@@ -836,6 +859,15 @@ html.playing.full .card.act canvas { border-radius: 0 }
     }
     return w;
   }
+  // 全画面のゲーム：画面いっぱいのキャンバスと、上（時計などのバー）・下（ボタン）の高さを返す
+  function fullCanvas(cv) {
+    const ab = availBox(cv);
+    const r = canvasFor(cv, clamp(ab.h / Math.max(1, ab.w), 0.5, 2.6));
+    const pad = cv.parentElement.querySelector(".kpad");
+    r.top = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
+    r.bottom = pad && getComputedStyle(pad).display !== "none" ? pad.offsetHeight : 0;
+    return r;
+  }
   function canvasFor(cv, ratio) {
     const w = fitWidth(cv, ratio), h = Math.round(w * ratio);
     cv._ratio = ratio; cv.style.width = w + "px"; cv.style.height = h + "px";
@@ -894,11 +926,12 @@ html.playing.full .card.act canvas { border-radius: 0 }
     return st;
   }
   ACTION.soccer = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("3対3サッカー", "青があなたのチーム。上のゴールをねらえ")}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="サッカーのフィールド"></canvas><div id="act-msg"></div>
-        <div class="ctrl"><div class="stick" id="stick"><div class="knob" id="knob"></div></div>
-          <div class="btns"><button class="gbtn" id="b-dash">ダッシュ</button><button class="gbtn" id="b-tackle">タックル</button><button class="gbtn big" id="b-shoot">シュート</button></div></div>
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="サッカーのフィールド"></canvas><div id="act-msg"></div>
+        <div class="kpad"><div class="grp"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
+          <div class="grp col"><div class="grp"><button class="kbtn small" id="b-dash">ダッシュ</button><button class="kbtn small" id="b-tackle">タックル</button></div><button class="kbtn big" id="b-shoot">シュート</button></div></div>
         <p class="muted">黄色い三角が動かしている選手。ボールにさわると自分のボールになります。「シュート」は長押しで強く。ボールがないときは「切替」で近くの味方に代わります。相手がボールを持っていたら「タックル」でうばえます。パソコンは矢印キー・Shift（ダッシュ）・X（タックル）・スペース（シュート）。</p></section></section>`;
     },
     mount() {
@@ -906,9 +939,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
       const myTeam = host ? 0 : 1, mates = host ? [0, 1, 2] : [3, 4, 5];
       const cv = $("#cv");
       const VW = FW + 8, VH = FH + 14;
-      const { c, w, h } = canvasFor(cv, VH / VW);
-      const k = w / VW;
-      const T = (x, y) => (host ? [(x + 4) * k, (y + 7) * k] : [(FW - x + 4) * k, (FH - y + 7) * k]);
+      const { c, w, h, top, bottom } = fullCanvas(cv);
+      // フィールドは、上のバーと下のボタンのあいだに収める
+      const areaH = Math.max(100, h - top - 44 - bottom - 6), k = Math.min(w / VW, areaH / VH);
+      const OX = (w - VW * k) / 2, OY = top + 44 + Math.max(0, (areaH - VH * k) / 2);
+      const T = (x, y) => (host ? [OX + (x + 4) * k, OY + (y + 7) * k] : [OX + (FW - x + 4) * k, OY + (FH - y + 7) * k]);
       const rectW = (x0, y0, x1, y1) => { const [a, b] = T(x0, y0), [cc, d] = T(x1, y1); return [Math.min(a, cc), Math.min(b, d), Math.abs(cc - a), Math.abs(d - b)] };
       const Pl = []; for (let i = 0; i < 6; i++) Pl.push(Object.assign(sHome(i), { fx: 0, fy: i < 3 ? -1 : 1, stun: 0, tkT: 0, tkCd: 0, grab: 0, team: i < 3 ? 0 : 1, role: i % 3 }));
       let ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0, own: -1 };
@@ -1124,7 +1159,8 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (p.tkT > 0) { c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.beginPath(); c.arc(sx, sy, s * 1.8, 0, 7); c.stroke() }
       }
       function draw() {
-        c.fillStyle = "#2C9A45"; c.fillRect(0, 0, w, h);
+        c.fillStyle = "#1F7A36"; c.fillRect(0, 0, w, h);
+        c.fillStyle = "#2C9A45"; c.fillRect(...rectW(-4, -7, FW + 4, FH + 7));
         c.fillStyle = "#36AE51"; for (let i = 0; i < 10; i += 2) c.fillRect(...rectW(-4, (i * FH) / 10, FW + 4, ((i + 1) * FH) / 10));
         c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = Math.max(1.5, k * 0.45);
         c.strokeRect(...rectW(0, 0, FW, FH));
@@ -1148,10 +1184,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
         ents.sort((p, q) => p.y - q.y).forEach((e) => e.f());
         const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
         const tt = Math.ceil(S.t), mm = Math.floor(tt / 60), ssec = String(tt % 60).padStart(2, "0");
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, 4, 70, 26); c.fillRect(w - 58, 4, 54, 26);
+        const HY = top + 4;
+        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, HY, 70, 26); c.fillRect(w - 58, HY, 54, 26);
         c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle";
-        c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, 18); c.fillStyle = "#fff"; c.fillText("−", 39, 18); c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, 18);
-        c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, w - 31, 18);
+        c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, HY + 14); c.fillStyle = "#fff"; c.fillText("−", 39, HY + 14); c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, HY + 14);
+        c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, w - 31, HY + 14);
         if (S.st === "wait") bigText(c, "あいて待ち", w / 2, h / 2 - 40, 26);
         else if (S.st === "count") bigText(c, String(Math.max(1, Math.ceil(S.gt))), w / 2, h / 2 - 40, 64, "#FFE14D");
         else if (S.st === "goal") bigText(c, S.last === myTeam ? "ゴール！" : "やられた…", w / 2, h / 2 - 40, 42, S.last === myTeam ? "#FFE14D" : "#FF9B91");
@@ -1180,15 +1217,17 @@ html.playing.full .card.act canvas { border-radius: 0 }
   }
   function pickItem() { let t = Math.random() * 100; for (const it of RUN_ITEMS) { if ((t -= it[2]) < 0) return it } return RUN_ITEMS[0] }
   ACTION.run = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("ジャンプ走", "先にゴールしたほうが勝ち")}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="ジャンプ走のコース"></canvas><div id="act-msg"></div>
-        <div class="row" style="flex-wrap:nowrap"><button class="gbtn" id="b-item" style="flex:1" disabled>アイテムなし</button><button class="gbtn big" id="b-jump" style="flex:2">ジャンプ</button></div>
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="ジャンプ走のコース"></canvas><div id="act-msg"></div>
+        <div class="kpad"><div class="grp"><button class="kbtn pill" id="b-item" disabled>アイテムなし</button></div><div class="grp"><button class="kbtn big" id="b-jump">ジャンプ</button></div></div>
         <p class="muted">ジャンプは空中でもう1回できます。土管・敵・ハトにぶつかると転び、穴に落ちると少しもどされます。？ブロックに当たるとアイテム：でかくなる（ぶつかってもこわせる）・足がはやくなる・こうら（投げると相手が転ぶ）。毒キノコとおそくなるはハズレ。パソコンはスペースでジャンプ、Zでこうら。</p></section></section>`;
     },
     mount() {
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 0.66);
-      const G = h - 34, PX = Math.min(90, w * 0.24);
+      const cv = $("#cv"); const { c, w, h, top, bottom } = fullCanvas(cv);
+      // 地面の上がゲームの場所。ボタンは地面（土）の上に重ねる
+      const G = Math.min(h - Math.max(34, bottom + 12), top + (h - top) * 0.66), PX = Math.min(90, w * 0.24);
       const C = runCourse(me.m.seed); const used = new Set(), hitObs = new Set();
       let ph = me.s.res != null ? "done" : "idle", d = me.s.res != null ? RUN_LEN : 0, y = 0, vy = 0, jumps = 0, t = 0, cd = 0;
       const fx = { big: 0, fast: 0, slow: 0, poison: 0, stun: 0 };
@@ -1264,8 +1303,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
         c.fillStyle = "#111"; c.fillRect(3, -35, 2, 3);
         c.restore();
       }
+      // 縦に長い画面では、地面のあたりを少し大きく映す
+      const RZ = clamp((G - top - 80) / 260, 1, 1.35);
       function draw() {
         c.fillStyle = "#5C94FC"; c.fillRect(0, 0, w, h);
+        c.save(); c.translate(0, G); c.scale(RZ, RZ); c.translate(0, -G);
         c.fillStyle = "rgba(255,255,255,.95)"; const cl = -((d * 0.3) % 420);
         for (let x = cl; x < w + 420; x += 420) { c.fillRect(x + 80, 26, 70, 16); c.fillRect(x + 96, 16, 36, 12); c.fillRect(x + 280, 54, 54, 12) }
         c.fillStyle = "#3FA34D"; const hl = -((d * 0.5) % 500); for (let x = hl; x < w + 500; x += 500) { c.beginPath(); c.moveTo(x + 40, G); c.lineTo(x + 140, G - 60); c.lineTo(x + 240, G); c.fill() }
@@ -1287,14 +1329,16 @@ html.playing.full .card.act canvas { border-radius: 0 }
         const sc = scale(), blink = fx.stun > 0 && Math.floor(t * 12) % 2;
         if (!blink && fallT <= 0) drawRunner(PX, G - y, d / 14, "#2E9AD0", 1, y > 0, sc, fx.poison > 0 ? "#9B59D0" : fx.fast > 0 ? "#FFB020" : null);
         if (fx.big > 0 || fx.fast > 0) { c.strokeStyle = "rgba(255,225,77,.7)"; c.lineWidth = 2; c.beginPath(); c.arc(PX, G - y - 20 * sc, 26 * sc, 0, 7); c.stroke() }
+        c.restore();
         // 上の表示
-        c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, 8, w - 16, 10);
-        c.fillStyle = "#46CBF3"; c.fillRect(8, 8, (w - 16) * (d / RUN_LEN), 10);
-        if (ox && ox.d != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.d / RUN_LEN, 0, 1) - 3, 4, 6, 18) }
-        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, 22, 118, 20);
-        c.font = `14px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(`${Math.floor(d / 10)}m / ${RUN_LEN / 10}m`, 12, 32);
+        const HY = top + 48;
+        c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, HY, w - 16, 10);
+        c.fillStyle = "#46CBF3"; c.fillRect(8, HY, (w - 16) * (d / RUN_LEN), 10);
+        if (ox && ox.d != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.d / RUN_LEN, 0, 1) - 3, HY - 4, 6, 18) }
+        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, HY + 14, 118, 20);
+        c.font = `14px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(`${Math.floor(d / 10)}m / ${RUN_LEN / 10}m`, 12, HY + 24);
         const eff = []; if (fx.big > 0) eff.push("でかい"); if (fx.fast > 0) eff.push("はやい"); if (fx.slow > 0) eff.push("おそい"); if (fx.poison > 0) eff.push("毒");
-        if (eff.length) { c.textAlign = "right"; c.fillStyle = "#FFE14D"; c.fillText(eff.join("・"), w - 10, 32) }
+        if (eff.length) { c.textAlign = "right"; c.fillStyle = "#FFE14D"; c.fillText(eff.join("・"), w - 10, HY + 24) }
         if (msg) bigText(c, msg.text, w / 2, h * 0.36 - (1.4 - msg.t) * 20, 22, msg.col);
         if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h / 2 - 10, 60, "#FFE14D");
         if (ph === "done") bigText(c, "ゴール！", w / 2, h / 2 - 20, 40, "#FFE14D");
@@ -1329,14 +1373,15 @@ html.playing.full .card.act canvas { border-radius: 0 }
   // ----- 連打すもう -----
   const SUMO_LIM = 30, SUMO_T = 15;
   ACTION.sumo = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("連打すもう", "連打で押し出せ")}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="土俵"></canvas><div id="act-msg"></div>
-        <button class="mash" id="mash" disabled>おす！</button>
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="土俵"></canvas><div id="act-msg"></div>
+        <div class="kpad"><div class="wide"><button class="mash" id="mash" disabled>おす！</button></div></div>
         <p class="muted">${SUMO_T}秒以内に${SUMO_LIM}回ぶん押しこんだら勝ち。時間切れなら押しているほうの勝ち。</p></section></section>`;
     },
     mount() {
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 0.6);
+      const cv = $("#cv"); const { c, w, h, top, bottom } = fullCanvas(cv);
       const mash = $("#mash");
       let n = 0, ph = "idle", cd = 0, t = SUMO_T, shake = 0, shown = 0;
       const push_ = () => { if (ph === "fight") { n++; shake = 0.12; sendX({ n }) } };
@@ -1374,18 +1419,19 @@ html.playing.full .card.act canvas { border-radius: 0 }
         const target = clamp(diff / SUMO_LIM, -1, 1); shown += (target - shown) * Math.min(1, dt * 12);
 
         c.fillStyle = "#2E211A"; c.fillRect(0, 0, w, h);
-        c.fillStyle = "#4A2F22"; c.fillRect(0, 0, w, h * 0.18);
-        const tas = ["#2E6FD0", "#E8483F", "#F5F5F5", "#1D1D1D"]; for (let i = 0; i < 4; i++) { c.fillStyle = tas[i]; c.fillRect(i < 2 ? 10 + i * 18 : w - 26 - (i - 2) * 18, h * 0.18, 10, h * 0.22) }
-        const base = h * 0.78, s = h / 190;
+        const RT = top + 40;
+        c.fillStyle = "#4A2F22"; c.fillRect(0, 0, w, RT + h * 0.06);
+        const tas = ["#2E6FD0", "#E8483F", "#F5F5F5", "#1D1D1D"]; for (let i = 0; i < 4; i++) { c.fillStyle = tas[i]; c.fillRect(i < 2 ? 10 + i * 18 : w - 26 - (i - 2) * 18, RT + h * 0.06, 10, h * 0.16) }
+        const base = h - bottom - 24, s = Math.min(w / 260, (base - RT) / 150);
         c.fillStyle = "#C99B62"; c.beginPath(); c.moveTo(w * 0.04, h); c.lineTo(w * 0.12, base); c.lineTo(w * 0.88, base); c.lineTo(w * 0.96, h); c.fill();
         c.fillStyle = "#E3C08A"; c.fillRect(w * 0.12, base, w * 0.76, 5);
         c.fillStyle = "#F4E7C8"; c.fillRect(w * 0.16, base - 2, 6, 6); c.fillRect(w * 0.84 - 6, base - 2, 6, 6);
         const cx = w / 2 + shown * w * 0.3 + (shake > 0 ? (Math.random() - 0.5) * 4 : 0);
         rikishi(cx - 34 * s, base, 1, "#2E6FD0", s);
         rikishi(cx + 34 * s, base, -1, "#D8433A", s);
-        c.font = `14px ${DISP}`; c.textBaseline = "middle"; c.textAlign = "left"; c.fillStyle = "#7FB5FF"; c.fillText(`あなた ${n}`, 10, 16);
-        c.textAlign = "right"; c.fillStyle = "#FF9B91"; c.fillText(`${on} ${oppName().slice(0, 6)}`, w - 10, 16);
-        c.textAlign = "center"; c.fillStyle = "#FFE14D"; c.fillText(ph === "fight" || ph === "end" ? `${Math.ceil(t)}秒` : "", w / 2, 16);
+        c.font = `16px ${DISP}`; c.textBaseline = "middle"; c.textAlign = "left"; c.fillStyle = "#7FB5FF"; c.fillText(`あなた ${n}`, 10, RT + 12);
+        c.textAlign = "right"; c.fillStyle = "#FF9B91"; c.fillText(`${on} ${oppName().slice(0, 6)}`, w - 10, RT + 12);
+        c.textAlign = "center"; c.fillStyle = "#FFE14D"; c.fillText(ph === "fight" || ph === "end" ? `${Math.ceil(t)}秒` : "", w / 2, RT + 12);
         if (ph === "count") bigText(c, cd > 1 ? String(Math.ceil(cd - 1)) : "はっけよい！", w / 2, h * 0.45, cd > 1 ? 56 : 34, "#FFE14D");
         if (ph === "end") { const win = res === "draw" ? null : (res === "host") === isFirst(); bigText(c, win === null ? "引き分け" : win ? "勝ち！" : "負け…", w / 2, h * 0.42, 44, win ? "#FFE14D" : "#FF9B91") }
         if (ph === "fight" && !isFirst() && t <= 0) bigText(c, "判定中", w / 2, h * 0.42, 30);
@@ -1503,15 +1549,16 @@ html.playing.full .card.act canvas { border-radius: 0 }
     }
   }
   ACTION.army = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("軍団ラン", "強くして、最後にふたりで決戦")}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="軍団ランの道"></canvas><div id="act-msg"></div>
-        <div class="row" style="flex-wrap:nowrap" id="run-btns"><button class="gbtn big" id="b-gren" style="flex:1">手りゅう弾</button></div>
-        <div class="row" style="flex-wrap:nowrap" id="bat-btns" hidden><button class="gbtn big" id="b-charge" style="flex:1">突撃</button><button class="gbtn" id="b-shield" style="flex:1">盾</button><button class="gbtn" id="b-reinf" style="flex:1">援軍</button></div>
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="軍団ランの道"></canvas><div id="act-msg"></div>
+        <div class="kpad"><div class="grp" id="bat-btns" hidden><button class="kbtn small" id="b-shield">盾</button><button class="kbtn small" id="b-reinf">援軍</button></div><div class="grp"></div>
+          <div class="grp" id="run-btns"><button class="kbtn big" id="b-gren" style="font-size:14px">手りゅう弾</button></div><div class="grp" id="bat-btns2" hidden><button class="kbtn big" id="b-charge">突撃</button></div></div>
         <p class="muted">道中：左右にドラッグして進む。青いゲートで仲間がふえて、赤いゲートでへります。兵隊は自動でうって、樽をこわすと武器（ジープ＝連射、戦車＝攻撃力、ヘリ＝射程）。赤い樽は爆弾。「手りゅう弾」は前の樽や敵を一気にこわせます（4秒ごと）。決戦：「突撃」で大ダメージ（3秒ごと）、「盾」で2秒間ダメージを大きく減らす（7秒ごと）、「援軍」は1回だけ人数が2割ふえる。${BATTLE_T}秒で多く残ったほうが勝ち。</p></section></section>`;
     },
     mount() {
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 1.4);
+      const cv = $("#cv"); const { c, w, h, top, bottom } = fullCanvas(cv);
       const S = armyNew(me.m.seed);
       let ph = me.s.res != null ? "done" : "idle", cd = 0, CS = null, lastSend = "";
       // 決戦の状態（自分の人数は自分で計算し、相手の人数・攻撃力・突撃の回数は相手から受けとる）
@@ -1528,7 +1575,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
       holdBtn(rfBtn, () => { if (ph === "battle" && !B.reinf) { B.reinf = true; B.N *= 1.2 } });
       actKey = () => { if (ph === "run") armyGrenade(S, true); else if (ph === "battle") chBtn.dispatchEvent(new PointerEvent("pointerdown")) };
 
-      const horizon = h * 0.1, crowdY = h * 0.8, RW = w * 0.42;
+      const horizon = top + h * 0.08, crowdY = h - bottom - 40, RW = w * 0.42;
       const P = (x, oz) => { const dz = oz - S.z + 6; if (dz < 0.8) return null; const p = 1 / (1 + (dz - 6) / 22); return { sx: w / 2 + x * RW * p, sy: horizon + (crowdY - horizon) * p, p } };
       function soldier(sx, sy, s, body, helmet, alpha) {
         c.globalAlpha = alpha;
@@ -1617,9 +1664,10 @@ html.playing.full .card.act canvas { border-radius: 0 }
         for (const b of S.booms) { const q = P(b.x, b.z); if (q) { c.fillStyle = `rgba(255,170,40,${1 - b.t * 1.6})`; c.beginPath(); c.arc(q.sx, q.sy - 20 * q.p, (20 + b.t * 80) * q.p, 0, 7); c.fill() } }
         if (B.flash > 0) { c.fillStyle = `rgba(255,225,77,${B.flash})`; c.fillRect(0, 0, w, h * 0.5) }
         if (B.hitFlash > 0) { c.fillStyle = `rgba(255,60,40,${B.hitFlash * 0.6})`; c.fillRect(0, h * 0.5, w, h * 0.5) }
-        c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, 8, w - 16, 10);
-        c.fillStyle = "#46CBF3"; c.fillRect(8, 8, (w - 16) * clamp(S.z / AR_L, 0, 1), 10);
-        if (ox && ox.z != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.z / AR_L, 0, 1) - 3, 4, 6, 18) }
+        const HY = top + 48;
+        c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, HY, w - 16, 10);
+        c.fillStyle = "#46CBF3"; c.fillRect(8, HY, (w - 16) * clamp(S.z / AR_L, 0, 1), 10);
+        if (ox && ox.z != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.z / AR_L, 0, 1) - 3, HY - 4, 6, 18) }
         S.fx.forEach((f, i) => label(f.text, w / 2, h * 0.5 - f.t * 60 - i * 4, 24, f.col));
         if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.42, 64, "#FFE14D");
         if (ph === "battle") bigText(c, `${Math.ceil(BATTLE_T - B.t)}`, w / 2, h * 0.36, 40, "#FFE14D");
@@ -1686,7 +1734,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
           ? { z: AR_L, x: 0, N: Math.floor(B.N), f: 1, atk: r2(B.atk), ch: B.ch, cd: Math.round(B.chDmg) }
           : { z: r2(S.z), x: r2(S.x), N: Math.floor(S.N), d: S.dead ? 1 : 0 };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        $("#run-btns").hidden = inBattle; $("#bat-btns").hidden = !inBattle;
+        $("#run-btns").hidden = inBattle; $("#bat-btns").hidden = !inBattle; $("#bat-btns2").hidden = !inBattle;
         grenBtn.disabled = ph !== "run" || S.gren > 0; grenBtn.textContent = S.gren > 0 ? `手りゅう弾 ${Math.ceil(S.gren)}` : "手りゅう弾";
         chBtn.disabled = ph !== "battle" || B.chCd > 0; chBtn.textContent = B.chCd > 0 ? `突撃 ${Math.ceil(B.chCd)}` : "突撃";
         shBtn.disabled = ph !== "battle" || B.shCd > 0; shBtn.textContent = B.shCd > 0 ? `盾 ${Math.ceil(B.shCd)}` : "盾";
@@ -2054,14 +2102,16 @@ html.playing.full .card.act canvas { border-radius: 0 }
     return t;
   }
   ACTION.tycoon = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("木こりタイクーン", "ふたりで協力してお城をたてよう")}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="木こりの村"></canvas><div id="act-msg"></div>
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="木こりの村"></canvas><div id="act-msg"></div>
         <p class="muted">画面をスワイプして移動。木に近づくと自動で切って、丸太を背負います。レジの前（黄色い丸）に運ぶとお客さんが買ってくれます。お金がたまったら四角い場所に立って、新しいものを買おう。お城が建ったらクリア！</p></section></section>`;
     },
     mount() {
       const host = isFirst();
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, TH / TW); const k = w / TW;
+      const cv = $("#cv"); const { c, w, h, top } = fullCanvas(cv);
+      const k = Math.min(w / TW, (h - top - 50) / TH), OX = (w - TW * k) / 2, OY = top + 44 + Math.max(0, (h - top - 50 - TH * k) / 2);
       const trees = tyTrees().map((t) => Object.assign({ hp: 3, re: 0 }, t));
       const P = { x: 18, y: 36, fx: 0, fy: -1 };
       // ホストが持つ世界の状態
@@ -2142,7 +2192,9 @@ html.playing.full .card.act canvas { border-radius: 0 }
           cu: Wd.cust.map((q) => q.need - q.got), wk: Wd.wk ? [r2(Wd.wk.x), r2(Wd.wk.y), Wd.wk.carry] : null, t: Math.floor(Wd.t), dn: Wd.done ? 1 : 0 };
       }
       function draw(V, others) {
-        c.fillStyle = "#E7EFF5"; c.fillRect(0, 0, w, h);
+        c.fillStyle = "#D7E2EC"; c.fillRect(0, 0, w, h);
+        c.save(); c.translate(OX, OY);
+        c.fillStyle = "#E7EFF5"; c.fillRect(0, 0, TW * k, TH * k);
         c.fillStyle = "#D3DEE8"; c.fillRect(16.5 * k, 14 * k, 3 * k, 38 * k); c.fillRect(2 * k, 34.5 * k, 32 * k, 3 * k);
         // 森の囲い
         c.strokeStyle = "#9A7A5A"; c.lineWidth = 2; c.strokeRect(1.5 * k, 1.8 * k, 15.5 * k, 11.5 * k); c.strokeRect(20 * k, 1.8 * k, 14 * k, 9.5 * k);
@@ -2189,10 +2241,12 @@ html.playing.full .card.act canvas { border-radius: 0 }
         const ppl = others.slice(); ppl.sort((a, b) => a.y - b.y);
         ppl.forEach((q) => person(q.x * k, q.y * k, q.c[0], q.c[1], q.carry, q.me));
         fx.forEach((f) => bigText(c, f.text, f.x * k, (f.y - f.t * 2) * k, 13, f.col));
+        c.restore();
         // 上の表示
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(w - 96, 6, 90, 26); c.fillRect(6, 6, 64, 26);
-        c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#7CF59A"; c.fillText(`¥${V.m}`, w - 51, 19);
-        c.fillStyle = "#fff"; c.fillText(`${Math.floor(V.t / 60)}:${String(V.t % 60).padStart(2, "0")}`, 38, 19);
+        const HY = top + 8;
+        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(w - 96, HY, 90, 26); c.fillRect(6, HY, 64, 26);
+        c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#7CF59A"; c.fillText(`¥${V.m}`, w - 51, HY + 13);
+        c.fillStyle = "#fff"; c.fillText(`${Math.floor(V.t / 60)}:${String(V.t % 60).padStart(2, "0")}`, 38, HY + 13);
         if (drag) { c.strokeStyle = "rgba(31,27,58,.35)"; c.lineWidth = 2; c.beginPath(); c.arc(drag.ox, drag.oy, 40, 0, 7); c.stroke(); c.fillStyle = "rgba(31,27,58,.35)"; c.beginPath(); c.arc(drag.ox + inp.x * 40, drag.oy + inp.y * 40, 14, 0, 7); c.fill() }
         if (V.dn) bigText(c, "お城が完成！", w / 2, h * 0.42, 34, "#FFE14D");
       }
@@ -2260,6 +2314,10 @@ html.playing.full .card.act canvas { border-radius: 0 }
     else if (act === "start") startMatch(t.dataset.g);
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
+    else if (act === "install") {
+      if (installEvt) { const ev = installEvt; installEvt = null; ev.prompt(); ev.userChoice.finally(() => render()) }
+      else { ui.installHelp = !ui.installHelp; render() }
+    }
     else if (act === "ishin-send") sendIshin();
     else if (act === "ishin-ok") setS({ ok: [...(me.s.ok || []), Number(t.dataset.i)] });
     else if (act === "quiz-pick") {
@@ -2301,7 +2359,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
   let refitT = null;
   addEventListener("resize", () => {
     clearTimeout(refitT);
-    refitT = setTimeout(() => { const cv = $("#cv"); if (!cv || !cv._ratio) return; const w = fitWidth(cv, cv._ratio); cv.style.width = w + "px"; cv.style.height = Math.round(w * cv._ratio) + "px" }, 150);
+    refitT = setTimeout(() => {
+      const cv = $("#cv"); if (!cv || !cv._ratio) return;
+      if (document.documentElement.classList.contains("full")) { const b = cv.parentElement; cv.style.width = b.clientWidth + "px"; cv.style.height = b.clientHeight + "px"; return }
+      const w = fitWidth(cv, cv._ratio); cv.style.width = w + "px"; cv.style.height = Math.round(w * cv._ratio) + "px";
+    }, 150);
   });
   document.addEventListener("input", (ev) => {
     if (ev.target.id === "ishin-input") ui.draft = ev.target.value;
@@ -2381,6 +2443,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
       const r = inArtifact ? await window.claude.use("room") : null;
       if (!r && inArtifact) { render(); return }
       SITE = !r;
+      if (SITE && "serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+      if (SITE && !isStandalone() && document.fullscreenEnabled) {
+        const goFull = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => {}) };
+        document.addEventListener("pointerup", goFull, { once: true });
+      }
       lobby = r || supaLobby(); room = lobby;
       const hc = (location.hash || "").slice(1);
       if (SITE && /^\d{4}$/.test(hc)) inviteCode = hc;
