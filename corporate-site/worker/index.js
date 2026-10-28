@@ -201,7 +201,7 @@ async function sendContractReminders(env) {
     const sent = await sendMail(env, {
       to: [m.email], reply_to: POS_TO,
       subject: `【ポスポス】今のレジの契約（${ym}）が近づいてきました`,
-      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・スタンダードプランはキャンペーン価格（予告なく終了する場合があります）\n・初期費用0円・登録の作業はこちらで代わりに行います\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
+      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・最初の1か月は無料でお試しできます（0円から始められます）\n・料金はお店に合わせてお見積もりします\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
     });
     if (sent) await sb(env, `posupos_monitors?id=eq.${m.id}`, { method: "PATCH", body: JSON.stringify({ reminded_at: new Date().toISOString() }) });
   }

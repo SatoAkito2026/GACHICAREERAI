@@ -94,9 +94,6 @@
 .topics button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pos-box{border:2px solid #1E5BD8;border-radius:18px;padding:18px 20px;background:#F5F8FF;display:grid;gap:12px;margin-bottom:6px}
 .pos-box .pb-h{margin:0;font-weight:900;color:#1E5BD8}
-.pos-box .pb-offer{margin:0;border:2px dashed #E8A21A;background:#FFF8E8;border-radius:12px;padding:10px 14px;font-size:14px;color:#5A3A00}
-.pos-box .pb-offer b{display:block;color:#D92D20;font-weight:900}
-.pos-box .pb-offer[hidden]{display:none}
 .pos-box .lbl{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
 .chips2{display:flex;flex-wrap:wrap;gap:8px}
 .chips2 button{font:inherit;font-size:14px;font-weight:700;border:1.5px solid #C9D6F2;background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;color:var(--ink)}
@@ -145,7 +142,6 @@
       </div>
       <div class="pos-box" id="pos-box" hidden>
         <p class="pb-h">ポスポスについて（押すだけでOK）</p>
-        <p class="pb-offer" id="pos-offer" hidden><b>特典が適用されます</b>商品・写真・従業員の登録代行が無料（通常は別途お見積もり）</p>
         <div class="field"><span class="lbl">ご希望</span>
           <div class="chips2" id="pos-want">
             <button type="button" data-v="無料で1か月ためしたい" aria-pressed="false">無料で1か月ためしたい</button>
@@ -223,9 +219,7 @@
   document.querySelectorAll('#topics button').forEach(function(b){b.addEventListener('click',syncPos)});
   var from=(function(){try{var r=new URL(document.referrer);return r.host===location.host?r.pathname:''}catch(e){return ''}})();
   var h=(location.hash||'').slice(1);
-  // LP・記事から来た人には「登録代行 無料」の特典を付ける（再読み込みしても残す）
-  var offer=h==='pos-offer';try{if(offer)sessionStorage.setItem('pos-offer','1');else if(sessionStorage.getItem('pos-offer'))offer=true}catch(e){}
-  if(offer)document.getElementById('pos-offer').hidden=false;
+  // LP・記事の「無料で1か月ためす」（#pos-offer・#pos-trial）からは、お試しの申し込みを選んでおく
   if(h==='pos-trial'||h==='pos-offer'){pick('pos',true);setWant('無料で1か月ためしたい')}
   else if(h==='pos-price'){pick('pos',true);setWant('料金を知りたい')}
   else if(h)pick(h,true);
@@ -251,11 +245,9 @@
     if(topic==='pos'){
       var shop=document.getElementById('f-shop').value,st=document.getElementById('f-stores').value;
       var head=['ご希望：'+(want||'（未選択）'),'お店の種類：'+(shop||'（未選択）'),'店舗数：'+(st||'（未選択）')];
-      if(offer)head.unshift('【特典】登録代行 無料（LP・記事からのお申し込み）');
       if(from)head.push('見ていたページ：'+from);
       data.message=head.join('\n')+'\n\n'+(data.message||'（お問い合わせ内容なし）');
       if(want&&data.subject===LABELS.pos)data.subject='ポスポス：'+want;
-      if(offer&&data.subject.indexOf('特典')<0)data.subject+='（登録代行無料の特典）';
     }
     if(!data.name||!data.email||!data.subject||!data.message){show(false,'お名前・メールアドレス・件名・お問い合わせ内容を入力してください。');return}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)){show(false,'メールアドレスの形をご確認ください（例：name@example.com）。');return}

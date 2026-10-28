@@ -134,8 +134,7 @@ def posupos_ld(html, mode):
          "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）",
          "description": desc, "url": url, "image": f"{SITE}/assets/img/ogp-posupos-{mode}.png",
          "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": f"{SITE}/"},
-         "offers": [{"@type": "Offer", "name": n, "price": str(v), "priceCurrency": "JPY", "url": url + "#plans"}
-                    for n, v in (("ライトプラン（月額・税込）", 11000), ("スタンダードプラン（キャンペーン価格・月額・税込・1店舗ごと）", 22000 if mode == "day" else 33000), ("個別プラン（月額・税込）〜", 55000))]},
+         "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": url + "#plans"}},
         {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]},
         {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": f"{SITE}/"},
@@ -219,7 +218,7 @@ def write_posupos_shops(lp_html, mode, other, word):
         t = tpl
         for k in ("key", "name", "title", "desc", "h1", "lead", "jobs", "aiq"):
             t = t.replace("{{" + k + "}}", d.get(k, ""))
-        t = t.replace("{{stdprice}}", "22,000" if mode == "day" else "33,000").replace("{{demo}}", d.get("demo", d["key"])).replace("{{param}}", d.get("param", d["key"]))
+        t = t.replace("{{demo}}", d.get("demo", d["key"])).replace("{{param}}", d.get("param", d["key"]))
         tb = ""
         if d.get("types"):
             chips = "".join(f'<li>{x}</li>' for x in d["types"])

@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
-{{#day}}<title>ポスポス｜AI面接つき飲食店のクラウドPOSレジ（居酒屋・ラーメン・カフェ）勤怠・シフト・給料も｜初期費用0円</title>
+{{#day}}<title>ポスポス｜AI面接つき飲食店のクラウドPOSレジ（居酒屋・ラーメン・カフェ）勤怠・シフト・給料も｜0円から始められる</title>
 <meta name="description" content="ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。">
-<meta property="og:title" content="ポスポス｜飲食店のクラウドPOSレジ 月額11,000円〜・初期費用0円">
+<meta property="og:title" content="ポスポス｜飲食店のクラウドPOSレジ 0円から始められる">
 <meta property="og:url" content="https://akitogroup.jp/posupos-day">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-day">
 <meta name="theme-color" content="#1557D6">{{/day}}
-{{#night}}<title>ポスポス｜AI面接つき キャバクラ・ホスト・ガールズバーのPOSレジ キャストの給料・バックまで｜初期費用0円</title>
+{{#night}}<title>ポスポス｜AI面接つき キャバクラ・ホスト・ガールズバーのPOSレジ キャストの給料・バックまで｜0円から始められる</title>
 <meta name="description" content="ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。">
-<meta property="og:title" content="ポスポス｜夜のお店のPOSシステム 月額11,000円〜・初期費用0円">
+<meta property="og:title" content="ポスポス｜夜のお店のPOSシステム 0円から始められる">
 <meta property="og:url" content="https://akitogroup.jp/posupos-night">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
 <link rel="canonical" href="https://akitogroup.jp/posupos-night">
@@ -397,7 +397,7 @@ body.night .logo img:not(.lk){border-radius:8px}
 @media (min-width:720px){.head-cta{margin-left:0}}
 .mode-note{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--white);border:1px solid var(--line);color:var(--ink-2);margin-top:14px}
 .mode-note a{color:var(--blue);font-weight:900}
-/* このページからの申し込み特典（登録代行が無料） */
+/* お申し込みの案内の箱 */
 .offer{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px 20px;align-items:center;border:2px dashed #E8A21A;border-radius:22px;padding:20px 24px;background:linear-gradient(135deg,#FFF8E8,#FFFDF6);color:#13234A;text-align:left;margin:0 0 28px}
 .offer .ic{width:56px;height:56px;border-radius:16px;background:#FFB547;display:grid;place-items:center}
 .offer .ic svg{width:30px;height:30px;fill:none;stroke:#3A2400;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -912,7 +912,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   <section class="hero">
     <div class="wrap">
       <div>
-        <a class="camp-bar" href="#plan-std"><span class="cb-tag"><i aria-hidden="true"></i>キャンペーン実施中</span><span class="cb-txt">スタンダードが<b>{{#day}}月額22,000円{{/day}}{{#night}}月額33,000円{{/night}}</b><br><em>今お申し込みのお店は、ずっとこの価格</em></span><span class="cb-go" aria-hidden="true">→</span></a>
+        <a class="camp-bar" href="#plans"><span class="cb-tag"><i aria-hidden="true"></i>今なら</span><span class="cb-txt"><b>0円から始められる</b><sup>※</sup><br><em>最初の1か月は無料でお試し。合わなければ、そのままやめられます</em></span><span class="cb-go" aria-hidden="true">→</span></a>
 {{#day}}
         <p class="hero-logo"><img src="assets/img/posupos-lockup.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for restaurants</span></p>
         <h1><span class="ln">注文も、給料も。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
@@ -933,16 +933,15 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         </div>
         <p class="used-in" style="display:inline-flex;align-items:center;gap:8px;margin:18px 0 0;padding:6px 14px;border-radius:999px;background:rgba(20,108,67,.1);color:#146C43;font-weight:800;font-size:14.5px"><span aria-hidden="true">●</span>夜のお店2店で使われています{{#day}}（昼のお店はモニター募集中）{{/day}}</p>
         <ul class="hero-pts">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>AI面接つきは月額{{#day}}22,000{{/day}}{{#night}}33,000{{/night}}円〜（レジだけなら11,000円〜）・初期費用0円</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>0円から始められる<sup>※</sup>（最初の1か月は無料）</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>AI が{{#day}}アルバイト{{/day}}{{#night}}キャスト・黒服{{/night}}の一次面接</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>インストール不要</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>パソコン・タブレット・スマホ</li>
 {{#day}}          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>QR で注文・券売機も</li>{{/day}}
 {{#night}}          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>キャストはスマホで給料確認</li>{{/night}}
         </ul>
-        <p class="ah-note">※ 2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+        <p class="ah-note">※ 最初の1か月は無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。2か月目からの料金は、プランとお店に合わせてお見積もりします。<br>※「世界初」は2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
         <a class="offer-pill mo-pill" href="posupos-monitor.html">モニター店舗 募集中：今のレジのまま<b>2か月無料</b> →</a><br>
-        <a class="offer-pill" href="#plans">このページからのお申し込みで、登録代行が<b>無料</b> →</a><br>
 {{#day}}        <p class="mode-note">夜のお店の方は <a href="posupos-night.html">夜のお店のページへ →</a></p>{{/day}}
 {{#night}}        <p class="mode-note">昼の飲食店の方は <a href="posupos-day.html">昼のお店のページへ →</a></p>{{/night}}
       </div>
@@ -1509,14 +1508,13 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
       <div class="sec-head rv">
         <p class="eyebrow">Plans</p>
         <h2>プラン</h2>
-        <p>お店の大きさや、やりたいことに合わせて選べます。初期費用は0円。1か月無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。</p>
+        <p>お店の大きさや、やりたいことに合わせて選べます。ライトプランとスタンダードプランは、最初の1か月は無料でお試しできます（カードを登録しなければ、お試しのあと勝手に請求されることはありません）。料金は1店舗ごとで、お店に合わせてお見積もりします。</p>
       </div>
-      <div class="offer"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9.5 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 14.5 8 12 8z"/></svg></span><div><small>このページからのお申し込み特典</small><b>商品・写真・{{w}}の登録代行が<em>無料</em></b><span>通常は別途お見積もりの登録作業を、まるごとお任せいただけます。無料お試しのお申し込みと一緒にどうぞ。</span></div><a class="btn btn-blue" href="contact.html#pos-offer">特典つきで申し込む <span class="arr" aria-hidden="true">→</span></a></div>
       <div class="plans stagger">
         <article class="plan rv">
           <h3>ライトプラン</h3>
           <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
-          <p class="price"><span class="py">月額 <b class="n">11,000</b>円<small>（税込）</small></span><span class="pn">初期費用 0円</span></p>
+          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">2か月目からの料金はお見積もり</span></p>
           <ul>
             <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
             <li><span>店内<small>{{#day}}卓の配置図、受付・注文・会計（フロアも分けられる）{{/day}}{{#night}}ホール・配置図、卓の受付・注文・会計{{/night}}</small></span></li>
@@ -1536,8 +1534,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          {{#day}}<p class="price"><span class="cp">作りたてキャンペーン価格</span><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・初期費用 0円</span></p>{{/day}}{{#night}}<p class="price"><span class="cp">作りたてキャンペーン価格</span><span class="py">月額 <b class="n">33,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・初期費用 0円</span></p>{{/night}}
-          <p class="camp"><b>今お申し込みのお店は、ずっとこの価格。</b>キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。</p>
+          <p class="price"><span class="py">まずは1か月 <b class="n">0</b>円</span><span class="pn">1店舗ごと・2か月目からの料金はお見積もり</span></p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
@@ -1578,7 +1575,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <article class="plan cus rv" id="plan-cus">
           <h3>個別プラン</h3>
           <p class="who">お店のやり方に、アプリを合わせたいお店に（1店舗ごと）。</p>
-          <p class="price"><span class="py">月額 <b class="n">55,000〜</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
+          <p class="price"><span class="py">お見積もり</span><span class="pn">1店舗ごと・付ける機能によって変わります</span></p>
           <p class="plus">ライト＋スタンダードの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<small>選ぶ質問＋1分の録画面接</small></span></li>
@@ -1601,7 +1598,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         </article>
       </div>
       <p class="plan-note rv">※ どのプランも、パソコン・タブレット・スマホのブラウザで動きます（アプリのインストールは不要。ホーム画面に追加もできます）。</p>
-      <div class="ai-more rv"><a class="btn btn-blue" href="posupos-{{mode}}-pricing.html">料金をくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>すべての機能の比べ方・グループ店（何店舗でも）・年間契約（最大5か月分おトク）</span></div>
+      <div class="ai-more rv"><a class="btn btn-blue" href="posupos-{{mode}}-pricing.html">プランの違いをくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>すべての機能の比べ方・グループ店（何店舗でも）</span></div>
     </div>
   </section>
 
@@ -1613,9 +1610,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <h2>よくある質問</h2>
       </div>
       <div class="faq rv">
-        <details><summary>料金はいくらですか？</summary><p>月額（税込）で、ライトプラン 11,000円、スタンダードプラン キャンペーン価格 {{#day}}22,000円{{/day}}{{#night}}33,000円{{/night}}、個別プラン 55,000円〜です。料金は1店舗ごとで、初期費用は0円です。キャンペーン期間中にお申し込みのお店は、ずっとキャンペーン価格のまま使えます（契約が続くかぎり）。キャンペーンは予告なく終了する場合があります。商品・写真・従業員などの登録をこちらで代わりに行う場合は、別途お見積もりします（このページからのお申し込みは無料）。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>料金は1店舗ごとで、プラン（ライト・スタンダード・個別）と、お店の大きさや使う機能に合わせてお見積もりします。ライトプランとスタンダードプランは最初の1か月は無料でお試しできるので、0円から始められます。くわしくはお問い合わせください。</p></details>
         <details><summary>お試しはできますか？</summary><p>はい、無料で1か月お試しいただけます。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
-        <details><summary>初期費用はかかりますか？</summary><p>初期費用は0円です。ご自分で商品やスタッフを登録すれば、すぐに使いはじめられます。登録をまるごとお任せしたい場合は、別途お見積もりします。このページからお申し込みいただいた場合は、登録代行を無料で承ります。</p></details>
         <details><summary>AI が合否を決めるのですか？</summary><p>いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。</p></details>
         <details><summary>面接は何分くらいですか？</summary><p>かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。</p></details>
         <details><summary>古い iPad でも使えますか？</summary><p>ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。</p></details>
@@ -1629,8 +1625,7 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
   <section class="sec final">
     <div class="wrap rv">
       <h2>まずは無料で、1か月。</h2>
-      <p>AI面接つきのスタンダードは月額{{#day}}22,000{{/day}}{{#night}}33,000{{/night}}円〜、レジだけのライトは11,000円〜。初期費用0円。お試しのお申し込みは、お問い合わせフォームから。</p>
-      <div class="offer"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9.5 8 12 8zM12 8c1.5-3 5-3.5 5-1.2C17 8 14.5 8 12 8z"/></svg></span><div><small>このページからのお申し込み特典</small><b>商品・写真・{{w}}の登録代行が<em>無料</em></b><span>通常は別途お見積もりの登録作業を、まるごとお任せいただけます。無料お試しのお申し込みと一緒にどうぞ。</span></div><a class="btn btn-blue" href="contact.html#pos-offer">特典つきで申し込む <span class="arr" aria-hidden="true">→</span></a></div>
+      <p>0円から始められます。最初の1か月は無料でお試し。料金はお店に合わせてお見積もりします。お試しのお申し込みは、お問い合わせフォームから。</p>
       <div class="btns">
         <a class="btn btn-w" href="contact.html#pos-offer">無料で1か月ためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="contact.html#pos">お問い合わせ</a>
