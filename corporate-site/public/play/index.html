@@ -1137,62 +1137,113 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (S.st === "end") setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたのチームの勝ち！" : mine < theirs ? `${esc(oppName())}のチームの勝ち！` : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
         else setMsg("");
       }
+      // 描画：テレビ中継のように、自分のゴール側の斜め上からボールを追いかけるカメラ
+      const F3 = w * 1.1, CAMH3 = 38, BACK3 = 60, HZ3 = top + 74;
+      let camX = FW / 2, camY = FH / 2, camT = performance.now();
+      // 自分が上（奥）に向かって攻める向きの座標にそろえる
+      const vx_ = (x) => (host ? x : FW - x), vy_ = (y) => (host ? y : FH - y);
+      function pv(vx, vy, ht) { const z = camY + BACK3 - vy; if (z < 7) return null; const s = F3 / z; return { sx: w / 2 + (vx - camX) * s, sy: HZ3 + CAMH3 * s - (ht || 0) * s, s, z } }
+      const pw = (x, y, ht) => pv(vx_(x), vy_(y), ht);
+      const nearVy = () => camY + BACK3 - 7;
+      function quad(x0, y0, x1, y1, col) {
+        y1 = Math.min(y1, nearVy()); if (y0 >= y1) return;
+        const a = pv(x0, y0), b = pv(x1, y0), cc = pv(x1, y1), d = pv(x0, y1); if (!a || !b || !cc || !d) return;
+        c.fillStyle = col; c.beginPath(); c.moveTo(a.sx, a.sy); c.lineTo(b.sx, b.sy); c.lineTo(cc.sx, cc.sy); c.lineTo(d.sx, d.sy); c.closePath(); c.fill();
+      }
+      function seg(ax, ay, bx, by, ha, hb) {
+        const n = 10, h0 = ha || 0, h1 = hb == null ? h0 : hb; let prev = null;
+        for (let i = 0; i <= n; i++) {
+          const t = i / n, p = pv(ax + (bx - ax) * t, ay + (by - ay) * t, h0 + (h1 - h0) * t);
+          if (p && prev) { c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() }
+          prev = p;
+        }
+      }
+      function goal3(gy, dir) {
+        const x0 = FW / 2 - GW / 2, x1 = FW / 2 + GW / 2, GH = 6.5, back = gy - dir * 4;
+        c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 1;
+        for (let x = x0; x <= x1 + 0.01; x += 2) seg(x, back, x, back, 0, GH);
+        for (let hh = 0; hh <= GH + 0.01; hh += 1.6) seg(x0, back, x1, back, hh, hh);
+        c.strokeStyle = "#fff"; c.lineWidth = 3;
+        seg(x0, gy, x0, gy, 0, GH); seg(x1, gy, x1, gy, 0, GH); seg(x0, gy, x1, gy, GH, GH);
+        c.lineWidth = 1.5; seg(x0, gy, x0, back, GH, GH); seg(x1, gy, x1, back, GH, GH); seg(x0, back, x1, back, GH, GH);
+      }
       function drawPlayer(i) {
-        const p = Pl[i]; const [sx, sy] = T(p.x, p.y); const s = PR * k;
-        const mineTeam = p.team === myTeam;
+        const pl = Pl[i]; const p = pw(pl.x, pl.y, 0); if (!p) return;
+        const s = p.s, mineTeam = pl.team === myTeam;
         const col = mineTeam ? ["#46CBF3", "#2390BA", "#16627F"] : ["#EA4A40", "#A82C25", "#6E1914"];
-        if (p.role === 0) col[0] = mineTeam ? "#8FE3FF" : "#FF9A8F";
-        c.fillStyle = "rgba(0,0,0,.22)"; c.beginPath(); c.ellipse(sx + s * 0.35, sy + s * 0.55, s * 1.15, s * 0.6, 0, 0, 7); c.fill();
-        c.globalAlpha = Pl[i].stun > 0 ? 0.55 : 1;
-        c.fillStyle = col[1]; c.fillRect(sx - s, sy - s * 0.4, s * 2, s * 1.2);
-        c.fillStyle = col[0]; c.fillRect(sx - s, sy - s * 0.85, s * 2, s * 1.0);
-        c.fillStyle = "#EDBE8F"; c.fillRect(sx - s * 0.6, sy - s * 1.75, s * 1.2, s * 0.85);
-        c.fillStyle = col[2]; c.fillRect(sx - s * 0.6, sy - s * 1.75, s * 1.2, s * 0.32);
+        if (pl.role === 0) col[0] = mineTeam ? "#8FE3FF" : "#FF9A8F";
+        const run = Math.sin(performance.now() / 90 + i) * 0.35 * s;
+        c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, 1.6 * s, 0.5 * s, 0, 0, 7); c.fill();
+        c.globalAlpha = pl.stun > 0 ? 0.55 : 1;
+        c.fillStyle = "#EDBE8F"; c.fillRect(p.sx - 0.75 * s + run, p.sy - 2.2 * s, 0.6 * s, 2.2 * s); c.fillRect(p.sx + 0.15 * s - run, p.sy - 2.2 * s, 0.6 * s, 2.2 * s);
+        c.fillStyle = "#fff"; c.fillRect(p.sx - 0.8 * s + run, p.sy - 0.5 * s, 0.7 * s, 0.5 * s); c.fillRect(p.sx + 0.1 * s - run, p.sy - 0.5 * s, 0.7 * s, 0.5 * s);
+        c.fillStyle = col[2]; c.fillRect(p.sx - 0.95 * s, p.sy - 3.2 * s, 1.9 * s, 1.1 * s);
+        c.fillStyle = col[0]; c.fillRect(p.sx - 1.05 * s, p.sy - 5.2 * s, 2.1 * s, 2.1 * s);
+        c.fillStyle = col[1]; c.fillRect(p.sx - 1.05 * s, p.sy - 5.2 * s, 2.1 * s, 0.4 * s);
+        c.fillStyle = "#EDBE8F"; c.fillRect(p.sx - 0.6 * s, p.sy - 6.4 * s, 1.2 * s, 1.2 * s);
+        c.fillStyle = "#3A2A1E"; c.fillRect(p.sx - 0.65 * s, p.sy - 6.6 * s, 1.3 * s, 0.45 * s);
         c.globalAlpha = 1;
         if (i === active) {
-          c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(sx - s * 0.6, sy - s * 2.7); c.lineTo(sx + s * 0.6, sy - s * 2.7); c.lineTo(sx, sy - s * 2.05); c.fill();
-          c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(sx - s, sy + s * 0.95, s * 2, 3); c.fillStyle = stamina > 0.25 ? "#7CF59A" : "#FF8A80"; c.fillRect(sx - s, sy + s * 0.95, s * 2 * stamina, 3);
-          if (charge >= 0) { c.fillStyle = "#FFE14D"; c.fillRect(sx - s, sy + s * 0.95 + 4, s * 2 * Math.min(1, charge / 0.8), 3) }
+          c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(p.sx - 0.7 * s, p.sy - 8 * s); c.lineTo(p.sx + 0.7 * s, p.sy - 8 * s); c.lineTo(p.sx, p.sy - 7 * s); c.fill();
+          c.strokeStyle = "rgba(255,225,77,.8)"; c.lineWidth = 2; c.beginPath(); c.ellipse(p.sx, p.sy, 2 * s, 0.65 * s, 0, 0, 7); c.stroke();
+          c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s, 2.8 * s, 3); c.fillStyle = stamina > 0.25 ? "#7CF59A" : "#FF8A80"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s, 2.8 * s * stamina, 3);
+          if (charge >= 0) { c.fillStyle = "#FFE14D"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s + 4, 2.8 * s * Math.min(1, charge / 0.8), 3) }
         }
-        const oA = host ? -1 : oppAct;
-        if ((host && rtOppPeer() && rtOppPeer().presence.x && i === rtOppPeer().presence.x.ai) || i === oA) { c.fillStyle = "#fff"; c.beginPath(); c.moveTo(sx - s * 0.45, sy - s * 2.6); c.lineTo(sx + s * 0.45, sy - s * 2.6); c.lineTo(sx, sy - s * 2.1); c.fill() }
-        if (p.tkT > 0) { c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.beginPath(); c.arc(sx, sy, s * 1.8, 0, 7); c.stroke() }
+        const ox = rtOppPeer() && rtOppPeer().presence.x;
+        if ((host && ox && i === ox.ai) || (!host && i === oppAct)) { c.fillStyle = "#fff"; c.beginPath(); c.moveTo(p.sx - 0.55 * s, p.sy - 7.8 * s); c.lineTo(p.sx + 0.55 * s, p.sy - 7.8 * s); c.lineTo(p.sx, p.sy - 7 * s); c.fill() }
+        if (pl.tkT > 0) { c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 2; c.beginPath(); c.ellipse(p.sx, p.sy, 2.6 * s, 0.9 * s, 0, 0, 7); c.stroke() }
       }
       function draw() {
+        // カメラはボールを追う
+        const now = performance.now(), cdt = Math.min(0.1, (now - camT) / 1000); camT = now;
+        const tx = FW / 2 + (vx_(ball.x) - FW / 2) * 0.55, ty = clamp(vy_(ball.y), 8, FH - 4);
+        camX += (tx - camX) * Math.min(1, cdt * 3); camY += (ty - camY) * Math.min(1, cdt * 2.5);
+        // スタンドと空
+        // スタンドはフィールドの奥のはしまでのばす
+        const fe = pv(FW / 2, -10), SB = fe ? Math.max(HZ3, fe.sy) : HZ3;
         c.fillStyle = "#1F7A36"; c.fillRect(0, 0, w, h);
-        c.fillStyle = "#2C9A45"; c.fillRect(...rectW(-4, -7, FW + 4, FH + 7));
-        c.fillStyle = "#36AE51"; for (let i = 0; i < 10; i += 2) c.fillRect(...rectW(-4, (i * FH) / 10, FW + 4, ((i + 1) * FH) / 10));
-        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = Math.max(1.5, k * 0.45);
-        c.strokeRect(...rectW(0, 0, FW, FH));
-        const [a1, b1] = T(0, FH / 2), [a2, b2] = T(FW, FH / 2); c.beginPath(); c.moveTo(a1, b1); c.lineTo(a2, b2); c.stroke();
-        const [cx, cy] = T(FW / 2, FH / 2); c.beginPath(); c.arc(cx, cy, 9 * k, 0, 7); c.stroke();
-        c.strokeRect(...rectW(FW / 2 - 18, 0, FW / 2 + 18, 15)); c.strokeRect(...rectW(FW / 2 - 18, FH - 15, FW / 2 + 18, FH));
-        for (const [y0, y1] of [[-4, 0], [FH, FH + 4]]) {
-          const r = rectW(FW / 2 - GW / 2, y0, FW / 2 + GW / 2, y1);
-          c.fillStyle = "rgba(255,255,255,.3)"; c.fillRect(...r);
-          c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 1;
-          for (let gx = r[0]; gx < r[0] + r[2]; gx += k * 1.6) { c.beginPath(); c.moveTo(gx, r[1]); c.lineTo(gx, r[1] + r[3]); c.stroke() }
-          c.strokeStyle = "#fff"; c.lineWidth = k * 0.8; c.strokeRect(...r);
-        }
-        const ents = []; for (let i = 0; i < 6; i++) ents.push({ y: T(Pl[i].x, Pl[i].y)[1], f: () => drawPlayer(i) });
-        const [bx, by] = T(ball.x, ball.y);
-        ents.push({ y: by, f: () => {
-          c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(bx + BR * k * 0.4, by + BR * k * 0.6, BR * k, BR * k * 0.55, 0, 0, 7); c.fill();
-          c.fillStyle = "#fff"; c.beginPath(); c.arc(bx, by, BR * k, 0, 7); c.fill();
-          c.fillStyle = "#222"; c.fillRect(bx - BR * k * 0.35, by - BR * k * 0.35, BR * k * 0.7, BR * k * 0.7);
+        const g = c.createLinearGradient(0, 0, 0, SB); g.addColorStop(0, "#1B2340"); g.addColorStop(1, "#46557F"); c.fillStyle = g; c.fillRect(0, 0, w, SB);
+        const rows = Math.max(6, Math.floor((SB - top) / 9));
+        for (let r = 0; r < rows; r++) for (let i = 0; i < 46; i++) { const hue = (i * 47 + r * 13) % 5; c.fillStyle = ["#E8E8F0", "#46CBF3", "#EA4A40", "#FFE14D", "#9AA6C8"][hue]; c.fillRect((i * w) / 46 + ((r * 7) % 9), SB - 12 - r * 9, 4, 4) }
+        c.fillStyle = "#5A6684"; c.fillRect(0, SB - 4, w, 4);
+        // 芝のしま
+        quad(-8, -10, FW + 8, FH + 10, "#2C9A45");
+        for (let i = 0; i < 12; i++) if (i % 2 === 0) quad(-4, (i * FH) / 12, FW + 4, ((i + 1) * FH) / 12, "#36AE51");
+        // 白線
+        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2;
+        seg(0, 0, FW, 0); seg(FW, 0, FW, FH); seg(FW, FH, 0, FH); seg(0, FH, 0, 0); seg(0, FH / 2, FW, FH / 2);
+        for (const [y0, y1] of [[0, 15], [FH, FH - 15]]) { seg(FW / 2 - 18, y0, FW / 2 - 18, y1); seg(FW / 2 + 18, y0, FW / 2 + 18, y1); seg(FW / 2 - 18, y1, FW / 2 + 18, y1) }
+        { let prev = null; for (let i = 0; i <= 40; i++) { const a = (i / 40) * Math.PI * 2, p = pv(FW / 2 + Math.cos(a) * 9, FH / 2 + Math.sin(a) * 9); if (p && prev) { c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() } prev = p } }
+        goal3(0, 1);
+        // 選手とボール（奥から順に）
+        const ents = [];
+        for (let i = 0; i < 6; i++) { const p = pw(Pl[i].x, Pl[i].y); if (p) ents.push({ z: p.z, f: () => drawPlayer(i) }) }
+        const bp = pw(ball.x, ball.y, 0);
+        if (bp) ents.push({ z: bp.z - 0.01, f: () => {
+          const r = 0.9 * bp.s; c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(bp.sx, bp.sy, r * 1.1, r * 0.35, 0, 0, 7); c.fill();
+          c.fillStyle = "#fff"; c.beginPath(); c.arc(bp.sx, bp.sy - r, r, 0, 7); c.fill();
+          c.fillStyle = "#222"; c.beginPath(); c.arc(bp.sx - r * 0.2, bp.sy - r * 1.1, r * 0.35, 0, 7); c.fill();
         } });
-        ents.sort((p, q) => p.y - q.y).forEach((e) => e.f());
+        ents.sort((a, b) => b.z - a.z).forEach((e) => e.f());
+        goal3(FH, -1);
+        // 点・時間・レーダー
         const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
         const tt = Math.ceil(S.t), mm = Math.floor(tt / 60), ssec = String(tt % 60).padStart(2, "0");
         const HY = top + 4;
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, HY, 70, 26); c.fillRect(w - 58, HY, 54, 26);
+        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, HY, 70, 26); c.fillRect(4, HY + 30, 70, 22);
         c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle";
         c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, HY + 14); c.fillStyle = "#fff"; c.fillText("−", 39, HY + 14); c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, HY + 14);
-        c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, w - 31, HY + 14);
-        if (S.st === "wait") bigText(c, "あいて待ち", w / 2, h / 2 - 40, 26);
-        else if (S.st === "count") bigText(c, String(Math.max(1, Math.ceil(S.gt))), w / 2, h / 2 - 40, 64, "#FFE14D");
-        else if (S.st === "goal") bigText(c, S.last === myTeam ? "ゴール！" : "やられた…", w / 2, h / 2 - 40, 42, S.last === myTeam ? "#FFE14D" : "#FF9B91");
-        else if (S.st === "end") bigText(c, "しゅうりょう", w / 2, h / 2 - 40, 34);
+        c.font = `13px ${DISP}`; c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, 39, HY + 41);
+        const rw = 54, rh = rw * FH / FW, rx = w - rw - 6, ry = HY;
+        c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(rx, ry, rw, rh); c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 1; c.strokeRect(rx + 0.5, ry + 0.5, rw - 1, rh - 1);
+        c.beginPath(); c.moveTo(rx, ry + rh / 2); c.lineTo(rx + rw, ry + rh / 2); c.stroke();
+        const R = (x, y) => [rx + (vx_(x) / FW) * rw, ry + (vy_(y) / FH) * rh];
+        for (let i = 0; i < 6; i++) { const [x, y] = R(Pl[i].x, Pl[i].y); c.fillStyle = Pl[i].team === myTeam ? (i === active ? "#FFE14D" : "#46CBF3") : "#FF7B70"; c.beginPath(); c.arc(x, y, i === active ? 3 : 2.4, 0, 7); c.fill() }
+        { const [x, y] = R(ball.x, ball.y); c.fillStyle = "#fff"; c.fillRect(x - 1.5, y - 1.5, 3, 3) }
+        if (S.st === "wait") bigText(c, "あいて待ち", w / 2, h * 0.4, 26);
+        else if (S.st === "count") bigText(c, String(Math.max(1, Math.ceil(S.gt))), w / 2, h * 0.4, 64, "#FFE14D");
+        else if (S.st === "goal") bigText(c, S.last === myTeam ? "ゴール！" : "やられた…", w / 2, h * 0.4, 42, S.last === myTeam ? "#FFE14D" : "#FF9B91");
+        else if (S.st === "end") bigText(c, "しゅうりょう", w / 2, h * 0.4, 34);
       }
       const stop = loop(frame);
       return () => { stop(); removeEventListener("keydown", kd) };
@@ -1293,43 +1344,65 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (CR.d >= RUN_LEN) { CR.fin = true; cpuSet({ res: Math.round(CR.t * 1000) }) }
         cpuX({ d: Math.round(CR.d), y: Math.round(cy), sz: 1, at: CR.at });
       }
-      function drawRunner(x, yb, phase, col, alpha, air, sc, tint) {
-        c.save(); c.globalAlpha = alpha; c.translate(x, yb); c.scale(sc, sc);
-        const L = air ? 4 : Math.sin(phase) * 6;
-        c.fillStyle = "#2A2A3A"; c.fillRect(-7 + L, -12, 6, 12); c.fillRect(1 - L, -12, 6, 12);
-        c.fillStyle = tint || col; c.fillRect(-10, -28, 20, 17);
-        c.fillStyle = "#EDBE8F"; c.fillRect(-8, -40, 16, 13);
-        c.fillStyle = col; c.fillRect(-9, -43, 18, 5); c.fillRect(-9, -40, 22, 3);
-        c.fillStyle = "#111"; c.fillRect(3, -35, 2, 3);
+      // 描画：走っている自分の後ろから見た画面。奥に向かって道がのびて、障害物が向こうから近づいてくる
+      const U = 10, HS = 2.2;
+      const HZR = top + 60 + (h - top - 60) * 0.2, FEET = h - bottom - 40, RWD = w * 0.36;
+      const PJ = (x, dist) => { const dz = (dist - d) / U + 4; if (dz < 0.6) return null; const p = 4 / dz; return { sx: w / 2 + x * RWD * p, sy: HZR + (FEET - HZR) * p, p } };
+      function band(d0, d1, x0, x1, col) {
+        const a = PJ(x0, d1), b = PJ(x1, d1), cc = PJ(x1, Math.max(d0, d - 34)), e = PJ(x0, Math.max(d0, d - 34)); if (!a || !b || !cc || !e) return;
+        c.fillStyle = col; c.beginPath(); c.moveTo(a.sx, a.sy); c.lineTo(b.sx, b.sy); c.lineTo(cc.sx, cc.sy); c.lineTo(e.sx, e.sy); c.closePath(); c.fill();
+      }
+      function drawBack(x, yb, s, col, alpha, air, phase, tint) {
+        c.save(); c.globalAlpha = alpha; c.translate(x, yb); c.scale(s, s);
+        const L = air ? 3 : Math.sin(phase) * 5, A = air ? -6 : Math.sin(phase) * 4;
+        c.fillStyle = "rgba(0,0,0,.25)"; if (!air) { c.beginPath(); c.ellipse(0, 0, 12, 3.5, 0, 0, 7); c.fill() }
+        c.fillStyle = "#2A2A3A"; c.fillRect(-8, -14 - L, 6, 14 + L); c.fillRect(2, -14 + L, 6, 14 - L);
+        c.fillStyle = "#3B3B55"; c.fillRect(-9, -20, 18, 8);
+        c.fillStyle = tint || col; c.fillRect(-10, -34, 20, 15);
+        c.fillRect(-15, -33 + A, 5, 11); c.fillRect(10, -33 - A, 5, 11);
+        c.fillStyle = "#EDBE8F"; c.fillRect(-15, -23 + A, 5, 4); c.fillRect(10, -23 - A, 5, 4);
+        c.fillStyle = "#3A2A1E"; c.fillRect(-7, -45, 14, 12);
+        c.fillStyle = col; c.fillRect(-8, -48, 16, 6);
         c.restore();
       }
-      // 縦に長い画面では、地面のあたりを少し大きく映す
-      const RZ = clamp((G - top - 80) / 260, 1, 1.35);
       function draw() {
-        c.fillStyle = "#5C94FC"; c.fillRect(0, 0, w, h);
-        c.save(); c.translate(0, G); c.scale(RZ, RZ); c.translate(0, -G);
-        c.fillStyle = "rgba(255,255,255,.95)"; const cl = -((d * 0.3) % 420);
-        for (let x = cl; x < w + 420; x += 420) { c.fillRect(x + 80, 26, 70, 16); c.fillRect(x + 96, 16, 36, 12); c.fillRect(x + 280, 54, 54, 12) }
-        c.fillStyle = "#3FA34D"; const hl = -((d * 0.5) % 500); for (let x = hl; x < w + 500; x += 500) { c.beginPath(); c.moveTo(x + 40, G); c.lineTo(x + 140, G - 60); c.lineTo(x + 240, G); c.fill() }
-        // 地面（穴をあける）
-        c.fillStyle = "#C84C0C"; c.fillRect(0, G, w, h - G);
-        c.fillStyle = "#8F3608"; const go = -(d % 32); for (let x = go; x < w; x += 32) { c.fillRect(x, G, 2, h - G); c.fillRect(x, G + 14, 32, 2) }
-        for (const p of C.pits) { const sx = p.x - d + PX; if (sx > w || sx + p.w < 0) continue; c.fillStyle = "#5C94FC"; c.fillRect(sx, G, p.w, h - G) }
-        // ゴール
-        const gx = RUN_LEN - d + PX; if (gx < w + 40) { c.fillStyle = "#ddd"; c.fillRect(gx, G - 150, 4, 150); c.fillStyle = "#3FBF4F"; c.beginPath(); c.moveTo(gx + 4, G - 150); c.lineTo(gx + 34, G - 138); c.lineTo(gx + 4, G - 126); c.fill(); bigText(c, "GOAL", gx + 2, G - 162, 14, "#FFE14D") }
+        // 空・雲・山
+        const sg = c.createLinearGradient(0, 0, 0, HZR); sg.addColorStop(0, "#4F86F7"); sg.addColorStop(1, "#9CC4FF"); c.fillStyle = sg; c.fillRect(0, 0, w, HZR + 1);
+        c.fillStyle = "rgba(255,255,255,.95)"; const cl = -((d * 0.05) % 420);
+        for (let x = cl; x < w + 420; x += 420) { c.fillRect(x + 60, HZR - 120, 70, 16); c.fillRect(x + 76, HZR - 130, 36, 12); c.fillRect(x + 250, HZR - 90, 54, 12) }
+        c.fillStyle = "#5FB86A"; for (const [px, r] of [[0.1, 0.16], [0.42, 0.11], [0.7, 0.18], [0.95, 0.12]]) { c.beginPath(); c.arc(px * w, HZR, w * r, Math.PI, 0); c.fill() }
+        c.fillStyle = "#58B846"; c.fillRect(0, HZR, w, h - HZR);
+        // 道（レンガのしま）と、両わきの草のしま
+        band(d - 40, d + 2400, -1.05, 1.05, "#C84C0C");
+        const k0 = Math.floor((d - 40) / 60);
+        for (let k = k0; k < k0 + 40; k++) { const a = k * 60; if (k % 2 === 0) { band(a, a + 30, -1.05, 1.05, "#B2430A"); band(a, a + 30, -6, -1.05, "#4FA83E"); band(a, a + 30, 1.05, 6, "#4FA83E") } }
+        band(d - 40, d + 2400, -1.12, -1.05, "#7A2E06"); band(d - 40, d + 2400, 1.05, 1.12, "#7A2E06");
+        // 穴
+        for (const p of C.pits) { if (p.x + p.w < d - 40 || p.x > d + 1600) continue; band(p.x, p.x + p.w, -6, 6, "#2B3A67"); band(p.x, p.x + 6, -6, 6, "#1A2340") }
+        // 奥から順に：ゴール・障害物・？ブロック・あいて
+        const items = [];
+        items.push({ dist: RUN_LEN, f: () => { const a = PJ(-1.2, RUN_LEN), b = PJ(1.2, RUN_LEN); if (!a || !b) return; const hh = 170 * HS * a.p; c.fillStyle = "#eee"; c.fillRect(a.sx - 4 * a.p, a.sy - hh, 8 * a.p, hh); c.fillRect(b.sx - 4 * a.p, b.sy - hh, 8 * a.p, hh); c.fillStyle = "#E23B2E"; c.fillRect(a.sx, a.sy - hh, b.sx - a.sx, 40 * a.p); bigText(c, "GOAL", (a.sx + b.sx) / 2, a.sy - hh + 20 * a.p, Math.max(10, 34 * a.p), "#FFE14D") } });
         C.obs.forEach((o, i) => {
-          const sx = o.x - d + PX; if (sx > w + 40 || sx + o.w < -10) return; if (hitObs.has(i) && fx.big > 0) return;
-          if (o.k === "pipe") { c.fillStyle = "#00A800"; c.fillRect(sx + 3, G - o.h, o.w - 6, o.h); c.fillStyle = "#00C800"; c.fillRect(sx, G - o.h, o.w, 10); c.fillStyle = "#005800"; c.fillRect(sx + 8, G - o.h + 10, 4, o.h - 10) }
-          else if (o.k === "kuri") { c.fillStyle = "#A0522D"; c.beginPath(); c.moveTo(sx, G - 10); c.quadraticCurveTo(sx + o.w / 2, G - o.h - 8, sx + o.w, G - 10); c.fill(); c.fillStyle = "#F0C69A"; c.fillRect(sx + 5, G - 10, o.w - 10, 7); c.fillStyle = "#222"; c.fillRect(sx + 3, G - 3, 8, 3); c.fillRect(sx + o.w - 11, G - 3, 8, 3); c.fillStyle = "#fff"; c.fillRect(sx + 7, G - 18, 4, 5); c.fillRect(sx + o.w - 11, G - 18, 4, 5) }
-          else { const top = G - o.fly - o.h, flap = Math.sin(d / 18) > 0; c.fillStyle = "#8C8FA3"; c.fillRect(sx + 4, top + 4, o.w - 8, o.h - 6); c.fillStyle = "#6D7084"; c.fillRect(sx + 10, flap ? top - 6 : top + o.h - 4, 14, 8); c.fillStyle = "#8C8FA3"; c.fillRect(sx, top, 10, 10); c.fillStyle = "#F2A93B"; c.fillRect(sx - 4, top + 4, 5, 3) }
+          if (o.x + o.w < d - 30 || o.x > d + 1600) return; if (hitObs.has(i) && fx.big > 0) return;
+          items.push({ dist: o.x, f: () => {
+            const a = PJ(-0.8, o.x), b = PJ(0.8, o.x), m = PJ(0, o.x); if (!a || !b || !m) return; const p = m.p;
+            if (o.k === "pipe") { const hh = o.h * HS * p; c.fillStyle = "#00A800"; c.fillRect(a.sx + 6 * p, a.sy - hh, b.sx - a.sx - 12 * p, hh); c.fillStyle = "#00C800"; c.fillRect(a.sx, a.sy - hh, b.sx - a.sx, 14 * p); c.fillStyle = "#007000"; c.fillRect(a.sx + 14 * p, a.sy - hh + 14 * p, 8 * p, hh - 14 * p) }
+            else if (o.k === "kuri") { for (const ox of [-0.45, 0.45]) { const q = PJ(ox, o.x), r = 32 * HS * p / 2; c.fillStyle = "#A0522D"; c.beginPath(); c.arc(q.sx, q.sy - r * 0.7, r, Math.PI, 0); c.fill(); c.fillStyle = "#F0C69A"; c.fillRect(q.sx - r * 0.55, q.sy - r * 0.7, r * 1.1, r * 0.6); c.fillStyle = "#fff"; c.fillRect(q.sx - r * 0.45, q.sy - r * 1.15, r * 0.25, r * 0.35); c.fillRect(q.sx + r * 0.2, q.sy - r * 1.15, r * 0.25, r * 0.35); c.fillStyle = "#222"; c.fillRect(q.sx - r * 0.75, q.sy - r * 0.15, r * 0.55, r * 0.2); c.fillRect(q.sx + r * 0.2, q.sy - r * 0.15, r * 0.55, r * 0.2) } }
+            else { const yy = m.sy - (o.fly + o.h / 2) * HS * p, ww = 40 * HS * p, flap = Math.sin(d / 18) > 0; c.fillStyle = "#8C8FA3"; c.fillRect(m.sx - ww * 0.3, yy - ww * 0.15, ww * 0.6, ww * 0.3); c.fillStyle = "#6D7084"; c.fillRect(m.sx - ww * 0.65, flap ? yy - ww * 0.3 : yy, ww * 1.3, ww * 0.12); c.fillStyle = "#F2A93B"; c.fillRect(m.sx - ww * 0.06, yy, ww * 0.12, ww * 0.12) }
+          } });
         });
-        C.blocks.forEach((b, i) => { const sx = b.x - d + PX; if (sx > w + 30 || sx < -30) return; const top = G - b.y - 26; c.fillStyle = used.has(i) ? "#9C6B3A" : "#F8B800"; c.fillRect(sx, top, 26, 26); c.strokeStyle = "#7A3E0A"; c.lineWidth = 2; c.strokeRect(sx + 1, top + 1, 24, 24); if (!used.has(i)) bigText(c, "?", sx + 13, top + 14, 18, "#fff") });
+        C.blocks.forEach((bk, i) => {
+          if (bk.x < d - 30 || bk.x > d + 1600) return;
+          items.push({ dist: bk.x, f: () => { const m = PJ(0, bk.x); if (!m) return; const sz = 26 * HS * m.p, yy = m.sy - (bk.y + 13) * HS * m.p; c.fillStyle = used.has(i) ? "#9C6B3A" : "#F8B800"; c.fillRect(m.sx - sz / 2, yy - sz / 2, sz, sz); c.strokeStyle = "#7A3E0A"; c.lineWidth = Math.max(1, 2 * m.p); c.strokeRect(m.sx - sz / 2, yy - sz / 2, sz, sz); if (!used.has(i)) bigText(c, "?", m.sx, yy + sz * 0.04, Math.max(9, sz * 0.7), "#fff") } });
+        });
         const op = rtOppPeer(), ox = op ? op.presence.x : null, os = oppS();
-        if (ox && ox.d != null && !(os && os.res != null)) { const gxp = ox.d - d + PX; if (gxp > -20 && gxp < w + 20) drawRunner(gxp, G - (ox.y || 0), ox.d / 14, "#E5413B", 0.5, (ox.y || 0) > 0, ox.sz || 1) }
+        if (ox && ox.d != null && !(os && os.res != null)) items.push({ dist: ox.d, f: () => { const q = PJ(0.55, ox.d); if (q) drawBack(q.sx, q.sy - (ox.y || 0) * HS * q.p, q.p * HS * (ox.sz || 1), "#E5413B", 0.55, (ox.y || 0) > 0, ox.d / 14) } });
+        items.sort((a, b) => b.dist - a.dist).forEach((it) => it.f());
+        // 自分（後ろすがた）
         const sc = scale(), blink = fx.stun > 0 && Math.floor(t * 12) % 2;
-        if (!blink && fallT <= 0) drawRunner(PX, G - y, d / 14, "#2E9AD0", 1, y > 0, sc, fx.poison > 0 ? "#9B59D0" : fx.fast > 0 ? "#FFB020" : null);
-        if (fx.big > 0 || fx.fast > 0) { c.strokeStyle = "rgba(255,225,77,.7)"; c.lineWidth = 2; c.beginPath(); c.arc(PX, G - y - 20 * sc, 26 * sc, 0, 7); c.stroke() }
-        c.restore();
+        if (fallT > 0) { const q = PJ(0, d); c.save(); c.globalAlpha = Math.max(0, fallT / 1.2); drawBack(q.sx, q.sy + (1.2 - fallT) * 160, HS * sc, "#2E9AD0", 1, true, 0); c.restore() }
+        else if (!blink) { const q = PJ(0, d); drawBack(q.sx, q.sy - y * HS, HS * sc, "#2E9AD0", 1, y > 0, d / 14, fx.poison > 0 ? "#9B59D0" : fx.fast > 0 ? "#FFB020" : null) }
+        if (fx.fast > 0 || fx.big > 0) { c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = (i * 97 + d * 3) % w, y0 = HZR + ((i * 53) % (h - HZR)); c.beginPath(); c.moveTo(x, y0); c.lineTo(x + (x - w / 2) * 0.15, y0 + 30); c.stroke() } }
         // 上の表示
         const HY = top + 48;
         c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, HY, w - 16, 10);
