@@ -171,6 +171,13 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
 .mash { width: 100%; height: 120px; border-radius: 20px; font-size: 38px }
 .mash:disabled { opacity: .4; cursor: default }
 .kick:active, .mash:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--pink) 55%, #000) }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; max-width: 230px }
+.btns .big { grid-column: 1 / -1 }
+.gbtn { appearance: none; border: 0; border-radius: 14px; padding: 14px 6px; font-family: var(--display); font-size: 16px; color: #fff; background: var(--sky); cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--sky) 55%, #000); touch-action: manipulation; user-select: none; -webkit-user-select: none; min-width: 0 }
+.gbtn.big { background: var(--pink); box-shadow: 0 4px 0 color-mix(in srgb, var(--pink) 55%, #000); font-size: 18px; padding: 16px 6px }
+.gbtn:disabled { opacity: .45; cursor: default }
+.gbtn:not(:disabled):active { transform: translateY(3px); box-shadow: none }
 .sec-title { display: flex; align-items: baseline; gap: 8px }
 .sec-title b { font-family: var(--display); font-weight: 400; font-size: 18px }
 
@@ -368,7 +375,7 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
         const gs = s.gs || [], myG = me.s.gs || [];
         if (gs.length < myG.length && !gs.includes(me.s.sec) && later("g" + gs.length, 1500)) cpuSet({ gs: [...gs, cpuHbGuess(me.s.sec, gs)] });
       }
-    } else if (g === "run" || g === "sumo" || g === "army") {
+    } else if (g === "run" || g === "sumo" || g === "army" || g === "kart") {
       if (me.s.rdy && !s.rdy && later("rdy", 700)) cpuSet({ rdy: true });
     }
   }
@@ -389,9 +396,10 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
 
   // ---------- rendering ----------
   const GAMES = {
-    soccer: { grp: "body", name: "1対1サッカー", ico: "⚽", c: "var(--ok)", desc: "スティックで走って、キックでゴールをねらう。90秒で点が多いほうが勝ち" },
-    run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "同じコースを同時に走る。タップでジャンプ、遠くまで行ったほうが勝ち" },
-    army: { grp: "body", name: "軍団ラン", ico: "兵", c: "var(--sky)", desc: "ゲートで仲間をふやし、樽をこわして武器をゲット。ボスを倒して残った人数で勝負" },
+    soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
+    kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "ドリフトでダッシュ、アイテムで妨害。3周して先にゴールしたら勝ち" },
+    run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "？ブロックのアイテムでレース。こうらで相手を転ばせろ" },
+    army: { grp: "body", name: "軍団ラン", ico: "兵", c: "var(--sky)", desc: "道中で軍団を強くして、最後はふたりの軍団で決戦" },
     tycoon: { grp: "body", name: "木こりタイクーン", ico: "木", c: "var(--ok)", desc: "ふたりで協力。木を切って売って、お店を広げてお城をたてよう" },
     sumo: { grp: "body", name: "連打すもう", ico: "力", c: "var(--pink)", desc: "ひたすら連打して相手を押し出せ。15秒の真剣勝負" },
     ishin: { name: "以心伝心", ico: "♡", c: "var(--pink)", desc: "同じお題にふたりで答えて、答えがそろうか挑戦。協力プレイ" },
@@ -787,183 +795,264 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
   }
   const againBtns = (g) => `<div class="row"><button class="btn grow" data-act="start" data-g="${g}">もう一回</button><button class="btn ghost" data-act="menu">メニュー</button></div>`;
 
-  // ----- 1対1サッカー -----
-  // 世界座標: 横 FW × 縦 FH。先に始めた人(ホスト)が下から上のゴールをねらい、ボールの動きを計算して送る。
-  const FW = 64, FH = 100, GW = 22, PR = 3, BR = 1.6, PSPD = 32, SOCCER_T = 90;
+  // ----- 3対3サッカー -----
+  // 先に始めた人(ホスト)がボールと全員の動きを計算する。人が動かしている1人だけは、その人の画面の位置を使う。
+  // 0〜2 = ホストのチーム（上のゴール y=0 をねらう）、3〜5 = あいてのチーム（下のゴール y=FH をねらう）。役わり 0=キーパー 1=守り 2=攻め
+  const FW = 64, FH = 100, GW = 24, PR = 2.6, BR = 1.5, SOCCER_T = 120;
+  const SPD = 27, DASH = 42, AI_SPD = 23.5;
+  const S_HOME = [[32, 95], [22, 74], [42, 60]];
+  const sHome = (i) => { const [x, y] = S_HOME[i % 3]; return i < 3 ? { x, y } : { x: FW - x, y: FH - y } };
+  // 操作パネル（スティック＋ボタン）。押している間の状態と、押した回数を返す
+  function controlPad(stickEl, knobEl) {
+    const inp = { x: 0, y: 0 }; let sid = null;
+    const set = (e) => {
+      const r = stickEl.getBoundingClientRect();
+      let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const R = r.width / 2 - 14, d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d }
+      inp.x = dx / R; inp.y = dy / R; knobEl.style.transform = `translate(${dx}px,${dy}px)`;
+    };
+    stickEl.addEventListener("pointerdown", (e) => { sid = e.pointerId; try { stickEl.setPointerCapture(sid) } catch (_) {} set(e); e.preventDefault() });
+    stickEl.addEventListener("pointermove", (e) => { if (e.pointerId === sid) set(e) });
+    const rel = (e) => { if (e.pointerId === sid) { sid = null; inp.x = inp.y = 0; knobEl.style.transform = "" } };
+    stickEl.addEventListener("pointerup", rel); stickEl.addEventListener("pointercancel", rel);
+    return inp;
+  }
+  function holdBtn(el, onDown, onUp) {
+    const st = { down: false };
+    el.addEventListener("pointerdown", (e) => { e.preventDefault(); st.down = true; try { el.setPointerCapture(e.pointerId) } catch (_) {} onDown && onDown() });
+    const up = () => { if (st.down) { st.down = false; onUp && onUp() } };
+    el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    return st;
+  }
   ACTION.soccer = {
     shell() {
-      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("1対1サッカー", "あなたは青。上のゴールをねらえ")}
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("3対3サッカー", "青があなたのチーム。上のゴールをねらえ")}
         <section class="card act" style="padding:12px"><canvas id="cv" aria-label="サッカーのフィールド"></canvas><div id="act-msg"></div>
-        <div class="ctrl"><div class="stick" id="stick"><div class="knob" id="knob"></div></div><button class="kick" id="kick">キック</button></div>
-        <p class="muted">左の丸をドラッグして走る。ボールの近くで「キック」。体当たりでもドリブルできます。パソコンは矢印キー＋スペース。</p></section></section>`;
+        <div class="ctrl"><div class="stick" id="stick"><div class="knob" id="knob"></div></div>
+          <div class="btns"><button class="gbtn" id="b-dash">ダッシュ</button><button class="gbtn" id="b-tackle">タックル</button><button class="gbtn big" id="b-shoot">シュート</button></div></div>
+        <p class="muted">黄色い三角が動かしている選手。ボールにさわると自分のボールになります。「シュート」は長押しで強く。ボールがないときは「切替」で近くの味方に代わります。相手がボールを持っていたら「タックル」でうばえます。パソコンは矢印キー・Shift（ダッシュ）・X（タックル）・スペース（シュート）。</p></section></section>`;
     },
     mount() {
       const host = isFirst();
+      const myTeam = host ? 0 : 1, mates = host ? [0, 1, 2] : [3, 4, 5];
       const cv = $("#cv");
       const VW = FW + 8, VH = FH + 14;
       const { c, w, h } = canvasFor(cv, VH / VW);
       const k = w / VW;
       const T = (x, y) => (host ? [(x + 4) * k, (y + 7) * k] : [(FW - x + 4) * k, (FH - y + 7) * k]);
       const rectW = (x0, y0, x1, y1) => { const [a, b] = T(x0, y0), [cc, d] = T(x1, y1); return [Math.min(a, cc), Math.min(b, d), Math.abs(cc - a), Math.abs(d - b)] };
-      const home = () => ({ x: FW / 2, y: host ? FH - 16 : 16 });
-      const P = Object.assign(home(), { fx: 0, fy: host ? -1 : 1, k: 0 });
-      let ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0 };
-      let S = { sh: 0, sg: 0, t: SOCCER_T, st: "wait", ko: 0, gt: 0, last: "" };
-      let seenKo = 0, oppK = null, solo = false, oppPos = null, kickFx = 0;
-      // own = ボールを持っている人（"h" ホスト / "g" あいて）。さわると持てて、キックで放す
-      let own = null, stealCd = 0; const noGrab = { h: 0, g: 0 };
-      const inp = { x: 0, y: 0 };
+      const Pl = []; for (let i = 0; i < 6; i++) Pl.push(Object.assign(sHome(i), { fx: 0, fy: i < 3 ? -1 : 1, stun: 0, tkT: 0, tkCd: 0, grab: 0, team: i < 3 ? 0 : 1, role: i % 3 }));
+      let ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0, own: -1 };
+      let S = { s0: 0, s1: 0, t: SOCCER_T, st: "count", ko: 0, gt: 3, last: -1 };
+      let active = host ? 2 : 5, switchCd = 0, stamina = 1, charge = -1, seenKo = 0, kpTry = 0;
+      let tkN = 0, shN = 0, shPw = 0, lastG = { tk: null, sh: null }, lastSend = "", oppAct = -1;
+      const inp = controlPad($("#stick"), $("#knob"));
+      const dashB = holdBtn($("#b-dash"));
+      holdBtn($("#b-tackle"), () => doTackle());
+      const shootBtn = $("#b-shoot");
+      holdBtn(shootBtn, () => { if (ball.own === active) charge = 0; else doSwitch() }, () => { if (charge >= 0) { doShoot(Math.min(1, charge / 0.8)); charge = -1 } });
+      actKey = () => { if (ball.own === active) doShoot(0.7); else doSwitch() };
+      const kd = (e) => { if (e.repeat) return; if (e.key === "x" || e.key === "X") doTackle() };
+      addEventListener("keydown", kd);
 
-      const stick = $("#stick"), knob = $("#knob"); let sid = null;
-      const setStick = (e) => {
-        const r = stick.getBoundingClientRect();
-        let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-        const R = r.width / 2 - 14, d = Math.hypot(dx, dy);
-        if (d > R) { dx *= R / d; dy *= R / d }
-        inp.x = dx / R; inp.y = dy / R; knob.style.transform = `translate(${dx}px,${dy}px)`;
-      };
-      stick.addEventListener("pointerdown", (e) => { sid = e.pointerId; try { stick.setPointerCapture(sid) } catch (_) {} setStick(e); e.preventDefault() });
-      stick.addEventListener("pointermove", (e) => { if (e.pointerId === sid) setStick(e) });
-      const rel = (e) => { if (e.pointerId === sid) { sid = null; inp.x = inp.y = 0; knob.style.transform = "" } };
-      stick.addEventListener("pointerup", rel); stick.addEventListener("pointercancel", rel);
-      const doKick = () => { P.k++; kickFx = 0.15; if (host) tryKick(P, 0, "h") };
-      $("#kick").addEventListener("pointerdown", (e) => { e.preventDefault(); doKick() });
-      actKey = doKick;
-      ui.soloSoccer = () => { solo = true };
-
-      function tryKick(p, slack, who) {
-        if (S.st !== "play") return;
-        const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy);
-        if (own !== who && d > PR + BR + 2.5 + slack) return;
-        let nx = (p.fx || 0), ny = (p.fy || 0);
-        if (own !== who) { nx = (dx / (d || 1)) * 0.4 + nx * 0.6; ny = (dy / (d || 1)) * 0.4 + ny * 0.6 }
-        const m = Math.hypot(nx, ny) || 1;
-        ball.vx = (nx / m) * 85; ball.vy = (ny / m) * 85;
-        own = null; noGrab[who] = 0.35;
+      const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+      const goalY = (t) => (t === 0 ? -3 : FH + 3), ownGoalY = (t) => (t === 0 ? FH : 0);
+      function doSwitch() {
+        let best = active, bd = 1e9;
+        for (const i of mates) { if (i === active) continue; const d = dist(Pl[i], ball); if (d < bd) { bd = d; best = i } }
+        active = best; switchCd = 0.6;
       }
-      function collide(p, who) {
-        const dx = ball.x - p.x, dy = ball.y - p.y, d = Math.hypot(dx, dy), m = PR + BR;
-        if (d >= m + 0.8 || own === who) return;
-        if (noGrab[who] <= 0 && (!own || stealCd <= 0)) { own = who; stealCd = 0.7; return }
-        if (d >= m) return;
-        const nx = d > 0.01 ? dx / d : 0, ny = d > 0.01 ? dy / d : -1;
-        ball.x = p.x + nx * m; ball.y = p.y + ny * m;
-        const vn = ball.vx * nx + ball.vy * ny;
-        if (vn < 12) { ball.vx += (12 - vn) * nx; ball.vy += (12 - vn) * ny }
+      function doTackle() {
+        const p = Pl[active]; if (p.tkCd > 0 || p.stun > 0) return;
+        p.tkT = 0.22; p.tkCd = 1.1; tkN++;
+        if (host) tackleCheck(active, 1.5);
       }
-      function carry(p) {
-        ball.x = clamp(p.x + (p.fx || 0) * (PR + BR + 0.2), BR, FW - BR);
-        ball.y = p.y + (p.fy || 0) * (PR + BR + 0.2);
-        ball.vx = 0; ball.vy = 0;
+      function doShoot(pw) {
+        if (ball.own !== active) return;
+        shN++; shPw = r2(pw);
+        if (host) kick(active, pw);
       }
-      function goal(who) {
-        if (S.st !== "play") return;
-        own = null;
-        if (who === "h") S.sh++; else S.sg++;
-        S.last = who; S.st = "goal"; S.gt = 1.8;
+      function kick(i, pw) {
+        if (ball.own !== i) return;
+        const p = Pl[i], sp = 50 + 62 * pw;
+        ball.own = -1; ball.vx = p.fx * sp; ball.vy = p.fy * sp; p.grab = 0.35; kpTry = 0;
       }
-      function stepBall(dt) {
-        ball.x += ball.vx * dt; ball.y += ball.vy * dt;
-        const f = Math.pow(0.35, dt); ball.vx *= f; ball.vy *= f;
-        const inMouth = Math.abs(ball.x - FW / 2) < GW / 2 - BR;
-        if (ball.x < BR) { ball.x = BR; ball.vx = Math.abs(ball.vx) * 0.8 }
-        if (ball.x > FW - BR) { ball.x = FW - BR; ball.vx = -Math.abs(ball.vx) * 0.8 }
-        if (!inMouth && ball.y < BR) { ball.y = BR; ball.vy = Math.abs(ball.vy) * 0.8 }
-        if (!inMouth && ball.y > FH - BR) { ball.y = FH - BR; ball.vy = -Math.abs(ball.vy) * 0.8 }
-        if (ball.y < -2.5) goal("h"); else if (ball.y > FH + 2.5) goal("g");
+      function pass(i) {
+        const p = Pl[i], dirY = p.team === 0 ? -1 : 1;
+        let best = null, bs = -1e9;
+        for (const j of (p.team === 0 ? [0, 1, 2] : [3, 4, 5])) { if (j === i) continue; const q = Pl[j]; const sc = (q.y - p.y) * dirY - dist(p, q) * 0.2; if (sc > bs) { bs = sc; best = q } }
+        if (!best) return;
+        const dx = best.x - p.x, dy = best.y - p.y, d = Math.hypot(dx, dy) || 1;
+        p.fx = dx / d; p.fy = dy / d; kick(i, clamp(d / 70, 0.2, 0.6));
       }
-      function move(dt) {
-        if (S.st === "end") return;
+      function tackleCheck(i, slack) {
+        const p = Pl[i]; if (ball.own < 0) return;
+        const o = Pl[ball.own]; if (o.team === p.team) return;
+        if (dist(p, o) < PR * 2 + 1.5 + slack) { o.stun = 0.9; ball.own = i; p.tkT = 0; p.grab = 0 }
+      }
+      function moveTo(p, tx, ty, sp, dt) {
+        const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
+        if (d > 0.4) { const s = Math.min(d, sp * dt); p.x += (dx / d) * s; p.y += (dy / d) * s; p.fx = dx / d; p.fy = dy / d }
+      }
+      function ai(i, dt) {
+        const p = Pl[i], t = p.team, dirY = t === 0 ? -1 : 1, gy = goalY(t);
+        if (p.stun > 0) return;
+        if (p.tkT > 0) { p.x += p.fx * 55 * dt; p.y += p.fy * 55 * dt; tackleCheck(i, 0); return }
+        const bo = ball.own, owner = bo >= 0 ? Pl[bo] : null;
+        const shift = (ball.y - FH / 2) * 0.45;
+        const hm = sHome(i); let tx = hm.x + (ball.x - FW / 2) * 0.35, ty = hm.y + shift, sp = AI_SPD;
+        if (p.role === 0) { tx = clamp(ball.x, FW / 2 - 9, FW / 2 + 9); ty = t === 0 ? FH - 3 : 3; if (dist(p, ball) < 13 && (!owner || owner.team !== t)) { tx = ball.x; ty = ball.y } }
+        if (bo === i) {
+          // ボールを持っている：ゴールへ向かって、近づいたらシュート。前に相手がいたらパス
+          p.wv = (p.wv || 0) + dt; tx = FW / 2 + Math.sin(p.wv * 1.3 + i) * 12; ty = gy; sp = AI_SPD * 0.88;
+          if (p.role === 0) { pass(i); return }
+          const dg = Math.abs(p.y - gy);
+          const blocker = Pl.some((q) => q.team !== t && Math.abs(q.x - p.x) < 5 && (q.y - p.y) * dirY > 0 && (q.y - p.y) * dirY < 9);
+          if (dg < 30 && Math.random() < dt * 1.6) { const ox = FW / 2 + (Math.random() - 0.5) * 18 - p.x, oy = gy - p.y, d = Math.hypot(ox, oy) || 1; p.fx = ox / d; p.fy = oy / d; kick(i, 0.55 + Math.random() * 0.45); return }
+          if (blocker && Math.random() < dt * 1.2) { pass(i); return }
+        } else if (owner && owner.team === t) {
+          if (p.role === 2) { tx = clamp(owner.x + (owner.x < FW / 2 ? 14 : -14), 6, FW - 6); ty = owner.y + dirY * 16 }
+          else if (p.role === 1) { tx = clamp(owner.x + (owner.x < FW / 2 ? 10 : -10), 6, FW - 6); ty = owner.y - dirY * 6 }
+        } else {
+          // 相手が持っている・だれも持っていない：いちばん近い1人が取りに行く
+          let chaser = -1, cd = 1e9;
+          for (const j of (t === 0 ? [0, 1, 2] : [3, 4, 5])) { const q = Pl[j]; if (q.role === 0 && dist(q, ball) > 13) continue; const d = dist(q, ball); if (d < cd) { cd = d; chaser = j } }
+          if (chaser === i) { tx = ball.x; ty = ball.y; sp = AI_SPD * 1.05; if (owner && dist(p, owner) < 4.5 && p.tkCd <= 0 && Math.random() < dt * 2.2) { p.tkT = 0.22; p.tkCd = 1.4; const dx = owner.x - p.x, dy = owner.y - p.y, d = Math.hypot(dx, dy) || 1; p.fx = dx / d; p.fy = dy / d } }
+        }
+        moveTo(p, clamp(tx, PR, FW - PR), clamp(ty, PR, FH - PR), sp, dt);
+      }
+      function controlMine(dt) {
+        const p = Pl[active];
         let ix = inp.x, iy = inp.y;
-        if (keys.has("ArrowLeft") || keys.has("a")) ix = -1;
-        if (keys.has("ArrowRight") || keys.has("d")) ix = 1;
-        if (keys.has("ArrowUp") || keys.has("w")) iy = -1;
-        if (keys.has("ArrowDown") || keys.has("s")) iy = 1;
+        if (keys.has("ArrowLeft") || keys.has("a")) ix = -1; if (keys.has("ArrowRight") || keys.has("d")) ix = 1;
+        if (keys.has("ArrowUp") || keys.has("w")) iy = -1; if (keys.has("ArrowDown") || keys.has("s")) iy = 1;
         const m = Math.hypot(ix, iy); if (m > 1) { ix /= m; iy /= m }
         if (!host) { ix = -ix; iy = -iy }
-        P.x = clamp(P.x + ix * PSPD * dt, PR, FW - PR);
-        P.y = clamp(P.y + iy * PSPD * dt, PR, FH - PR);
-        if (m > 0.2) { const n = Math.hypot(ix, iy); P.fx = ix / n; P.fy = iy / n }
+        const dashing = (dashB.down || keys.has("Shift")) && stamina > 0.05 && m > 0.2;
+        stamina = clamp(stamina + (dashing ? -0.45 : 0.22) * dt, 0, 1);
+        if (S.st === "end") return;
+        if (p.stun > 0) return;
+        if (p.tkT > 0) { p.x += p.fx * 60 * dt; p.y += p.fy * 60 * dt }
+        else { const sp = (dashing ? DASH : SPD) * (ball.own === active ? 0.9 : 1); p.x += ix * sp * dt; p.y += iy * sp * dt; if (m > 0.2) { const n = Math.hypot(ix, iy); p.fx = ix / n; p.fy = iy / n } }
+        p.x = clamp(p.x, PR, FW - PR); p.y = clamp(p.y, PR, FH - PR);
       }
-
-      let C = null;
-      function cpuSoccer(dt) {
-        if (!C || C.ko !== S.ko) C = { x: FW / 2, y: 16, fx: 0, fy: 1, k: C ? C.k : 0, ko: S.ko, cool: 0.5 };
-        C.cool -= dt;
-        const gx = FW / 2, gy = FH + 3, bgx = gx - ball.x, bgy = gy - ball.y, bl = Math.hypot(bgx, bgy) || 1;
-        let tx = C.x, ty = C.y;
-        if (S.st === "play") {
-          if (own === "g") { C.wv = (C.wv || 0) + dt; tx = gx + Math.sin(C.wv * 1.7) * 10; ty = FH }
-          else if (!own && ball.y < C.y - 2) { tx = ball.x + (C.x < ball.x ? -6 : 6); ty = Math.max(PR, ball.y - 5) }
-          else { tx = ball.x; ty = ball.y }
-        }
-        const dx = tx - C.x, dy = ty - C.y, d = Math.hypot(dx, dy);
-        if (d > 0.3) { const st = Math.min(d, PSPD * (own === "g" ? 0.62 : 0.78) * dt); C.x = clamp(C.x + (dx / d) * st, PR, FW - PR); C.y = clamp(C.y + (dy / d) * st, PR, FH - PR); C.fx = dx / d; C.fy = dy / d }
-        if (S.st === "play" && own === "g") {
-          const gdx = gx - C.x, gdy = FH - C.y, gl = Math.hypot(gdx, gdy) || 1;
-          if (C.y > FH - 30 && C.cool <= 0) { C.fx = gdx / gl; C.fy = gdy / gl; C.k++; C.cool = 0.9 }
-        }
-        cpuX({ px: r2(C.x), py: r2(C.y), fx: r2(C.fx), fy: r2(C.fy), k: C.k });
+      function autoSwitch(dt) {
+        switchCd -= dt;
+        if (ball.own >= 0 && mates.includes(ball.own)) { if (ball.own !== active) active = ball.own; return }
+        if (switchCd > 0) return;
+        let best = active, bd = dist(Pl[active], ball);
+        for (const i of mates) { if (i === active || Pl[i].role === 0) continue; const d = dist(Pl[i], ball); if (d < bd - 7) { bd = d; best = i } }
+        if (best !== active) { active = best; switchCd = 0.8 }
       }
-      function frame(dt) {
-        kickFx = Math.max(0, kickFx - dt);
-        move(dt);
-        if (host && cpuActive()) cpuSoccer(dt);
-        const op = rtOppPeer();
-        const ox = op ? op.presence.x : null;
-        if (host) {
-          oppPos = ox && ox.px != null ? { x: ox.px, y: ox.py, fx: ox.fx, fy: ox.fy } : null;
-          if (ox && oppK === null) oppK = ox.k || 0;
-          if (S.st === "wait" && (oppPos || solo)) { S.st = "count"; S.gt = 3 }
-          if (S.st === "count") { S.gt -= dt; if (S.gt <= 0) S.st = "play" }
-          else if (S.st === "play") {
-            S.t -= dt; stealCd -= dt; noGrab.h -= dt; noGrab.g -= dt;
-            if (own === "g" && !oppPos) own = null;
-            if (own) carry(own === "h" ? P : oppPos);
-            stepBall(dt); collide(P, "h"); if (oppPos) collide(oppPos, "g");
-            if (S.t <= 0 && S.st === "play") { S.t = 0; S.st = "end" }
-          } else if (S.st === "goal") {
-            S.gt -= dt;
-            if (S.gt <= 0) {
-              if (S.t <= 0) S.st = "end";
-              else { ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0 }; own = null; S.ko++; S.st = "count"; S.gt = 2 }
+      function stepBall(dt) {
+        if (ball.own >= 0) { const o = Pl[ball.own]; ball.x = clamp(o.x + o.fx * (PR + BR + 0.3), BR, FW - BR); ball.y = o.y + o.fy * (PR + BR + 0.3); ball.vx = ball.vy = 0 }
+        else {
+          ball.x += ball.vx * dt; ball.y += ball.vy * dt; const f = Math.pow(0.45, dt); ball.vx *= f; ball.vy *= f;
+          const inMouth = Math.abs(ball.x - FW / 2) < GW / 2 - BR;
+          if (ball.x < BR) { ball.x = BR; ball.vx = Math.abs(ball.vx) * 0.8 } if (ball.x > FW - BR) { ball.x = FW - BR; ball.vx = -Math.abs(ball.vx) * 0.8 }
+          if (!inMouth && ball.y < BR) { ball.y = BR; ball.vy = Math.abs(ball.vy) * 0.8 } if (!inMouth && ball.y > FH - BR) { ball.y = FH - BR; ball.vy = -Math.abs(ball.vy) * 0.8 }
+          // 拾う（キーパーは手が届く範囲が広い。速いシュートは止められないこともある）
+          kpTry -= dt; let best = -1, bd = 1e9; const spd = Math.hypot(ball.vx, ball.vy);
+          for (let i = 0; i < 6; i++) {
+            const p = Pl[i]; if (p.stun > 0 || p.grab > 0) continue;
+            const reach = PR + BR + 0.6 + (p.role === 0 ? 1.4 : 0), d = dist(p, ball);
+            if (d < reach && d < bd) {
+              if (p.role === 0 && spd > 70) { if (kpTry > 0) continue; kpTry = 0.6; if (Math.random() < 0.45) { ball.vx = -ball.vx * 0.4 + (Math.random() - 0.5) * 30; ball.vy = -ball.vy * 0.5; continue } }
+              else if (spd > 75 && p.role !== 0) continue;
+              bd = d; best = i;
             }
           }
-          if (ox && oppK !== null && (ox.k || 0) > oppK) { oppK = ox.k; if (oppPos) tryKick(oppPos, 3, "g") }
-          sendX({ px: r2(P.x), py: r2(P.y), fx: r2(P.fx), fy: r2(P.fy), k: P.k,
-            b: [r2(ball.x), r2(ball.y), r2(ball.vx), r2(ball.vy)], S: { sh: S.sh, sg: S.sg, t: Math.round(S.t * 10) / 10, st: S.st, ko: S.ko, gt: Math.round(S.gt * 10) / 10, last: S.last, own: own || "" } });
-        } else {
-          if (ox && ox.S && ox.b) {
-            S = Object.assign({}, ox.S);
-            const age = Math.min(0.15, Math.max(0, (Date.now() - op.updatedAt) / 1000));
-            const b = ox.b;
-            ball = S.st === "play" ? { x: b[0] + b[2] * age, y: b[1] + b[3] * age, vx: b[2], vy: b[3] } : { x: b[0], y: b[1], vx: 0, vy: 0 };
-            oppPos = { x: ox.px, y: ox.py, fx: ox.fx, fy: ox.fy };
-            if (S.own === "g") carry(P); else if (S.own === "h") carry(oppPos);
-          } else { S = Object.assign({}, S, { st: "wait" }); oppPos = null }
-          sendX({ px: r2(P.x), py: r2(P.y), fx: r2(P.fx), fy: r2(P.fy), k: P.k });
+          if (best >= 0) ball.own = best;
         }
-        if (S.ko !== seenKo) { seenKo = S.ko; Object.assign(P, home(), { fx: 0, fy: host ? -1 : 1 }) }
-        draw();
-        const mine = host ? S.sh : S.sg, theirs = host ? S.sg : S.sh;
-        if (S.st === "end") {
-          setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたの勝ち！" : mine < theirs ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
-        } else if (S.st === "wait" && host && !solo) {
-          setMsg(`<button class="btn ghost" data-act="solo-soccer">あいてを待たずにひとりで練習</button>`);
-        } else setMsg("");
+        if (ball.y < -2.5 && Math.abs(ball.x - FW / 2) < GW / 2) goal(0); else if (ball.y > FH + 2.5 && Math.abs(ball.x - FW / 2) < GW / 2) goal(1);
+      }
+      function goal(t) { if (S.st !== "play") return; if (t === 0) S.s0++; else S.s1++; S.last = t; S.st = "goal"; S.gt = 2; ball.own = -1 }
+      function kickoff(conceded) {
+        for (let i = 0; i < 6; i++) Object.assign(Pl[i], sHome(i), { stun: 0, tkT: 0, fx: 0, fy: i < 3 ? -1 : 1 });
+        const fw = conceded === 0 ? 2 : 5; Pl[fw].x = FW / 2; Pl[fw].y = FH / 2 + (conceded === 0 ? 3 : -3);
+        ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0, own: fw }; S.ko++; S.st = "count"; S.gt = 2;
+      }
+      function hostStep(dt, gx) {
+        if (S.st === "count") { S.gt -= dt; if (S.gt <= 0) S.st = "play" }
+        else if (S.st === "goal") { S.gt -= dt; if (S.gt <= 0) { if (S.t <= 0) S.st = "end"; else kickoff(S.last === 0 ? 1 : 0) } }
+        else if (S.st === "play") { S.t -= dt; if (S.t <= 0) { S.t = 0; S.st = "end" } }
+        const gAct = gx && gx.ai >= 3 ? gx.ai : -1;
+        for (let i = 0; i < 6; i++) { const p = Pl[i]; p.stun = Math.max(0, p.stun - dt); p.tkT = Math.max(0, p.tkT - dt); p.tkCd = Math.max(0, p.tkCd - dt); p.grab = Math.max(0, p.grab - dt) }
+        if (S.st === "play") {
+          for (let i = 0; i < 6; i++) {
+            if (i === active) continue;
+            if (i === gAct) { const p = Pl[i]; p.x = gx.px; p.y = gx.py; p.fx = gx.fx; p.fy = gx.fy; continue }
+            ai(i, dt);
+          }
+          if (Pl[active].tkT > 0) tackleCheck(active, 0);
+          if (gx && gAct >= 0) {
+            if (lastG.tk === null) { lastG.tk = gx.tk || 0; lastG.sh = gx.sh || 0 }
+            if ((gx.tk || 0) > lastG.tk) { lastG.tk = gx.tk; Pl[gAct].tkCd = 1.1; tackleCheck(gAct, 4) }
+            if ((gx.sh || 0) > lastG.sh) { lastG.sh = gx.sh; if (ball.own === gAct) kick(gAct, gx.pw || 0.6) }
+          }
+          stepBall(dt);
+        }
+      }
+      // あいて側：ホストの計算した位置へなめらかに近づける
+      function applySnap(hx, dt) {
+        const Sn = hx.S; S = Object.assign({}, Sn);
+        const arr = hx.P;
+        for (let i = 0; i < 6; i++) {
+          if (i === active && S.ko === seenKo) continue;
+          const p = Pl[i], tx = arr[i * 4], ty = arr[i * 4 + 1];
+          const a = Math.min(1, dt * 14); p.x += (tx - p.x) * a; p.y += (ty - p.y) * a; p.fx = arr[i * 4 + 2]; p.fy = arr[i * 4 + 3];
+        }
+        oppAct = hx.a;
+        const b = hx.b; ball.own = b[4];
+        if (ball.own < 0) { const age = Math.min(0.15, Math.max(0, (Date.now() - hx._t) / 1000)); ball.x = b[0] + b[2] * age; ball.y = b[1] + b[3] * age; ball.vx = b[2]; ball.vy = b[3] }
+        else { const o = Pl[ball.own]; ball.x = o.x + o.fx * (PR + BR + 0.3); ball.y = o.y + o.fy * (PR + BR + 0.3) }
       }
 
-      function drawPlayer(p, mine) {
-        const [sx, sy] = T(p.x, p.y); const s = PR * k;
-        const col = mine ? ["#46CBF3", "#2390BA", "#16627F"] : ["#EA4A40", "#A82C25", "#6E1914"];
+      function frame(dt) {
+        const op = rtOppPeer(); const ox = op ? op.presence.x : null;
+        if (charge >= 0) charge += dt;
+        if (S.ko !== seenKo) { seenKo = S.ko; Object.assign(Pl[active], sHome(active)) }
+        controlMine(dt);
+        if (host) {
+          hostStep(dt, ox && ox.px != null ? ox : null);
+          autoSwitch(dt);
+          const P = []; for (const p of Pl) P.push(r2(p.x), r2(p.y), r2(p.fx), r2(p.fy));
+          const out = { P, a: active, b: [r2(ball.x), r2(ball.y), r2(ball.vx), r2(ball.vy), ball.own], S: { s0: S.s0, s1: S.s1, t: Math.round(S.t * 10) / 10, st: S.st, ko: S.ko, gt: Math.round(S.gt * 10) / 10, last: S.last } };
+          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        } else {
+          if (ox && ox.P) { applySnap(Object.assign({ _t: op.updatedAt }, ox), dt); autoSwitch(dt) }
+          else S = Object.assign({}, S, { st: "wait" });
+          Pl[active].tkT = Math.max(0, Pl[active].tkT - dt); Pl[active].tkCd = Math.max(0, Pl[active].tkCd - dt);
+          const p = Pl[active];
+          const out = { ai: active, px: r2(p.x), py: r2(p.y), fx: r2(p.fx), fy: r2(p.fy), tk: tkN, sh: shN, pw: shPw };
+          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        }
+        shootBtn.textContent = ball.own === active ? "シュート" : "切替";
+        draw();
+        const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
+        if (S.st === "end") setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたのチームの勝ち！" : mine < theirs ? `${esc(oppName())}のチームの勝ち！` : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
+        else setMsg("");
+      }
+      function drawPlayer(i) {
+        const p = Pl[i]; const [sx, sy] = T(p.x, p.y); const s = PR * k;
+        const mineTeam = p.team === myTeam;
+        const col = mineTeam ? ["#46CBF3", "#2390BA", "#16627F"] : ["#EA4A40", "#A82C25", "#6E1914"];
+        if (p.role === 0) col[0] = mineTeam ? "#8FE3FF" : "#FF9A8F";
         c.fillStyle = "rgba(0,0,0,.22)"; c.beginPath(); c.ellipse(sx + s * 0.35, sy + s * 0.55, s * 1.15, s * 0.6, 0, 0, 7); c.fill();
+        c.globalAlpha = Pl[i].stun > 0 ? 0.55 : 1;
         c.fillStyle = col[1]; c.fillRect(sx - s, sy - s * 0.4, s * 2, s * 1.2);
         c.fillStyle = col[0]; c.fillRect(sx - s, sy - s * 0.85, s * 2, s * 1.0);
-        c.fillStyle = "#C98F5F"; c.fillRect(sx - s * 0.6, sy - s * 0.95, s * 1.2, s * 0.45);
         c.fillStyle = "#EDBE8F"; c.fillRect(sx - s * 0.6, sy - s * 1.75, s * 1.2, s * 0.85);
         c.fillStyle = col[2]; c.fillRect(sx - s * 0.6, sy - s * 1.75, s * 1.2, s * 0.32);
-        if (mine) { c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(sx - s * 0.45, sy - s * 2.5); c.lineTo(sx + s * 0.45, sy - s * 2.5); c.lineTo(sx, sy - s * 2.0); c.fill() }
-        if (mine && kickFx > 0) { c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.beginPath(); c.arc(sx, sy, s * (2.6 - kickFx * 6), 0, 7); c.stroke() }
+        c.globalAlpha = 1;
+        if (i === active) {
+          c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(sx - s * 0.6, sy - s * 2.7); c.lineTo(sx + s * 0.6, sy - s * 2.7); c.lineTo(sx, sy - s * 2.05); c.fill();
+          c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(sx - s, sy + s * 0.95, s * 2, 3); c.fillStyle = stamina > 0.25 ? "#7CF59A" : "#FF8A80"; c.fillRect(sx - s, sy + s * 0.95, s * 2 * stamina, 3);
+          if (charge >= 0) { c.fillStyle = "#FFE14D"; c.fillRect(sx - s, sy + s * 0.95 + 4, s * 2 * Math.min(1, charge / 0.8), 3) }
+        }
+        const oA = host ? -1 : oppAct;
+        if ((host && rtOppPeer() && rtOppPeer().presence.x && i === rtOppPeer().presence.x.ai) || i === oA) { c.fillStyle = "#fff"; c.beginPath(); c.moveTo(sx - s * 0.45, sy - s * 2.6); c.lineTo(sx + s * 0.45, sy - s * 2.6); c.lineTo(sx, sy - s * 2.1); c.fill() }
+        if (p.tkT > 0) { c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.beginPath(); c.arc(sx, sy, s * 1.8, 0, 7); c.stroke() }
       }
       function draw() {
         c.fillStyle = "#2C9A45"; c.fillRect(0, 0, w, h);
@@ -980,8 +1069,7 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
           for (let gx = r[0]; gx < r[0] + r[2]; gx += k * 1.6) { c.beginPath(); c.moveTo(gx, r[1]); c.lineTo(gx, r[1] + r[3]); c.stroke() }
           c.strokeStyle = "#fff"; c.lineWidth = k * 0.8; c.strokeRect(...r);
         }
-        const ents = [{ y: T(P.x, P.y)[1], f: () => drawPlayer(P, true) }];
-        if (oppPos) ents.push({ y: T(oppPos.x, oppPos.y)[1], f: () => drawPlayer(oppPos, false) });
+        const ents = []; for (let i = 0; i < 6; i++) ents.push({ y: T(Pl[i].x, Pl[i].y)[1], f: () => drawPlayer(i) });
         const [bx, by] = T(ball.x, ball.y);
         ents.push({ y: by, f: () => {
           c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(bx + BR * k * 0.4, by + BR * k * 0.6, BR * k, BR * k * 0.55, 0, 0, 7); c.fill();
@@ -989,162 +1077,186 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
           c.fillStyle = "#222"; c.fillRect(bx - BR * k * 0.35, by - BR * k * 0.35, BR * k * 0.7, BR * k * 0.7);
         } });
         ents.sort((p, q) => p.y - q.y).forEach((e) => e.f());
-
-        const mine = host ? S.sh : S.sg, theirs = host ? S.sg : S.sh;
+        const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
         const tt = Math.ceil(S.t), mm = Math.floor(tt / 60), ssec = String(tt % 60).padStart(2, "0");
         c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, 4, 70, 26); c.fillRect(w - 58, 4, 54, 26);
         c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle";
-        c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, 18);
-        c.fillStyle = "#fff"; c.fillText("−", 39, 18);
-        c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, 18);
+        c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, 18); c.fillStyle = "#fff"; c.fillText("−", 39, 18); c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, 18);
         c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, w - 31, 18);
-        if (S.st === "wait") bigText(c, host ? "あいて待ち" : "あいて待ち", w / 2, h / 2 - 40, 26);
+        if (S.st === "wait") bigText(c, "あいて待ち", w / 2, h / 2 - 40, 26);
         else if (S.st === "count") bigText(c, String(Math.max(1, Math.ceil(S.gt))), w / 2, h / 2 - 40, 64, "#FFE14D");
-        else if (S.st === "goal") bigText(c, (S.last === "h") === host ? "ゴール！" : "やられた…", w / 2, h / 2 - 40, 42, (S.last === "h") === host ? "#FFE14D" : "#FF9B91");
+        else if (S.st === "goal") bigText(c, S.last === myTeam ? "ゴール！" : "やられた…", w / 2, h / 2 - 40, 42, S.last === myTeam ? "#FFE14D" : "#FF9B91");
         else if (S.st === "end") bigText(c, "しゅうりょう", w / 2, h / 2 - 40, 34);
       }
-      return loop(frame);
+      const stop = loop(frame);
+      return () => { stop(); removeEventListener("keydown", kd) };
     },
   };
-
-  // ----- ジャンプ走 -----
+  // ----- ジャンプ走（レース） -----
+  // 同じコースを同時に走って、先にゴールしたほうが勝ち。？ブロックからアイテムが出る。こうらを投げると相手が転ぶ
+  const RUN_LEN = 15000, RUN_SPD = 340;
+  const RUN_ITEMS = [["big", "でかくなる！", 20], ["fast", "足がはやくなる！", 20], ["shell", "こうらをゲット！", 26], ["poison", "毒キノコ…", 17], ["slow", "おそくなる…", 17]];
+  function runCourse(seed) {
+    const r = rng(seed); const obs = [], blocks = [], pits = []; let x = 650;
+    while (x < RUN_LEN - 500) {
+      const t = r();
+      if (t < 0.28) obs.push({ x, k: "pipe", w: 36, h: 30 + Math.floor(r() * 3) * 12 });
+      else if (t < 0.46) obs.push({ x, k: "kuri", w: 26, h: 24 });
+      else if (t < 0.6) pits.push({ x, w: Math.round(70 + r() * 40) });
+      else if (t < 0.72) obs.push({ x, k: "bird", w: 34, h: 18, fly: 64 + r() * 22 });
+      else { blocks.push({ x, y: 92 }); if (r() < 0.5) blocks.push({ x: x + 30, y: 92 }) }
+      x += 250 + r() * 300;
+    }
+    return { obs, blocks, pits };
+  }
+  function pickItem() { let t = Math.random() * 100; for (const it of RUN_ITEMS) { if ((t -= it[2]) < 0) return it } return RUN_ITEMS[0] }
   ACTION.run = {
     shell() {
-      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("ジャンプ走", "タップでジャンプ（2段OK）")}
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("ジャンプ走", "先にゴールしたほうが勝ち")}
         <section class="card act" style="padding:12px"><canvas id="cv" aria-label="ジャンプ走のコース"></canvas><div id="act-msg"></div>
-        <p class="muted">ふたりとも同じコース。うすい赤い人があいてです。コーンと木箱はジャンプでよけて、ハトにはぶつからないように。</p></section></section>`;
+        <div class="row" style="flex-wrap:nowrap"><button class="gbtn" id="b-item" style="flex:1" disabled>アイテムなし</button><button class="gbtn big" id="b-jump" style="flex:2">ジャンプ</button></div>
+        <p class="muted">ジャンプは空中でもう1回できます。土管・敵・ハトにぶつかると転び、穴に落ちると少しもどされます。？ブロックに当たるとアイテム：でかくなる（ぶつかってもこわせる）・足がはやくなる・こうら（投げると相手が転ぶ）。毒キノコとおそくなるはハズレ。パソコンはスペースでジャンプ、Zでこうら。</p></section></section>`;
     },
     mount() {
-      const cv = $("#cv");
-      const { c, w, h } = canvasFor(cv, 0.62);
-      const G = h - 34, PX = Math.min(80, w * 0.22);
-      const r = rng(me.m.seed); const obs = []; let ox = 900;
-      for (let i = 0; i < 600; i++) {
-        const t = r(); let o;
-        if (t < 0.42) o = { w: 22, h: 28, k: "cone" };
-        else if (t < 0.68) o = { w: 30, h: 46, k: "box" };
-        else if (t < 0.84) o = { w: 52, h: 28, k: "cones" };
-        else o = { w: 34, h: 18, k: "bird", fly: 62 + r() * 26 };
-        o.x = ox; obs.push(o); ox += 320 + r() * 380 + i * 4;
-      }
-      let ph = me.s.res != null ? "dead" : "idle", d = me.s.res != null ? me.s.res * 10 : 0, y = 0, vy = 0, jumps = 0, t = 0, cd = 0;
-      const jump = () => { if (ph === "run" && jumps < 2) { vy = jumps ? 640 : 780; jumps++ } };
+      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 0.66);
+      const G = h - 34, PX = Math.min(90, w * 0.24);
+      const C = runCourse(me.m.seed); const used = new Set(), hitObs = new Set();
+      let ph = me.s.res != null ? "done" : "idle", d = me.s.res != null ? RUN_LEN : 0, y = 0, vy = 0, jumps = 0, t = 0, cd = 0;
+      const fx = { big: 0, fast: 0, slow: 0, poison: 0, stun: 0 };
+      let fallT = 0, fallX = 0;
+      let shell = false, atN = 0, seenAt = null, msg = null, lastSend = "", CR = null;
+      const itemBtn = $("#b-item");
+      const jump = () => { if (ph === "run" && jumps < 2 && fallT <= 0) { const p = fx.poison > 0 ? 0.8 : 1; vy = (jumps ? 660 : 790) * p; jumps++ } };
+      const throwShell = () => { if (ph === "run" && shell) { shell = false; atN++; say("こうらを投げた！", "#7CF59A") } };
+      holdBtn($("#b-jump"), jump); holdBtn(itemBtn, throwShell);
       cv.addEventListener("pointerdown", (e) => { e.preventDefault(); jump() });
       actKey = jump;
-      sendX({ d: Math.round(d), y: 0 });
-
-      function castle(x, base, s) {
-        c.fillRect(x - 60 * s, base - 60 * s, 120 * s, 60 * s);
-        c.fillRect(x - 78 * s, base - 88 * s, 24 * s, 88 * s); c.fillRect(x + 54 * s, base - 88 * s, 24 * s, 88 * s);
-        c.fillRect(x - 32 * s, base - 100 * s, 20 * s, 100 * s); c.fillRect(x + 12 * s, base - 100 * s, 20 * s, 100 * s);
-        c.fillRect(x - 10 * s, base - 125 * s, 20 * s, 125 * s);
-        const roof = (cx, top, wd, ht) => { c.beginPath(); c.moveTo(cx - wd / 2, top); c.lineTo(cx + wd / 2, top); c.lineTo(cx, top - ht); c.fill() };
-        roof(x - 66 * s, base - 88 * s, 30 * s, 34 * s); roof(x + 66 * s, base - 88 * s, 30 * s, 34 * s);
-        roof(x - 22 * s, base - 100 * s, 26 * s, 30 * s); roof(x + 22 * s, base - 100 * s, 26 * s, 30 * s); roof(x, base - 125 * s, 26 * s, 40 * s);
+      const kd = (e) => { if (!e.repeat && (e.key === "z" || e.key === "Z")) throwShell() }; addEventListener("keydown", kd);
+      const say = (text, col) => { msg = { text, col, t: 1.4 } };
+      const scale = () => (fx.big > 0 ? 1.5 : fx.poison > 0 ? 0.7 : 1);
+      function gotHit() {
+        if (fx.big > 0) { fx.big = 0; say("こうらが当たって小さくなった", "#FF8A80") }
+        else { fx.stun = 1.5; say("こうらが当たった！", "#FF8A80") }
       }
-      function runner(x, yb, phase, col, alpha, airborne) {
-        c.globalAlpha = alpha; const L = airborne ? 4 : Math.sin(phase) * 6;
-        c.fillStyle = "#2A2A3A"; c.fillRect(x - 7 + L, yb - 12, 6, 12); c.fillRect(x + 1 - L, yb - 12, 6, 12);
-        c.fillStyle = col; c.fillRect(x - 10, yb - 28, 20, 17);
-        c.fillStyle = "#EDBE8F"; c.fillRect(x - 8, yb - 40, 16, 13);
-        c.fillStyle = "#3A2A1E"; c.fillRect(x - 8, yb - 40, 16, 4);
-        c.fillStyle = "#111"; c.fillRect(x + 3, yb - 35, 2, 3);
-        c.globalAlpha = 1;
-      }
-      function drawOb(o, sx) {
-        if (o.k === "cone" || o.k === "cones") {
-          const n = o.k === "cones" ? 2 : 1, cw = o.w / n;
-          for (let i = 0; i < n; i++) {
-            const x0 = sx + i * cw;
-            c.fillStyle = "#FF7A1A"; c.beginPath(); c.moveTo(x0, G); c.lineTo(x0 + cw, G); c.lineTo(x0 + cw / 2, G - o.h); c.fill();
-            c.fillStyle = "#fff"; c.fillRect(x0 + cw * 0.3, G - o.h * 0.55, cw * 0.4, 4);
+      function speedMul() { let m = 1; if (fx.fast > 0) m *= 1.45; if (fx.slow > 0) m *= 0.65; if (fx.stun > 0) m *= 0.25; if (fallT > 0) m = 0; return m }
+      function step(dt) {
+        t += dt;
+        for (const kk in fx) fx[kk] = Math.max(0, fx[kk] - dt);
+        d = Math.min(RUN_LEN, d + RUN_SPD * speedMul() * dt);
+        if (fallT > 0) { fallT -= dt; if (fallT <= 0) { d = fallX - 60; y = 0; vy = 0; jumps = 0 } return }
+        vy -= 2300 * dt; y += vy * dt;
+        const pit = C.pits.find((p) => d >= p.x + 4 && d <= p.x + p.w - 4);
+        if (y <= 0 && !pit) { y = 0; vy = 0; jumps = 0 }
+        if (pit && y < -40) { fallT = 1.2; fallX = pit.x; say("穴に落ちた…", "#FF8A80"); return }
+        const sc = scale(), ph_ = 36 * sc, pw = 8 * sc;
+        for (let i = 0; i < C.obs.length; i++) {
+          const o = C.obs[i]; if (hitObs.has(i)) continue;
+          const rel = o.x - d; if (rel > 40) break; if (rel + o.w < -30) continue;
+          const oy0 = o.fly || 0, oy1 = oy0 + o.h * (o.k === "kuri" ? 0.8 : 0.92);
+          if (pw > rel + 4 && -pw < rel + o.w - 4 && y < oy1 && y + ph_ > oy0) {
+            hitObs.add(i);
+            if (fx.big > 0) say("ドーン！こわした", "#FFE14D");
+            else if (o.k === "kuri" && vy < -100 && y > oy1 - 14) { vy = 520; say("ふみつけた！", "#7CF59A") }
+            else { fx.stun = 1; say("ころんだ…", "#FF8A80") }
           }
-        } else if (o.k === "box") {
-          c.fillStyle = "#B7793E"; c.fillRect(sx, G - o.h, o.w, o.h);
-          c.strokeStyle = "#7E4E22"; c.lineWidth = 3; c.strokeRect(sx + 1.5, G - o.h + 1.5, o.w - 3, o.h - 3);
-          c.beginPath(); c.moveTo(sx, G - o.h); c.lineTo(sx + o.w, G); c.stroke();
-        } else {
-          const top = G - o.fly - o.h, flap = Math.sin(d / 18) > 0;
-          c.fillStyle = "#8C8FA3"; c.fillRect(sx + 4, top + 4, o.w - 8, o.h - 6);
-          c.fillStyle = "#6D7084"; c.fillRect(sx + 10, flap ? top - 6 : top + o.h - 4, 14, 8);
-          c.fillStyle = "#8C8FA3"; c.fillRect(sx, top, 10, 10);
-          c.fillStyle = "#F2A93B"; c.fillRect(sx - 4, top + 4, 5, 3);
+        }
+        for (let i = 0; i < C.blocks.length; i++) {
+          if (used.has(i)) continue; const b = C.blocks[i]; const rel = b.x - d;
+          if (rel > 30) break; if (rel + 26 < -20) continue;
+          if (pw > rel && -pw < rel + 26 && y + ph_ > b.y && y < b.y + 26) {
+            used.add(i); if (vy > 0) vy = -60;
+            const it = pickItem(); say(it[1], it[0] === "poison" || it[0] === "slow" ? "#D58CFF" : "#FFE14D");
+            if (it[0] === "shell") shell = true; else { fx[it[0]] = it[0] === "big" ? 7 : it[0] === "poison" ? 5 : 4; if (it[0] === "big") fx.poison = 0; if (it[0] === "poison") fx.big = 0 }
+          }
         }
       }
-      let CR = null;
       function cpuRun(dt) {
-        if (!CR) {
-          const idx = 4 + Math.floor(Math.pow(Math.random(), 1.3) * 30);
-          CR = { d: 0, t: 0, die: obs[idx].x + 6, deathOb: obs[idx], go: false, done: cpu.s.res != null };
-        }
-        if (ph === "run") CR.go = true;
-        if (CR.go && !CR.done) {
-          CR.t += dt; CR.d += Math.min(720, 300 + CR.t * 14) * dt;
-          if (CR.d >= CR.die) { CR.done = true; cpuSet({ res: Math.floor(CR.d / 10) }) }
-        }
+        if (!CR) CR = { d: 0, t: 0, stun: 0, fast: 0, slow: 0, shellIn: 2 + Math.random() * 4, hitObs: new Set(), used: new Set(), at: 0, fin: cpu.s.res != null, y: 0 };
+        if (CR.fin) return;
+        if (ph === "run" || ph === "done") CR.go = true;
+        if (!CR.go) { cpuX({ d: 0, y: 0, sz: 1 }); return }
+        CR.t += dt; CR.stun = Math.max(0, CR.stun - dt); CR.fast = Math.max(0, CR.fast - dt); CR.slow = Math.max(0, CR.slow - dt);
+        let m = 1; if (CR.fast > 0) m *= 1.45; if (CR.slow > 0) m *= 0.65; if (CR.stun > 0) m *= 0.25;
+        CR.d = Math.min(RUN_LEN, CR.d + RUN_SPD * m * dt);
         let cy = 0;
-        for (const o of obs) {
-          const rel = o.x - CR.d; if (rel > 120) break; if (rel < -o.w - 40) continue;
-          if (o.k !== "bird" || o === CR.deathOb) cy = Math.max(cy, 95 * Math.sin(Math.PI * clamp((120 - rel) / (160 + o.w), 0, 1)));
-        }
-        if (CR.done) cy = 0;
-        cpuX({ d: Math.round(CR.d), y: Math.round(cy) });
+        C.obs.forEach((o, i) => { const rel = o.x - CR.d; if (rel < 110 && rel > -o.w - 30 && o.k !== "bird") cy = Math.max(cy, 100 * Math.sin(Math.PI * clamp((110 - rel) / (150 + o.w), 0, 1))); if (rel < 0 && !CR.hitObs.has(i)) { CR.hitObs.add(i); if (Math.random() < 0.13) CR.stun = 1 } });
+        C.blocks.forEach((b, i) => { if (b.x - CR.d < 0 && !CR.used.has(i)) { CR.used.add(i); if (Math.random() < 0.5) { const it = pickItem()[0]; if (it === "fast") CR.fast = 4; else if (it === "slow") CR.slow = 4; else if (it === "shell") CR.shellIn = Math.min(CR.shellIn, 1 + Math.random() * 2) } } });
+        CR.shellIn -= dt; if (CR.shellIn <= 0) { CR.at++; CR.shellIn = 8 + Math.random() * 8 }
+        if (CR.d >= RUN_LEN) { CR.fin = true; cpuSet({ res: Math.round(CR.t * 1000) }) }
+        cpuX({ d: Math.round(CR.d), y: Math.round(cy), sz: 1, at: CR.at });
+      }
+      function drawRunner(x, yb, phase, col, alpha, air, sc, tint) {
+        c.save(); c.globalAlpha = alpha; c.translate(x, yb); c.scale(sc, sc);
+        const L = air ? 4 : Math.sin(phase) * 6;
+        c.fillStyle = "#2A2A3A"; c.fillRect(-7 + L, -12, 6, 12); c.fillRect(1 - L, -12, 6, 12);
+        c.fillStyle = tint || col; c.fillRect(-10, -28, 20, 17);
+        c.fillStyle = "#EDBE8F"; c.fillRect(-8, -40, 16, 13);
+        c.fillStyle = col; c.fillRect(-9, -43, 18, 5); c.fillRect(-9, -40, 22, 3);
+        c.fillStyle = "#111"; c.fillRect(3, -35, 2, 3);
+        c.restore();
+      }
+      function draw() {
+        c.fillStyle = "#5C94FC"; c.fillRect(0, 0, w, h);
+        c.fillStyle = "rgba(255,255,255,.95)"; const cl = -((d * 0.3) % 420);
+        for (let x = cl; x < w + 420; x += 420) { c.fillRect(x + 80, 26, 70, 16); c.fillRect(x + 96, 16, 36, 12); c.fillRect(x + 280, 54, 54, 12) }
+        c.fillStyle = "#3FA34D"; const hl = -((d * 0.5) % 500); for (let x = hl; x < w + 500; x += 500) { c.beginPath(); c.moveTo(x + 40, G); c.lineTo(x + 140, G - 60); c.lineTo(x + 240, G); c.fill() }
+        // 地面（穴をあける）
+        c.fillStyle = "#C84C0C"; c.fillRect(0, G, w, h - G);
+        c.fillStyle = "#8F3608"; const go = -(d % 32); for (let x = go; x < w; x += 32) { c.fillRect(x, G, 2, h - G); c.fillRect(x, G + 14, 32, 2) }
+        for (const p of C.pits) { const sx = p.x - d + PX; if (sx > w || sx + p.w < 0) continue; c.fillStyle = "#5C94FC"; c.fillRect(sx, G, p.w, h - G) }
+        // ゴール
+        const gx = RUN_LEN - d + PX; if (gx < w + 40) { c.fillStyle = "#ddd"; c.fillRect(gx, G - 150, 4, 150); c.fillStyle = "#3FBF4F"; c.beginPath(); c.moveTo(gx + 4, G - 150); c.lineTo(gx + 34, G - 138); c.lineTo(gx + 4, G - 126); c.fill(); bigText(c, "GOAL", gx + 2, G - 162, 14, "#FFE14D") }
+        C.obs.forEach((o, i) => {
+          const sx = o.x - d + PX; if (sx > w + 40 || sx + o.w < -10) return; if (hitObs.has(i) && fx.big > 0) return;
+          if (o.k === "pipe") { c.fillStyle = "#00A800"; c.fillRect(sx + 3, G - o.h, o.w - 6, o.h); c.fillStyle = "#00C800"; c.fillRect(sx, G - o.h, o.w, 10); c.fillStyle = "#005800"; c.fillRect(sx + 8, G - o.h + 10, 4, o.h - 10) }
+          else if (o.k === "kuri") { c.fillStyle = "#A0522D"; c.beginPath(); c.moveTo(sx, G - 10); c.quadraticCurveTo(sx + o.w / 2, G - o.h - 8, sx + o.w, G - 10); c.fill(); c.fillStyle = "#F0C69A"; c.fillRect(sx + 5, G - 10, o.w - 10, 7); c.fillStyle = "#222"; c.fillRect(sx + 3, G - 3, 8, 3); c.fillRect(sx + o.w - 11, G - 3, 8, 3); c.fillStyle = "#fff"; c.fillRect(sx + 7, G - 18, 4, 5); c.fillRect(sx + o.w - 11, G - 18, 4, 5) }
+          else { const top = G - o.fly - o.h, flap = Math.sin(d / 18) > 0; c.fillStyle = "#8C8FA3"; c.fillRect(sx + 4, top + 4, o.w - 8, o.h - 6); c.fillStyle = "#6D7084"; c.fillRect(sx + 10, flap ? top - 6 : top + o.h - 4, 14, 8); c.fillStyle = "#8C8FA3"; c.fillRect(sx, top, 10, 10); c.fillStyle = "#F2A93B"; c.fillRect(sx - 4, top + 4, 5, 3) }
+        });
+        C.blocks.forEach((b, i) => { const sx = b.x - d + PX; if (sx > w + 30 || sx < -30) return; const top = G - b.y - 26; c.fillStyle = used.has(i) ? "#9C6B3A" : "#F8B800"; c.fillRect(sx, top, 26, 26); c.strokeStyle = "#7A3E0A"; c.lineWidth = 2; c.strokeRect(sx + 1, top + 1, 24, 24); if (!used.has(i)) bigText(c, "?", sx + 13, top + 14, 18, "#fff") });
+        const op = rtOppPeer(), ox = op ? op.presence.x : null, os = oppS();
+        if (ox && ox.d != null && !(os && os.res != null)) { const gxp = ox.d - d + PX; if (gxp > -20 && gxp < w + 20) drawRunner(gxp, G - (ox.y || 0), ox.d / 14, "#E5413B", 0.5, (ox.y || 0) > 0, ox.sz || 1) }
+        const sc = scale(), blink = fx.stun > 0 && Math.floor(t * 12) % 2;
+        if (!blink && fallT <= 0) drawRunner(PX, G - y, d / 14, "#2E9AD0", 1, y > 0, sc, fx.poison > 0 ? "#9B59D0" : fx.fast > 0 ? "#FFB020" : null);
+        if (fx.big > 0 || fx.fast > 0) { c.strokeStyle = "rgba(255,225,77,.7)"; c.lineWidth = 2; c.beginPath(); c.arc(PX, G - y - 20 * sc, 26 * sc, 0, 7); c.stroke() }
+        // 上の表示
+        c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, 8, w - 16, 10);
+        c.fillStyle = "#46CBF3"; c.fillRect(8, 8, (w - 16) * (d / RUN_LEN), 10);
+        if (ox && ox.d != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.d / RUN_LEN, 0, 1) - 3, 4, 6, 18) }
+        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, 22, 118, 20);
+        c.font = `14px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(`${Math.floor(d / 10)}m / ${RUN_LEN / 10}m`, 12, 32);
+        const eff = []; if (fx.big > 0) eff.push("でかい"); if (fx.fast > 0) eff.push("はやい"); if (fx.slow > 0) eff.push("おそい"); if (fx.poison > 0) eff.push("毒");
+        if (eff.length) { c.textAlign = "right"; c.fillStyle = "#FFE14D"; c.fillText(eff.join("・"), w - 10, 32) }
+        if (msg) bigText(c, msg.text, w / 2, h * 0.36 - (1.4 - msg.t) * 20, 22, msg.col);
+        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h / 2 - 10, 60, "#FFE14D");
+        if (ph === "done") bigText(c, "ゴール！", w / 2, h / 2 - 20, 40, "#FFE14D");
       }
       function frame(dt) {
+        const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
         if (cpuActive()) cpuRun(dt);
-        const op = rtOppPeer(); const oxs = op ? op.presence.x : null; const os = oppS();
         if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3 }
         if (ph === "count") { cd -= dt; if (cd <= 0) ph = "run" }
-        if (ph === "run") {
-          t += dt; const v = Math.min(720, 300 + t * 14);
-          d += v * dt; vy -= 2300 * dt; y += vy * dt;
-          if (y <= 0) { y = 0; vy = 0; jumps = 0 }
-          for (const o of obs) {
-            const sx = o.x - d + PX; if (sx > PX + 20) break; if (sx + o.w < PX - 20) continue;
-            const oy0 = o.fly || 0, oy1 = oy0 + (o.k === "box" || o.k === "bird" ? o.h - 3 : o.h * 0.75);
-            if (PX + 8 > sx + 4 && PX - 8 < sx + o.w - 4 && y < oy1 && y + 36 > oy0) { ph = "dead"; setS({ res: Math.floor(d / 10) }); break }
-          }
-          sendX({ d: Math.round(d), y: Math.round(y) });
-        }
-        // 描画
-        const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#77C8F8"); g.addColorStop(1, "#DDF3FF"); c.fillStyle = g; c.fillRect(0, 0, w, h);
-        const cs = h / 300;
-        c.fillStyle = "#F3B9D2"; const co = -((d * 0.12) % 700); for (let bx = co; bx < w + 700; bx += 700) castle(bx + 260 * cs * 2, G, cs);
-        c.fillStyle = "rgba(255,255,255,.92)"; const cl = -((d * 0.3) % 420);
-        for (let x = cl; x < w + 420; x += 420) { c.fillRect(x + 80, 26, 70, 16); c.fillRect(x + 96, 16, 36, 12); c.fillRect(x + 280, 54, 54, 12) }
-        c.fillStyle = "#58B846"; c.fillRect(0, G, w, 8); c.fillStyle = "#B67A49"; c.fillRect(0, G + 8, w, h - G - 8);
-        c.fillStyle = "#A36A3C"; const go = -(d % 40); for (let x = go; x < w; x += 40) c.fillRect(x, G + 16, 20, 6);
-        for (const o of obs) { const sx = o.x - d + PX; if (sx > w + 60) break; if (sx + o.w < -10) continue; drawOb(o, sx) }
-        const oppDone = os && os.res != null;
-        if (oppDone) {
-          const fx = os.res * 10 - d + PX;
-          if (fx > -20 && fx < w + 20) { c.fillStyle = "#E5413B"; c.fillRect(fx, G - 54, 3, 54); c.fillRect(fx + 3, G - 54, 22, 14); c.font = `12px ${DISP}`; c.textAlign = "center"; c.fillStyle = "#1F1B3A"; c.fillText(`${oppName().slice(0, 6)}`, fx, G - 62) }
-        } else if (oxs && oxs.d != null) {
-          const gx = oxs.d - d + PX; if (gx > -20 && gx < w + 20) runner(gx, G - (oxs.y || 0), oxs.d / 14, "#E5413B", 0.5, (oxs.y || 0) > 0);
-        }
-        runner(PX, G - y, d / 14, "#2E9AD0", ph === "dead" ? 0.6 : 1, y > 0);
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 6, 170, 28);
-        c.font = `15px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff";
-        const od = oppDone ? os.res : oxs && oxs.d != null ? Math.floor(oxs.d / 10) : null;
-        c.fillText(`${Math.floor(d / 10)}m`, 14, 20);
-        if (od != null) { c.fillStyle = "#FF9B91"; c.fillText(`あいて ${od}m`, 80, 20) }
-        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h / 2 - 10, 60, "#FFE14D");
-        if (ph === "dead") bigText(c, "ドーン！", w / 2, h / 2 - 20, 40, "#FF9B91");
-
-        // メッセージ
-        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() ? "ふたりとも押すと同時にスタート" : "あいてがいないので、押すとひとりで走ります"}</p>`);
+        if (ox) { const at = ox.at || 0; if (seenAt === null) seenAt = at; else if (at > seenAt) { seenAt = at; if (ph === "run") gotHit() } }
+        if (CR && atN > (CR.seenMine || 0)) { CR.seenMine = atN; CR.stun = 1.5 }
+        if (ph === "run") { step(dt); if (d >= RUN_LEN) { ph = "done"; setS({ res: Math.round(t * 1000) }) } }
+        if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
+        itemBtn.disabled = !shell; itemBtn.textContent = shell ? "こうらを投げる" : "アイテムなし";
+        const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN }, js = JSON.stringify(out);
+        if (js !== lastSend) { lastSend = js; sendX(out) }
+        draw();
+        const fmt = (ms) => `${(ms / 1000).toFixed(1)}秒`;
+        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() ? "ふたりとも押すと同時にスタート" : "押すとスタート"}</p>`);
         else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
-        else if (ph === "dead") {
-          const mineR = me.s.res ?? Math.floor(d / 10);
-          if (!opp() && !os) setMsg(`<p class="verdict good">記録 ${mineR}m</p>${againBtns("run")}`);
-          else if (oppDone) setMsg(`<p class="verdict ${mineR >= os.res ? "good" : "bad"}">${mineR > os.res ? "あなたの勝ち！" : mineR < os.res ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${mineR}m 対 ${os.res}m</p>${againBtns("run")}`);
-          else setMsg(`<p class="wait">記録 ${mineR}m。${esc(oppName())}はまだ走っています</p>`);
+        else if (ph === "done") {
+          const mine = me.s.res;
+          if (!opp()) setMsg(`<p class="verdict good">ゴール ${fmt(mine)}</p>${againBtns("run")}`);
+          else if (os && os.res != null) setMsg(`<p class="verdict ${mine <= os.res ? "good" : "bad"}">${mine < os.res ? "あなたの勝ち！" : mine > os.res ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${fmt(mine)} 対 ${fmt(os.res)}</p>${againBtns("run")}`);
+          else setMsg(`<p class="wait">ゴール ${fmt(mine)}。${esc(oppName())}はまだ走っています</p>`);
         } else setMsg("");
       }
-      return loop(frame);
+      const stop = loop(frame);
+      return () => { stop(); removeEventListener("keydown", kd) };
     },
   };
-
   // ----- 連打すもう -----
   const SUMO_LIM = 30, SUMO_T = 15;
   ACTION.sumo = {
@@ -1220,15 +1332,18 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
   };
 
   // ----- 軍団ラン -----
-  // 同じコース（シード）をふたりで同時に走る。ゲートで人数が増減、樽をうって壊すと武器が手に入る。最後にボス軍団と戦って残った人数が得点。
-  const AR_L = 900, AR_SPD = 15, AR_MAX = 1999;
+  // 同じコースを同時に走って軍団を強くし、最後にふたりの軍団どうしで決戦する。
+  // 道中：ゲートで人数が増減、兵隊は自動でうつ、樽をこわすと武器。手りゅう弾（ボタン）で前の樽や敵を一気にこわせる。
+  // 決戦：おたがい相手の「人数×攻撃力」ぶん減っていく。突撃・盾・援軍のボタンで差をつける。
+  const AR_L = 900, AR_SPD = 15, AR_MAX = 9999999, GREN_CD = 4, BATTLE_T = 20;
+  const fmtN = (n) => { n = Math.max(0, Math.floor(n)); return n >= 100000 ? `${(n / 10000).toFixed(0)}万` : n >= 10000 ? `${(n / 10000).toFixed(1)}万` : String(n) };
   function armyCourse(seed) {
-    const r = rng(seed); const objs = []; let z = 45;
+    const r = rng(seed); const objs = []; let z = 75;
+    objs.push({ t: "gate", z: 30, ops: [{ k: "+", v: 10 }, { k: "×", v: 2 }] });
     const opGood = () => { const t = r(); return t < 0.55 ? { k: "+", v: 5 + Math.floor(r() * 6) * 5 } : t < 0.88 ? { k: "×", v: 2 } : { k: "×", v: 3 } };
     const opBad = () => { const t = r(); return t < 0.6 ? { k: "−", v: 5 + Math.floor(r() * 4) * 5 } : { k: "÷", v: 2 } };
     const kinds = ["jeep", "tank", "heli", "plus", "plus", "bomb"];
-    objs.push({ t: "gate", z: 30, ops: [{ k: "+", v: 10 }, { k: "×", v: 2 }] }); z = 75;
-    while (z < AR_L - 60) {
+    while (z < AR_L - 40) {
       const t = r(), d = z / AR_L;
       if (t < 0.4) { const ops = r() < 0.7 ? [opGood(), opBad()] : [opGood(), opGood()]; if (r() < 0.5) ops.reverse(); objs.push({ t: "gate", z, ops }) }
       else if (t < 0.72) {
@@ -1237,47 +1352,59 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
       } else objs.push({ t: "enemy", z, x: (r() - 0.5) * 1.2, n: Math.round((6 + r() * 14) * (1 + d * 3)) });
       z += 38 + r() * 18;
     }
-    objs.push({ t: "boss", z: AR_L, x: 0, n: Math.round(150 + r() * 100) });
     return objs;
   }
-  function armyNew(seed) { return { objs: armyCourse(seed).map((o) => Object.assign({ alive: true }, o)), z: 0, x: 0, tx: 0, N: 20, dmg: 1, rate: 1, range: 1, cool: 0, wpn: {}, dead: false, fin: false, score: null, fx: [], shots: [] } }
+  function armyNew(seed) { return { objs: armyCourse(seed).map((o) => Object.assign({ alive: true }, o)), z: 0, x: 0, tx: 0, N: 20, dmg: 1, rate: 1, range: 1, cool: 0, gren: 0, wpn: {}, dead: false, fin: false, fx: [], shots: [], booms: [] } }
   function armyFx(S, on, text, col) { if (on) S.fx.push({ text, col, t: 0 }) }
+  function armyBreak(S, o, fxOn) {
+    o.alive = false;
+    if (o.kind === "jeep") { S.rate *= 1.35; S.wpn.jeep = (S.wpn.jeep || 0) + 1; armyFx(S, fxOn, "ジープ！連射アップ", "#FFE14D") }
+    else if (o.kind === "tank") { S.dmg *= 1.6; S.wpn.tank = (S.wpn.tank || 0) + 1; armyFx(S, fxOn, "戦車！攻撃力アップ", "#FFE14D") }
+    else if (o.kind === "heli") { S.range *= 1.35; S.dmg *= 1.2; S.wpn.heli = (S.wpn.heli || 0) + 1; armyFx(S, fxOn, "ヘリ！射程アップ", "#FFE14D") }
+    else if (o.kind === "plus") { const g = Math.round(o.hp0 / 2); S.N = Math.min(AR_MAX, S.N + g); armyFx(S, fxOn, `+${g}人`, "#7CF59A") }
+    else armyFx(S, fxOn, "爆弾をこわした", "#fff");
+  }
+  // 決戦での強さ（武器ほど強い）
+  const armyAtk = (S) => S.dmg * Math.sqrt(S.rate) * (1 + (S.range - 1) * 0.3);
+  function armyGrenade(S, fxOn) {
+    if (S.gren > 0 || S.fin || S.dead) return false;
+    let tgt = null, best = 1e9;
+    for (const o of S.objs) {
+      if (!o.alive || o.t === "gate") continue; const dz = o.z - S.z; if (dz < 0) continue; if (dz > 48) break;
+      const sc = dz + Math.abs(o.x - S.x) * 30; if (sc < best) { best = sc; tgt = o }
+    }
+    if (!tgt) return false;
+    S.gren = GREN_CD;
+    if (fxOn) S.booms.push({ x: tgt.x, z: tgt.z, t: 0 });
+    if (tgt.t === "barrel") { armyBreak(S, tgt, fxOn) }
+    else { const kill = 10 + S.N * 0.3; tgt.n -= kill; if (tgt.n <= 0.5) tgt.alive = false; armyFx(S, fxOn, "手りゅう弾！", "#FFE14D") }
+    return true;
+  }
   function armyStep(S, dt, fxOn) {
     if (S.dead || S.fin) return;
+    S.gren = Math.max(0, S.gren - dt);
     S.x += clamp(S.tx - S.x, -3 * dt, 3 * dt);
-    const boss = S.objs[S.objs.length - 1];
-    if (!(boss.alive && boss.z - S.z < 6)) S.z += AR_SPD * dt;
+    S.z += AR_SPD * dt;
+    if (S.z >= AR_L) { S.z = AR_L; S.fin = true; armyFx(S, fxOn, "決戦へ！", "#FFE14D"); return }
     S.cool -= dt;
     if (S.cool <= 0) {
-      S.cool = 1 / (Math.min(14, 2 + S.N * 0.12) * S.rate);
+      S.cool = 1 / (Math.min(14, 2 + Math.sqrt(S.N) * 0.9) * S.rate);
       const range = 38 * S.range; let tgt = null;
       for (const o of S.objs) {
         if (!o.alive || o.t === "gate") continue;
         const dz = o.z - S.z; if (dz < -1) continue; if (dz > range) break;
-        if (o.t === "boss" || Math.abs(o.x - S.x) < 0.42) { tgt = o; break }
+        if (Math.abs(o.x - S.x) < 0.42) { tgt = o; break }
       }
       if (tgt) {
-        const dmg = (2 + S.N / 10) * S.dmg;
-        if (tgt.t === "barrel") {
-          tgt.hp -= dmg;
-          if (tgt.hp <= 0) {
-            tgt.alive = false;
-            if (tgt.kind === "jeep") { S.rate *= 1.35; S.wpn.jeep = 1; armyFx(S, fxOn, "ジープ！連射アップ", "#FFE14D") }
-            else if (tgt.kind === "tank") { S.dmg *= 1.6; S.wpn.tank = 1; armyFx(S, fxOn, "戦車！攻撃力アップ", "#FFE14D") }
-            else if (tgt.kind === "heli") { S.range *= 1.35; S.dmg *= 1.2; S.wpn.heli = 1; armyFx(S, fxOn, "ヘリ！射程アップ", "#FFE14D") }
-            else if (tgt.kind === "plus") { const g = Math.round(tgt.hp0 / 2); S.N = Math.min(AR_MAX, S.N + g); armyFx(S, fxOn, `+${g}人`, "#7CF59A") }
-            else armyFx(S, fxOn, "爆弾をこわした", "#fff");
-          }
-        } else {
-          tgt.n -= dmg / 4;
-          if (tgt.n <= 0.5) { tgt.alive = false; if (tgt.t === "boss") { S.fin = true; S.score = Math.floor(S.N); armyFx(S, fxOn, "ボスをたおした！", "#FFE14D") } }
-        }
-        if (fxOn) S.shots.push({ x: S.x + (Math.random() - 0.5) * 0.2, tx: tgt.t === "boss" ? (Math.random() - 0.5) * 0.6 : tgt.x, tz: tgt.z, t: 0 });
+        const dmg = (2 + Math.sqrt(S.N) * 0.9) * S.dmg;
+        if (tgt.t === "barrel") { tgt.hp -= dmg; if (tgt.hp <= 0) armyBreak(S, tgt, fxOn) }
+        else { tgt.n -= dmg / 4; if (tgt.n <= 0.5) tgt.alive = false }
+        if (fxOn) S.shots.push({ x: S.x + (Math.random() - 0.5) * 0.2, tx: tgt.x, tz: tgt.z, t: 0 });
       }
     }
     for (const o of S.objs) {
       if (!o.alive) continue;
-      const dz = o.z - S.z; if (dz > 6.5) break; if (dz < -2) continue;
+      const dz = o.z - S.z; if (dz > 1.5) break; if (dz < -2) continue;
       if (o.t === "gate" && dz <= 0.3) {
         o.alive = false; const op = o.ops[S.x < 0 ? 0 : 1], before = S.N;
         S.N = op.k === "+" ? S.N + op.v : op.k === "×" ? S.N * op.v : op.k === "−" ? S.N - op.v : Math.floor(S.N / op.v);
@@ -1288,45 +1415,51 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
         S.N -= loss; armyFx(S, fxOn, o.kind === "bomb" ? `ドカン −${loss}` : `ぶつかった −${loss}`, "#FF8A80");
       } else if (o.t === "enemy" && dz <= 0.8 && Math.abs(o.x - S.x) < 0.6) {
         o.alive = false; const loss = Math.ceil(o.n); S.N -= loss; armyFx(S, fxOn, `たたかった −${loss}`, "#FF8A80");
-      } else if (o.t === "boss" && dz <= 6.2) {
-        const k = Math.min(S.N, o.n, dt * (20 + 0.6 * Math.max(S.N, o.n)));
-        S.N -= k; o.n -= k;
-        if (o.n <= 0.5) { o.alive = false; S.fin = true; S.score = Math.max(0, Math.floor(S.N)); armyFx(S, fxOn, "ボスをたおした！", "#FFE14D") }
       }
-      if (S.N < 1) { S.N = 0; S.dead = true; S.score = 0; break }
+      if (S.N < 1) { S.N = 0; S.dead = true; break }
     }
   }
   function armyAI(S) {
+    if (Math.random() < 0.02) armyGrenade(S, false);
     for (const o of S.objs) {
       if (!o.alive) continue; const dz = o.z - S.z; if (dz < 0) continue; if (dz > 30) break;
       if ((o.t === "enemy" && o.n > S.N * 0.5) || (o.t === "barrel" && o.kind === "bomb" && dz < 12)) { if (Math.abs(o.x - S.x) < 0.6) { S.tx = o.x > 0 ? -0.85 : 0.85; return } continue }
       if (o.t === "barrel") continue;
       if (o.t === "gate") {
         const val = (op) => (op.k === "+" ? S.N + op.v : op.k === "×" ? S.N * op.v : op.k === "−" ? S.N - op.v : S.N / op.v);
-        let side = val(o.ops[0]) > val(o.ops[1]) ? 0 : 1; if (Math.random() < 0.004) side = 1 - side;
-        if (o._ai == null) o._ai = Math.random() < 0.22 ? 1 - side : side;
+        const side = val(o.ops[0]) > val(o.ops[1]) ? 0 : 1;
+        if (o._ai == null) o._ai = Math.random() < 0.25 ? 1 - side : side;
         S.tx = o._ai === 0 ? -0.55 : 0.55; return;
       }
     }
   }
   ACTION.army = {
     shell() {
-      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("軍団ラン", "左右にドラッグして進む")}
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("軍団ラン", "強くして、最後にふたりで決戦")}
         <section class="card act" style="padding:12px"><canvas id="cv" aria-label="軍団ランの道"></canvas><div id="act-msg"></div>
-        <p class="muted">青いゲートで仲間がふえて、赤いゲートでへります。兵隊は自動でうつので、樽をこわすと武器が手に入ります（ジープ＝連射、戦車＝攻撃力、ヘリ＝射程）。赤い樽は爆弾。最後のボス軍団を倒して、残った人数が多いほうが勝ち。</p></section></section>`;
+        <div class="row" style="flex-wrap:nowrap" id="run-btns"><button class="gbtn big" id="b-gren" style="flex:1">手りゅう弾</button></div>
+        <div class="row" style="flex-wrap:nowrap" id="bat-btns" hidden><button class="gbtn big" id="b-charge" style="flex:1">突撃</button><button class="gbtn" id="b-shield" style="flex:1">盾</button><button class="gbtn" id="b-reinf" style="flex:1">援軍</button></div>
+        <p class="muted">道中：左右にドラッグして進む。青いゲートで仲間がふえて、赤いゲートでへります。兵隊は自動でうって、樽をこわすと武器（ジープ＝連射、戦車＝攻撃力、ヘリ＝射程）。赤い樽は爆弾。「手りゅう弾」は前の樽や敵を一気にこわせます（4秒ごと）。決戦：「突撃」で大ダメージ（3秒ごと）、「盾」で2秒間ダメージを大きく減らす（7秒ごと）、「援軍」は1回だけ人数が2割ふえる。${BATTLE_T}秒で多く残ったほうが勝ち。</p></section></section>`;
     },
     mount() {
-      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 1.45);
+      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 1.4);
       const S = armyNew(me.m.seed);
       let ph = me.s.res != null ? "done" : "idle", cd = 0, CS = null, lastSend = "";
-      if (me.s.res != null) { S.fin = true; S.score = me.s.res }
+      // 決戦の状態（自分の人数は自分で計算し、相手の人数・攻撃力・突撃の回数は相手から受けとる）
+      const B = { N: 0, atk: 1, t: 0, ch: 0, chDmg: 0, chCd: 0, shield: 0, shCd: 0, reinf: false, seenCh: null, flash: 0, hitFlash: 0, oppN: null };
+      const CB = { N: 0, atk: 1, chCd: 2, shield: 0, shCd: 4, reinf: false };
       let drag = null;
       cv.addEventListener("pointerdown", (e) => { e.preventDefault(); drag = { x: e.clientX, tx: S.tx, id: e.pointerId }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
       cv.addEventListener("pointermove", (e) => { if (drag && e.pointerId === drag.id) S.tx = clamp(drag.tx + ((e.clientX - drag.x) / cv.clientWidth) * 2.6, -1, 1) });
       const end = () => { drag = null }; cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+      const grenBtn = $("#b-gren"), chBtn = $("#b-charge"), shBtn = $("#b-shield"), rfBtn = $("#b-reinf");
+      holdBtn(grenBtn, () => { if (ph === "run") armyGrenade(S, true) });
+      holdBtn(chBtn, () => { if (ph === "battle" && B.chCd <= 0) { B.chCd = 3; B.chDmg = B.N * B.atk * 0.12; B.ch++; B.flash = 0.4 } });
+      holdBtn(shBtn, () => { if (ph === "battle" && B.shCd <= 0) { B.shCd = 7; B.shield = 2 } });
+      holdBtn(rfBtn, () => { if (ph === "battle" && !B.reinf) { B.reinf = true; B.N *= 1.2 } });
+      actKey = () => { if (ph === "run") armyGrenade(S, true); else if (ph === "battle") chBtn.dispatchEvent(new PointerEvent("pointerdown")) };
 
       const horizon = h * 0.1, crowdY = h * 0.8, RW = w * 0.42;
-      // 遠くの物も見やすいように、ふつうの遠近法よりゆっくり小さくする
       const P = (x, oz) => { const dz = oz - S.z + 6; if (dz < 0.8) return null; const p = 1 / (1 + (dz - 6) / 22); return { sx: w / 2 + x * RW * p, sy: horizon + (crowdY - horizon) * p, p } };
       function soldier(sx, sy, s, body, helmet, alpha) {
         c.globalAlpha = alpha;
@@ -1342,52 +1475,61 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
         pts.sort((a, b) => b[1] - a[1]);
         for (const [px, pz] of pts) { const q = P(px, pz); if (q) soldier(q.sx, q.sy, 13 * q.p, body, helmet, alpha) }
       }
-      function label(txt, sx, sy, size, fill) { bigText(c, txt, sx, sy, size, fill) }
+      const label = (txt, sx, sy, size, fill) => bigText(c, txt, sx, sy, size, fill);
       function vehicle(kind, sx, sy, s) {
         if (kind === "tank") { c.fillStyle = "#5B7FA6"; c.fillRect(sx - s, sy - s * 0.7, s * 2, s * 0.7); c.fillStyle = "#3E5E82"; c.fillRect(sx - s * 0.55, sy - s * 1.15, s * 1.1, s * 0.5); c.fillRect(sx - s * 0.1, sy - s * 1.6, s * 0.2, s * 0.6); c.fillStyle = "#2A2F3A"; c.fillRect(sx - s, sy - s * 0.2, s * 2, s * 0.25) }
         else if (kind === "heli") { c.fillStyle = "#3D7FE0"; c.fillRect(sx - s * 0.7, sy - s * 0.9, s * 1.4, s * 0.6); c.fillRect(sx + s * 0.6, sy - s * 0.75, s * 0.8, s * 0.18); c.fillStyle = "#222"; c.fillRect(sx - s * 1.2, sy - s * 1.05, s * 2.4, s * 0.08) }
         else if (kind === "jeep") { c.fillStyle = "#6E8E7A"; c.fillRect(sx - s, sy - s * 0.75, s * 2, s * 0.55); c.fillStyle = "#4C6655"; c.fillRect(sx - s * 0.5, sy - s * 1.1, s * 0.9, s * 0.4); c.fillStyle = "#222"; c.fillRect(sx - s * 0.85, sy - s * 0.25, s * 0.45, s * 0.3); c.fillRect(sx + s * 0.4, sy - s * 0.25, s * 0.45, s * 0.3) }
         else if (kind === "plus") { soldier(sx, sy, s * 1.2, "#2F7FE0", "#1E5FB8", 1); bigText(c, "+", sx + s * 0.8, sy - s * 1.4, Math.max(10, s), "#7CF59A") }
       }
-      function draw() {
+      const oppX = () => { const op = rtOppPeer(); return op ? op.presence.x : null };
+      function draw(ox) {
         c.fillStyle = "#C9D3DE"; c.fillRect(0, 0, w, h);
         c.fillStyle = "#AEB9C6"; c.fillRect(0, 0, w, horizon);
         const far = P(-1.15, S.z + 200), farR = P(1.15, S.z + 200), nl = P(-1.15, S.z - 5.1), nr = P(1.15, S.z - 5.1);
         c.fillStyle = "#6B7280"; c.beginPath(); c.moveTo(far.sx, far.sy); c.lineTo(farR.sx, farR.sy); c.lineTo(nr.sx, nr.sy); c.lineTo(nl.sx, nl.sy); c.fill();
         c.fillStyle = "rgba(255,255,255,.85)";
         for (let i = 0; i < 26; i++) { const zz = Math.floor(S.z / 8) * 8 + i * 8 - 4; const a = P(0, zz), b = P(0, zz + 3); if (a && b) { c.beginPath(); c.moveTo(a.sx - 2 * a.p, a.sy); c.lineTo(a.sx + 2 * a.p, a.sy); c.lineTo(b.sx + 2 * b.p, b.sy); c.lineTo(b.sx - 2 * b.p, b.sy); c.fill() } }
+        // 決戦の場所
+        const ar = P(-1.1, AR_L + 3), ar2 = P(1.1, AR_L + 3); if (ar && ar2) { c.fillStyle = "rgba(255,225,77,.85)"; c.fillRect(ar.sx, ar.sy - 3, ar2.sx - ar.sx, 5); label("決戦", w / 2, ar.sy - 14, Math.max(11, 24 * ar.p), "#FFE14D") }
         const items = [];
         for (const o of S.objs) { if (!o.alive) continue; const dz = o.z - S.z; if (dz < -1.5 || dz > 160) continue; items.push({ z: o.z, o }) }
-        const ox = oppX();
-        if (ox && ox.z != null && !ox.d) items.push({ z: ox.z - 0.01, ghost: ox });
+        const battle = ph === "battle" || ph === "bwait" || (ph === "done" && S.fin);
+        if (battle) { const n = B.oppN != null ? B.oppN : ox ? ox.N || 0 : 0; items.push({ z: AR_L + 12, foe: n }) }
+        else if (ox && ox.z != null && !ox.d) items.push({ z: ox.z - 0.01, ghost: ox });
         items.push({ z: S.z, me: true });
         items.sort((a, b) => b.z - a.z);
         for (const it of items) {
           if (it.me) {
-            if (!S.dead) {
-              const q = P(S.x, S.z);
-              c.strokeStyle = "#5BE36A"; c.lineWidth = 3; c.beginPath(); c.ellipse(q.sx, q.sy - 4, Math.min(w * 0.3, 18 + Math.sqrt(S.N) * 5), Math.min(40, 8 + Math.sqrt(S.N) * 1.6), 0, 0, 7); c.stroke();
-              if (S.wpn.heli) { const v = P(S.x + 0.42, S.z - 0.5); vehicle("heli", v.sx, v.sy - 70 * v.p * 0.5, 16) }
-              if (S.wpn.tank) { const v = P(S.x - 0.42, S.z - 0.8); vehicle("tank", v.sx, v.sy, 16) }
-              if (S.wpn.jeep) { const v = P(S.x + 0.45, S.z - 1.2); vehicle("jeep", v.sx, v.sy, 15) }
-              cluster(S.x, S.z, S.N, "#2F7FE0", "#1E5FB8", 1, 70);
-              label(String(Math.floor(S.N)), q.sx, q.sy - 24 - Math.sqrt(S.N) * 2.2, 26, "#fff");
-            }
+            const n = battle ? B.N || S.N : S.N; if (n < 1) continue;
+            const q = P(S.x, S.z);
+            c.strokeStyle = "#5BE36A"; c.lineWidth = 3; c.beginPath(); c.ellipse(q.sx, q.sy - 4, Math.min(w * 0.3, 18 + Math.sqrt(Math.min(n, 4000)) * 3), Math.min(40, 8 + Math.sqrt(Math.min(n, 4000)) * 1), 0, 0, 7); c.stroke();
+            if (S.wpn.heli) { const v = P(S.x + 0.42, S.z - 0.5); vehicle("heli", v.sx, v.sy - 35, 16) }
+            if (S.wpn.tank) { const v = P(S.x - 0.42, S.z - 0.8); vehicle("tank", v.sx, v.sy, 16) }
+            if (S.wpn.jeep) { const v = P(S.x + 0.45, S.z - 1.2); vehicle("jeep", v.sx, v.sy, 15) }
+            cluster(S.x, S.z, n, "#2F7FE0", "#1E5FB8", 1, 70);
+            label(fmtN(n), q.sx, q.sy - 50, 26, "#fff");
+            if (B.shield > 0) { c.strokeStyle = "rgba(127,200,255,.9)"; c.lineWidth = 4; c.beginPath(); c.arc(q.sx, q.sy - 20, 70, Math.PI, 0); c.stroke() }
+            continue;
+          }
+          if (it.foe != null) {
+            cluster(0, it.z, it.foe, "#E04A3F", "#A92C25", 1, 70);
+            const q = P(0, it.z); if (q) label(`${oppName().slice(0, 6)} ${fmtN(it.foe)}`, q.sx, q.sy - 60 * q.p - 6, 18, "#FFC2BC");
             continue;
           }
           if (it.ghost) {
             const g = it.ghost; cluster(g.x, g.z, g.N || 0, "#F08A3C", "#C2601E", 0.45, 25);
-            const q = P(g.x, g.z); if (q) label(`${oppName().slice(0, 5)} ${g.N || 0}`, q.sx, q.sy - 30 * q.p - 10, Math.max(11, 16 * Math.min(1, q.p)), "#FFD3B0");
+            const q = P(g.x, g.z); if (q) label(`${oppName().slice(0, 5)} ${fmtN(g.N || 0)}`, q.sx, q.sy - 30 * q.p - 10, Math.max(11, 16 * Math.min(1, q.p)), "#FFD3B0");
             continue;
           }
           const o = it.o;
           if (o.t === "gate") {
             for (let i = 0; i < 2; i++) {
               const a = P(i ? 0.05 : -1.12, o.z), b = P(i ? 1.12 : -0.05, o.z); if (!a || !b) continue;
-              const op = o.ops[i], good = op.k === "+" || op.k === "×", ph_ = 62 * a.p;
-              c.fillStyle = good ? "rgba(52,152,255,.55)" : "rgba(235,64,52,.55)"; c.fillRect(a.sx, a.sy - ph_, b.sx - a.sx, ph_);
-              c.strokeStyle = good ? "#BFE0FF" : "#FFC2BC"; c.lineWidth = Math.max(1, 2 * a.p); c.strokeRect(a.sx, a.sy - ph_, b.sx - a.sx, ph_);
-              label(`${op.k}${op.v}`, (a.sx + b.sx) / 2, a.sy - ph_ / 2, Math.max(10, 30 * a.p), "#fff");
+              const op = o.ops[i], good = op.k === "+" || op.k === "×", hh = 62 * a.p;
+              c.fillStyle = good ? "rgba(52,152,255,.55)" : "rgba(235,64,52,.55)"; c.fillRect(a.sx, a.sy - hh, b.sx - a.sx, hh);
+              c.strokeStyle = good ? "#BFE0FF" : "#FFC2BC"; c.lineWidth = Math.max(1, 2 * a.p); c.strokeRect(a.sx, a.sy - hh, b.sx - a.sx, hh);
+              label(`${op.k}${op.v}`, (a.sx + b.sx) / 2, a.sy - hh / 2, Math.max(10, 30 * a.p), "#fff");
             }
           } else if (o.t === "barrel") {
             const q = P(o.x, o.z); if (!q) continue;
@@ -1396,52 +1538,312 @@ input[type=text]:focus { outline: none; border-color: var(--sky) }
             c.fillStyle = o.kind === "bomb" ? "#9E2219" : "#8E5220"; c.fillRect(q.sx - bw / 2, q.sy - bh * 0.78, bw, bh * 0.07); c.fillRect(q.sx - bw / 2, q.sy - bh * 0.3, bw, bh * 0.07);
             label(String(Math.ceil(o.kind === "bomb" ? -o.hp : o.hp)), q.sx, q.sy - bh / 2, Math.max(9, bh * 0.45), "#fff");
             if (o.kind !== "bomb") vehicle(o.kind, q.sx, q.sy - bh, bw * 0.3);
-          } else if (o.t === "enemy" || o.t === "boss") {
-            if (o.t === "boss") { const q = P(0, o.z + 3); if (q) { c.fillStyle = "#8E3B3B"; c.fillRect(q.sx - RW * q.p * 0.9, q.sy - 70 * q.p, RW * q.p * 1.8, 70 * q.p); c.fillStyle = "#6E2A2A"; for (let i = -4; i <= 4; i += 2) c.fillRect(q.sx + i * RW * q.p * 0.2 - 6 * q.p, q.sy - 86 * q.p, 12 * q.p, 16 * q.p) } }
-            cluster(o.x, o.z, o.n, "#E04A3F", "#A92C25", 1, o.t === "boss" ? 80 : 40);
-            const q = P(o.x, o.z); if (q) label((o.t === "boss" ? "ボス " : "") + Math.ceil(o.n), q.sx, q.sy - 40 * q.p - 6, Math.max(11, 22 * Math.min(1.2, q.p)), "#FFC2BC");
+          } else if (o.t === "enemy") {
+            cluster(o.x, o.z, o.n, "#E04A3F", "#A92C25", 1, 40);
+            const q = P(o.x, o.z); if (q) label(String(Math.ceil(o.n)), q.sx, q.sy - 40 * q.p - 6, Math.max(11, 22 * Math.min(1.2, q.p)), "#FFC2BC");
           }
         }
         c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2;
         for (const s of S.shots) { const a = P(s.x, S.z + 0.5 + (s.tz - S.z) * s.t * 4), b = P(s.x + (s.tx - s.x) * s.t * 4, S.z + 2 + (s.tz - S.z) * s.t * 4); if (a && b) { c.beginPath(); c.moveTo(a.sx, a.sy - 10 * a.p); c.lineTo(b.sx, b.sy - 10 * b.p); c.stroke() } }
-        // 進み具合
+        for (const b of S.booms) { const q = P(b.x, b.z); if (q) { c.fillStyle = `rgba(255,170,40,${1 - b.t * 1.6})`; c.beginPath(); c.arc(q.sx, q.sy - 20 * q.p, (20 + b.t * 80) * q.p, 0, 7); c.fill() } }
+        if (B.flash > 0) { c.fillStyle = `rgba(255,225,77,${B.flash})`; c.fillRect(0, 0, w, h * 0.5) }
+        if (B.hitFlash > 0) { c.fillStyle = `rgba(255,60,40,${B.hitFlash * 0.6})`; c.fillRect(0, h * 0.5, w, h * 0.5) }
         c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, 8, w - 16, 10);
         c.fillStyle = "#46CBF3"; c.fillRect(8, 8, (w - 16) * clamp(S.z / AR_L, 0, 1), 10);
         if (ox && ox.z != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.z / AR_L, 0, 1) - 3, 4, 6, 18) }
         S.fx.forEach((f, i) => label(f.text, w / 2, h * 0.5 - f.t * 60 - i * 4, 24, f.col));
         if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.42, 64, "#FFE14D");
+        if (ph === "battle") bigText(c, `${Math.ceil(BATTLE_T - B.t)}`, w / 2, h * 0.36, 40, "#FFE14D");
         if (S.dead) bigText(c, "全滅…", w / 2, h * 0.42, 44, "#FF8A80");
-        else if (S.fin) bigText(c, `のこり ${S.score}人`, w / 2, h * 0.42, 36, "#FFE14D");
       }
-      function oppX() { const op = rtOppPeer(); return op ? op.presence.x : null }
+      function cpuRun(dt) {
+        if (!CS) CS = armyNew(me.m.seed);
+        if (ph !== "idle" && ph !== "count") CS.go = true;
+        if (CS.go && !CS.dead && !CS.fin) { armyAI(CS); armyStep(CS, dt, false) }
+        if ((CS.fin || CS.dead) && !CS.bat) { CS.bat = true; CB.N = CS.N; CB.atk = armyAtk(CS) }
+        cpuX({ z: r2(CS.z), x: r2(CS.x), N: Math.floor(CS.bat ? CB.N : CS.N), d: CS.dead ? 1 : 0, f: CS.fin || CS.dead ? 1 : 0, atk: r2(CB.atk) });
+        if (ph === "done" && CS.bat && cpu.s.res == null) cpuSet({ res: Math.floor(CS.dead ? 0 : CB.N) });
+      }
+      function battleStep(dt, ox) {
+        const vsCpu = cpuActive();
+        B.t += dt; B.chCd = Math.max(0, B.chCd - dt); B.shCd = Math.max(0, B.shCd - dt); B.shield = Math.max(0, B.shield - dt); B.flash = Math.max(0, B.flash - dt); B.hitFlash = Math.max(0, B.hitFlash - dt);
+        let oN, oAtk;
+        if (vsCpu) {
+          // コンピューターの決戦（こちらで計算する）
+          CB.chCd -= dt; CB.shCd -= dt; CB.shield = Math.max(0, CB.shield - dt);
+          if (CB.chCd <= 0 && Math.random() < dt * 1.5) { CB.chCd = 3; const dmg = CB.N * CB.atk * 0.12; B.N -= dmg * (B.shield > 0 ? 0.3 : 1); B.hitFlash = 0.4 }
+          if (CB.shCd <= 0 && B.flash > 0.3 && Math.random() < 0.5) { CB.shCd = 7; CB.shield = 2 }
+          if (!CB.reinf && CB.N < B.N * 0.8 && Math.random() < dt) { CB.reinf = true; CB.N *= 1.2 }
+          CB.N -= B.N * B.atk * 0.07 * dt * (CB.shield > 0 ? 0.3 : 1);
+          if (B.ch > (CB.seenCh || 0)) { CB.seenCh = B.ch; CB.N -= B.chDmg * (CB.shield > 0 ? 0.3 : 1) }
+          CB.N = Math.max(0, CB.N);
+          cpuX({ z: AR_L, x: 0, N: Math.floor(CB.N), f: 1, atk: r2(CB.atk) });
+          oN = CB.N; oAtk = CB.atk;
+        } else {
+          oN = ox ? ox.N || 0 : 0; oAtk = ox ? ox.atk || 1 : 1;
+          const ch = ox ? ox.ch || 0 : 0;
+          if (B.seenCh === null) B.seenCh = ch;
+          if (ch > B.seenCh) { B.seenCh = ch; B.N -= (ox.cd || 0) * (B.shield > 0 ? 0.3 : 1); B.hitFlash = 0.4 }
+        }
+        B.oppN = oN;
+        B.N -= oN * oAtk * 0.07 * dt * (B.shield > 0 ? 0.3 : 1);
+        B.N = Math.max(0, B.N);
+        const over = B.N <= 0 || oN <= 0 || B.t >= BATTLE_T;
+        if (over) { ph = "done"; setS({ res: Math.floor(B.N) }); if (vsCpu && cpu.s.res == null) cpuSet({ res: Math.floor(CB.N) }) }
+      }
       function frame(dt) {
-        const os = oppS();
+        const ox = oppX(), os = oppS();
+        if (cpuActive() && ph !== "battle") cpuRun(dt);
         if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3 }
         if (ph === "count") { cd -= dt; if (cd <= 0) ph = "run" }
         if (ph === "run") {
           if (keys.has("ArrowLeft") || keys.has("a")) S.tx = clamp(S.tx - 2.5 * dt, -1, 1);
           if (keys.has("ArrowRight") || keys.has("d")) S.tx = clamp(S.tx + 2.5 * dt, -1, 1);
           armyStep(S, dt, true);
-          if (S.dead || S.fin) { ph = "done"; setS({ res: S.score }) }
+          if (S.dead) { ph = "done"; setS({ res: 0 }) }
+          else if (S.fin) { ph = "bwait"; B.N = S.N; B.atk = armyAtk(S) }
         }
+        if (ph === "bwait") {
+          if (!opp()) { ph = "done"; setS({ res: Math.floor(B.N) }) }
+          else if (ox && ox.f) ph = "battle";
+          else if (ox && ox.d) { ph = "done"; setS({ res: Math.floor(B.N) }) }
+        }
+        if (ph === "battle") battleStep(dt, ox);
         S.shots = S.shots.filter((s) => (s.t += dt) < 0.25);
+        S.booms = S.booms.filter((b) => (b.t += dt) < 0.6);
         S.fx = S.fx.filter((f) => (f.t += dt) < 1.2);
-        if (cpuActive()) {
-          if (!CS) CS = armyNew(me.m.seed);
-          if (ph === "run" || ph === "done") CS.go = true;
-          if (CS.go && !CS.dead && !CS.fin) { armyAI(CS); armyStep(CS, dt, false); if (CS.dead || CS.fin) cpuSet({ res: CS.score }) }
-          cpuX({ z: r2(CS.z), x: r2(CS.x), N: Math.floor(CS.N), d: CS.dead ? 1 : 0 });
-        }
-        const out = { z: r2(S.z), x: r2(S.x), N: Math.floor(S.N), d: S.dead ? 1 : 0 }, js = JSON.stringify(out);
-        if (js !== lastSend) { lastSend = js; sendX(out) }
-        draw();
+        const inBattle = ph === "battle" || ph === "bwait";
+        const out = inBattle || (ph === "done" && S.fin)
+          ? { z: AR_L, x: 0, N: Math.floor(B.N), f: 1, atk: r2(B.atk), ch: B.ch, cd: Math.round(B.chDmg) }
+          : { z: r2(S.z), x: r2(S.x), N: Math.floor(S.N), d: S.dead ? 1 : 0 };
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        $("#run-btns").hidden = inBattle; $("#bat-btns").hidden = !inBattle;
+        grenBtn.disabled = ph !== "run" || S.gren > 0; grenBtn.textContent = S.gren > 0 ? `手りゅう弾 ${Math.ceil(S.gren)}` : "手りゅう弾";
+        chBtn.disabled = ph !== "battle" || B.chCd > 0; chBtn.textContent = B.chCd > 0 ? `突撃 ${Math.ceil(B.chCd)}` : "突撃";
+        shBtn.disabled = ph !== "battle" || B.shCd > 0; shBtn.textContent = B.shCd > 0 ? `盾 ${Math.ceil(B.shCd)}` : "盾";
+        rfBtn.disabled = ph !== "battle" || B.reinf; rfBtn.textContent = B.reinf ? "援軍ずみ" : "援軍";
+        draw(ox);
         if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() ? "ふたりとも押すと同時にスタート" : "押すとスタート"}</p>`);
         else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+        else if (ph === "bwait") setMsg(`<p class="wait">${esc(oppName())}が決戦の場所に来るのを待っています</p>`);
         else if (ph === "done") {
-          const mine = me.s.res ?? S.score ?? 0;
-          if (!opp()) setMsg(`<p class="verdict good">のこり ${mine}人</p>${againBtns("army")}`);
-          else if (os && os.res != null) setMsg(`<p class="verdict ${mine >= os.res ? "good" : "bad"}">${mine > os.res ? "あなたの勝ち！" : mine < os.res ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${mine}人 対 ${os.res}人</p>${againBtns("army")}`);
-          else setMsg(`<p class="wait">のこり ${mine}人。${esc(oppName())}はまだ戦っています</p>`);
+          const mine = me.s.res ?? 0;
+          if (!opp()) setMsg(`<p class="verdict good">のこり ${fmtN(mine)}人</p>${againBtns("army")}`);
+          else if (os && os.res != null) {
+            const win = mine > 0 && (os.res <= 0 || mine > os.res), lose = mine <= 0 && os.res > 0 || (mine > 0 && os.res > mine);
+            setMsg(`<p class="verdict ${win ? "good" : lose ? "bad" : ""}">${win ? "あなたの勝ち！" : lose ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${fmtN(mine)} 対 ${fmtN(os.res)}</p>${againBtns("army")}`);
+          } else setMsg(`<p class="wait">のこり ${fmtN(mine)}人。${esc(oppName())}の結果を待っています</p>`);
+        } else setMsg("");
+      }
+      return loop(frame);
+    },
+  };
+  // ----- カートレース -----
+  // 3周レース。自分のカートは自分の画面で動かし、コンピューターのカートは先に始めた人(ホスト)が動かす。
+  // 投げたアイテム（バナナ・こうら）は投げた人の画面が持ち主。当たった側が「当たった」を送り、持ち主が消す。
+  const KT_LAPS = 3, KT_VMAX = 250, KT_RW = 46;
+  const KT_ITEMS = { mush: "キノコ", banana: "バナナ", shell: "こうら", star: "スター" };
+  const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"]];
+  function kartTrack() {
+    const P = [[300, 250], [800, 180], [1250, 260], [1420, 520], [1250, 760], [950, 700], [750, 850], [900, 1050], [600, 1180], [280, 1050], [200, 700]];
+    const out = [], n = P.length, SEG = 40;
+    for (let i = 0; i < n; i++) {
+      const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+      for (let j = 0; j < SEG; j++) {
+        const t = j / SEG, t2 = t * t, t3 = t2 * t;
+        const f = (a, b, c2, d) => 0.5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3);
+        out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
+    }
+    return out;
+  }
+  ACTION.kart = {
+    shell() {
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("カートレース", `${KT_LAPS}周で先にゴールしたら勝ち`)}
+        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="レースのコース"></canvas><div id="act-msg"></div>
+        <div class="row" style="flex-wrap:nowrap"><button class="gbtn big" id="k-left" style="flex:1">◀</button><button class="gbtn" id="k-item" style="flex:1;font-size:13px">アイテム</button><button class="gbtn" id="k-drift" style="flex:1;font-size:13px">ドリフト</button><button class="gbtn big" id="k-right" style="flex:1">▶</button></div>
+        <p class="muted">アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ。虹色の？箱でアイテム：キノコ（ダッシュ）・スター（無敵で速い）・バナナ（後ろに置く）・こうら（前にとばす）。芝生は遅くなります。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
+    },
+    mount() {
+      const host = isFirst();
+      const cv = $("#cv"); const { c, w, h } = canvasFor(cv, 1.2);
+      const TR = kartTrack(), NS = TR.length, sc = w / 330;
+      const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
+      const slot = (n) => { const i = NS - 8 - Math.floor(n / 2) * 14; const [nx, ny, tx, ty] = norm(i); const off = n % 2 ? 18 : -18; return { x: TR[i][0] + nx * off, y: TR[i][1] + ny * off, ang: Math.atan2(ty, tx), idx: i } };
+      function nearest(x, y, guess) {
+        let best = guess, bd = 1e12;
+        const scan = (from, to) => { for (let j = from; j <= to; j++) { const i = ((j % NS) + NS) % NS; const d = (TR[i][0] - x) ** 2 + (TR[i][1] - y) ** 2; if (d < bd) { bd = d; best = i } } };
+        if (guess == null) scan(0, NS - 1); else scan(guess - 25, guess + 45);
+        return [best, Math.sqrt(bd)];
+      }
+      const BOXES = []; for (const bi of [70, 200, 320]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0 }) }
+      const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, driftT: 0, item: null, fin: 0, col, prog: 0 });
+      const meSlot = host ? 0 : 1;
+      const K = newKart(meSlot, 0);
+      let cpus = [];
+      const nCpu = () => (realOppPeer() ? 2 : 3);
+      function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = 0.86 + Math.random() * 0.08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
+      if (host) makeCpus();
+      let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "";
+      let myIt = [], itSeq = 0, hits = [], drift = false, lastDrift = false, msg = null, guestCpus = [], ownCpuIt = [];
+      const removedByHit = new Set();
+      const L = holdBtn($("#k-left")), R = holdBtn($("#k-right"));
+      const D = holdBtn($("#k-drift"));
+      const itemBtn = $("#k-item");
+      const useItem = (kk, owner) => {
+        if (!kk.item || ph !== "race") return;
+        const it = kk.item; kk.item = null;
+        if (it === "mush") kk.boost = 1.3;
+        else if (it === "star") kk.star = 4.5;
+        else if (it === "banana") owner.push({ id: `${cid}-${++itSeq}`, k: "b", x: kk.x - Math.cos(kk.ang) * 20, y: kk.y - Math.sin(kk.ang) * 20, vx: 0, vy: 0, life: 40, from: kk, t: 0 });
+        else if (it === "shell") owner.push({ id: `${cid}-${++itSeq}`, k: "s", x: kk.x + Math.cos(kk.ang) * 18, y: kk.y + Math.sin(kk.ang) * 18, vx: Math.cos(kk.ang) * 440, vy: Math.sin(kk.ang) * 440, life: 2.8, from: kk, t: 0 });
+      };
+      holdBtn(itemBtn, () => useItem(K, myIt));
+      actKey = () => useItem(K, myIt);
+      const say = (text, col) => { msg = { text, col, t: 1.3 } };
+      function rankOf(kk, all) { return 1 + all.filter((o) => o !== kk && (o.fin && (!kk.fin || o.fin < kk.fin) || (!o.fin && !kk.fin && o.prog > kk.prog))).length }
+      function pickItem(kk, rank, total) {
+        const r = Math.random(), back = (rank - 1) / Math.max(1, total - 1);
+        return back > 0.6 ? (r < 0.4 ? "star" : r < 0.75 ? "mush" : "shell") : back > 0.3 ? (r < 0.4 ? "shell" : r < 0.7 ? "mush" : "banana") : (r < 0.5 ? "banana" : r < 0.8 ? "shell" : "mush");
+      }
+      function physics(kk, dt, steer, driftOn) {
+        const [idx, dd] = nearest(kk.x, kk.y, kk.idx);
+        const prev = kk.idx; kk.idx = idx;
+        if (prev > NS * 0.8 && idx < NS * 0.2) kk.lap++; else if (prev < NS * 0.2 && idx > NS * 0.8) kk.lap--;
+        kk.prog = kk.lap * NS + idx;
+        const off = dd > KT_RW;
+        kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt);
+        if (kk.fin) { kk.v *= Math.pow(0.3, dt); }
+        else if (kk.spin > 0) { kk.v *= Math.pow(0.15, dt); kk.ang += 11 * dt }
+        else {
+          const vm = KT_VMAX * (off && kk.star <= 0 ? 0.45 : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
+          kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
+          const tr = (driftOn ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1);
+          kk.ang += steer * tr * dt;
+          if (driftOn && Math.abs(steer) > 0.3) kk.driftT += dt; else { if (kk.driftT > 0.9) { kk.boost = Math.max(kk.boost, 0.9); if (kk === K) say("ダッシュ！", "#FFE14D") } kk.driftT = 0 }
+        }
+        const slide = driftOn && kk.spin <= 0 ? 0.88 : 1;
+        kk.x += Math.cos(kk.ang) * kk.v * dt * slide; kk.y += Math.sin(kk.ang) * kk.v * dt * slide;
+        // ？箱
+        for (const b of BOXES) { if (b.re > 0) continue; if (Math.hypot(b.x - kk.x, b.y - kk.y) < 15 && !kk.item && !kk.fin) { b.re = 3; return "box" } }
+        return null;
+      }
+      function hitTest(kk, list, isOwn) {
+        for (const p of list) {
+          if (p.dead || removedByHit.has(p.id)) continue;
+          if (isOwn && p.from === kk && p.t < 0.5) continue;
+          if (Math.hypot(p.x - kk.x, p.y - kk.y) < 14) {
+            if (kk.star <= 0) { kk.spin = 1.1; if (kk === K) say(p.k === "b" ? "バナナでスリップ！" : "こうらが当たった！", "#FF8A80") }
+            if (isOwn) p.dead = true; else { hits.push(p.id); if (hits.length > 16) hits.shift(); removedByHit.add(p.id) }
+          }
+        }
+      }
+      function moveIt(list, dt) { for (const p of list) { p.t += dt; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) p.dead = true } return list.filter((p) => !p.dead) }
+      function foreignItems(ox, age) { if (!ox || !ox.it) return []; return ox.it.map((a) => ({ id: a[0], k: a[1], x: a[2] + a[4] * age, y: a[3] + a[5] * age, vx: a[4], vy: a[5] })) }
+      const packIt = (list) => list.map((p) => [p.id, p.k, Math.round(p.x), Math.round(p.y), Math.round(p.vx), Math.round(p.vy)]);
+      function cpuDrive(kk, dt, all) {
+        if (ph !== "race" && ph !== "done") return;
+        if (kk.fin) { physics(kk, dt, 0, false); return }
+        const ti = (kk.idx + 14) % NS, tx = TR[ti][0] - kk.x, ty = TR[ti][1] - kk.y;
+        let da = Math.atan2(ty, tx) - kk.ang; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        const leader = Math.max(...all.map((o) => o.prog));
+        kk.skill = clamp((kk.skill0 || (kk.skill0 = kk.skill)) + (leader - kk.prog > 60 ? 0.07 : 0), 0.8, 1.02);
+        const r = physics(kk, dt, clamp(da * 2.2, -1, 1), false);
+        if (r === "box") { kk.item = pickItem(kk, rankOf(kk, all), all.length); kk.useAt = raceT + 1 + Math.random() * 2.5 }
+        if (kk.item && raceT > kk.useAt) useItem(kk, ownCpuIt);
+      }
+      // 描画
+      function drawKart(kk, alpha) {
+        const [b1, b2] = KT_COLORS[kk.col] || KT_COLORS[0];
+        c.save(); c.globalAlpha = alpha; c.translate(kk.x, kk.y); c.rotate(kk.ang);
+        c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(-10, -6, 22, 14);
+        c.fillStyle = "#222"; c.fillRect(-9, -9, 6, 4); c.fillRect(-9, 5, 6, 4); c.fillRect(5, -8, 5, 3); c.fillRect(5, 5, 5, 3);
+        c.fillStyle = b2; c.fillRect(-10, -6, 21, 12); c.fillStyle = b1; c.fillRect(-8, -5, 17, 10);
+        c.fillStyle = "#EDBE8F"; c.beginPath(); c.arc(-2, 0, 4.2, 0, 7); c.fill(); c.fillStyle = b2; c.beginPath(); c.arc(-3, 0, 4.4, Math.PI / 2, Math.PI * 1.5); c.fill();
+        if (kk.star > 0) { c.strokeStyle = `hsl(${(performance.now() / 3) % 360},90%,60%)`; c.lineWidth = 3; c.strokeRect(-12, -8, 25, 16) }
+        c.restore();
+      }
+      function draw(allKarts, items) {
+        c.fillStyle = "#58B04A"; c.fillRect(0, 0, w, h);
+        c.save();
+        c.translate(w / 2, h * 0.7); c.scale(sc, sc); c.rotate(-K.ang - Math.PI / 2); c.translate(-K.x, -K.y);
+        c.fillStyle = "#4E9F42"; for (let gx = Math.floor((K.x - 500) / 80) * 80; gx < K.x + 500; gx += 80) for (let gy = Math.floor((K.y - 500) / 80) * 80; gy < K.y + 500; gy += 80) if (((gx + gy) / 80) % 2 === 0) c.fillRect(gx, gy, 80, 80);
+        const path = () => { c.beginPath(); c.moveTo(TR[0][0], TR[0][1]); for (let i = 1; i < NS; i++) c.lineTo(TR[i][0], TR[i][1]); c.closePath() };
+        c.lineJoin = "round";
+        path(); c.strokeStyle = "#fff"; c.lineWidth = KT_RW * 2 + 10; c.stroke();
+        path(); c.strokeStyle = "#E23B2E"; c.setLineDash([18, 18]); c.lineWidth = KT_RW * 2 + 10; c.stroke(); c.setLineDash([]);
+        path(); c.strokeStyle = "#6E6E78"; c.lineWidth = KT_RW * 2; c.stroke();
+        path(); c.strokeStyle = "rgba(255,255,255,.55)"; c.setLineDash([14, 22]); c.lineWidth = 2; c.stroke(); c.setLineDash([]);
+        // スタートライン
+        { const [nx, ny] = norm(0); for (let j = -5; j < 5; j++) for (let r = 0; r < 2; r++) { c.fillStyle = (j + r) % 2 ? "#fff" : "#111"; const px = TR[0][0] + nx * j * 9.2, py = TR[0][1] + ny * j * 9.2; c.save(); c.translate(px, py); c.rotate(Math.atan2(ny, nx)); c.fillRect(0, r * 5 - 5, 9.2, 5); c.restore() } }
+        for (const b of BOXES) { if (b.re > 0) continue; c.save(); c.translate(b.x, b.y); c.rotate(performance.now() / 600); c.fillStyle = `hsl(${(performance.now() / 8 + b.x) % 360},85%,60%)`; c.fillRect(-7, -7, 14, 14); c.restore(); c.save(); c.translate(b.x, b.y); c.rotate(K.ang + Math.PI / 2); c.fillStyle = "#fff"; c.font = `bold 11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", 0, 1); c.restore() }
+        for (const p of items) { if (p.dead) continue; if (p.k === "b") { c.fillStyle = "#F4D03F"; c.beginPath(); c.ellipse(p.x, p.y, 7, 4, 0.6, 0, 7); c.fill(); c.strokeStyle = "#8a6d00"; c.lineWidth = 1; c.stroke() } else { c.fillStyle = "#2FA84F"; c.beginPath(); c.arc(p.x, p.y, 6, 0, 7); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(p.x, p.y, 3, 0, 7); c.fill() } }
+        allKarts.slice().sort((a, b) => (a === K) - (b === K)).forEach((kk) => drawKart(kk, 1));
+        c.restore();
+        // 小さい地図
+        const mw = 86, mh = 70, mx = w - mw - 6, my = 6;
+        c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(mx, my, mw, mh);
+        const ms = Math.min((mw - 8) / 1300, (mh - 8) / 1050);
+        c.strokeStyle = "#ddd"; c.lineWidth = 2; c.beginPath(); TR.forEach((p, i) => { const X = mx + 4 + (p[0] - 180) * ms, Y = my + 4 + (p[1] - 160) * ms; i ? c.lineTo(X, Y) : c.moveTo(X, Y) }); c.closePath(); c.stroke();
+        for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(mx + 4 + (kk.x - 180) * ms, my + 4 + (kk.y - 160) * ms, kk === K ? 4 : 3, 0, 7); c.fill() }
+        // 表示
+        const rk = rankOf(K, allKarts);
+        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 6, 96, 48);
+        c.font = `22px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 12, 22);
+        c.font = `13px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}周`, 12, 44);
+        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 58, 96, 24); c.font = `13px ${DISP}`; c.fillStyle = K.item ? "#7CF59A" : "#aaa"; c.fillText(K.item ? KT_ITEMS[K.item] : "アイテムなし", 12, 70);
+        if (K.driftT > 0.9) { c.fillStyle = "#FFB020"; c.fillRect(w / 2 - 30, h - 16, 60, 6) } else if (K.driftT > 0) { c.fillStyle = "rgba(255,255,255,.7)"; c.fillRect(w / 2 - 30, h - 16, 60 * (K.driftT / 0.9), 6) }
+        if (msg) bigText(c, msg.text, w / 2, h * 0.3, 24, msg.col);
+        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.4, 64, "#FFE14D");
+        if (K.fin) bigText(c, `${me.s.rk || rk}位でゴール！`, w / 2, h * 0.4, 34, "#FFE14D");
+      }
+      function frame(dt) {
+        const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
+        const age = op ? Math.min(0.2, Math.max(0, (Date.now() - op.updatedAt) / 1000)) : 0;
+        if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3; if (host) makeCpus() }
+        if (ph === "count") { cd -= dt; if (cd <= 0) ph = "race" }
+        if (ph === "race" || ph === "done") raceT += dt;
+        for (const b of BOXES) b.re = Math.max(0, b.re - dt);
+        // 自分のカート
+        let steer = 0; if (L.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (R.down || keys.has("ArrowRight") || keys.has("d")) steer += 1;
+        drift = D.down || keys.has("Shift");
+        if (ph === "race" || ph === "done") {
+          const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
+          if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); say(`${KT_ITEMS[K.item]}をゲット！`, "#7CF59A") }
+          if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
+        }
+        // あいてのカート（表示用）
+        let oppKart = null;
+        if (ox && ox.k) { const a = ox.k; oppKart = { x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: 1, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], item: null } }
+        // コンピューター
+        if (host) {
+          const all = [K, ...cpus, ...(oppKart ? [oppKart] : [])];
+          for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT }
+        } else if (ox && ox.ck) {
+          guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7] }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
+        }
+        // アイテム
+        myIt = moveIt(myIt, dt); ownCpuIt = moveIt(ownCpuIt, dt);
+        const foreign = foreignItems(ox, age);
+        const oppHits = new Set(ox && ox.hit ? ox.hit : []);
+        myIt = myIt.filter((p) => !oppHits.has(p.id)); ownCpuIt = ownCpuIt.filter((p) => !oppHits.has(p.id));
+        hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
+        if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
+        const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
+        if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000), rk: rankOf(K, allKarts) });
+        if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
+        itemBtn.textContent = K.item ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item;
+        const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
+        if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0]);
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        draw(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))]);
+        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート" : "押すとスタート"}</p>`);
+        else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+        else if (ph === "done" && me.s.res != null) {
+          const mine = me.s.rk, t = (me.s.res / 1000).toFixed(1);
+          if (realOppPeer() && os && os.res != null) setMsg(`<p class="verdict ${mine < os.rk ? "good" : "bad"}">${mine < os.rk ? "あなたの勝ち！" : `${esc(oppName())}の勝ち！`}　あなた${mine}位・${esc(oppName())}${os.rk}位</p>${againBtns("kart")}`);
+          else if (realOppPeer()) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
+          else setMsg(`<p class="verdict good">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
         } else setMsg("");
       }
       return loop(frame);
