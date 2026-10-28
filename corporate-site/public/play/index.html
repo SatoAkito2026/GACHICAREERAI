@@ -210,6 +210,25 @@ html.playing .stick { width: 120px; height: 120px }
 html.playing .card.act > .ctrl, html.playing .card.act > .row, html.playing .card.act > .mash { margin-top: auto }
 html.playing .card.act > .row + .row { margin-top: 0 }
 html.playing .gbtn { padding-block: 20px }
+/* 全画面のゲーム（カート）：画面いっぱいに描いて、ボタンは下の両はしに半透明で重ねる */
+html.playing.full .wrap { padding: 0; max-width: none }
+html.playing.full #app > section > .row:first-child { position: fixed; z-index: 10; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); gap: 6px; flex-wrap: nowrap }
+html.playing.full #app > section > .row:first-child .grow { display: none }
+html.playing.full #app > section > .row:first-child .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px }
+html.playing.full .card.act { position: fixed; inset: 0; z-index: 1 }
+html.playing.full .card.act canvas { border-radius: 0 }
+.kpad { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;
+  padding: 0 max(12px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)) }
+.kpad .grp { display: flex; gap: 12px; align-items: flex-end; pointer-events: auto }
+.kpad .grp.col { flex-direction: column; align-items: center }
+.kbtn { width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); background: rgba(20,18,42,.32); color: #fff; font-family: var(--display); font-size: 24px;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; padding: 0; display: grid; place-items: center }
+.kbtn.small { width: 62px; height: 62px; font-size: 12px }
+.kbtn:active { background: rgba(255,255,255,.35) }
+.kbtn:disabled { opacity: .4 }
+.stages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.chipbtn { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 6px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer }
+.chipbtn.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, var(--surface)) }
 
 @media (prefers-reduced-motion: reduce) { .wait::after { animation: none } .game:active { transform: none } }
 </style>
@@ -302,9 +321,9 @@ html.playing .gbtn { padding-block: 20px }
     if (room) room.presence({ cid, n: myName, m: me.m, s: me.s }).catch(() => {});
   }
   function setS(patch) { me.s = Object.assign({}, me.s, patch); push(); render() }
-  function startMatch(g) {
+  function startMatch(g, extra) {
     const e = Date.now();
-    me.m = { g, e, host: cid, seed: Math.floor(Math.random() * 1e9) };
+    me.m = Object.assign({ g, e, host: cid, seed: Math.floor(Math.random() * 1e9) }, extra || {});
     me.s = { e };
     ui.draft = ""; ui.hbEntry = "";
     push(); render(); window.scrollTo({ top: 0 });
@@ -442,6 +461,7 @@ html.playing .gbtn { padding-block: 20px }
   function render() {
     const playing = !ui.renaming && !!ACTION[me.m.g];
     document.documentElement.classList.toggle("playing", playing);
+    document.documentElement.classList.toggle("full", playing && !!ACTION[me.m.g].full);
     if (!playing) document.documentElement.classList.remove("howto");
     const active = document.activeElement;
     const focusId = active && active.id;
@@ -1693,8 +1713,44 @@ html.playing .gbtn { padding-block: 20px }
   const KT_LAPS = 3, KT_VMAX = 250, KT_RW = 46;
   const KT_ITEMS = { mush: "キノコ", banana: "バナナ", shell: "こうら", star: "スター" };
   const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"]];
-  function kartTrack() {
-    const P = [[300, 250], [800, 180], [1250, 260], [1420, 520], [1250, 760], [950, 700], [750, 850], [900, 1050], [600, 1180], [280, 1050], [200, 700]];
+  const KT_STAGES = [
+    { name: "グリーンサーキット", pts: [[300, 250], [800, 180], [1250, 260], [1420, 520], [1250, 760], [950, 700], [750, 850], [900, 1050], [600, 1180], [280, 1050], [200, 700]],
+      off: ["#58B04A", "#4E9F42"], road: "#76767F", curb: ["#fff", "#E23B2E"], line: "rgba(255,255,255,.7)", sky: [[110, 170, 235], [168, 214, 240]], hill: ["#8FB8D8", "#3E9A4C"], slow: 0.45 },
+    { name: "サンセットビーチ", pts: [[250, 300], [600, 200], [1000, 260], [1400, 220], [1450, 600], [1150, 700], [1300, 1000], [1000, 1180], [600, 1050], [350, 1150], [200, 800]],
+      off: ["#E9D29C", "#DFC48A"], road: "#8A7F74", curb: ["#fff", "#2BA7D8"], line: "rgba(255,255,255,.6)", sky: [[250, 140, 90], [255, 214, 160]], hill: ["#E59B7A", "#2E9AA8"], slow: 0.5 },
+    { name: "スノーマウンテン", pts: [[300, 200], [1300, 200], [1450, 450], [1100, 500], [1350, 800], [1300, 1150], [900, 1000], [500, 1180], [200, 950], [450, 650], [200, 450]],
+      off: ["#F2F6FA", "#E1EAF2"], road: "#5E6670", curb: ["#fff", "#2E6FD0"], line: "rgba(255,255,255,.75)", sky: [[150, 180, 215], [225, 236, 246]], hill: ["#C7D5E6", "#F7FBFF"], slow: 0.4 },
+    { name: "ナイトシティ", pts: [[250, 250], [700, 400], [1100, 180], [1450, 400], [1250, 650], [1450, 950], [1050, 1200], [800, 900], [500, 1150], [200, 900], [400, 600]],
+      off: ["#1A1E3A", "#22284A"], road: "#3A3A4A", curb: ["#FF3FD0", "#33E6FF"], line: "rgba(200,220,255,.45)", sky: [[10, 12, 40], [60, 40, 110]], hill: ["#2B2560", "#3E3480"], slow: 0.45 },
+  ];
+  // アイテムの絵（ルーレット・持っているアイテムの表示・コースの上で使う）
+  function kartItemIcon(c, k, x, y, r) {
+    c.save(); c.translate(x, y);
+    if (k === "mush") {
+      c.fillStyle = "#F4E2C6"; c.fillRect(-r * 0.42, -r * 0.05, r * 0.84, r * 0.75);
+      c.fillStyle = "#111"; c.fillRect(-r * 0.22, r * 0.12, r * 0.1, r * 0.22); c.fillRect(r * 0.12, r * 0.12, r * 0.1, r * 0.22);
+      c.fillStyle = "#E23B2E"; c.beginPath(); c.arc(0, 0, r * 0.82, Math.PI, 0); c.fill();
+      c.fillStyle = "#fff"; for (const [px, py, pr] of [[0, -0.5, 0.2], [-0.5, -0.22, 0.16], [0.5, -0.22, 0.16]]) { c.beginPath(); c.arc(px * r, py * r, pr * r, 0, 7); c.fill() }
+    } else if (k === "banana") {
+      c.rotate(-0.5); c.fillStyle = "#F7D23E"; c.beginPath(); c.arc(0, -r * 0.35, r * 0.85, 0.35, Math.PI - 0.35); c.arc(0, -r * 0.95, r * 1.2, Math.PI - 0.55, 0.55, true); c.fill();
+      c.fillStyle = "#6B4A1A"; c.fillRect(r * 0.62, -r * 0.05, r * 0.16, r * 0.2); c.fillRect(-r * 0.78, -r * 0.05, r * 0.16, r * 0.2);
+      c.strokeStyle = "rgba(160,110,20,.6)"; c.lineWidth = Math.max(1, r * 0.06); c.beginPath(); c.arc(0, -r * 0.35, r * 0.6, 0.6, Math.PI - 0.6); c.stroke();
+    } else if (k === "shell") {
+      c.fillStyle = "#fff"; c.beginPath(); c.ellipse(0, r * 0.25, r * 0.85, r * 0.42, 0, 0, 7); c.fill();
+      c.fillStyle = "#24A148"; c.beginPath(); c.arc(0, r * 0.12, r * 0.8, Math.PI, 0); c.fill();
+      c.strokeStyle = "#E9F7EC"; c.lineWidth = Math.max(1, r * 0.08);
+      c.beginPath(); c.moveTo(-r * 0.32, r * 0.1); c.lineTo(-r * 0.2, -r * 0.4); c.lineTo(r * 0.2, -r * 0.4); c.lineTo(r * 0.32, r * 0.1); c.closePath(); c.stroke();
+      c.beginPath(); c.moveTo(-r * 0.2, -r * 0.4); c.lineTo(-r * 0.62, -r * 0.2); c.moveTo(r * 0.2, -r * 0.4); c.lineTo(r * 0.62, -r * 0.2); c.stroke();
+      c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.ellipse(-r * 0.3, -r * 0.35, r * 0.18, r * 0.1, -0.5, 0, 7); c.fill();
+    } else if (k === "star") {
+      c.fillStyle = "#FFD23A"; c.strokeStyle = "#D99A00"; c.lineWidth = Math.max(1, r * 0.08); c.beginPath();
+      for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? r * 0.42 : r * 0.95; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) }
+      c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#111"; c.fillRect(-r * 0.2, -r * 0.18, r * 0.1, r * 0.26); c.fillRect(r * 0.1, -r * 0.18, r * 0.1, r * 0.26);
+    }
+    c.restore();
+  }
+  function kartTrack(P) {
     const out = [], n = P.length, SEG = 40;
     for (let i = 0; i < n; i++) {
       const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
@@ -1709,17 +1765,22 @@ html.playing .gbtn { padding-block: 20px }
   ACTION.kart = {
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("カートレース", `${KT_LAPS}周で先にゴールしたら勝ち`)}
-        <section class="card act" style="padding:12px"><canvas id="cv" aria-label="レースのコース"></canvas><div id="act-msg"></div>
-        <div class="row" style="flex-wrap:nowrap"><button class="gbtn big" id="k-left" style="flex:1">◀</button><button class="gbtn" id="k-item" style="flex:1;font-size:13px">アイテム</button><button class="gbtn" id="k-drift" style="flex:1;font-size:13px">ドリフト</button><button class="gbtn big" id="k-right" style="flex:1">▶</button></div>
-        <p class="muted">アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ。虹色の？箱でアイテム：キノコ（ダッシュ）・スター（無敵で速い）・バナナ（後ろに置く）・こうら（前にとばす）。芝生は遅くなります。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="レースのコース"></canvas><div id="act-msg"></div>
+        <div class="kpad"><div class="grp"><button class="kbtn" id="k-left" aria-label="左へ">◀</button><button class="kbtn" id="k-right" aria-label="右へ">▶</button></div>
+          <div class="grp col"><button class="kbtn small" id="k-item">アイテム</button><button class="kbtn" id="k-drift" style="font-size:14px">ドリフト</button></div></div>
+        <p class="muted">ステージはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ。虹色の？箱でアイテム：キノコ（ダッシュ）・スター（無敵で速い）・バナナ（後ろに置く）・こうら（前にとばす）。芝生は遅くなります。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
     },
+    full: true,
     mount() {
       const host = isFirst();
+      const ST = KT_STAGES[me.m.stage || 0] || KT_STAGES[0];
       const cv = $("#cv");
-      // ゲーム中は画面の残りいっぱいに広げる（奥行きの画面は縦横の比がちがっても描ける）
+      // ゲーム中は画面いっぱいに広げる（奥行きの画面は縦横の比がちがっても描ける）
       const ab = isPlaying() ? availBox(cv) : null;
-      const { c, w, h } = canvasFor(cv, ab ? clamp(ab.h / ab.w, 1.05, 1.75) : 1.05);
-      const TR = kartTrack(), NS = TR.length, sc = w / 330;
+      const { c, w, h } = canvasFor(cv, ab ? clamp(ab.h / ab.w, 1.05, 2.6) : 1.05);
+      const safeTop = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
+      const TR = kartTrack(ST.pts), NS = TR.length;
+      const bx0 = Math.min(...TR.map((p) => p[0])), by0 = Math.min(...TR.map((p) => p[1])), bx1 = Math.max(...TR.map((p) => p[0])), by1 = Math.max(...TR.map((p) => p[1]));
       const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
       const slot = (n) => { const i = NS - 8 - Math.floor(n / 2) * 14; const [nx, ny, tx, ty] = norm(i); const off = n % 2 ? 18 : -18; return { x: TR[i][0] + nx * off, y: TR[i][1] + ny * off, ang: Math.atan2(ty, tx), idx: i } };
       function nearest(x, y, guess) {
@@ -1743,7 +1804,7 @@ html.playing .gbtn { padding-block: 20px }
       const D = holdBtn($("#k-drift"));
       const itemBtn = $("#k-item");
       const useItem = (kk, owner) => {
-        if (!kk.item || ph !== "race") return;
+        if (!kk.item || ph !== "race" || kk.roul > 0) return;
         const it = kk.item; kk.item = null;
         if (it === "mush") kk.boost = 1.3;
         else if (it === "star") kk.star = 4.5;
@@ -1764,11 +1825,11 @@ html.playing .gbtn { padding-block: 20px }
         if (prev > NS * 0.8 && idx < NS * 0.2) kk.lap++; else if (prev < NS * 0.2 && idx > NS * 0.8) kk.lap--;
         kk.prog = kk.lap * NS + idx;
         const off = dd > KT_RW;
-        kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt);
+        kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt); kk.roul = Math.max(0, (kk.roul || 0) - dt);
         if (kk.fin) { kk.v *= Math.pow(0.3, dt); }
         else if (kk.spin > 0) { kk.v *= Math.pow(0.15, dt); kk.ang += 11 * dt }
         else {
-          const vm = KT_VMAX * (off && kk.star <= 0 ? 0.45 : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
+          const vm = KT_VMAX * (off && kk.star <= 0 ? ST.slow : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
           kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
           const tr = (driftOn ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1);
           kk.ang += steer * tr * dt;
@@ -1808,14 +1869,14 @@ html.playing .gbtn { padding-block: 20px }
       const TEX_W = 1650, TEX_H = 1350;
       const tex = (() => {
         const tc = document.createElement("canvas"); tc.width = TEX_W; tc.height = TEX_H; const t = tc.getContext("2d");
-        t.fillStyle = "#58B04A"; t.fillRect(0, 0, TEX_W, TEX_H);
-        t.fillStyle = "#4E9F42"; for (let gx = 0; gx < TEX_W; gx += 60) for (let gy = 0; gy < TEX_H; gy += 60) if (((gx + gy) / 60) % 2 === 0) t.fillRect(gx, gy, 60, 60);
+        t.fillStyle = ST.off[0]; t.fillRect(0, 0, TEX_W, TEX_H);
+        t.fillStyle = ST.off[1]; for (let gx = 0; gx < TEX_W; gx += 60) for (let gy = 0; gy < TEX_H; gy += 60) if (((gx + gy) / 60) % 2 === 0) t.fillRect(gx, gy, 60, 60);
         const path = () => { t.beginPath(); t.moveTo(TR[0][0], TR[0][1]); for (let i = 1; i < NS; i++) t.lineTo(TR[i][0], TR[i][1]); t.closePath() };
         t.lineJoin = "round";
-        path(); t.strokeStyle = "#fff"; t.lineWidth = KT_RW * 2 + 12; t.stroke();
-        path(); t.strokeStyle = "#E23B2E"; t.setLineDash([16, 16]); t.lineWidth = KT_RW * 2 + 12; t.stroke(); t.setLineDash([]);
-        path(); t.strokeStyle = "#76767F"; t.lineWidth = KT_RW * 2; t.stroke();
-        path(); t.strokeStyle = "rgba(255,255,255,.7)"; t.setLineDash([12, 20]); t.lineWidth = 2.5; t.stroke(); t.setLineDash([]);
+        path(); t.strokeStyle = ST.curb[0]; t.lineWidth = KT_RW * 2 + 12; t.stroke();
+        path(); t.strokeStyle = ST.curb[1]; t.setLineDash([16, 16]); t.lineWidth = KT_RW * 2 + 12; t.stroke(); t.setLineDash([]);
+        path(); t.strokeStyle = ST.road; t.lineWidth = KT_RW * 2; t.stroke();
+        path(); t.strokeStyle = ST.line; t.setLineDash([12, 20]); t.lineWidth = 2.5; t.stroke(); t.setLineDash([]);
         const [nx, ny] = norm(0);
         for (let j = -5; j < 5; j++) for (let r = 0; r < 3; r++) { t.fillStyle = (j + r) % 2 ? "#fff" : "#111"; t.save(); t.translate(TR[0][0] + nx * j * 9.2, TR[0][1] + ny * j * 9.2); t.rotate(Math.atan2(ny, nx)); t.fillRect(0, r * 5 - 7.5, 9.2, 5); t.restore() }
         return new Uint32Array(t.getImageData(0, 0, TEX_W, TEX_H).data.buffer);
@@ -1825,14 +1886,15 @@ html.playing .gbtn { padding-block: 20px }
       const b7 = buf7.getContext("2d"), img7 = b7.createImageData(RW7, RH7), px7 = new Uint32Array(img7.data.buffer);
       const le = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
       const rgba = (r, g, b) => (le ? (255 << 24) | (b << 16) | (g << 8) | r : (r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
-      const GRASS = rgba(88, 176, 74), FOG = [168, 214, 240];
+      const hex = (hs) => [parseInt(hs.slice(1, 3), 16), parseInt(hs.slice(3, 5), 16), parseInt(hs.slice(5, 7), 16)];
+      const GRASS = rgba(...hex(ST.off[0])), FOG = ST.sky[1], SKY0 = ST.sky[0];
       const SC = w / RW7;
       let cam = { x: 0, y: 0, dx: 1, dy: 0, rx: 0, ry: 1 };
       function floor() {
         const a = K.ang, dx = Math.cos(a), dy = Math.sin(a);
         cam = { x: K.x - dx * CAMD, y: K.y - dy * CAMD, dx, dy, rx: -dy, ry: dx };
         for (let y = 0; y < RH7; y++) {
-          if (y <= HZ) { const t = y / HZ; const col = rgba(110 + t * 58 | 0, 170 + t * 44 | 0, 235 + t * 5 | 0); px7.fill(col, y * RW7, y * RW7 + RW7); continue }
+          if (y <= HZ) { const t = y / HZ; const col = rgba(SKY0[0] + (FOG[0] - SKY0[0]) * t | 0, SKY0[1] + (FOG[1] - SKY0[1]) * t | 0, SKY0[2] + (FOG[2] - SKY0[2]) * t | 0); px7.fill(col, y * RW7, y * RW7 + RW7); continue }
           const z = (CAMH * FOC) / (y - HZ), k = z / FOC, fog = clamp((z - 260) / 500, 0, 1);
           const bx = cam.x + dx * z - cam.rx * k * (RW7 / 2), by = cam.y + dy * z - cam.ry * k * (RW7 / 2), sx = cam.rx * k, sy = cam.ry * k;
           let wx = bx, wy = by, o = y * RW7;
@@ -1854,10 +1916,10 @@ html.playing .gbtn { padding-block: 20px }
       }
       function hills() {
         const hy = HZ * SC, off = ((-K.ang / (Math.PI * 2)) * w * 3) % w;
-        c.fillStyle = "#8FB8D8";
+        c.fillStyle = ST.hill[0];
         for (let i = -1; i < 3; i++) { const bx = off + i * w; c.beginPath(); c.moveTo(bx, hy); c.lineTo(bx + w * 0.18, hy - h * 0.1); c.lineTo(bx + w * 0.34, hy - h * 0.04); c.lineTo(bx + w * 0.55, hy - h * 0.13); c.lineTo(bx + w * 0.78, hy - h * 0.03); c.lineTo(bx + w, hy); c.fill() }
         const off2 = ((-K.ang / (Math.PI * 2)) * w * 5) % w;
-        c.fillStyle = "#3E9A4C";
+        c.fillStyle = ST.hill[1];
         for (let i = -1; i < 3; i++) { const bx = off2 + i * w; for (const [px, r] of [[0.1, 0.07], [0.32, 0.05], [0.5, 0.09], [0.76, 0.06]]) { c.beginPath(); c.arc(bx + w * px, hy, w * r, Math.PI, 0); c.fill() } }
       }
       function kartSprite(kk, p, isMe) {
@@ -1876,22 +1938,46 @@ html.playing .gbtn { padding-block: 20px }
       }
       function draw(allKarts, items) {
         floor(); hills();
+        if (ST.name === "ナイトシティ") { c.fillStyle = "rgba(255,255,255,.8)"; for (let i = 0; i < 40; i++) { const sx = ((i * 97 + (-K.ang / (Math.PI * 2)) * w * 2) % w + w) % w, sy = (i * 53) % (HZ * SC * 0.8); c.fillRect(sx, sy, 2, 2) } }
         const spr = [];
-        for (const b of BOXES) { if (b.re > 0) continue; const p = proj(b.x, b.y); if (p) spr.push({ z: p.z, f: () => { const sz = 11 * p.s, y0 = p.sy - 9 * p.s; c.save(); c.translate(p.sx, y0); c.fillStyle = `hsl(${(performance.now() / 8 + b.x) % 360},85%,60%)`; c.globalAlpha = 0.9; c.fillRect(-sz / 2, -sz / 2, sz, sz); c.globalAlpha = 1; c.strokeStyle = "#fff"; c.lineWidth = Math.max(1, p.s); c.strokeRect(-sz / 2, -sz / 2, sz, sz); c.fillStyle = "#fff"; c.font = `${Math.max(8, 8 * p.s) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", 0, 1); c.restore() } }) }
-        for (const it of items) { if (it.dead) continue; const p = proj(it.x, it.y); if (!p) continue; spr.push({ z: p.z, f: () => { if (it.k === "b") { c.fillStyle = "#F4D03F"; c.beginPath(); c.ellipse(p.sx, p.sy - 3 * p.s, 6 * p.s, 3.5 * p.s, 0, 0, 7); c.fill(); c.strokeStyle = "#8a6d00"; c.lineWidth = 1; c.stroke() } else { c.fillStyle = "#2FA84F"; c.beginPath(); c.arc(p.sx, p.sy - 5 * p.s, 5 * p.s, 0, 7); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(p.sx, p.sy - 5 * p.s, 2.4 * p.s, 0, 7); c.fill() } } }) }
-        for (const kk of allKarts) { const p = proj(kk.x, kk.y); if (p) spr.push({ z: p.z - (kk === K ? 0.01 : 0), f: () => kartSprite(kk, p, kk === K) }) }
+        for (const b of BOXES) {
+          if (b.re > 0) continue; const p = proj(b.x, b.y); if (!p) continue;
+          spr.push({ z: p.z, f: () => {
+            const sz = 12 * p.s, bob = Math.sin(performance.now() / 300 + b.x) * 1.5 * p.s, y0 = p.sy - 11 * p.s + bob, hue = (performance.now() / 8 + b.x) % 360;
+            c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, sz * 0.45, sz * 0.12, 0, 0, 7); c.fill();
+            c.save(); c.translate(p.sx, y0);
+            const g = c.createLinearGradient(-sz / 2, -sz / 2, sz / 2, sz / 2); g.addColorStop(0, `hsla(${hue},90%,70%,.85)`); g.addColorStop(1, `hsla(${(hue + 120) % 360},90%,55%,.85)`);
+            c.fillStyle = g; c.fillRect(-sz / 2, -sz / 2, sz, sz);
+            c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.moveTo(-sz / 2, -sz / 2); c.lineTo(sz / 2, -sz / 2); c.lineTo(sz * 0.3, -sz * 0.3); c.lineTo(-sz * 0.3, -sz * 0.3); c.fill();
+            c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = Math.max(1, p.s * 0.8); c.strokeRect(-sz / 2, -sz / 2, sz, sz);
+            c.fillStyle = "#fff"; c.font = `${Math.max(8, 8 * p.s) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = Math.max(1, p.s * 0.6); c.strokeStyle = "rgba(0,0,0,.35)"; c.strokeText("?", 0, 1); c.fillText("?", 0, 1);
+            c.restore();
+          } });
+        }
+        for (const it of items) {
+          if (it.dead) continue; const p = proj(it.x, it.y); if (!p) continue;
+          spr.push({ z: p.z, f: () => { c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, 6 * p.s, 1.8 * p.s, 0, 0, 7); c.fill(); kartItemIcon(c, it.k === "b" ? "banana" : "shell", p.sx, p.sy - 4.5 * p.s, 6 * p.s) } });
+        }
+        for (const kk of allKarts) { const p = proj(kk.x, kk.y); if (p) spr.push({ z: p.z - (kk === K ? 0.01 : 0), f: () => { if (kk.boost > 0) { c.fillStyle = `rgba(255,${120 + Math.random() * 100 | 0},40,.85)`; c.beginPath(); c.ellipse(p.sx - 5 * p.s, p.sy - 3 * p.s, 2.5 * p.s, (4 + Math.random() * 4) * p.s, 0, 0, 7); c.ellipse(p.sx + 5 * p.s, p.sy - 3 * p.s, 2.5 * p.s, (4 + Math.random() * 4) * p.s, 0, 0, 7); c.fill() } kartSprite(kk, p, kk === K) } }) }
         spr.sort((a, b) => b.z - a.z).forEach((o) => o.f());
+        if (K.star > 0) { c.fillStyle = `hsla(${(performance.now() / 3) % 360},90%,60%,.12)`; c.fillRect(0, 0, w, h) }
+        const T0 = safeTop + 6;
         // 小さい地図
-        const mw = 86, mh = 70, mx = w - mw - 6, my = 6;
-        c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(mx, my, mw, mh);
-        const ms = Math.min((mw - 8) / 1300, (mh - 8) / 1050);
-        c.strokeStyle = "#ddd"; c.lineWidth = 2; c.beginPath(); TR.forEach((p, i) => { const X = mx + 4 + (p[0] - 180) * ms, Y = my + 4 + (p[1] - 160) * ms; i ? c.lineTo(X, Y) : c.moveTo(X, Y) }); c.closePath(); c.stroke();
-        for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(mx + 4 + (kk.x - 180) * ms, my + 4 + (kk.y - 160) * ms, kk === K ? 4 : 3, 0, 7); c.fill() }
+        const mw = 86, mh = 70, mx = w - mw - 6, my = T0;
+        c.fillStyle = "rgba(20,18,42,.5)"; c.fillRect(mx, my, mw, mh);
+        const ms = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (by1 - by0));
+        const MX = (x) => mx + 5 + (x - bx0) * ms, MY = (y) => my + 5 + (y - by0) * ms;
+        c.strokeStyle = "#ddd"; c.lineWidth = 2; c.beginPath(); TR.forEach((p, i) => { i ? c.lineTo(MX(p[0]), MY(p[1])) : c.moveTo(MX(p[0]), MY(p[1])) }); c.closePath(); c.stroke();
+        for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4 : 3, 0, 7); c.fill() }
+        // 順位・周回・アイテム
         const rk = rankOf(K, allKarts);
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 6, 96, 48);
-        c.font = `22px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 12, 22);
-        c.font = `13px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}周`, 12, 44);
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(6, 58, 96, 24); c.font = `13px ${DISP}`; c.fillStyle = K.item ? "#7CF59A" : "#aaa"; c.fillText(K.item ? KT_ITEMS[K.item] : "アイテムなし", 12, 70);
+        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(6, T0, 70, 50);
+        c.font = `24px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 12, T0 + 17);
+        c.font = `12px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}周`, 12, T0 + 39);
+        const ix = 6, iy = T0 + 56, isz = 54;
+        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
+        const shown = K.roul > 0 ? ["mush", "banana", "shell", "star"][Math.floor(performance.now() / 70) % 4] : K.item;
+        if (shown) kartItemIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 18);
         if (msg) bigText(c, msg.text, w / 2, h * 0.24, 24, msg.col);
         if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.3, 64, "#FFE14D");
         if (K.fin) bigText(c, `${me.s.rk || rk}位でゴール！`, w / 2, h * 0.3, 34, "#FFE14D");
@@ -1908,7 +1994,7 @@ html.playing .gbtn { padding-block: 20px }
         drift = D.down || keys.has("Shift");
         if (ph === "race" || ph === "done") {
           const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
-          if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); say(`${KT_ITEMS[K.item]}をゲット！`, "#7CF59A") }
+          if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); K.roul = 1.1 }
           if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
         }
         // あいてのカート（表示用）
@@ -1931,12 +2017,13 @@ html.playing .gbtn { padding-block: 20px }
         const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
         if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000), rk: rankOf(K, allKarts) });
         if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
-        itemBtn.textContent = K.item ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item;
+        itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
         const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
         if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0]);
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
         draw(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))]);
-        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート" : "押すとスタート"}</p>`);
+        if (ph === "idle" && !me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
+          <button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート（ステージを変えると相手も同じステージになります）" : "押すとスタート"}</p>`);
         else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
         else if (ph === "done" && me.s.res != null) {
           const mine = me.s.rk, t = (me.s.res / 1000).toFixed(1);
@@ -2187,6 +2274,7 @@ html.playing .gbtn { padding-block: 20px }
       setS({ mv: [...(me.s.mv || []), c] });
     }
     else if (act === "act-ready") setS({ rdy: true });
+    else if (act === "kart-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
     else if (act === "code-join") joinCode(ui.codeDraft || ($("#code-input") || {}).value);
     else if (act === "code-leave") { codeState = ""; useChannel("") }
