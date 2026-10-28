@@ -15,6 +15,8 @@ WordPress から置き換える、合同会社AKITOグループのホームペ�
 | `news` / `news-*` | お知らせ・ブログ | `/blog-2/`、`/2025/...` |
 | `contact` | お問い合わせフォーム | `/contact/` |
 
+`/play/` は「待ち時間バトル」（ふたりでスマホ対戦するミニゲーム集）。`public/play/index.html` 1枚で完結していて `build.py` は触らない（サイトマップにも入れず、noindex）。
+
 古いURLに来た人は、新しいページへ自動で転送される（`worker/index.js` の `OLD_URLS`）。
 
 ## 直し方
