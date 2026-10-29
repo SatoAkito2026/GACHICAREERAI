@@ -238,6 +238,38 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .chipbtn { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 6px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer }
 .chipbtn.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, var(--surface)) }
 
+/* 感度設定 */
+#sens { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px }
+.sens-box { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.3) }
+.sens-box p { margin: 0 }
+.sens-row { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; font-size: 13px; align-items: center }
+.sens-row span { grid-column: 1 / -1 } .sens-row input { width: 100%; accent-color: var(--pink) } .sens-row b { font-family: var(--display); text-align: right }
+/* 荒野バトル（横画面） */
+.br-gl, .br-cv { position: absolute; left: 0; top: 0; border-radius: 0 !important }
+.br-cv { z-index: 1 }
+.br-ui { position: absolute; inset: 0; z-index: 3; pointer-events: none }
+.br-ui > * { position: absolute; pointer-events: auto }
+.br-stick { left: max(24px, env(safe-area-inset-left, 0px)); bottom: 22px; width: 130px !important; height: 130px !important }
+#b-fire { right: max(26px, env(safe-area-inset-right, 0px)); bottom: 34px; width: 92px; height: 92px; background: rgba(217,44,44,.45) }
+#b-fire2 { left: max(40px, calc(env(safe-area-inset-left, 0px) + 16px)); bottom: 170px; width: 60px; height: 60px; font-size: 13px; background: rgba(217,44,44,.4) }
+#b-ads { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 104px); bottom: 26px }
+#b-cr { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 112px); bottom: 98px }
+#b-jump { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 14px); bottom: 136px }
+#b-rl { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 176px); bottom: 40px }
+#b-gr { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 84px); bottom: 170px; line-height: 1.1 }
+#b-med { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 150px); bottom: 170px; line-height: 1.1 }
+.br-ui .kbtn.small { width: 58px; height: 58px; font-size: 12px }
+.br-ui .kbtn.on { background: rgba(255,225,77,.55); color: #1F1B3A }
+.br-slots { left: 50%; transform: translateX(-50%); bottom: 10px; display: flex; gap: 8px }
+.br-slot { appearance: none; border: 2px solid rgba(255,255,255,.5); background: rgba(20,18,42,.5); color: #fff; border-radius: 10px; padding: 4px 10px; min-width: 110px; display: flex; flex-direction: column; align-items: center; font: 12px var(--body); line-height: 1.3 }
+.br-slot.on { border-color: #FFE14D; background: rgba(20,18,42,.75) }
+.br-pick { left: 50%; transform: translateX(-50%); bottom: 96px; display: none; appearance: none; border: 0; border-radius: 12px; padding: 10px 16px; background: #FFE14D; color: #1F1B3A; font: 900 14px var(--body) }
+.br-pick.on { display: block }
+.br.br-dead .br-ui { display: none }
+.br-rot { position: absolute; inset: 0; z-index: 9; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
+.br-rot small { font-family: var(--body); font-size: 14px; color: #ccc }
+html.br-portrait .br-rot { display: flex }
+html.br-portrait .br-ui { display: none }
 /* トランプ */
 .tc { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; overflow: hidden; color: #fff;
   background: radial-gradient(ellipse at 50% 40%, #2F8F5B 0%, #1E6B43 60%, #154F31 100%);
@@ -517,6 +549,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
 
   // ---------- rendering ----------
   const GAMES = {
+    br: { grp: "body", name: "荒野バトル", ico: "銃", c: "var(--ng)", desc: "横画面のバトルロイヤル。空から降りて、武器を拾って強化。手榴弾・スナイパーもあり。人数もえらべる" },
     soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
     hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "3Dのおうち・公園・遊園地・テーマパークで、物に変身して隠れる。鬼は撃って探す" },
     pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
@@ -637,7 +670,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
       <button class="btn small ${cpuOn ? "" : "ghost"}" data-act="cpu-toggle" aria-pressed="${cpuOn}">${cpuOn ? "オン" : "オフ"}</button></div>`;
     if (!room) notice = `<div class="note">ふたりで対戦するには、このページを相手にも共有して、それぞれのスマホで開いてね。開くと自動でつながります。</div>`;
     else if (!real) notice = `<div class="note">つながると上の「あいて」に名前が出ます。どちらかがゲームを選ぶと、ふたりとも同じゲームに切りかわります。</div>`;
-    notice += cpuRow;
+    notice += cpuRow + `<div class="note row" style="justify-content:space-between;flex-wrap:nowrap"><span style="flex:1;min-width:0">操作の<b>感度</b>（カート・サッカー・荒野バトルなど全部に効く）</span><button class="btn small ghost" data-act="sens">感度設定</button></div>`;
     if (lobby) notice = renderInvite() + notice;
     if (SITE && !isStandalone()) notice = renderInstall() + notice;
     const cards = (grp) => Object.entries(GAMES).filter(([, g]) => (g.grp || "brain") === grp).map(([k, g], i) => `
@@ -656,7 +689,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
 
   function topBar(title, sub) {
     return `<div class="row"><div class="grow"><p class="eyebrow">${esc(sub || "")}</p><h2>${esc(title)}</h2></div>
-      <button class="btn ghost small howto-btn" data-act="howto">遊び方</button><button class="btn ghost small" data-act="menu">メニュー</button></div>`;
+      <button class="btn ghost small howto-btn" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div>`;
   }
   function needOpp() { return opp() ? "" : `<div class="note">あいてがまだいません。相手がページを開くと始まります。</div>` }
   function progress(n, done, now) { let s = ""; for (let i = 0; i < n; i++) s += `<i class="${i < done ? "done" : i === now ? "now" : ""}"></i>`; return `<div class="progress">${s}</div>` }
@@ -971,13 +1004,24 @@ html.playing.full .card.act canvas { border-radius: 0 }
   const S_HOME = [[32, 95], [22, 74], [42, 60]];
   const sHome = (i) => { const [x, y] = S_HOME[i % 3]; return i < 3 ? { x, y } : { x: FW - x, y: FH - y } };
   // 操作パネル（スティック＋ボタン）。押している間の状態と、押した回数を返す
+  // 感度（すべてのゲーム共通。端末に保存）
+  const SENS = Object.fromEntries(["look", "scope", "stick", "steer"].map((k) => [k, clamp(Number(ls.get("sens_" + k)) || 1, .3, 2.5)]));
+  function sensPanel(open) {
+    let el = $("#sens"); if (!open) { if (el) el.remove(); return } if (el) return;
+    el = document.createElement("div"); el.id = "sens";
+    const rows = [["look", "視点（画面をなぞって向きを変える）"], ["scope", "スコープをのぞいている時の視点"], ["stick", "スティック（少したおすだけで速く動く）"], ["steer", "カートのハンドル（曲がる速さ）"]];
+    el.innerHTML = `<div class="sens-box"><p class="eyebrow">感度設定（すべてのゲーム共通）</p>${rows.map(([k, t]) => `<label class="sens-row"><span>${t}</span><input type="range" min="0.3" max="2.5" step="0.1" value="${SENS[k]}" data-sens="${k}"><b>${SENS[k].toFixed(1)}</b></label>`).join("")}<p class="muted" style="font-size:12px;margin:0">1.0 がふつう。大きいほど少しの操作でよく動きます</p><div class="row"><button class="btn ghost" data-act="sens-reset">もとにもどす</button><button class="btn grow" data-act="sens">とじる</button></div></div>`;
+    document.body.appendChild(el);
+    el.addEventListener("input", (e) => { const k = e.target.dataset.sens; if (!k) return; SENS[k] = Number(e.target.value); ls.set("sens_" + k, SENS[k]); e.target.nextElementSibling.textContent = SENS[k].toFixed(1) });
+    el.addEventListener("click", (e) => { if (e.target === el) sensPanel(false) });
+  }
   function controlPad(stickEl, knobEl) {
     const inp = { x: 0, y: 0 }; let sid = null;
     const set = (e) => {
       const r = stickEl.getBoundingClientRect();
       let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
       const R = r.width / 2 - 14, d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d }
-      inp.x = dx / R; inp.y = dy / R; knobEl.style.transform = `translate(${dx}px,${dy}px)`;
+      let nx = (dx / R) * SENS.stick, ny = (dy / R) * SENS.stick; const mg = Math.hypot(nx, ny); if (mg > 1) { nx /= mg; ny /= mg } inp.x = nx; inp.y = ny; knobEl.style.transform = `translate(${dx}px,${dy}px)`;
     };
     stickEl.addEventListener("pointerdown", (e) => { sid = e.pointerId; try { stickEl.setPointerCapture(sid) } catch (_) {} set(e); e.preventDefault() });
     stickEl.addEventListener("pointermove", (e) => { if (e.pointerId === sid) set(e) });
@@ -2178,7 +2222,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (ph === "race" || ph === "done") raceT += dt;
         for (const b of BOXES) b.re = Math.max(0, b.re - dt);
         // 自分のカート
-        let steer = 0; if (L.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (R.down || keys.has("ArrowRight") || keys.has("d")) steer += 1;
+        let steer = 0; if (L.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (R.down || keys.has("ArrowRight") || keys.has("d")) steer += 1; steer *= SENS.steer;
         drift = D.down || keys.has("Shift");
         if (ph === "race" || ph === "done") {
           const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
@@ -2871,7 +2915,11 @@ html.playing.full .card.act canvas { border-radius: 0 }
         B.box(w, 2.4, d, "#7A4A2A", cx, 1.2, cz); B.box(w - .4, .2, d - .4, "#B08050", cx, 2.45, cz); B.box(w * .2, 1.4, d - .4, "#6A3E22", b.x1 - w * .12, 3.2, cz);
         for (const fx of [.35, .65]) { const mx = b.x0 + w * fx; B.cyl(.15, .18, 11, "#5A3A22", mx, 7.5, cz, 8); B.box(.1, 4.2, d + 1.5, "#F4F0E2", mx + .25, 8, cz); B.box(.1, 2.6, d + .5, "#F4F0E2", mx + .25, 11.6, cz) }
         B.box(.8, .6, .05, "#111", cx, 12.8, cz);
-      } else if (v.k === "bld" || v.k === "stall") {
+      } else if (v.k === "container") {
+        B.box(w, h, d, v.col, cx, h / 2, cz); const L = v.ax ? w : d; for (let s2 = .3; s2 < L; s2 += .45) { if (v.ax) B.box(.07, h - .2, d + .06, phShade(v.col, -.2), b.x0 + s2, h / 2, cz); else B.box(w + .06, h - .2, .07, phShade(v.col, -.2), cx, h / 2, b.z0 + s2) } B.box(w + .04, .1, d + .04, phShade(v.col, -.32), cx, h - .05, cz);
+      } else if (v.k === "sandbag") { const along = w > d, L = along ? w : d; for (let y = 0; y < 3; y++) for (let s2 = .3 + (y % 2) * .25; s2 < L - .15; s2 += .52) B.sph(.3, y % 2 ? "#B8A27A" : "#A8926A", along ? b.x0 + s2 : cx, .16 + y * .3, along ? cz : b.z0 + s2, along ? 1 : .6, .5, along ? .6 : 1, 1) }
+      else if (v.k === "cwall") { B.box(w, h, d, "#A3A29C", cx, h / 2, cz); B.box(w + .08, .1, d + .08, "#8A8984", cx, h - .05, cz); B.box(w + .06, .2, d + .06, "#8A8984", cx, .1, cz) }
+      else if (v.k === "bld" || v.k === "stall") {
         const col = v.col || "#DDD";
         if (v.k === "stall") {
           B.box(w, 1.0, d, phShade(col, -.1), cx, .5, cz); B.box(w + .1, .08, d + .1, "#FFFFFF", cx, 1.04, cz); for (const [x, z] of [[b.x0 + .1, b.z0 + .1], [b.x1 - .1, b.z0 + .1], [b.x0 + .1, b.z1 - .1], [b.x1 - .1, b.z1 - .1]]) B.box(.1, h, .1, "#FFFFFF", x, h / 2, z);
@@ -3183,7 +3231,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     const stickInp = controlPad($("#stick"), $("#knob"));
     let look = null;
     cv.addEventListener("pointerdown", (e) => { au(); if (look) return; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
-    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; camYaw -= (e.clientX - look.x) * .0075; camPitch = clamp(camPitch - (e.clientY - look.y) * .005, -.8, .45); look.x = e.clientX; look.y = e.clientY });
+    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; camYaw -= (e.clientX - look.x) * .0075 * SENS.look; camPitch = clamp(camPitch - (e.clientY - look.y) * .005 * SENS.look, -.8, .45); look.x = e.clientX; look.y = e.clientY });
     const lend = (e) => { if (look && e.pointerId === look.id) look = null }; cv.addEventListener("pointerup", lend); cv.addEventListener("pointercancel", lend);
     const bAct = $("#b-act"), bJump = $("#b-jump");
     const actSt = holdBtn(bAct, () => { au(); onAct() }); holdBtn(bJump, () => { au(); jump() });
@@ -3341,6 +3389,553 @@ html.playing.full .card.act canvas { border-radius: 0 }
     });
     return () => {
       stopLoop(); removeEventListener("keydown", onKey);
+      scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
+      Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
+      if (actx) try { actx.close() } catch (_) {}
+    };
+  }
+  // ----- 荒野バトル（横画面のバトルロイヤル・3D） -----
+  // 飛行機から飛び降りてパラシュートで着地 → 武器・防具・回復・手榴弾を拾って強くなる → 縮んでいく安全地帯の中で最後のひとりを目指す。
+  // 人数（2〜20人）をえらべて、人が足りない分はCPU。ホスト（先に始めた人）がCPU・安全地帯・ダメージ・拾われた物をまとめて計算して送る。
+  // あいては自分の位置・撃った弾（当たった相手とダメージ）・拾った物・投げた手榴弾を送る。見た目は かくれんぼ の3D（phBuild など）を使う。
+  const BR_W = [
+    { k: "hg", n: "ハンドガン", dmg: 24, rate: .3, spr: .02, rng: 70, mag: 12, rl: 1.2, zoom: 1.4, len: .32, sc: 1 },
+    { k: "smg", n: "サブマシンガン", dmg: 16, rate: .085, spr: .042, rng: 55, mag: 30, rl: 1.8, zoom: 1.5, len: .55, auto: 1, sc: 2.4 },
+    { k: "sg", n: "ショットガン", dmg: 14, pel: 8, rate: .85, spr: .085, rng: 26, mag: 5, rl: 2.2, zoom: 1.3, len: .72, sc: 2.6 },
+    { k: "ar", n: "アサルトライフル", dmg: 22, rate: .12, spr: .028, rng: 140, mag: 30, rl: 2.2, zoom: 2, len: .85, auto: 1, sc: 3.4 },
+    { k: "sr", n: "スナイパー", dmg: 92, rate: 1.3, spr: .003, hip: .07, rng: 320, mag: 5, rl: 2.8, zoom: 4, len: 1.15, sc: 3.2 },
+  ];
+  const BR_LV = [{ n: "ふつう", c: "#E2E2E2", m: 1 }, { n: "レア", c: "#4FA3F7", m: 1.15 }, { n: "エピック", c: "#B36BF2", m: 1.3 }, { n: "伝説", c: "#F2B233", m: 1.5 }];
+  const BR_ARMOR = [0, .25, .4, .55], BR_HELM = [0, .3, .45, .6];
+  const BR_NAMES = ["ケンタ", "ユウキ", "ソラ", "ハルト", "リク", "ミオ", "アオイ", "レン", "カイト", "ヒナ", "タクミ", "サクラ", "ダイチ", "ユイ", "コウ", "ナギ", "ルイ", "マコト", "シュン", "エマ"];
+  const BR_PAL = [["#3A5A40", "#2A3A2C", "#C9A26B"], ["#4A4E69", "#22223B", "#9A8C98"], ["#8D5A3B", "#3E2C23", "#D9B26F"], ["#2E6FD0", "#1E2F55", "#E2E2E2"], ["#6B705C", "#3F4238", "#CB997E"], ["#9B2226", "#3A1F1F", "#E9D8A6"], ["#5E548E", "#231942", "#E0B1CB"], ["#2A9D8F", "#264653", "#E9C46A"]];
+  const BR_ZONE = [{ wait: 50, shrink: 25, r: 110, d: 2 }, { wait: 35, shrink: 20, r: 65, d: 4 }, { wait: 28, shrink: 18, r: 35, d: 7 }, { wait: 22, shrink: 15, r: 15, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }];
+  function brMap(seed) {
+    const r = rng(seed * 7 + 3); r();
+    const M = { id: "br", W: 240, D: 240, ground: "grass", floors: [], boxes: [], circles: [], props: [], water: [], objs: [], items: [], indoor: false };
+    const R = (a, b) => a + r() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
+    const F = (x0, z0, x1, z1, t) => M.floors.push({ x0, z0, x1, z1, t });
+    const box = (x0, z0, x1, z1, h, vis) => { const b = { x0: Math.min(x0, x1), z0: Math.min(z0, z1), x1: Math.max(x0, x1), z1: Math.max(z0, z1), h, vis }; M.boxes.push(b); return b };
+    const circ = (x, z, rr, h) => M.circles.push({ x, z, r: rr, h });
+    const onFloor = (x, z, m, ts) => M.floors.some((f) => (!ts || ts.includes(f.t)) && x > f.x0 - m && x < f.x1 + m && z > f.z0 - m && z < f.z1 + m);
+    function free(x, z, rad) {
+      if (x < rad + 2 || z < rad + 2 || x > M.W - rad - 2 || z > M.D - rad - 2) return false;
+      for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return false;
+      for (const cc of M.circles) if (Math.hypot(cc.x - x, cc.z - z) < cc.r + rad + .3) return false;
+      for (const p of M.props) if (Math.hypot(p.x - x, p.z - z) < PH_PROPS[p.type].r + rad + .25) return false;
+      return true;
+    }
+    const prop = (type, x, z, ry) => { if (!free(x, z, PH_PROPS[type].r)) return false; M.props.push({ type, x, z, ry: ry == null ? r() * 6.28 : ry }); return true };
+    const scatter = (types, n, area, off) => { for (let i = 0, t = 0; i < n && t < n * 30; t++) { const x = R(area[0], area[2]), z = R(area[1], area[3]); if (off && onFloor(x, z, 1, off)) continue; if (prop(types[Math.floor(r() * types.length)], x, z)) i++ } };
+    const tree = (x, z, s) => { if (!free(x, z, .7 * s)) return false; M.objs.push({ k: "tree", x, z, s, kind: r() < .45 ? "pine" : "round", c: RI(0, 2) }); circ(x, z, .35 * s, 7 * s); return true };
+    // 道
+    F(116, 0, 124, 240, "dirt"); F(0, 116, 240, 124, "dirt"); F(36, 36, 204, 42, "dirt"); F(36, 198, 204, 204, "dirt"); F(36, 36, 42, 204, "dirt"); F(198, 36, 204, 204, "dirt");
+    // 町
+    const spots = [[72, 72], [168, 72], [72, 168], [168, 168], [120, 120], [120, 26], [26, 120], [214, 120], [120, 214]];
+    const towns = spots.filter((_, i) => i < 5 || r() < .6);
+    const hc = ["#E8DCC5", "#C9B79C", "#B5C4B1", "#D8C3A5", "#A9B4C2", "#E4C590", "#C2A383"], rc = ["#8B3A2A", "#4A5A6A", "#5A3A2A", "#3A5A3A", "#7A4A2A"];
+    towns.forEach(([tx, tz], ti) => {
+      F(tx - 24, tz - 24, tx + 24, tz + 24, ti % 2 ? "sand" : "dirt");
+      const yard = ti === 1;
+      for (let gx = -1; gx <= 1; gx++) for (let gz = -1; gz <= 1; gz++) {
+        if (gx === 0 && gz === 0 && ti !== 4) continue;
+        const cx = tx + gx * 15 + R(-1.5, 1.5), cz = tz + gz * 15 + R(-1.5, 1.5);
+        if (yard || r() < .2) { // コンテナ
+          const along = r() < .5, L = 6, Wd = 2.5, cols = ["#B5452F", "#2E6FD0", "#3A8A4A", "#D9A02C", "#7A7F87"];
+          for (let k = 0; k < RI(1, 3); k++) { const ox = along ? 0 : (k - 1) * 3.2, oz = along ? (k - 1) * 3.2 : 0; const x0 = cx + ox - (along ? L / 2 : Wd / 2), z0 = cz + oz - (along ? Wd / 2 : L / 2); if (free(x0 + (along ? L : Wd) / 2, z0 + (along ? Wd : L) / 2, 3.4)) box(x0, z0, x0 + (along ? L : Wd), z0 + (along ? Wd : L), 2.6, { k: "container", col: cols[RI(0, 4)], ax: along }) }
+        } else if (r() < .85) {
+          const w = R(7, 10), d = R(6, 8.5), h = R(3.2, 5);
+          box(cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2, h, { k: "bld", col: hc[RI(0, 6)], roof: "gable", rc: rc[RI(0, 4)] });
+        } else { for (let k = 0; k < 3; k++) { const a = r() * 6.28, x = cx + Math.cos(a) * 3, z = cz + Math.sin(a) * 3; box(x - 1.6, z - .35, x + 1.6, z + .35, .95, { k: "sandbag" }) } }
+      }
+      // 低いかべ・木箱・車（かくれる場所）
+      for (let k = 0; k < 7; k++) { const x = tx + R(-22, 22), z = tz + R(-22, 22), along = r() < .5, L = R(3, 7); if (free(x, z, L / 2 + .5)) box(x - (along ? L / 2 : .2), z - (along ? .2 : L / 2), x + (along ? L / 2 : .2), z + (along ? .2 : L / 2), 1.15, { k: "cwall" }) }
+      for (let k = 0; k < 3; k++) { const x = tx + R(-20, 20), z = tz + R(-20, 20), ax = r() < .5; if (free(x, z, 2.6)) box(x - (ax ? 2.2 : 1), z - (ax ? 1 : 2.2), x + (ax ? 2.2 : 1), z + (ax ? 1 : 2.2), 1.5, { k: "car", col: ["#D9302C", "#EEEEEE", "#333338", "#3AA05A", "#2E6FD0"][RI(0, 4)], ax }) }
+      scatter(["crate", "barrel", "crate", "cbox", "tire", "trash"], 16, [tx - 23, tz - 23, tx + 23, tz + 23]);
+    });
+    // 野原：とりでの土のう・こわれたかべ・木・岩
+    for (let k = 0; k < 18; k++) { const x = R(10, 230), z = R(10, 230); if (onFloor(x, z, 3)) continue; const a = r() < .5; if (free(x, z, 3)) { box(x - (a ? 1.8 : .35), z - (a ? .35 : 1.8), x + (a ? 1.8 : .35), z + (a ? .35 : 1.8), .95, { k: "sandbag" }); if (r() < .6) prop("crate", x + (a ? 0 : 1.4), z + (a ? 1.4 : 0)) } }
+    for (let k = 0; k < 22; k++) { const x = R(10, 230), z = R(10, 230); if (onFloor(x, z, 3)) continue; const a = r() < .5, L = R(3, 6); if (free(x, z, L / 2 + .5)) box(x - (a ? L / 2 : .25), z - (a ? .25 : L / 2), x + (a ? L / 2 : .25), z + (a ? .25 : L / 2), R(1.1, 2.4), { k: "cwall" }) }
+    for (let k = 0; k < 14; k++) { const x = R(15, 225), z = R(15, 225), s = R(2.5, 5); if (!onFloor(x, z, s + 2) && free(x, z, s)) { M.objs.push({ k: "bigrock", x, z, s }); circ(x, z, s * .9, s * 1.4) } }
+    for (let i = 0, t = 0; i < 230 && t < 4000; t++) { const x = R(4, 236), z = R(4, 236); if (onFloor(x, z, 3)) continue; if (tree(x, z, R(.9, 1.4))) i++ }
+    scatter(["bush", "bush", "rock", "bush", "crate", "barrel", "rock"], 170, [4, 4, 236, 236], ["dirt", "sand"]);
+    // 拾える物
+    const pickLv = () => { const v = r(); return v < .5 ? 0 : v < .8 ? 1 : v < .95 ? 2 : 3 };
+    const mkItem = () => { const v = r(); if (v < .46) { const w = r(); return { t: "w", w: w < .16 ? 0 : w < .38 ? 1 : w < .56 ? 2 : w < .82 ? 3 : 4, lv: pickLv() } } if (v < .56) return { t: "vest", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .66) return { t: "helm", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .81) return { t: "med" }; if (v < .93) return { t: "gren" }; return { t: "scope", z: [2, 4, 8][Math.floor(r() * r() * 3)] } };
+    const addItem = (x, z) => { if (!free(x, z, .5)) return false; M.items.push(Object.assign({ id: M.items.length, x, z }, mkItem())); return true };
+    for (const b of M.boxes) { if (b.vis.k !== "bld" && b.vis.k !== "container") continue; for (let k = 0; k < 3; k++) { const side = RI(0, 3), x = side < 2 ? R(b.x0, b.x1) : side === 2 ? b.x0 - 1.2 : b.x1 + 1.2, z = side >= 2 ? R(b.z0, b.z1) : side === 0 ? b.z0 - 1.2 : b.z1 + 1.2; addItem(x, z) } }
+    towns.forEach(([tx, tz]) => { for (let k = 0; k < 10; k++) addItem(tx + R(-22, 22), tz + R(-22, 22)) });
+    for (let i = 0, t = 0; i < 90 && t < 2000; t++) if (addItem(R(6, 234), R(6, 234))) i++;
+    for (const p of M.props) p.cr = PH_PROPS[p.type].r * .85;
+    // 道さがし用のマス目（1m）
+    const gw = M.W, gh = M.D, grid = new Uint8Array(gw * gh), pad = .45;
+    const mark = (x0, z0, x1, z1) => { for (let z = Math.max(0, Math.floor(z0 - pad)); z <= Math.min(gh - 1, Math.floor(z1 + pad)); z++) for (let x = Math.max(0, Math.floor(x0 - pad)); x <= Math.min(gw - 1, Math.floor(x1 + pad)); x++) grid[z * gw + x] = 1 };
+    for (const b of M.boxes) mark(b.x0, b.z0, b.x1, b.z1);
+    for (const cc of [...M.circles, ...M.props.map((p) => ({ x: p.x, z: p.z, r: p.cr }))]) for (let z = Math.max(0, Math.floor(cc.z - cc.r - 1)); z <= Math.min(gh - 1, Math.floor(cc.z + cc.r + 1)); z++) for (let x = Math.max(0, Math.floor(cc.x - cc.r - 1)); x <= Math.min(gw - 1, Math.floor(cc.x + cc.r + 1)); x++) if (Math.hypot(x + .5 - cc.x, z + .5 - cc.z) < cc.r + pad) grid[z * gw + x] = 1;
+    M.grid = { gw, gh, grid }; M.towns = towns; M.types = [];
+    return M;
+  }
+  // 兵士の形（正面は +z）。右うでに武器5種類（持っている物だけ見せる）、頭の上にパラシュート
+  function brChar(pal) {
+    const T = THREE, g = new T.Group(), body = new T.Group(); g.add(body); const mats = {};
+    const mesh = (geo, col, x, y, z, parent = body) => { const m = new T.Mesh(geo, mats[col] || (mats[col] = new T.MeshStandardMaterial({ color: col, roughness: .8 }))); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m };
+    const pivot = (x, y, z, parent = body) => { const p = new T.Group(); p.position.set(x, y, z); parent.add(p); return p };
+    const [top, pants, acc] = pal;
+    const legL = pivot(-.13, .86, 0), legR = pivot(.13, .86, 0);
+    for (const L of [legL, legR]) { mesh(new T.BoxGeometry(.2, .78, .22), pants, 0, -.4, 0, L); mesh(new T.BoxGeometry(.22, .14, .34), "#2A2220", 0, -.8, .05, L) }
+    mesh(new T.BoxGeometry(.5, .62, .3), top, 0, 1.17, 0); mesh(new T.BoxGeometry(.52, .1, .32), "#2A2220", 0, .87, 0);
+    const vest = mesh(new T.BoxGeometry(.54, .46, .34), "#4A4A3A", 0, 1.22, 0); vest.visible = false;
+    mesh(new T.BoxGeometry(.42, .5, .2), acc, 0, 1.18, -.25);
+    const armL = pivot(-.34, 1.43, 0), armR = pivot(.34, 1.43, 0);
+    for (const A of [armL, armR]) { mesh(new T.BoxGeometry(.15, .58, .17), top, 0, -.28, 0, A); mesh(new T.BoxGeometry(.13, .12, .13), "#E8B990", 0, -.62, 0, A) }
+    mesh(new T.BoxGeometry(.14, .1, .14), "#E8B990", 0, 1.51, 0); mesh(new T.SphereGeometry(.19, 14, 10), "#E8B990", 0, 1.69, 0);
+    const helm = mesh(new T.SphereGeometry(.215, 14, 8, 0, Math.PI * 2, 0, 1.6), "#4A5A3A", 0, 1.72, 0); helm.visible = false;
+    const cap = mesh(new T.SphereGeometry(.2, 14, 8, 0, Math.PI * 2, 0, 1.5), acc, 0, 1.73, 0);
+    for (const x of [-.07, .07]) mesh(new T.SphereGeometry(.025, 6, 5), "#222", x, 1.7, .175);
+    // 武器（右うでの先。うでを前に向けると前を向く）
+    const guns = BR_W.map((W, i) => { const gg = new T.Group(); armR.add(gg); gg.position.set(0, -.62, .05); mesh(new T.BoxGeometry(.08, W.len, .12), "#222226", 0, -W.len / 2, .03, gg); mesh(new T.BoxGeometry(.07, .16, .1), "#3A2A20", 0, -.06, .1, gg); if (i >= 3) mesh(new T.CylinderGeometry(.035, .035, .22, 8), "#111", 0, -W.len * .4, -.06, gg); if (i === 4) mesh(new T.CylinderGeometry(.045, .045, .3, 8), "#111", 0, -W.len * .35, -.1, gg); gg.visible = false; return gg });
+    const tip = new T.Object3D(); armR.add(tip); tip.position.set(0, -1.2, .05);
+    // パラシュート
+    const para = new T.Group(); g.add(para); para.position.y = 4.2; para.visible = false;
+    const cm = new T.MeshStandardMaterial({ color: acc, roughness: .7, side: T.DoubleSide }), cm2 = new T.MeshStandardMaterial({ color: "#F2F2F2", roughness: .7, side: T.DoubleSide });
+    for (let i = 0; i < 8; i++) { const s = new T.Mesh(new T.SphereGeometry(2.3, 4, 6, i * Math.PI / 4, Math.PI / 4, 0, Math.PI / 2.4), i % 2 ? cm : cm2); s.scale.y = .55; para.add(s) }
+    for (const [x, z] of [[-1.5, -1.5], [1.5, -1.5], [-1.5, 1.5], [1.5, 1.5]]) { const ln = new T.Mesh(new T.CylinderGeometry(.01, .01, 3.2, 4), mats["#DDD"] || (mats["#DDD"] = new T.MeshBasicMaterial({ color: "#DDDDDD" }))); ln.position.set(x * .5, -1.4, z * .5); ln.rotation.set(z * -.28, 0, x * .28); para.add(ln) }
+    return { g, body, legL, legR, armL, armR, guns, tip, para, vest, helm, cap };
+  }
+  // 拾える物の形（下に、強さの色の輪）
+  function brItemGeo(it) {
+    const B = phParts(), lc = it.t === "w" ? BR_LV[it.lv].c : it.t === "vest" || it.t === "helm" ? BR_LV[it.lv].c : it.t === "med" ? "#FF6B6B" : it.t === "gren" ? "#7CF59A" : "#F2D230";
+    B.tor(.55, .05, lc, 0, .03, 0, Math.PI / 2, 0);
+    if (it.t === "w") { const W = BR_W[it.w]; B.box(W.len + .2, .12, .09, "#222226", 0, .18, 0); B.box(.1, .2, .08, "#3A2A20", W.len * .2, .08, 0); B.box(.18, .06, .1, lc, -W.len * .3, .26, 0); if (it.w >= 3) B.cyl(.04, .04, .22, "#111", 0, .28, 0, 8, 0, Math.PI / 2) }
+    else if (it.t === "vest") { B.box(.5, .45, .2, "#4A4A3A", 0, .3, 0); B.box(.52, .1, .22, lc, 0, .45, 0) }
+    else if (it.t === "helm") { B.sph(.22, "#4A5A3A", 0, .15, 0, 1, .7, 1); B.box(.3, .04, .04, lc, 0, .18, .2) }
+    else if (it.t === "med") { B.box(.4, .26, .3, "#F5F5F5", 0, .15, 0); B.box(.22, .04, .06, "#E23A3A", 0, .29, 0); B.box(.06, .04, .22, "#E23A3A", 0, .29, 0) }
+    else if (it.t === "gren") { B.sph(.11, "#3A5A30", 0, .13, 0); B.box(.05, .06, .03, "#888", 0, .25, 0) }
+    else { B.cyl(.06, .06, .34, "#111", 0, .1, 0, 10, 0, Math.PI / 2); B.box(.12, .1, .06, lc, 0, .18, 0) }
+    return phMerge(B.L, false);
+  }
+  const brItemName = (it) => (it.t === "w" ? `${BR_W[it.w].n}（${BR_LV[it.lv].n}）` : it.t === "vest" ? `ベスト Lv${it.lv}` : it.t === "helm" ? `ヘルメット Lv${it.lv}` : it.t === "med" ? "救急箱" : it.t === "gren" ? "手榴弾" : `${it.z}倍スコープ`);
+  ACTION.br = {
+    full: true,
+    shell() {
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("荒野バトル", "横画面のバトルロイヤル")}
+        <section class="card act br" style="padding:0;position:relative"><canvas id="gl" class="br-gl"></canvas><canvas id="cv" class="br-cv" aria-label="荒野バトルの3Dマップ"></canvas><div id="act-msg"></div>
+        <div class="br-ui">
+          <div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
+          <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
+          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button>
+          <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-med">回復</button>
+          <div class="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
+        </div>
+        <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small></div>
+        <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」と弾をよけられます。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ。</p></section></section>`;
+    },
+    mount() {
+      let alive = true, stop = null;
+      setMsg(`<p class="wait">3Dのマップを読み込んでいます</p>`);
+      phLoad().then(() => { if (!alive) return; try { stop = brRun() } catch (e) { console.error(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("br")}`) } })
+        .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("br")}`) });
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-portrait") };
+    },
+  };
+  function brRun() {
+    const T = THREE, host = isFirst(), cardEl = $(".card.act.br"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
+    const M = brMap((me.m.seed || 1) % 100000), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
+    const mobile = matchMedia("(pointer: coarse)").matches;
+    const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene();
+    const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#A4D2F3"); gr.addColorStop(1, "#E9F2EA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog("#D3E6EE", 80, 260);
+    const camera = new T.PerspectiveCamera(62, 2, .08, 600);
+    scene.add(new T.HemisphereLight("#D8ECFF", "#5E7F3E", .72));
+    const sun = new T.DirectionalLight("#FFF0D6", 1.0); sun.castShadow = true; sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
+    const W3 = phBuild(M, scene);
+    // 安全地帯のかべ
+    const zoneM = new T.Mesh(new T.CylinderGeometry(1, 1, 90, 64, 1, true), new T.MeshBasicMaterial({ color: "#5AB0FF", transparent: true, opacity: .2, side: T.DoubleSide, depthWrite: false, fog: false })); zoneM.position.y = 45; scene.add(zoneM);
+    // 飛行機
+    const plane = (() => { const B = phParts(); B.cyl(1.3, 1.1, 14, "#D8DCE0", 0, 0, 0, 12, Math.PI / 2); B.sph(1.15, "#D8DCE0", 0, 0, -7, 1, 1, 1.7); B.box(18, .25, 2.6, "#C0C6CC", 0, 0, .5); B.box(6, .2, 1.6, "#C0C6CC", 0, .4, 6.4); B.box(.2, 2.6, 1.8, "#C0473B", 0, 1.6, 6.6); for (const x of [-4.5, 4.5]) B.cyl(.5, .5, 2, "#555", x, -.5, -.3, 10, Math.PI / 2); B.box(2.2, .5, .1, "#2A3442", 0, .6, -6.9); const g = phMerge(B.L, false); const m = new T.Mesh(g, W3.mat); m.castShadow = false; scene.add(m); return m })();
+    // 拾える物
+    const itemGeo = {}, itemMeshes = M.items.map((it) => { const k = it.t + (it.w ?? "") + (it.lv ?? "") + (it.z ?? ""); const g = itemGeo[k] || (itemGeo[k] = brItemGeo(it)); const m = new T.Mesh(g, W3.mat); m.position.set(it.x, 0, it.z); scene.add(m); return m });
+    // ---- 状態
+    let S = { ph: "lobby", n: 12, names: [], zone: null, feed: [], fx: [], grl: [], tk: [], plane: null, winner: -1 }, E = [];
+    const vis = [], taken = new Set();
+    let fxId = 0, feedId = 0, grId = 0, lastSend = "", seenFx = 0, seenFeed = 0, seenGr = new Set(), lastGuestShot = 0, lastGuestHeal = 0, lastGuestPick = new Set(), myShots = [], myGren = [], myPicks = [], myHeal = [0, 0], shotSeq = 0;
+    let specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
+    const nm = (i) => (i === myIdx ? "あなた" : S.names[i] || "");
+    const fmt = (t) => String(t).replace(/\{(\d+)\}/g, (_, i) => nm(Number(i)));
+    function mkE(i) { return { i, x: 120, z: 120, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
+    function ensureVis(n) { while (vis.length < n) { const i = vis.length, ch = brChar(BR_PAL[i % BR_PAL.length]); scene.add(ch.g); vis.push(Object.assign(ch, { px: 0, pz: 0, ph: 0 })) } }
+    // ---- 当たり判定
+    const blocked = (x, z, rad) => {
+      if (x < rad + 1 || z < rad + 1 || x > M.W - rad - 1 || z > M.D - rad - 1) return true;
+      for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
+      for (const cc of M.circles) { const dx = cc.x - x, dz = cc.z - z, rr = cc.r + rad; if (dx * dx + dz * dz < rr * rr) return true }
+      for (const p of M.props) { const dx = p.x - x, dz = p.z - z, rr = p.cr + rad; if (dx * dx + dz * dz < rr * rr) return true }
+      return false;
+    };
+    function moveE(e, dx, dz) { if (!blocked(e.x + dx, e.z, .38)) e.x += dx; if (!blocked(e.x, e.z + dz, .38)) e.z += dz }
+    const eyeOf = (e) => new T.Vector3(e.x, e.y + (e.cr ? 1.05 : 1.55), e.z);
+    function castRay(o, d, maxT, skip, worldOnly) {
+      let best = maxT, code = -9, head = false;
+      for (const b of M.boxes) { const t = phRayBox(o, d, b, best); if (t >= 0 && t < best) { best = t; code = -2 } }
+      for (const cc of M.circles) { const t = phRayCyl(o, d, cc.x, cc.z, cc.r, 0, cc.h, best); if (t >= 0 && t < best) { best = t; code = -2 } }
+      for (const p of M.props) { if (p.type === "bush") continue; const P = PH_PROPS[p.type], t = phRayCyl(o, d, p.x, p.z, P.r * .8, 0, P.h, best); if (t >= 0 && t < best) { best = t; code = -2 } }
+      if (!worldOnly) for (const e of E) { if (!e.alive || e.i === skip) continue; const hh = e.cr ? 1.25 : 1.85, t = phRayCyl(o, d, e.x, e.z, .42, e.y, hh, best); if (t >= 0 && t < best) { best = t; code = e.i; head = o.y + d.y * t - e.y > (e.cr ? .95 : 1.5) } }
+      if (d.y < 0) { const t = -o.y / d.y; if (t < best) { best = t; code = -1; head = false } }
+      return { t: best, code, head, p: [o.x + d.x * best, o.y + d.y * best, o.z + d.z * best] };
+    }
+    const jitter = (d, s) => { const v = new T.Vector3(d.x + (Math.random() - .5) * 2 * s, d.y + (Math.random() - .5) * 2 * s, d.z + (Math.random() - .5) * 2 * s); return v.normalize() };
+    // ---- 効果
+    const fxs = [];
+    function shotFx(a, b, kind, big) {
+      const ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(...a), new T.Vector3(...b)]), new T.LineBasicMaterial({ color: big ? "#FFFFFF" : "#FFE680", transparent: true }));
+      const pf = new T.Mesh(new T.IcosahedronGeometry(kind ? .22 : .16, 0), new T.MeshBasicMaterial({ color: kind ? "#D92C2C" : "#CBB79A", transparent: true })); pf.position.set(...b);
+      const fl = new T.Mesh(new T.SphereGeometry(.1, 6, 5), new T.MeshBasicMaterial({ color: "#FFD86B", transparent: true })); fl.position.set(...a);
+      scene.add(ln, pf, fl); fxs.push({ o: [ln, pf, fl], t: 0, life: .35, upd(k) { ln.material.opacity = Math.max(0, 1 - k * 4); fl.material.opacity = Math.max(0, 1 - k * 6); pf.scale.setScalar(1 + k * 2); pf.material.opacity = 1 - k } });
+      const m = E[myIdx]; if (m) sfx(big ? "sr" : "shot", clamp(1.2 - Math.hypot(a[0] - m.x, a[2] - m.z) / 90, 0, 1));
+    }
+    function boomFx(x, y, z) {
+      const s = new T.Mesh(new T.SphereGeometry(1, 16, 12), new T.MeshBasicMaterial({ color: "#FF9A3C", transparent: true })), sm = new T.Mesh(new T.IcosahedronGeometry(1.4, 1), new T.MeshLambertMaterial({ color: "#6A6560", transparent: true }));
+      s.position.set(x, y + .5, z); sm.position.set(x, y + 1, z); scene.add(s, sm);
+      fxs.push({ o: [s, sm], t: 0, life: 1.4, upd(k) { s.scale.setScalar(1 + k * 9); s.material.opacity = Math.max(0, 1 - k * 2.5); sm.scale.setScalar(1.5 + k * 4); sm.position.y = y + 1 + k * 3; sm.material.opacity = Math.max(0, .8 - k * .8) } });
+      const m = E[myIdx]; if (m) { const d = Math.hypot(x - m.x, z - m.z); sfx("boom", clamp(1.3 - d / 70, 0, 1)); if (d < 14) hurtT = Math.max(hurtT, .25) }
+    }
+    function stepFx(dt) { for (let i = fxs.length - 1; i >= 0; i--) { const f = fxs[i]; f.t += dt; const k = f.t / f.life; f.upd(Math.min(1, k)); if (k >= 1) { f.o.forEach((o) => { scene.remove(o); o.geometry.dispose(); o.material.dispose() }); fxs.splice(i, 1) } } }
+    // 手榴弾（投げた時の速さから、みんな同じ動きを計算する）
+    const grens = [];
+    function spawnGren(gid, owner, x, y, z, vx, vy, vz) { if (seenGr.has(gid)) return; seenGr.add(gid); const m = new T.Mesh(new T.SphereGeometry(.12, 10, 8), new T.MeshStandardMaterial({ color: "#3A5A30" })); m.castShadow = true; scene.add(m); grens.push({ gid, owner, x, y, z, vx, vy, vz, t: 0, m }) }
+    function stepGren(dt) {
+      for (let i = grens.length - 1; i >= 0; i--) {
+        const g = grens[i]; g.t += dt; g.vy -= 18 * dt; const nx = g.x + g.vx * dt, nz = g.z + g.vz * dt;
+        if (blocked(nx, g.z, .1) && g.y < 3) g.vx *= -.4; else g.x = nx; if (blocked(g.x, nz, .1) && g.y < 3) g.vz *= -.4; else g.z = nz;
+        g.y += g.vy * dt; if (g.y < .12) { g.y = .12; g.vy = Math.abs(g.vy) * .35; g.vx *= .6; g.vz *= .6 }
+        g.m.position.set(g.x, g.y, g.z);
+        if (g.t >= 2.6) {
+          scene.remove(g.m); g.m.geometry.dispose(); g.m.material.dispose(); grens.splice(i, 1); boomFx(g.x, g.y, g.z);
+          if (host) for (const e of E) { if (!e.alive) continue; const ch = new T.Vector3(e.x, e.y + 1, e.z), o = new T.Vector3(g.x, g.y + .3, g.z), d = Math.hypot(ch.x - o.x, ch.y - o.y, ch.z - o.z); if (d > 7) continue; const dir = ch.clone().sub(o).normalize(), hit = castRay(o, dir, d, -9, true); if (hit.t < d - .3) continue; hurt(e, 105 * Math.pow(1 - d / 7, 1.1), g.owner, false, "手榴弾") }
+        }
+      }
+    }
+    // ---- 音
+    let actx = null; const au = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume() } catch (_) {} return actx };
+    function sfx(kind, vol = 1) {
+      const a = actx; if (!a || vol <= .03) return; const t = a.currentTime, g = a.createGain(); g.connect(a.destination);
+      if (kind === "shot" || kind === "sr" || kind === "boom") { const len = kind === "boom" ? .8 : kind === "sr" ? .3 : .12, n = Math.floor(a.sampleRate * len), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, kind === "boom" ? 1.6 : 3); const s = a.createBufferSource(); s.buffer = buf; const f = a.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = kind === "boom" ? 600 : kind === "sr" ? 2200 : 4000; s.connect(f); f.connect(g); g.gain.value = (kind === "boom" ? .7 : kind === "sr" ? .45 : .28) * vol; s.start(t) }
+      else { const o = a.createOscillator(); o.type = "square"; o.frequency.setValueAtTime(kind === "hit" ? 1400 : 600, t); g.gain.setValueAtTime(.06 * vol, t); g.gain.linearRampToValueAtTime(0, t + .06); o.connect(g); o.start(t); o.stop(t + .08) }
+    }
+    // ---- ダメージ（ホストだけ）
+    function hurt(e, dmg, from, head, wk) {
+      if (!e.alive || S.ph === "end") return; let d = dmg * (1 - (head ? BR_HELM[e.helm] : BR_ARMOR[e.vest])); e.hp -= d; e.hitT = .3; e.lastHit = from;
+      if (e.hp <= 0) {
+        e.hp = 0; e.alive = false; const left = E.filter((o) => o.alive).length; e.rank = left + 1; e.killer = from;
+        if (from >= 0 && E[from]) E[from].kills++;
+        S.feed = [...S.feed, [++feedId, from >= 0 ? `{${from}} が {${e.i}} を倒した（${wk}${head ? "・ヘッドショット" : ""}）` : `{${e.i}} は安全地帯の外で倒れた`]].slice(-6);
+        if (left <= 1) { const w = E.find((o) => o.alive); if (w) w.rank = 1; S.winner = w ? w.i : -1; S.ph = "end" }
+      }
+    }
+    // ---- 武器
+    const curW = (e) => e.w[e.cur] || e.w[1 - e.cur];
+    function startReload(e) { const sl = curW(e); if (!sl || e.rl > 0 || sl.ammo >= BR_W[sl.w].mag) return; e.rl = BR_W[sl.w].rl }
+    function fire(e, o, d) {
+      const sl = curW(e); if (!sl || !e.alive || !e.landed || e.rl > 0 || e.healT > 0 || e.fireCd > 0) return null;
+      if (sl.ammo <= 0) { startReload(e); return null }
+      const Wp = BR_W[sl.w], lv = BR_LV[sl.lv]; e.fireCd = Wp.rate; sl.ammo--;
+      let spr = e.ads ? Wp.spr * .45 : (Wp.hip || Wp.spr); if (e.mv) spr *= 1.5; if (e.cr) spr *= .75; if (e.y > .05) spr *= 2.5; if (e.i !== myIdx && !isHuman(e.i)) spr += e.err;
+      const hits = []; for (let k = 0; k < (Wp.pel || 1); k++) { const dd = jitter(d, spr), h = castRay(o, dd, Wp.rng * 1.3, e.i); let dmg = Wp.dmg * lv.m * (h.head ? (Wp.k === "sr" ? 2.4 : 1.8) : 1); if (Wp.k === "sg") dmg *= clamp(1.4 - h.t / 18, .2, 1.25); hits.push({ code: h.code, dmg, head: h.head, p: h.p }) }
+      if (sl.ammo <= 0) startReload(e);
+      return { hits, wk: Wp.n, sr: Wp.k === "sr" };
+    }
+    const isHuman = (i) => i === 0 || (i === 1 && S.h1);
+    function applyShot(e, r, tip) {
+      r.hits.forEach((h, k) => { if (h.code >= 0) hurt(E[h.code], h.dmg, e.i, h.head, r.wk); if (k < 3) { S.fx = [...S.fx, [++fxId, e.i, ...tip.map(r2), ...h.p.map(r2), h.code >= 0 ? (h.head ? 2 : 1) : 0, r.sr ? 1 : 0]].slice(-14); if (e.i !== myIdx) shotFx(tip, h.p, h.code >= 0, r.sr) } });
+    }
+    // ---- 拾う
+    const wScore = (s) => (s ? BR_W[s.w].sc + s.lv * .8 : -1);
+    function pickMode(e, it) {
+      if (it.t === "w") { if (!e.w[0] || !e.w[1]) return "auto"; for (const s of e.w) if (s.w === it.w && s.lv < it.lv) return "auto"; if (e.w.some((s) => s.w === it.w && s.lv >= it.lv)) return null; return "swap" }
+      if (it.t === "vest") return it.lv > e.vest ? "auto" : null; if (it.t === "helm") return it.lv > e.helm ? "auto" : null;
+      if (it.t === "med") return e.med < 5 ? "auto" : null; if (it.t === "gren") return e.gren < 3 ? "auto" : null; return it.z > e.scope ? "auto" : null;
+    }
+    function take(e, it, swap) {
+      if (it.t === "w") {
+        const ns = { w: it.w, lv: it.lv, ammo: BR_W[it.w].mag }; let k = e.w.findIndex((s) => s && s.w === it.w && s.lv < it.lv);
+        if (k < 0) k = e.w.findIndex((s) => !s); if (k < 0) k = swap === "bot" ? (wScore(e.w[0]) < wScore(e.w[1]) ? 0 : 1) : e.cur; e.w[k] = ns; e.cur = k;
+      } else if (it.t === "vest") e.vest = it.lv; else if (it.t === "helm") e.helm = it.lv; else if (it.t === "med") e.med++; else if (it.t === "gren") e.gren++; else e.scope = it.z;
+    }
+    // ---- 体の動き（降下・歩く・ジャンプ）
+    function body(e, mx, mz, dt, sprint) {
+      if (!e.landed) {
+        let hs; if (!e.para && e.y > 48) { e.vy = -24; hs = 14 } else { e.para = true; e.vy = -6.5; hs = 7.5 }
+        e.x = clamp(e.x + mx * hs * dt, 4, M.W - 4); e.z = clamp(e.z + mz * hs * dt, 4, M.D - 4); e.y += e.vy * dt;
+        if (e.y <= 0) { e.y = 0; e.vy = 0; e.landed = true; e.para = false; for (let k = 0; k < 40 && blocked(e.x, e.z, .4); k++) { e.x += Math.cos(k) * k * .3; e.z += Math.sin(k) * k * .3 } e.tp++ }
+        return;
+      }
+      const sp = e.healT > 0 ? 1.6 : e.cr ? 2.4 : e.ads ? 3 : sprint ? 7 : 5;
+      moveE(e, mx * sp * dt, mz * sp * dt); e.mv = Math.hypot(mx, mz) > .1;
+      e.vy -= 18 * dt; e.y = Math.max(0, e.y + e.vy * dt); if (e.y <= 0) e.vy = 0;
+    }
+    // ---- 安全地帯（ホスト）
+    function zoneTarget(Z) { const nr = BR_ZONE[Z.k].r, a = Math.random() * 6.28, d = Math.random() * Math.max(0, Z.r - nr) * .8; Z.tx = clamp(Z.cx + Math.cos(a) * d, nr + 5, M.W - nr - 5); Z.tz = clamp(Z.cz + Math.sin(a) * d, nr + 5, M.D - nr - 5); Z.tr = nr; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
+    function zoneStep(dt) {
+      const Z = S.zone; if (Z.st === "done") return; Z.t -= dt;
+      if (Z.st === "wait" && Z.t <= 0) { Z.st = "shrink"; Z.t = BR_ZONE[Z.k].shrink; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
+      if (Z.st === "shrink") { const D = BR_ZONE[Z.k].shrink, a = clamp(1 - Z.t / D, 0, 1); Z.cx = Z.fx + (Z.tx - Z.fx) * a; Z.cz = Z.fz + (Z.tz - Z.fz) * a; Z.r = Z.fr + (Z.tr - Z.fr) * a; if (Z.t <= 0) { Z.k++; if (Z.k < BR_ZONE.length) { Z.st = "wait"; Z.t = BR_ZONE[Z.k].wait; zoneTarget(Z) } else { Z.st = "done"; Z.k = BR_ZONE.length - 1 } } }
+      const dmg = BR_ZONE[Math.min(Z.k, BR_ZONE.length - 1)].d;
+      for (const e of E) if (e.alive && e.landed && Math.hypot(e.x - Z.cx, e.z - Z.cz) > Z.r) { e.zAcc = (e.zAcc || 0) + dmg * dt; if (e.zAcc >= 1) { const v = Math.floor(e.zAcc); e.zAcc -= v; hurt(e, v / (1 - BR_ARMOR[e.vest]), -1, false, "") } }
+    }
+    // ---- コンピューター
+    function los(e, t) { const o = eyeOf(e), ch = new T.Vector3(t.x, t.y + (t.cr ? .8 : 1.25), t.z), d = ch.clone().sub(o), dist = d.length(); d.normalize(); const h = castRay(o, d, dist + .5, e.i); return h.code === t.i }
+    function botMove(e, tx, tz, dt, sprint) {
+      e.pathT -= dt;
+      if (!e.path || e.pathT <= 0 || !e.goal || Math.hypot(e.goal[0] - tx, e.goal[1] - tz) > 4) { e.path = phPath(M, e.x, e.z, tx, tz); e.goal = [tx, tz]; e.pathT = 3 }
+      while (e.path.length && Math.hypot(e.path[0][0] - e.x, e.path[0][1] - e.z) < .6) e.path.shift();
+      const [px, pz] = e.path.length ? e.path[0] : [tx, tz], dx = px - e.x, dz = pz - e.z, d = Math.hypot(dx, dz);
+      if (d < .3) return true; const ox = e.x, oz = e.z; body(e, dx / d, dz / d, dt, sprint); e.yaw = Math.atan2(dx, dz);
+      if (Math.hypot(e.x - ox, e.z - oz) < dt * .8) { e.stuck = (e.stuck || 0) + dt; if (e.stuck > .7) { e.stuck = 0; e.path = null; moveE(e, (Math.random() - .5) * 1.5, (Math.random() - .5) * 1.5) } } else e.stuck = 0;
+      return false;
+    }
+    function bot(e, dt) {
+      if (!e.alive) return;
+      if (!e.landed) { const dx = e.land.x - e.x, dz = e.land.z - e.z, d = Math.hypot(dx, dz); if (e.y < 110 && d < 25 && !e.para) e.para = true; body(e, d > 1 ? dx / d : 0, d > 1 ? dz / d : 0, dt); e.yaw = Math.atan2(dx, dz); return }
+      e.fireCd -= dt; e.think -= dt; e.lootT -= dt;
+      if (e.rl > 0) { e.rl -= dt; if (e.rl <= 0) { const sl = curW(e); if (sl) sl.ammo = BR_W[sl.w].mag } }
+      if (e.healT > 0) { e.healT -= dt; if (e.healT <= 0) { e.hp = Math.min(100, e.hp + 50); e.med--; } body(e, 0, 0, dt); return }
+      if (e.think <= 0) {
+        e.think = .3 + Math.random() * .2; const sl = curW(e), rngW = sl ? BR_W[sl.w].rng : 40; let best = -1, bd = 1e9;
+        for (const o of E) { if (o === e || !o.alive) continue; const d = Math.hypot(o.x - e.x, o.z - e.z); if (d > Math.min(150, rngW * 1.2) || d > bd) continue; const an = Math.abs(phAng(Math.atan2(o.x - e.x, o.z - e.z) - e.yaw)); if (d > 25 && an > 1.4 && e.lastHit !== o.i) continue; if (los(e, o)) { best = o.i; bd = d } }
+        if (best !== e.tg) e.seen = 0; e.tg = best;
+      }
+      const Z = S.zone;
+      if (e.tg >= 0 && E[e.tg].alive) {
+        const t = E[e.tg], dx = t.x - e.x, dz = t.z - e.z, d = Math.hypot(dx, dz), ty = t.y + (t.cr ? .8 : 1.25) - (e.y + (e.cr ? 1.05 : 1.55));
+        e.seen += dt; const wy = Math.atan2(dx, dz), wp = Math.atan2(ty, d);
+        e.yaw += clamp(phAng(wy - e.yaw), -dt * 5, dt * 5); e.pitch += clamp(wp - e.pitch, -dt * 3, dt * 3);
+        e.strafeT -= dt; if (e.strafeT <= 0) { e.strafeT = .8 + Math.random() * 1.4; e.strafe = Math.random() < .5 ? -1 : 1; e.cr = Math.random() < .25 }
+        const sl = curW(e), Wp = sl ? BR_W[sl.w] : null; e.ads = !!Wp && d > 25;
+        const fwd = d > (Wp ? Wp.rng * .7 : 20) ? 1 : d < 6 ? -.5 : 0, rx = -Math.cos(e.yaw), rz = Math.sin(e.yaw);
+        body(e, Math.sin(e.yaw) * fwd + rx * e.strafe * .7, Math.cos(e.yaw) * fwd + rz * e.strafe * .7, dt);
+        if (e.gren > 0 && d > 9 && d < 28 && Math.random() < dt * .1) { e.gren--; const Tt = .8 + d / 30, o = eyeOf(e); botGren(e, o, (t.x - o.x) / Tt, (t.y + .3 - o.y + .5 * 18 * Tt * Tt) / Tt, (t.z - o.z) / Tt) }
+        if (e.seen > .45 && Math.abs(phAng(wy - e.yaw)) < .1) { const o = eyeOf(e), dir = new T.Vector3(Math.sin(e.yaw) * Math.cos(e.pitch), Math.sin(e.pitch), Math.cos(e.yaw) * Math.cos(e.pitch)), r = fire(e, o, dir); if (r) applyShot(e, r, [o.x + dir.x * .8, o.y - .1, o.z + dir.z * .8]) }
+        return;
+      }
+      e.ads = false; e.cr = false;
+      if (e.hp < 60 && e.med > 0) { e.healT = 3; return }
+      const sl = curW(e); if (sl && sl.ammo < BR_W[sl.w].mag * .5 && e.rl <= 0) startReload(e);
+      // 安全地帯へ
+      const zr = Z.st === "wait" ? Z.tr : Z.r, zx = Z.st === "wait" ? Z.tx : Z.cx, zz = Z.st === "wait" ? Z.tz : Z.cz;
+      if (Math.hypot(e.x - zx, e.z - zz) > zr * .8 && (Z.k > 0 || Z.st === "shrink" || Z.t < 20)) { if (!e.zg || Math.hypot(e.zg.x - zx, e.zg.z - zz) > zr) { const a = Math.random() * 6.28, rr = Math.random() * zr * .6; e.zg = { x: zx + Math.cos(a) * rr, z: zz + Math.sin(a) * rr } } botMove(e, e.zg.x, e.zg.z, dt, true); return }
+      // 物を拾いに行く
+      if (e.lootT <= 0) { e.lootT = 2; let bi = -1, bd = 45; for (const it of M.items) { if (taken.has(it.id) || !pickMode(e, it)) continue; const d = Math.hypot(it.x - e.x, it.z - e.z); if (d < bd) { bd = d; bi = it.id } } e.loot = bi }
+      if (e.loot >= 0 && !taken.has(e.loot)) { const it = M.items[e.loot]; if (botMove(e, it.x, it.z, dt) || Math.hypot(it.x - e.x, it.z - e.z) < 1.2) { if (pickMode(e, it)) { take(e, it, "bot"); taken.add(it.id) } e.loot = -1; e.lootT = 0 } return }
+      if (!e.wander || Math.hypot(e.wander.x - e.x, e.wander.z - e.z) < 2) { const a = Math.random() * 6.28, rr = Math.random() * Math.min(60, Z.r * .7); e.wander = { x: clamp(Z.cx + Math.cos(a) * rr, 5, M.W - 5), z: clamp(Z.cz + Math.sin(a) * rr, 5, M.D - 5) } }
+      botMove(e, e.wander.x, e.wander.z, dt);
+    }
+    function botGren(e, o, vx, vy, vz) { const gid = ++grId; spawnGren(gid, e.i, o.x, o.y, o.z, vx, vy, vz); S.grl = [...S.grl, [gid, e.i, r2(o.x), r2(o.y), r2(o.z), r2(vx), r2(vy), r2(vz)]].slice(-10) }
+    // ---- はじめる（ホスト）
+    function start() {
+      const n = clamp(S.n, two() ? 2 : 2, 20); S.h1 = two(); E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n);
+      const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i === 1 && S.h1 ? oppName() : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
+      const pz = 30 + Math.random() * 180, dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
+      E.forEach((e) => { e.x = 20 + Math.random() * 200; e.z = clamp(pz + (Math.random() - .5) * 80, 10, 230); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * 210, z: 15 + Math.random() * 210 }; e.yaw = Math.random() * 6.28; e.tp++ });
+      S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait + 12, cx: 120, cz: 120, r: 175 }; zoneTarget(S.zone);
+      S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear();
+      const m = E[myIdx]; camYaw = Math.atan2(120 - m.x, 120 - m.z);
+    }
+    // ---- 操作
+    const stickInp = controlPad($("#stick"), $("#knob"));
+    let look = null, fireHeld = false, fire2Held = false;
+    const lookBy = (dx, dy) => { const z = adsOn ? zoomOf(E[myIdx]) : 1, k = SENS.look * (adsOn ? SENS.scope / z : 1); camYaw -= dx * .0068 * k; camPitch = clamp(camPitch - dy * .0052 * k, -1.2, .9) };
+    cv.addEventListener("pointerdown", (e) => { au(); if (look) return; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
+    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; lookBy(e.clientX - look.x, e.clientY - look.y); look.x = e.clientX; look.y = e.clientY });
+    const lend = (e) => { if (look && e.pointerId === look.id) look = null }; cv.addEventListener("pointerup", lend); cv.addEventListener("pointercancel", lend);
+    cv.addEventListener("contextmenu", (e) => { e.preventDefault(); adsOn = !adsOn });
+    // 撃つボタンは、押したままなぞると向きも変わる
+    const fireBtn = (el, set) => { let id = null, lx = 0, ly = 0; el.addEventListener("pointerdown", (e) => { e.preventDefault(); au(); id = e.pointerId; lx = e.clientX; ly = e.clientY; set(true); tryFire(); try { el.setPointerCapture(id) } catch (_) {} }); el.addEventListener("pointermove", (e) => { if (e.pointerId !== id) return; lookBy(e.clientX - lx, e.clientY - ly); lx = e.clientX; ly = e.clientY }); const up = (e) => { if (e.pointerId === id) { id = null; set(false) } }; el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up) };
+    fireBtn($("#b-fire"), (v) => (fireHeld = v)); fireBtn($("#b-fire2"), (v) => (fire2Held = v));
+    const tapBtn = (id, fn) => holdBtn($(id), () => { au(); fn() });
+    tapBtn("#b-ads", () => (adsOn = !adsOn)); tapBtn("#b-cr", () => (crOn = !crOn)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-gr", throwGren); tapBtn("#b-med", heal);
+    tapBtn("#b-s0", () => swapTo(0)); tapBtn("#b-s1", () => swapTo(1)); tapBtn("#b-pick", () => { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) });
+    const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") crOn = !crOn; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(); else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) } };
+    const onKeyUp = (e) => { if (e.key === " ") fireHeld = false };
+    addEventListener("keydown", onKey); addEventListener("keyup", onKeyUp);
+    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
+    cardEl.addEventListener("click", onClick);
+    const meE = () => E[myIdx];
+    function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.y <= .01) { m.vy = 5.5; crOn = false } }
+    function swapTo(k) { const m = meE(); if (m && m.w[k] && m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false } }
+    function heal() { const m = meE(); if (m && m.alive && m.landed && m.med > 0 && m.hp < 100 && m.healT <= 0) { m.healT = 3; adsOn = false } }
+    function throwGren() {
+      const m = meE(); if (!m || !m.alive || !m.landed || m.gren <= 0) return; m.gren--; const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = eyeOf(m).addScaledVector(d, .6), v = [d.x * 16, d.y * 16 + 4.5, d.z * 16];
+      if (host) botGren(m, o, ...v); else { const gid = 1e6 + (++shotSeq); spawnGren(gid, myIdx, o.x, o.y, o.z, ...v); myGren = [...myGren, [shotSeq, r2(o.x), r2(o.y), r2(o.z), ...v.map(r2)]].slice(-5) }
+      floats.push({ txt: "手榴弾を投げた！", col: "#FFE14D", t: 0 });
+    }
+    function tryFire() {
+      const m = meE(); if (!m || !m.alive || S.ph !== "play") return;
+      const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = camera.position.clone().addScaledVector(d, camDist * .9), r = fire(m, o, d); if (!r) return;
+      const tp = new T.Vector3(); vis[myIdx].tip.getWorldPosition(tp); const tip = [tp.x, tp.y, tp.z];
+      r.hits.forEach((h, k) => { if (k < 3) shotFx(tip, h.p, h.code >= 0, r.sr); if (h.code >= 0) { hitT = .25; sfx("hit", .8) } });
+      if (host) applyShot(m, r, tip); else r.hits.forEach((h) => { myShots = [...myShots, [++shotSeq, h.code, r2(h.dmg), h.head ? 1 : 0, ...tip.map(r2), ...h.p.map(r2), r.wk, r.sr ? 1 : 0]].slice(-16) });
+      m.recoil = .12;
+    }
+    let pickTarget = -1;
+    function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; take(m, it); taken.add(it.id); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
+    const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; return Math.max(Wp.zoom, sl.w >= 1 && sl.w !== 2 ? m.scope : 1) };
+    // ---- 表示
+    function updVis(dt) {
+      ensureVis(E.length); const m = meE(), scoped = adsOn && m && zoomOf(m) >= 3.5 && m.alive;
+      for (const e of E) {
+        const v = vis[e.i], far = m && Math.hypot(e.x - m.x, e.z - m.z) > 170; v.g.visible = e.alive && !far && !(e.i === myIdx && scoped); if (!v.g.visible) continue;
+        v.g.position.set(e.x, e.y, e.z); v.g.rotation.y = e.yaw;
+        const sp = Math.hypot(e.x - v.px, e.z - v.pz) / Math.max(dt, 1e-3); v.px = e.x; v.pz = e.z; const k = clamp(sp / 4, 0, 1); v.ph += sp * dt * 3.2;
+        const sw = Math.sin(v.ph) * .75 * k, air = e.y > .05 && e.landed, fall = !e.landed;
+        v.body.position.y = e.cr ? -.42 : 0; v.legL.rotation.x = fall ? .4 : e.cr ? -1.3 : air ? -.5 : sw; v.legR.rotation.x = fall ? -.3 : e.cr ? -1.1 : air ? .3 : -sw;
+        const pitch = e.i === myIdx ? camPitch : e.pitch, rc = e.recoil || 0; e.recoil = Math.max(0, rc - dt);
+        if (fall) { v.armL.rotation.set(0, 0, -2.6); v.armR.rotation.set(0, 0, 2.6) } else { v.armR.rotation.set(-1.5 - pitch - rc * 2, 0, 0); v.armL.rotation.set(-1.3 - pitch, 0, -.45) }
+        v.para.visible = !e.landed && e.para; const sl = curW(e); v.guns.forEach((g, gi) => (g.visible = !!sl && sl.w === gi && e.landed)); v.vest.visible = e.vest > 0; v.helm.visible = e.helm > 0; v.cap.visible = !e.helm;
+      }
+      itemMeshes.forEach((mm, i) => { const it = M.items[i]; mm.visible = !taken.has(it.id) && !!m && Math.abs(it.x - m.x) < 60 && Math.abs(it.z - m.z) < 60; if (mm.visible) { mm.rotation.y = tAll * .8 + i; mm.position.y = .05 + Math.sin(tAll * 2 + i) * .04 } });
+      if (S.zone) { zoneM.visible = true; zoneM.position.x = S.zone.cx; zoneM.position.z = S.zone.cz; zoneM.scale.set(Math.max(.1, S.zone.r), 1, Math.max(.1, S.zone.r)) } else zoneM.visible = false;
+      if (S.plane && S.plane.t < 16) { plane.visible = true; const x = S.plane.dir > 0 ? -40 + S.plane.t * 20 : 280 - S.plane.t * 20; plane.position.set(x, 165, S.plane.z); plane.rotation.y = S.plane.dir > 0 ? -Math.PI / 2 : Math.PI / 2 } else plane.visible = false;
+    }
+    function updCam(dt) {
+      let f = meE(); specI = -1; if (f && !f.alive) { const k = f.killer >= 0 ? E[f.killer] : null, al = k && k.alive ? k : E.find((o) => o.alive); if (al) { f = al; specI = al.i } }
+      if (!f) { camera.position.set(120, 60, 220); camera.lookAt(120, 0, 120); return }
+      const z = adsOn && f === meE() ? zoomOf(f) : 1, fall = !f.landed;
+      const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw);
+      const sh = fall ? 0 : z > 1 ? .45 : .75, th = f.y + (fall ? 1 : f.cr ? 1.2 : 1.65), d0 = fall ? 9 : z > 1 ? 1.1 : 3.3;
+      const tg = new T.Vector3(f.x + rx * sh, th, f.z + rz * sh), back = dir.clone().negate();
+      let dist = d0; for (const b of M.boxes) { const t = phRayBox(tg, back, b, dist); if (t >= 0 && t < dist) dist = t } dist = Math.max(.4, dist - .2); camDist = dist;
+      camera.position.copy(tg).addScaledVector(back, dist); if (camera.position.y < .25) camera.position.y = .25;
+      camera.lookAt(tg.clone().addScaledVector(dir, 10)); const fov = 62 / z; if (Math.abs(camera.fov - fov) > .01) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 14); camera.updateProjectionMatrix() }
+      sun.position.set(f.x + 30, 60, f.z + 20); sun.target.position.set(f.x, 0, f.z); sun.target.updateMatrixWorld();
+    }
+    let VW = 0, VH = 0;
+    function resize() {
+      const w = innerWidth, h = innerHeight; document.documentElement.classList.toggle("br-portrait", h > w); if (w === VW && h === VH) return; VW = w; VH = h;
+      renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px";
+      const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    const tmpV = new T.Vector3(), project = (x, y, z) => { tmpV.set(x, y, z).project(camera); return tmpV.z > 1 ? null : [(tmpV.x + 1) / 2 * VW, (1 - tmpV.y) / 2 * VH] };
+    function hud(dt) {
+      const w = VW, h = VH; c.clearRect(0, 0, w, h); const m = meE();
+      if (S.ph === "lobby" || !m) return;
+      const z = adsOn ? zoomOf(m) : 1, scoped = adsOn && z >= 3.5 && m.alive;
+      if (scoped) { const R = Math.min(w, h) * .46; c.fillStyle = "#000"; c.beginPath(); c.rect(0, 0, w, h); c.arc(w / 2, h / 2, R, 0, 7, true); c.fill(); c.strokeStyle = "rgba(0,0,0,.85)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w / 2 - R, h / 2); c.lineTo(w / 2 + R, h / 2); c.moveTo(w / 2, h / 2 - R); c.lineTo(w / 2, h / 2 + R); c.stroke(); c.fillStyle = "#E23A3A"; c.beginPath(); c.arc(w / 2, h / 2, 2.5, 0, 7); c.fill(); bigText(c, `${z}倍`, w / 2, h / 2 + R - 20, 14, "#fff") }
+      else if (m.alive && m.landed) { const sl = curW(m), Wp = sl ? BR_W[sl.w] : null, sp = Wp ? (adsOn ? Wp.spr * .45 : Wp.hip || Wp.spr) * (m.mv ? 1.5 : 1) : .03, R = 6 + sp * h * 1.2; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * R, h / 2 + dy * R); c.lineTo(w / 2 + dx * (R + 7), h / 2 + dy * (R + 7)); c.stroke() } c.fillStyle = "#fff"; c.fillRect(w / 2 - 1, h / 2 - 1, 2, 2) }
+      if (hitT > 0) { hitT -= dt; c.strokeStyle = "#FF4D4D"; c.lineWidth = 2.5; for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * 6, h / 2 + dy * 6); c.lineTo(w / 2 + dx * 13, h / 2 + dy * 13); c.stroke() } }
+      const L = w > h && mobile ? 40 : 14;
+      const alive = E.filter((e) => e.alive).length;
+      c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(L, 10, 150, 26); c.font = `14px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(`生存 ${alive}人`, L + 8, 23); c.fillStyle = "#FFB4A8"; c.fillText(`キル ${m.kills}`, L + 92, 23);
+      // 安全地帯のお知らせ
+      const Z = S.zone; if (Z) { const tt = Math.max(0, Math.ceil(Z.t)), tx = Z.st === "wait" ? `安全地帯が縮むまで ${Math.floor(tt / 60)}:${String(tt % 60).padStart(2, "0")}` : Z.st === "shrink" ? "安全地帯が縮んでいます！" : "最後の安全地帯"; bigText(c, tx, w / 2, 58, 14, Z.st === "shrink" ? "#FFB4A8" : "#fff") }
+      if (Z && m.alive && m.landed && Math.hypot(m.x - Z.cx, m.z - Z.cz) > Z.r) { bigText(c, "安全地帯の外！ 地図の白い円の中へ", w / 2, 82, 15, "#FF6B6B"); c.fillStyle = "rgba(80,140,255,.12)"; c.fillRect(0, 0, w, h) }
+      // 地図
+      const mw = Math.min(130, h * .32), mx = w - mw - Math.max(12, L - 2), my = 10, ms = mw / M.W;
+      c.save(); c.beginPath(); c.rect(mx, my, mw, mw); c.clip(); c.fillStyle = "rgba(60,110,50,.85)"; c.fillRect(mx, my, mw, mw); c.fillStyle = "rgba(210,180,130,.8)"; for (const f of M.floors) c.fillRect(mx + f.x0 * ms, my + f.z0 * ms, Math.max(1, (f.x1 - f.x0) * ms), Math.max(1, (f.z1 - f.z0) * ms));
+      c.fillStyle = "rgba(90,80,70,.9)"; for (const b of M.boxes) if (b.h > 2) c.fillRect(mx + b.x0 * ms, my + b.z0 * ms, Math.max(1, (b.x1 - b.x0) * ms), Math.max(1, (b.z1 - b.z0) * ms));
+      if (Z) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.beginPath(); c.arc(mx + Z.cx * ms, my + Z.cz * ms, Z.r * ms, 0, 7); c.stroke(); if (Z.st === "wait") { c.setLineDash([3, 3]); c.strokeStyle = "#7CF59A"; c.beginPath(); c.arc(mx + Z.tx * ms, my + Z.tz * ms, Z.tr * ms, 0, 7); c.stroke(); c.setLineDash([]) } }
+      if (S.plane && S.plane.t < 16) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * 20 : 280 - S.plane.t * 20) * ms - 6, my + S.plane.z * ms) }
+      c.restore(); { const px = mx + m.x * ms, pz = my + m.z * ms; c.save(); c.translate(px, pz); c.rotate(-camYaw + Math.PI); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(0, -6); c.lineTo(4, 4); c.lineTo(-4, 4); c.closePath(); c.fill(); c.restore() }
+      // たおした・たおされたのお知らせ
+      c.font = `12px ${DISP}`; c.textAlign = "right"; S.feed.slice(-4).forEach((f, i) => { const tx = fmt(f[1]), tw = c.measureText(tx).width + 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(mx + mw - tw, my + mw + 8 + i * 20, tw, 18); c.fillStyle = "#fff"; c.fillText(tx, mx + mw - 6, my + mw + 17 + i * 20) });
+      // 体力
+      if (m.alive) { const bw = Math.min(260, w * .32), bx = w / 2 - bw / 2, by = h - 64; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(bx, by, bw, 12); c.fillStyle = m.hp > 50 ? "#F2F2F2" : m.hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(bx + 1, by + 1, (bw - 2) * clamp(m.hp, 0, 100) / 100, 10); c.font = `11px ${DISP}`; c.textAlign = "left"; c.fillStyle = "#fff"; c.fillText(`${Math.ceil(m.hp)}　ベスト${m.vest ? "Lv" + m.vest : "なし"}・ヘルメット${m.helm ? "Lv" + m.helm : "なし"}${m.scope > 1 ? `・${m.scope}倍スコープ` : ""}`, bx, by - 8) }
+      if (!m.landed && m.alive) { bigText(c, m.para ? "パラシュートで降下中" : "降下中！（ジャンプでパラシュート）", w / 2, h * .3, 18, "#fff"); bigText(c, `高さ ${Math.round(m.y)}m　スティックで着地点をえらぼう`, w / 2, h * .3 + 26, 13, "#E9F7EE") }
+      if (m.rl > 0) bigText(c, "リロード中…", w / 2, h * .62, 15, "#fff");
+      if (m.healT > 0) bigText(c, `回復中… ${m.healT.toFixed(1)}`, w / 2, h * .62, 15, "#7CF59A");
+      floats = floats.filter((f) => (f.t += dt) < 1.6); floats.forEach((f, i) => bigText(c, f.txt, w / 2, h * .42 - f.t * 22 - i * 24, 15, f.col));
+      if (hurtT > 0) { hurtT -= dt; const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, "rgba(255,0,0,0)"); g.addColorStop(1, `rgba(255,30,30,${hurtT * 1.3})`); c.fillStyle = g; c.fillRect(0, 0, w, h) }
+      // 相手（人）の名前
+      if (S.h1) { const o = E[1 - myIdx]; if (o && o.alive && m) { const p = project(o.x, o.y + 2.2, o.z); if (p && Math.hypot(o.x - m.x, o.z - m.z) < 80) bigText(c, nm(o.i), p[0], p[1], 12, "#FFE14D") } }
+      if (!m.alive && specI >= 0) bigText(c, `観戦中：${nm(specI)}`, w / 2, 100, 13, "#fff");
+    }
+    function panel() {
+      const m = meE();
+      if (S.ph === "lobby") {
+        if (host) setMsg(`<p class="eyebrow">荒野バトル</p><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
+        else setMsg(`<p class="wait">${esc(oppName())}が人数をえらんでいます（${S.n}人）</p>`);
+        return;
+      }
+      if (m && (!m.alive || S.ph === "end") && !watching) {
+        const won = S.ph === "end" && S.winner === myIdx, rank = won ? 1 : m.rank || E.filter((o) => o.alive).length;
+        setMsg(`<p class="verdict ${won ? "good" : "bad"}">${won ? "勝ち残った！ 1位" : `${rank}位`}</p><p>キル ${m.kills}　／　${S.n}人中</p>${S.ph === "end" && !won ? `<p class="muted">優勝：${esc(nm(S.winner))}</p>` : ""}${againBtns("br")}${S.ph !== "end" ? `<button class="btn ghost" data-br="watch">観戦する</button>` : ""}`);
+      } else setMsg("");
+    }
+    // ---- 毎フレーム
+    const stopLoop = loop((dt) => {
+      tAll += dt; resize();
+      const op = rtOppPeer(), ox = op ? op.presence.x : null;
+      if (!host && ox && ox.S) {
+        const pS = S.ph; S = Object.assign({}, S, ox.S); const n = S.n;
+        if (S.ph !== "lobby" && E.length !== n) { E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n) }
+        if (pS === "lobby" && S.ph === "play") { taken.clear(); seenGr.clear() }
+        (ox.tk || []).forEach((id) => taken.add(id));
+        if (ox.E) ox.E.forEach((a, i) => {
+          const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13];
+          if (i === myIdx) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(120 - e.x, 120 - e.z) } return }
+          const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.z += (a[1] - e.z) * al; e.y += (a[2] - e.y) * al; e.yaw = a[3]; e.pitch = a[4];
+          e.cr = !!(a[6] & 2); e.ads = !!(a[6] & 4); e.para = !!(a[6] & 16); e.landed = !!(a[6] & 32); e.w = [a[7] >= 0 ? { w: a[7], lv: a[8], ammo: 1 } : null, null]; e.cur = 0; e.vest = a[9]; e.helm = a[10];
+        });
+        for (const f of ox.fx || []) if (f[0] > seenFx) { seenFx = f[0]; if (f[1] !== myIdx) shotFx(f.slice(2, 5), f.slice(5, 8), f[8] > 0, f[9]) }
+        for (const g of ox.grl || []) spawnGren(...g);
+      }
+      const m = meE();
+      // 自分を動かす
+      if (m && S.ph !== "lobby") {
+        let ix = stickInp.x, iz = stickInp.y;
+        if (keys.has("a") || keys.has("A")) ix = -1; if (keys.has("d") || keys.has("D")) ix = 1; if (keys.has("w") || keys.has("W")) iz = -1; if (keys.has("s") || keys.has("S")) iz = 1;
+        if (keys.has("ArrowLeft")) camYaw += dt * 2.2 * SENS.look; if (keys.has("ArrowRight")) camYaw -= dt * 2.2 * SENS.look; if (keys.has("ArrowUp")) camPitch = Math.min(.9, camPitch + dt * 1.5); if (keys.has("ArrowDown")) camPitch = Math.max(-1.2, camPitch - dt * 1.5);
+        let mg = Math.hypot(ix, iz); if (mg > 1) { ix /= mg; iz /= mg; mg = 1 }
+        const fx = Math.sin(camYaw), fz = Math.cos(camYaw), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
+        if (m.alive && S.ph === "play") {
+          m.cr = crOn && m.landed; m.ads = adsOn && m.landed; m.fireCd -= dt;
+          if (m.rl > 0) { m.rl -= dt; if (m.rl <= 0) { const sl = curW(m); if (sl) sl.ammo = BR_W[sl.w].mag } }
+          if (m.healT > 0) { m.healT -= dt; if (m.healT <= 0) { m.med--; if (host) m.hp = Math.min(100, m.hp + 50); else myHeal = [myHeal[0] + 1, 50] } }
+          body(m, mg > .1 ? mx : 0, mg > .1 ? mz : 0, dt, mg > .92 && !adsOn && !crOn);
+          m.yaw = m.landed && (adsOn || fireHeld || fire2Held || mg < .1) ? camYaw : mg > .1 ? Math.atan2(mx, mz) : m.yaw; if (adsOn || fireHeld || fire2Held) m.yaw = camYaw; m.pitch = camPitch;
+          const sl = curW(m); if ((fireHeld || fire2Held) && sl && BR_W[sl.w].auto) tryFire();
+          // 拾う
+          pickTarget = -1; if (m.landed) for (const it of M.items) { if (taken.has(it.id) || Math.abs(it.x - m.x) > 1.6 || Math.abs(it.z - m.z) > 1.6) continue; const md = pickMode(m, it); if (md === "auto") doPick(m, it, false); else if (md === "swap") pickTarget = it.id }
+        }
+      }
+      if (host) {
+        if (S.ph === "play") {
+          S.plane.t += dt; zoneStep(dt);
+          if (S.h1 && two() && ox && ox.px != null) {
+            const g = E[1]; if (g.alive) { g.x = ox.px; g.z = ox.pz; g.y = ox.y; g.yaw = ox.yaw; g.pitch = ox.pt; g.cr = !!ox.cr; g.ads = !!ox.ads; g.landed = !!ox.ld; g.para = !!ox.pa; g.vest = ox.vs; g.helm = ox.hm; g.w = [ox.wp >= 0 ? { w: ox.wp, lv: ox.wl, ammo: 1 } : null, null]; g.cur = 0 }
+            for (const s of ox.sh || []) if (s[0] > lastGuestShot) { lastGuestShot = s[0]; if (g.alive && s[1] >= 0 && E[s[1]]) hurt(E[s[1]], s[2], 1, !!s[3], s[10]); S.fx = [...S.fx, [++fxId, 1, ...s.slice(4, 10), s[1] >= 0 ? 1 : 0, s[11]]].slice(-14); shotFx(s.slice(4, 7), s.slice(7, 10), s[1] >= 0, s[11]) }
+            for (const gr of ox.gr || []) { const gid = 1e6 + gr[0]; if (!seenGr.has(gid)) { spawnGren(gid, 1, ...gr.slice(1)); S.grl = [...S.grl, [gid, 1, ...gr.slice(1)]].slice(-10) } }
+            if (ox.hl && ox.hl[0] > lastGuestHeal) { lastGuestHeal = ox.hl[0]; if (g.alive) g.hp = Math.min(100, g.hp + ox.hl[1]) }
+            for (const id of ox.pk || []) taken.add(id);
+          }
+          for (const e of E) if (!isHuman(e.i) || (e.i === 1 && !two())) bot(e, dt);
+        }
+        const out = { S: { ph: S.ph, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1 },
+          E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp] }), fx: S.fx, grl: S.grl, tk: [...taken] };
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      } else if (m) {
+        const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), cr: m.cr ? 1 : 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks };
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      }
+      if (m && m.hp < myHpSeen - .5) { hurtT = .45 } if (m) myHpSeen = m.hp;
+      stepGren(dt); updVis(dt); updCam(dt); stepFx(dt);
+      W3.wmat.map.offset.x = (tAll * .02) % 1;
+      renderer.render(scene, camera); hud(dt); panel();
+      // ボタン
+      if (m) {
+        const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${BR_W[s.w].mag}`}</small>` : `<small>空き</small>`);
+        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, adsOn, crOn, pickTarget, m.landed].join();
+        if (key !== lastBtn) {
+          lastBtn = key; $("#b-s0").innerHTML = lbl(s0, 0); $("#b-s1").innerHTML = lbl(s1, 1); $("#b-s0").classList.toggle("on", m.cur === 0); $("#b-s1").classList.toggle("on", m.cur === 1);
+          $("#b-med").innerHTML = `回復<br><small>${m.med}</small>`; $("#b-gr").innerHTML = `手榴弾<br><small>${m.gren}</small>`; $("#b-ads").classList.toggle("on", adsOn); $("#b-cr").classList.toggle("on", crOn);
+          const pk = $("#b-pick"); pk.classList.toggle("on", pickTarget >= 0); if (pickTarget >= 0) pk.textContent = `拾う：${brItemName(M.items[pickTarget])}（今の武器と持ちかえ）`;
+          cardEl.classList.toggle("br-dead", !m.alive || S.ph !== "play");
+        }
+      }
+    });
+    return () => {
+      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp);
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -3838,6 +4433,8 @@ html.playing.full .card.act canvas { border-radius: 0 }
     else if (act === "start") startMatch(t.dataset.g);
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
+    else if (act === "sens") sensPanel(!$("#sens"));
+    else if (act === "sens-reset") { for (const k in SENS) { SENS[k] = 1; ls.set("sens_" + k, 1) } sensPanel(false); sensPanel(true) }
     else if (act === "install") {
       if (installEvt) { const ev = installEvt; installEvt = null; ev.prompt(); ev.userChoice.finally(() => render()) }
       else { ui.installHelp = !ui.installHelp; render() }
