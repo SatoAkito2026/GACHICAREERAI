@@ -3501,6 +3501,7 @@ html.br-portrait .br-ui { display: none }
   const BR_NAMES = ["ケンタ", "ユウキ", "ソラ", "ハルト", "リク", "ミオ", "アオイ", "レン", "カイト", "ヒナ", "タクミ", "サクラ", "ダイチ", "ユイ", "コウ", "ナギ", "ルイ", "マコト", "シュン", "エマ"];
   const BR_PAL = [["#3A5A40", "#2A3A2C", "#C9A26B"], ["#4A4E69", "#22223B", "#9A8C98"], ["#8D5A3B", "#3E2C23", "#D9B26F"], ["#2E6FD0", "#1E2F55", "#E2E2E2"], ["#6B705C", "#3F4238", "#CB997E"], ["#9B2226", "#3A1F1F", "#E9D8A6"], ["#5E548E", "#231942", "#E0B1CB"], ["#2A9D8F", "#264653", "#E9C46A"]];
   const BR_ZONE = [{ wait: 70, shrink: 32, r: .46, d: 2 }, { wait: 45, shrink: 26, r: .263, d: 4 }, { wait: 35, shrink: 20, r: .145, d: 7 }, { wait: 25, shrink: 16, r: .058, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }]; // r は マップの大きさに対する割合
+  const BR_DIFF = [{ n: "よわい", err: [.05, .035], react: 1.0, turn: 3, see: .8, gren: .04 }, { n: "ふつう", err: [.012, .03], react: .45, turn: 5, see: 1, gren: .1 }, { n: "つよい", err: [.006, .014], react: .25, turn: 7, see: 1.15, gren: .15 }, { n: "鬼", err: [.002, .005], react: .12, turn: 10, see: 1.35, gren: .22 }];
   const BR_SIZES = [{ m: 380, n: "ふつう 380m" }, { m: 600, n: "広い 600m" }, { m: 1000, n: "1km" }];
   // ステージ（どれも 380m 四方の広いマップ）
   const BR_STAGES = [
@@ -3605,7 +3606,7 @@ html.br-portrait .br-ui { display: none }
     function bld(x0, z0, x1, z1, h, v) { return box(x0, z0, x1, z1, h, Object.assign({ k: "bld" }, v)) }
     // 拾える物
     const pickLv = () => { const v = r(); return v < .5 ? 0 : v < .8 ? 1 : v < .95 ? 2 : 3 };
-    const mkItem = () => { const v = r(); if (v < .46) { const w = r(); return { t: "w", w: w < .16 ? 0 : w < .38 ? 1 : w < .56 ? 2 : w < .82 ? 3 : 4, lv: pickLv() } } if (v < .56) return { t: "vest", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .66) return { t: "helm", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .81) return { t: "med" }; if (v < .93) return { t: "gren" }; return { t: "scope", z: [2, 4, 8][Math.floor(r() * r() * 3)] } };
+    const mkItem = () => { const v = r(); if (v < .46) { const w = r(); return { t: "w", w: w < .16 ? 0 : w < .38 ? 1 : w < .56 ? 2 : w < .82 ? 3 : 4, lv: pickLv() } } if (v < .56) return { t: "vest", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .66) return { t: "helm", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .81) return { t: "med" }; if (v < .93) return { t: "gren" }; return { t: "scope", z: [1.5, 2, 4, 8][Math.floor(r() * r() * 4)] } };
     const addItem = (x, z) => { if (!free(x, z, .5)) return false; M.items.push(Object.assign({ id: M.items.length, x, z }, mkItem())); return true };
     for (const b of M.boxes) { if (b.vis.k !== "bld" && b.vis.k !== "container") continue; for (let k = 0; k < (b.vis.k === "bld" ? 3 : 1); k++) { const side = RI(0, 3), x = side < 2 ? R(b.x0, b.x1) : side === 2 ? b.x0 - 1.2 : b.x1 + 1.2, z = side >= 2 ? R(b.z0, b.z1) : side === 0 ? b.z0 - 1.2 : b.z1 + 1.2; addItem(x, z) } }
     for (const hs of M.houses) for (let k = 0, n = RI(2, 4), t = 0; k < n && t < 20; t++) if (addItem(R(hs.x0 + 1, hs.x1 - 1), R(hs.z0 + 1, hs.z1 - 1))) k++;
@@ -3676,7 +3677,7 @@ html.br-portrait .br-ui { display: none }
     else { B.cyl(.06, .06, .34, "#111", 0, .1, 0, 10, 0, Math.PI / 2); B.box(.12, .1, .06, lc, 0, .18, 0) }
     return phMerge(B.L, false);
   }
-  const brItemName = (it) => (it.t === "w" ? `${BR_W[it.w].n}（${BR_LV[it.lv].n}）` : it.t === "vest" ? `ベスト Lv${it.lv}` : it.t === "helm" ? `ヘルメット Lv${it.lv}` : it.t === "med" ? "救急箱" : it.t === "gren" ? "手榴弾" : `${it.z}倍スコープ`);
+  const brItemName = (it) => (it.t === "w" ? `${BR_W[it.w].n}（${BR_LV[it.lv].n}）` : it.t === "vest" ? `ベスト Lv${it.lv}` : it.t === "helm" ? `ヘルメット Lv${it.lv}` : it.t === "med" ? "救急箱" : it.t === "gren" ? "手榴弾" : it.z < 2 ? "ドットサイト" : `${it.z}倍スコープ`);
   ACTION.br = {
     full: true,
     shell() {
@@ -3723,7 +3724,7 @@ html.br-portrait .br-ui { display: none }
     // 拾える物
     const itemGeo = {}, itemMeshes = M.items.map((it) => { const k = it.t + (it.w ?? "") + (it.lv ?? "") + (it.z ?? ""); const g = itemGeo[k] || (itemGeo[k] = brItemGeo(it)); const m = new T.Mesh(g, W3.mat); m.position.set(it.x, 0, it.z); scene.add(m); return m });
     // ---- 状態
-    let S = { ph: "lobby", n: 12, names: [], zone: null, feed: [], fx: [], grl: [], tk: [], plane: null, winner: -1 }, E = [];
+    let S = { ph: "lobby", diff: Number(ls.get("brDiff") ?? 1) || (ls.get("brDiff") === "0" ? 0 : 1), n: 12, names: [], zone: null, feed: [], fx: [], grl: [], tk: [], plane: null, winner: -1 }, E = [];
     const vis = [], taken = new Set();
     let fxId = 0, feedId = 0, grId = 0, lastSend = "", seenFx = 0, seenFeed = 0, seenGr = new Set(), lastGuestShot = 0, lastGuestHeal = 0, lastGuestPick = new Set(), myShots = [], myGren = [], myPicks = [], myHeal = [0, 0], shotSeq = 0;
     let hitFrom = null, cullT = 0, specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
@@ -3874,20 +3875,20 @@ html.br-portrait .br-ui { display: none }
       if (e.healT > 0) { e.healT -= dt; if (e.healT <= 0) { e.hp = Math.min(100, e.hp + 50); e.med--; } body(e, 0, 0, dt); return }
       if (e.think <= 0) {
         e.think = .3 + Math.random() * .2; const sl = curW(e), rngW = sl ? BR_W[sl.w].rng : 40; let best = -1, bd = 1e9;
-        for (const o of E) { if (o === e || !o.alive) continue; const d = Math.hypot(o.x - e.x, o.z - e.z); if (d > Math.min(150, rngW * 1.2) || d > bd) continue; const an = Math.abs(phAng(Math.atan2(o.x - e.x, o.z - e.z) - e.yaw)); if (d > 25 && an > 1.4 && e.lastHit !== o.i) continue; if (los(e, o)) { best = o.i; bd = d } }
+        for (const o of E) { if (o === e || !o.alive) continue; const d = Math.hypot(o.x - e.x, o.z - e.z); if (d > Math.min(150, rngW * 1.2) * (e.see || 1) || d > bd) continue; const an = Math.abs(phAng(Math.atan2(o.x - e.x, o.z - e.z) - e.yaw)); if (d > 25 && an > 1.4 && e.lastHit !== o.i) continue; if (los(e, o)) { best = o.i; bd = d } }
         if (best !== e.tg) e.seen = 0; e.tg = best;
       }
       const Z = S.zone;
       if (e.tg >= 0 && E[e.tg].alive) {
         const t = E[e.tg], dx = t.x - e.x, dz = t.z - e.z, d = Math.hypot(dx, dz), ty = t.y + (t.cr ? .8 : 1.25) - (e.y + (e.cr ? 1.05 : 1.55));
         e.seen += dt; const wy = Math.atan2(dx, dz), wp = Math.atan2(ty, d);
-        e.yaw += clamp(phAng(wy - e.yaw), -dt * 5, dt * 5); e.pitch += clamp(wp - e.pitch, -dt * 3, dt * 3);
+        e.yaw += clamp(phAng(wy - e.yaw), -dt * (e.turn || 5), dt * (e.turn || 5)); e.pitch += clamp(wp - e.pitch, -dt * (e.turn || 5) * .6, dt * (e.turn || 5) * .6);
         e.strafeT -= dt; if (e.strafeT <= 0) { e.strafeT = .8 + Math.random() * 1.4; e.strafe = Math.random() < .5 ? -1 : 1; e.cr = Math.random() < .25 }
         const sl = curW(e), Wp = sl ? BR_W[sl.w] : null; e.ads = !!Wp && d > 25;
         const fwd = d > (Wp ? Wp.rng * .7 : 20) ? 1 : d < 6 ? -.5 : 0, rx = -Math.cos(e.yaw), rz = Math.sin(e.yaw);
         body(e, Math.sin(e.yaw) * fwd + rx * e.strafe * .7, Math.cos(e.yaw) * fwd + rz * e.strafe * .7, dt);
-        if (e.gren > 0 && d > 9 && d < 28 && Math.random() < dt * .1) { e.gren--; const Tt = .8 + d / 30, o = eyeOf(e); botGren(e, o, (t.x - o.x) / Tt, (t.y + .3 - o.y + .5 * 18 * Tt * Tt) / Tt, (t.z - o.z) / Tt) }
-        if (e.seen > .45 && Math.abs(phAng(wy - e.yaw)) < .1) { const o = eyeOf(e), dir = new T.Vector3(Math.sin(e.yaw) * Math.cos(e.pitch), Math.sin(e.pitch), Math.cos(e.yaw) * Math.cos(e.pitch)), r = fire(e, o, dir); if (r) applyShot(e, r, [o.x + dir.x * .8, o.y - .1, o.z + dir.z * .8]) }
+        if (e.gren > 0 && d > 9 && d < 28 && Math.random() < dt * (e.gren2 ?? .1)) { e.gren--; const Tt = .8 + d / 30, o = eyeOf(e); botGren(e, o, (t.x - o.x) / Tt, (t.y + .3 - o.y + .5 * 18 * Tt * Tt) / Tt, (t.z - o.z) / Tt) }
+        if (e.seen > (e.react ?? .45) && Math.abs(phAng(wy - e.yaw)) < .1) { const o = eyeOf(e), dir = new T.Vector3(Math.sin(e.yaw) * Math.cos(e.pitch), Math.sin(e.pitch), Math.cos(e.yaw) * Math.cos(e.pitch)), r = fire(e, o, dir); if (r) applyShot(e, r, [o.x + dir.x * .8, o.y - .1, o.z + dir.z * .8]) }
         return;
       }
       e.ads = false; e.cr = false;
@@ -3909,6 +3910,7 @@ html.br-portrait .br-ui { display: none }
       const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i === 1 && S.h1 ? oppName() : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
       const pz = 50 + Math.random() * (M.D - 100), dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
       E.forEach((e) => { e.x = 20 + Math.random() * (M.W - 40); e.z = clamp(pz + (Math.random() - .5) * 100, 10, M.D - 10); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * (M.W - 30), z: 15 + Math.random() * (M.D - 30) }; if (M.water.some((w) => e.land.x > w.x0 - 3 && e.land.x < w.x1 + 3 && e.land.z > w.z0 - 3 && e.land.z < w.z1 + 3)) e.land = { x: C0, z: C0 }; e.yaw = Math.random() * 6.28; e.tp++ });
+      const DF = BR_DIFF[S.diff ?? 1]; E.forEach((e) => { e.err = DF.err[0] + Math.random() * DF.err[1]; e.react = DF.react * (.8 + Math.random() * .4); e.turn = DF.turn; e.see = DF.see; e.gren2 = DF.gren });
       S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait * ZK + 12, cx: C0, cz: C0, r: M.W * .74 }; zoneTarget(S.zone);
       S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear();
       const m = E[myIdx]; camYaw = Math.atan2(C0 - m.x, C0 - m.z);
@@ -3955,7 +3957,7 @@ html.br-portrait .br-ui { display: none }
       const up = (e) => { if (drag && e.pointerId === drag.id) drag = null }; editLayer.addEventListener("pointerup", up); editLayer.addEventListener("pointercancel", up);
       selectId(null);
     }
-    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
+    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.y <= .01) { m.vy = 5.5; crOn = false } }
@@ -3976,14 +3978,15 @@ html.br-portrait .br-ui { display: none }
     }
     let pickTarget = -1;
     function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; take(m, it); taken.add(it.id); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
-    const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; return Math.max(Wp.zoom, sl.w >= 1 && sl.w !== 2 ? m.scope : 1) };
+    // スコープ・ドットサイトはショットガン以外につく（スナイパーは4倍より下にはならない）
+    const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; if (m.scope > 1 && sl.w !== 2) return Wp.k === "sr" ? Math.max(4, m.scope) : m.scope; return Wp.zoom };
     // ---- 表示
     function updVis(dt) {
       ensureVis(E.length); const m = meE(), scoped = adsOn && m && zoomOf(m) >= 3.5 && m.alive;
       for (const e of E) {
         const v = vis[e.i], far = m && Math.hypot(e.x - m.x, e.z - m.z) > 170; v.g.visible = e.alive && !far && !(e.i === myIdx && scoped); if (!v.g.visible) continue;
         v.g.position.set(e.x, e.y, e.z); v.g.rotation.y = e.yaw;
-        const sp = Math.hypot(e.x - v.px, e.z - v.pz) / Math.max(dt, 1e-3); v.px = e.x; v.pz = e.z; const k = clamp(sp / 4, 0, 1); v.ph += sp * dt * 3.2;
+        const sp = Math.hypot(e.x - v.px, e.z - v.pz) / Math.max(dt, 1e-3); v.px = e.x; v.pz = e.z; e.spd = e.spd == null ? sp : e.spd * .85 + Math.min(sp, 12) * .15; const k = clamp(sp / 4, 0, 1); v.ph += sp * dt * 3.2;
         const sw = Math.sin(v.ph) * .75 * k, air = e.y > .05 && e.landed, fall = !e.landed;
         v.body.position.y = e.cr ? -.36 : 0;
         v.legL.rotation.x = fall ? .4 : e.cr ? -1.35 : air ? -.6 : sw; v.legR.rotation.x = fall ? -.3 : e.cr ? -1.1 : air ? .2 : -sw;
@@ -4032,6 +4035,13 @@ html.br-portrait .br-ui { display: none }
       if (S.ph === "lobby" || !m) return;
       const z = adsOn ? zoomOf(m) : 1, scoped = adsOn && z >= 3.5 && m.alive;
       if (scoped) { const R = Math.min(w, h) * .46; c.fillStyle = "#000"; c.beginPath(); c.rect(0, 0, w, h); c.arc(w / 2, h / 2, R, 0, Math.PI * 2); c.fill("evenodd"); c.strokeStyle = "rgba(0,0,0,.85)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w / 2 - R, h / 2); c.lineTo(w / 2 + R, h / 2); c.moveTo(w / 2, h / 2 - R); c.lineTo(w / 2, h / 2 + R); c.stroke(); c.fillStyle = "#E23A3A"; c.beginPath(); c.arc(w / 2, h / 2, 2.5, 0, 7); c.fill(); bigText(c, `${z}倍`, w / 2, h / 2 - R + 22, 14, "#fff") }
+      else if (adsOn && m.alive && m.landed && m.scope > 1 && z < 3.5 && curW(m) && curW(m).w !== 2) {
+        // ドットサイト・2倍スコープ：まるい枠の中に、赤い点（2倍は十字つき）
+        const R = Math.min(w, h) * .2; c.fillStyle = "rgba(140,200,255,.06)"; c.beginPath(); c.arc(w / 2, h / 2, R, 0, 7); c.fill(); c.strokeStyle = "rgba(20,20,24,.85)"; c.lineWidth = 7; c.beginPath(); c.arc(w / 2, h / 2, R + 4, 0, 7); c.stroke();
+        if (m.scope >= 2) { c.strokeStyle = "rgba(0,0,0,.8)"; c.lineWidth = 1.5; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * 8, h / 2 + dy * 8); c.lineTo(w / 2 + dx * R * .7, h / 2 + dy * R * .7); c.stroke() } }
+        const gl2 = c.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 9); gl2.addColorStop(0, "rgba(255,40,40,1)"); gl2.addColorStop(.35, "rgba(255,40,40,.9)"); gl2.addColorStop(1, "rgba(255,40,40,0)"); c.fillStyle = gl2; c.beginPath(); c.arc(w / 2, h / 2, 9, 0, 7); c.fill();
+        bigText(c, m.scope < 2 ? "ドットサイト" : `${m.scope}倍`, w / 2, h / 2 - R - 14, 12, "#fff");
+      }
       else if (m.alive && m.landed) { const sl = curW(m), Wp = sl ? BR_W[sl.w] : null, sp = Wp ? (adsOn ? Wp.spr * .45 : Wp.hip || Wp.spr) * (m.mv ? 1.5 : 1) : .03, R = 6 + sp * h * 1.2; const xc = xhCol(); for (const [lw, col] of [[4.5, "rgba(0,0,0,.8)"], [2, xc]]) { c.strokeStyle = col; c.lineWidth = lw; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * R, h / 2 + dy * R); c.lineTo(w / 2 + dx * (R + 8), h / 2 + dy * (R + 8)); c.stroke() } } c.fillStyle = "rgba(0,0,0,.8)"; c.fillRect(w / 2 - 2.5, h / 2 - 2.5, 5, 5); c.fillStyle = xc; c.fillRect(w / 2 - 1.5, h / 2 - 1.5, 3, 3) }
       if (hitT > 0) { hitT -= dt; c.strokeStyle = "#FF4D4D"; c.lineWidth = 2.5; for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * 6, h / 2 + dy * 6); c.lineTo(w / 2 + dx * 13, h / 2 + dy * 13); c.stroke() } }
       // 画面の表示（地図・体力など）は「ボタン配置」で動かせる。位置と大きさは hudBox で読む
@@ -4050,21 +4060,25 @@ html.br-portrait .br-ui { display: none }
       if (S.plane && S.plane.t < (M.W + 80) / PSP) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * PSP : M.W + 40 - S.plane.t * PSP) * ms - 6, my + S.plane.z * ms) }
       // 地図：銃声（オレンジ）・スナイパー（赤）・爆発（黄色）の場所
       for (const hd of heard) { const k = 1 - hd.t / 4; if (k <= 0) continue; c.globalAlpha = k; c.strokeStyle = c.fillStyle = hd.k === "sr" ? "#FF4D4D" : hd.k === "boom" ? "#FFE14D" : "#FF9F43"; c.lineWidth = 2; c.beginPath(); c.arc(mx + hd.x * ms, my + hd.z * ms, 2.5 + (hd.t % 1) * 7, 0, 7); c.stroke(); c.beginPath(); c.arc(mx + hd.x * ms, my + hd.z * ms, 2.2, 0, 7); c.fill() } c.globalAlpha = 1;
+      if (m.alive) for (const o of E) { if (o === m || !o.alive || !o.landed || o.cr || (o.spd || 0) < 1.2) continue; const d = Math.hypot(o.x - m.x, o.z - m.z); if (d > (o.spd > 6 ? 45 : 30)) continue; const ph2 = (tAll * 3 + o.i) % 1; c.fillStyle = `rgba(127,208,255,${1 - ph2 * .7})`; for (const k of [0, 1]) { c.beginPath(); c.ellipse(mx + o.x * ms + (k ? 2 : -2), my + o.z * ms + (k ? -2 : 2) - ph2 * 3, 1.6, 2.4, 0, 0, 7); c.fill() } }
       c.restore(); { const px = mx + m.x * ms, pz = my + m.z * ms; c.save(); c.translate(px, pz); c.rotate(-camYaw + Math.PI); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(0, -6); c.lineTo(4, 4); c.lineTo(-4, 4); c.closePath(); c.fill(); c.restore() }
       // たおした・たおされたのお知らせ
 
       // 体力
-      if (m.alive) { const HB = hudBox("hud-hp"), bw = HB.w, bx = HB.x, by = HB.y + HB.h - 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(bx, by, bw, 12); c.fillStyle = m.hp > 50 ? "#F2F2F2" : m.hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(bx + 1, by + 1, (bw - 2) * clamp(m.hp, 0, 100) / 100, 10); c.font = `11px ${DISP}`; c.textAlign = "left"; c.fillStyle = "#fff"; c.fillText(`${Math.ceil(m.hp)}　ベスト${m.vest ? "Lv" + m.vest : "なし"}・ヘルメット${m.helm ? "Lv" + m.helm : "なし"}${m.scope > 1 ? `・${m.scope}倍スコープ` : ""}`, bx, by - 8) }
+      if (m.alive) { const HB = hudBox("hud-hp"), bw = HB.w, bx = HB.x, by = HB.y + HB.h - 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(bx, by, bw, 12); c.fillStyle = m.hp > 50 ? "#F2F2F2" : m.hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(bx + 1, by + 1, (bw - 2) * clamp(m.hp, 0, 100) / 100, 10); c.font = `11px ${DISP}`; c.textAlign = "left"; c.fillStyle = "#fff"; c.fillText(`${Math.ceil(m.hp)}　ベスト${m.vest ? "Lv" + m.vest : "なし"}・ヘルメット${m.helm ? "Lv" + m.helm : "なし"}${m.scope > 1 ? (m.scope < 2 ? "・ドットサイト" : `・${m.scope}倍スコープ`) : ""}`, bx, by - 8) }
       if (!m.landed && m.alive) { bigText(c, m.para ? "パラシュートで降下中" : "降下中！（ジャンプでパラシュート）", w / 2, h * .3, 18, "#fff"); bigText(c, `高さ ${Math.round(m.y)}m　スティックで着地点をえらぼう`, w / 2, h * .3 + 26, 13, "#E9F7EE") }
       if (m.rl > 0) bigText(c, "リロード中…", w / 2, h * .62, 15, "#fff");
       if (m.healT > 0) bigText(c, `回復中… ${m.healT.toFixed(1)}`, w / 2, h * .62, 15, "#7CF59A");
       floats = floats.filter((f) => (f.t += dt) < 1.6); floats.forEach((f, i) => bigText(c, f.txt, w / 2, h * .42 - f.t * 22 - i * 24, 15, f.col));
       // 画面のふち：どっちから音がしたか・どっちから撃たれたか
-      const ring = (x, z, col, wd, len, label) => { const ph = -phAng(Math.atan2(x - m.x, z - m.z) - camYaw), Rx = w * .3, Ry = h * .3; c.strokeStyle = col; c.lineWidth = wd; c.beginPath(); c.ellipse(w / 2, h / 2, Rx, Ry, 0, -Math.PI / 2 + ph - len, -Math.PI / 2 + ph + len); c.stroke(); if (label) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = 3; c.strokeStyle = "rgba(20,18,42,.8)"; const lx = w / 2 + Math.sin(ph) * (Rx - 30), ly = h / 2 - Math.cos(ph) * (Ry - 16); c.strokeText(label, lx, ly); c.fillStyle = col; c.fillText(label, lx, ly) } };
+      const ring = (x, z, col, wd, len, label) => { const ph = -phAng(Math.atan2(x - m.x, z - m.z) - camYaw), Rx = w * .3, Ry = h * .3; for (const [lw, cl] of [[wd + 3, "rgba(10,10,20,.55)"], [wd, col]]) { c.strokeStyle = cl; c.lineWidth = lw; c.beginPath(); c.ellipse(w / 2, h / 2, Rx, Ry, 0, -Math.PI / 2 + ph - len, -Math.PI / 2 + ph + len); c.stroke() } if (label) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = 3; c.strokeStyle = "rgba(20,18,42,.8)"; const lx = w / 2 + Math.sin(ph) * (Rx - 30), ly = h / 2 - Math.cos(ph) * (Ry - 16); c.strokeText(label, lx, ly); c.fillStyle = col; c.fillText(label, lx, ly) } };
       const usedDir = new Set(); for (const hd of heard) hd.t += dt;
       for (let i = heard.length - 1; i >= 0; i--) { const hd = heard[i]; if (hd.t >= 2.2 || !m.alive) continue; const sec = Math.round(phAng(Math.atan2(hd.x - m.x, hd.z - m.z) - camYaw) / .5), lab = !usedDir.has(sec); usedDir.add(sec); c.globalAlpha = Math.max(0, 1 - hd.t / 2.2); ring(hd.x, hd.z, hd.k === "sr" ? "#FF4D4D" : hd.k === "boom" ? "#FFE14D" : "#FFB066", 4, .12, lab ? `${hd.k === "boom" ? "爆発" : hd.k === "sr" ? "スナイパー" : "銃声"} ${Math.round(Math.hypot(hd.x - m.x, hd.z - m.z))}m` : ""); c.globalAlpha = 1 }
       for (let i = heard.length - 1; i >= 0; i--) if (heard[i].t > 4) heard.splice(i, 1);
       if (hitFrom && m.alive) { hitFrom.t += dt; if (hitFrom.t < 1.6) { c.globalAlpha = 1 - hitFrom.t / 1.6; ring(hitFrom.x, hitFrom.z, "#FF2A2A", 9, .3, "ここから撃たれた"); c.globalAlpha = 1 } else hitFrom = null }
+      // 足音：近くで歩いている（30m）・走っている（45m）人。しゃがんでいると聞こえない
+      const steps = m.alive ? E.filter((o) => o !== m && o.alive && o.landed && !o.cr && (o.spd || 0) > 1.2 && Math.hypot(o.x - m.x, o.z - m.z) < (o.spd > 6 ? 45 : 30)) : [];
+      const usedStep = new Set(); for (const o of steps) { const d = Math.hypot(o.x - m.x, o.z - m.z), sec = Math.round(phAng(Math.atan2(o.x - m.x, o.z - m.z) - camYaw) / .5), lab = !usedStep.has(sec) && !usedDir.has(sec); usedStep.add(sec); c.globalAlpha = .55 + Math.abs(Math.sin(tAll * 6 + o.i)) * .45; ring(o.x, o.z, "#7FD0FF", 4, .09, lab ? `足音 ${Math.round(d)}m` : ""); c.globalAlpha = 1 }
       if (hurtT > 0) { hurtT -= dt; const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, "rgba(255,0,0,0)"); g.addColorStop(1, `rgba(255,30,30,${hurtT * 1.3})`); c.fillStyle = g; c.fillRect(0, 0, w, h) }
       // 相手（人）の名前
       if (S.h1) { const o = E[1 - myIdx]; if (o && o.alive && m) { const p = project(o.x, o.y + 2.2, o.z); if (p && Math.hypot(o.x - m.x, o.z - m.z) < 80) bigText(c, nm(o.i), p[0], p[1], 12, "#FFE14D") } }
@@ -4073,8 +4087,8 @@ html.br-portrait .br-ui { display: none }
     function panel() {
       const m = meE();
       if (S.ph === "lobby") {
-        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">広さ</p><div class="br-stages" style="grid-template-columns:repeat(3,1fr)">${BR_SIZES.map((z, i) => `<button class="chipbtn ${i === (me.m.size || 0) ? "on" : ""}" data-act="br-size" data-i="${i}">${z.n}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
-        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${SZ.n}・${S.n}人）</p>`);
+        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">広さ</p><div class="br-stages" style="grid-template-columns:repeat(3,1fr)">${BR_SIZES.map((z, i) => `<button class="chipbtn ${i === (me.m.size || 0) ? "on" : ""}" data-act="br-size" data-i="${i}">${z.n}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">CPUの強さ</p><div class="br-stages" style="grid-template-columns:repeat(4,1fr)">${BR_DIFF.map((d, i) => `<button class="chipbtn ${i === S.diff ? "on" : ""}" data-br="diff" data-v="${i}">${d.n}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
+        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${SZ.n}・CPU${BR_DIFF[S.diff ?? 1].n}・${S.n}人）</p>`);
         return;
       }
       if (m && (!m.alive || S.ph === "end") && !watching) {
@@ -4131,7 +4145,7 @@ html.br-portrait .br-ui { display: none }
           }
           for (const e of E) if (!isHuman(e.i) || (e.i === 1 && !two())) bot(e, dt);
         }
-        const out = { S: { ph: S.ph, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1 },
+        const out = { S: { ph: S.ph, diff: S.diff, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1 },
           E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp, e.lastHit ?? -1] }), fx: S.fx, grl: S.grl, tk: [...taken] };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else if (m) {
@@ -4731,7 +4745,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1029-1720";
+  const APP_VER = "1029-1734";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
