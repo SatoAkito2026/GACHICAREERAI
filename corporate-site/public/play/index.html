@@ -249,6 +249,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .br-cv { z-index: 1 }
 .br-ui { position: absolute; inset: 0; z-index: 3; pointer-events: none }
 .br-ui > * { position: absolute; pointer-events: auto }
+.br-stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px } .br-stages .chipbtn { padding: 8px 4px; font-size: 13px }
 .br-stick { left: max(24px, env(safe-area-inset-left, 0px)); bottom: 22px; width: 130px !important; height: 130px !important }
 #b-fire { right: max(26px, env(safe-area-inset-right, 0px)); bottom: 34px; width: 92px; height: 92px; background: rgba(217,44,44,.45) }
 #b-fire2 { left: max(40px, calc(env(safe-area-inset-left, 0px) + 16px)); bottom: 170px; width: 60px; height: 60px; font-size: 13px; background: rgba(217,44,44,.4) }
@@ -269,10 +270,14 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .br-rot { position: absolute; inset: 0; z-index: 9; padding: 16px; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
 .br-rot small { font-family: var(--body); font-size: 14px; color: #ccc }
 html.playing .br #act-msg { top: 50%; left: 50%; right: auto; width: min(520px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
-.br-top { display: none; left: 50%; top: 6px; transform: translateX(-50%); gap: 6px }
+.br-top { position: absolute; z-index: 5; display: flex; left: 50%; top: 6px; transform: translateX(-50%); gap: 6px }
+html.br-on #app > section > .row:first-child { display: none !important }
+.br-editlayer { position: absolute; inset: 0; z-index: 6; background: rgba(0,0,0,.25); touch-action: none }
+.br-editbar { position: absolute; z-index: 7; left: 50%; top: 44px; transform: translateX(-50%); background: var(--surface); color: var(--ink); border-radius: 14px; padding: 8px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 20px); box-shadow: 0 6px 20px rgba(0,0,0,.3); font-size: 13px }
+.br-editbar input { width: 130px; accent-color: var(--pink) }
+.br-ui .br-sel { outline: 3px dashed #FFE14D; outline-offset: 3px }
+.br.br-editing .br-ui > * { outline: 2px dashed rgba(255,255,255,.7); outline-offset: 2px }
 .br-top .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px; white-space: nowrap }
-html.br-fake .br-top { display: flex }
-html.br-fake #app > section > .row:first-child { display: none !important }
 html.br-fake #sens { inset: auto; left: 0; top: 0; width: 100vh; height: 100vw; transform-origin: 0 0; transform: translate(100vw, 0) rotate(90deg) }
 html.br-portrait .br-rot { display: flex }
 html.br-portrait .br-ui { display: none }
@@ -2866,11 +2871,13 @@ html.br-portrait .br-ui { display: none }
     else if (kind === "tile2") { c.fillStyle = "#9FC8D8"; c.fillRect(0, 0, S, S); for (let y = 0; y < S; y += 32) for (let x = 0; x < S; x += 32) { const v = .92 + r() * .1; c.fillStyle = `rgb(${200 * v | 0},${232 * v | 0},${242 * v | 0})`; c.fillRect(x + 1.5, y + 1.5, 29, 29) } }
     else if (kind === "asphalt") noise("#55565C", ["#4A4B50", "#606168", "#5A5B60", "#45464A"], 14000, 2, 2);
     else if (kind.startsWith("rug")) { const cl = { rug: ["#B03A3A", "#E8C27A"], rug2: ["#3A5AB0", "#E8E0C8"], rug3: ["#3AA07A", "#F5E6A0"] }[kind]; c.fillStyle = cl[0]; c.fillRect(0, 0, S, S); c.strokeStyle = cl[1]; c.lineWidth = 10; c.strokeRect(14, 14, S - 28, S - 28); c.lineWidth = 4; c.strokeRect(34, 34, S - 68, S - 68); c.fillStyle = cl[1]; c.beginPath(); c.arc(S / 2, S / 2, 40, 0, 7); c.fill() }
+    else if (kind === "snow") noise("#EEF3F8", ["#E2EAF2", "#FFFFFF", "#D8E2EC", "#F6F9FC"], 9000, 3, 3);
+    else if (kind === "line2") { noise("#4C4D53", ["#45464B", "#56575D", "#505157"], 9000, 2, 2); c.fillStyle = "#EDEDE6"; for (let y = 0; y < S; y += 64) c.fillRect(S / 2 - 3, y, 6, 32) }
     else if (kind === "line") { c.fillStyle = "#F2F2EE"; c.fillRect(0, 0, S, S) }
     else if (kind === "water") { c.fillStyle = "#3E8FD0"; c.fillRect(0, 0, S, S); c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2; for (let i = 0; i < 40; i++) { const x = r() * S, y = r() * S; c.beginPath(); c.arc(x, y, 6 + r() * 10, 3.6, 5.8); c.stroke() } }
     const tx = new T.CanvasTexture(cv); tx.wrapS = tx.wrapT = T.RepeatWrapping; tx.anisotropy = 4; return tx;
   }
-  const PH_TS = { grass: 4, grass2: 4, dirt: 7, sand: 5, paving: 4, stone: 5, wood: 3, tile: 2.4, tile2: 1.6, asphalt: 7, line: 1, water: 9 };
+  const PH_TS = { snow: 6, line2: 10, grass: 4, grass2: 4, dirt: 7, sand: 5, paving: 4, stone: 5, wood: 3, tile: 2.4, tile2: 1.6, asphalt: 7, line: 1, water: 9 };
   // 見た目を作る：静かな物は全部1つの形にまとめる（スマホでも軽く）
   function phBuild(M, scene) {
     const T = THREE, B = phParts(), ms = [];
@@ -2937,7 +2944,7 @@ html.br-portrait .br-ui { display: none }
         if (v.stripe) B.box(w + .06, .5, d + .06, v.stripe, cx, h - .9, cz);
         // 窓
         const wc = v.wc || "#BFE3F5", fl = Math.max(1, Math.floor((h - 1) / 3.2));
-        const face = (len, fn) => { const n = Math.max(1, Math.floor(len / 3)); for (let i = 0; i < n; i++) for (let f = 0; f < fl; f++) { const t = (i + .5) / n * len, y = 1.9 + f * 3.2; if (y > h - .8) continue; fn(t, y) } };
+        const face = (len, fn) => { const n = Math.max(1, Math.floor(len / (v.wstep || 3))); for (let i = 0; i < n; i++) for (let f = 0; f < fl; f++) { const t = (i + .5) / n * len, y = 1.9 + f * 3.2; if (y > h - .8) continue; fn(t, y) } };
         face(w, (t, y) => { for (const [z, s] of [[b.z0, -1], [b.z1, 1]]) { B.box(1.3, 1.5, .1, "#F7F5EF", b.x0 + t, y, z + s * .03); B.box(1.1, 1.3, .12, wc, b.x0 + t, y, z + s * .04) } });
         face(d, (t, y) => { for (const [x, s] of [[b.x0, -1], [b.x1, 1]]) { B.box(.1, 1.5, 1.3, "#F7F5EF", x + s * .03, y, b.z0 + t); B.box(.12, 1.3, 1.1, wc, x + s * .04, y, b.z0 + t) } });
         if (v.door === "big") { B.box(w * .5, Math.min(6, h - 1.5), .14, "#6E747C", cx, Math.min(6, h - 1.5) / 2, b.z1 + .02); for (let y = .6; y < Math.min(6, h - 1.5); y += .5) B.box(w * .5, .05, .16, "#5E646C", cx, y, b.z1 + .03) }
@@ -2955,7 +2962,9 @@ html.br-portrait .br-ui { display: none }
         B.cyl(.18 * s, .3 * s, 2.6 * s, "#7A5230", o.x, 1.3 * s, o.z, 7);
         if (o.kind === "pine") { for (let i = 0; i < 3; i++) B.cone((1.9 - i * .45) * s, 2.2 * s, gcs[i], o.x, (2.5 + i * 1.3) * s, o.z, 8) }
         else { B.sph(1.55 * s, gcs[0], o.x, 3.2 * s, o.z, 1, .9, 1); B.sph(1.05 * s, gcs[1], o.x + .7 * s, 3.8 * s, o.z + .3 * s); B.sph(.95 * s, gcs[2], o.x - .6 * s, 3.9 * s, o.z - .4 * s); B.sph(.8 * s, gcs[1], o.x + .1 * s, 4.5 * s, o.z) }
-      } else if (o.k === "bigrock") { B.sph(o.s, "#8A847A", o.x, o.s * .45, o.z, 1.1, .95, 1, 0); B.sph(o.s * .6, "#9C968A", o.x + o.s * .5, o.s * .9, o.z - o.s * .2, 1, 1, 1, 0); B.sph(o.s * .3, "#4C9A44", o.x - o.s * .3, o.s * 1.25, o.z, 1.4, .5, 1.4, 1) }
+      } else if (o.k === "cactus") { const s = o.s, cc = "#4E8A3A"; B.cyl(.32 * s, .36 * s, 3.2 * s, cc, o.x, 1.6 * s, o.z, 8); B.sph(.32 * s, cc, o.x, 3.2 * s, o.z); for (const d of [-1, 1]) { B.cyl(.2 * s, .2 * s, .7 * s, cc, o.x + d * .45 * s, 1.5 * s, o.z, 8, 0, Math.PI / 2); B.cyl(.2 * s, .2 * s, 1 * s, cc, o.x + d * .8 * s, 2 * s, o.z, 8); B.sph(.2 * s, cc, o.x + d * .8 * s, 2.5 * s, o.z) } }
+      else if (o.k === "bigrock" && o.desert) { B.sph(o.s, "#C08A5A", o.x, o.s * .55, o.z, 1.1, 1.1, 1, 0); B.sph(o.s * .7, "#B07A4A", o.x + o.s * .5, o.s * .9, o.z - o.s * .3, 1, 1, 1, 0); B.box(o.s * 1.4, o.s * .2, o.s * 1.2, "#D09A6A", o.x, o.s * 1.5, o.z) }
+      else if (o.k === "bigrock") { B.sph(o.s, "#8A847A", o.x, o.s * .45, o.z, 1.1, .95, 1, 0); B.sph(o.s * .6, "#9C968A", o.x + o.s * .5, o.s * .9, o.z - o.s * .2, 1, 1, 1, 0); B.sph(o.s * .3, "#4C9A44", o.x - o.s * .3, o.s * 1.25, o.z, 1.4, .5, 1.4, 1) }
       else if (o.k === "fountain") { B.cyl(3.6, 3.8, .7, "#C9C2B6", o.x, .35, o.z, 24); B.cyl(3.2, 3.2, .1, "#5AA8E0", o.x, .68, o.z, 24); B.cyl(.4, .6, 1.6, "#C9C2B6", o.x, 1.4, o.z, 12); B.cyl(1.4, .5, .3, "#C9C2B6", o.x, 2.2, o.z, 16); B.cyl(1.2, 1.2, .05, "#5AA8E0", o.x, 2.36, o.z, 16); B.sph(.35, "#BDE6FA", o.x, 2.7, o.z, 1, 1.6, 1) }
       else if (o.k === "carousel") {
         B.cyl(6, 6.2, .6, "#E8D6B0", o.x, .3, o.z, 28); B.cyl(1, 1, 5.5, "#F2C230", o.x, 3.2, o.z, 12); B.cone(6.6, 2.4, "#D9302C", o.x, 7, o.z, 16); B.cone(6.65, 2.4, "#FFFFFF", o.x, 6.95, o.z, 8); B.cyl(6.6, 6.6, .5, "#F2C230", o.x, 5.7, o.z, 28); B.sph(.4, "#F2C230", o.x, 8.4, o.z);
@@ -2981,7 +2990,10 @@ html.br-portrait .br-ui { display: none }
     }
     // 空と天井
     if (M.indoor) { const cg = new T.PlaneGeometry(M.W, M.D); cg.rotateX(Math.PI / 2); cg.translate(M.W / 2, 3, M.D / 2); const cm = new T.Mesh(cg, new T.MeshStandardMaterial({ color: "#F7F4EE", roughness: 1 })); scene.add(cm); ms.push(cm); for (let x = 4; x < M.W; x += 8) for (let z = 4; z < M.D; z += 8) B.cyl(.35, .35, .06, "#FFFBEA", x, 2.97, z, 12) }
-    const g = phMerge(B.L, true), mesh = new T.Mesh(g, mat); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh);
+    // 広いマップは 48m ごとの区画に分けてまとめる（画面や影に入らない区画は描かないので軽い）
+    const TL = M.W > 150 ? 48 : 1e9, tiles = new Map();
+    for (const p of B.L) { const a = p.g.attributes.position.array, k = Math.floor(a[0] / TL) + "," + Math.floor(a[2] / TL); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(p) }
+    for (const L of tiles.values()) { const mesh = new T.Mesh(phMerge(L, true), mat); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh) }
     // 草むら・花（たくさん並べる）
     if (!M.indoor) {
       const grassy = (x, z) => (M.ground === "grass" ? !M.floors.some((f) => x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1 && f.t !== "grass2" && f.t !== "grass") : M.floors.some((f) => (f.t === "grass" || f.t === "grass2") && x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1)) && !M.water.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
@@ -3416,10 +3428,18 @@ html.br-portrait .br-ui { display: none }
   const BR_ARMOR = [0, .25, .4, .55], BR_HELM = [0, .3, .45, .6];
   const BR_NAMES = ["ケンタ", "ユウキ", "ソラ", "ハルト", "リク", "ミオ", "アオイ", "レン", "カイト", "ヒナ", "タクミ", "サクラ", "ダイチ", "ユイ", "コウ", "ナギ", "ルイ", "マコト", "シュン", "エマ"];
   const BR_PAL = [["#3A5A40", "#2A3A2C", "#C9A26B"], ["#4A4E69", "#22223B", "#9A8C98"], ["#8D5A3B", "#3E2C23", "#D9B26F"], ["#2E6FD0", "#1E2F55", "#E2E2E2"], ["#6B705C", "#3F4238", "#CB997E"], ["#9B2226", "#3A1F1F", "#E9D8A6"], ["#5E548E", "#231942", "#E0B1CB"], ["#2A9D8F", "#264653", "#E9C46A"]];
-  const BR_ZONE = [{ wait: 50, shrink: 25, r: 110, d: 2 }, { wait: 35, shrink: 20, r: 65, d: 4 }, { wait: 28, shrink: 18, r: 35, d: 7 }, { wait: 22, shrink: 15, r: 15, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }];
-  function brMap(seed) {
-    const r = rng(seed * 7 + 3); r();
-    const M = { id: "br", W: 240, D: 240, ground: "grass", floors: [], boxes: [], circles: [], props: [], water: [], objs: [], items: [], indoor: false };
+  const BR_ZONE = [{ wait: 70, shrink: 32, r: 175, d: 2 }, { wait: 45, shrink: 26, r: 100, d: 4 }, { wait: 35, shrink: 20, r: 55, d: 7 }, { wait: 25, shrink: 16, r: 22, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }];
+  // ステージ（どれも 380m 四方の広いマップ）
+  const BR_STAGES = [
+    { id: "grass", name: "草原", ground: "grass", town: ["dirt", "sand"], road: "dirt", fog: "#D3E6EE", hemi: "#5E7F3E" },
+    { id: "desert", name: "砂漠", ground: "sand", town: ["dirt", "stone"], road: "dirt", fog: "#EBDDC2", hemi: "#9C8458" },
+    { id: "snow", name: "雪山", ground: "snow", town: ["stone", "stone"], road: "stone", fog: "#E4EBF2", hemi: "#A2AEBC" },
+    { id: "harbor", name: "港町", ground: "grass", town: ["paving", "dirt"], road: "paving", fog: "#D0E4F0", hemi: "#5E7F3E" },
+    { id: "city", name: "都市", ground: "asphalt", town: ["paving", "paving"], road: "asphalt", fog: "#D8DDE4", hemi: "#6A6E76" },
+  ];
+  function brMap(seed, st) {
+    const r = rng(seed * 7 + 3 + st.id.length * 31); r();
+    const S0 = 380, M = { id: "br", W: S0, D: S0, ground: st.ground, floors: [], boxes: [], circles: [], props: [], water: [], objs: [], items: [], indoor: false };
     const R = (a, b) => a + r() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
     const F = (x0, z0, x1, z1, t) => M.floors.push({ x0, z0, x1, z1, t });
     const box = (x0, z0, x1, z1, h, vis) => { const b = { x0: Math.min(x0, x1), z0: Math.min(z0, z1), x1: Math.max(x0, x1), z1: Math.max(z0, z1), h, vis }; M.boxes.push(b); return b };
@@ -3428,56 +3448,81 @@ html.br-portrait .br-ui { display: none }
     function free(x, z, rad) {
       if (x < rad + 2 || z < rad + 2 || x > M.W - rad - 2 || z > M.D - rad - 2) return false;
       for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return false;
+      for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return false;
       for (const cc of M.circles) if (Math.hypot(cc.x - x, cc.z - z) < cc.r + rad + .3) return false;
       for (const p of M.props) if (Math.hypot(p.x - x, p.z - z) < PH_PROPS[p.type].r + rad + .25) return false;
       return true;
     }
     const prop = (type, x, z, ry) => { if (!free(x, z, PH_PROPS[type].r)) return false; M.props.push({ type, x, z, ry: ry == null ? r() * 6.28 : ry }); return true };
     const scatter = (types, n, area, off) => { for (let i = 0, t = 0; i < n && t < n * 30; t++) { const x = R(area[0], area[2]), z = R(area[1], area[3]); if (off && onFloor(x, z, 1, off)) continue; if (prop(types[Math.floor(r() * types.length)], x, z)) i++ } };
-    const tree = (x, z, s) => { if (!free(x, z, .7 * s)) return false; M.objs.push({ k: "tree", x, z, s, kind: r() < .45 ? "pine" : "round", c: RI(0, 2) }); circ(x, z, .35 * s, 7 * s); return true };
-    // 道
-    F(116, 0, 124, 240, "dirt"); F(0, 116, 240, 124, "dirt"); F(36, 36, 204, 42, "dirt"); F(36, 198, 204, 204, "dirt"); F(36, 36, 42, 204, "dirt"); F(198, 36, 204, 204, "dirt");
-    // 町
-    const spots = [[72, 72], [168, 72], [72, 168], [168, 168], [120, 120], [120, 26], [26, 120], [214, 120], [120, 214]];
-    const towns = spots.filter((_, i) => i < 5 || r() < .6);
-    const hc = ["#E8DCC5", "#C9B79C", "#B5C4B1", "#D8C3A5", "#A9B4C2", "#E4C590", "#C2A383"], rc = ["#8B3A2A", "#4A5A6A", "#5A3A2A", "#3A5A3A", "#7A4A2A"];
-    towns.forEach(([tx, tz], ti) => {
-      F(tx - 24, tz - 24, tx + 24, tz + 24, ti % 2 ? "sand" : "dirt");
-      const yard = ti === 1;
-      for (let gx = -1; gx <= 1; gx++) for (let gz = -1; gz <= 1; gz++) {
-        if (gx === 0 && gz === 0 && ti !== 4) continue;
-        const cx = tx + gx * 15 + R(-1.5, 1.5), cz = tz + gz * 15 + R(-1.5, 1.5);
-        if (yard || r() < .2) { // コンテナ
-          const along = r() < .5, L = 6, Wd = 2.5, cols = ["#B5452F", "#2E6FD0", "#3A8A4A", "#D9A02C", "#7A7F87"];
-          for (let k = 0; k < RI(1, 3); k++) { const ox = along ? 0 : (k - 1) * 3.2, oz = along ? (k - 1) * 3.2 : 0; const x0 = cx + ox - (along ? L / 2 : Wd / 2), z0 = cz + oz - (along ? Wd / 2 : L / 2); if (free(x0 + (along ? L : Wd) / 2, z0 + (along ? Wd : L) / 2, 3.4)) box(x0, z0, x0 + (along ? L : Wd), z0 + (along ? Wd : L), 2.6, { k: "container", col: cols[RI(0, 4)], ax: along }) }
-        } else if (r() < .85) {
-          const w = R(7, 10), d = R(6, 8.5), h = R(3.2, 5);
-          box(cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2, h, { k: "bld", col: hc[RI(0, 6)], roof: "gable", rc: rc[RI(0, 4)] });
-        } else { for (let k = 0; k < 3; k++) { const a = r() * 6.28, x = cx + Math.cos(a) * 3, z = cz + Math.sin(a) * 3; box(x - 1.6, z - .35, x + 1.6, z + .35, .95, { k: "sandbag" }) } }
+    const tree = (x, z, s, kind) => { if (!free(x, z, .7 * s)) return false; M.objs.push({ k: "tree", x, z, s, kind: kind || (r() < .45 ? "pine" : "round"), c: RI(0, 2) }); circ(x, z, .35 * s, 7 * s); return true };
+    const trees = (n, kind) => { for (let i = 0, t = 0; i < n && t < n * 15; t++) { const x = R(4, S0 - 4), z = R(4, S0 - 4); if (onFloor(x, z, 3)) continue; if (tree(x, z, R(.9, 1.4), kind)) i++ } };
+    const cover = (n, area) => {
+      for (let k = 0; k < n; k++) { const x = R(area[0], area[2]), z = R(area[1], area[3]), a = r() < .5; if (r() < .45) { if (free(x, z, 3)) { box(x - (a ? 1.8 : .35), z - (a ? .35 : 1.8), x + (a ? 1.8 : .35), z + (a ? .35 : 1.8), .95, { k: "sandbag" }); if (r() < .6) prop("crate", x + (a ? 0 : 1.4), z + (a ? 1.4 : 0)) } } else { const L = R(3, 7); if (free(x, z, L / 2 + .5)) box(x - (a ? L / 2 : .22), z - (a ? .22 : L / 2), x + (a ? L / 2 : .22), z + (a ? .22 : L / 2), r() < .6 ? 1.15 : R(1.6, 2.6), { k: "cwall" }) } }
+    };
+    const car = (x, z) => { const ax = r() < .5; if (free(x, z, 2.6)) box(x - (ax ? 2.2 : 1), z - (ax ? 1 : 2.2), x + (ax ? 2.2 : 1), z + (ax ? 1 : 2.2), 1.5, { k: "car", col: ["#D9302C", "#EEEEEE", "#333338", "#3AA05A", "#2E6FD0", "#F2C230"][RI(0, 5)], ax }) };
+    const container = (cx, cz, along) => { const L = 6, Wd = 2.5, cols = ["#B5452F", "#2E6FD0", "#3A8A4A", "#D9A02C", "#7A7F87"], x0 = cx - (along ? L / 2 : Wd / 2), z0 = cz - (along ? Wd / 2 : L / 2); if (free(cx, cz, 3.4)) box(x0, z0, x0 + (along ? L : Wd), z0 + (along ? Wd : L), 2.6, { k: "container", col: cols[RI(0, 4)], ax: along }) };
+    const towns = [];
+    if (st.id === "city") {
+      // 都市：道でくぎられたブロックに高いビル。ところどころ公園
+      const step = 52, bl = 40;
+      for (let i = 0; i <= 7; i++) { const p = 6 + i * step; F(p - 6, 0, p + 6, S0, "line2"); F(0, p - 6, S0, p + 6, "line2") }
+      for (let bx = 0; bx < 7; bx++) for (let bz = 0; bz < 7; bz++) {
+        const x0 = 12 + bx * step, z0 = 12 + bz * step, x1 = x0 + bl, z1 = z0 + bl, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; towns.push([cx, cz]);
+        F(x0, z0, x1, z1, "paving");
+        if (r() < .22) { F(x0 + 3, z0 + 3, x1 - 3, z1 - 3, "grass"); for (let k = 0; k < 8; k++) tree(R(x0 + 5, x1 - 5), R(z0 + 5, z1 - 5), R(.9, 1.3), "round"); scatter(["bench", "bush", "trash", "flower", "rock"], 10, [x0 + 4, z0 + 4, x1 - 4, z1 - 4]); cover(3, [x0 + 6, z0 + 6, x1 - 6, z1 - 6]); continue }
+        const n = RI(1, 3), cols = ["#B98E6B", "#8E9AAF", "#C7A57A", "#A86464", "#D8CFC0", "#7F8C7A", "#C4B49C", "#6F7F99"];
+        if (n === 1) bld(x0 + 6, z0 + 6, x1 - 6, z1 - 6, R(14, 26), { col: cols[RI(0, 7)], roof: "flat", wstep: 5 });
+        else for (let k = 0; k < 2; k++) { const half = k ? [cx + 2, z0 + 5, x1 - 5, z1 - 5] : [x0 + 5, z0 + 5, cx - 2, z1 - 5]; bld(half[0], half[1], half[2], half[3], R(9, 20), { col: cols[RI(0, 7)], roof: "flat", wstep: 5, aw: r() < .4 ? ["#E23A3A", "#2F6FD0", "#2FA04A"][RI(0, 2)] : null }) }
+        scatter(["trash", "hydrant", "post", "newsbox", "lamp", "crate", "barrel", "cone", "barrier", "cbox"], 9, [x0 + 1, z0 + 1, x1 - 1, z1 - 1]);
       }
-      // 低いかべ・木箱・車（かくれる場所）
-      for (let k = 0; k < 7; k++) { const x = tx + R(-22, 22), z = tz + R(-22, 22), along = r() < .5, L = R(3, 7); if (free(x, z, L / 2 + .5)) box(x - (along ? L / 2 : .2), z - (along ? .2 : L / 2), x + (along ? L / 2 : .2), z + (along ? .2 : L / 2), 1.15, { k: "cwall" }) }
-      for (let k = 0; k < 3; k++) { const x = tx + R(-20, 20), z = tz + R(-20, 20), ax = r() < .5; if (free(x, z, 2.6)) box(x - (ax ? 2.2 : 1), z - (ax ? 1 : 2.2), x + (ax ? 2.2 : 1), z + (ax ? 1 : 2.2), 1.5, { k: "car", col: ["#D9302C", "#EEEEEE", "#333338", "#3AA05A", "#2E6FD0"][RI(0, 4)], ax }) }
-      scatter(["crate", "barrel", "crate", "cbox", "tire", "trash"], 16, [tx - 23, tz - 23, tx + 23, tz + 23]);
-    });
-    // 野原：とりでの土のう・こわれたかべ・木・岩
-    for (let k = 0; k < 18; k++) { const x = R(10, 230), z = R(10, 230); if (onFloor(x, z, 3)) continue; const a = r() < .5; if (free(x, z, 3)) { box(x - (a ? 1.8 : .35), z - (a ? .35 : 1.8), x + (a ? 1.8 : .35), z + (a ? .35 : 1.8), .95, { k: "sandbag" }); if (r() < .6) prop("crate", x + (a ? 0 : 1.4), z + (a ? 1.4 : 0)) } }
-    for (let k = 0; k < 22; k++) { const x = R(10, 230), z = R(10, 230); if (onFloor(x, z, 3)) continue; const a = r() < .5, L = R(3, 6); if (free(x, z, L / 2 + .5)) box(x - (a ? L / 2 : .25), z - (a ? .25 : L / 2), x + (a ? L / 2 : .25), z + (a ? .25 : L / 2), R(1.1, 2.4), { k: "cwall" }) }
-    for (let k = 0; k < 14; k++) { const x = R(15, 225), z = R(15, 225), s = R(2.5, 5); if (!onFloor(x, z, s + 2) && free(x, z, s)) { M.objs.push({ k: "bigrock", x, z, s }); circ(x, z, s * .9, s * 1.4) } }
-    for (let i = 0, t = 0; i < 230 && t < 4000; t++) { const x = R(4, 236), z = R(4, 236); if (onFloor(x, z, 3)) continue; if (tree(x, z, R(.9, 1.4))) i++ }
-    scatter(["bush", "bush", "rock", "bush", "crate", "barrel", "rock"], 170, [4, 4, 236, 236], ["dirt", "sand"]);
+      for (let k = 0; k < 70; k++) { const i = RI(0, 7), along = R(8, S0 - 8), side = r() < .5 ? -3 : 3, p = 6 + i * step; if (r() < .5) car(along, p + side); else car(p + side, along) }
+      for (let k = 0; k < 40; k++) { const i = RI(0, 7), p = 6 + i * step, along = R(8, S0 - 8); cover(1, r() < .5 ? [along - 1, p - 3, along + 1, p + 3] : [p - 3, along - 1, p + 3, along + 1]) }
+    } else {
+      // 道
+      const rd = st.road, c0 = S0 / 2;
+      F(c0 - 5, 0, c0 + 5, S0, rd); F(0, c0 - 5, S0, c0 + 5, rd); const q = 56; F(q, q, S0 - q, q + 7, rd); F(q, S0 - q - 7, S0 - q, S0 - q, rd); F(q, q, q + 7, S0 - q, rd); F(S0 - q - 7, q, S0 - q, S0 - q, rd);
+      if (st.id === "harbor") { M.water.push({ x0: 0, z0: 0, x1: 46, z1: S0 }, { x0: 46, z0: 250, x1: 120, z1: 330 }); F(46, 0, 58, 250, "wood"); F(120, 250, 132, 330, "wood"); F(46, 330, 132, 342, "wood") }
+      // 町（3×3 の位置＋まわり）
+      const fr = [.16, .5, .84], spots = []; for (const a of fr) for (const b of fr) spots.push([a * S0, b * S0]); spots.push([.33 * S0, .33 * S0], [.67 * S0, .67 * S0], [.33 * S0, .67 * S0], [.67 * S0, .33 * S0]);
+      const hcAll = { grass: ["#E8DCC5", "#C9B79C", "#B5C4B1", "#D8C3A5", "#A9B4C2", "#E4C590", "#C2A383"], desert: ["#D9B98A", "#C9A06E", "#E2C79A", "#CFA778", "#E8D2A8"], snow: ["#8B5A34", "#6E4524", "#A0703F", "#7A5A3A"], harbor: ["#E8DCC5", "#B5C4B1", "#A9B4C2", "#D8C3A5", "#9AA6B4"] }[st.id];
+      const rcAll = { grass: ["#8B3A2A", "#4A5A6A", "#5A3A2A", "#3A5A3A", "#7A4A2A"], desert: ["#B08A5A"], snow: ["#EEF3F7", "#E2E8EE"], harbor: ["#4A5A6A", "#8B3A2A", "#3A4A5A"] }[st.id];
+      spots.forEach(([tx, tz], ti) => {
+        if (M.water.some((w) => tx > w.x0 - 20 && tx < w.x1 + 20 && tz > w.z0 - 20 && tz < w.z1 + 20)) return;
+        if (ti >= 9 && r() < .35) return; towns.push([tx, tz]);
+        F(tx - 26, tz - 26, tx + 26, tz + 26, st.town[ti % 2]);
+        const yard = st.id === "harbor" ? ti % 3 === 0 : ti === 2;
+        for (let gx = -1; gx <= 1; gx++) for (let gz = -1; gz <= 1; gz++) {
+          if (gx === 0 && gz === 0 && ti !== 4) continue;
+          const cx = tx + gx * 16 + R(-1.5, 1.5), cz = tz + gz * 16 + R(-1.5, 1.5);
+          if (yard || r() < .16) { const along = r() < .5; for (let k = 0; k < RI(1, 3); k++) container(cx + (along ? 0 : (k - 1) * 3.2), cz + (along ? (k - 1) * 3.2 : 0), along) }
+          else if (r() < .85) { const w = R(7, 11), d = R(6, 9), h = st.id === "desert" ? R(3, 4.5) : R(3.2, 5); box(cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2, h, { k: "bld", col: hcAll[RI(0, hcAll.length - 1)], roof: st.id === "desert" ? "flat" : "gable", rc: rcAll[RI(0, rcAll.length - 1)] }) }
+          else { for (let k = 0; k < 3; k++) { const a = r() * 6.28, x = cx + Math.cos(a) * 3, z = cz + Math.sin(a) * 3; if (free(x, z, 1.8)) box(x - 1.6, z - .35, x + 1.6, z + .35, .95, { k: "sandbag" }) } }
+        }
+        cover(7, [tx - 24, tz - 24, tx + 24, tz + 24]);
+        for (let k = 0; k < 3; k++) car(tx + R(-22, 22), tz + R(-22, 22));
+        scatter(["crate", "barrel", "crate", "cbox", "tire", "trash"], 18, [tx - 25, tz - 25, tx + 25, tz + 25]);
+      });
+      if (st.id === "harbor") { for (let z = 10; z < 240; z += 7) if (r() < .7) container(52, z, false); for (let k = 0; k < 14; k++) container(R(70, 110), R(20, 120), r() < .5); scatter(["barrel", "crate", "tire", "cbox"], 40, [46, 0, 60, 250]) }
+      cover(45, [10, 10, S0 - 10, S0 - 10]);
+      const rocks = st.id === "desert" ? 45 : 22;
+      for (let k = 0; k < rocks; k++) { const x = R(15, S0 - 15), z = R(15, S0 - 15), s = st.id === "desert" ? R(3, 8) : R(2.5, 5); if (!onFloor(x, z, s + 2) && free(x, z, s)) { M.objs.push({ k: "bigrock", x, z, s, desert: st.id === "desert" }); circ(x, z, s * .9, s * 1.4) } }
+      if (st.id === "desert") { for (let i = 0, t = 0; i < 90 && t < 2000; t++) { const x = R(6, S0 - 6), z = R(6, S0 - 6), s = R(.8, 1.3); if (onFloor(x, z, 2) || !free(x, z, .7)) continue; M.objs.push({ k: "cactus", x, z, s }); circ(x, z, .4 * s, 4 * s); i++ } trees(30, "round"); scatter(["rock", "rock", "barrel", "crate", "tire"], 160, [4, 4, S0 - 4, S0 - 4], st.town) }
+      else { trees(st.id === "snow" ? 520 : st.id === "harbor" ? 300 : 430, st.id === "snow" ? "pine" : null); scatter(st.id === "snow" ? ["rock", "rock", "crate", "barrel", "bush"] : ["bush", "bush", "rock", "bush", "crate", "barrel", "rock"], 300, [4, 4, S0 - 4, S0 - 4], [...st.town, st.road]) }
+    }
+    function bld(x0, z0, x1, z1, h, v) { return box(x0, z0, x1, z1, h, Object.assign({ k: "bld" }, v)) }
     // 拾える物
     const pickLv = () => { const v = r(); return v < .5 ? 0 : v < .8 ? 1 : v < .95 ? 2 : 3 };
     const mkItem = () => { const v = r(); if (v < .46) { const w = r(); return { t: "w", w: w < .16 ? 0 : w < .38 ? 1 : w < .56 ? 2 : w < .82 ? 3 : 4, lv: pickLv() } } if (v < .56) return { t: "vest", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .66) return { t: "helm", lv: Math.min(3, 1 + Math.floor(r() * r() * 3)) }; if (v < .81) return { t: "med" }; if (v < .93) return { t: "gren" }; return { t: "scope", z: [2, 4, 8][Math.floor(r() * r() * 3)] } };
     const addItem = (x, z) => { if (!free(x, z, .5)) return false; M.items.push(Object.assign({ id: M.items.length, x, z }, mkItem())); return true };
-    for (const b of M.boxes) { if (b.vis.k !== "bld" && b.vis.k !== "container") continue; for (let k = 0; k < 3; k++) { const side = RI(0, 3), x = side < 2 ? R(b.x0, b.x1) : side === 2 ? b.x0 - 1.2 : b.x1 + 1.2, z = side >= 2 ? R(b.z0, b.z1) : side === 0 ? b.z0 - 1.2 : b.z1 + 1.2; addItem(x, z) } }
-    towns.forEach(([tx, tz]) => { for (let k = 0; k < 10; k++) addItem(tx + R(-22, 22), tz + R(-22, 22)) });
-    for (let i = 0, t = 0; i < 90 && t < 2000; t++) if (addItem(R(6, 234), R(6, 234))) i++;
+    for (const b of M.boxes) { if (b.vis.k !== "bld" && b.vis.k !== "container") continue; for (let k = 0; k < (b.vis.k === "bld" ? 3 : 1); k++) { const side = RI(0, 3), x = side < 2 ? R(b.x0, b.x1) : side === 2 ? b.x0 - 1.2 : b.x1 + 1.2, z = side >= 2 ? R(b.z0, b.z1) : side === 0 ? b.z0 - 1.2 : b.z1 + 1.2; addItem(x, z) } }
+    towns.forEach(([tx, tz]) => { for (let k = 0; k < 8; k++) addItem(tx + R(-22, 22), tz + R(-22, 22)) });
+    for (let i = 0, t = 0; i < 160 && t < 3000; t++) if (addItem(R(6, S0 - 6), R(6, S0 - 6))) i++;
     for (const p of M.props) p.cr = PH_PROPS[p.type].r * .85;
     // 道さがし用のマス目（1m）
     const gw = M.W, gh = M.D, grid = new Uint8Array(gw * gh), pad = .45;
     const mark = (x0, z0, x1, z1) => { for (let z = Math.max(0, Math.floor(z0 - pad)); z <= Math.min(gh - 1, Math.floor(z1 + pad)); z++) for (let x = Math.max(0, Math.floor(x0 - pad)); x <= Math.min(gw - 1, Math.floor(x1 + pad)); x++) grid[z * gw + x] = 1 };
-    for (const b of M.boxes) mark(b.x0, b.z0, b.x1, b.z1);
+    for (const b of [...M.boxes, ...M.water]) mark(b.x0, b.z0, b.x1, b.z1);
     for (const cc of [...M.circles, ...M.props.map((p) => ({ x: p.x, z: p.z, r: p.cr }))]) for (let z = Math.max(0, Math.floor(cc.z - cc.r - 1)); z <= Math.min(gh - 1, Math.floor(cc.z + cc.r + 1)); z++) for (let x = Math.max(0, Math.floor(cc.x - cc.r - 1)); x <= Math.min(gw - 1, Math.floor(cc.x + cc.r + 1)); x++) if (Math.hypot(x + .5 - cc.x, z + .5 - cc.z) < cc.r + pad) grid[z * gw + x] = 1;
     M.grid = { gw, gh, grid }; M.towns = towns; M.types = [];
     return M;
@@ -3532,8 +3577,9 @@ html.br-portrait .br-ui { display: none }
           <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
           <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button>
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-med">回復</button>
-          <div class="br-top"><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div><div class="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
+          <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-br="layout">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」と弾をよけられます。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ。</p></section></section>`;
     },
@@ -3542,20 +3588,21 @@ html.br-portrait .br-ui { display: none }
       setMsg(`<p class="wait">3Dのマップを読み込んでいます</p>`);
       phLoad().then(() => { if (!alive) return; try { stop = brRun() } catch (e) { console.error(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("br")}`) } })
         .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("br")}`) });
-      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-portrait", "br-fake"); ROT90 = false };
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-portrait", "br-fake", "br-on"); ROT90 = false };
     },
   };
   function brRun() {
     const T = THREE, host = isFirst(), cardEl = $(".card.act.br"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
-    const M = brMap((me.m.seed || 1) % 100000), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
+    document.documentElement.classList.add("br-on");
+    const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], M = brMap((me.m.seed || 1) % 100000, STG), C0 = M.W / 2, myIdx = host ? 0 : 1, two = () => !!realOppPeer();
     const mobile = matchMedia("(pointer: coarse)").matches;
     const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene();
     const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#A4D2F3"); gr.addColorStop(1, "#E9F2EA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
-    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog("#D3E6EE", 80, 260);
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(STG.fog, 90, 300);
     const camera = new T.PerspectiveCamera(62, 2, .08, 600);
-    scene.add(new T.HemisphereLight("#D8ECFF", "#5E7F3E", .72));
+    scene.add(new T.HemisphereLight("#D8ECFF", STG.hemi, .72));
     const sun = new T.DirectionalLight("#FFF0D6", 1.0); sun.castShadow = true; sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
     const W3 = phBuild(M, scene);
     // 安全地帯のかべ
@@ -3571,12 +3618,13 @@ html.br-portrait .br-ui { display: none }
     let specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
     const nm = (i) => (i === myIdx ? "あなた" : S.names[i] || "");
     const fmt = (t) => String(t).replace(/\{(\d+)\}/g, (_, i) => nm(Number(i)));
-    function mkE(i) { return { i, x: 120, z: 120, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
+    function mkE(i) { return { i, x: C0, z: C0, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
     function ensureVis(n) { while (vis.length < n) { const i = vis.length, ch = brChar(BR_PAL[i % BR_PAL.length]); scene.add(ch.g); vis.push(Object.assign(ch, { px: 0, pz: 0, ph: 0 })) } }
     // ---- 当たり判定
     const blocked = (x, z, rad) => {
       if (x < rad + 1 || z < rad + 1 || x > M.W - rad - 1 || z > M.D - rad - 1) return true;
       for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
+      for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
       for (const cc of M.circles) { const dx = cc.x - x, dz = cc.z - z, rr = cc.r + rad; if (dx * dx + dz * dz < rr * rr) return true }
       for (const p of M.props) { const dx = p.x - x, dz = p.z - z, rr = p.cr + rad; if (dx * dx + dz * dz < rr * rr) return true }
       return false;
@@ -3743,11 +3791,11 @@ html.br-portrait .br-ui { display: none }
     function start() {
       const n = clamp(S.n, two() ? 2 : 2, 20); S.h1 = two(); E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n);
       const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i === 1 && S.h1 ? oppName() : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
-      const pz = 30 + Math.random() * 180, dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
-      E.forEach((e) => { e.x = 20 + Math.random() * 200; e.z = clamp(pz + (Math.random() - .5) * 80, 10, 230); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * 210, z: 15 + Math.random() * 210 }; e.yaw = Math.random() * 6.28; e.tp++ });
-      S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait + 12, cx: 120, cz: 120, r: 175 }; zoneTarget(S.zone);
+      const pz = 50 + Math.random() * (M.D - 100), dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
+      E.forEach((e) => { e.x = 20 + Math.random() * (M.W - 40); e.z = clamp(pz + (Math.random() - .5) * 100, 10, M.D - 10); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * (M.W - 30), z: 15 + Math.random() * (M.D - 30) }; if (M.water.some((w) => e.land.x > w.x0 - 3 && e.land.x < w.x1 + 3 && e.land.z > w.z0 - 3 && e.land.z < w.z1 + 3)) e.land = { x: C0, z: C0 }; e.yaw = Math.random() * 6.28; e.tp++ });
+      S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait + 12, cx: C0, cz: C0, r: M.W * .74 }; zoneTarget(S.zone);
       S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear();
-      const m = E[myIdx]; camYaw = Math.atan2(120 - m.x, 120 - m.z);
+      const m = E[myIdx]; camYaw = Math.atan2(C0 - m.x, C0 - m.z);
     }
     // ---- 操作
     const stickInp = controlPad($("#stick"), $("#knob"));
@@ -3770,7 +3818,26 @@ html.br-portrait .br-ui { display: none }
     // （ブラウザでは全画面にしないと固定できないので、さわった時に全画面→横固定の順でためす）
     const lockLand = async () => { try { if (screen.orientation && screen.orientation.lock) { if (!document.fullscreenElement && !matchMedia("(display-mode: standalone)").matches && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }); await screen.orientation.lock("landscape") } } catch (_) {} };
     lockLand(); cardEl.addEventListener("pointerdown", lockLand, { once: true });
-    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
+    // ---- ボタンの配置と大きさ（端末に保存）
+    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-rl", "b-gr", "b-med", "br-slots"], uiEl = $(".br-ui");
+    let lay = {}; try { lay = JSON.parse(ls.get("brLayout") || "{}") || {} } catch (_) {}
+    function applyLay() { for (const id of LAY_IDS) { const el = $("#" + id); if (!el) continue; const v = lay[id]; Object.assign(el.style, v ? { left: v.x + "%", top: v.y + "%", right: "auto", bottom: "auto", transform: `translate(-50%,-50%) scale(${v.s})` } : { left: "", top: "", right: "", bottom: "", transform: "" }) } }
+    function centerOf(el) { if (lay[el.id]) return lay[el.id]; const W2 = uiEl.offsetWidth, H2 = uiEl.offsetHeight, cx = el.id === "br-slots" ? el.offsetLeft : el.offsetLeft + el.offsetWidth / 2; return { x: cx / W2 * 100, y: (el.offsetTop + el.offsetHeight / 2) / H2 * 100, s: 1 } }
+    applyLay();
+    let editLayer = null, editBar = null, selId = null, drag = null;
+    function closeEdit(save) { if (save) ls.set("brLayout", JSON.stringify(lay)); if (editLayer) editLayer.remove(); if (editBar) editBar.remove(); editLayer = editBar = null; cardEl.classList.remove("br-editing"); LAY_IDS.forEach((id) => $("#" + id) && $("#" + id).classList.remove("br-sel")) }
+    function selectId(id) { selId = id; LAY_IDS.forEach((k) => $("#" + k) && $("#" + k).classList.toggle("br-sel", k === id)); if (editBar) { const sl = editBar.querySelector("input"); sl.disabled = !id; if (id) sl.value = lay[id].s } }
+    function openEdit() {
+      if (editLayer) return; LAY_IDS.forEach((id) => { const el = $("#" + id); if (el) lay[id] = centerOf(el) }); applyLay(); cardEl.classList.add("br-editing");
+      editLayer = document.createElement("div"); editLayer.className = "br-editlayer"; cardEl.appendChild(editLayer);
+      editBar = document.createElement("div"); editBar.className = "br-editbar"; editBar.innerHTML = `<b>ボタンをドラッグして動かす</b><label>大きさ <input type="range" min="0.6" max="1.8" step="0.05" value="1" disabled></label><button class="btn ghost small" data-br="lay-reset">もとにもどす</button><button class="btn small" data-br="lay-done">完了</button>`; cardEl.appendChild(editBar);
+      editBar.querySelector("input").addEventListener("input", (e) => { if (!selId) return; lay[selId].s = Number(e.target.value); applyLay() });
+      editLayer.addEventListener("pointerdown", (e) => { const hit = LAY_IDS.find((id) => { const el = $("#" + id); if (!el) return false; const rc = el.getBoundingClientRect(); return e.clientX >= rc.left && e.clientX <= rc.right && e.clientY >= rc.top && e.clientY <= rc.bottom }); selectId(hit || null); if (hit) { drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { editLayer.setPointerCapture(e.pointerId) } catch (_) {} } });
+      editLayer.addEventListener("pointermove", (e) => { if (!drag || e.pointerId !== drag.id || !selId) return; let dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (ROT90) [dx, dy] = [dy, -dx]; drag.x = e.clientX; drag.y = e.clientY; const v = lay[selId]; v.x = clamp(v.x + dx / uiEl.offsetWidth * 100, 3, 97); v.y = clamp(v.y + dy / uiEl.offsetHeight * 100, 4, 96); applyLay() });
+      const up = (e) => { if (drag && e.pointerId === drag.id) drag = null }; editLayer.addEventListener("pointerup", up); editLayer.addEventListener("pointercancel", up);
+      selectId(null);
+    }
+    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.y <= .01) { m.vy = 5.5; crOn = false } }
@@ -3807,11 +3874,11 @@ html.br-portrait .br-ui { display: none }
       }
       itemMeshes.forEach((mm, i) => { const it = M.items[i]; mm.visible = !taken.has(it.id) && !!m && Math.abs(it.x - m.x) < 60 && Math.abs(it.z - m.z) < 60; if (mm.visible) { mm.rotation.y = tAll * .8 + i; mm.position.y = .05 + Math.sin(tAll * 2 + i) * .04 } });
       if (S.zone) { zoneM.visible = true; zoneM.position.x = S.zone.cx; zoneM.position.z = S.zone.cz; zoneM.scale.set(Math.max(.1, S.zone.r), 1, Math.max(.1, S.zone.r)) } else zoneM.visible = false;
-      if (S.plane && S.plane.t < 16) { plane.visible = true; const x = S.plane.dir > 0 ? -40 + S.plane.t * 20 : 280 - S.plane.t * 20; plane.position.set(x, 165, S.plane.z); plane.rotation.y = S.plane.dir > 0 ? -Math.PI / 2 : Math.PI / 2 } else plane.visible = false;
+      if (S.plane && S.plane.t < (M.W + 80) / 20) { plane.visible = true; const x = S.plane.dir > 0 ? -40 + S.plane.t * 20 : M.W + 40 - S.plane.t * 20; plane.position.set(x, 165, S.plane.z); plane.rotation.y = S.plane.dir > 0 ? -Math.PI / 2 : Math.PI / 2 } else plane.visible = false;
     }
     function updCam(dt) {
       let f = meE(); specI = -1; if (f && !f.alive) { const k = f.killer >= 0 ? E[f.killer] : null, al = k && k.alive ? k : E.find((o) => o.alive); if (al) { f = al; specI = al.i } }
-      if (!f) { camera.position.set(120, 60, 220); camera.lookAt(120, 0, 120); return }
+      if (!f) { camera.position.set(C0, 70, M.D - 20); camera.lookAt(C0, 0, C0); return }
       const z = adsOn && f === meE() ? zoomOf(f) : 1, fall = !f.landed;
       const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw);
       const sh = fall ? 0 : z > 1 ? .45 : .75, th = f.y + (fall ? 1 : f.cr ? 1.2 : 1.65), d0 = fall ? 9 : z > 1 ? 1.1 : 3.3;
@@ -3836,7 +3903,7 @@ html.br-portrait .br-ui { display: none }
       const w = VW, h = VH; c.clearRect(0, 0, w, h); const m = meE();
       if (S.ph === "lobby" || !m) return;
       const z = adsOn ? zoomOf(m) : 1, scoped = adsOn && z >= 3.5 && m.alive;
-      if (scoped) { const R = Math.min(w, h) * .46; c.fillStyle = "#000"; c.beginPath(); c.rect(0, 0, w, h); c.arc(w / 2, h / 2, R, 0, 7, true); c.fill(); c.strokeStyle = "rgba(0,0,0,.85)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w / 2 - R, h / 2); c.lineTo(w / 2 + R, h / 2); c.moveTo(w / 2, h / 2 - R); c.lineTo(w / 2, h / 2 + R); c.stroke(); c.fillStyle = "#E23A3A"; c.beginPath(); c.arc(w / 2, h / 2, 2.5, 0, 7); c.fill(); bigText(c, `${z}倍`, w / 2, h / 2 + R - 20, 14, "#fff") }
+      if (scoped) { const R = Math.min(w, h) * .46; c.fillStyle = "#000"; c.beginPath(); c.rect(0, 0, w, h); c.arc(w / 2, h / 2, R, 0, Math.PI * 2); c.fill("evenodd"); c.strokeStyle = "rgba(0,0,0,.85)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w / 2 - R, h / 2); c.lineTo(w / 2 + R, h / 2); c.moveTo(w / 2, h / 2 - R); c.lineTo(w / 2, h / 2 + R); c.stroke(); c.fillStyle = "#E23A3A"; c.beginPath(); c.arc(w / 2, h / 2, 2.5, 0, 7); c.fill(); bigText(c, `${z}倍`, w / 2, h / 2 - R + 22, 14, "#fff") }
       else if (m.alive && m.landed) { const sl = curW(m), Wp = sl ? BR_W[sl.w] : null, sp = Wp ? (adsOn ? Wp.spr * .45 : Wp.hip || Wp.spr) * (m.mv ? 1.5 : 1) : .03, R = 6 + sp * h * 1.2; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * R, h / 2 + dy * R); c.lineTo(w / 2 + dx * (R + 7), h / 2 + dy * (R + 7)); c.stroke() } c.fillStyle = "#fff"; c.fillRect(w / 2 - 1, h / 2 - 1, 2, 2) }
       if (hitT > 0) { hitT -= dt; c.strokeStyle = "#FF4D4D"; c.lineWidth = 2.5; for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * 6, h / 2 + dy * 6); c.lineTo(w / 2 + dx * 13, h / 2 + dy * 13); c.stroke() } }
       const L = w > h && mobile ? 40 : 14;
@@ -3847,13 +3914,13 @@ html.br-portrait .br-ui { display: none }
       if (Z && m.alive && m.landed && Math.hypot(m.x - Z.cx, m.z - Z.cz) > Z.r) { bigText(c, "安全地帯の外！ 地図の白い円の中へ", w / 2, 82, 15, "#FF6B6B"); c.fillStyle = "rgba(80,140,255,.12)"; c.fillRect(0, 0, w, h) }
       // 地図
       const mw = Math.min(130, h * .32), mx = w - mw - Math.max(12, L - 2), my = 10, ms = mw / M.W;
-      c.save(); c.beginPath(); c.rect(mx, my, mw, mw); c.clip(); c.fillStyle = "rgba(60,110,50,.85)"; c.fillRect(mx, my, mw, mw); c.fillStyle = "rgba(210,180,130,.8)"; for (const f of M.floors) c.fillRect(mx + f.x0 * ms, my + f.z0 * ms, Math.max(1, (f.x1 - f.x0) * ms), Math.max(1, (f.z1 - f.z0) * ms));
+      c.save(); c.beginPath(); c.rect(mx, my, mw, mw); c.clip(); c.fillStyle = { grass: "rgba(60,110,50,.85)", harbor: "rgba(60,110,50,.85)", desert: "rgba(190,160,110,.88)", snow: "rgba(200,210,222,.9)", city: "rgba(80,82,90,.9)" }[STG.id]; c.fillRect(mx, my, mw, mw); c.fillStyle = "rgba(60,140,220,.9)"; for (const wt of M.water) c.fillRect(mx + wt.x0 * ms, my + wt.z0 * ms, (wt.x1 - wt.x0) * ms, (wt.z1 - wt.z0) * ms); c.fillStyle = "rgba(210,180,130,.8)"; for (const f of M.floors) c.fillRect(mx + f.x0 * ms, my + f.z0 * ms, Math.max(1, (f.x1 - f.x0) * ms), Math.max(1, (f.z1 - f.z0) * ms));
       c.fillStyle = "rgba(90,80,70,.9)"; for (const b of M.boxes) if (b.h > 2) c.fillRect(mx + b.x0 * ms, my + b.z0 * ms, Math.max(1, (b.x1 - b.x0) * ms), Math.max(1, (b.z1 - b.z0) * ms));
       if (Z) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.beginPath(); c.arc(mx + Z.cx * ms, my + Z.cz * ms, Z.r * ms, 0, 7); c.stroke(); if (Z.st === "wait") { c.setLineDash([3, 3]); c.strokeStyle = "#7CF59A"; c.beginPath(); c.arc(mx + Z.tx * ms, my + Z.tz * ms, Z.tr * ms, 0, 7); c.stroke(); c.setLineDash([]) } }
-      if (S.plane && S.plane.t < 16) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * 20 : 280 - S.plane.t * 20) * ms - 6, my + S.plane.z * ms) }
+      if (S.plane && S.plane.t < (M.W + 80) / 20) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * 20 : M.W + 40 - S.plane.t * 20) * ms - 6, my + S.plane.z * ms) }
       c.restore(); { const px = mx + m.x * ms, pz = my + m.z * ms; c.save(); c.translate(px, pz); c.rotate(-camYaw + Math.PI); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(0, -6); c.lineTo(4, 4); c.lineTo(-4, 4); c.closePath(); c.fill(); c.restore() }
       // たおした・たおされたのお知らせ
-      c.font = `12px ${DISP}`; c.textAlign = "right"; S.feed.slice(-4).forEach((f, i) => { const tx = fmt(f[1]), tw = c.measureText(tx).width + 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(mx + mw - tw, my + mw + 8 + i * 20, tw, 18); c.fillStyle = "#fff"; c.fillText(tx, mx + mw - 6, my + mw + 17 + i * 20) });
+      c.font = `12px ${DISP}`; c.textAlign = "left"; S.feed.slice(-4).forEach((f, i) => { const tx = fmt(f[1]), tw = c.measureText(tx).width + 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(L, 42 + i * 20, tw, 18); c.fillStyle = "#fff"; c.fillText(tx, L + 6, 51 + i * 20) });
       // 体力
       if (m.alive) { const bw = Math.min(260, w * .32), bx = w / 2 - bw / 2, by = h - 64; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(bx, by, bw, 12); c.fillStyle = m.hp > 50 ? "#F2F2F2" : m.hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(bx + 1, by + 1, (bw - 2) * clamp(m.hp, 0, 100) / 100, 10); c.font = `11px ${DISP}`; c.textAlign = "left"; c.fillStyle = "#fff"; c.fillText(`${Math.ceil(m.hp)}　ベスト${m.vest ? "Lv" + m.vest : "なし"}・ヘルメット${m.helm ? "Lv" + m.helm : "なし"}${m.scope > 1 ? `・${m.scope}倍スコープ` : ""}`, bx, by - 8) }
       if (!m.landed && m.alive) { bigText(c, m.para ? "パラシュートで降下中" : "降下中！（ジャンプでパラシュート）", w / 2, h * .3, 18, "#fff"); bigText(c, `高さ ${Math.round(m.y)}m　スティックで着地点をえらぼう`, w / 2, h * .3 + 26, 13, "#E9F7EE") }
@@ -3868,8 +3935,8 @@ html.br-portrait .br-ui { display: none }
     function panel() {
       const m = meE();
       if (S.ph === "lobby") {
-        if (host) setMsg(`<p class="eyebrow">荒野バトル</p><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
-        else setMsg(`<p class="wait">${esc(oppName())}が人数をえらんでいます（${S.n}人）</p>`);
+        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
+        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${S.n}人）</p>`);
         return;
       }
       if (m && (!m.alive || S.ph === "end") && !watching) {
@@ -3888,7 +3955,7 @@ html.br-portrait .br-ui { display: none }
         (ox.tk || []).forEach((id) => taken.add(id));
         if (ox.E) ox.E.forEach((a, i) => {
           const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13];
-          if (i === myIdx) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(120 - e.x, 120 - e.z) } return }
+          if (i === myIdx) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(C0 - e.x, C0 - e.z) } return }
           const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.z += (a[1] - e.z) * al; e.y += (a[2] - e.y) * al; e.yaw = a[3]; e.pitch = a[4];
           e.cr = !!(a[6] & 2); e.ads = !!(a[6] & 4); e.para = !!(a[6] & 16); e.landed = !!(a[6] & 32); e.w = [a[7] >= 0 ? { w: a[7], lv: a[8], ammo: 1 } : null, null]; e.cur = 0; e.vest = a[9]; e.helm = a[10];
         });
@@ -3950,7 +4017,7 @@ html.br-portrait .br-ui { display: none }
       }
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake");
+      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -4468,6 +4535,7 @@ html.br-portrait .br-ui { display: none }
       setS({ mv: [...(me.s.mv || []), c] });
     }
     else if (act === "act-ready") setS({ rdy: true });
+    else if (act === "br-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("br", { stage: i }) }
     else if (act === "hide-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("hide", { stage: i }) }
     else if (act === "kart-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
