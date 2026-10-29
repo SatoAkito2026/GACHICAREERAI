@@ -238,6 +238,56 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .chipbtn { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 6px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer }
 .chipbtn.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, var(--surface)) }
 
+/* トランプ */
+.tc { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; overflow: hidden; color: #fff;
+  background: radial-gradient(ellipse at 50% 40%, #2F8F5B 0%, #1E6B43 60%, #154F31 100%);
+  padding: calc(env(safe-area-inset-top, 0px) + 50px) 8px calc(env(safe-area-inset-bottom, 0px) + 10px) }
+.tc-seats { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap }
+.tc-seat { background: rgba(0,0,0,.25); border: 2px solid transparent; border-radius: 12px; padding: 4px 8px; min-width: 70px; display: flex; flex-direction: column; align-items: center; font-size: 12px; line-height: 1.3 }
+.tc-seat b { font-size: 13px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.tc-seat small { color: #FFE9A8 }
+.tc-seat.turn, .tc-bj.turn { border-color: #FFE14D; box-shadow: 0 0 14px rgba(255,225,77,.55) }
+.tc-mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; overflow: auto }
+.tc-turn { margin: 0; font-family: var(--display); font-size: 16px; color: #E9F7EE } .tc-turn.me { color: #FFE14D; font-size: 20px }
+.tc-note { margin: 0; font-size: 13px; color: #E9F7EE; text-align: center }
+.tc-badge { margin: 0; background: #D2463A; border-radius: 99px; padding: 2px 12px; font-size: 13px; font-weight: 900 }
+.tc-log { margin: 0; min-height: 20px; font-size: 13px; text-align: center; color: #FFF6D6 }
+.tc-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px }
+.tc-field { min-height: 92px; display: flex; gap: 6px; align-items: center; justify-content: center; padding: 8px 14px; border: 2px dashed rgba(255,255,255,.35); border-radius: 14px; min-width: 200px }
+.tc-me { border-radius: 14px; padding: 6px 0 }
+.tc-me.turn { background: rgba(255,225,77,.12) }
+.tc-hand { display: flex; flex-wrap: wrap; justify-content: center; padding-left: 20px; row-gap: 6px }
+.tc-hand .tcc { margin-left: -20px }
+.tc-btns { display: flex; gap: 10px; justify-content: center }
+.tc-btn { appearance: none; border: 0; border-radius: 14px; padding: 12px 22px; font: 900 16px var(--body); background: #FFE14D; color: #1F1B3A; cursor: pointer }
+.tc-btn.ghost { background: rgba(255,255,255,.22); color: #fff }
+.tc-btn:disabled { opacity: .4 }
+.tcc { width: 46px; height: 66px; flex: none; border-radius: 7px; background: #FFFFFF; color: #1F1B3A; border: 1px solid #C9C9C9; box-shadow: 0 2px 5px rgba(0,0,0,.35);
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 4px 0 0 5px; font-family: var(--display); font-size: 15px; line-height: 1.05; user-select: none; -webkit-user-select: none; transition: transform .12s, box-shadow .12s }
+.tcc .s { font-size: 19px }
+.tcc.red { color: #D2302C } .tcc.jk { color: #7A3FC0 }
+.tcc.back { background: repeating-linear-gradient(45deg, #B7352B 0 6px, #D9483C 6px 12px); border: 3px solid #fff }
+.tcc.gone { background: none; border: 2px dashed rgba(255,255,255,.18); box-shadow: none }
+.tcc.empty { background: rgba(255,255,255,.08); border: 1px dashed rgba(255,255,255,.2); box-shadow: none }
+.tcc.tap, .tcc.pick { cursor: pointer }
+.tcc.sel { transform: translateY(-14px); box-shadow: 0 0 0 3px #FFE14D, 0 6px 10px rgba(0,0,0,.4) }
+.tcc.ok { box-shadow: 0 0 0 3px #7CF59A } .tcc.dim { filter: brightness(.55) }
+.tcc.pick:active { transform: translateY(-8px) }
+.tcc.big { width: 56px; height: 80px; font-size: 18px } .tcc.big .s { font-size: 23px }
+.tcc.back, .tcc.big, .tcc.xs { align-items: center; justify-content: center; padding: 0 }
+.tcc.sm { width: 30px; height: 44px; border-width: 2px } .tcc.xs { width: 25px; height: 36px; font-size: 10px; border-radius: 4px } .tcc.xs .s { font-size: 11px }
+.tc-board { display: flex; flex-direction: column; gap: 4px } .tc-brow { display: flex; gap: 2px }
+.tc-grid { display: grid; grid-template-columns: repeat(6, 46px); gap: 6px }
+.tc-dealer { display: flex; flex-direction: column; align-items: center; gap: 4px }
+.tc-bjs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center }
+.tc-bj { background: rgba(0,0,0,.25); border: 2px solid transparent; border-radius: 12px; padding: 4px 8px; display: flex; flex-direction: column; align-items: center; font-size: 12px; min-width: 90px }
+.tc-over { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 6 }
+.tc-panel { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,.3) }
+.tc-panel p { margin: 0 }
+.tc-rank { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; counter-reset: rk }
+.tc-rank li { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; border-radius: 10px; background: var(--surface-2); counter-increment: rk }
+.tc-rank li::before { content: counter(rk) "位"; font-weight: 900; color: var(--muted) }
+.tc-rank li b { flex: 1; text-align: left } .tc-rank li.me { outline: 2px solid var(--pink) }
 @media (prefers-reduced-motion: reduce) { .wait::after { animation: none } .game:active { transform: none } }
 </style>
 
@@ -473,6 +523,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     army: { grp: "body", name: "軍団ラン", ico: "兵", c: "var(--sky)", desc: "道中で軍団を強くして、最後はふたりの軍団で決戦" },
     tycoon: { grp: "body", name: "木こりタイクーン", ico: "木", c: "var(--ok)", desc: "ふたりで協力。木を切って売って、お店を広げてお城をたてよう" },
     sumo: { grp: "body", name: "連打すもう", ico: "力", c: "var(--pink)", desc: "ひたすら連打して相手を押し出せ。15秒の真剣勝負" },
+    cards: { name: "トランプ", ico: "♠", c: "var(--ok)", desc: "大富豪・ババ抜き・七並べ・神経衰弱・ブラックジャック。人数もえらべて、足りない席はコンピューター" },
     ishin: { name: "以心伝心", ico: "♡", c: "var(--pink)", desc: "同じお題にふたりで答えて、答えがそろうか挑戦。協力プレイ" },
     quiz: { name: "ディズニークイズ", ico: "?", c: "var(--sky)", desc: "全10問の4択。正解が多いほうが勝ち" },
     reflex: { name: "反射神経", ico: "!", c: "var(--ok)", desc: "画面が緑になったら即タップ。5回の合計タイムで勝負" },
@@ -3293,6 +3344,264 @@ html.playing.full .card.act canvas { border-radius: 0 }
       if (actx) try { actx.close() } catch (_) {}
     };
   }
+  // ----- トランプ（いろいろなゲーム・人数を選べる） -----
+  // ホスト（先に始めた人）が山札と全員の手札を持って計算し、あいてには「あいてから見える分」だけ送る。
+  // 人が足りない席はコンピューター。あいては自分の操作を { aid, a } で送り、ホストが1回だけ実行する。
+  const TC_GAMES = {
+    daifugo: { name: "大富豪", min: 2, max: 6, def: 4, desc: "場より強いカードを同じ枚数で出す。3が最弱・2が最強・ジョーカーは何にでもなれる。8切り・4枚出しで革命" },
+    baba: { name: "ババ抜き", min: 2, max: 6, def: 4, desc: "となりの人から1枚引いて、同じ数字の2枚を捨てる。最後にジョーカーが残った人の負け" },
+    seven: { name: "七並べ", min: 2, max: 6, def: 4, desc: "7からつながるカードを出していく。パスは3回まで。先に手札がなくなった人の勝ち" },
+    memory: { name: "神経衰弱", min: 2, max: 4, def: 2, desc: "2枚めくって同じ数字ならもらえて、もう1回。たくさん取った人の勝ち" },
+    bj: { name: "ブラックジャック", min: 1, max: 5, def: 3, desc: "ディーラーと勝負。21をこえないように21に近づける。3回の合計点で順位" },
+  };
+  const TC_S = ["♠", "♥", "♦", "♣"], TC_R = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+  const tcSuit = (c) => (c >= 52 ? 4 : Math.floor(c / 13)), tcRank = (c) => (c >= 52 ? 0 : (c % 13) + 1);
+  const tcName = (c) => (c >= 52 ? "ジョーカー" : TC_S[tcSuit(c)] + TC_R[tcRank(c)]);
+  const tcShuf = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
+  const tcNext = (n, i, ok) => { for (let k = 1; k <= n; k++) { const j = (i + k) % n; if (ok(j)) return j } return i };
+  function tcCard(c, cls = "", attrs = "") {
+    if (c == null || c === -1) return `<div class="tcc back ${cls}" ${attrs}></div>`;
+    if (c === -2) return `<div class="tcc gone ${cls}" ${attrs}></div>`;
+    if (c >= 52) return `<div class="tcc jk ${cls}" ${attrs}><span>JO</span><span class="s">★</span></div>`;
+    const s = tcSuit(c); return `<div class="tcc ${s === 1 || s === 2 ? "red" : ""} ${cls}" ${attrs}><span>${TC_R[tcRank(c)]}</span><span class="s">${TC_S[s]}</span></div>`;
+  }
+  // 大富豪の強さ（3=1 … K=11, A=12, 2=13, ジョーカー=100）
+  const dfStr = (c) => (c >= 52 ? 100 : ((tcRank(c) + 10) % 13) + 1);
+  function dfInfo(cards) { if (!cards.length || cards.length > 4) return null; const nj = cards.filter((c) => c < 52); if (nj.some((c) => tcRank(c) !== tcRank(nj[0]))) return null; return { cnt: cards.length, str: nj.length ? dfStr(nj[0]) : 100, jo: !nj.length } }
+  function dfCan(field, rev, cards) { const f = dfInfo(cards); if (!f) return false; if (!field) return true; if (f.cnt !== field.cnt || field.jo) return false; if (f.jo) return true; return rev ? f.str < field.str : f.str > field.str }
+  const dfTitle = (k, n) => (k === 0 ? "大富豪" : k === n - 1 ? "大貧民" : n >= 4 && k === 1 ? "富豪" : n >= 4 && k === n - 2 ? "貧民" : "平民");
+  const bjVal = (h) => { let s = 0, a = false; for (const c of h) { const r = tcRank(c); s += Math.min(10, r); if (r === 1) a = true } return a && s + 10 <= 21 ? s + 10 : s };
+  const TC = {
+    baba: {
+      init(n) { const d = tcShuf([...Array(52).keys(), 52]), hands = Array.from({ length: n }, () => []); d.forEach((c, i) => hands[i % n].push(c)); const G = { n, hands: hands.map((h) => tcShuf(TC.baba.drop(h))), turn: 0, out: [], log: "同じ数字の2枚は最初に捨てました", end: false }; G.hands.forEach((h, i) => { if (!h.length) G.out.push(i) }); if (!G.hands[0].length) G.turn = tcNext(n, 0, (i) => G.hands[i].length > 0); return G },
+      drop(h) { const by = {}; for (const c of h) (by[c >= 52 ? "J" : tcRank(c)] = by[c >= 52 ? "J" : tcRank(c)] || []).push(c); return Object.entries(by).flatMap(([k, l]) => (k === "J" ? l : l.length % 2 ? [l[0]] : [])) },
+      target(G, s) { return tcNext(G.n, s, (i) => G.hands[i].length > 0) },
+      act(G, s, a, N) {
+        if (G.end || a.t !== "draw" || s !== G.turn) return false; const t = TC.baba.target(G, s); if (t === s) return false;
+        const H = G.hands[t], c = H.splice(clamp(a.k | 0, 0, H.length - 1), 1)[0], mine = G.hands[s], j = c < 52 ? mine.findIndex((x) => x < 52 && tcRank(x) === tcRank(c)) : -1;
+        if (j >= 0) { mine.splice(j, 1); G.log = `${N(s)}が${N(t)}から引いて、ペアを捨てた` } else { mine.push(c); G.log = `${N(s)}が${N(t)}から1枚引いた` }
+        G.last = { s, t, c, pair: j >= 0 }; G.hands[t] = tcShuf(G.hands[t]); G.hands[s] = tcShuf(G.hands[s]);
+        for (const p of [t, s]) if (!G.hands[p].length && !G.out.includes(p)) { G.out.push(p); G.log += `　${N(p)}があがり！` }
+        const alive = G.hands.map((h, i) => (h.length ? i : -1)).filter((i) => i >= 0);
+        if (alive.length <= 1) { if (alive.length) G.out.push(alive[0]); G.loser = alive[0]; G.end = true; G.rank = G.out.map((i, k) => ({ i, t: i === G.loser ? "ババが残った…" : `${k + 1}番であがり` })); return true }
+        G.turn = tcNext(G.n, s, (i) => G.hands[i].length > 0); return true;
+      },
+      cpu(G, s) { return { t: "draw", k: Math.floor(Math.random() * G.hands[TC.baba.target(G, s)].length) } },
+      view(G, me) {
+        const tg = TC.baba.target(G, G.turn), L = G.last;
+        return { turn: G.turn, target: tg, drawN: G.hands[tg].length, hand: G.hands[me].slice().sort((a, b) => tcRank(a) - tcRank(b) || a - b), seats: G.hands.map((h, i) => ({ c: h.length, st: G.out.includes(i) ? (G.end && i === G.loser ? "負け" : "あがり") : "" })), last: L ? { s: L.s, t: L.t, pair: L.pair, c: L.s === me || L.t === me ? L.c : null } : null, log: G.log, end: G.end, rank: G.rank };
+      },
+    },
+    daifugo: {
+      init(n) { const d = tcShuf([...Array(52).keys(), 52]), hands = Array.from({ length: n }, () => []); d.forEach((c, i) => hands[i % n].push(c)); const turn = Math.max(0, hands.findIndex((h) => h.includes(28))); return { n, hands, turn, field: null, passed: [], rev: false, last: -1, out: [], log: "♦3を持っている人からスタート", end: false } },
+      next(G, s) { return tcNext(G.n, s, (i) => G.hands[i].length > 0 && !G.passed.includes(i)) },
+      endCheck(G) { const al = G.hands.map((h, i) => (h.length ? i : -1)).filter((i) => i >= 0); if (al.length > 1) return false; if (al.length) G.out.push(al[0]); G.end = true; G.rank = G.out.map((i, k) => ({ i, t: dfTitle(k, G.n) })); return true },
+      act(G, s, a, N) {
+        if (G.end || s !== G.turn) return false; const D = TC.daifugo;
+        if (a.t === "pass") {
+          if (!G.field) return false; G.passed.push(s); G.log = `${N(s)}はパス`;
+          const al = G.hands.map((h, i) => (h.length ? i : -1)).filter((i) => i >= 0 && i !== G.last);
+          if (al.every((i) => G.passed.includes(i))) { G.field = null; G.passed = []; G.turn = G.hands[G.last] && G.hands[G.last].length ? G.last : tcNext(G.n, G.last, (i) => G.hands[i].length > 0); G.log += "　場が流れた" } else G.turn = D.next(G, s);
+          return true;
+        }
+        if (a.t !== "play") return false;
+        const cards = [...new Set(a.cards || [])], h = G.hands[s]; if (!cards.length || !cards.every((c) => h.includes(c)) || !dfCan(G.field, G.rev, cards)) return false;
+        G.hands[s] = h.filter((c) => !cards.includes(c)); const f = dfInfo(cards); G.field = Object.assign({ cards, by: s }, f); G.last = s; G.passed = [];
+        const eight = cards.some((c) => c < 52 && tcRank(c) === 8);
+        G.log = `${N(s)}が ${cards.map(tcName).join(" ")} を出した`; if (f.cnt === 4) { G.rev = !G.rev; G.log += G.rev ? "　革命！強さが逆になった" : "　革命返し！" } if (eight) G.log += "　8切り！";
+        if (!G.hands[s].length) { G.out.push(s); G.log += `　${N(s)}があがり！` }
+        if (D.endCheck(G)) return true;
+        if (eight) { G.field = null; G.turn = G.hands[s].length ? s : tcNext(G.n, s, (i) => G.hands[i].length > 0); return true }
+        G.turn = D.next(G, s); if (G.turn === s && !G.hands[s].length) G.turn = tcNext(G.n, s, (i) => G.hands[i].length > 0);
+        return true;
+      },
+      cpu(G, s) {
+        const h = G.hands[s], jok = h.filter((c) => c >= 52), by = {}; for (const c of h) if (c < 52) (by[dfStr(c)] = by[dfStr(c)] || []).push(c);
+        let ks = Object.keys(by).map(Number).sort((a, b) => a - b); if (G.rev) ks.reverse();
+        if (!G.field) { if (!ks.length) return { t: "play", cards: jok.slice(0, 1) }; const k = ks.length > 1 && (by[ks[0]].length === 4 && !G.rev) ? ks[1] : ks[0]; return { t: "play", cards: by[k] } }
+        const f = G.field; for (const k of ks) { const g = by[k]; if (g.length >= f.cnt && dfCan(f, G.rev, g.slice(0, f.cnt))) return { t: "play", cards: g.slice(0, f.cnt) } }
+        if (jok.length) { for (const k of ks) { const g = by[k]; if (g.length < f.cnt && g.length + jok.length >= f.cnt) { const cand = [...g, ...jok].slice(0, f.cnt); if (dfCan(f, G.rev, cand)) return { t: "play", cards: cand } } } if (f.cnt === 1 && (h.length <= 3 || Math.random() < .35) && dfCan(f, G.rev, [jok[0]])) return { t: "play", cards: [jok[0]] } }
+        return { t: "pass" };
+      },
+      view(G, me) { return { turn: G.turn, field: G.field, rev: G.rev, hand: G.hands[me].slice().sort((a, b) => dfStr(a) - dfStr(b) || a - b), seats: G.hands.map((h, i) => ({ c: h.length, st: G.out.includes(i) ? `${G.out.indexOf(i) + 1}番あがり` : G.passed.includes(i) ? "パス" : "" })), log: G.log, end: G.end, rank: G.rank } },
+    },
+    seven: {
+      init(n) {
+        const d = tcShuf([...Array(52).keys()]), hands = Array.from({ length: n }, () => []); d.forEach((c, i) => hands[i % n].push(c));
+        const turn = Math.max(0, hands.findIndex((h) => h.includes(32))), placed = [0, 1, 2, 3].map(() => Array(14).fill(0)); for (let s = 0; s < 4; s++) placed[s][7] = 1;
+        return { n, hands: hands.map((h) => h.filter((c) => tcRank(c) !== 7)), turn, placed, passes: Array(n).fill(3), out: [], dead: [], log: "7を並べました。♦7を持っていた人からスタート", end: false };
+      },
+      ok(G, c) { const s = tcSuit(c), r = tcRank(c); return !G.placed[s][r] && ((r > 1 && G.placed[s][r - 1]) || (r < 13 && G.placed[s][r + 1])) },
+      alive(G, i) { return G.hands[i].length > 0 && !G.dead.includes(i) },
+      fin(G) { const al = G.hands.map((h, i) => i).filter((i) => TC.seven.alive(G, i)); if (al.length > 1) return false; if (al.length) G.out.push(al[0]); G.end = true; G.rank = [...G.out.map((i, k) => ({ i, t: `${k + 1}番であがり` })), ...G.dead.slice().reverse().map((i) => ({ i, t: "失格" }))]; return true },
+      act(G, s, a, N) {
+        if (G.end || s !== G.turn) return false; const V = TC.seven;
+        if (a.t === "play") { const c = a.c, h = G.hands[s]; if (!h.includes(c) || !V.ok(G, c)) return false; G.hands[s] = h.filter((x) => x !== c); G.placed[tcSuit(c)][tcRank(c)] = 1; G.log = `${N(s)}が ${tcName(c)} を出した`; if (!G.hands[s].length) { G.out.push(s); G.log += `　${N(s)}があがり！` } }
+        else if (a.t === "pass") { if (G.passes[s] > 0) { G.passes[s]--; G.log = `${N(s)}はパス（のこり${G.passes[s]}回）` } else { for (const c of G.hands[s]) G.placed[tcSuit(c)][tcRank(c)] = 1; G.hands[s] = []; G.dead.push(s); G.log = `${N(s)}はパスの回数をこえて失格。カードを並べた` } }
+        else return false;
+        if (!V.fin(G)) G.turn = tcNext(G.n, s, (i) => V.alive(G, i)); return true;
+      },
+      cpu(G, s) {
+        const h = G.hands[s], ok = h.filter((c) => TC.seven.ok(G, c)); if (!ok.length) return { t: "pass" };
+        const score = (c) => { const su = tcSuit(c), r = tcRank(c), dir = r < 7 ? -1 : 1; let k = 0; for (let x = r + dir; x >= 1 && x <= 13; x += dir) if (h.includes(su * 13 + x - 1)) k++; return k + Math.random() * .5 };
+        return { t: "play", c: ok.sort((a, b) => score(b) - score(a))[0] };
+      },
+      view(G, me) { return { turn: G.turn, placed: G.placed.map((r) => r.join("")), passes: G.passes[me], hand: G.hands[me].slice().sort((a, b) => a - b), seats: G.hands.map((h, i) => ({ c: h.length, st: G.out.includes(i) ? "あがり" : G.dead.includes(i) ? "失格" : `パス${G.passes[i]}` })), log: G.log, end: G.end, rank: G.rank } },
+    },
+    memory: {
+      init(n) { return { n, grid: tcShuf([...Array(13).keys(), ...Array.from({ length: 13 }, (_, i) => 13 + i)]), taken: Array(26).fill(-1), open: [], score: Array(n).fill(0), turn: 0, wait: 0, mem: Array.from({ length: n }, () => ({})), log: "2枚めくって、同じ数字ならもらえる", end: false } },
+      act(G, s, a, N) {
+        if (G.end || s !== G.turn || G.wait > 0 || a.t !== "flip") return false; const k = a.k | 0;
+        if (k < 0 || k >= 26 || G.taken[k] >= 0 || G.open.includes(k) || G.open.length >= 2) return false;
+        G.open.push(k); G.mem.forEach((m, i) => { if (Math.random() < .6) m[k] = tcRank(G.grid[k]) });
+        if (G.open.length === 2) {
+          const [p, q] = G.open;
+          if (tcRank(G.grid[p]) === tcRank(G.grid[q])) { G.taken[p] = G.taken[q] = s; G.score[s]++; G.open = []; G.mem.forEach((m) => { delete m[p]; delete m[q] }); G.log = `${N(s)}がペアをとった！もう1回`; if (G.taken.every((t) => t >= 0)) { G.end = true; const order = G.score.map((v, i) => i).sort((a, b) => G.score[b] - G.score[a]); G.rank = order.map((i) => ({ i, t: `${G.score[i]}ペア` })) } }
+          else { G.wait = 1.3; G.log = `${N(s)}：ざんねん、ちがう数字` }
+        }
+        return true;
+      },
+      tick(G, dt) { if (G.wait > 0) { G.wait -= dt; if (G.wait <= 0) { G.wait = 0; G.open = []; G.turn = (G.turn + 1) % G.n } } },
+      cpu(G, s) {
+        const m = G.mem[s], free = [...Array(26).keys()].filter((k) => G.taken[k] < 0 && !G.open.includes(k)), known = free.filter((k) => m[k] != null), unknown = free.filter((k) => m[k] == null);
+        const pick = (l) => l[Math.floor(Math.random() * l.length)];
+        if (G.open.length === 1) { const r = tcRank(G.grid[G.open[0]]), hit = known.find((k) => m[k] === r); return { t: "flip", k: hit != null ? hit : pick(unknown.length ? unknown : free) } }
+        for (const k of known) for (const k2 of known) if (k !== k2 && m[k] === m[k2]) return { t: "flip", k };
+        return { t: "flip", k: pick(unknown.length ? unknown : free) };
+      },
+      view(G, me) { return { turn: G.turn, grid: G.grid.map((c, k) => (G.taken[k] >= 0 ? -2 : G.open.includes(k) ? c : -1)), seats: G.score.map((v) => ({ c: null, st: `${v}ペア` })), wait: G.wait > 0, log: G.log, end: G.end, rank: G.rank } },
+    },
+    bj: {
+      init(n) { const G = { n, round: 1, rounds: 3, score: Array(n).fill(0), end: false }; TC.bj.deal(G); return G },
+      deal(G) {
+        G.deck = tcShuf([...Array(52).keys()]); G.hands = Array.from({ length: G.n }, () => [G.deck.pop(), G.deck.pop()]); G.dealer = [G.deck.pop(), G.deck.pop()];
+        G.done = G.hands.map((h) => bjVal(h) === 21); G.res = Array(G.n).fill(""); G.ph = "play"; G.wait = 0; G.turn = G.done.indexOf(false); G.log = `${G.round}回戦。ヒットで1枚引く・スタンドで止める`;
+        if (G.turn < 0) { G.ph = "dealer"; G.wait = .9 }
+      },
+      adv(G) { const nx = G.done.findIndex((d, i) => !d && i > G.turn); if (nx >= 0) G.turn = nx; else { G.turn = -1; G.ph = "dealer"; G.wait = .9 } },
+      act(G, s, a, N) {
+        if (G.end || G.ph !== "play" || s !== G.turn) return false;
+        if (a.t === "hit") { G.hands[s].push(G.deck.pop()); const v = bjVal(G.hands[s]); G.log = `${N(s)}はヒット（${v}）`; if (v > 21) { G.done[s] = true; G.log = `${N(s)}は${v}でバースト！` } else if (v === 21) G.done[s] = true }
+        else if (a.t === "stand") { G.done[s] = true; G.log = `${N(s)}はスタンド（${bjVal(G.hands[s])}）` }
+        else return false;
+        if (G.done[s]) TC.bj.adv(G); return true;
+      },
+      tick(G, dt, N) {
+        if (G.end || G.ph === "play") return; G.wait -= dt; if (G.wait > 0) return;
+        if (G.ph === "dealer") {
+          if (bjVal(G.dealer) < 17 && G.hands.some((h) => bjVal(h) <= 21)) { G.dealer.push(G.deck.pop()); G.log = `ディーラーが引いた（${bjVal(G.dealer)}）`; G.wait = .9; return }
+          const dv = bjVal(G.dealer), dbj = dv === 21 && G.dealer.length === 2;
+          G.hands.forEach((h, i) => { const v = bjVal(h), bj = v === 21 && h.length === 2; let p, t; if (v > 21) { p = -1; t = "バースト" } else if (bj && !dbj) { p = 1.5; t = "ブラックジャック！" } else if (dv > 21 || v > dv) { p = 1; t = "勝ち" } else if (v === dv) { p = 0; t = "引き分け" } else { p = -1; t = "負け" } G.score[i] += p; G.res[i] = `${t}（${p > 0 ? "+" : ""}${p}）` });
+          G.log = `ディーラーは${dv > 21 ? "バースト" : dv}`; G.ph = "result"; G.wait = 3.6; return;
+        }
+        if (G.ph === "result") { if (G.round < G.rounds) { G.round++; TC.bj.deal(G) } else { G.end = true; const order = G.score.map((v, i) => i).sort((a, b) => G.score[b] - G.score[a]); G.rank = order.map((i) => ({ i, t: `${G.score[i] > 0 ? "+" : ""}${G.score[i]}点` })) } }
+      },
+      cpu(G, s) { const v = bjVal(G.hands[s]), up = Math.min(10, tcRank(G.dealer[0])) || 10; return { t: v < 12 || (v < 17 && !(up >= 2 && up <= 6 && v >= 13)) ? "hit" : "stand" } },
+      view(G, me) { const show = G.ph !== "play"; return { turn: G.turn, ph: G.ph, round: G.round, rounds: G.rounds, dealer: show ? G.dealer : [G.dealer[0], -1], dv: show ? bjVal(G.dealer) : null, hands: G.hands, vals: G.hands.map(bjVal), res: G.res, seats: G.score.map((v, i) => ({ c: null, st: `${v > 0 ? "+" : ""}${v}点` })), hand: G.hands[me], log: G.log, end: G.end, rank: G.rank } },
+    },
+  };
+  ACTION.cards = {
+    full: true,
+    shell() {
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("トランプ", "ゲームと人数をえらんで遊ぶ")}
+        <section class="card act" style="padding:12px;position:relative"><div id="tc" class="tc"></div><div id="act-msg"></div>
+        <p class="muted">ゲーム（大富豪・ババ抜き・七並べ・神経衰弱・ブラックジャック）と人数をえらんで「はじめる」。人数は自分とあいてをふくめた数で、足りない席はコンピューターが入ります。ふたりでつながっているときは、先にトランプをひらいた人がゲームと人数をえらびます。</p></section></section>`;
+    },
+    mount() {
+      const host = isFirst(), root = $("#tc"), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
+      let S = { ph: "lobby", lobby: { game: "daifugo", n: 4 }, names: [], kind: [], game: null, G: null }, lastAid = 0, myAid = 0, sel = new Set(), lastHtml = "", lastSent = "", cpuAt = 0, V = null, last = performance.now();
+      const isCpu = (i) => S.kind[i] === "cpu" || (S.kind[i] === "h1" && !two());
+      const N = (i) => `{${i}}`; // ログの名前は、見る人ごとに「あなた」に置きかえる
+      function start() {
+        const L = S.lobby, gm = TC_GAMES[L.game], n = clamp(Math.max(L.n, two() ? 2 : 1), gm.min, gm.max);
+        S.kind = Array.from({ length: n }, (_, i) => (i === 0 ? "h0" : i === 1 && two() ? "h1" : "cpu"));
+        let k = 0; S.names = S.kind.map((kd) => (kd === "h0" ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : kd === "h1" ? oppName() : `CPU${++k}`));
+        S.game = L.game; S.G = TC[L.game].init(n); S.ph = "play"; cpuAt = 0; sel.clear();
+      }
+      function doAct(seat, a) { if (S.ph !== "play" || !S.G) return false; const ok = TC[S.game].act(S.G, seat, a, N); if (ok) cpuAt = 0; return ok }
+      function view(seat) { const v = { ph: S.ph, me: seat, lobby: S.lobby, names: S.names, game: S.game, n: S.names.length }; if (S.ph === "play" && S.G) Object.assign(v, TC[S.game].view(S.G, seat)); return v }
+      function send(a) { if (host) { if (a.lobby) Object.assign(S.lobby, a.lobby); else if (a.start) start(); else if (a.back) { S.ph = "lobby"; S.G = null } else doAct(0, a) } else { myAid++; sendX({ aid: myAid, a }) } }
+      const nm = (i) => (i === V.me ? "あなた" : V.names[i] || "");
+      function html() {
+        if (V.ph === "lobby") {
+          const L = V.lobby, gm = TC_GAMES[L.game];
+          if (!host) return `<div class="tc-mid"><div class="tc-panel"><p class="eyebrow">トランプ</p><p><b>${gm.name}</b>・${L.n}人</p><p class="muted">${esc(oppName())}がゲームと人数をえらんでいます</p><p class="muted" style="font-size:13px">${gm.desc}</p><button class="btn ghost" data-act="menu">メニューにもどる</button></div></div>`;
+          return `<div class="tc-mid"><div class="tc-panel"><p class="eyebrow">ゲームをえらぶ</p><div class="stages">${Object.entries(TC_GAMES).map(([k, g]) => `<button class="chipbtn ${k === L.game ? "on" : ""}" data-tc="game" data-g="${k}">${g.name}</button>`).join("")}</div>
+            <p class="muted" style="font-size:13px;margin:0">${gm.desc}</p>
+            <p class="eyebrow">人数（あなたもふくめて）</p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-tc="n" data-d="-1" ${L.n <= gm.min ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${L.n}人</b><button class="btn ghost small" data-tc="n" data-d="1" ${L.n >= gm.max ? "disabled" : ""}>＋</button></div>
+            <p class="muted" style="font-size:12px;margin:0">${two() ? `あなた・${esc(oppName())}${L.n > 2 ? `・CPU${L.n - 2}人` : ""}` : L.n > 1 ? `あなた・CPU${L.n - 1}人` : "あなたひとり（ディーラーと勝負）"}</p>
+            <button class="btn" data-tc="start">はじめる</button></div></div>`;
+        }
+        const G = V, my = V.turn === V.me && !V.end, seatsOrder = [...Array(V.n).keys()].filter((i) => i !== V.me);
+        const seats = `<div class="tc-seats">${seatsOrder.map((i) => `<div class="tc-seat ${V.turn === i && !V.end ? "turn" : ""}"><b>${esc(nm(i))}</b><span>${V.seats[i].c != null ? `🂠 ${V.seats[i].c}枚` : ""}</span><small>${V.seats[i].st || "&nbsp;"}</small></div>`).join("")}</div>`;
+        let mid = "", bottom = "", btns = "";
+        const who = V.turn >= 0 && V.turn != null ? nm(V.turn) : "";
+        const turnLine = V.end ? "" : my ? `<p class="tc-turn me">あなたの番</p>` : who ? `<p class="tc-turn">${esc(who)}の番</p>` : "";
+        if (V.game === "baba") {
+          const tg = V.target, L = V.last;
+          mid = `${turnLine}<div class="tc-row">${Array.from({ length: V.drawN }, (_, k) => tcCard(-1, my ? "pick" : "sm", my ? `data-tc="draw" data-k="${k}"` : "")).join("")}</div><p class="tc-note">${my ? `${esc(nm(tg))}のカードを1枚えらんで引こう` : `${esc(who)}が${esc(nm(tg))}から引いています`}</p>${L && L.c != null ? `<p class="tc-note">${L.s === V.me ? `引いたカード：${tcName(L.c)}${L.pair ? "（ペアで捨てた）" : ""}` : `引かれたカード：${tcName(L.c)}`}</p>` : ""}`;
+          bottom = `<div class="tc-hand">${V.hand.map((c) => tcCard(c)).join("")}</div>`;
+        } else if (V.game === "daifugo") {
+          const f = V.field, cards = [...sel].filter((c) => V.hand.includes(c)), can = my && dfCan(f, V.rev, cards);
+          mid = `${turnLine}${V.rev ? `<p class="tc-badge">革命中：弱いほうが強い</p>` : ""}<div class="tc-field">${f ? f.cards.map((c) => tcCard(c, "big")).join("") : `<span class="tc-note">場は空です${my ? "（好きなカードを出せる）" : ""}</span>`}</div>${f ? `<p class="tc-note">${esc(nm(f.by))}が出したカード${f.cnt > 1 ? `（${f.cnt}枚）` : ""}</p>` : ""}`;
+          bottom = `<div class="tc-hand">${V.hand.map((c) => tcCard(c, `${sel.has(c) ? "sel" : ""} ${my ? "tap" : ""}`, `data-tc="sel" data-c="${c}"`)).join("")}</div>`;
+          if (my) btns = `<div class="tc-btns"><button class="tc-btn" data-tc="play" ${can ? "" : "disabled"}>出す${cards.length ? `（${cards.length}枚）` : ""}</button><button class="tc-btn ghost" data-tc="pass" ${f ? "" : "disabled"}>パス</button></div>`;
+        } else if (V.game === "seven") {
+          mid = `${turnLine}<div class="tc-board">${V.placed.map((row, s) => `<div class="tc-brow">${Array.from({ length: 13 }, (_, r) => (row[r + 1] === "1" ? tcCard(s * 13 + r, "xs") : `<div class="tcc xs empty"></div>`)).join("")}</div>`).join("")}</div>`;
+          bottom = `<div class="tc-hand">${V.hand.map((c) => { const s = tcSuit(c), r = tcRank(c), row = V.placed[s], ok = row[r] !== "1" && ((r > 1 && row[r - 1] === "1") || (r < 13 && row[r + 1] === "1")); return tcCard(c, my ? (ok ? "tap ok" : "dim") : "", my && ok ? `data-tc="play1" data-c="${c}"` : "") }).join("")}</div>`;
+          if (my) btns = `<div class="tc-btns"><button class="tc-btn ghost" data-tc="pass">${V.passes > 0 ? `パス（のこり${V.passes}回）` : "パス（失格になる）"}</button></div>`;
+        } else if (V.game === "memory") {
+          mid = `${turnLine}<div class="tc-grid">${V.grid.map((c, k) => tcCard(c, my && c === -1 && !V.wait ? "tap" : "", my && c === -1 && !V.wait ? `data-tc="flip" data-k="${k}"` : "")).join("")}</div>`;
+          bottom = `<p class="tc-note">あなた：${V.seats[V.me].st}</p>`;
+        } else if (V.game === "bj") {
+          const row = (i) => `<div class="tc-bj ${V.turn === i ? "turn" : ""}"><b>${esc(nm(i))}</b><div class="tc-row">${V.hands[i].map((c) => tcCard(c, "xs")).join("")}</div><span>${V.vals[i]}</span><small>${V.res[i] || V.seats[i].st}</small></div>`;
+          mid = `<p class="tc-note">${V.round}/${V.rounds}回戦</p><div class="tc-dealer"><p class="eyebrow" style="color:#E9F7EE">ディーラー${V.dv != null ? `（${V.dv}）` : ""}</p><div class="tc-row">${V.dealer.map((c) => tcCard(c)).join("")}</div></div>${turnLine}<div class="tc-bjs">${seatsOrder.map(row).join("")}</div>`;
+          bottom = `<div class="tc-hand">${V.hand.map((c) => tcCard(c, "big")).join("")}</div><p class="tc-note">あなた：<b>${V.vals[V.me]}</b>　${V.res[V.me] || V.seats[V.me].st}</p>`;
+          if (my) btns = `<div class="tc-btns"><button class="tc-btn" data-tc="hit">ヒット</button><button class="tc-btn ghost" data-tc="stand">スタンド</button></div>`;
+        }
+        let over = "";
+        if (V.end) {
+          const mine = V.rank.findIndex((r) => r.i === V.me);
+          over = `<div class="tc-over"><div class="tc-panel"><p class="verdict ${mine === 0 ? "good" : mine === V.rank.length - 1 && V.rank.length > 1 ? "bad" : ""}">${mine === 0 ? "あなたの勝ち！" : `あなたは${mine + 1}位`}</p><ol class="tc-rank">${V.rank.map((r) => `<li class="${r.i === V.me ? "me" : ""}"><b>${esc(nm(r.i))}</b><span>${esc(r.t)}</span></li>`).join("")}</ol>
+            ${host ? `<div class="row"><button class="btn grow" data-tc="start">もう一回</button><button class="btn ghost" data-tc="back">ゲームをかえる</button></div>` : `<p class="muted">${esc(oppName())}が次をえらびます</p>`}<button class="btn ghost" data-act="menu">メニュー</button></div></div>`;
+        }
+        return `${seats}<div class="tc-mid">${mid}</div><p class="tc-log">${esc((V.log || "").replace(/\{(\d)\}/g, (_, i) => nm(Number(i))))}</p>${btns}<div class="tc-me ${my ? "turn" : ""}">${bottom}</div>${over}`;
+      }
+      root.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-tc]"); if (!t || !V) return; const k = t.dataset.tc;
+        if (k === "game") send({ lobby: { game: t.dataset.g, n: clamp(S.lobby.n, TC_GAMES[t.dataset.g].min, TC_GAMES[t.dataset.g].max) } });
+        else if (k === "n") { const gm = TC_GAMES[S.lobby.game]; send({ lobby: { n: clamp(S.lobby.n + Number(t.dataset.d), Math.max(gm.min, two() ? 2 : 1), gm.max) } }) }
+        else if (k === "start") send({ start: 1 });
+        else if (k === "back") send({ back: 1 });
+        else if (k === "draw") send({ t: "draw", k: Number(t.dataset.k) });
+        else if (k === "sel") { const c = Number(t.dataset.c); if (sel.has(c)) sel.delete(c); else sel.add(c); lastHtml = "" }
+        else if (k === "play") { send({ t: "play", cards: [...sel] }); sel.clear() }
+        else if (k === "pass") { send({ t: "pass" }); sel.clear() }
+        else if (k === "play1") send({ t: "play", c: Number(t.dataset.c) });
+        else if (k === "flip") send({ t: "flip", k: Number(t.dataset.k) });
+        else if (k === "hit" || k === "stand") send({ t: k });
+        tick();
+      });
+      function tick() {
+        const now = performance.now(), dt = Math.min(.5, (now - last) / 1000); last = now;
+        const op = rtOppPeer(), ox = op ? op.presence.x : null;
+        if (host) {
+          if (ox && ox.aid > lastAid && S.kind[1] === "h1") { lastAid = ox.aid; doAct(1, ox.a) }
+          if (ox && ox.aid > lastAid) lastAid = ox.aid;
+          if (S.ph === "play" && S.G && !S.G.end) {
+            const M = TC[S.game]; if (M.tick) M.tick(S.G, dt, N);
+            const tn = S.G.turn; if (tn != null && tn >= 0 && isCpu(tn) && !(S.G.wait > 0) && (S.game !== "bj" || S.G.ph === "play")) { if (!cpuAt) cpuAt = now + 650 + Math.random() * 500; else if (now >= cpuAt) { cpuAt = 0; const a = M.cpu(S.G, tn); if (!doAct(tn, a) && a.t !== "pass") doAct(tn, { t: "pass" }) } } else cpuAt = 0;
+          }
+          V = view(0);
+          if (two()) { const v1 = JSON.stringify(view(1)); if (v1 !== lastSent) { lastSent = v1; sendX({ v: JSON.parse(v1) }) } }
+        } else V = ox && ox.v ? ox.v : { ph: "lobby", me: 1, lobby: { game: "daifugo", n: 4 }, names: [] };
+        if (V.hand) for (const c of [...sel]) if (!V.hand.includes(c)) sel.delete(c);
+        const h = html(); if (h !== lastHtml) { lastHtml = h; root.innerHTML = h }
+      }
+      const iv = setInterval(tick, 120); tick();
+      return () => clearInterval(iv);
+    },
+  };
   // ----- 木こりタイクーン（ふたりで協力） -----
   // 先に始めた人(ホスト)が木・お金・お客さん・買ったものをぜんぶ計算して送る。あいては自分の位置だけ送る。
   const TW = 36, TH = 52, TY_PRICE = 10;
