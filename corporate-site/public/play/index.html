@@ -444,7 +444,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
           : (rnd() < 0.2 ? { u: 0, v: 0.4 } : { u: rr((rnd() < 0.5 ? -1 : 1) * (0.35 + rnd() * 0.55)), v: rr(rnd() * 0.85) });
         cpuSet({ p: [...cp, a] });
       }
-    } else if (g === "run" || g === "sumo" || g === "army" || g === "kart") {
+    } else if (g === "run" || g === "sumo" || g === "army" || g === "kart" || g === "hide") {
       if (me.s.rdy && !s.rdy && later("rdy", 700)) cpuSet({ rdy: true });
     }
   }
@@ -466,6 +466,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
   // ---------- rendering ----------
   const GAMES = {
     soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
+    hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "おうち・遊園地・広いテーマパークで、隠れて探す。鬼を交代して2ラウンド" },
     pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
     kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "ドリフトでダッシュ、アイテムで妨害。3周して先にゴールしたら勝ち" },
     run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "？ブロックのアイテムでレース。こうらで相手を転ばせろ" },
@@ -2457,6 +2458,340 @@ html.playing.full .card.act canvas { border-radius: 0 }
       return loop(frame);
     },
   };
+  // ----- かくれんぼ -----
+  // 鬼は赤い「見える範囲」に入った人を見つける（壁のかげは見えない。茂みや箱に入っている人は、すぐ近くまで来ないと見えない）。
+  // 先に隠れる時間があって、そのあと制限時間内に鬼が探す。見つかった人は「おり」に入り、仲間がさわると助けられる。
+  // 2ラウンドで鬼を交代。ホスト（先に始めた人）が、コンピューター・見つけた判定・時間をまとめて計算して送る。
+  const HS_STAGES = [
+    { id: "house", name: "おうち", W: 1400, H: 1100, ground: "#E9D9BF", seek: 50 },
+    { id: "fun", name: "ゆうえんち", W: 2200, H: 2000, ground: "#8ECF6A", seek: 75 },
+    { id: "castle", name: "キャッスルパーク", W: 2400, H: 2400, ground: "#7DC46A", seek: 90 },
+    { id: "movie", name: "ムービーパーク", W: 2200, H: 2200, ground: "#C9C3B8", seek: 80 },
+  ];
+  const HS_HIDE_T = 10, HS_R = 13;
+  function hsMap(st, seed) {
+    const r = rng(seed * 7 + st.id.length * 131); r();
+    const M = { solid: [], low: [], water: [], hides: [], decor: [], labels: [], W: st.W, H: st.H };
+    const solid = (x, y, w, h, col, label) => { M.solid.push({ x, y, w, h, col }); if (label) M.labels.push({ x: x + w / 2, y: y + h / 2, t: label }) };
+    const low = (x, y, w, h, col) => M.low.push({ x, y, w, h, col });
+    const hide = (x, y, rr, k) => M.hides.push({ x, y, r: rr, k });
+    const deco = (x, y, w, h, col) => M.decor.push({ x, y, w, h, col });
+    const T = 16;
+    solid(0, 0, st.W, T, "#6B5B4B"); solid(0, st.H - T, st.W, T, "#6B5B4B"); solid(0, 0, T, st.H, "#6B5B4B"); solid(st.W - T, 0, T, st.H, "#6B5B4B");
+    // 置ける場所か（ほかのものと重ならないか）
+    const free = (x, y, w, h) => [...M.solid, ...M.low, ...M.water].every((o) => x + w < o.x - 10 || x > o.x + o.w + 10 || y + h < o.y - 10 || y > o.y + o.h + 10) && M.hides.every((q) => Math.hypot(q.x - (x + w / 2), q.y - (y + h / 2)) > q.r + Math.max(w, h) / 2 + 10);
+    const scatter = (n, kinds, area) => { for (let i = 0, tries = 0; i < n && tries < n * 30; tries++) { const a = area || [60, 60, st.W - 60, st.H - 60]; const x = a[0] + r() * (a[2] - a[0]), y = a[1] + r() * (a[3] - a[1]); const k = kinds[Math.floor(r() * kinds.length)], rr = k === "bush" || k === "tree" ? 30 : 22; if (free(x - rr, y - rr, rr * 2, rr * 2)) { hide(x, y, rr, k); i++ } } };
+    if (st.id === "house") {
+      const W = "#8A6E55";
+      const wallH = (x1, x2, y, doors) => { let x = x1; for (const d of doors) { if (d - 45 > x) solid(x, y, d - 45 - x, 14, W); x = d + 45 } if (x < x2) solid(x, y, x2 - x, 14, W) };
+      const wallV = (y1, y2, x, doors) => { let y = y1; for (const d of doors) { if (d - 45 > y) solid(x, y, 14, d - 45 - y, W); y = d + 45 } if (y < y2) solid(x, y, 14, y2 - y, W) };
+      wallV(16, 1084, 480, [260, 800]); wallV(16, 1084, 930, [300, 820]); wallH(16, 480, 560, [250]); wallH(480, 930, 560, [700]); wallH(930, 1384, 600, [1150]);
+      deco(30, 30, 440, 520, "#D9C29E"); deco(500, 30, 420, 520, "#F0E6D6"); deco(950, 30, 420, 560, "#CFE0E8"); deco(30, 580, 440, 490, "#E6D2E8"); deco(500, 580, 420, 490, "#D8E8CF"); deco(950, 620, 420, 450, "#F2D9C2");
+      M.labels.push({ x: 250, y: 60, t: "リビング" }, { x: 710, y: 60, t: "キッチン" }, { x: 1160, y: 60, t: "おふろ" }, { x: 250, y: 610, t: "しんしつ" }, { x: 710, y: 610, t: "こども部屋" }, { x: 1160, y: 650, t: "ものおき" });
+      low(80, 120, 240, 70, "#6C8EBF"); low(150, 260, 140, 90, "#A8794F"); low(560, 120, 300, 50, "#B0B0B0"); low(600, 300, 160, 100, "#A8794F"); low(1000, 120, 200, 110, "#F5F5F5"); low(1250, 400, 100, 60, "#F5F5F5");
+      low(80, 700, 200, 260, "#E8B4C8"); low(560, 700, 180, 120, "#9BD08A"); low(780, 900, 100, 140, "#C9A26B"); low(1000, 700, 120, 100, "#A08060"); low(1200, 900, 140, 120, "#A08060");
+      [[400, 120, "closet"], [400, 450, "curtain"], [880, 470, "box"], [600, 470, "box"], [1300, 200, "curtain"], [1300, 520, "box"], [330, 1000, "closet"], [180, 1000, "under"], [880, 640, "closet"], [600, 1000, "box"], [1010, 1000, "box"], [1320, 700, "closet"], [1100, 820, "box"], [1300, 1020, "box"], [80, 460, "plant"], [860, 200, "plant"]].forEach(([x, y, k]) => hide(x, y, 24, k));
+      M.spawnSeek = { x: 700, y: 820 }; M.spawnHide = { x: 250, y: 420 }; M.jail = { x: 710, y: 470 };
+    } else {
+      const theme = st.id;
+      const pathCol = theme === "movie" ? "#9E978C" : "#E8D9B0";
+      // 大きな道（十字）
+      deco(st.W / 2 - 60, 0, 120, st.H, pathCol); deco(0, st.H / 2 - 60, st.W, 120, pathCol);
+      if (theme === "castle") {
+        // 真ん中のお城とお堀、橋
+        M.water.push({ x: st.W / 2 - 330, y: st.H / 2 - 330, w: 660, h: 80, col: "#4FA3E0" }, { x: st.W / 2 - 330, y: st.H / 2 + 250, w: 660, h: 80, col: "#4FA3E0" }, { x: st.W / 2 - 330, y: st.H / 2 - 250, w: 80, h: 500, col: "#4FA3E0" }, { x: st.W / 2 + 250, y: st.H / 2 - 250, w: 80, h: 500, col: "#4FA3E0" });
+        M.water = M.water.flatMap((o) => o.w > o.h ? [{ ...o, w: o.w / 2 - 70 }, { ...o, x: o.x + o.w / 2 + 70, w: o.w / 2 - 70 }] : [o]);
+        solid(st.W / 2 - 150, st.H / 2 - 150, 300, 300, "#E7E1F0", "お城");
+        solid(st.W - 600, 200, 300, 220, "#B08A5A", "山の汽車"); M.water.push({ x: 250, y: st.H - 650, w: 420, h: 300, col: "#4FA3E0" }); solid(380, st.H - 560, 160, 110, "#8B5A2B", "海賊船");
+      }
+      if (theme === "fun") {
+        solid(st.W / 2 - 110, 260, 220, 220, "#F0C3D8", "観覧車"); solid(380, st.H / 2 - 110, 200, 200, "#FFD27A", "メリーゴーランド"); solid(st.W - 620, st.H / 2 - 150, 380, 120, "#B05A5A", "ジェットコースター"); solid(st.W - 560, st.H - 520, 260, 220, "#5A4A6A", "おばけやしき");
+        M.water.push({ x: 300, y: st.H - 600, w: 380, h: 260, col: "#4FA3E0" });
+      }
+      if (theme === "movie") {
+        solid(260, 260, 420, 220, "#A2A9B4", "スタジオA"); solid(st.W - 680, 260, 420, 220, "#A2A9B4", "スタジオB"); solid(st.W / 2 - 160, st.H - 520, 320, 200, "#C08A5A", "西部の町");
+        M.water.push({ x: st.W - 640, y: st.H - 620, w: 460, h: 360, col: "#3E8BC9" }); solid(st.W - 520, st.H - 520, 180, 90, "#6A6A6A", "船");
+      }
+      // ふつうの建物（お店・セット）をあちこちに
+      const cols = theme === "movie" ? ["#B98E6B", "#8E9AAF", "#C7A57A", "#A86464"] : theme === "castle" ? ["#F2C4D8", "#C9E4F5", "#F5E1A4", "#D8C4F0"] : ["#F7B2B7", "#A7D8F0", "#FFE08A", "#C4E8B0"];
+      const names = theme === "movie" ? ["カフェ", "ショップ", "撮影セット", "劇場"] : theme === "castle" ? ["ショップ", "レストラン", "ステージ", "ワゴン"] : ["屋台", "ショップ", "ゲーム", "カフェ"];
+      for (let i = 0, tries = 0; i < 14 && tries < 400; tries++) { const w_ = 120 + r() * 140, h_ = 90 + r() * 110, x = 60 + r() * (st.W - 120 - w_), y = 60 + r() * (st.H - 120 - h_); if (Math.abs(x + w_ / 2 - st.W / 2) < 140 + w_ / 2 || Math.abs(y + h_ / 2 - st.H / 2) < 140 + h_ / 2) continue; if (free(x, y, w_, h_)) { solid(x, y, w_, h_, cols[i % 4], names[i % 4]); i++ } }
+      for (let i = 0, tries = 0; i < 18 && tries < 400; tries++) { const x = 60 + r() * (st.W - 160), y = 60 + r() * (st.H - 120); if (free(x, y, 70, 40)) { low(x, y, 70, 40, theme === "movie" ? "#7A6A5A" : "#C98F5A"); i++ } }
+      const kinds = theme === "movie" ? ["bush", "box", "barrel", "trash", "fern"] : theme === "castle" ? ["bush", "tree", "box", "trash", "bush"] : ["bush", "box", "trash", "tree", "costume"];
+      scatter(theme === "castle" ? 60 : 48, kinds);
+      M.spawnSeek = { x: st.W / 2, y: st.H / 2 + (theme === "castle" ? 420 : 0) }; M.spawnHide = { x: st.W / 2 + 200, y: st.H / 2 + 200 }; M.jail = { x: st.W / 2 - 200, y: st.H / 2 + (theme === "castle" ? 420 : 200) };
+      if (theme === "castle") M.spawnHide = { x: st.W / 2 + 250, y: st.H / 2 + 450 };
+    }
+    // おり・スタート地点のそばの隠れ場所はなくす
+    M.hides = M.hides.filter((q) => [M.jail, M.spawnSeek, M.spawnHide].every((p) => Math.hypot(q.x - p.x, q.y - p.y) > 80));
+    // ぶつかる物（動けない）・視線をさえぎる物
+    M.block = [...M.solid, ...M.low, ...M.water];
+    // 道さがし用のマス目（32ずつ）
+    const C = 32, gw = Math.ceil(st.W / C), gh = Math.ceil(st.H / C), grid = new Uint8Array(gw * gh);
+    for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) { const cx = gx * C + C / 2, cy = gy * C + C / 2; grid[gy * gw + gx] = M.block.some((o) => cx > o.x - HS_R - 2 && cx < o.x + o.w + HS_R + 2 && cy > o.y - HS_R - 2 && cy < o.y + o.h + HS_R + 2) ? 1 : 0 }
+    M.grid = { C, gw, gh, grid };
+    return M;
+  }
+  function hsPath(M, sx, sy, tx, ty) {
+    const { C, gw, gh, grid } = M.grid, id = (x, y) => y * gw + x;
+    const s = [clamp(Math.floor(sx / C), 0, gw - 1), clamp(Math.floor(sy / C), 0, gh - 1)], t = [clamp(Math.floor(tx / C), 0, gw - 1), clamp(Math.floor(ty / C), 0, gh - 1)];
+    const goal = id(...t), start = id(...s), came = new Int32Array(gw * gh).fill(-1), g = new Float32Array(gw * gh).fill(1e9);
+    const open = [[0, start]]; g[start] = 0; let steps = 0;
+    while (open.length && steps++ < 6000) {
+      let bi = 0; for (let i = 1; i < open.length; i++) if (open[i][0] < open[bi][0]) bi = i;
+      const [, cur] = open.splice(bi, 1)[0]; if (cur === goal) break;
+      const cx = cur % gw, cy = (cur / gw) | 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const nx = cx + dx, ny = cy + dy; if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue; const ni = id(nx, ny); if (grid[ni] && ni !== goal) continue;
+        if (dx && dy && (grid[id(cx + dx, cy)] || grid[id(cx, cy + dy)])) continue;
+        const ng = g[cur] + (dx && dy ? 1.414 : 1); if (ng < g[ni]) { g[ni] = ng; came[ni] = cur; open.push([ng + Math.hypot(nx - t[0], ny - t[1]), ni]) }
+      }
+    }
+    const out = []; let c2 = goal; if (came[c2] < 0 && c2 !== start) return [[tx, ty]];
+    while (c2 !== start && c2 >= 0) { out.unshift([(c2 % gw) * C + C / 2, ((c2 / gw) | 0) * C + C / 2]); c2 = came[c2] }
+    out.push([tx, ty]); return out;
+  }
+  // 線分が壁（見えない物：建物・壁）をさえぎるか
+  function hsSeg(M, x1, y1, x2, y2) {
+    for (const o of M.solid) {
+      let t0 = 0, t1 = 1; const dx = x2 - x1, dy = y2 - y1; let ok = true;
+      for (const [p, q] of [[-dx, x1 - o.x], [dx, o.x + o.w - x1], [-dy, y1 - o.y], [dy, o.y + o.h - y1]]) { if (p === 0) { if (q < 0) { ok = false; break } } else { const tt = q / p; if (p < 0) { if (tt > t1) { ok = false; break } if (tt > t0) t0 = tt } else { if (tt < t0) { ok = false; break } if (tt < t1) t1 = tt } } }
+      if (ok && t0 <= t1) return true;
+    }
+    return false;
+  }
+  ACTION.hide = {
+    full: true,
+    shell() {
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("かくれんぼ", "隠れて、探して、2ラウンド勝負")}
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="かくれんぼのマップ"></canvas><div id="act-msg"></div>
+        <p class="muted">画面をなぞると動きます。2ラウンドで鬼を交代。<b>隠れる番</b>：はじめの${HS_HIDE_T}秒で隠れる場所へ。茂み・箱・クローゼットなどに入ると、鬼がすぐ近くに来ないかぎり見つかりません。鬼の赤い範囲に入ると見つかります（壁のかげは安全）。見つかった仲間は「おり」にさわると助けられます。<b>鬼の番</b>：赤い範囲で見つけよう。隠れている場所は近づくと見えます。時間内に全員見つけたら鬼の勝ち。</p></section></section>`;
+    },
+    mount() {
+      const host = isFirst();
+      const ST = HS_STAGES[me.m.stage || 0] || HS_STAGES[0];
+      const M = hsMap(ST, me.m.seed % 1000);
+      const cv = $("#cv"); const { c, w, h, top } = fullCanvas(cv);
+      const VIEW = ST.id === "house" ? 470 : 540, k = w / VIEW;
+      const two = () => !!realOppPeer();
+      // 登場人物：0=ホスト、1=あいて（ふたりのとき）かCPU、2・3=CPU
+      const E = [0, 1, 2, 3].map((i) => ({ i, x: M.spawnHide.x, y: M.spawnHide.y, fa: 0, caught: false, hid: false, tp: 0, path: null, pathT: 0, goal: null, cpuT: 0, catchT: null, vx: 0, vy: 0 }));
+      const myIdx = host ? 0 : 1;
+      let S = { round: 0, ph: "lobby", t: 0, seeker: 0, res: [], msg: "", msgT: 0 }, lastSend = "", seenTp = -1, inp = { x: 0, y: 0 }, drag = null, flash = null;
+      const isHuman = (i) => i === 0 || (i === 1 && two());
+      const seekerOf = (round) => round === 0 ? 0 : 1;
+      cv.addEventListener("pointerdown", (e) => { e.preventDefault(); const rc = cv.getBoundingClientRect(); drag = { id: e.pointerId, x: e.clientX, y: e.clientY, ox: e.clientX - rc.left, oy: e.clientY - rc.top }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
+      cv.addEventListener("pointermove", (e) => { if (!drag || e.pointerId !== drag.id) return; let dx = e.clientX - drag.x, dy = e.clientY - drag.y; const d = Math.hypot(dx, dy), R = 44; if (d > R) { dx *= R / d; dy *= R / d } inp = { x: dx / R, y: dy / R } });
+      const end = () => { drag = null; inp = { x: 0, y: 0 } }; cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+      const hit = (x, y) => M.block.some((o) => x + HS_R > o.x && x - HS_R < o.x + o.w && y + HS_R > o.y && y - HS_R < o.y + o.h);
+      function moveE(e, dx, dy) { if (!hit(e.x + dx, e.y)) e.x += dx; if (!hit(e.x, e.y + dy)) e.y += dy; e.x = clamp(e.x, 20, M.W - 20); e.y = clamp(e.y, 20, M.H - 20) }
+      const inHide = (e) => M.hides.some((q) => Math.hypot(q.x - e.x, q.y - e.y) < q.r);
+      const CONE = 210, CANG = 0.62;
+      // 鬼から見えるか（赤い範囲の中・壁にさえぎられない・隠れ場所の中ならすぐ近くだけ）
+      function sees(sk, e) {
+        const dx = e.x - sk.x, dy = e.y - sk.y, d = Math.hypot(dx, dy);
+        if (d < 34) return true;
+        if (d > CONE) return false;
+        let da = Math.atan2(dy, dx) - sk.fa; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        if (Math.abs(da) > CANG) return false;
+        if (hsSeg(M, sk.x, sk.y, e.x, e.y)) return false;
+        return !e.hid || d < 70;
+      }
+      function placeAll() {
+        E.forEach((e, i) => {
+          const sk = i === S.seeker; const sp = sk ? M.spawnSeek : M.spawnHide;
+          e.x = sp.x + (sk ? 0 : (i - 1.5) * 40); e.y = sp.y + (sk ? 0 : (i % 2) * 30); if (hit(e.x, e.y)) { e.x = sp.x; e.y = sp.y }
+          e.caught = false; e.hid = false; e.tp++; e.path = null; e.goal = null; e.catchT = null; e.fa = -Math.PI / 2; e.target = null; e.rescue = false; e.visit = null; e.lastSeen = null;
+        });
+      }
+      // ---- コンピューター
+      function goTo(e, tx, ty, sp, dt) {
+        e.pathT -= dt;
+        if (!e.path || e.pathT <= 0 || !e.goal || Math.hypot(e.goal[0] - tx, e.goal[1] - ty) > 40) { e.path = hsPath(M, e.x, e.y, tx, ty); e.goal = [tx, ty]; e.pathT = 0.8 }
+        while (e.path.length && Math.hypot(e.path[0][0] - e.x, e.path[0][1] - e.y) < 14) e.path.shift();
+        if (!e.path.length) return true;
+        const [px, py] = e.path[0], dx = px - e.x, dy = py - e.y, d = Math.hypot(dx, dy) || 1, s = Math.min(d, sp * dt);
+        moveE(e, (dx / d) * s, (dy / d) * s); e.fa = Math.atan2(dy, dx); return false;
+      }
+      function cpuHider(e, dt, sk) {
+        if (e.caught) return;
+        const ds = Math.hypot(sk.x - e.x, sk.y - e.y), danger = S.ph === "seek" && ds < 230 && !hsSeg(M, sk.x, sk.y, e.x, e.y);
+        e.cpuT -= dt;
+        if (!e.target || (danger && e.cpuT <= 0)) {
+          // 鬼から遠い隠れ場所を選ぶ
+          let best = null, bs = -1e9;
+          for (let j = 0; j < 8; j++) { const q = M.hides[Math.floor(Math.random() * M.hides.length)]; const sc = Math.hypot(q.x - sk.x, q.y - sk.y) - Math.hypot(q.x - e.x, q.y - e.y) * 0.5 + Math.random() * 120; if (sc > bs && !E.some((o) => o !== e && o.target === q)) { bs = sc; best = q } }
+          e.target = best; e.cpuT = 2 + Math.random() * 2;
+        }
+        const jailed = E.some((o) => o.caught && o.i !== S.seeker);
+        if (jailed && S.ph === "seek" && Math.hypot(sk.x - M.jail.x, sk.y - M.jail.y) > 420 && Math.random() < 0.004) e.rescue = true;
+        if (e.rescue) { if (goTo(e, M.jail.x, M.jail.y, 150, dt) || !jailed) e.rescue = false; return }
+        if (e.target) goTo(e, e.target.x, e.target.y, danger ? 150 : 120, dt);
+      }
+      function cpuSeeker(e, dt) {
+        if (S.ph !== "seek") return;
+        const vis = E.filter((o) => o !== e && !o.caught && sees(e, o));
+        if (vis.length) { const t = vis[0]; goTo(e, t.x, t.y, 138, dt); e.lastSeen = [t.x, t.y]; return }
+        if (e.lastSeen) { if (goTo(e, e.lastSeen[0], e.lastSeen[1], 132, dt)) e.lastSeen = null; return }
+        if (!e.visit || !e.target) { e.visit = e.visit || new Set(); const cand = M.hides.filter((q, qi) => !e.visit.has(qi)); if (!cand.length) e.visit.clear(); let best = null, bd = 1e9; for (const q of cand) { const d = Math.hypot(q.x - e.x, q.y - e.y) + Math.random() * 200; if (d < bd) { bd = d; best = q } } e.target = best }
+        if (e.target && goTo(e, e.target.x, e.target.y, 125, dt)) { e.visit.add(M.hides.indexOf(e.target)); e.target = null; e.fa += Math.PI }
+      }
+      // ---- ホストの計算
+      function hostStep(dt, gx) {
+        const sk = E[S.seeker];
+        if (S.ph === "lobby") { if (me.s.rdy && (!opp() || !realOppPeer() || (oppS() && oppS().rdy))) { S.ph = "hide"; S.t = HS_HIDE_T; S.seeker = seekerOf(S.round); placeAll() } return }
+        if (S.ph === "rres") { S.t -= dt; if (S.t <= 0) { if (S.round === 0) { S.round = 1; S.seeker = seekerOf(1); S.ph = "hide"; S.t = HS_HIDE_T; placeAll() } else S.ph = "end" } return }
+        if (S.ph === "end") return;
+        S.t -= dt;
+        if (S.ph === "hide" && S.t <= 0) { S.ph = "seek"; S.t = ST.seek }
+        // あいて（ふたりのとき）
+        if (two() && gx && gx.px != null) { const g = E[1]; if (!g.caught && !(S.ph === "hide" && S.seeker === 1)) { g.x = gx.px; g.y = gx.py; g.fa = gx.fa } }
+        for (const e of E) { if (!isHuman(e.i)) { if (e.i === S.seeker) cpuSeeker(e, dt); else if (S.ph !== "lobby") cpuHider(e, dt, sk) } e.hid = !e.caught && e.i !== S.seeker && inHide(e) }
+        if (S.ph === "seek") {
+          for (const e of E) {
+            if (e.i === S.seeker || e.caught) continue;
+            if (sees(sk, e)) { e.caught = true; e.catchT = ST.seek - S.t; e.x = M.jail.x + (e.i - 1.5) * 18; e.y = M.jail.y; e.tp++; S.msg = `${nameOf(e.i)}を見つけた！`; S.msgT = 1.6 }
+            else if (E.some((o) => o.caught && o.i !== S.seeker) && Math.hypot(e.x - M.jail.x, e.y - M.jail.y) < 42) {
+              E.forEach((o) => { if (o.caught && o.i !== S.seeker) { o.caught = false; o.x = M.jail.x + (Math.random() - 0.5) * 60; o.y = M.jail.y + 46; o.tp++ } }); S.msg = `${nameOf(e.i)}が仲間を助けた！`; S.msgT = 1.6;
+            }
+          }
+          const left = E.filter((e) => e.i !== S.seeker && !e.caught).length;
+          if (left === 0 || S.t <= 0) {
+            const humanHider = two() ? (S.seeker === 0 ? 1 : 0) : (S.seeker === 0 ? null : 0);
+            S.res = [...S.res, { seeker: S.seeker, caught: E.filter((e) => e.i !== S.seeker && e.caught).length, total: E.length - 1, hh: humanHider, hhCaught: humanHider != null ? E[humanHider].caught : null, hhT: humanHider != null ? E[humanHider].catchT : null }];
+            S.ph = "rres"; S.t = 4.5;
+          }
+        }
+        S.msgT = Math.max(0, S.msgT - dt);
+      }
+      const nameOf = (i) => (i === myIdx ? "あなた" : isHuman(i) ? oppName() : "CPU");
+      // ---- 描画
+      const rr = (x, y, w2, h2, col) => { c.fillStyle = col; c.fillRect(x, y, w2, h2) };
+      function drawSpot(q) {
+        const x = q.x, y = q.y, s = q.r;
+        if (q.k === "bush" || q.k === "fern" || q.k === "plant") { c.fillStyle = q.k === "fern" ? "#2F8A3A" : "#3E9E45"; for (const [ox, oy, rad] of [[-0.45, 0.1, 0.6], [0.45, 0.1, 0.6], [0, -0.35, 0.65], [0, 0.3, 0.6]]) { c.beginPath(); c.arc(x + ox * s, y + oy * s, rad * s, 0, 7); c.fill() } c.fillStyle = "rgba(255,255,255,.15)"; c.beginPath(); c.arc(x - 0.2 * s, y - 0.45 * s, 0.25 * s, 0, 7); c.fill() }
+        else if (q.k === "tree") { c.fillStyle = "#7A5230"; c.fillRect(x - 5, y, 10, s * 0.6); c.fillStyle = "#2E8B3E"; c.beginPath(); c.arc(x, y - 4, s, 0, 7); c.fill(); c.fillStyle = "#3FA04E"; c.beginPath(); c.arc(x - s * 0.3, y - s * 0.35, s * 0.55, 0, 7); c.fill() }
+        else if (q.k === "box") { rr(x - s, y - s * 0.8, s * 2, s * 1.6, "#C9965C"); rr(x - s, y - s * 0.15, s * 2, s * 0.25, "#E3C089"); c.strokeStyle = "#8E6236"; c.lineWidth = 2; c.strokeRect(x - s, y - s * 0.8, s * 2, s * 1.6) }
+        else if (q.k === "barrel") { c.fillStyle = "#8E5A2F"; c.beginPath(); c.ellipse(x, y, s * 0.8, s, 0, 0, 7); c.fill(); c.strokeStyle = "#5E3A1A"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - s * 0.8, y - s * 0.3); c.lineTo(x + s * 0.8, y - s * 0.3); c.moveTo(x - s * 0.8, y + s * 0.3); c.lineTo(x + s * 0.8, y + s * 0.3); c.stroke() }
+        else if (q.k === "trash") { rr(x - s * 0.6, y - s * 0.7, s * 1.2, s * 1.4, "#5E8C6A"); rr(x - s * 0.7, y - s * 0.85, s * 1.4, s * 0.25, "#46705A") }
+        else if (q.k === "costume") { rr(x - s, y - s * 0.7, s * 2, s * 1.4, "#E8E0F0"); c.fillStyle = "#C89BE0"; c.beginPath(); c.arc(x, y - s * 0.1, s * 0.5, 0, 7); c.fill() }
+        else if (q.k === "closet") { rr(x - s, y - s * 0.9, s * 2, s * 1.8, "#8A5A34"); c.fillStyle = "#E3C089"; c.fillRect(x - 2, y - s * 0.7, 4, s * 1.4) }
+        else if (q.k === "curtain") { rr(x - s, y - s * 0.9, s * 2, s * 1.8, "#D96C8A"); c.strokeStyle = "#B04D6B"; c.lineWidth = 2; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(x + i * s * 0.35, y - s * 0.9); c.lineTo(x + i * s * 0.35, y + s * 0.9); c.stroke() } }
+        else { rr(x - s, y - s * 0.6, s * 2, s * 1.2, "#7A6A9A") }
+      }
+      function person(e, col, alpha, label, isSeeker) {
+        c.globalAlpha = alpha;
+        c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(e.x, e.y + 11, 12, 5, 0, 0, 7); c.fill();
+        c.fillStyle = col; c.beginPath(); c.arc(e.x, e.y + 2, 11, 0, 7); c.fill();
+        c.fillStyle = "#F2C9A0"; c.beginPath(); c.arc(e.x, e.y - 10, 8.5, 0, 7); c.fill();
+        const fx = Math.cos(e.fa), fy = Math.sin(e.fa); c.fillStyle = "#222"; c.fillRect(e.x + fx * 3 - 3 - fy * 3, e.y - 12 + fy * 2, 2, 2.5); c.fillRect(e.x + fx * 3 + 1 + fy * 3, e.y - 12 + fy * 2, 2, 2.5);
+        if (isSeeker) { c.fillStyle = "#D92C2C"; c.beginPath(); c.arc(e.x, e.y - 13, 8.5, Math.PI, 0); c.fill() }
+        c.globalAlpha = 1;
+        if (label) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "rgba(20,18,42,.7)"; const tw = c.measureText(label).width + 8; c.fillRect(e.x - tw / 2, e.y - 34, tw, 14); c.fillStyle = "#fff"; c.fillText(label, e.x, e.y - 27) }
+      }
+      function cone(sk) {
+        const pts = [[sk.x, sk.y]];
+        for (let i = 0; i <= 24; i++) {
+          const a = sk.fa - CANG + (2 * CANG * i) / 24, ex = sk.x + Math.cos(a) * CONE, ey = sk.y + Math.sin(a) * CONE;
+          let lo = 0, hi = 1; if (hsSeg(M, sk.x, sk.y, ex, ey)) { for (let j = 0; j < 9; j++) { const mid = (lo + hi) / 2; if (hsSeg(M, sk.x, sk.y, sk.x + (ex - sk.x) * mid, sk.y + (ey - sk.y) * mid)) hi = mid; else lo = mid } } else lo = 1;
+          pts.push([sk.x + (ex - sk.x) * lo, sk.y + (ey - sk.y) * lo]);
+        }
+        c.fillStyle = "rgba(255,40,40,.28)"; c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.closePath(); c.fill();
+        c.strokeStyle = "rgba(255,60,60,.55)"; c.lineWidth = 2; c.stroke();
+        c.fillStyle = "rgba(255,40,40,.18)"; c.beginPath(); c.arc(sk.x, sk.y, 34, 0, 7); c.fill();
+      }
+      function draw() {
+        const meE = E[myIdx], iSeek = S.seeker === myIdx && S.ph !== "lobby";
+        c.fillStyle = "#3B3B45"; c.fillRect(0, 0, w, h);
+        c.save(); c.translate(w / 2, top + (h - top) * 0.5); c.scale(k, k); c.translate(-meE.x, -meE.y);
+        rr(0, 0, M.W, M.H, ST.ground);
+        for (const d of M.decor) rr(d.x, d.y, d.w, d.h, d.col);
+        for (const o of M.water) { rr(o.x, o.y, o.w, o.h, o.col); c.fillStyle = "rgba(255,255,255,.25)"; for (let i = 0; i < 4; i++) c.fillRect(o.x + 20 + i * o.w / 4, o.y + o.h / 2 + Math.sin(performance.now() / 500 + i) * 6, 22, 3) }
+        for (const o of M.low) { rr(o.x, o.y, o.w, o.h, o.col); rr(o.x, o.y + o.h - 6, o.w, 6, "rgba(0,0,0,.18)") }
+        // おり
+        c.strokeStyle = "#555"; c.lineWidth = 3; c.fillStyle = "rgba(80,80,80,.18)"; c.beginPath(); c.arc(M.jail.x, M.jail.y, 40, 0, 7); c.fill(); for (let a = 0; a < 12; a++) { const an = (a / 12) * Math.PI * 2; c.beginPath(); c.moveTo(M.jail.x + Math.cos(an) * 34, M.jail.y + Math.sin(an) * 34); c.lineTo(M.jail.x + Math.cos(an) * 42, M.jail.y + Math.sin(an) * 42); c.stroke() }
+        c.font = `12px ${DISP}`; c.textAlign = "center"; c.fillStyle = "#444"; c.fillText("おり", M.jail.x, M.jail.y - 50);
+        for (const q of M.hides) drawSpot(q);
+        if (S.ph === "seek" || S.ph === "hide") cone(E[S.seeker]);
+        // 人（鬼から見えない人は鬼の画面には出さない）
+        for (const e of [...E].sort((a, b) => a.y - b.y)) {
+          const isSk = e.i === S.seeker && S.ph !== "lobby";
+          const visible = !iSeek || e.i === myIdx || e.caught || isSk || (S.ph === "seek" && sees(E[S.seeker], e)) || S.ph === "rres" || S.ph === "end";
+          if (!visible) continue;
+          const col = isSk ? "#D92C2C" : e.i === myIdx ? "#2E7BE6" : isHuman(e.i) ? "#F08A3C" : ["#3DBE5A", "#A45BE0", "#F2B233", "#3DBE5A"][e.i];
+          person(e, col, e.hid ? 0.5 : 1, e.i === myIdx ? "あなた" : isHuman(e.i) ? oppName().slice(0, 5) : isSk ? "鬼" : "", isSk);
+        }
+        // 建物（上に重ねて、うしろに隠れられるように少し透かす）
+        for (const o of M.solid) { rr(o.x, o.y, o.w, o.h, o.col); rr(o.x, o.y + o.h - 10, o.w, 10, "rgba(0,0,0,.22)"); c.strokeStyle = "rgba(0,0,0,.25)"; c.lineWidth = 2; c.strokeRect(o.x, o.y, o.w, o.h) }
+        c.font = `22px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; for (const l of M.labels) { c.fillStyle = "rgba(20,18,42,.55)"; c.fillText(l.t, l.x, l.y) }
+        // 建物のうしろにいても自分の位置はうすく見せる
+        if (M.solid.some((o) => meE.x > o.x && meE.x < o.x + o.w && meE.y - 20 > o.y && meE.y - 20 < o.y + o.h)) person(meE, iSeek ? "#D92C2C" : "#2E7BE6", 0.45, "", iSeek);
+        c.restore();
+        // 隠れる時間は鬼の画面を暗くする
+        if (S.ph === "hide" && iSeek) { c.fillStyle = "rgba(10,10,20,.88)"; c.fillRect(0, 0, w, h); bigText(c, "目をつぶって数えています", w / 2, h * 0.42, 22, "#fff"); bigText(c, String(Math.ceil(S.t)), w / 2, h * 0.52, 60, "#FFE14D") }
+        // 上の表示
+        const HY = top + 50;
+        c.fillStyle = "rgba(20,18,42,.75)"; c.fillRect(8, HY, 170, S.ph === "seek" ? 70 : 52);
+        c.font = `13px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D";
+        c.fillText(S.ph === "lobby" ? ST.name : `ラウンド${S.round + 1}/2　${iSeek ? "あなたが鬼" : "隠れる番"}`, 14, HY + 14);
+        c.fillStyle = "#fff"; c.font = `18px ${DISP}`;
+        const left = E.filter((e) => e.i !== S.seeker && !e.caught).length;
+        c.fillText(S.ph === "hide" ? `隠れる ${Math.ceil(S.t)}秒` : S.ph === "seek" ? `のこり ${Math.ceil(S.t)}秒` : "", 14, HY + 36);
+        if (S.ph === "seek") { c.font = `13px ${DISP}`; c.fillStyle = "#FF9B91"; c.fillText(`隠れている ${left}人`, 14, HY + 58) }
+        // 小さい地図
+        const mw = 92, mh = mw * M.H / M.W, mx = w - mw - 8, my = HY;
+        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(mx, my, mw, mh); const ms = mw / M.W;
+        c.fillStyle = "rgba(255,255,255,.35)"; for (const o of M.solid) c.fillRect(mx + o.x * ms, my + o.y * ms, Math.max(1, o.w * ms), Math.max(1, o.h * ms));
+        c.fillStyle = "#4FA3E0"; for (const o of M.water) c.fillRect(mx + o.x * ms, my + o.y * ms, o.w * ms, o.h * ms);
+        c.fillStyle = "#888"; c.fillRect(mx + M.jail.x * ms - 2, my + M.jail.y * ms - 2, 4, 4);
+        for (const e of E) { const isSk = e.i === S.seeker && S.ph !== "lobby"; if (iSeek && !isSk && e.i !== myIdx && !e.caught) continue; c.fillStyle = e.i === myIdx ? "#46CBF3" : isSk ? "#FF4D4D" : "#7CF59A"; c.beginPath(); c.arc(mx + e.x * ms, my + e.y * ms, e.i === myIdx ? 3 : 2.4, 0, 7); c.fill() }
+        if (S.msgT > 0 && S.msg) bigText(c, S.msg, w / 2, top + (h - top) * 0.3, 24, "#FFE14D");
+        if (meE.caught && S.ph === "seek") bigText(c, "見つかった！仲間を待とう", w / 2, top + (h - top) * 0.72, 20, "#FF9B91");
+        if (drag) { c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; c.beginPath(); c.arc(drag.ox, drag.oy, 44, 0, 7); c.stroke(); c.fillStyle = "rgba(255,255,255,.5)"; c.beginPath(); c.arc(drag.ox + inp.x * 44, drag.oy + inp.y * 44, 15, 0, 7); c.fill() }
+      }
+      function roundText(r, idx) {
+        const mineSeek = r.seeker === myIdx;
+        if (two()) { const won = mineSeek ? r.hhCaught : !r.hhCaught; return `ラウンド${idx + 1}（${mineSeek ? "あなたが鬼" : "あなたが隠れる"}）：${won ? "勝ち" : "負け"}` }
+        return mineSeek ? `ラウンド${idx + 1}（あなたが鬼）：${r.caught}/${r.total}人 見つけた${r.caught === r.total ? "（勝ち）" : ""}` : `ラウンド${idx + 1}（あなたが隠れる）：${r.hhCaught ? "見つかった（負け）" : "逃げきった（勝ち）"}`;
+      }
+      function frame(dt) {
+        const op = rtOppPeer(), ox = op ? op.presence.x : null;
+        if (!host && ox && ox.S) { S = Object.assign({}, ox.S) }
+        // 自分を動かす
+        const meE = E[myIdx];
+        let ix = inp.x, iy = inp.y;
+        if (keys.has("ArrowLeft") || keys.has("a")) ix = -1; if (keys.has("ArrowRight") || keys.has("d")) ix = 1; if (keys.has("ArrowUp") || keys.has("w")) iy = -1; if (keys.has("ArrowDown") || keys.has("s")) iy = 1;
+        const m = Math.hypot(ix, iy); if (m > 1) { ix /= m; iy /= m }
+        const frozen = meE.caught || S.ph === "lobby" || S.ph === "rres" || S.ph === "end" || (S.ph === "hide" && S.seeker === myIdx);
+        if (!frozen && m > 0.1) { const sp = S.seeker === myIdx ? 140 : 150; moveE(meE, ix * sp * dt, iy * sp * dt); meE.fa = Math.atan2(iy, ix) }
+        if (host) {
+          hostStep(dt, ox);
+          const out = { E: E.map((e) => [Math.round(e.x), Math.round(e.y), r2(e.fa), (e.caught ? 1 : 0) | (e.hid ? 2 : 0), e.tp]), S: { round: S.round, ph: S.ph, t: Math.round(S.t * 10) / 10, seeker: S.seeker, res: S.res, msg: S.msg, msgT: Math.round(S.msgT * 10) / 10 } };
+          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        } else {
+          if (ox && ox.E) ox.E.forEach((a, i) => { const e = E[i]; if (i === myIdx) { if (a[4] !== seenTp) { seenTp = a[4]; e.x = a[0]; e.y = a[1] } e.caught = !!(a[3] & 1); e.hid = !!(a[3] & 2); return } const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.y += (a[1] - e.y) * al; e.fa = a[2]; e.caught = !!(a[3] & 1); e.hid = !!(a[3] & 2) });
+          const out = { px: Math.round(meE.x), py: Math.round(meE.y), fa: r2(meE.fa) }, js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+        }
+        draw();
+        if (S.ph === "lobby") {
+          if (!me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${HS_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="hide-stage" data-i="${i}">${st.name}</button>`).join("")}</div><button class="btn" data-act="act-ready">準備OK</button><p class="muted">${realOppPeer() ? "ふたりとも押すとスタート。1ラウンド目は" + (host ? "あなた" : esc(oppName())) + "が鬼" : "1ラウンド目はあなたが鬼、2ラウンド目はあなたが隠れる番"}</p>`);
+          else setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+        } else if (S.ph === "rres") {
+          const r = S.res[S.res.length - 1]; setMsg(`<p class="verdict">${roundText(r, S.res.length - 1)}</p><p class="muted">${S.round === 0 ? "まもなく鬼を交代します" : ""}</p>`);
+        } else if (S.ph === "end") {
+          let msg = S.res.map((r, i) => `<p>${roundText(r, i)}</p>`).join("");
+          let verdict = "";
+          if (two()) {
+            const myWins = S.res.filter((r) => (r.seeker === myIdx ? r.hhCaught : !r.hhCaught)).length, opWins = 2 - myWins;
+            if (myWins !== opWins) verdict = myWins > opWins ? "あなたの勝ち！" : "あなたの負け…";
+            else { const mine = S.res.find((r) => r.seeker === myIdx), theirs = S.res.find((r) => r.seeker !== myIdx); if (mine.hhCaught && theirs.hhCaught) verdict = mine.hhT < theirs.hhT ? "あなたの勝ち！（早く見つけた）" : mine.hhT > theirs.hhT ? "あなたの負け…（見つけるのがおそかった）" : "引き分け！"; else verdict = "引き分け！" }
+          } else { const wins = S.res.filter((r) => (r.seeker === myIdx ? r.caught === r.total : !r.hhCaught)).length; verdict = `${wins}勝${2 - wins}敗` }
+          setMsg(`<p class="verdict ${verdict.includes("勝ち") ? "good" : verdict.includes("負け") ? "bad" : ""}">${verdict}</p>${msg}${againBtns("hide")}`);
+        } else setMsg("");
+      }
+      return loop(frame);
+    },
+  };
   // ----- 木こりタイクーン（ふたりで協力） -----
   // 先に始めた人(ホスト)が木・お金・お客さん・買ったものをぜんぶ計算して送る。あいては自分の位置だけ送る。
   const TW = 36, TH = 52, TY_PRICE = 10;
@@ -2706,6 +3041,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
       setS({ mv: [...(me.s.mv || []), c] });
     }
     else if (act === "act-ready") setS({ rdy: true });
+    else if (act === "hide-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("hide", { stage: i }) }
     else if (act === "kart-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
     else if (act === "code-join") joinCode(ui.codeDraft || ($("#code-input") || {}).value);
