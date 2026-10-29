@@ -432,6 +432,18 @@ html.playing.full .card.act canvas { border-radius: 0 }
         const gs = s.gs || [], myG = me.s.gs || [];
         if (gs.length < myG.length && !gs.includes(me.s.sec) && later("g" + gs.length, 1500)) cpuSet({ gs: [...gs, cpuHbGuess(me.s.sec, gs)] });
       }
+    } else if (g === "pk") {
+      // コンピューターはあいて（偶数回はホスト＝あなたが蹴る）
+      const cp = s.p || [], mp = me.s.p || [], r = cp.length;
+      if (r <= mp.length && !pkState(mp, cp, true, me.m.seed).over && later("pk" + r, 1500 + rnd() * 1500)) {
+        const cpuKicks = r % 2 === 1, rr = (x) => Math.round(x * 100) / 100, sc = pkScene(me.m.seed, r);
+        const wallish = sc.type === "fkn" || sc.type === "fkf";
+        const a = cpuKicks
+          ? (rnd() < 0.12 ? { u: rr((rnd() < 0.5 ? -1 : 1) * (1.0 + rnd() * 0.2)), v: rr(rnd() * 0.9), pw: 1, cv: 0, tm: 0 }
+            : { u: rr((rnd() * 2 - 1) * 0.85), v: rr(wallish ? 0.45 + rnd() * 0.45 : 0.1 + rnd() * 0.75), pw: rr(sc.type === "fkf" ? 0.75 + rnd() * 0.4 : 0.6 + rnd() * 0.5), cv: rr((rnd() - 0.5) * 0.5), tm: rr(sc.type === "pass" ? (rnd() < 0.85 ? (rnd() - 0.5) * 0.4 : 0.6) : 0) })
+          : (rnd() < 0.2 ? { u: 0, v: 0.4 } : { u: rr((rnd() < 0.5 ? -1 : 1) * (0.35 + rnd() * 0.55)), v: rr(rnd() * 0.85) });
+        cpuSet({ p: [...cp, a] });
+      }
     } else if (g === "run" || g === "sumo" || g === "army" || g === "kart") {
       if (me.s.rdy && !s.rdy && later("rdy", 700)) cpuSet({ rdy: true });
     }
@@ -454,6 +466,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
   // ---------- rendering ----------
   const GAMES = {
     soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
+    pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
     kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "ドリフトでダッシュ、アイテムで妨害。3周して先にゴールしたら勝ち" },
     run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "？ブロックのアイテムでレース。こうらで相手を転ばせろ" },
     army: { grp: "body", name: "軍団ラン", ico: "兵", c: "var(--sky)", desc: "道中で軍団を強くして、最後はふたりの軍団で決戦" },
@@ -2165,6 +2178,280 @@ html.playing.full .card.act canvas { border-radius: 0 }
           else if (realOppPeer() && mine != null) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
           else if (realOppPeer()) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
           else setMsg(`<p class="verdict good">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
+        } else setMsg("");
+      }
+      return loop(frame);
+    },
+  };
+  // ----- PK対決 -----
+  // 交代で蹴る。蹴る人は画面をなぞってシュート、キーパーは蹴られる場所を予想してゴールをタップ。
+  // ふたりとも「その回に選んだもの」を s.p[回] に入れ、両方そろったら同じ計算（pkJudge）で結果を出すので、ふたりの画面で結果がずれない。
+  // ゴールの中の位置は u（左はし-1〜右はし1）・v（地面0〜バー1）で表す。
+  // 場面：1本目はPK、そのあとは毎回かわる（ふたりとも同じ順番）。壁は近い・遠いフリーキックだけ
+  const PK_TYPES = { pk: "PK", fkn: "フリーキック（近い）", fkf: "フリーキック（遠い）", pass: "パスからシュート" };
+  function pkScene(seed, r) {
+    const n = Math.floor(r / 2); if (n === 0) return { type: "pk", wall: 0, side: 0 };
+    const q = rng(seed + n * 7717); q();
+    const type = ["pk", "fkn", "fkf", "pass", "fkn", "pass"][Math.floor(q() * 6)], side = q() < 0.5 ? -1 : 1;
+    return { type, side, wall: side * (0.3 + q() * 0.3) };
+  }
+  function pkJudge(k, g, sc) {
+    sc = sc || { type: "pk" };
+    if (sc.type === "pass" && Math.abs(k.tm || 0) > 0.35) return "whiff";
+    if (sc.type === "fkf" && k.pw < 0.7) return "short";
+    if (Math.abs(k.u) > 1.04 || k.v > 1.04) return "miss";
+    if (Math.abs(k.u) > 0.96 || k.v > 0.96) return "post";
+    // 壁：低いシュートは止められる。強く曲げると回りこめる
+    if ((sc.type === "fkn" || sc.type === "fkf") && k.v < 0.42 && Math.abs(k.u - sc.wall) < 0.35 && Math.abs(k.cv || 0) < 0.25) return "wall";
+    let reach = 0.5 * (k.pw < 0.5 ? 1.35 : 1) * (k.pw > 1 ? 0.85 : 1);
+    if (sc.type === "fkf") reach *= 1.2; else if (sc.type === "pass") reach *= 0.9;
+    reach *= 1 - Math.min(0.5, Math.abs(k.cv || 0)) * 0.4; // スピンがかかると読みにくい
+    return Math.hypot(k.u - g.u, (k.v - g.v) * 1.3) < reach ? "save" : "goal";
+  }
+  // 何回目までそろったか・点数・決着したか（host = 先に始めた人。偶数回はホストが蹴る）
+  function pkState(myP, opP, iAmHost, seed) {
+    const n = Math.min(myP.length, opP.length), res = [];
+    let hS = 0, gS = 0, over = false, last = n;
+    for (let r = 0; r < n; r++) {
+      const hostKicks = r % 2 === 0, iKick = hostKicks === iAmHost;
+      const k = iKick ? myP[r] : opP[r], g = iKick ? opP[r] : myP[r], out = pkJudge(k, g, pkScene(seed, r));
+      res.push({ r, iKick, out, k, g });
+      if (out === "goal") { if (hostKicks) hS++; else gS++ }
+      const done = r + 1, hk = Math.ceil(done / 2), gk = Math.floor(done / 2);
+      if (done <= 10) { if (hS + (5 - hk) < gS || gS + (5 - gk) < hS) { over = true; last = done; break } }
+      else if (done % 2 === 0 && hS !== gS) { over = true; last = done; break }
+      if (done === 10 && hS !== gS) { over = true; last = done; break }
+    }
+    return { n: Math.min(n, last), res, hS, gS, over };
+  }
+  ACTION.pk = {
+    full: true,
+    shell() {
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("PK対決", "交代で5本ずつ。多く決めたほうが勝ち")}
+        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="PKのゴール"></canvas><div id="act-msg"></div>
+        <p class="muted">蹴る番：ボールのあたりから、ねらう場所に向かって画面をなぞってシュート。なぞった線の先がねらう場所、速くなぞるほど強いシュート（強すぎるとバーの上へ）。曲げてなぞるとスピンがかかってボールが曲がり、キーパーが読みにくくなります。場面は毎回かわります：PK／フリーキック（近い・遠い。低いシュートは壁に止められるので、上をこえるか大きく曲げる。遠いと弱いシュートは届かない）／パスからシュート（横から来たボールが置き場所に着く瞬間になぞりおわる）。キーパーの番：相手が蹴りそうな場所を予想して、ゴールをタップ。おたがいが選ぶまで、相手の選んだ場所は見えません。5本ずつで同じ点ならサドンデス。</p></section></section>`;
+    },
+    mount() {
+      const host = isFirst();
+      const cv = $("#cv"); const { c, w, h, top } = fullCanvas(cv);
+      const myP = () => me.s.p || [], opP = () => (oppS() || {}).p || [];
+      let shown = pkState(myP(), opP(), host, me.m.seed).n, anim = null, swipe = null, lastTap = null;
+      const r2_ = (x) => Math.round(x * 100) / 100;
+      const canAct = () => { const st = pkState(myP(), opP(), host, me.m.seed); return !anim && shown === st.n && !st.over && myP().length === st.n && !!opp() };
+      const roleNow = () => { const r = myP().length; return (r % 2 === 0) === host ? "kick" : "keep" };
+      const commit = (a) => setS({ p: [...myP(), a] });
+      // ---- 3D（単位はメートル）。x：横、y：高さ、z：ゴールラインから手前へ。ゴールは幅7.32・高さ2.44
+      const GWm = 7.32, GHm = 2.44;
+      const spotOf = (sc) => sc.type === "fkn" ? { x: sc.side * 5, z: 19 } : sc.type === "fkf" ? { x: sc.side * 9, z: 27 } : sc.type === "pass" ? { x: sc.side * 3, z: 13 } : { x: 0, z: 11 };
+      const PASS_IN = 1.3, PASS_LOOP = 2.6, passT0 = performance.now();
+      const passPhase = () => ((performance.now() - passT0) / 1000) % PASS_LOOP;
+      let CAM = null;
+      function setCam(view, sp) {
+        // 蹴る番：ボールの後ろの高いところから、ゴールを見下ろす。キーパーの番：ゴールの後ろの上から、蹴る人を見る
+        const pos = view === "kick" ? [sp.x * 0.8 + (sp.x >= 0 ? 1.5 : -1.5), 6.2, sp.z + 7] : [0, 2.7, -11];
+        const tgt = view === "kick" ? [sp.x * 0.25, 0, sp.z * 0.42] : [sp.x * 0.3, 0.9, sp.z * 0.6];
+        const f = [tgt[0] - pos[0], tgt[1] - pos[1], tgt[2] - pos[2]], fl = Math.hypot(...f); f[0] /= fl; f[1] /= fl; f[2] /= fl;
+        let r = [-f[2], 0, f[0]]; const rl = Math.hypot(...r); r = r.map((v) => v / rl); // 画面の右（見る向き×上）
+        const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+        const up = u[1] < 0 ? u.map((v) => -v) : u;
+        CAM = { pos, f, r, up, F: w * 1.35, cx: w / 2, cy: top + (h - top) * 0.5, view };
+      }
+      function P(x, y, z) {
+        const d = [x - CAM.pos[0], y - CAM.pos[1], z - CAM.pos[2]];
+        const zc = d[0] * CAM.f[0] + d[1] * CAM.f[1] + d[2] * CAM.f[2]; if (zc < 0.4) return null;
+        const xc = d[0] * CAM.r[0] + d[1] * CAM.r[1] + d[2] * CAM.r[2], yc = d[0] * CAM.up[0] + d[1] * CAM.up[1] + d[2] * CAM.up[2];
+        return { sx: CAM.cx + (xc * CAM.F) / zc, sy: CAM.cy - (yc * CAM.F) / zc, s: CAM.F / zc, zc };
+      }
+      // 画面の点から、ゴールラインの面（z=0）の上の点を求める
+      function toGoal(sx, sy) {
+        const a = (sx - CAM.cx) / CAM.F, b = (CAM.cy - sy) / CAM.F;
+        const d = [CAM.f[0] + CAM.r[0] * a + CAM.up[0] * b, CAM.f[1] + CAM.r[1] * a + CAM.up[1] * b, CAM.f[2] + CAM.r[2] * a + CAM.up[2] * b];
+        if (Math.abs(d[2]) < 1e-6) return null; const t = -CAM.pos[2] / d[2]; if (t <= 0) return null;
+        return { x: CAM.pos[0] + d[0] * t, y: CAM.pos[1] + d[1] * t };
+      }
+      // ---- 操作
+      cv.addEventListener("pointerdown", (e) => {
+        e.preventDefault(); if (!canAct()) return;
+        const rc = cv.getBoundingClientRect(), x = e.clientX - rc.left, y = e.clientY - rc.top;
+        if (roleNow() === "keep") {
+          const g = toGoal(x, y); if (!g) return;
+          lastTap = { u: clamp(g.x / (GWm / 2), -1.1, 1.1), v: clamp(g.y / GHm, 0, 1.1) };
+          commit({ u: r2_(lastTap.u), v: r2_(lastTap.v) }); return;
+        }
+        swipe = { id: e.pointerId, pts: [{ x, y, t: performance.now() }] };
+        try { cv.setPointerCapture(e.pointerId) } catch (_) {}
+      });
+      cv.addEventListener("pointermove", (e) => { if (!swipe || e.pointerId !== swipe.id) return; const rc = cv.getBoundingClientRect(); swipe.pts.push({ x: e.clientX - rc.left, y: e.clientY - rc.top, t: performance.now() }) });
+      const endSwipe = (e) => {
+        if (!swipe || e.pointerId !== swipe.id) return;
+        const pts = swipe.pts; swipe = null;
+        if (pts.length < 3 || !canAct()) return;
+        const S = pts[0], E = pts[pts.length - 1];
+        if (E.y > S.y - 40) return;
+        const L = Math.hypot(E.x - S.x, E.y - S.y), T = Math.max(0.05, (E.t - S.t) / 1000);
+        const pw = clamp(L / T / 1700, 0.25, 1.45);
+        const sc = pkScene(me.m.seed, myP().length);
+        const tm = sc.type === "pass" ? r2_(passPhase() - PASS_IN) : 0;
+        let g = toGoal(E.x, E.y);
+        for (let k = 1.25; (!g || g.y < GHm * 0.25) && k <= 6; k += 0.25) g = toGoal(S.x + (E.x - S.x) * k, S.y + (E.y - S.y) * k);
+        if (!g) g = { x: 0, y: GHm * 0.4 };
+        let u = g.x / (GWm / 2), v = g.y / GHm;
+        const M = pts[Math.floor(pts.length / 2)], cross = ((E.x - S.x) * (M.y - S.y) - (E.y - S.y) * (M.x - S.x)) / (L * L);
+        const cvv = clamp(cross * 2, -0.5, 0.5);
+        u += -cvv * 0.35; if (pw > 1.2) v += (pw - 1.2) * 2;
+        commit({ u: r2_(clamp(u, -1.6, 1.6)), v: r2_(clamp(v, 0, 1.6)), pw: r2_(pw), cv: r2_(cvv), tm });
+      };
+      cv.addEventListener("pointerup", endSwipe); cv.addEventListener("pointercancel", endSwipe);
+
+      // ---- 人（高さ1.8m。足もとと頭の位置を3Dで求めて描く）
+      function fig(x, z, col, opt) {
+        opt = opt || {};
+        const f = P(x, 0, z), hd = P(x, opt.dive ? 0.9 : 1.8, z); if (!f || !hd) return;
+        const H = f.sy - hd.sy, s = H / 1.8, X = f.sx;
+        c.save(); c.translate(X, f.sy);
+        c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.ellipse(0, 0, 0.5 * s, 0.13 * s, 0, 0, 7); c.fill();
+        if (opt.dive) c.rotate(opt.dive);
+        const leg = opt.kick ? 0.35 : Math.sin(performance.now() / 160 + x) * 0.04;
+        c.fillStyle = col.sock || col.short; c.fillRect(-0.2 * s, -0.45 * s, 0.13 * s, 0.45 * s); c.fillRect(0.07 * s + leg * s, -0.45 * s, 0.13 * s, 0.45 * s);
+        c.fillStyle = "#EDBE8F"; c.fillRect(-0.2 * s, -0.75 * s, 0.13 * s, 0.32 * s); c.fillRect(0.07 * s + leg * s * 0.5, -0.75 * s, 0.13 * s, 0.32 * s);
+        c.fillStyle = col.short; c.fillRect(-0.25 * s, -0.95 * s, 0.5 * s, 0.25 * s);
+        c.fillStyle = col.shirt; c.fillRect(-0.27 * s, -1.45 * s, 0.54 * s, 0.52 * s);
+        const arm = opt.arms ? -0.25 : 0;
+        c.save(); c.translate(-0.27 * s, -1.42 * s); c.rotate(0.25 + arm * 3); c.fillRect(-0.11 * s, 0, 0.11 * s, 0.45 * s); c.restore();
+        c.save(); c.translate(0.27 * s, -1.42 * s); c.rotate(-0.25 - arm * 3); c.fillRect(0, 0, 0.11 * s, 0.45 * s); c.restore();
+        if (opt.num) { c.fillStyle = col.num || "#fff"; c.font = `${Math.max(7, 0.3 * s) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(opt.num, 0, -1.2 * s) }
+        c.fillStyle = "#EDBE8F"; c.fillRect(-0.12 * s, -1.75 * s, 0.24 * s, 0.3 * s);
+        c.fillStyle = col.hair || "#2B1D14"; c.fillRect(-0.13 * s, -1.8 * s, 0.26 * s, opt.back ? 0.3 * s : 0.1 * s);
+        if (opt.gloves) { c.fillStyle = "#fff"; c.fillRect(-0.5 * s, -1.1 * s + arm * s * 2, 0.14 * s, 0.14 * s); c.fillRect(0.36 * s, -1.1 * s + arm * s * 2, 0.14 * s, 0.14 * s) }
+        c.restore();
+      }
+      const BLUE = { shirt: "#2F5FD0", short: "#F2F2F2", sock: "#2F5FD0", num: "#fff" }, RED = { shirt: "#D93A33", short: "#D93A33", sock: "#B32420", num: "#fff" }, KEEPER = { shirt: "#7BE33B", short: "#59B82A", sock: "#7BE33B", num: "#1B3A0F" };
+      function line3(pts) { let prev = null; for (const q of pts) { const p = P(...q); if (p && prev) { c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() } prev = p } }
+      function quad3(a, b, cc, d, col) { const A = P(...a), B = P(...b), C2 = P(...cc), D = P(...d); if (!A || !B || !C2 || !D) return; c.fillStyle = col; c.beginPath(); c.moveTo(A.sx, A.sy); c.lineTo(B.sx, B.sy); c.lineTo(C2.sx, C2.sy); c.lineTo(D.sx, D.sy); c.closePath(); c.fill() }
+      function stadium(view) {
+        // 空とスタンド（見る向きで奥にあるもの）
+        c.fillStyle = "#24304F"; c.fillRect(0, 0, w, h);
+        const gp = P(0, 0, view === "kick" ? -6 : 60) || { sy: h * 0.3 };
+        const sb = clamp(gp.sy, top, h * 0.6);
+        for (let r = 0; r * 7 < sb + 10; r++) for (let i = 0; i < 52; i++) { c.fillStyle = ["#E8E8F0", "#2F5FD0", "#D93A33", "#FFE14D", "#9AA6C8", "#3B4566"][(i * 47 + r * 13) % 6]; c.fillRect((i * w) / 52 + ((r * 5) % 7), sb - 8 - r * 7, 5, 5) }
+        // 芝
+        c.fillStyle = "#3E9A3C"; c.fillRect(0, sb, w, h - sb);
+        const zs = view === "kick" ? [-6, 60] : [-6, 60];
+        for (let z = zs[0]; z < zs[1]; z += 4) if (Math.floor(z / 4) % 2 === 0) quad3([-40, 0, z], [40, 0, z], [40, 0, z + 4], [-40, 0, z + 4], "#47AD44");
+        // 広告ボード（ゴールの裏）
+        if (view === "kick") for (let i = -6; i < 6; i++) { const cols = ["#D93A66", "#2F5FD0", "#7C3AED", "#E04A8C"]; quad3([i * 5, 0, -5], [i * 5 + 5, 0, -5], [i * 5 + 5, 1, -5], [i * 5, 1, -5], cols[(i + 6) % 4]) }
+        if (view === "kick") { const p = P(-7, 0.5, -5), q = P(7, 0.5, -5); if (p && q) { c.fillStyle = "#fff"; c.font = `${Math.max(8, p.s * 0.45) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("待ち時間バトル", p.sx, p.sy); c.fillText("待ち時間バトル", q.sx, q.sy) } }
+        // 白線
+        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2.5;
+        line3([[-34, 0, 0], [34, 0, 0]]);
+        line3([[-9.16, 0, 0], [-9.16, 0, 5.5], [9.16, 0, 5.5], [9.16, 0, 0]]);
+        line3([[-20.16, 0, 0], [-20.16, 0, 16.5], [20.16, 0, 16.5], [20.16, 0, 0]]);
+        { const arc = []; for (let a = 0.93; a <= Math.PI - 0.93; a += 0.08) arc.push([Math.cos(a) * 9.15, 0, 11 + Math.sin(a) * 9.15]); line3(arc) }
+        { const p = P(0, 0, 11); if (p) { c.fillStyle = "#fff"; c.beginPath(); c.ellipse(p.sx, p.sy, 0.12 * p.s, 0.05 * p.s, 0, 0, 7); c.fill() } }
+      }
+      function goal3() {
+        const x0 = -GWm / 2, x1 = GWm / 2, back = -2;
+        c.strokeStyle = CAM.view === "keep" ? "rgba(255,255,255,.12)" : "rgba(255,255,255,.4)"; c.lineWidth = 1;
+        for (let x = x0; x <= x1 + 0.01; x += 0.5) line3([[x, 0, back], [x, GHm, back], [x, GHm, 0]]);
+        for (let y = 0; y <= GHm + 0.01; y += 0.4) line3([[x0, y, back], [x1, y, back]]);
+        for (let zz = back; zz <= 0; zz += 0.5) { line3([[x0, 0, zz], [x0, GHm, zz]]); line3([[x1, 0, zz], [x1, GHm, zz]]) }
+        const p = P(x0, 0, 0), wdt = p ? Math.max(2.5, p.s * 0.12) : 3;
+        c.strokeStyle = "#fff"; c.lineWidth = wdt; c.lineCap = "round";
+        line3([[x0, 0, 0], [x0, GHm, 0], [x1, GHm, 0], [x1, 0, 0]]); c.lineCap = "butt";
+      }
+      function ballAt(x, y, z, trail) {
+        const p = P(x, y, z), g = P(x, 0, z); if (!p) return;
+        if (g) { c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(g.sx, g.sy, 0.14 * g.s, 0.05 * g.s, 0, 0, 7); c.fill() }
+        const r = Math.max(3, 0.12 * p.s); c.fillStyle = "#fff"; c.beginPath(); c.arc(p.sx, p.sy, r, 0, 7); c.fill();
+        c.fillStyle = "#222"; c.beginPath(); c.arc(p.sx - r * 0.25, p.sy - r * 0.2, r * 0.35, 0, 7); c.fill(); c.beginPath(); c.arc(p.sx + r * 0.45, p.sy + r * 0.35, r * 0.2, 0, 7); c.fill();
+      }
+      // ボールの飛び方（3Dの曲線）。t=0〜1
+      function flight(sp, k, t) {
+        const end = [clamp(k.u, -1.6, 1.6) * GWm / 2, clamp(k.v, 0, 1.6) * GHm, 0], st_ = [sp.x, 0.11, sp.z];
+        const ctl = [(st_[0] + end[0]) / 2 + (k.cv || 0) * 9, Math.max(end[1], 0.5) + (k.pw || 1) * 0.6 + (sp.z > 15 ? 1.2 : 0), (st_[2] + end[2]) / 2];
+        const q = (a, b, cc) => (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * cc;
+        return [q(st_[0], ctl[0], end[0]), q(st_[1], ctl[1], end[1]), q(st_[2], ctl[2], end[2])];
+      }
+      function scoreboard(st) {
+        const mine = host ? st.hS : st.gS, theirs = host ? st.gS : st.hS, minute = Math.min(120, 75 + st.n * 5);
+        const x = 10, y = top + 50;
+        c.fillStyle = "#111"; c.fillRect(x, y, 56, 36); c.fillStyle = "#fff"; c.font = `17px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(`${minute}'`, x + 28, y + 19);
+        c.fillStyle = "#fff"; c.fillRect(x + 58, y - 2, 104, 40);
+        c.fillStyle = "#2F5FD0"; c.fillRect(x + 61, y + 1, 46, 34); c.fillStyle = "#D93A33"; c.fillRect(x + 113, y + 1, 46, 34);
+        c.fillStyle = "#fff"; c.font = `19px ${DISP}`; c.fillText(String(mine), x + 84, y + 19); c.fillText(String(theirs), x + 136, y + 19);
+        c.fillStyle = "#111"; c.fillText("-", x + 110, y + 18);
+        c.font = `11px ${DISP}`; c.fillStyle = "#fff"; c.textAlign = "left"; c.fillText(`あなた（青）対 ${oppName().slice(0, 6)}（赤）`, x, y + 50);
+      }
+      function frame(dt) {
+        const st = pkState(myP(), opP(), host, me.m.seed);
+        if (!anim && shown < st.n) anim = { r: shown, t: 0 };
+        if (anim) { anim.t += dt; if (anim.t > 3.0) { shown++; anim = null; lastTap = null } }
+        const curR = anim ? anim.r : st.n, SC = pkScene(me.m.seed, curR), SP = spotOf(SC), info = anim ? st.res[anim.r] : null;
+        const view = anim ? (info.iKick ? "kick" : "keep") : roleNow();
+        setCam(view, SP);
+        stadium(view);
+        // 奥から順に描く：ゴール・キーパー・壁・ほかの選手・ボール・蹴る人
+        const ents = [];
+        const iKickNow = anim ? info.iKick : roleNow() === "kick";
+        const atkCol = iKickNow ? BLUE : RED, defCol = iKickNow ? RED : BLUE;
+        let kx = 0, kdive = 0, ky = 0;
+        if (anim) { const g = info.g, dk = clamp((anim.t - 0.4) / 0.45, 0, 1); kx = clamp(g.u, -1, 1) * GWm / 2 * dk; kdive = dk * Math.sign(g.u) * Math.min(1, Math.abs(g.u)) * 1.2; ky = g.v }
+        ents.push({ z: 0.3, f: () => fig(kx, 0.4, KEEPER, { gloves: true, num: "1", dive: kdive * (view === "keep" ? -1 : 1), arms: anim && anim.t > 0.4 }) });
+        if (SC.type === "fkn" || SC.type === "fkf") {
+          const dir = Math.hypot(SP.x - SC.wall * GWm / 2, SP.z), wx = SP.x + ((SC.wall * GWm / 2 - SP.x) * 9.15) / dir, wz = SP.z - (SP.z * 9.15) / dir;
+          for (let i = -1.5; i <= 1.5; i++) ents.push({ z: wz, f: () => fig(wx + i * 0.6, wz, defCol, { arms: true, num: String(4 + i * 2 | 0) }) });
+        }
+        const q = rng(me.m.seed + curR * 31); q();
+        for (let i = 0; i < 4; i++) {
+          const pz = 4 + q() * Math.max(3, SP.z - 6), lineX = SP.x * (pz / SP.z), px = lineX + (q() < 0.5 ? -1 : 1) * (4 + q() * 9), col = i % 2 ? atkCol : defCol;
+          ents.push({ z: pz, f: () => fig(px, pz, col, { num: String(2 + i * 3), back: view === "kick" && col === atkCol }) });
+        }
+        // ボール
+        let bp = [SP.x, 0.11, SP.z], trailT = 0;
+        if (anim) {
+          const k = info.k, t1 = clamp((anim.t - 0.35) / 0.8, 0, 1), out = info.out;
+          if (out === "whiff") bp = [SP.x - SC.side * Math.max(0, anim.t - 0.35) * 8, 0.11, SP.z + Math.max(0, anim.t - 0.35) * 2];
+          else if ((out === "wall" || out === "short") && t1 > 0.5) { const p = flight(SP, k, 0.5); bp = [p[0], Math.max(0.11, p[1] * (1 - (t1 - 0.5) * 2)), p[2] + (t1 - 0.5) * 4] }
+          else if (out === "save" && t1 >= 1) bp = [kx, 0.8, 1.2];
+          else { bp = flight(SP, k, t1); trailT = t1 }
+          if (trailT > 0) ents.push({ z: -1, f: () => { c.strokeStyle = "rgba(255,255,255,.85)"; c.lineCap = "round"; let prev = null; for (let i = 0; i <= 24; i++) { const tt = (trailT * i) / 24, p = P(...flight(SP, k, tt)); if (p && prev) { c.lineWidth = Math.max(1.5, 0.07 * p.s); c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() } prev = p } c.lineCap = "butt" } });
+        } else if (SC.type === "pass" && roleNow() === "kick" && canAct()) {
+          const ph_ = passPhase(); if (ph_ < PASS_IN) { const t = ph_ / PASS_IN; bp = [SP.x + SC.side * 14 * (1 - t), 0.11, SP.z + 3 * (1 - t)] } else bp = [SP.x - SC.side * (ph_ - PASS_IN) * 9, 0.11, SP.z - (ph_ - PASS_IN) * 2];
+        }
+        ents.push({ z: bp[2] - 0.05, f: () => ballAt(...bp) });
+        const kickPose = anim && anim.t > 0.25 && anim.t < 0.7, runIn = anim ? clamp(anim.t / 0.35, 0, 1) : 0;
+        // 蹴る人はボールの左うしろ（カメラから見てボールにかぶらない側）から走りこむ
+        const kxp = SP.x - 1.2 + 0.7 * runIn, kzp = SP.z + 0.25 + 0.6 * (1 - runIn);
+        ents.push({ z: kzp, f: () => fig(kxp, kzp, atkCol, { kick: kickPose, num: "10", back: view === "kick" }) });
+        ents.sort((a, b) => (view === "kick" ? a.z - b.z : b.z - a.z));
+        goal3();
+        ents.forEach((e) => e.f());
+        if (view === "keep") goal3();
+        // キーパーが選んだ場所
+        if (lastTap && !anim) { const p = P(lastTap.u * GWm / 2, lastTap.v * GHm, 0); if (p) { c.strokeStyle = "#FFE14D"; c.lineWidth = 3; c.beginPath(); c.arc(p.sx, p.sy, 16, 0, 7); c.stroke(); c.fillStyle = "rgba(255,225,77,.35)"; c.fill() } }
+        if (swipe && swipe.pts.length > 1) { c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 7; c.lineCap = "round"; c.beginPath(); swipe.pts.forEach((p, i) => (i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y))); c.stroke(); c.lineCap = "butt" }
+        scoreboard(st);
+        // 結果・案内
+        if (anim && anim.t > 1.2) {
+          const out = info.out, good = (out === "goal") === info.iKick;
+          bigText(c, out === "goal" ? "ゴール！" : out === "save" ? "セーブ！" : out === "post" ? "ポスト…" : out === "wall" ? "壁に当たった" : out === "short" ? "とどかない…" : out === "whiff" ? "からぶり…" : "外れた…", w / 2, top + (h - top) * 0.55, 46, good ? "#FFE14D" : "#FF9B91");
+          if (info.iKick && Math.abs(info.k.cv || 0) >= 0.2) { c.font = `14px ${DISP}`; c.textAlign = "center"; c.fillStyle = "#7CF59A"; c.fillText("スピンがかかった！", w / 2, top + (h - top) * 0.55 + 36) }
+        }
+        if (!st.over) {
+          c.font = `13px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff";
+          c.fillText(`場面：${PK_TYPES[SC.type]}`, 10, top + 116);
+          if (!anim && shown === st.n) c.fillText(roleNow() === "kick" ? `${Math.floor(st.n / 2) + 1}本目　あなたが蹴る番` : `${Math.floor(st.n / 2) + 1}本目　あなたはキーパー`, 10, top + 134);
+        }
+        let tip = "";
+        if (!opp()) tip = "あいてを待っています";
+        else if (!anim && shown === st.n && !st.over) {
+          if (myP().length > st.n) tip = "あいてを待っています";
+          else tip = roleNow() === "kick" ? (SC.type === "pass" ? "ボールが来た瞬間になぞってシュート！" : SC.type === "fkn" || SC.type === "fkf" ? "壁をこえるか、曲げてシュート！" : "なぞってシュート！") : "どこに来るか予想して、ゴールをタップ！";
+        }
+        if (tip) bigText(c, tip, w / 2, h - 60, 19, "#fff");
+        if (st.over && !anim && shown >= st.n) {
+          const mine = host ? st.hS : st.gS, theirs = host ? st.gS : st.hS;
+          setMsg(`<p class="verdict ${mine > theirs ? "good" : "bad"}">${mine > theirs ? "あなたの勝ち！" : "あなたの負け…"}　${mine} − ${theirs}</p>${againBtns("pk")}`);
         } else setMsg("");
       }
       return loop(frame);
