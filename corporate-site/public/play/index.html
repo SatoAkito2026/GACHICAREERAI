@@ -238,9 +238,13 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .chipbtn { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 6px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer }
 .chipbtn.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, var(--surface)) }
 
+/* ゲーム中は、2本指でさわってもページが拡大・選択されないようにする（iPhone で画面がずれてボタンが消えるのを防ぐ） */
+html.playing.full, html.playing.full body { touch-action: none; overscroll-behavior: none }
+html.playing.full .card.act, html.playing.full .card.act * { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
+html.playing.full .card.act > p.muted, html.playing.full #act-msg, #sens, #sens * { touch-action: pan-y }
 /* 感度設定 */
 #sens { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px }
-.sens-box { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.3) }
+.sens-box { max-height: calc(100% - 8px); overflow: auto; background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.3) }
 .sens-box p { margin: 0 }
 .sens-row { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; font-size: 13px; align-items: center }
 .sens-row span { grid-column: 1 / -1 } .sens-row input { width: 100%; accent-color: var(--pink) } .sens-row b { font-family: var(--display); text-align: right }
@@ -998,6 +1002,10 @@ html.br-portrait .br-ui { display: none }
   function setMsg(html) { const el = $("#act-msg"); if (el && el._h !== html) { el._h = html; el.innerHTML = html } }
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const r2 = (v) => Math.round(v * 100) / 100;
+  // iPhone の Safari は user-scalable=no でも2本指で拡大するので、ゲーム中はとめる
+  for (const ev of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(ev, (e) => { if (document.documentElement.classList.contains("playing")) e.preventDefault() }, { passive: false });
+  document.addEventListener("touchmove", (e) => { if (e.touches.length > 1 && document.documentElement.classList.contains("full")) e.preventDefault() }, { passive: false });
+  let lastTouchEnd = 0; document.addEventListener("touchend", (e) => { const now = Date.now(); if (now - lastTouchEnd < 320 && document.documentElement.classList.contains("full") && !e.target.closest("button, input, a")) e.preventDefault(); lastTouchEnd = now }, { passive: false });
   const keys = new Set();
   addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT") return;
@@ -1024,12 +1032,16 @@ html.br-portrait .br-ui { display: none }
   const sHome = (i) => { const [x, y] = S_HOME[i % 3]; return i < 3 ? { x, y } : { x: FW - x, y: FH - y } };
   // 操作パネル（スティック＋ボタン）。押している間の状態と、押した回数を返す
   // 感度（すべてのゲーム共通。端末に保存）
+  // 画質（3Dのゲーム用）。自動なら iPhone・iPad は「低」、ほかのスマホは「中」、パソコンは「高」
+  const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const gfxLevel = () => { const v = ls.get("gfx") || "auto"; if (v !== "auto") return v; return IS_IOS ? "low" : matchMedia("(pointer: coarse)").matches ? "mid" : "high" };
+  const GFX = () => ({ high: { pr: 2, sh: 2048, aa: true, far: 300, grass: 5000 }, mid: { pr: 1.3, sh: 1024, aa: true, far: 230, grass: 3000 }, low: { pr: 1, sh: 0, aa: false, far: 170, grass: 1200 } })[gfxLevel()];
   const SENS = Object.fromEntries(["look", "scope", "stick", "steer"].map((k) => [k, clamp(Number(ls.get("sens_" + k)) || 1, .3, 2.5)]));
   function sensPanel(open) {
     let el = $("#sens"); if (!open) { if (el) el.remove(); return } if (el) return;
     el = document.createElement("div"); el.id = "sens";
     const rows = [["look", "視点（画面をなぞって向きを変える）"], ["scope", "スコープをのぞいている時の視点"], ["stick", "スティック（少したおすだけで速く動く）"], ["steer", "カートのハンドル（曲がる速さ）"]];
-    el.innerHTML = `<div class="sens-box"><p class="eyebrow">感度設定（すべてのゲーム共通）</p>${rows.map(([k, t]) => `<label class="sens-row"><span>${t}</span><input type="range" min="0.3" max="2.5" step="0.1" value="${SENS[k]}" data-sens="${k}"><b>${SENS[k].toFixed(1)}</b></label>`).join("")}<p class="muted" style="font-size:12px;margin:0">1.0 がふつう。大きいほど少しの操作でよく動きます</p><div class="row"><button class="btn ghost" data-act="sens-reset">もとにもどす</button><button class="btn grow" data-act="sens">とじる</button></div></div>`;
+    el.innerHTML = `<div class="sens-box"><p class="eyebrow">感度設定（すべてのゲーム共通）</p>${rows.map(([k, t]) => `<label class="sens-row"><span>${t}</span><input type="range" min="0.3" max="2.5" step="0.1" value="${SENS[k]}" data-sens="${k}"><b>${SENS[k].toFixed(1)}</b></label>`).join("")}<p class="muted" style="font-size:12px;margin:0">1.0 がふつう。大きいほど少しの操作でよく動きます</p><p class="eyebrow" style="margin-top:4px">画質（3Dのゲーム）</p><div class="stages" style="grid-template-columns:repeat(4,1fr)">${[["auto", "自動"], ["high", "高"], ["mid", "中"], ["low", "低"]].map(([k, t]) => `<button class="chipbtn ${(ls.get("gfx") || "auto") === k ? "on" : ""}" data-act="gfx" data-v="${k}">${t}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">カクカクする・止まるときは「低」に。次にゲームを開いたときから変わります${IS_IOS ? "（iPhone は自動で「低」）" : ""}</p><div class="row"><button class="btn ghost" data-act="sens-reset">もとにもどす</button><button class="btn grow" data-act="sens">とじる</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("input", (e) => { const k = e.target.dataset.sens; if (!k) return; SENS[k] = Number(e.target.value); ls.set("sens_" + k, SENS[k]); e.target.nextElementSibling.textContent = SENS[k].toFixed(1) });
     el.addEventListener("click", (e) => { if (e.target === el) sensPanel(false) });
@@ -2589,6 +2601,8 @@ html.br-portrait .br-ui { display: none }
     { id: "movie", name: "ムービーパーク", seek: 150 },
   ];
   const PH_HIDE = 15, PH_HIT = 34, PH_MISS = 4;
+  // 3Dの表示がこわれた（スマホのメモリが足りないなど）ときに、止まったままにしないでお知らせを出す
+  function watchLost(cv, g) { cv.addEventListener("webglcontextlost", (e) => { e.preventDefault(); setMsg(`<p class="verdict bad">3Dの表示が止まりました</p><p class="muted">スマホの力が足りなかったようです。画質を「低」にするか、マップを小さくしてもう一度ためしてください</p><button class="btn ghost" data-act="sens">画質を変える</button>${againBtns(g)}`) }) }
   let phThreeP = null;
   function phLoad() {
     if (window.THREE) return Promise.resolve();
@@ -3039,7 +3053,7 @@ html.br-portrait .br-ui { display: none }
       const grassy = (x, z) => (M.ground === "grass" ? !M.floors.some((f) => x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1 && f.t !== "grass2" && f.t !== "grass") : M.floors.some((f) => (f.t === "grass" || f.t === "grass2") && x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1)) && !M.water.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
       const tg = new T.BufferGeometry(), tp = [], tc = []; for (let k = 0; k < 3; k++) { const a = k * 2.1, cx = Math.cos(a) * .12, cz = Math.sin(a) * .12, ox = Math.cos(a + 1.57) * .08, oz = Math.sin(a + 1.57) * .08; tp.push(cx - ox, 0, cz - oz, cx + ox, 0, cz + oz, cx * 1.8, .38, cz * 1.8); tc.push(.22, .45, .15, .22, .45, .15, .5, .8, .3) }
       tg.setAttribute("position", new T.Float32BufferAttribute(tp, 3)); tg.setAttribute("color", new T.Float32BufferAttribute(tc, 3)); tg.computeVertexNormals();
-      const BIGG = M.W > 300, n = BIGG ? 5000 : Math.min(6000, Math.floor(M.W * M.D / 3)), im = new T.InstancedMesh(tg, new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide }), n), m4 = new T.Matrix4(); let k = 0;
+      const BIGG = M.W > 300, n = BIGG ? GFX().grass : Math.min(6000, Math.floor(M.W * M.D / 3)), im = new T.InstancedMesh(tg, new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide }), n), m4 = new T.Matrix4(); let k = 0;
       // 広いマップでは、自分のまわり 65m だけに草を生やして、動いたら並べなおす
       const gx = (cx) => (BIGG ? cx + (Math.random() - .5) * 130 : Math.random() * M.W);
       const layGrass = (cx, cz) => { k = 0; for (let t = 0; t < n * 3 && k < n; t++) { const x = gx(cx), z = gx(cz); if (!grassy(x, z)) continue; const s = .45 + Math.random() * .6; m4.makeRotationY(Math.random() * 6.28).scale(new T.Vector3(s, s, s)).setPosition(x, 0, z); im.setMatrixAt(k++, m4) } im.count = k; im.instanceMatrix.needsUpdate = true };
@@ -3121,9 +3135,9 @@ html.br-portrait .br-ui { display: none }
     const cv = $("#cv"), gl = $("#gl"); const { c, w, h, top, bottom } = fullCanvas(cv);
     gl.style.width = w + "px"; gl.style.height = h + "px";
     const mobile = matchMedia("(pointer: coarse)").matches;
-    const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.6 : 2)); renderer.setSize(w, h, false);
-    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.setSize(w, h, false);
+    renderer.shadowMap.enabled = Q.sh > 0; renderer.shadowMap.type = T.PCFSoftShadowMap; watchLost(gl, "hide");
     const scene = new T.Scene();
     const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#9CCDF3"); gr.addColorStop(1, "#E4F2FA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
     scene.background = new T.CanvasTexture(skc);
@@ -3131,7 +3145,7 @@ html.br-portrait .br-ui { display: none }
     const camera = new T.PerspectiveCamera(60, w / h, .08, 420);
     scene.add(new T.HemisphereLight(M.indoor ? "#FFF6E6" : "#D8ECFF", M.indoor ? "#8A7058" : "#5E7F3E", M.indoor ? .9 : .72));
     const sun = new T.DirectionalLight("#FFF0D6", M.indoor ? .55 : 1.0); sun.castShadow = true; const SR = M.indoor ? 22 : 34;
-    sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -SR, right: SR, top: SR, bottom: -SR, near: 1, far: 160 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
+    sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -SR, right: SR, top: SR, bottom: -SR, near: 1, far: 160 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
     scene.add(sun, sun.target);
     const W3 = phBuild(M, scene);
     // ---- 登場人物：0=ホスト、1=あいて（ふたりのとき）かCPU、2・3=CPU
@@ -3681,14 +3695,14 @@ html.br-portrait .br-ui { display: none }
     document.documentElement.classList.add("br-on");
     const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], SZ = BR_SIZES[me.m.size || 0] || BR_SIZES[0], M = brMap((me.m.seed || 1) % 100000, STG, SZ.m), C0 = M.W / 2, ZK = Math.sqrt(M.W / 380), PSP = 20 * Math.max(1, M.W / 380), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
     const mobile = matchMedia("(pointer: coarse)").matches;
-    const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.shadowMap.enabled = Q.sh > 0; renderer.shadowMap.type = T.PCFSoftShadowMap; watchLost(gl, "br");
     const scene = new T.Scene();
     const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#A4D2F3"); gr.addColorStop(1, "#E9F2EA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
-    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(STG.fog, 90, 320);
-    const camera = new T.PerspectiveCamera(62, 2, .08, 360);
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(STG.fog, Q.far * .3, Q.far + 20);
+    const camera = new T.PerspectiveCamera(62, 2, .08, Q.far + 60);
     scene.add(new T.HemisphereLight("#D8ECFF", STG.hemi, .72));
-    const sun = new T.DirectionalLight("#FFF0D6", 1.0); sun.castShadow = true; sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
+    const sun = new T.DirectionalLight("#FFF0D6", 1.0); sun.castShadow = Q.sh > 0; sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
     const W3 = phBuild(M, scene);
     // 安全地帯のかべ
     const zoneM = new T.Mesh(new T.CylinderGeometry(1, 1, 90, 64, 1, true), new T.MeshBasicMaterial({ color: "#5AB0FF", transparent: true, opacity: .2, side: T.DoubleSide, depthWrite: false, fog: false })); zoneM.position.y = 45; scene.add(zoneM);
@@ -3988,7 +4002,7 @@ html.br-portrait .br-ui { display: none }
       camera.lookAt(tg.clone().addScaledVector(dir, 10)); const fov = 62 / z; if (Math.abs(camera.fov - fov) > .01) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 14); camera.updateProjectionMatrix() }
       sun.position.set(f.x + 30, 60, f.z + 20); sun.target.position.set(f.x, 0, f.z); sun.target.updateMatrixWorld();
       // 遠くの区画は描かない（広いマップを軽くする）
-      W3.grassAt(f.x, f.z); cullT -= dt; if (cullT <= 0) { cullT = .3; for (const t of W3.cull) t.m.visible = Math.hypot(t.x - f.x, t.z - f.z) < 300 + (t.r || 40) }
+      W3.grassAt(f.x, f.z); cullT -= dt; if (cullT <= 0) { cullT = .3; for (const t of W3.cull) t.m.visible = Math.hypot(t.x - f.x, t.z - f.z) < Q.far + (t.r || 40) }
     }
     let VW = 0, VH = 0;
     function resize() {
@@ -4628,6 +4642,7 @@ html.br-portrait .br-ui { display: none }
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
     else if (act === "sens") sensPanel(!$("#sens"));
+    else if (act === "gfx") { ls.set("gfx", t.dataset.v); sensPanel(false); sensPanel(true) }
     else if (act === "sens-reset") { for (const k in SENS) { SENS[k] = 1; ls.set("sens_" + k, 1) } sensPanel(false); sensPanel(true) }
     else if (act === "install") {
       if (installEvt) { const ev = installEvt; installEvt = null; ev.prompt(); ev.userChoice.finally(() => render()) }
