@@ -1,6 +1,6 @@
 // 待ち時間バトルのサービスワーカー（/play/ の中だけ）。
 // いつもはネットから取り、取れたら保存しておく。電波がないときだけ保存したものを出す（コンピューター相手なら遊べる）。
-const CACHE = "play-v1";
+const CACHE = "play-v2";
 const FILES = ["./", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).catch(() => {}));
