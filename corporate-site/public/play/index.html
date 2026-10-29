@@ -2615,14 +2615,15 @@ html.br-portrait .br-ui { display: none }
   // 部品をまとめて1つの形にする（地面に近いところは少し暗くして、影っぽく見せる）
   function phMerge(L, ao) {
     const T = THREE; let n = 0; for (const p of L) n += p.g.attributes.position.count;
-    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Float32Array(n * 3), cc = new T.Color(); let o = 0;
+    // 向き・色は 1バイトずつにして、メモリを小さくする（広いマップ用）
+    const pos = new Float32Array(n * 3), nor = new Int8Array(n * 3), col = new Uint8Array(n * 3), cc = new T.Color(); let o = 0;
     for (const p of L) {
       const P = p.g.attributes.position.array, N = p.g.attributes.normal.array, cnt = p.g.attributes.position.count; cc.set(p.col);
-      pos.set(P, o * 3); nor.set(N, o * 3);
-      for (let i = 0; i < cnt; i++) { const k = ao ? 0.62 + 0.38 * Math.min(1, Math.max(0, P[i * 3 + 1]) / 0.9) : 1; col[(o + i) * 3] = cc.r * k; col[(o + i) * 3 + 1] = cc.g * k; col[(o + i) * 3 + 2] = cc.b * k }
+      pos.set(P, o * 3); for (let i = 0; i < cnt * 3; i++) nor[o * 3 + i] = Math.round(N[i] * 127);
+      for (let i = 0; i < cnt; i++) { const k = ao ? 0.62 + 0.38 * Math.min(1, Math.max(0, P[i * 3 + 1]) / 0.9) : 1; col[(o + i) * 3] = Math.round(cc.r * k * 255); col[(o + i) * 3 + 1] = Math.round(cc.g * k * 255); col[(o + i) * 3 + 2] = Math.round(cc.b * k * 255) }
       o += cnt; p.g.dispose();
     }
-    const g = new T.BufferGeometry(); g.setAttribute("position", new T.BufferAttribute(pos, 3)); g.setAttribute("normal", new T.BufferAttribute(nor, 3)); g.setAttribute("color", new T.BufferAttribute(col, 3));
+    const g = new T.BufferGeometry(); g.setAttribute("position", new T.BufferAttribute(pos, 3)); g.setAttribute("normal", new T.BufferAttribute(nor, 3, true)); g.setAttribute("color", new T.BufferAttribute(col, 3, true));
     g.computeBoundingSphere(); return g;
   }
   const phShade = (hex, k) => { const c = new THREE.Color(hex); c.multiplyScalar(1 + k); c.r = Math.min(1, c.r); c.g = Math.min(1, c.g); c.b = Math.min(1, c.b); return c.getHex() };
@@ -2821,29 +2822,32 @@ html.br-portrait .br-ui { display: none }
     return M;
   }
   // 道さがし（A*、1mのマス）
+  // 道さがし（A*）。マスの大きさは M.grid.cs（ふつう 1m、広いマップは 2m）。作業用の配列は使い回す
   function phPath(M, sx, sz, tx, tz) {
-    const { gw, gh, grid } = M.grid, N = gw * gh;
-    const cell = (x, z) => clamp(Math.floor(z), 0, gh - 1) * gw + clamp(Math.floor(x), 0, gw - 1);
+    const G = M.grid, { gw, gh, grid } = G, cs = G.cs || 1, N = gw * gh;
+    if (!G.gv) { G.gv = new Float32Array(N); G.came = new Int32Array(N); G.st = new Int32Array(N); G.cl = new Int32Array(N); G.gen = 0 }
+    const gen = ++G.gen, gv = G.gv, came = G.came, st = G.st, cl = G.cl;
+    const cell = (x, z) => clamp(Math.floor(z / cs), 0, gh - 1) * gw + clamp(Math.floor(x / cs), 0, gw - 1);
     const s = cell(sx, sz); let t = cell(tx, tz);
     if (grid[t]) { let best = -1, bd = 1e9; const tx0 = t % gw, tz0 = (t / gw) | 0; for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) { const x = tx0 + dx, z = tz0 + dz; if (x < 0 || z < 0 || x >= gw || z >= gh || grid[z * gw + x]) continue; const d = dx * dx + dz * dz; if (d < bd) { bd = d; best = z * gw + x } } if (best < 0) return [[tx, tz]]; t = best }
-    const g = new Float32Array(N).fill(1e9), came = new Int32Array(N).fill(-1), closed = new Uint8Array(N);
+    const getg = (i) => (st[i] === gen ? gv[i] : 1e9);
     const hk = [], hv = []; const hpush = (k, v) => { hk.push(k); hv.push(v); let i = hk.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (hk[p] <= hk[i]) break; [hk[p], hk[i]] = [hk[i], hk[p]]; [hv[p], hv[i]] = [hv[i], hv[p]]; i = p } };
     const hpop = () => { const v = hv[0], lk = hk.pop(), lv = hv.pop(); if (hk.length) { hk[0] = lk; hv[0] = lv; let i = 0; for (;;) { const a = 2 * i + 1, b = a + 1; let m = i; if (a < hk.length && hk[a] < hk[m]) m = a; if (b < hk.length && hk[b] < hk[m]) m = b; if (m === i) break; [hk[m], hk[i]] = [hk[i], hk[m]]; [hv[m], hv[i]] = [hv[i], hv[m]]; i = m } } return v };
-    const ttx = t % gw, ttz = (t / gw) | 0; g[s] = 0; hpush(0, s); let steps = 0;
+    const ttx = t % gw, ttz = (t / gw) | 0; st[s] = gen; gv[s] = 0; came[s] = -1; hpush(0, s); let steps = 0, found = false;
     while (hk.length && steps++ < 30000) {
-      const cur = hpop(); if (cur === t) break; if (closed[cur]) continue; closed[cur] = 1;
-      const cx = cur % gw, cz = (cur / gw) | 0;
+      const cur = hpop(); if (cur === t) { found = true; break } if (cl[cur] === gen) continue; cl[cur] = gen;
+      const cx = cur % gw, cz = (cur / gw) | 0, gc = gv[cur];
       for (let k = 0; k < 8; k++) {
         const dx = [1, -1, 0, 0, 1, 1, -1, -1][k], dz = [0, 0, 1, -1, 1, -1, 1, -1][k], nx = cx + dx, nz = cz + dz;
         if (nx < 0 || nz < 0 || nx >= gw || nz >= gh) continue; const ni = nz * gw + nx; if (grid[ni] && ni !== t) continue;
         if (dx && dz && (grid[cz * gw + nx] || grid[nz * gw + cx])) continue;
-        const ng = g[cur] + (dx && dz ? 1.414 : 1); if (ng < g[ni]) { g[ni] = ng; came[ni] = cur; hpush(ng + Math.hypot(nx - ttx, nz - ttz), ni) }
+        const ng = gc + (dx && dz ? 1.414 : 1); if (ng < getg(ni)) { st[ni] = gen; gv[ni] = ng; came[ni] = cur; hpush(ng + Math.hypot(nx - ttx, nz - ttz), ni) }
       }
     }
-    if (came[t] < 0 && t !== s) return [[tx, tz]];
-    const out = []; let c2 = t; while (c2 !== s && c2 >= 0) { out.unshift([(c2 % gw) + .5, ((c2 / gw) | 0) + .5]); c2 = came[c2] }
+    if (!found && t !== s) return [[tx, tz]];
+    const out = []; let c2 = t; while (c2 !== s && c2 >= 0) { out.unshift([((c2 % gw) + .5) * cs, (((c2 / gw) | 0) + .5) * cs]); c2 = came[c2] }
     // まっすぐ行けるところは間をとばす
-    const clear = (a, b) => { const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 2); for (let i = 1; i < n; i++) { const x = a[0] + (b[0] - a[0]) * i / n, z = a[1] + (b[1] - a[1]) * i / n; if (grid[cell(x, z)]) return false } return true };
+    const clear = (a, b) => { const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 2 / cs); for (let i = 1; i < n; i++) { const x = a[0] + (b[0] - a[0]) * i / n, z = a[1] + (b[1] - a[1]) * i / n; if (grid[cell(x, z)]) return false } return true };
     const sm = []; let from = [sx, sz]; for (let i = 0; i < out.length; i++) { if (i === out.length - 1 || !clear(from, out[i + 1])) { sm.push(out[i]); from = out[i] } }
     return sm.length ? sm : [[tx, tz]];
   }
@@ -2878,8 +2882,15 @@ html.br-portrait .br-ui { display: none }
     const tx = new T.CanvasTexture(cv); tx.wrapS = tx.wrapT = T.RepeatWrapping; tx.anisotropy = 4; return tx;
   }
   const PH_TS = { snow: 6, line2: 10, grass: 4, grass2: 4, dirt: 7, sand: 5, paving: 4, stone: 5, wood: 3, tile: 2.4, tile2: 1.6, asphalt: 7, line: 1, water: 9 };
+  function phTree(B, o) {
+    const s = o.s, gcs = [["#2E8B3E", "#3FA04E", "#4DB05A"], ["#3A7F2E", "#4A9A3A", "#5CB048"], ["#2F7A44", "#3D9A55", "#52AE62"]][o.c];
+    B.cyl(.18 * s, .3 * s, 2.6 * s, "#7A5230", o.x, 1.3 * s, o.z, 7);
+    if (o.kind === "pine") { for (let i = 0; i < 3; i++) B.cone((1.9 - i * .45) * s, 2.2 * s, gcs[i], o.x, (2.5 + i * 1.3) * s, o.z, 8) }
+    else { B.sph(1.55 * s, gcs[0], o.x, 3.2 * s, o.z, 1, .9, 1); B.sph(1.05 * s, gcs[1], o.x + .7 * s, 3.8 * s, o.z + .3 * s); B.sph(.95 * s, gcs[2], o.x - .6 * s, 3.9 * s, o.z - .4 * s); B.sph(.8 * s, gcs[1], o.x + .1 * s, 4.5 * s, o.z) }
+  }
   // 見た目を作る：静かな物は全部1つの形にまとめる（スマホでも軽く）
   function phBuild(M, scene) {
+    let grassAt = null;
     const T = THREE, B = phParts(), ms = [];
     const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .86, metalness: 0 });
     // 地面と床
@@ -2955,9 +2966,12 @@ html.br-portrait .br-ui { display: none }
         else { B.box(w + .1, .5, .3, phShade(col, -.15), cx, h + .25, b.z0); B.box(w + .1, .5, .3, phShade(col, -.15), cx, h + .25, b.z1); B.box(.3, .5, d, phShade(col, -.15), b.x0, h + .25, cz); B.box(.3, .5, d, phShade(col, -.15), b.x1, h + .25, cz); B.box(1.6, 1, 1.6, "#9AA0A6", cx + w * .2, h + .5, cz) }
       }
     }
-    // そのほかの物
+    // そのほかの物（広いマップの木は、同じ形をたくさん並べる方法で描く）
+    const BIG = M.W > 300, treeList = [], cull = [];
     for (const o of M.objs) {
-      if (o.k === "tree") {
+      if (o.k === "tree" && BIG) treeList.push(o);
+      else if (o.k === "tree") phTree(B, o);
+      else if (o.k === "__") {
         const s = o.s, gcs = [["#2E8B3E", "#3FA04E", "#4DB05A"], ["#3A7F2E", "#4A9A3A", "#5CB048"], ["#2F7A44", "#3D9A55", "#52AE62"]][o.c];
         B.cyl(.18 * s, .3 * s, 2.6 * s, "#7A5230", o.x, 1.3 * s, o.z, 7);
         if (o.kind === "pine") { for (let i = 0; i < 3; i++) B.cone((1.9 - i * .45) * s, 2.2 * s, gcs[i], o.x, (2.5 + i * 1.3) * s, o.z, 8) }
@@ -2991,25 +3005,41 @@ html.br-portrait .br-ui { display: none }
     // 空と天井
     if (M.indoor) { const cg = new T.PlaneGeometry(M.W, M.D); cg.rotateX(Math.PI / 2); cg.translate(M.W / 2, 3, M.D / 2); const cm = new T.Mesh(cg, new T.MeshStandardMaterial({ color: "#F7F4EE", roughness: 1 })); scene.add(cm); ms.push(cm); for (let x = 4; x < M.W; x += 8) for (let z = 4; z < M.D; z += 8) B.cyl(.35, .35, .06, "#FFFBEA", x, 2.97, z, 12) }
     // 広いマップは 48m ごとの区画に分けてまとめる（画面や影に入らない区画は描かないので軽い）
-    const TL = M.W > 150 ? 48 : 1e9, tiles = new Map();
+    const TL = M.W > 500 ? 64 : M.W > 150 ? 48 : 1e9, TT = M.W > 500 ? 128 : TL, tiles = new Map();
     for (const p of B.L) { const a = p.g.attributes.position.array, k = Math.floor(a[0] / TL) + "," + Math.floor(a[2] / TL); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(p) }
-    for (const L of tiles.values()) { const mesh = new T.Mesh(phMerge(L, true), mat); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh) }
+    for (const [k, L] of tiles) { const mesh = new T.Mesh(phMerge(L, true), mat); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh); if (M.W > 500) for (const at of Object.values(mesh.geometry.attributes)) at.onUpload(function () { this.array = null }); if (BIG) { const [tx, tz] = k.split(",").map(Number); cull.push({ m: mesh, x: (tx + .5) * TL, z: (tz + .5) * TL }) } }
+    if (treeList.length) {
+      const base = {}, groups = new Map(), m4 = new T.Matrix4(), qq = new T.Quaternion(), up = new T.Vector3(0, 1, 0);
+      for (const o of treeList) { const k = o.kind + o.c + "|" + Math.floor(o.x / TT) + "," + Math.floor(o.z / TT); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(o) }
+      for (const [k, L] of groups) {
+        const bk = k.split("|")[0]; if (!base[bk]) { const b2 = phParts(); phTree(b2, { x: 0, z: 0, s: 1, kind: L[0].kind, c: L[0].c }); base[bk] = phMerge(b2.L, true) }
+        const im = new T.InstancedMesh(base[bk], mat, L.length); L.forEach((o, i) => { qq.setFromAxisAngle(up, (o.x * 7.3 + o.z) % 6.28); m4.compose(new T.Vector3(o.x, 0, o.z), qq, new T.Vector3(o.s, o.s, o.s)); im.setMatrixAt(i, m4) });
+        im.instanceMatrix.needsUpdate = true; im.castShadow = im.receiveShadow = true; im.frustumCulled = false; scene.add(im); ms.push(im);
+        const [tx, tz] = k.split("|")[1].split(",").map(Number); cull.push({ m: im, x: (tx + .5) * TT, z: (tz + .5) * TT, r: TT * .7 });
+      }
+    }
     // 草むら・花（たくさん並べる）
     if (!M.indoor) {
       const grassy = (x, z) => (M.ground === "grass" ? !M.floors.some((f) => x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1 && f.t !== "grass2" && f.t !== "grass") : M.floors.some((f) => (f.t === "grass" || f.t === "grass2") && x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1)) && !M.water.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
       const tg = new T.BufferGeometry(), tp = [], tc = []; for (let k = 0; k < 3; k++) { const a = k * 2.1, cx = Math.cos(a) * .12, cz = Math.sin(a) * .12, ox = Math.cos(a + 1.57) * .08, oz = Math.sin(a + 1.57) * .08; tp.push(cx - ox, 0, cz - oz, cx + ox, 0, cz + oz, cx * 1.8, .38, cz * 1.8); tc.push(.22, .45, .15, .22, .45, .15, .5, .8, .3) }
       tg.setAttribute("position", new T.Float32BufferAttribute(tp, 3)); tg.setAttribute("color", new T.Float32BufferAttribute(tc, 3)); tg.computeVertexNormals();
-      const n = Math.min(6000, Math.floor(M.W * M.D / 3)), im = new T.InstancedMesh(tg, new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide }), n), m4 = new T.Matrix4(); let k = 0;
-      for (let t = 0; t < n * 3 && k < n; t++) { const x = Math.random() * M.W, z = Math.random() * M.D; if (!grassy(x, z)) continue; const s = .45 + Math.random() * .6; m4.makeRotationY(Math.random() * 6.28).scale(new T.Vector3(s, s, s)).setPosition(x, 0, z); im.setMatrixAt(k++, m4) }
+      const BIGG = M.W > 300, n = BIGG ? 5000 : Math.min(6000, Math.floor(M.W * M.D / 3)), im = new T.InstancedMesh(tg, new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide }), n), m4 = new T.Matrix4(); let k = 0;
+      // 広いマップでは、自分のまわり 65m だけに草を生やして、動いたら並べなおす
+      const gx = (cx) => (BIGG ? cx + (Math.random() - .5) * 130 : Math.random() * M.W);
+      const layGrass = (cx, cz) => { k = 0; for (let t = 0; t < n * 3 && k < n; t++) { const x = gx(cx), z = gx(cz); if (!grassy(x, z)) continue; const s = .45 + Math.random() * .6; m4.makeRotationY(Math.random() * 6.28).scale(new T.Vector3(s, s, s)).setPosition(x, 0, z); im.setMatrixAt(k++, m4) } im.count = k; im.instanceMatrix.needsUpdate = true };
+      if (BIGG) { im.frustumCulled = false; layGrass(M.W / 2, M.D / 2); let last = [M.W / 2, M.D / 2]; grassAt = (px, pz) => { if (Math.hypot(px - last[0], pz - last[1]) < 22) return; last = [px, pz]; layGrass(px, pz); layFl(px, pz) } }
+      for (let t = 0; t < (BIGG ? 0 : n * 3) && k < n; t++) { const x = Math.random() * M.W, z = Math.random() * M.D; if (!grassy(x, z)) continue; const s = .45 + Math.random() * .6; m4.makeRotationY(Math.random() * 6.28).scale(new T.Vector3(s, s, s)).setPosition(x, 0, z); im.setMatrixAt(k++, m4) }
       im.count = k; im.instanceMatrix.needsUpdate = true; scene.add(im); ms.push(im);
-      const fg = new T.IcosahedronGeometry(.07, 0), nf = Math.min(1500, Math.floor(M.W * M.D / 12)), fm = new T.InstancedMesh(fg, new T.MeshLambertMaterial(), nf), fc = ["#FFFFFF", "#F2D230", "#E86AC0", "#E84A4A", "#9A6AE0"].map((h) => new T.Color(h)); k = 0;
+      const fg = new T.IcosahedronGeometry(.07, 0), nf = M.W > 300 ? 1200 : Math.min(1500, Math.floor(M.W * M.D / 12)), fm = new T.InstancedMesh(fg, new T.MeshLambertMaterial(), nf), fc = ["#FFFFFF", "#F2D230", "#E86AC0", "#E84A4A", "#9A6AE0"].map((h) => new T.Color(h)); k = 0;
       for (let t = 0; t < nf * 3 && k < nf; t++) { const x = Math.random() * M.W, z = Math.random() * M.D; if (!grassy(x, z)) continue; m4.makeTranslation(x, .25 + Math.random() * .1, z); fm.setMatrixAt(k, m4); fm.setColorAt(k, fc[k % 5]); k++ }
       fm.count = k; fm.instanceMatrix.needsUpdate = true; if (fm.instanceColor) fm.instanceColor.needsUpdate = true; scene.add(fm); ms.push(fm);
+      const layFl = (cx, cz) => { let j = 0; for (let t = 0; t < nf * 3 && j < nf; t++) { const x = cx + (Math.random() - .5) * 130, z = cz + (Math.random() - .5) * 130; if (!grassy(x, z)) continue; m4.makeTranslation(x, .25 + Math.random() * .1, z); fm.setMatrixAt(j, m4); fm.setColorAt(j, fc[j % 5]); j++ } fm.count = j; fm.instanceMatrix.needsUpdate = true; if (fm.instanceColor) fm.instanceColor.needsUpdate = true };
+      if (BIGG) { fm.frustumCulled = false; layFl(M.W / 2, M.D / 2) }
       // 雲
       const cl = phParts(); for (let i = 0; i < 14; i++) { const a = i / 14 * 6.28 + .3, R0 = 140 + (i % 3) * 30, x = M.W / 2 + Math.cos(a) * R0, z = M.D / 2 + Math.sin(a) * R0, y = 45 + (i % 4) * 8; for (let j = 0; j < 4; j++) cl.sph(6 + (j % 2) * 3, "#FFFFFF", x + j * 6 - 9, y + (j % 2) * 2, z, 1.2, .55, 1) }
       const cm = new T.Mesh(phMerge(cl.L, false), new T.MeshBasicMaterial({ vertexColors: true, fog: false })); scene.add(cm); ms.push(cm);
     }
-    return { ms, mat, wmat, texs };
+    return { ms, mat, wmat, texs, cull, grassAt: (x, z) => grassAt && grassAt(x, z) };
   }
   // 人の形（鬼＝黒と赤の服とリュック、隠れる人＝青い服）。正面は +z
   function phChar(kind) {
@@ -3428,7 +3458,8 @@ html.br-portrait .br-ui { display: none }
   const BR_ARMOR = [0, .25, .4, .55], BR_HELM = [0, .3, .45, .6];
   const BR_NAMES = ["ケンタ", "ユウキ", "ソラ", "ハルト", "リク", "ミオ", "アオイ", "レン", "カイト", "ヒナ", "タクミ", "サクラ", "ダイチ", "ユイ", "コウ", "ナギ", "ルイ", "マコト", "シュン", "エマ"];
   const BR_PAL = [["#3A5A40", "#2A3A2C", "#C9A26B"], ["#4A4E69", "#22223B", "#9A8C98"], ["#8D5A3B", "#3E2C23", "#D9B26F"], ["#2E6FD0", "#1E2F55", "#E2E2E2"], ["#6B705C", "#3F4238", "#CB997E"], ["#9B2226", "#3A1F1F", "#E9D8A6"], ["#5E548E", "#231942", "#E0B1CB"], ["#2A9D8F", "#264653", "#E9C46A"]];
-  const BR_ZONE = [{ wait: 70, shrink: 32, r: 175, d: 2 }, { wait: 45, shrink: 26, r: 100, d: 4 }, { wait: 35, shrink: 20, r: 55, d: 7 }, { wait: 25, shrink: 16, r: 22, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }];
+  const BR_ZONE = [{ wait: 70, shrink: 32, r: .46, d: 2 }, { wait: 45, shrink: 26, r: .263, d: 4 }, { wait: 35, shrink: 20, r: .145, d: 7 }, { wait: 25, shrink: 16, r: .058, d: 10 }, { wait: 15, shrink: 14, r: 0, d: 15 }]; // r は マップの大きさに対する割合
+  const BR_SIZES = [{ m: 380, n: "ふつう 380m" }, { m: 600, n: "広い 600m" }, { m: 1000, n: "1km" }];
   // ステージ（どれも 380m 四方の広いマップ）
   const BR_STAGES = [
     { id: "grass", name: "草原", ground: "grass", town: ["dirt", "sand"], road: "dirt", fog: "#D3E6EE", hemi: "#5E7F3E" },
@@ -3437,9 +3468,9 @@ html.br-portrait .br-ui { display: none }
     { id: "harbor", name: "港町", ground: "grass", town: ["paving", "dirt"], road: "paving", fog: "#D0E4F0", hemi: "#5E7F3E" },
     { id: "city", name: "都市", ground: "asphalt", town: ["paving", "paving"], road: "asphalt", fog: "#D8DDE4", hemi: "#6A6E76" },
   ];
-  function brMap(seed, st) {
+  function brMap(seed, st, size) {
     const r = rng(seed * 7 + 3 + st.id.length * 31); r();
-    const S0 = 380, M = { id: "br", W: S0, D: S0, ground: st.ground, floors: [], boxes: [], circles: [], props: [], water: [], objs: [], items: [], indoor: false };
+    const S0 = size || 380, A = (S0 / 380) * (S0 / 380), f = S0 / 380, M = { id: "br", W: S0, D: S0, ground: st.ground, floors: [], boxes: [], circles: [], props: [], water: [], objs: [], items: [], indoor: false };
     const R = (a, b) => a + r() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
     const F = (x0, z0, x1, z1, t) => M.floors.push({ x0, z0, x1, z1, t });
     const box = (x0, z0, x1, z1, h, vis) => { const b = { x0: Math.min(x0, x1), z0: Math.min(z0, z1), x1: Math.max(x0, x1), z1: Math.max(z0, z1), h, vis }; M.boxes.push(b); return b };
@@ -3465,31 +3496,33 @@ html.br-portrait .br-ui { display: none }
     const towns = [];
     if (st.id === "city") {
       // 都市：道でくぎられたブロックに高いビル。ところどころ公園
-      const step = 52, bl = 40;
-      for (let i = 0; i <= 7; i++) { const p = 6 + i * step; F(p - 6, 0, p + 6, S0, "line2"); F(0, p - 6, S0, p + 6, "line2") }
-      for (let bx = 0; bx < 7; bx++) for (let bz = 0; bz < 7; bz++) {
+      const step = 52, bl = 40, nb = Math.floor((S0 - 12) / step);
+      for (let i = 0; i <= nb; i++) { const p = 6 + i * step; F(p - 6, 0, p + 6, S0, "line2"); F(0, p - 6, S0, p + 6, "line2") }
+      for (let bx = 0; bx < nb; bx++) for (let bz = 0; bz < nb; bz++) {
         const x0 = 12 + bx * step, z0 = 12 + bz * step, x1 = x0 + bl, z1 = z0 + bl, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; towns.push([cx, cz]);
         F(x0, z0, x1, z1, "paving");
+        const sub = Math.hypot(cx - S0 / 2, cz - S0 / 2) > 230; // 広い都市では、まん中だけビル街で、まわりは住宅地
+        if (sub && r() < .7) { if (r() < .5) { F(x0 + 3, z0 + 3, x1 - 3, z1 - 3, "grass"); for (let k = 0; k < 6; k++) tree(R(x0 + 4, x1 - 4), R(z0 + 4, z1 - 4), R(.9, 1.3)) } for (let k = 0; k < 2; k++) { const hx = R(x0 + 8, x1 - 8), hz = R(z0 + 8, z1 - 8), w = R(7, 10), d = R(6, 8); if (free(hx, hz, 6)) box(hx - w / 2, hz - d / 2, hx + w / 2, hz + d / 2, R(3.2, 4.5), { k: "bld", col: ["#E8DCC5", "#C9B79C", "#B5C4B1", "#D8C3A5"][RI(0, 3)], roof: "gable", rc: ["#8B3A2A", "#4A5A6A", "#5A3A2A"][RI(0, 2)] }) } cover(2, [x0 + 4, z0 + 4, x1 - 4, z1 - 4]); scatter(["trash", "crate", "barrel", "cbox", "bush"], 5, [x0 + 1, z0 + 1, x1 - 1, z1 - 1]); continue }
         if (r() < .22) { F(x0 + 3, z0 + 3, x1 - 3, z1 - 3, "grass"); for (let k = 0; k < 8; k++) tree(R(x0 + 5, x1 - 5), R(z0 + 5, z1 - 5), R(.9, 1.3), "round"); scatter(["bench", "bush", "trash", "flower", "rock"], 10, [x0 + 4, z0 + 4, x1 - 4, z1 - 4]); cover(3, [x0 + 6, z0 + 6, x1 - 6, z1 - 6]); continue }
         const n = RI(1, 3), cols = ["#B98E6B", "#8E9AAF", "#C7A57A", "#A86464", "#D8CFC0", "#7F8C7A", "#C4B49C", "#6F7F99"];
         if (n === 1) bld(x0 + 6, z0 + 6, x1 - 6, z1 - 6, R(14, 26), { col: cols[RI(0, 7)], roof: "flat", wstep: 5 });
         else for (let k = 0; k < 2; k++) { const half = k ? [cx + 2, z0 + 5, x1 - 5, z1 - 5] : [x0 + 5, z0 + 5, cx - 2, z1 - 5]; bld(half[0], half[1], half[2], half[3], R(9, 20), { col: cols[RI(0, 7)], roof: "flat", wstep: 5, aw: r() < .4 ? ["#E23A3A", "#2F6FD0", "#2FA04A"][RI(0, 2)] : null }) }
         scatter(["trash", "hydrant", "post", "newsbox", "lamp", "crate", "barrel", "cone", "barrier", "cbox"], 9, [x0 + 1, z0 + 1, x1 - 1, z1 - 1]);
       }
-      for (let k = 0; k < 70; k++) { const i = RI(0, 7), along = R(8, S0 - 8), side = r() < .5 ? -3 : 3, p = 6 + i * step; if (r() < .5) car(along, p + side); else car(p + side, along) }
-      for (let k = 0; k < 40; k++) { const i = RI(0, 7), p = 6 + i * step, along = R(8, S0 - 8); cover(1, r() < .5 ? [along - 1, p - 3, along + 1, p + 3] : [p - 3, along - 1, p + 3, along + 1]) }
+      for (let k = 0; k < 70 * A; k++) { const i = RI(0, nb), along = R(8, S0 - 8), side = r() < .5 ? -3 : 3, p = 6 + i * step; if (r() < .5) car(along, p + side); else car(p + side, along) }
+      for (let k = 0; k < 40 * A; k++) { const i = RI(0, nb), p = 6 + i * step, along = R(8, S0 - 8); cover(1, r() < .5 ? [along - 1, p - 3, along + 1, p + 3] : [p - 3, along - 1, p + 3, along + 1]) }
     } else {
       // 道
       const rd = st.road, c0 = S0 / 2;
-      F(c0 - 5, 0, c0 + 5, S0, rd); F(0, c0 - 5, S0, c0 + 5, rd); const q = 56; F(q, q, S0 - q, q + 7, rd); F(q, S0 - q - 7, S0 - q, S0 - q, rd); F(q, q, q + 7, S0 - q, rd); F(S0 - q - 7, q, S0 - q, S0 - q, rd);
-      if (st.id === "harbor") { M.water.push({ x0: 0, z0: 0, x1: 46, z1: S0 }, { x0: 46, z0: 250, x1: 120, z1: 330 }); F(46, 0, 58, 250, "wood"); F(120, 250, 132, 330, "wood"); F(46, 330, 132, 342, "wood") }
+      F(c0 - 5, 0, c0 + 5, S0, rd); F(0, c0 - 5, S0, c0 + 5, rd); const q = Math.round(S0 * .15); F(q, q, S0 - q, q + 7, rd); F(q, S0 - q - 7, S0 - q, S0 - q, rd); F(q, q, q + 7, S0 - q, rd); F(S0 - q - 7, q, S0 - q, S0 - q, rd); if (S0 > 500) for (const a of [.33, .67]) { F(a * S0 - 4, q, a * S0 + 4, S0 - q, rd); F(q, a * S0 - 4, S0 - q, a * S0 + 4, rd) }
+      if (st.id === "harbor") { M.water.push({ x0: 0, z0: 0, x1: 46 * f, z1: S0 }, { x0: 46 * f, z0: 250 * f, x1: 120 * f, z1: 330 * f }); F(46 * f, 0, 46 * f + 12, 250 * f, "wood"); F(120 * f, 250 * f, 120 * f + 12, 330 * f, "wood"); F(46 * f, 330 * f, 120 * f + 12, 330 * f + 12, "wood") }
       // 町（3×3 の位置＋まわり）
-      const fr = [.16, .5, .84], spots = []; for (const a of fr) for (const b of fr) spots.push([a * S0, b * S0]); spots.push([.33 * S0, .33 * S0], [.67 * S0, .67 * S0], [.33 * S0, .67 * S0], [.67 * S0, .33 * S0]);
+      const gn = Math.max(3, Math.round(S0 / 125)), spots = []; for (let a = 0; a < gn; a++) for (let b = 0; b < gn; b++) spots.push([(a + .5) / gn * S0 + R(-12, 12), (b + .5) / gn * S0 + R(-12, 12)]); if (gn === 3) spots.push([.33 * S0, .33 * S0], [.67 * S0, .67 * S0], [.33 * S0, .67 * S0], [.67 * S0, .33 * S0]); const keep = S0 > 500 ? .62 : 1;
       const hcAll = { grass: ["#E8DCC5", "#C9B79C", "#B5C4B1", "#D8C3A5", "#A9B4C2", "#E4C590", "#C2A383"], desert: ["#D9B98A", "#C9A06E", "#E2C79A", "#CFA778", "#E8D2A8"], snow: ["#8B5A34", "#6E4524", "#A0703F", "#7A5A3A"], harbor: ["#E8DCC5", "#B5C4B1", "#A9B4C2", "#D8C3A5", "#9AA6B4"] }[st.id];
       const rcAll = { grass: ["#8B3A2A", "#4A5A6A", "#5A3A2A", "#3A5A3A", "#7A4A2A"], desert: ["#B08A5A"], snow: ["#EEF3F7", "#E2E8EE"], harbor: ["#4A5A6A", "#8B3A2A", "#3A4A5A"] }[st.id];
       spots.forEach(([tx, tz], ti) => {
         if (M.water.some((w) => tx > w.x0 - 20 && tx < w.x1 + 20 && tz > w.z0 - 20 && tz < w.z1 + 20)) return;
-        if (ti >= 9 && r() < .35) return; towns.push([tx, tz]);
+        if ((ti >= 9 && r() < .35) || r() > keep) return; towns.push([tx, tz]);
         F(tx - 26, tz - 26, tx + 26, tz + 26, st.town[ti % 2]);
         const yard = st.id === "harbor" ? ti % 3 === 0 : ti === 2;
         for (let gx = -1; gx <= 1; gx++) for (let gz = -1; gz <= 1; gz++) {
@@ -3503,12 +3536,12 @@ html.br-portrait .br-ui { display: none }
         for (let k = 0; k < 3; k++) car(tx + R(-22, 22), tz + R(-22, 22));
         scatter(["crate", "barrel", "crate", "cbox", "tire", "trash"], 18, [tx - 25, tz - 25, tx + 25, tz + 25]);
       });
-      if (st.id === "harbor") { for (let z = 10; z < 240; z += 7) if (r() < .7) container(52, z, false); for (let k = 0; k < 14; k++) container(R(70, 110), R(20, 120), r() < .5); scatter(["barrel", "crate", "tire", "cbox"], 40, [46, 0, 60, 250]) }
-      cover(45, [10, 10, S0 - 10, S0 - 10]);
-      const rocks = st.id === "desert" ? 45 : 22;
+      if (st.id === "harbor") { for (let z = 10; z < 240 * f; z += 7) if (r() < .7) container(46 * f + 6, z, false); for (let k = 0; k < 14 * f; k++) container(R(70, 110) * f, R(20, 120) * f, r() < .5); scatter(["barrel", "crate", "tire", "cbox"], 40 * f, [46 * f, 0, 46 * f + 14, 250 * f]) }
+      cover(45 * A, [10, 10, S0 - 10, S0 - 10]);
+      const rocks = (st.id === "desert" ? 45 : 22) * A;
       for (let k = 0; k < rocks; k++) { const x = R(15, S0 - 15), z = R(15, S0 - 15), s = st.id === "desert" ? R(3, 8) : R(2.5, 5); if (!onFloor(x, z, s + 2) && free(x, z, s)) { M.objs.push({ k: "bigrock", x, z, s, desert: st.id === "desert" }); circ(x, z, s * .9, s * 1.4) } }
-      if (st.id === "desert") { for (let i = 0, t = 0; i < 90 && t < 2000; t++) { const x = R(6, S0 - 6), z = R(6, S0 - 6), s = R(.8, 1.3); if (onFloor(x, z, 2) || !free(x, z, .7)) continue; M.objs.push({ k: "cactus", x, z, s }); circ(x, z, .4 * s, 4 * s); i++ } trees(30, "round"); scatter(["rock", "rock", "barrel", "crate", "tire"], 160, [4, 4, S0 - 4, S0 - 4], st.town) }
-      else { trees(st.id === "snow" ? 520 : st.id === "harbor" ? 300 : 430, st.id === "snow" ? "pine" : null); scatter(st.id === "snow" ? ["rock", "rock", "crate", "barrel", "bush"] : ["bush", "bush", "rock", "bush", "crate", "barrel", "rock"], 300, [4, 4, S0 - 4, S0 - 4], [...st.town, st.road]) }
+      if (st.id === "desert") { for (let i = 0, t = 0; i < 90 * A && t < 2000 * A; t++) { const x = R(6, S0 - 6), z = R(6, S0 - 6), s = R(.8, 1.3); if (onFloor(x, z, 2) || !free(x, z, .7)) continue; M.objs.push({ k: "cactus", x, z, s }); circ(x, z, .4 * s, 4 * s); i++ } trees(30 * A, "round"); scatter(["rock", "rock", "barrel", "crate", "tire"], 160 * Math.sqrt(A) * 1.4, [4, 4, S0 - 4, S0 - 4], st.town) }
+      else { trees((st.id === "snow" ? 520 : st.id === "harbor" ? 300 : 430) * A, st.id === "snow" ? "pine" : null); scatter(st.id === "snow" ? ["rock", "rock", "crate", "barrel", "bush"] : ["bush", "bush", "rock", "bush", "crate", "barrel", "rock"], 300 * Math.sqrt(A) * 1.5, [4, 4, S0 - 4, S0 - 4], [...st.town, st.road]) }
     }
     function bld(x0, z0, x1, z1, h, v) { return box(x0, z0, x1, z1, h, Object.assign({ k: "bld" }, v)) }
     // 拾える物
@@ -3517,14 +3550,14 @@ html.br-portrait .br-ui { display: none }
     const addItem = (x, z) => { if (!free(x, z, .5)) return false; M.items.push(Object.assign({ id: M.items.length, x, z }, mkItem())); return true };
     for (const b of M.boxes) { if (b.vis.k !== "bld" && b.vis.k !== "container") continue; for (let k = 0; k < (b.vis.k === "bld" ? 3 : 1); k++) { const side = RI(0, 3), x = side < 2 ? R(b.x0, b.x1) : side === 2 ? b.x0 - 1.2 : b.x1 + 1.2, z = side >= 2 ? R(b.z0, b.z1) : side === 0 ? b.z0 - 1.2 : b.z1 + 1.2; addItem(x, z) } }
     towns.forEach(([tx, tz]) => { for (let k = 0; k < 8; k++) addItem(tx + R(-22, 22), tz + R(-22, 22)) });
-    for (let i = 0, t = 0; i < 160 && t < 3000; t++) if (addItem(R(6, S0 - 6), R(6, S0 - 6))) i++;
+    const extra = 160 * (1 + (A - 1) * .4); for (let i = 0, t = 0; i < extra && t < extra * 20; t++) if (addItem(R(6, S0 - 6), R(6, S0 - 6))) i++;
     for (const p of M.props) p.cr = PH_PROPS[p.type].r * .85;
-    // 道さがし用のマス目（1m）
-    const gw = M.W, gh = M.D, grid = new Uint8Array(gw * gh), pad = .45;
-    const mark = (x0, z0, x1, z1) => { for (let z = Math.max(0, Math.floor(z0 - pad)); z <= Math.min(gh - 1, Math.floor(z1 + pad)); z++) for (let x = Math.max(0, Math.floor(x0 - pad)); x <= Math.min(gw - 1, Math.floor(x1 + pad)); x++) grid[z * gw + x] = 1 };
+    // 道さがし用のマス目（ふつう 1m、広いマップは 2m）
+    const cs = S0 > 500 ? 2 : 1, gw = Math.ceil(M.W / cs), gh = Math.ceil(M.D / cs), grid = new Uint8Array(gw * gh), pad = .45;
+    const mark = (x0, z0, x1, z1) => { for (let z = Math.max(0, Math.floor((z0 - pad) / cs)); z <= Math.min(gh - 1, Math.floor((z1 + pad) / cs)); z++) for (let x = Math.max(0, Math.floor((x0 - pad) / cs)); x <= Math.min(gw - 1, Math.floor((x1 + pad) / cs)); x++) grid[z * gw + x] = 1 };
     for (const b of [...M.boxes, ...M.water]) mark(b.x0, b.z0, b.x1, b.z1);
-    for (const cc of [...M.circles, ...M.props.map((p) => ({ x: p.x, z: p.z, r: p.cr }))]) for (let z = Math.max(0, Math.floor(cc.z - cc.r - 1)); z <= Math.min(gh - 1, Math.floor(cc.z + cc.r + 1)); z++) for (let x = Math.max(0, Math.floor(cc.x - cc.r - 1)); x <= Math.min(gw - 1, Math.floor(cc.x + cc.r + 1)); x++) if (Math.hypot(x + .5 - cc.x, z + .5 - cc.z) < cc.r + pad) grid[z * gw + x] = 1;
-    M.grid = { gw, gh, grid }; M.towns = towns; M.types = [];
+    for (const cc of [...M.circles, ...M.props.map((p) => ({ x: p.x, z: p.z, r: p.cr }))]) mark(cc.x - cc.r * .8, cc.z - cc.r * .8, cc.x + cc.r * .8, cc.z + cc.r * .8);
+    M.grid = { gw, gh, grid, cs }; M.towns = towns; M.types = [];
     return M;
   }
   // 兵士の形（正面は +z）。右うでに武器5種類（持っている物だけ見せる）、頭の上にパラシュート
@@ -3594,14 +3627,14 @@ html.br-portrait .br-ui { display: none }
   function brRun() {
     const T = THREE, host = isFirst(), cardEl = $(".card.act.br"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
     document.documentElement.classList.add("br-on");
-    const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], M = brMap((me.m.seed || 1) % 100000, STG), C0 = M.W / 2, myIdx = host ? 0 : 1, two = () => !!realOppPeer();
+    const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], SZ = BR_SIZES[me.m.size || 0] || BR_SIZES[0], M = brMap((me.m.seed || 1) % 100000, STG, SZ.m), C0 = M.W / 2, ZK = Math.sqrt(M.W / 380), PSP = 20 * Math.max(1, M.W / 380), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
     const mobile = matchMedia("(pointer: coarse)").matches;
     const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene();
     const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#A4D2F3"); gr.addColorStop(1, "#E9F2EA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
-    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(STG.fog, 90, 300);
-    const camera = new T.PerspectiveCamera(62, 2, .08, 600);
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(STG.fog, 90, 320);
+    const camera = new T.PerspectiveCamera(62, 2, .08, 360);
     scene.add(new T.HemisphereLight("#D8ECFF", STG.hemi, .72));
     const sun = new T.DirectionalLight("#FFF0D6", 1.0); sun.castShadow = true; sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 220 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
     const W3 = phBuild(M, scene);
@@ -3615,7 +3648,7 @@ html.br-portrait .br-ui { display: none }
     let S = { ph: "lobby", n: 12, names: [], zone: null, feed: [], fx: [], grl: [], tk: [], plane: null, winner: -1 }, E = [];
     const vis = [], taken = new Set();
     let fxId = 0, feedId = 0, grId = 0, lastSend = "", seenFx = 0, seenFeed = 0, seenGr = new Set(), lastGuestShot = 0, lastGuestHeal = 0, lastGuestPick = new Set(), myShots = [], myGren = [], myPicks = [], myHeal = [0, 0], shotSeq = 0;
-    let specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
+    let cullT = 0, specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
     const nm = (i) => (i === myIdx ? "あなた" : S.names[i] || "");
     const fmt = (t) => String(t).replace(/\{(\d+)\}/g, (_, i) => nm(Number(i)));
     function mkE(i) { return { i, x: C0, z: C0, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
@@ -3731,11 +3764,11 @@ html.br-portrait .br-ui { display: none }
       e.vy -= 18 * dt; e.y = Math.max(0, e.y + e.vy * dt); if (e.y <= 0) e.vy = 0;
     }
     // ---- 安全地帯（ホスト）
-    function zoneTarget(Z) { const nr = BR_ZONE[Z.k].r, a = Math.random() * 6.28, d = Math.random() * Math.max(0, Z.r - nr) * .8; Z.tx = clamp(Z.cx + Math.cos(a) * d, nr + 5, M.W - nr - 5); Z.tz = clamp(Z.cz + Math.sin(a) * d, nr + 5, M.D - nr - 5); Z.tr = nr; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
+    function zoneTarget(Z) { const nr = BR_ZONE[Z.k].r * M.W, a = Math.random() * 6.28, d = Math.random() * Math.max(0, Z.r - nr) * .8; Z.tx = clamp(Z.cx + Math.cos(a) * d, nr + 5, M.W - nr - 5); Z.tz = clamp(Z.cz + Math.sin(a) * d, nr + 5, M.D - nr - 5); Z.tr = nr; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
     function zoneStep(dt) {
       const Z = S.zone; if (Z.st === "done") return; Z.t -= dt;
-      if (Z.st === "wait" && Z.t <= 0) { Z.st = "shrink"; Z.t = BR_ZONE[Z.k].shrink; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
-      if (Z.st === "shrink") { const D = BR_ZONE[Z.k].shrink, a = clamp(1 - Z.t / D, 0, 1); Z.cx = Z.fx + (Z.tx - Z.fx) * a; Z.cz = Z.fz + (Z.tz - Z.fz) * a; Z.r = Z.fr + (Z.tr - Z.fr) * a; if (Z.t <= 0) { Z.k++; if (Z.k < BR_ZONE.length) { Z.st = "wait"; Z.t = BR_ZONE[Z.k].wait; zoneTarget(Z) } else { Z.st = "done"; Z.k = BR_ZONE.length - 1 } } }
+      if (Z.st === "wait" && Z.t <= 0) { Z.st = "shrink"; Z.sd = Math.max(BR_ZONE[Z.k].shrink, (Z.r - Z.tr) / 5.5); Z.t = Z.sd; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
+      if (Z.st === "shrink") { const D = Z.sd || BR_ZONE[Z.k].shrink, a = clamp(1 - Z.t / D, 0, 1); Z.cx = Z.fx + (Z.tx - Z.fx) * a; Z.cz = Z.fz + (Z.tz - Z.fz) * a; Z.r = Z.fr + (Z.tr - Z.fr) * a; if (Z.t <= 0) { Z.k++; if (Z.k < BR_ZONE.length) { Z.st = "wait"; Z.t = BR_ZONE[Z.k].wait * ZK; zoneTarget(Z) } else { Z.st = "done"; Z.k = BR_ZONE.length - 1 } } }
       const dmg = BR_ZONE[Math.min(Z.k, BR_ZONE.length - 1)].d;
       for (const e of E) if (e.alive && e.landed && Math.hypot(e.x - Z.cx, e.z - Z.cz) > Z.r) { e.zAcc = (e.zAcc || 0) + dmg * dt; if (e.zAcc >= 1) { const v = Math.floor(e.zAcc); e.zAcc -= v; hurt(e, v / (1 - BR_ARMOR[e.vest]), -1, false, "") } }
     }
@@ -3793,7 +3826,7 @@ html.br-portrait .br-ui { display: none }
       const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i === 1 && S.h1 ? oppName() : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
       const pz = 50 + Math.random() * (M.D - 100), dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
       E.forEach((e) => { e.x = 20 + Math.random() * (M.W - 40); e.z = clamp(pz + (Math.random() - .5) * 100, 10, M.D - 10); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * (M.W - 30), z: 15 + Math.random() * (M.D - 30) }; if (M.water.some((w) => e.land.x > w.x0 - 3 && e.land.x < w.x1 + 3 && e.land.z > w.z0 - 3 && e.land.z < w.z1 + 3)) e.land = { x: C0, z: C0 }; e.yaw = Math.random() * 6.28; e.tp++ });
-      S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait + 12, cx: C0, cz: C0, r: M.W * .74 }; zoneTarget(S.zone);
+      S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait * ZK + 12, cx: C0, cz: C0, r: M.W * .74 }; zoneTarget(S.zone);
       S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear();
       const m = E[myIdx]; camYaw = Math.atan2(C0 - m.x, C0 - m.z);
     }
@@ -3874,11 +3907,11 @@ html.br-portrait .br-ui { display: none }
       }
       itemMeshes.forEach((mm, i) => { const it = M.items[i]; mm.visible = !taken.has(it.id) && !!m && Math.abs(it.x - m.x) < 60 && Math.abs(it.z - m.z) < 60; if (mm.visible) { mm.rotation.y = tAll * .8 + i; mm.position.y = .05 + Math.sin(tAll * 2 + i) * .04 } });
       if (S.zone) { zoneM.visible = true; zoneM.position.x = S.zone.cx; zoneM.position.z = S.zone.cz; zoneM.scale.set(Math.max(.1, S.zone.r), 1, Math.max(.1, S.zone.r)) } else zoneM.visible = false;
-      if (S.plane && S.plane.t < (M.W + 80) / 20) { plane.visible = true; const x = S.plane.dir > 0 ? -40 + S.plane.t * 20 : M.W + 40 - S.plane.t * 20; plane.position.set(x, 165, S.plane.z); plane.rotation.y = S.plane.dir > 0 ? -Math.PI / 2 : Math.PI / 2 } else plane.visible = false;
+      if (S.plane && S.plane.t < (M.W + 80) / PSP) { plane.visible = true; const x = S.plane.dir > 0 ? -40 + S.plane.t * PSP : M.W + 40 - S.plane.t * PSP; plane.position.set(x, 165, S.plane.z); plane.rotation.y = S.plane.dir > 0 ? -Math.PI / 2 : Math.PI / 2 } else plane.visible = false;
     }
     function updCam(dt) {
       let f = meE(); specI = -1; if (f && !f.alive) { const k = f.killer >= 0 ? E[f.killer] : null, al = k && k.alive ? k : E.find((o) => o.alive); if (al) { f = al; specI = al.i } }
-      if (!f) { camera.position.set(C0, 70, M.D - 20); camera.lookAt(C0, 0, C0); return }
+      if (!f) { camera.position.set(C0, 70, M.D - 20); camera.lookAt(C0, 0, C0); for (const t of W3.cull) t.m.visible = Math.hypot(t.x - C0, t.z - (M.D - 20)) < 300 + (t.r || 0); return }
       const z = adsOn && f === meE() ? zoomOf(f) : 1, fall = !f.landed;
       const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw);
       const sh = fall ? 0 : z > 1 ? .45 : .75, th = f.y + (fall ? 1 : f.cr ? 1.2 : 1.65), d0 = fall ? 9 : z > 1 ? 1.1 : 3.3;
@@ -3887,6 +3920,8 @@ html.br-portrait .br-ui { display: none }
       camera.position.copy(tg).addScaledVector(back, dist); if (camera.position.y < .25) camera.position.y = .25;
       camera.lookAt(tg.clone().addScaledVector(dir, 10)); const fov = 62 / z; if (Math.abs(camera.fov - fov) > .01) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 14); camera.updateProjectionMatrix() }
       sun.position.set(f.x + 30, 60, f.z + 20); sun.target.position.set(f.x, 0, f.z); sun.target.updateMatrixWorld();
+      // 遠くの区画は描かない（広いマップを軽くする）
+      W3.grassAt(f.x, f.z); cullT -= dt; if (cullT <= 0) { cullT = .3; for (const t of W3.cull) t.m.visible = Math.hypot(t.x - f.x, t.z - f.z) < 300 + (t.r || 40) }
     }
     let VW = 0, VH = 0;
     function resize() {
@@ -3917,7 +3952,7 @@ html.br-portrait .br-ui { display: none }
       c.save(); c.beginPath(); c.rect(mx, my, mw, mw); c.clip(); c.fillStyle = { grass: "rgba(60,110,50,.85)", harbor: "rgba(60,110,50,.85)", desert: "rgba(190,160,110,.88)", snow: "rgba(200,210,222,.9)", city: "rgba(80,82,90,.9)" }[STG.id]; c.fillRect(mx, my, mw, mw); c.fillStyle = "rgba(60,140,220,.9)"; for (const wt of M.water) c.fillRect(mx + wt.x0 * ms, my + wt.z0 * ms, (wt.x1 - wt.x0) * ms, (wt.z1 - wt.z0) * ms); c.fillStyle = "rgba(210,180,130,.8)"; for (const f of M.floors) c.fillRect(mx + f.x0 * ms, my + f.z0 * ms, Math.max(1, (f.x1 - f.x0) * ms), Math.max(1, (f.z1 - f.z0) * ms));
       c.fillStyle = "rgba(90,80,70,.9)"; for (const b of M.boxes) if (b.h > 2) c.fillRect(mx + b.x0 * ms, my + b.z0 * ms, Math.max(1, (b.x1 - b.x0) * ms), Math.max(1, (b.z1 - b.z0) * ms));
       if (Z) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.beginPath(); c.arc(mx + Z.cx * ms, my + Z.cz * ms, Z.r * ms, 0, 7); c.stroke(); if (Z.st === "wait") { c.setLineDash([3, 3]); c.strokeStyle = "#7CF59A"; c.beginPath(); c.arc(mx + Z.tx * ms, my + Z.tz * ms, Z.tr * ms, 0, 7); c.stroke(); c.setLineDash([]) } }
-      if (S.plane && S.plane.t < (M.W + 80) / 20) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * 20 : M.W + 40 - S.plane.t * 20) * ms - 6, my + S.plane.z * ms) }
+      if (S.plane && S.plane.t < (M.W + 80) / PSP) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * PSP : M.W + 40 - S.plane.t * PSP) * ms - 6, my + S.plane.z * ms) }
       c.restore(); { const px = mx + m.x * ms, pz = my + m.z * ms; c.save(); c.translate(px, pz); c.rotate(-camYaw + Math.PI); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(0, -6); c.lineTo(4, 4); c.lineTo(-4, 4); c.closePath(); c.fill(); c.restore() }
       // たおした・たおされたのお知らせ
       c.font = `12px ${DISP}`; c.textAlign = "left"; S.feed.slice(-4).forEach((f, i) => { const tx = fmt(f[1]), tw = c.measureText(tx).width + 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(L, 42 + i * 20, tw, 18); c.fillStyle = "#fff"; c.fillText(tx, L + 6, 51 + i * 20) });
@@ -3935,8 +3970,8 @@ html.br-portrait .br-ui { display: none }
     function panel() {
       const m = meE();
       if (S.ph === "lobby") {
-        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
-        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${S.n}人）</p>`);
+        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">広さ</p><div class="br-stages" style="grid-template-columns:repeat(3,1fr)">${BR_SIZES.map((z, i) => `<button class="chipbtn ${i === (me.m.size || 0) ? "on" : ""}" data-act="br-size" data-i="${i}">${z.n}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
+        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${SZ.n}・${S.n}人）</p>`);
         return;
       }
       if (m && (!m.alive || S.ph === "end") && !watching) {
@@ -4512,7 +4547,7 @@ html.br-portrait .br-ui { display: none }
     if (act === "rename") { ui.renaming = true; render(); const i = $("#name-input"); if (i) i.focus() }
     else if (act === "rename-cancel") { ui.renaming = false; render() }
     else if (act === "rename-save") { const v = ($("#name-input").value || "").trim().slice(0, 12); if (v) { myName = v; ls.set("name", v) } ui.renaming = false; push(); render() }
-    else if (act === "start") startMatch(t.dataset.g);
+    else if (act === "start") startMatch(t.dataset.g, t.dataset.g === "br" ? { stage: Number(ls.get("brStage")) || 0, size: Number(ls.get("brSize")) || 0 } : undefined);
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
     else if (act === "sens") sensPanel(!$("#sens"));
@@ -4535,7 +4570,8 @@ html.br-portrait .br-ui { display: none }
       setS({ mv: [...(me.s.mv || []), c] });
     }
     else if (act === "act-ready") setS({ rdy: true });
-    else if (act === "br-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("br", { stage: i }) }
+    else if (act === "br-stage") { const i = Number(t.dataset.i); ls.set("brStage", i); if (i !== (me.m.stage || 0)) startMatch("br", { stage: i, size: me.m.size || 0 }) }
+    else if (act === "br-size") { const i = Number(t.dataset.i); ls.set("brSize", i); if (i !== (me.m.size || 0)) startMatch("br", { stage: me.m.stage || 0, size: i }) }
     else if (act === "hide-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("hide", { stage: i }) }
     else if (act === "kart-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
