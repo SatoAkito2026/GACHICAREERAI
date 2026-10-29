@@ -707,6 +707,7 @@ html.br-portrait .br-ui { display: none }
       <p class="sec-title"><b>頭をつかう</b><span class="muted">じっくり対戦</span></p>
       <div class="games">${cards("brain")}</div>
       <p class="muted">名前は上の「${esc(myName)}」をタップすると変えられます。</p>
+      <p class="muted" style="text-align:center;font-size:11px">バージョン ${APP_VER}</p>
     </section>`;
   }
 
@@ -4725,6 +4726,15 @@ html.br-portrait .br-ui { display: none }
   // room と同じ形（presence / peers / onPeers / join / leave）にそろえて、ゲーム側は同じコードで動かす
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
+  // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
+  const APP_VER = "1029-1708";
+  async function checkVer() {
+    if (!SITE || APP_VER.startsWith("__")) return;
+    try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
+      const el = document.createElement("div"); el.id = "newver"; el.style.cssText = "position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translateX(-50%);z-index:80;background:#1F1B3A;color:#fff;border-radius:14px;padding:8px 12px;display:flex;gap:10px;align-items:center;font:700 13px var(--body);box-shadow:0 6px 20px rgba(0,0,0,.3)";
+      el.innerHTML = `新しいバージョンがあります<button class="btn small" id="newver-go">更新する</button>`; document.body.appendChild(el); $("#newver-go").addEventListener("click", () => location.reload()) } catch (_) {}
+  }
+  setTimeout(checkVer, 4000); document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkVer() });
   function supaLobby() {
     return { connected: () => true, peers: () => [], onPeers: () => () => {}, onConnection: () => () => {}, presence: async () => {}, leave: async () => {}, join: async (name) => supaChannel(name) };
   }
