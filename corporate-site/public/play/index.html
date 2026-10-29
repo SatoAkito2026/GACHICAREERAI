@@ -270,6 +270,8 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .tcc.gone { background: none; border: 2px dashed rgba(255,255,255,.18); box-shadow: none }
 .tcc.empty { background: rgba(255,255,255,.08); border: 1px dashed rgba(255,255,255,.2); box-shadow: none }
 .tcc.tap, .tcc.pick { cursor: pointer }
+.tcc { position: relative } .tcc.sel, .tcc.ok { z-index: 2 }
+.tc-can { gap: 8px; margin-bottom: 6px }
 .tcc.sel { transform: translateY(-14px); box-shadow: 0 0 0 3px #FFE14D, 0 6px 10px rgba(0,0,0,.4) }
 .tcc.ok { box-shadow: 0 0 0 3px #7CF59A } .tcc.dim { filter: brightness(.55) }
 .tcc.pick:active { transform: translateY(-8px) }
@@ -3548,7 +3550,10 @@ html.playing.full .card.act canvas { border-radius: 0 }
           if (my) btns = `<div class="tc-btns"><button class="tc-btn" data-tc="play" ${can ? "" : "disabled"}>出す${cards.length ? `（${cards.length}枚）` : ""}</button><button class="tc-btn ghost" data-tc="pass" ${f ? "" : "disabled"}>パス</button></div>`;
         } else if (V.game === "seven") {
           mid = `${turnLine}<div class="tc-board">${V.placed.map((row, s) => `<div class="tc-brow">${Array.from({ length: 13 }, (_, r) => (row[r + 1] === "1" ? tcCard(s * 13 + r, "xs") : `<div class="tcc xs empty"></div>`)).join("")}</div>`).join("")}</div>`;
-          bottom = `<div class="tc-hand">${V.hand.map((c) => { const s = tcSuit(c), r = tcRank(c), row = V.placed[s], ok = row[r] !== "1" && ((r > 1 && row[r - 1] === "1") || (r < 13 && row[r + 1] === "1")); return tcCard(c, my ? (ok ? "tap ok" : "dim") : "", my && ok ? `data-tc="play1" data-c="${c}"` : "") }).join("")}</div>`;
+          // 出せるカードは手札から出して、重ならない列にならべる（タップしやすく）
+          const okc = (c) => { const s = tcSuit(c), r = tcRank(c), row = V.placed[s]; return row[r] !== "1" && ((r > 1 && row[r - 1] === "1") || (r < 13 && row[r + 1] === "1")) };
+          const can = my ? V.hand.filter(okc) : [], rest = V.hand.filter((c) => !can.includes(c));
+          bottom = `${my ? `<p class="tc-note">${can.length ? "出せるカード（タップで出す）" : "出せるカードがありません。パスしよう"}</p>` : ""}${can.length ? `<div class="tc-row tc-can">${can.map((c) => tcCard(c, "big tap ok", `data-tc="play1" data-c="${c}"`)).join("")}</div>` : ""}<div class="tc-hand">${rest.map((c) => tcCard(c, my ? "dim" : "")).join("")}</div>`;
           if (my) btns = `<div class="tc-btns"><button class="tc-btn ghost" data-tc="pass">${V.passes > 0 ? `パス（のこり${V.passes}回）` : "パス（失格になる）"}</button></div>`;
         } else if (V.game === "memory") {
           mid = `${turnLine}<div class="tc-grid">${V.grid.map((c, k) => tcCard(c, my && c === -1 && !V.wait ? "tap" : "", my && c === -1 && !V.wait ? `data-tc="flip" data-k="${k}"` : "")).join("")}</div>`;
