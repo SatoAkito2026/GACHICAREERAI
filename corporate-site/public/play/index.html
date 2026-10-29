@@ -268,6 +268,12 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .br.br-dead .br-ui { display: none }
 .br-rot { position: absolute; inset: 0; z-index: 9; padding: 16px; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
 .br-rot small { font-family: var(--body); font-size: 14px; color: #ccc }
+html.playing .br #act-msg { top: 50%; left: 50%; right: auto; width: min(520px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
+.br-top { display: none; left: 50%; top: 6px; transform: translateX(-50%); gap: 6px }
+.br-top .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px; white-space: nowrap }
+html.br-fake .br-top { display: flex }
+html.br-fake #app > section > .row:first-child { display: none !important }
+html.br-fake #sens { inset: auto; left: 0; top: 0; width: 100vh; height: 100vw; transform-origin: 0 0; transform: translate(100vw, 0) rotate(90deg) }
 html.br-portrait .br-rot { display: flex }
 html.br-portrait .br-ui { display: none }
 /* トランプ */
@@ -1015,11 +1021,12 @@ html.br-portrait .br-ui { display: none }
     el.addEventListener("input", (e) => { const k = e.target.dataset.sens; if (!k) return; SENS[k] = Number(e.target.value); ls.set("sens_" + k, SENS[k]); e.target.nextElementSibling.textContent = SENS[k].toFixed(1) });
     el.addEventListener("click", (e) => { if (e.target === el) sensPanel(false) });
   }
+  let ROT90 = false; // 荒野バトルが画面を90度まわして表示しているとき
   function controlPad(stickEl, knobEl) {
     const inp = { x: 0, y: 0 }; let sid = null;
     const set = (e) => {
       const r = stickEl.getBoundingClientRect();
-      let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); if (ROT90) [dx, dy] = [dy, -dx];
       const R = r.width / 2 - 14, d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d }
       let nx = (dx / R) * SENS.stick, ny = (dy / R) * SENS.stick; const mg = Math.hypot(nx, ny); if (mg > 1) { nx /= mg; ny /= mg } inp.x = nx; inp.y = ny; knobEl.style.transform = `translate(${dx}px,${dy}px)`;
     };
@@ -3525,7 +3532,7 @@ html.br-portrait .br-ui { display: none }
           <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
           <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button>
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-med">回復</button>
-          <div class="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
+          <div class="br-top"><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div><div class="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」と弾をよけられます。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ。</p></section></section>`;
@@ -3535,7 +3542,7 @@ html.br-portrait .br-ui { display: none }
       setMsg(`<p class="wait">3Dのマップを読み込んでいます</p>`);
       phLoad().then(() => { if (!alive) return; try { stop = brRun() } catch (e) { console.error(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("br")}`) } })
         .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("br")}`) });
-      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-portrait") };
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-portrait", "br-fake"); ROT90 = false };
     },
   };
   function brRun() {
@@ -3745,7 +3752,7 @@ html.br-portrait .br-ui { display: none }
     // ---- 操作
     const stickInp = controlPad($("#stick"), $("#knob"));
     let look = null, fireHeld = false, fire2Held = false;
-    const lookBy = (dx, dy) => { const z = adsOn ? zoomOf(E[myIdx]) : 1, k = SENS.look * (adsOn ? SENS.scope / z : 1); camYaw -= dx * .0068 * k; camPitch = clamp(camPitch - dy * .0052 * k, -1.2, .9) };
+    const lookBy = (dx0, dy0) => { const dx = ROT90 ? dy0 : dx0, dy = ROT90 ? -dx0 : dy0; const z = adsOn ? zoomOf(E[myIdx]) : 1, k = SENS.look * (adsOn ? SENS.scope / z : 1); camYaw -= dx * .0068 * k; camPitch = clamp(camPitch - dy * .0052 * k, -1.2, .9) };
     cv.addEventListener("pointerdown", (e) => { au(); if (look) return; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
     cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; lookBy(e.clientX - look.x, e.clientY - look.y); look.x = e.clientX; look.y = e.clientY });
     const lend = (e) => { if (look && e.pointerId === look.id) look = null }; cv.addEventListener("pointerup", lend); cv.addEventListener("pointercancel", lend);
@@ -3816,7 +3823,11 @@ html.br-portrait .br-ui { display: none }
     }
     let VW = 0, VH = 0;
     function resize() {
-      const w = innerWidth, h = innerHeight; document.documentElement.classList.toggle("br-portrait", h > w); if (w === VW && h === VH) return; VW = w; VH = h;
+      // スマホが横にならないとき（Android のアプリの向きの設定が古いままなど）は、画面ごと90度まわして横画面として表示する
+      const fake = innerHeight > innerWidth, w = fake ? innerHeight : innerWidth, h = fake ? innerWidth : innerHeight;
+      ROT90 = fake; document.documentElement.classList.toggle("br-fake", fake);
+      if (w === VW && h === VH) return; VW = w; VH = h;
+      Object.assign(cardEl.style, fake ? { inset: "auto", left: "0px", top: "0px", width: w + "px", height: h + "px", transformOrigin: "0 0", transform: `translate(${innerWidth}px,0) rotate(90deg)` } : { inset: "", left: "", top: "", width: "", height: "", transformOrigin: "", transform: "" });
       renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px";
       const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
@@ -3939,7 +3950,7 @@ html.br-portrait .br-ui { display: none }
       }
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {}
+      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
