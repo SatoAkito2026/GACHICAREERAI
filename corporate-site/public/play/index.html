@@ -221,7 +221,7 @@ html.ingame header { display: none }
 .kpad .mash { width: 100%; height: 110px; opacity: .92 }
 html.playing.full #app > section > .row:first-child { position: fixed; z-index: 10; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); gap: 6px; flex-wrap: nowrap }
 html.playing.full #app > section > .row:first-child .grow { display: none }
-html.playing.full #app > section > .row:first-child .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px }
+html.playing.full #app > section > .row:first-child .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px; white-space: nowrap; flex: none }
 html.playing.full .card.act { position: fixed; inset: 0; z-index: 1 }
 html.playing.full .card.act canvas { border-radius: 0 }
 .kpad { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;
@@ -266,7 +266,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
 .br-pick { left: 50%; transform: translateX(-50%); bottom: 96px; display: none; appearance: none; border: 0; border-radius: 12px; padding: 10px 16px; background: #FFE14D; color: #1F1B3A; font: 900 14px var(--body) }
 .br-pick.on { display: block }
 .br.br-dead .br-ui { display: none }
-.br-rot { position: absolute; inset: 0; z-index: 9; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
+.br-rot { position: absolute; inset: 0; z-index: 9; padding: 16px; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
 .br-rot small { font-family: var(--body); font-size: 14px; color: #ccc }
 html.br-portrait .br-rot { display: flex }
 html.br-portrait .br-ui { display: none }
@@ -3527,7 +3527,7 @@ html.br-portrait .br-ui { display: none }
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-med">回復</button>
           <div class="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
-        <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small></div>
+        <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」と弾をよけられます。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ。</p></section></section>`;
     },
     mount() {
@@ -3759,7 +3759,11 @@ html.br-portrait .br-ui { display: none }
     const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") crOn = !crOn; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(); else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) } };
     const onKeyUp = (e) => { if (e.key === " ") fireHeld = false };
     addEventListener("keydown", onKey); addEventListener("keyup", onKeyUp);
-    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
+    // Android は、ホーム画面に入れたアプリが前の「縦固定」の設定のままのことがあるので、ゲーム中だけ横に固定する
+    // （ブラウザでは全画面にしないと固定できないので、さわった時に全画面→横固定の順でためす）
+    const lockLand = async () => { try { if (screen.orientation && screen.orientation.lock) { if (!document.fullscreenElement && !matchMedia("(display-mode: standalone)").matches && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }); await screen.orientation.lock("landscape") } } catch (_) {} };
+    lockLand(); cardEl.addEventListener("pointerdown", lockLand, { once: true });
+    const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.y <= .01) { m.vy = 5.5; crOn = false } }
@@ -3935,7 +3939,7 @@ html.br-portrait .br-ui { display: none }
       }
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp);
+      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {}
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
