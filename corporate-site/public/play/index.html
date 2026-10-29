@@ -449,7 +449,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     }
   }
   const isFirst = () => me.m.host === cid;
-  const oppName = () => (opp() && opp().n) || "あいて";
+  const oppName = () => { const n = opp() && opp().n; return !n || n === myName || n === "プレイヤー" ? "あいて" : n };
 
   // ---------- rendering ----------
   const GAMES = {
@@ -660,7 +660,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         }).join("")}</div></div>`;
     }
     if (R >= QUIZ_N) {
-      const res = ms > os2 ? "あなたの勝ち！" : ms < os2 ? `${esc(oppName())}の勝ち！` : "引き分け！";
+      const res = ms > os2 ? "あなたの勝ち！" : ms < os2 ? "あなたの負け…" : "引き分け！";
       body += `<section class="card"><p class="eyebrow">結果</p><div class="big">${ms} − ${os2}</div><p class="verdict ${ms >= os2 ? "good" : "bad"}">${res}</p>
         <button class="btn" data-act="start" data-g="quiz">別の問題でもう一回</button></section>`;
     } else if (mine.length > R) {
@@ -709,7 +709,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     if (R >= RX_N) {
       const a = sum(mine), b = sum(theirs);
       stage = `<section class="card"><p class="eyebrow">結果（合計タイム・小さいほうが勝ち）</p><div class="pair"><div class="ans"><small>${esc(myName)}</small><b>${a}ms</b></div><div class="ans"><small>${esc(oppName())}</small><b>${b}ms</b></div></div>
-        <p class="verdict ${a <= b ? "good" : "bad"}">${a < b ? "あなたの勝ち！" : a > b ? `${esc(oppName())}の勝ち！` : "引き分け！"}</p>
+        <p class="verdict ${a <= b ? "good" : "bad"}">${a < b ? "あなたの勝ち！" : a > b ? "あなたの負け…" : "引き分け！"}</p>
         <button class="btn" data-act="start" data-g="reflex">もう一回</button></section>`;
     } else if (mine.length > R) {
       stage = `<section class="card"><p class="eyebrow">${R + 1}回目</p><div class="big">${fmt(mine[R])}</div><p class="wait">${esc(oppName())}の結果を待っています</p></section>`;
@@ -761,7 +761,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
     const over = st.win || st.full;
     const myTurn = !over && !!oppS() && st.turn === st.myP;
     let status;
-    if (st.win) status = st.win.p === st.myP ? `<span class="verdict good">あなたの勝ち！</span>` : `<span class="verdict bad">${esc(oppName())}の勝ち！</span>`;
+    if (st.win) status = st.win.p === st.myP ? `<span class="verdict good">あなたの勝ち！</span>` : `<span class="verdict bad">あなたの負け…</span>`;
     else if (st.full) status = `<span class="verdict">引き分け</span>`;
     else if (!o) status = "";
     else status = myTurn ? `<b>あなたの番</b> <span class="chip p${st.myP}"></span>好きな列をタップ` : `<span class="wait">${esc(oppName())}の番</span>`;
@@ -814,7 +814,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
       let status = "";
       if (over) {
         const a = myWin >= 0, b = opWin >= 0;
-        status = `<p class="verdict ${a && !b ? "good" : !a && b ? "bad" : ""}">${a && b ? "同時正解で引き分け！" : a ? "あなたの勝ち！" : b ? `${esc(oppName())}の勝ち！` : "どちらも当てられず引き分け"}</p>
+        status = `<p class="verdict ${a && !b ? "good" : !a && b ? "bad" : ""}">${a && b ? "同時正解で引き分け！" : a ? "あなたの勝ち！" : b ? "あなたの負け…" : "どちらも当てられず引き分け"}</p>
           <div class="pair"><div class="ans"><small>あなたの数字</small><b>${esc(mySec)}</b></div><div class="ans"><small>${esc(oppName())}の数字</small><b>${esc(opSec)}</b></div></div>
           <button class="btn" data-act="start" data-g="hb">もう一回</button>`;
       } else if (myTurn) {
@@ -1134,7 +1134,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         shootBtn.textContent = ball.own === active ? "シュート" : "切替";
         draw();
         const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
-        if (S.st === "end") setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたのチームの勝ち！" : mine < theirs ? `${esc(oppName())}のチームの勝ち！` : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
+        if (S.st === "end") setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたのチームの勝ち！" : mine < theirs ? "あなたのチームの負け…" : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
         else setMsg("");
       }
       // 描画：テレビ中継のように、自分のゴール側の斜め上からボールを追いかけるカメラ
@@ -1435,7 +1435,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         else if (ph === "done") {
           const mine = me.s.res;
           if (!opp()) setMsg(`<p class="verdict good">ゴール ${fmt(mine)}</p>${againBtns("run")}`);
-          else if (os && os.res != null) setMsg(`<p class="verdict ${mine <= os.res ? "good" : "bad"}">${mine < os.res ? "あなたの勝ち！" : mine > os.res ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${fmt(mine)} 対 ${fmt(os.res)}</p>${againBtns("run")}`);
+          else if (os && os.res != null) setMsg(`<p class="verdict ${mine <= os.res ? "good" : "bad"}">${mine < os.res ? "あなたの勝ち！" : mine > os.res ? "あなたの負け…" : "引き分け！"}　${fmt(mine)} 対 ${fmt(os.res)}</p>${againBtns("run")}`);
           else setMsg(`<p class="wait">ゴール ${fmt(mine)}。${esc(oppName())}はまだ走っています</p>`);
         } else setMsg("");
       }
@@ -1512,7 +1512,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (!opp()) setMsg(`<p class="wait">あいてがページを開くのを待っています</p>`);
         else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button>`);
         else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
-        else if (ph === "end") { const win = res === "draw" ? null : (res === "host") === isFirst(); setMsg(`<p class="verdict ${win === false ? "bad" : "good"}">${win === null ? "引き分け！" : win ? "あなたの勝ち！" : `${esc(oppName())}の勝ち！`}</p>${againBtns("sumo")}`) }
+        else if (ph === "end") { const win = res === "draw" ? null : (res === "host") === isFirst(); setMsg(`<p class="verdict ${win === false ? "bad" : "good"}">${win === null ? "引き分け！" : win ? "あなたの勝ち！" : "あなたの負け…"}</p>${againBtns("sumo")}`) }
         else setMsg("");
       }
       return loop(frame);
@@ -1821,7 +1821,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
           if (!opp()) setMsg(`<p class="verdict good">のこり ${fmtN(mine)}人</p>${againBtns("army")}`);
           else if (os && os.res != null) {
             const win = mine > 0 && (os.res <= 0 || mine > os.res), lose = mine <= 0 && os.res > 0 || (mine > 0 && os.res > mine);
-            setMsg(`<p class="verdict ${win ? "good" : lose ? "bad" : ""}">${win ? "あなたの勝ち！" : lose ? `${esc(oppName())}の勝ち！` : "引き分け！"}　${fmtN(mine)} 対 ${fmtN(os.res)}</p>${againBtns("army")}`);
+            setMsg(`<p class="verdict ${win ? "good" : lose ? "bad" : ""}">${win ? "あなたの勝ち！" : lose ? "あなたの負け…" : "引き分け！"}　${fmtN(mine)} 対 ${fmtN(os.res)}</p>${againBtns("army")}`);
           } else setMsg(`<p class="wait">のこり ${fmtN(mine)}人。${esc(oppName())}の結果を待っています</p>`);
         } else setMsg("");
       }
@@ -1918,7 +1918,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
       const nCpu = () => (realOppPeer() ? 2 : 3);
       function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = 0.86 + Math.random() * 0.08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
       if (host) makeCpus();
-      let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "";
+      let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = null, finRank = null;
       let myIt = [], itSeq = 0, hits = [], drift = false, lastDrift = false, msg = null, guestCpus = [], ownCpuIt = [];
       const removedByHit = new Set();
       const L = holdBtn($("#k-left")), R = holdBtn($("#k-right"));
@@ -2101,7 +2101,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
         if (shown) kartItemIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 18);
         if (msg) bigText(c, msg.text, w / 2, h * 0.24, 24, msg.col);
         if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.3, 64, "#FFE14D");
-        if (K.fin) bigText(c, `${me.s.rk || rk}位でゴール！`, w / 2, h * 0.3, 34, "#FFE14D");
+        if (K.fin) bigText(c, finRank ? `${finRank}位でゴール！` : "ゴール！", w / 2, h * 0.3, 34, "#FFE14D");
       }
       function frame(dt) {
         const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
@@ -2136,7 +2136,20 @@ html.playing.full .card.act canvas { border-radius: 0 }
         hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
         if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
         const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
-        if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000), rk: rankOf(K, allKarts) });
+        // 順位はホストが、ゴールした順番（ホストの画面で見た時間）で決める。あいては、ホストが決めた順位を出す（ふたりの画面で結果がずれない）
+        if (host) {
+          if (oppKart && oppKart.fin && gFin == null) gFin = raceT - age;
+          const fins = [{ t: K.fin || null }, ...cpus.map((kk) => ({ t: kk.fin || null })), ...(realOppPeer() ? [{ t: gFin }] : [])];
+          const rankAt = (t0) => 1 + fins.filter((f) => f.t != null && f.t < t0).length;
+          const patch = {};
+          if (K.fin && me.s.rkH == null) Object.assign(patch, { res: Math.round(K.fin * 1000), rkH: rankAt(K.fin) });
+          if (gFin != null && me.s.rkG == null) patch.rkG = rankAt(gFin);
+          if (Object.keys(patch).length) setS(patch);
+          finRank = me.s.rkH || null;
+        } else {
+          if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) });
+          finRank = (os && os.rkG) || null;
+        }
         if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
         itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
         const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
@@ -2147,9 +2160,10 @@ html.playing.full .card.act canvas { border-radius: 0 }
           <button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート（ステージを変えると相手も同じステージになります）" : "押すとスタート"}</p>`);
         else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
         else if (ph === "done" && me.s.res != null) {
-          const mine = me.s.rk, t = (me.s.res / 1000).toFixed(1);
-          if (realOppPeer() && os && os.res != null) setMsg(`<p class="verdict ${mine < os.rk ? "good" : "bad"}">${mine < os.rk ? "あなたの勝ち！" : `${esc(oppName())}の勝ち！`}　あなた${mine}位・${esc(oppName())}${os.rk}位</p>${againBtns("kart")}`);
-          else if (realOppPeer()) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
+          const hs = host ? me.s : os || {}, mine = host ? hs.rkH : hs.rkG, theirs = host ? hs.rkG : hs.rkH, t = (me.s.res / 1000).toFixed(1);
+          if (realOppPeer() && mine != null && theirs != null) setMsg(`<p class="verdict ${mine < theirs ? "good" : "bad"}">${mine < theirs ? "あなたの勝ち！" : "あなたの負け…"}　あなた${mine}位・${esc(oppName())}${theirs}位</p>${againBtns("kart")}`);
+          else if (realOppPeer() && mine != null) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
+          else if (realOppPeer()) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
           else setMsg(`<p class="verdict good">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
         } else setMsg("");
       }
