@@ -466,7 +466,7 @@ html.playing.full .card.act canvas { border-radius: 0 }
   // ---------- rendering ----------
   const GAMES = {
     soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
-    hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "おうち・遊園地・広いテーマパークで、隠れて探す。鬼を交代して2ラウンド" },
+    hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "3Dのおうち・公園・遊園地・テーマパークで、物に変身して隠れる。鬼は撃って探す" },
     pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
     kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "ドリフトでダッシュ、アイテムで妨害。3周して先にゴールしたら勝ち" },
     run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "？ブロックのアイテムでレース。こうらで相手を転ばせろ" },
@@ -2458,340 +2458,841 @@ html.playing.full .card.act canvas { border-radius: 0 }
       return loop(frame);
     },
   };
-  // ----- かくれんぼ -----
-  // 鬼は赤い「見える範囲」に入った人を見つける（壁のかげは見えない。茂みや箱に入っている人は、すぐ近くまで来ないと見えない）。
-  // 先に隠れる時間があって、そのあと制限時間内に鬼が探す。見つかった人は「おり」に入り、仲間がさわると助けられる。
-  // 2ラウンドで鬼を交代。ホスト（先に始めた人）が、コンピューター・見つけた判定・時間をまとめて計算して送る。
-  const HS_STAGES = [
-    { id: "house", name: "おうち", W: 1400, H: 1100, ground: "#E9D9BF", seek: 50 },
-    { id: "fun", name: "ゆうえんち", W: 2200, H: 2000, ground: "#8ECF6A", seek: 75 },
-    { id: "castle", name: "キャッスルパーク", W: 2400, H: 2400, ground: "#7DC46A", seek: 90 },
-    { id: "movie", name: "ムービーパーク", W: 2200, H: 2200, ground: "#C9C3B8", seek: 80 },
+  // ----- かくれんぼ（物に変身するかくれんぼ・3D） -----
+  // 隠れる側は、まわりにある物（ゴミ箱・ベンチ・たる・ソファなど）をねらって「へんしん」し、その物になって隠れる。
+  // 鬼は背中ごしの視点で、あやしい物を撃って探す。本物の物を撃つと鬼の体力が減る。隠れる側は3回当たると見つかる。
+  // ときどき、隠れている物から「ピーッ」と音が出る（鬼のヒント）。2ラウンドで鬼を交代。
+  // 3D は Three.js（cdnjs）で描く。マップは seed から同じものを作るので、ふたりの画面で同じ。
+  // ホスト（先に始めた人）がコンピューター・当たり・時間をまとめて計算して送る。
+  const PH_STAGES = [
+    { id: "house", name: "おうち", seek: 100 },
+    { id: "park", name: "こうえん", seek: 120 },
+    { id: "fun", name: "ゆうえんち", seek: 150 },
+    { id: "castle", name: "キャッスルパーク", seek: 160 },
+    { id: "movie", name: "ムービーパーク", seek: 150 },
   ];
-  const HS_HIDE_T = 10, HS_R = 13;
-  function hsMap(st, seed) {
-    const r = rng(seed * 7 + st.id.length * 131); r();
-    const M = { solid: [], low: [], water: [], hides: [], decor: [], labels: [], W: st.W, H: st.H };
-    const solid = (x, y, w, h, col, label) => { M.solid.push({ x, y, w, h, col }); if (label) M.labels.push({ x: x + w / 2, y: y + h / 2, t: label }) };
-    const low = (x, y, w, h, col) => M.low.push({ x, y, w, h, col });
-    const hide = (x, y, rr, k) => M.hides.push({ x, y, r: rr, k });
-    const deco = (x, y, w, h, col) => M.decor.push({ x, y, w, h, col });
-    const T = 16;
-    solid(0, 0, st.W, T, "#6B5B4B"); solid(0, st.H - T, st.W, T, "#6B5B4B"); solid(0, 0, T, st.H, "#6B5B4B"); solid(st.W - T, 0, T, st.H, "#6B5B4B");
-    // 置ける場所か（ほかのものと重ならないか）
-    const free = (x, y, w, h) => [...M.solid, ...M.low, ...M.water].every((o) => x + w < o.x - 10 || x > o.x + o.w + 10 || y + h < o.y - 10 || y > o.y + o.h + 10) && M.hides.every((q) => Math.hypot(q.x - (x + w / 2), q.y - (y + h / 2)) > q.r + Math.max(w, h) / 2 + 10);
-    const scatter = (n, kinds, area) => { for (let i = 0, tries = 0; i < n && tries < n * 30; tries++) { const a = area || [60, 60, st.W - 60, st.H - 60]; const x = a[0] + r() * (a[2] - a[0]), y = a[1] + r() * (a[3] - a[1]); const k = kinds[Math.floor(r() * kinds.length)], rr = k === "bush" || k === "tree" ? 30 : 22; if (free(x - rr, y - rr, rr * 2, rr * 2)) { hide(x, y, rr, k); i++ } } };
-    if (st.id === "house") {
-      const W = "#8A6E55";
-      const wallH = (x1, x2, y, doors) => { let x = x1; for (const d of doors) { if (d - 45 > x) solid(x, y, d - 45 - x, 14, W); x = d + 45 } if (x < x2) solid(x, y, x2 - x, 14, W) };
-      const wallV = (y1, y2, x, doors) => { let y = y1; for (const d of doors) { if (d - 45 > y) solid(x, y, 14, d - 45 - y, W); y = d + 45 } if (y < y2) solid(x, y, 14, y2 - y, W) };
-      wallV(16, 1084, 480, [260, 800]); wallV(16, 1084, 930, [300, 820]); wallH(16, 480, 560, [250]); wallH(480, 930, 560, [700]); wallH(930, 1384, 600, [1150]);
-      deco(30, 30, 440, 520, "#D9C29E"); deco(500, 30, 420, 520, "#F0E6D6"); deco(950, 30, 420, 560, "#CFE0E8"); deco(30, 580, 440, 490, "#E6D2E8"); deco(500, 580, 420, 490, "#D8E8CF"); deco(950, 620, 420, 450, "#F2D9C2");
-      M.labels.push({ x: 250, y: 60, t: "リビング" }, { x: 710, y: 60, t: "キッチン" }, { x: 1160, y: 60, t: "おふろ" }, { x: 250, y: 610, t: "しんしつ" }, { x: 710, y: 610, t: "こども部屋" }, { x: 1160, y: 650, t: "ものおき" });
-      low(80, 120, 240, 70, "#6C8EBF"); low(150, 260, 140, 90, "#A8794F"); low(560, 120, 300, 50, "#B0B0B0"); low(600, 300, 160, 100, "#A8794F"); low(1000, 120, 200, 110, "#F5F5F5"); low(1250, 400, 100, 60, "#F5F5F5");
-      low(80, 700, 200, 260, "#E8B4C8"); low(560, 700, 180, 120, "#9BD08A"); low(780, 900, 100, 140, "#C9A26B"); low(1000, 700, 120, 100, "#A08060"); low(1200, 900, 140, 120, "#A08060");
-      [[400, 120, "closet"], [400, 450, "curtain"], [880, 470, "box"], [600, 470, "box"], [1300, 200, "curtain"], [1300, 520, "box"], [330, 1000, "closet"], [180, 1000, "under"], [880, 640, "closet"], [600, 1000, "box"], [1010, 1000, "box"], [1320, 700, "closet"], [1100, 820, "box"], [1300, 1020, "box"], [80, 460, "plant"], [860, 200, "plant"]].forEach(([x, y, k]) => hide(x, y, 24, k));
-      M.spawnSeek = { x: 700, y: 820 }; M.spawnHide = { x: 250, y: 420 }; M.jail = { x: 710, y: 470 };
-    } else {
-      const theme = st.id;
-      const pathCol = theme === "movie" ? "#9E978C" : "#E8D9B0";
-      // 大きな道（十字）
-      deco(st.W / 2 - 60, 0, 120, st.H, pathCol); deco(0, st.H / 2 - 60, st.W, 120, pathCol);
-      if (theme === "castle") {
-        // 真ん中のお城とお堀、橋
-        M.water.push({ x: st.W / 2 - 330, y: st.H / 2 - 330, w: 660, h: 80, col: "#4FA3E0" }, { x: st.W / 2 - 330, y: st.H / 2 + 250, w: 660, h: 80, col: "#4FA3E0" }, { x: st.W / 2 - 330, y: st.H / 2 - 250, w: 80, h: 500, col: "#4FA3E0" }, { x: st.W / 2 + 250, y: st.H / 2 - 250, w: 80, h: 500, col: "#4FA3E0" });
-        M.water = M.water.flatMap((o) => o.w > o.h ? [{ ...o, w: o.w / 2 - 70 }, { ...o, x: o.x + o.w / 2 + 70, w: o.w / 2 - 70 }] : [o]);
-        solid(st.W / 2 - 150, st.H / 2 - 150, 300, 300, "#E7E1F0", "お城");
-        solid(st.W - 600, 200, 300, 220, "#B08A5A", "山の汽車"); M.water.push({ x: 250, y: st.H - 650, w: 420, h: 300, col: "#4FA3E0" }); solid(380, st.H - 560, 160, 110, "#8B5A2B", "海賊船");
-      }
-      if (theme === "fun") {
-        solid(st.W / 2 - 110, 260, 220, 220, "#F0C3D8", "観覧車"); solid(380, st.H / 2 - 110, 200, 200, "#FFD27A", "メリーゴーランド"); solid(st.W - 620, st.H / 2 - 150, 380, 120, "#B05A5A", "ジェットコースター"); solid(st.W - 560, st.H - 520, 260, 220, "#5A4A6A", "おばけやしき");
-        M.water.push({ x: 300, y: st.H - 600, w: 380, h: 260, col: "#4FA3E0" });
-      }
-      if (theme === "movie") {
-        solid(260, 260, 420, 220, "#A2A9B4", "スタジオA"); solid(st.W - 680, 260, 420, 220, "#A2A9B4", "スタジオB"); solid(st.W / 2 - 160, st.H - 520, 320, 200, "#C08A5A", "西部の町");
-        M.water.push({ x: st.W - 640, y: st.H - 620, w: 460, h: 360, col: "#3E8BC9" }); solid(st.W - 520, st.H - 520, 180, 90, "#6A6A6A", "船");
-      }
-      // ふつうの建物（お店・セット）をあちこちに
-      const cols = theme === "movie" ? ["#B98E6B", "#8E9AAF", "#C7A57A", "#A86464"] : theme === "castle" ? ["#F2C4D8", "#C9E4F5", "#F5E1A4", "#D8C4F0"] : ["#F7B2B7", "#A7D8F0", "#FFE08A", "#C4E8B0"];
-      const names = theme === "movie" ? ["カフェ", "ショップ", "撮影セット", "劇場"] : theme === "castle" ? ["ショップ", "レストラン", "ステージ", "ワゴン"] : ["屋台", "ショップ", "ゲーム", "カフェ"];
-      for (let i = 0, tries = 0; i < 14 && tries < 400; tries++) { const w_ = 120 + r() * 140, h_ = 90 + r() * 110, x = 60 + r() * (st.W - 120 - w_), y = 60 + r() * (st.H - 120 - h_); if (Math.abs(x + w_ / 2 - st.W / 2) < 140 + w_ / 2 || Math.abs(y + h_ / 2 - st.H / 2) < 140 + h_ / 2) continue; if (free(x, y, w_, h_)) { solid(x, y, w_, h_, cols[i % 4], names[i % 4]); i++ } }
-      for (let i = 0, tries = 0; i < 18 && tries < 400; tries++) { const x = 60 + r() * (st.W - 160), y = 60 + r() * (st.H - 120); if (free(x, y, 70, 40)) { low(x, y, 70, 40, theme === "movie" ? "#7A6A5A" : "#C98F5A"); i++ } }
-      const kinds = theme === "movie" ? ["bush", "box", "barrel", "trash", "fern"] : theme === "castle" ? ["bush", "tree", "box", "trash", "bush"] : ["bush", "box", "trash", "tree", "costume"];
-      scatter(theme === "castle" ? 60 : 48, kinds);
-      M.spawnSeek = { x: st.W / 2, y: st.H / 2 + (theme === "castle" ? 420 : 0) }; M.spawnHide = { x: st.W / 2 + 200, y: st.H / 2 + 200 }; M.jail = { x: st.W / 2 - 200, y: st.H / 2 + (theme === "castle" ? 420 : 200) };
-      if (theme === "castle") M.spawnHide = { x: st.W / 2 + 250, y: st.H / 2 + 450 };
+  const PH_HIDE = 15, PH_HIT = 34, PH_MISS = 4;
+  let phThreeP = null;
+  function phLoad() {
+    if (window.THREE) return Promise.resolve();
+    if (!phThreeP) phThreeP = new Promise((ok, ng) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"; s.onload = ok; s.onerror = () => { phThreeP = null; s.remove(); ng(new Error("three")) }; document.head.appendChild(s) });
+    return phThreeP;
+  }
+  // 部品を集める道具（y は部品の中心の高さ）。最後に1つの形にまとめる
+  function phParts() {
+    const T = THREE, L = [], q = new T.Quaternion(), e = new T.Euler(), one = new T.Vector3(1, 1, 1);
+    const put = (g, col, x, y, z, rx = 0, ry = 0, rz = 0) => {
+      g = g.index ? g.toNonIndexed() : g;
+      g.applyMatrix4(new T.Matrix4().compose(new T.Vector3(x, y, z), q.setFromEuler(e.set(rx, ry, rz)), one)); L.push({ g, col });
+    };
+    const B = {
+      L,
+      box: (w, h, d, col, x, y, z, ry = 0, rx = 0, rz = 0) => put(new T.BoxGeometry(w, h, d), col, x, y, z, rx, ry, rz),
+      cyl: (rt, rb, h, col, x, y, z, seg = 12, rx = 0, rz = 0) => put(new T.CylinderGeometry(rt, rb, h, seg), col, x, y, z, rx, 0, rz),
+      sph: (r, col, x, y, z, sx = 1, sy = 1, sz = 1, det = 1) => { const g = new T.IcosahedronGeometry(r, det); g.scale(sx, sy, sz); put(g, col, x, y, z) },
+      cone: (r, h, col, x, y, z, seg = 10) => put(new T.ConeGeometry(r, h, seg), col, x, y, z),
+      tor: (R, r, col, x, y, z, rx = 0, ry = 0) => put(new T.TorusGeometry(R, r, 6, 18), col, x, y, z, rx, ry, 0),
+      // 2点をつなぐ棒（太さ w×h）
+      seg: (x1, y1, z1, x2, y2, z2, w, h, col) => {
+        const a = new T.Vector3(x1, y1, z1), b = new T.Vector3(x2, y2, z2), len = a.distanceTo(b); if (len < 1e-3) return;
+        const g = new T.BoxGeometry(w, h, len).toNonIndexed(), m = new T.Matrix4().lookAt(b, a, Math.abs(b.y - a.y) > len * 0.99 ? new T.Vector3(1, 0, 0) : new T.Vector3(0, 1, 0));
+        m.setPosition(a.clone().add(b).multiplyScalar(0.5)); g.applyMatrix4(m); L.push({ g, col });
+      },
+      // 三角の屋根の妻（x の向きに長い）
+      gable: (w, d, rh, col, cx, y, cz) => { const s = new T.Shape(); s.moveTo(-d / 2, 0); s.lineTo(d / 2, 0); s.lineTo(0, rh); s.closePath(); const g = new T.ExtrudeGeometry(s, { depth: w, bevelEnabled: false }); put(g, col, cx - w / 2, y, cz, 0, Math.PI / 2, 0) },
+    };
+    return B;
+  }
+  // 部品をまとめて1つの形にする（地面に近いところは少し暗くして、影っぽく見せる）
+  function phMerge(L, ao) {
+    const T = THREE; let n = 0; for (const p of L) n += p.g.attributes.position.count;
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Float32Array(n * 3), cc = new T.Color(); let o = 0;
+    for (const p of L) {
+      const P = p.g.attributes.position.array, N = p.g.attributes.normal.array, cnt = p.g.attributes.position.count; cc.set(p.col);
+      pos.set(P, o * 3); nor.set(N, o * 3);
+      for (let i = 0; i < cnt; i++) { const k = ao ? 0.62 + 0.38 * Math.min(1, Math.max(0, P[i * 3 + 1]) / 0.9) : 1; col[(o + i) * 3] = cc.r * k; col[(o + i) * 3 + 1] = cc.g * k; col[(o + i) * 3 + 2] = cc.b * k }
+      o += cnt; p.g.dispose();
     }
-    // おり・スタート地点のそばの隠れ場所はなくす
-    M.hides = M.hides.filter((q) => [M.jail, M.spawnSeek, M.spawnHide].every((p) => Math.hypot(q.x - p.x, q.y - p.y) > 80));
-    // ぶつかる物（動けない）・視線をさえぎる物
-    M.block = [...M.solid, ...M.low, ...M.water];
-    // 道さがし用のマス目（32ずつ）
-    const C = 32, gw = Math.ceil(st.W / C), gh = Math.ceil(st.H / C), grid = new Uint8Array(gw * gh);
-    for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) { const cx = gx * C + C / 2, cy = gy * C + C / 2; grid[gy * gw + gx] = M.block.some((o) => cx > o.x - HS_R - 2 && cx < o.x + o.w + HS_R + 2 && cy > o.y - HS_R - 2 && cy < o.y + o.h + HS_R + 2) ? 1 : 0 }
-    M.grid = { C, gw, gh, grid };
+    const g = new T.BufferGeometry(); g.setAttribute("position", new T.BufferAttribute(pos, 3)); g.setAttribute("normal", new T.BufferAttribute(nor, 3)); g.setAttribute("color", new T.BufferAttribute(col, 3));
+    g.computeBoundingSphere(); return g;
+  }
+  const phShade = (hex, k) => { const c = new THREE.Color(hex); c.multiplyScalar(1 + k); c.r = Math.min(1, c.r); c.g = Math.min(1, c.g); c.b = Math.min(1, c.b); return c.getHex() };
+  // 変身できる物（r = 半径、h = 高さ、n = 名前）。正面は -z
+  const PH_PROPS = {
+    trash: { n: "ゴミ箱", r: .36, h: .98, b(B) { B.cyl(.33, .29, .86, "#3F7F4A", 0, .43, 0, 14); B.cyl(.37, .37, .1, "#2E5E37", 0, .9, 0, 14); B.box(.18, .05, .05, "#222", 0, .97, 0); B.tor(.3, .025, "#2E5E37", 0, .3, 0, Math.PI / 2) } },
+    bench: { n: "ベンチ", r: .9, h: .9, b(B) { for (const z of [-.16, 0, .16]) B.box(1.7, .06, .14, "#B5733A", 0, .46, z); B.box(1.7, .13, .05, "#B5733A", 0, .66, .27); B.box(1.7, .13, .05, "#B5733A", 0, .84, .29); for (const x of [-.72, .72]) { B.box(.07, .46, .5, "#2F2F33", x, .23, 0); B.box(.07, .5, .06, "#2F2F33", x, .66, .28) } } },
+    picnic: { n: "ピクニックテーブル", r: 1.0, h: .8, b(B) { B.box(1.7, .07, .8, "#D9443B", 0, .76, 0); for (const z of [-.62, .62]) B.box(1.7, .06, .3, "#3B6FD9", 0, .45, z); for (const x of [-.7, .7]) { B.seg(x, 0, -.75, x, .76, .1, .07, .07, "#F2C230"); B.seg(x, 0, .75, x, .76, -.1, .07, .07, "#F2C230") } } },
+    barrel: { n: "たる", r: .38, h: .95, b(B) { B.cyl(.34, .34, .9, "#8E5A2F", 0, .45, 0, 14); B.cyl(.38, .34, .2, "#9C6636", 0, .45, 0, 14); for (const y of [.12, .78]) B.tor(.35, .025, "#4A4A4A", 0, y, 0, Math.PI / 2); B.cyl(.3, .3, .02, "#6E4524", 0, .9, 0, 14) } },
+    crate: { n: "木箱", r: .46, h: .82, b(B) { B.box(.8, .8, .8, "#C9965C", 0, .4, 0); for (const [x, z] of [[-.38, -.38], [.38, -.38], [-.38, .38], [.38, .38]]) B.box(.09, .82, .09, "#946436", x, .41, z); for (const y of [.05, .77]) { B.box(.84, .08, .09, "#946436", 0, y, -.38); B.box(.84, .08, .09, "#946436", 0, y, .38); B.box(.09, .08, .84, "#946436", -.38, y, 0); B.box(.09, .08, .84, "#946436", .38, y, 0) } B.seg(-.38, .05, -.41, .38, .77, -.41, .08, .08, "#946436") } },
+    cone: { n: "コーン", r: .26, h: .75, b(B) { B.box(.5, .05, .5, "#D9481F", 0, .025, 0); B.cyl(.03, .2, .7, "#F26B2A", 0, .38, 0, 14); B.cyl(.1, .13, .14, "#F7F7F7", 0, .45, 0, 14) } },
+    hydrant: { n: "消火栓", r: .26, h: .85, b(B) { B.cyl(.14, .17, .62, "#D9302C", 0, .31, 0, 12); B.sph(.15, "#D9302C", 0, .64, 0, 1, .8, 1); B.cyl(.06, .06, .44, "#C02520", 0, .42, 0, 8, 0, Math.PI / 2); B.cyl(.2, .2, .06, "#B02020", 0, .05, 0, 12); B.cyl(.04, .04, .1, "#F2C230", 0, .78, 0, 6) } },
+    lamp: { n: "街灯", r: .22, h: 3.5, b(B) { B.cyl(.18, .22, .3, "#2F3438", 0, .15, 0, 10); B.cyl(.06, .08, 3.1, "#2F3438", 0, 1.7, 0, 8); B.sph(.24, "#FFF4C8", 0, 3.3, 0, 1, 1.1, 1); B.cone(.3, .2, "#2F3438", 0, 3.6, 0, 8) } },
+    bush: { n: "しげみ", r: .7, h: 1.0, b(B) { B.sph(.6, "#3E8F3A", 0, .5, 0, 1.25, .9, 1.2); B.sph(.42, "#4CA547", .35, .72, .12); B.sph(.4, "#36803A", -.36, .66, -.16); B.sph(.33, "#58B050", .05, .9, -.05) } },
+    rock: { n: "岩", r: .58, h: .62, b(B) { B.sph(.56, "#8A8A86", 0, .22, 0, 1.15, .7, .95, 0); B.sph(.3, "#9C9C96", .3, .45, .1, 1, .8, 1, 0) } },
+    pot: { n: "植木ばち", r: .32, h: 1.05, b(B) { B.cyl(.26, .19, .42, "#B65C3A", 0, .21, 0, 12); B.cyl(.28, .28, .06, "#A04E30", 0, .42, 0, 12); B.sph(.34, "#3E9E45", 0, .72, 0, 1, 1.05, 1); B.sph(.2, "#4FB456", .12, .9, .08) } },
+    post: { n: "ポスト", r: .3, h: 1.35, b(B) { B.cyl(.25, .25, 1.15, "#D9302C", 0, .58, 0, 14); B.cyl(.3, .3, .1, "#B8221E", 0, 1.2, 0, 14); B.sph(.24, "#D9302C", 0, 1.26, 0, 1, .4, 1); B.box(.3, .04, .03, "#222", 0, .95, -.25); B.box(.18, .1, .02, "#FFF", 0, .7, -.25) } },
+    cbox: { n: "段ボール", r: .36, h: .5, b(B) { B.box(.62, .46, .5, "#C9965C", 0, .23, 0); B.box(.62, .02, .1, "#E3C089", 0, .465, 0); B.box(.22, .14, .01, "#FFFFFF", .12, .26, -.255) } },
+    tire: { n: "タイヤ", r: .42, h: .32, b(B) { B.tor(.3, .14, "#222226", 0, .15, 0, Math.PI / 2); B.cyl(.17, .17, .1, "#555", 0, .15, 0, 10) } },
+    chair: { n: "いす", r: .34, h: .95, b(B) { B.box(.46, .06, .46, "#9C6B3E", 0, .46, 0); B.box(.46, .46, .05, "#9C6B3E", 0, .72, .21); for (const [x, z] of [[-.19, -.19], [.19, -.19], [-.19, .19], [.19, .19]]) B.box(.05, .46, .05, "#6E4A2A", x, .23, z) } },
+    sofa: { n: "ソファ", r: .95, h: .9, b(B) { B.box(1.8, .42, .85, "#5A79B5", 0, .26, 0); B.box(1.7, .14, .7, "#6A89C5", 0, .5, -.04); B.box(1.9, .52, .22, "#4E6BA3", 0, .7, .33); for (const x of [-.9, .9]) B.box(.22, .62, .86, "#4E6BA3", x, .35, 0) } },
+    table: { n: "テーブル", r: .7, h: .78, b(B) { B.box(1.3, .07, .82, "#A8794F", 0, .74, 0); for (const [x, z] of [[-.58, -.34], [.58, -.34], [-.58, .34], [.58, .34]]) B.box(.07, .72, .07, "#7A5634", x, .36, z) } },
+    tv: { n: "テレビ", r: .62, h: 1.2, b(B) { B.box(1.3, .5, .42, "#6B4A32", 0, .25, 0); B.box(1.2, .7, .06, "#151518", 0, .88, 0); B.box(1.08, .6, .01, "#2A3A55", 0, .88, -.035); B.box(.3, .05, .2, "#151518", 0, .52, 0) } },
+    fridge: { n: "れいぞうこ", r: .46, h: 1.8, b(B) { B.box(.76, 1.8, .72, "#E6ECF0", 0, .9, 0); B.box(.77, .02, .73, "#AEB6BC", 0, 1.15, 0); B.box(.04, .45, .05, "#8A949C", .28, 1.42, -.38); B.box(.04, .35, .05, "#8A949C", .28, .85, -.38) } },
+    bed: { n: "ベッド", r: 1.05, h: .75, b(B) { B.box(1.1, .3, 2.1, "#8B5A34", 0, .2, 0); B.box(1.02, .2, 2.0, "#F4F1EA", 0, .44, 0); B.box(1.04, .1, 1.3, "#E07A8F", 0, .55, -.35); B.box(.6, .14, .35, "#FFFFFF", 0, .6, .75); B.box(1.1, .55, .08, "#7A4A2A", 0, .5, 1.05) } },
+    teddy: { n: "くまのぬいぐるみ", r: .3, h: .68, b(B) { B.sph(.23, "#B07A4A", 0, .22, 0, 1, 1.1, .9); B.sph(.17, "#B07A4A", 0, .5, 0); for (const x of [-.12, .12]) { B.sph(.06, "#9A6A3E", x, .65, 0); B.sph(.07, "#B07A4A", x * 1.6, .12, -.1) } B.sph(.07, "#E8C8A0", 0, .47, -.14); B.sph(.022, "#222", 0, .5, -.2) } },
+    ball: { n: "ボール", r: .3, h: .52, b(B) { B.sph(.26, "#E84A4A", 0, .26, 0, 1, 1, 1, 2); B.tor(.262, .03, "#FFFFFF", 0, .26, 0, 0, 0); B.tor(.262, .03, "#FFFFFF", 0, .26, 0, Math.PI / 2, 0) } },
+    shelf: { n: "本だな", r: .6, h: 1.8, b(B) { B.box(1.1, 1.8, .4, "#8B5A34", 0, .9, .02); const cols = ["#C0392B", "#2E86C1", "#27AE60", "#F1C40F", "#8E44AD", "#E67E22"]; for (let s = 0; s < 4; s++) { B.box(1.0, .03, .36, "#6E4524", 0, .1 + s * .43, -.01); for (let i = 0; i < 7; i++) B.box(.1, .3, .28, cols[(s * 3 + i) % 6], -.42 + i * .14, .27 + s * .43, -.05) } } },
+    stand: { n: "スタンドライト", r: .26, h: 1.7, b(B) { B.cyl(.2, .22, .05, "#333", 0, .03, 0, 12); B.cyl(.02, .02, 1.4, "#333", 0, .72, 0, 6); B.cyl(.15, .26, .32, "#F6E7C1", 0, 1.5, 0, 14) } },
+    toilet: { n: "トイレ", r: .34, h: .85, b(B) { B.cyl(.18, .14, .4, "#F5F5F5", 0, .2, -.05, 12); B.sph(.24, "#F5F5F5", 0, .42, -.08, 1, .3, 1.25); B.box(.42, .4, .18, "#F5F5F5", 0, .62, .22) } },
+    popcorn: { n: "ポップコーン屋台", r: .75, h: 1.95, b(B) { B.box(1.1, .75, .65, "#D9302C", 0, .6, 0); for (const x of [-.45, .45]) B.tor(.18, .05, "#222", x, .2, -.34, 0, 0); B.box(.9, .6, .55, "#FFF4B8", 0, 1.28, 0); B.sph(.2, "#FFF0C0", 0, 1.1, 0, 2, .6, 1.2); B.box(1.15, .1, .75, "#FFFFFF", 0, 1.64, 0); B.cone(.5, .3, "#D9302C", 0, 1.85, 0, 4) } },
+    balloon: { n: "風船", r: .4, h: 2.4, b(B) { B.cyl(.12, .14, .3, "#666", 0, .15, 0, 8); const cs = ["#E84A4A", "#F2C230", "#3B8FE0", "#4CC46A", "#E86AC0"]; cs.forEach((cl, i) => { const a = i * 1.26, x = Math.cos(a) * .22, z = Math.sin(a) * .22, y = 1.9 + (i % 2) * .25; B.seg(0, .3, 0, x, y - .25, z, .01, .01, "#DDD"); B.sph(.2, cl, x, y, z, 1, 1.2, 1) }) } },
+    lantern: { n: "灯ろう", r: .3, h: 1.6, b(B) { B.box(.45, .2, .45, "#8C8C88", 0, .1, 0); B.cyl(.08, .1, .8, "#8C8C88", 0, .6, 0, 8); B.box(.42, .35, .42, "#FFF0C4", 0, 1.17, 0); B.cone(.42, .3, "#5A5A58", 0, 1.5, 0, 4) } },
+    flower: { n: "花だん", r: .72, h: .55, b(B) { B.box(1.3, .3, .65, "#8B5A34", 0, .15, 0); B.box(1.2, .06, .55, "#5A3A22", 0, .31, 0); const cs = ["#E84A4A", "#F2C230", "#E86AC0", "#FFFFFF", "#9A6AE0"]; for (let i = 0; i < 12; i++) B.sph(.08, cs[i % 5], -.5 + (i % 6) * .2, .42, i < 6 ? -.13 : .13) ; for (let i = 0; i < 6; i++) B.sph(.11, "#3E9E45", -.5 + i * .2, .36, 0) } },
+    newsbox: { n: "新聞ボックス", r: .3, h: 1.1, b(B) { B.box(.5, .75, .45, "#2E6FD0", 0, .62, 0); B.box(.4, .3, .02, "#BFE3F5", 0, .75, -.23); for (const x of [-.2, .2]) B.box(.05, .25, .4, "#333", x, .12, 0) } },
+    barrier: { n: "バリケード", r: .75, h: 1.05, b(B) { for (const x of [-.6, .6]) { B.box(.08, 1.0, .08, "#DDD", x, .5, 0); B.box(.4, .05, .3, "#444", x, .03, 0) } for (const y of [.55, .85]) for (let i = 0; i < 6; i++) B.box(.22, .2, .05, i % 2 ? "#FFFFFF" : "#F26B2A", -.55 + i * .22, y, 0) } },
+    bucket: { n: "バケツ", r: .22, h: .34, b(B) { B.cyl(.2, .15, .32, "#3B8FE0", 0, .16, 0, 12); B.tor(.16, .01, "#888", 0, .4, 0, 0, 0) } },
+  };
+  // マップ（当たり判定に使う中身だけ。見た目は phBuild で作る）
+  // boxes = 四角い物（壁・建物・車など、h は高さ）、circles = 丸い物（木など）、props = 変身できる物、water = 入れない水、floors = 床の模様
+  function phMap(st, seed) {
+    const r = rng(seed * 13 + st.id.length * 101 + 7); r();
+    const M = { id: st.id, W: 90, D: 90, ground: "grass", floors: [], boxes: [], circles: [], props: [], water: [], objs: [], indoor: false };
+    const R = (a, b) => a + r() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
+    const F = (x0, z0, x1, z1, t) => M.floors.push({ x0, z0, x1, z1, t });
+    const box = (x0, z0, x1, z1, h, vis) => { const b = { x0: Math.min(x0, x1), z0: Math.min(z0, z1), x1: Math.max(x0, x1), z1: Math.max(z0, z1), h, vis }; M.boxes.push(b); return b };
+    const water = (x0, z0, x1, z1) => M.water.push({ x0, z0, x1, z1 });
+    const circ = (x, z, rr, h, vis) => M.circles.push({ x, z, r: rr, h, vis });
+    const obj = (o) => M.objs.push(o);
+    const onFloor = (x, z, m = 0, ts) => M.floors.some((f) => (!ts || ts.includes(f.t)) && x > f.x0 - m && x < f.x1 + m && z > f.z0 - m && z < f.z1 + m);
+    function free(x, z, rad) {
+      if (x < rad + 1 || z < rad + 1 || x > M.W - rad - 1 || z > M.D - rad - 1) return false;
+      for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return false;
+      for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return false;
+      for (const cc of M.circles) if (Math.hypot(cc.x - x, cc.z - z) < cc.r + rad + .3) return false;
+      for (const p of M.props) if (Math.hypot(p.x - x, p.z - z) < PH_PROPS[p.type].r + rad + .25) return false;
+      return true;
+    }
+    const prop = (type, x, z, ry) => { if (!free(x, z, PH_PROPS[type].r)) return false; M.props.push({ type, x, z, ry: ry == null ? Math.round(r() * 8) * Math.PI / 4 : ry }); return true };
+    // あちこちに置く（area の中、floorsTs の床の上だけ／noTs の床はさける）
+    const scatter = (types, n, area, o = {}) => { for (let i = 0, t = 0; i < n && t < n * 40; t++) { const x = R(area[0], area[2]), z = R(area[1], area[3]); if (o.on && !onFloor(x, z, 0, o.on)) continue; if (o.off && onFloor(x, z, 1, o.off)) continue; if (prop(types[Math.floor(r() * types.length)], x, z, o.ry)) i++ } };
+    const tree = (x, z, s, kind) => { if (!free(x, z, .6 * s)) return false; obj({ k: "tree", x, z, s, kind: kind || (r() < .3 ? "pine" : "round"), c: RI(0, 2) }); circ(x, z, .35 * s, 7 * s); return true };
+    const trees = (n, area, off) => { for (let i = 0, t = 0; i < n && t < n * 30; t++) { const x = R(area[0], area[2]), z = R(area[1], area[3]); if (off && onFloor(x, z, 2, off)) continue; if (tree(x, z, R(.85, 1.3))) i++ } };
+    const bld = (x0, z0, x1, z1, h, v) => box(x0, z0, x1, z1, h, Object.assign({ k: "bld" }, v));
+    const fence = (x0, z0, x1, z1) => box(x0, z0, x1, z1, 1.1, { k: "fence" });
+    const hedge = (x0, z0, x1, z1, h = 1.9) => box(x0, z0, x1, z1, h, { k: "hedge" });
+    const pal = ["#F2C4D8", "#BFE0F5", "#F5E1A4", "#D8C4F0", "#C9E8C0", "#F7C9A8", "#E8E2D0"];
+    if (st.id === "house") {
+      M.W = 32; M.D = 24; M.ground = "wood"; M.indoor = true;
+      F(14, 0, 24, 12, "tile"); F(24, 0, 32, 10, "tile2"); F(3, 3, 11, 9, "rug"); F(2.5, 14.5, 8.5, 21, "rug2"); F(13, 15, 21, 21, "rug3");
+      const T2 = .12, WH = 3, wv = { k: "wall" }, wo = { k: "wall", win: true };
+      box(-T2, -T2, 32 + T2, T2, WH, wo); box(-T2, 24 - T2, 32 + T2, 24 + T2, WH, wo); box(-T2, 0, T2, 24, WH, wo); box(32 - T2, 0, 32 + T2, 24, WH, wo);
+      // 間の壁（ドアのところはあける）
+      const wallX = (x, z0, z1, doors) => { let z = z0; for (const [a, b] of doors) { if (a > z) box(x - T2, z, x + T2, a, WH, wv); z = b } if (z < z1) box(x - T2, z, x + T2, z1, WH, wv) };
+      const wallZ = (z, x0, x1, doors) => { let x = x0; for (const [a, b] of doors) { if (a > x) box(x, z - T2, a, z + T2, WH, wv); x = b } if (x < x1) box(x, z - T2, x1, z + T2, WH, wv) };
+      wallZ(12, 0, 24, [[5.5, 7.3], [17, 18.8]]); wallX(14, 0, 12, [[5, 6.8]]); wallX(24, 0, 24, [[4, 5.8], [16.5, 18.3]]); wallZ(10, 24, 32, [[27, 28.8]]); wallX(11, 12, 24, [[17, 18.8]]);
+      // 動かない家具
+      box(14.3, .15, 23.6, .85, .95, { k: "counter" }); box(23, .9, 23.85, 6, .95, { k: "counter" }); box(28, .2, 31.8, 2.2, .6, { k: "tub" }); box(24.3, 6.8, 25.2, 9.6, .9, { k: "counter", col: "#F5F5F5" });
+      box(.2, 21.4, 2.6, 23.8, 2.2, { k: "furn", col: "#8B5A34" }); box(8.6, 12.3, 10.8, 13, 1.9, { k: "furn", col: "#A87A50" }); box(.2, 5, .8, 9, .5, { k: "furn", col: "#6E4524" });
+      // リビング
+      prop("tv", 6.5, .9, 0); prop("sofa", 6.5, 7.6, Math.PI); prop("table", 6.5, 4.6, 0); prop("shelf", 12.9, 3, -Math.PI / 2); prop("stand", 12.8, 10.6, 0); prop("pot", .9, 11, 0); prop("pot", 1, 1, 0); prop("chair", 3, 4.5, Math.PI / 2); prop("teddy", 10, 10.4, Math.PI); prop("sofa", 1.4, 3.6, -Math.PI / 2); prop("cbox", 12.6, 8.2, .3); prop("ball", 9.5, 2, 0); prop("stand", 1, 6.8, 0); prop("chair", 11.4, 6, -Math.PI / 2);
+      // キッチン
+      prop("fridge", 23.3, 10.8, Math.PI); prop("table", 18.5, 6.5, 0); prop("chair", 17.3, 5.6, 0); prop("chair", 19.7, 5.6, 0); prop("chair", 17.3, 7.4, Math.PI); prop("chair", 19.7, 7.4, Math.PI); prop("trash", 14.7, 11.4, 0); prop("cbox", 15.2, 2, 0); prop("pot", 22.2, 11.3, 0); prop("barrel", 14.6, 1.5, 0); prop("bucket", 21.6, 9.4, 0);
+      // おふろ
+      prop("toilet", 25, 1.2, 0); prop("bucket", 26.6, .8, 0); prop("trash", 31.4, 9.4, 0); prop("cbox", 28.8, 9, .2); prop("pot", 31.4, 3.5, 0); prop("teddy", 26.2, 9.2, 0);
+      // しんしつ
+      prop("bed", 4.8, 18.5, 0); prop("bed", 8.6, 21.6, Math.PI / 2); prop("stand", 3, 23.2, 0); prop("chair", 9.7, 15, Math.PI); prop("cbox", .9, 13, 0); prop("teddy", 6.5, 16.5, 0); prop("pot", 10.2, 23.2, 0); prop("shelf", .45, 16.5, Math.PI / 2);
+      // こども部屋
+      prop("ball", 14, 14.5, 0); prop("ball", 20.5, 20, 0); prop("teddy", 12, 23, 0); prop("teddy", 23, 13, 0); prop("cbox", 16, 23.2, 0); prop("cbox", 17, 23.3, .4); prop("chair", 18.5, 16.5, 0); prop("table", 17, 17.5, 0); prop("bed", 22.6, 21.6, 0); prop("shelf", 11.5, 13.3, 0); prop("crate", 13, 19, 0); prop("tire", 20.5, 13.2, 0); prop("pot", 23.3, 15.5, 0);
+      // ものおき
+      scatter(["crate", "cbox", "barrel", "tire", "cbox", "bucket", "crate"], 22, [24.6, 10.6, 31.4, 23.4]);
+      M.spawnHunt = { x: 19, z: 3.5 }; M.spawnHide = { x: 7, z: 10 };
+    } else if (st.id === "park") {
+      M.W = M.D = 92;
+      F(41, 2, 51, 90, "dirt"); F(2, 41, 90, 51, "dirt"); F(14, 14, 78, 19, "dirt"); F(14, 73, 78, 78, "dirt"); F(14, 14, 19, 78, "dirt"); F(73, 14, 78, 78, "dirt");
+      fence(1.4, 1.4, 90.6, 1.7); fence(1.4, 90.3, 90.6, 90.6); fence(1.4, 1.4, 1.7, 90.6); fence(90.3, 1.4, 90.6, 90.6);
+      bld(5, 4, 21, 15, 5, { col: "#3E6FB5", roof: "gable", rc: "#7A3B2A", wc: "#FFFFFF" }); bld(80, 5, 89, 13, 4, { col: "#E8DCC5", roof: "gable", rc: "#B5452F" }); bld(24, 5, 30, 10, 3, { col: "#C0473B", roof: "gable", rc: "#5A3A2A" });
+      F(55, 55, 70, 70, "sand"); box(57, 57, 58.4, 62, 2.4, { k: "slide", c1: "#2F6FD0", c2: "#E23A3A" }); box(63, 64, 64.4, 69, 2.4, { k: "slide", c1: "#E2A23A", c2: "#3AB04A" }); box(60.5, 66.2, 66, 67.6, 2.7, { k: "swing" }); box(65, 57, 68.5, 60.5, 2.2, { k: "jungle" });
+      water(8, 58, 30, 76);
+      for (let i = 0; i < 14; i++) { const a = i / 14 * 6.28; prop("rock", 19 + Math.cos(a) * 13.5, 67 + Math.sin(a) * 11, a) }
+      for (let i = 0; i < 4; i++) prop("picnic", 58 + (i % 2) * 9, 26 + Math.floor(i / 2) * 7, 0);
+      for (let z = 6; z < 88; z += 10) { if (Math.abs(z - 46) < 9) continue; prop("bench", 39.6, z, -Math.PI / 2); prop("trash", 39.7, z + 1.7, 0); prop("bench", 52.4, z + 4, Math.PI / 2) }
+      for (let x = 6; x < 88; x += 10) { if (Math.abs(x - 46) < 9) continue; prop("bench", x, 39.6, Math.PI); prop("bench", x + 5, 52.4, 0); prop("trash", x + 6.7, 52.5, 0) }
+      for (let z = 4; z < 90; z += 12) { prop("lamp", 40.2, z + 6, 0); prop("lamp", 51.8, z, 0) }
+      scatter(["crate", "barrel", "cbox", "crate", "tire"], 14, [4, 15.5, 24, 24]);
+      scatter(["tire", "ball", "bucket", "cone"], 12, [54, 54, 72, 72]);
+      scatter(["bush", "bush", "bush", "rock", "pot", "flower", "bush"], 70, [3, 3, 89, 89], { off: ["dirt", "sand"] });
+      scatter(["picnic", "bench", "trash", "hydrant", "ball", "teddy", "cone", "cbox"], 16, [3, 3, 89, 89], { off: ["dirt"] });
+      trees(85, [3, 3, 89, 89], ["dirt", "sand"]);
+      M.spawnHunt = { x: 46, z: 46 }; M.spawnHide = { x: 46, z: 55 };
+    } else if (st.id === "fun") {
+      M.W = M.D = 112;
+      F(18, 18, 94, 94, "paving"); F(52, 0, 60, 18, "paving"); F(0, 52, 18, 60, "paving"); F(94, 52, 112, 60, "paving"); F(52, 94, 60, 112, "paving");
+      obj({ k: "ferris", x: 30, z: 27 }); box(23, 25.5, 37, 28.5, 16, { k: "none" });
+      obj({ k: "carousel", x: 58, z: 32 }); circ(58, 32, 6.3, 6.5);
+      obj({ k: "teacups", x: 83, z: 34 }); circ(83, 34, 7.2, 1.8);
+      obj({ k: "fountain", x: 56, z: 58 }); circ(56, 58, 3.6, 1.4);
+      const cp = []; for (let i = 0; i <= 48; i++) { const t = i / 48; cp.push([10 + t * 92, 3.5 + 2.8 * Math.sin(t * 15) + 2.5 * Math.sin(t * 5.3) + 2.5, 103 + 3 * Math.sin(t * 9)]) }
+      obj({ k: "coaster", pts: cp }); cp.forEach((p, i) => { if (i % 3 === 0) circ(p[0], p[2], .35, p[1]) });
+      bld(72, 66, 90, 84, 9, { col: "#5A4870", roof: "gable", rc: "#2E2440", wc: "#F2D46B" });
+      bld(22, 66, 38, 80, 6, { col: "#F2F0E6", roof: "flat", wc: "#BFE3F5", stripe: "#E23A3A" });
+      const stalls = [[22, 44], [22, 50], [88, 44], [40, 88], [70, 88], [46, 22], [66, 22], [88, 90]];
+      stalls.forEach(([x, z], i) => bld(x - 2.2, z - 1.6, x + 2.2, z + 1.6, 2.8, { k: "stall", col: pal[i % pal.length], aw: ["#E23A3A", "#2F6FD0", "#2FA04A", "#E2A23A"][i % 4] }));
+      for (let i = 0; i < 12; i++) { const a = i / 12 * 6.28; prop(i % 2 ? "flower" : "bench", 56 + Math.cos(a) * 8, 58 + Math.sin(a) * 8, -a + Math.PI / 2) }
+      scatter(["popcorn", "balloon", "bench", "trash", "trash", "lamp", "flower", "pot", "cone", "barrel", "crate", "cbox", "teddy", "ball", "bench", "bush"], 120, [19, 19, 93, 93], { on: ["paving"] });
+      scatter(["bush", "bush", "rock", "flower", "trash", "bench"], 50, [2, 2, 110, 110], { off: ["paving"] });
+      trees(60, [2, 2, 110, 110], ["paving"]);
+      M.spawnHunt = { x: 56, z: 50 }; M.spawnHide = { x: 56, z: 66 };
+    } else if (st.id === "castle") {
+      M.W = M.D = 130;
+      F(40, 64, 90, 96, "paving"); F(58, 96, 72, 130, "paving"); F(46, 22, 84, 64, "stone");
+      obj({ k: "castle", x: 65, z: 44 }); box(52, 32, 78, 56, 11, { k: "none" }); for (const [x, z] of [[52, 32], [78, 32], [52, 56], [78, 56]]) circ(x, z, 3.2, 19);
+      water(44, 22, 86, 26); water(44, 62, 62, 66); water(68, 62, 86, 66); water(44, 26, 48, 62); water(82, 26, 86, 62); F(62, 61, 68, 67, "wood");
+      for (let z = 98; z < 126; z += 9) { bld(46, z, 56.5, z + 7.4, R(7, 10), { col: pal[RI(0, 6)], roof: "gable", rc: ["#4A78D0", "#C0473B", "#3A8A4A", "#7A4AA0"][RI(0, 3)], aw: ["#E23A3A", "#2F6FD0", "#2FA04A"][RI(0, 2)] }); bld(73.5, z, 84, z + 7.4, R(7, 10), { col: pal[RI(0, 6)], roof: "gable", rc: ["#4A78D0", "#C0473B", "#3A8A4A", "#7A4AA0"][RI(0, 3)], aw: ["#E2A23A", "#2F6FD0", "#E86AC0"][RI(0, 2)] }) }
+      // 森
+      trees(70, [3, 3, 40, 60]);
+      // 海賊の港
+      water(94, 12, 126, 42); box(102, 22, 118, 28, 3.2, { k: "ship" }); F(92, 42, 128, 50, "wood"); scatter(["barrel", "crate", "crate", "barrel", "tire", "cbox", "lantern"], 22, [92, 42.5, 127, 49.5]);
+      // 生け垣の迷路
+      const MC = 5, mx0 = 4, mz0 = 70, nx = 8, nz = 10, vis = new Uint8Array(nx * nz), wE = new Uint8Array(nx * nz).fill(1), wS = new Uint8Array(nx * nz).fill(1);
+      const stack = [0]; vis[0] = 1; while (stack.length) { const c0 = stack[stack.length - 1], cx = c0 % nx, cz = (c0 / nx) | 0; const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dz]) => [cx + dx, cz + dz, dx, dz]).filter(([x, z]) => x >= 0 && z >= 0 && x < nx && z < nz && !vis[z * nx + x]); if (!nb.length) { stack.pop(); continue } const [x, z, dx, dz] = nb[Math.floor(r() * nb.length)]; if (dx === 1) wE[c0] = 0; if (dx === -1) wE[z * nx + x] = 0; if (dz === 1) wS[c0] = 0; if (dz === -1) wS[z * nx + x] = 0; vis[z * nx + x] = 1; stack.push(z * nx + x) }
+      F(mx0, mz0, mx0 + nx * MC, mz0 + nz * MC, "grass2");
+      for (let z = 0; z < nz; z++) for (let x = 0; x < nx; x++) { const i = z * nx + x, X = mx0 + x * MC, Z = mz0 + z * MC; if (wE[i] && x < nx - 1) hedge(X + MC - .4, Z, X + MC + .4, Z + MC); if (wS[i] && z < nz - 1) hedge(X, Z + MC - .4, X + MC, Z + MC + .4); if (r() < .35) prop(["flower", "bush", "lantern", "bench", "pot", "trash"][RI(0, 5)], X + MC / 2, Z + MC / 2) }
+      hedge(mx0, mz0 - .4, mx0 + nx * MC - 6, mz0 + .4); hedge(mx0 + 6, mz0 + nz * MC - .4, mx0 + nx * MC, mz0 + nz * MC + .4); hedge(mx0 - .4, mz0, mx0 + .4, mz0 + nz * MC); hedge(mx0 + nx * MC - .4, mz0, mx0 + nx * MC + .4, mz0 + nz * MC - 6);
+      // 岩山
+      for (let i = 0; i < 9; i++) { const x = R(94, 124), z = R(72, 122), s = R(3, 6); if (free(x, z, s)) { obj({ k: "bigrock", x, z, s }); circ(x, z, s * .9, s * 1.4) } }
+      scatter(["rock", "barrel", "crate", "bush", "lantern"], 20, [90, 68, 128, 128]);
+      for (let i = 0; i < 16; i++) { const a = i / 16 * 6.28; prop(i % 2 ? "lantern" : "flower", 65 + Math.cos(a) * 13, 80 + Math.sin(a) * 11, -a) }
+      obj({ k: "fountain", x: 65, z: 80 }); circ(65, 80, 3.6, 1.4);
+      scatter(["bench", "trash", "lamp", "popcorn", "balloon", "flower", "pot", "lantern", "cbox", "teddy", "trash", "bench"], 70, [40, 64, 90, 128], { on: ["paving"] });
+      scatter(["lantern", "flower", "bench", "trash", "pot", "barrel"], 22, [46, 22, 84, 64], { on: ["stone"] });
+      scatter(["bush", "bush", "rock", "flower", "bench", "trash", "lantern"], 60, [3, 3, 127, 127], { off: ["paving", "stone", "wood", "grass2"] });
+      trees(50, [3, 3, 127, 127], ["paving", "stone", "wood", "grass2"]);
+      M.spawnHunt = { x: 65, z: 72 }; M.spawnHide = { x: 65, z: 90 };
+    } else {
+      M.W = M.D = 112; M.ground = "asphalt";
+      const bands = [[6, 30], [38, 74], [82, 106]];
+      for (const s of [34, 78]) { for (let i = 0; i < 112; i += 6) { F(s - .12, i, s + .12, i + 3, "line"); F(i, s - .12, i + 3, s + .12, "line") } }
+      bands.forEach(([x0, x1], bx) => bands.forEach(([z0, z1], bz) => {
+        F(x0, z0, x1, z1, "paving");
+        if (bx === 1 && bz === 1) { F(x0 + 3, z0 + 3, x1 - 3, z1 - 3, "grass"); obj({ k: "fountain", x: 56, z: 56 }); circ(56, 56, 3.6, 1.4); for (const [tx, tz] of [[44, 44], [68, 44], [44, 68], [68, 68], [50, 62], [62, 50]]) tree(tx, tz, 1.1, "round"); return }
+        const ix0 = x0 + 3.5, ix1 = x1 - 3.5, iz0 = z0 + 3.5, iz1 = z1 - 3.5, alongX = ix1 - ix0 >= iz1 - iz0;
+        const n = alongX ? Math.max(1, Math.round((ix1 - ix0) / 13)) : Math.max(1, Math.round((iz1 - iz0) / 13));
+        for (let k = 0; k < n; k++) {
+          const a0 = alongX ? ix0 + (ix1 - ix0) * k / n + (k ? 1.2 : 0) : iz0 + (iz1 - iz0) * k / n + (k ? 1.2 : 0), a1 = alongX ? ix0 + (ix1 - ix0) * (k + 1) / n - (k < n - 1 ? 1.2 : 0) : iz0 + (iz1 - iz0) * (k + 1) / n - (k < n - 1 ? 1.2 : 0);
+          const big = (bx + bz * 3 + k) % 5 === 2, cols = ["#B98E6B", "#8E9AAF", "#C7A57A", "#A86464", "#D8CFC0", "#7F8C7A", "#C4B49C"];
+          if (alongX) bld(a0, iz0, a1, iz1, big ? 9 : R(8, 18), big ? { col: "#A2A9B4", roof: "arch", rc: "#8C939E", door: "big" } : { col: cols[RI(0, 6)], roof: "flat", aw: r() < .5 ? ["#E23A3A", "#2F6FD0", "#2FA04A", "#E2A23A"][RI(0, 3)] : null });
+          else bld(ix0, a0, ix1, a1, big ? 9 : R(8, 18), big ? { col: "#A2A9B4", roof: "arch", rc: "#8C939E", door: "big" } : { col: cols[RI(0, 6)], roof: "flat", aw: r() < .5 ? ["#E23A3A", "#2F6FD0", "#2FA04A", "#E2A23A"][RI(0, 3)] : null });
+        }
+      }));
+      // 止まっている車（道のはし）
+      const carCols = ["#D9302C", "#F2C230", "#2E6FD0", "#EEEEEE", "#333338", "#3AA05A", "#F2C230"];
+      for (let i = 0, t = 0; i < 22 && t < 400; t++) {
+        const s = [34, 78][RI(0, 1)], side = r() < .5 ? -2.6 : 2.6, along = R(4, 108), ax = r() < .5;
+        const cx = ax ? along : s + side, cz = ax ? s + side : along, hw = ax ? 2.2 : 1, hd = ax ? 1 : 2.2;
+        if (!free(cx, cz, 2.4)) continue; box(cx - hw, cz - hd, cx + hw, cz + hd, 1.5, { k: "car", col: carCols[RI(0, 6)], ax }); i++;
+      }
+      obj({ k: "tower", x: 103, z: 9 }); circ(103, 9, 2.6, 16);
+      scatter(["hydrant", "post", "newsbox", "trash", "trash", "lamp", "cone", "barrier", "bench", "crate", "barrel", "pot", "tire", "cbox", "cone", "lamp"], 160, [1, 1, 111, 111], { on: ["paving"] });
+      scatter(["cone", "barrier", "cone", "tire"], 18, [1, 1, 111, 111], { off: ["paving"] });
+      scatter(["bench", "bush", "flower", "trash", "pot", "balloon"], 18, [41.5, 41.5, 70.5, 70.5], { on: ["grass"] });
+      M.spawnHunt = { x: 56, z: 50 }; M.spawnHide = { x: 56, z: 62 };
+    }
+    // スタート地点のまわりはあけておく
+    M.props = M.props.filter((p) => [M.spawnHunt, M.spawnHide].every((q) => Math.hypot(p.x - q.x, p.z - q.z) > 3.2 + PH_PROPS[p.type].r));
+    for (const p of M.props) p.cr = PH_PROPS[p.type].r * .85;
+    // コンピューターの道さがし用のマス目（1m）
+    const gw = Math.ceil(M.W), gh = Math.ceil(M.D), grid = new Uint8Array(gw * gh), pad = .45;
+    const mark = (x0, z0, x1, z1) => { for (let z = Math.max(0, Math.floor(z0 - pad)); z <= Math.min(gh - 1, Math.floor(z1 + pad)); z++) for (let x = Math.max(0, Math.floor(x0 - pad)); x <= Math.min(gw - 1, Math.floor(x1 + pad)); x++) { const cx = x + .5, cz = z + .5; if (cx > x0 - pad && cx < x1 + pad && cz > z0 - pad && cz < z1 + pad) grid[z * gw + x] = 1 } };
+    for (const b of M.boxes) mark(b.x0, b.z0, b.x1, b.z1);
+    for (const b of M.water) mark(b.x0, b.z0, b.x1, b.z1);
+    for (const cc of [...M.circles, ...M.props.map((p) => ({ x: p.x, z: p.z, r: p.cr }))]) for (let z = Math.max(0, Math.floor(cc.z - cc.r - 1)); z <= Math.min(gh - 1, Math.floor(cc.z + cc.r + 1)); z++) for (let x = Math.max(0, Math.floor(cc.x - cc.r - 1)); x <= Math.min(gw - 1, Math.floor(cc.x + cc.r + 1)); x++) if (Math.hypot(x + .5 - cc.x, z + .5 - cc.z) < cc.r + pad) grid[z * gw + x] = 1;
+    for (let x = 0; x < gw; x++) { grid[x] = 1; grid[(gh - 1) * gw + x] = 1 } for (let z = 0; z < gh; z++) { grid[z * gw] = 1; grid[z * gw + gw - 1] = 1 }
+    M.grid = { gw, gh, grid };
+    M.types = [...new Set(M.props.map((p) => p.type))];
     return M;
   }
-  function hsPath(M, sx, sy, tx, ty) {
-    const { C, gw, gh, grid } = M.grid, id = (x, y) => y * gw + x;
-    const s = [clamp(Math.floor(sx / C), 0, gw - 1), clamp(Math.floor(sy / C), 0, gh - 1)], t = [clamp(Math.floor(tx / C), 0, gw - 1), clamp(Math.floor(ty / C), 0, gh - 1)];
-    const goal = id(...t), start = id(...s), came = new Int32Array(gw * gh).fill(-1), g = new Float32Array(gw * gh).fill(1e9);
-    const open = [[0, start]]; g[start] = 0; let steps = 0;
-    while (open.length && steps++ < 6000) {
-      let bi = 0; for (let i = 1; i < open.length; i++) if (open[i][0] < open[bi][0]) bi = i;
-      const [, cur] = open.splice(bi, 1)[0]; if (cur === goal) break;
-      const cx = cur % gw, cy = (cur / gw) | 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-        const nx = cx + dx, ny = cy + dy; if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue; const ni = id(nx, ny); if (grid[ni] && ni !== goal) continue;
-        if (dx && dy && (grid[id(cx + dx, cy)] || grid[id(cx, cy + dy)])) continue;
-        const ng = g[cur] + (dx && dy ? 1.414 : 1); if (ng < g[ni]) { g[ni] = ng; came[ni] = cur; open.push([ng + Math.hypot(nx - t[0], ny - t[1]), ni]) }
+  // 道さがし（A*、1mのマス）
+  function phPath(M, sx, sz, tx, tz) {
+    const { gw, gh, grid } = M.grid, N = gw * gh;
+    const cell = (x, z) => clamp(Math.floor(z), 0, gh - 1) * gw + clamp(Math.floor(x), 0, gw - 1);
+    const s = cell(sx, sz); let t = cell(tx, tz);
+    if (grid[t]) { let best = -1, bd = 1e9; const tx0 = t % gw, tz0 = (t / gw) | 0; for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) { const x = tx0 + dx, z = tz0 + dz; if (x < 0 || z < 0 || x >= gw || z >= gh || grid[z * gw + x]) continue; const d = dx * dx + dz * dz; if (d < bd) { bd = d; best = z * gw + x } } if (best < 0) return [[tx, tz]]; t = best }
+    const g = new Float32Array(N).fill(1e9), came = new Int32Array(N).fill(-1), closed = new Uint8Array(N);
+    const hk = [], hv = []; const hpush = (k, v) => { hk.push(k); hv.push(v); let i = hk.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (hk[p] <= hk[i]) break; [hk[p], hk[i]] = [hk[i], hk[p]]; [hv[p], hv[i]] = [hv[i], hv[p]]; i = p } };
+    const hpop = () => { const v = hv[0], lk = hk.pop(), lv = hv.pop(); if (hk.length) { hk[0] = lk; hv[0] = lv; let i = 0; for (;;) { const a = 2 * i + 1, b = a + 1; let m = i; if (a < hk.length && hk[a] < hk[m]) m = a; if (b < hk.length && hk[b] < hk[m]) m = b; if (m === i) break; [hk[m], hk[i]] = [hk[i], hk[m]]; [hv[m], hv[i]] = [hv[i], hv[m]]; i = m } } return v };
+    const ttx = t % gw, ttz = (t / gw) | 0; g[s] = 0; hpush(0, s); let steps = 0;
+    while (hk.length && steps++ < 30000) {
+      const cur = hpop(); if (cur === t) break; if (closed[cur]) continue; closed[cur] = 1;
+      const cx = cur % gw, cz = (cur / gw) | 0;
+      for (let k = 0; k < 8; k++) {
+        const dx = [1, -1, 0, 0, 1, 1, -1, -1][k], dz = [0, 0, 1, -1, 1, -1, 1, -1][k], nx = cx + dx, nz = cz + dz;
+        if (nx < 0 || nz < 0 || nx >= gw || nz >= gh) continue; const ni = nz * gw + nx; if (grid[ni] && ni !== t) continue;
+        if (dx && dz && (grid[cz * gw + nx] || grid[nz * gw + cx])) continue;
+        const ng = g[cur] + (dx && dz ? 1.414 : 1); if (ng < g[ni]) { g[ni] = ng; came[ni] = cur; hpush(ng + Math.hypot(nx - ttx, nz - ttz), ni) }
       }
     }
-    const out = []; let c2 = goal; if (came[c2] < 0 && c2 !== start) return [[tx, ty]];
-    while (c2 !== start && c2 >= 0) { out.unshift([(c2 % gw) * C + C / 2, ((c2 / gw) | 0) * C + C / 2]); c2 = came[c2] }
-    out.push([tx, ty]); return out;
+    if (came[t] < 0 && t !== s) return [[tx, tz]];
+    const out = []; let c2 = t; while (c2 !== s && c2 >= 0) { out.unshift([(c2 % gw) + .5, ((c2 / gw) | 0) + .5]); c2 = came[c2] }
+    // まっすぐ行けるところは間をとばす
+    const clear = (a, b) => { const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 2); for (let i = 1; i < n; i++) { const x = a[0] + (b[0] - a[0]) * i / n, z = a[1] + (b[1] - a[1]) * i / n; if (grid[cell(x, z)]) return false } return true };
+    const sm = []; let from = [sx, sz]; for (let i = 0; i < out.length; i++) { if (i === out.length - 1 || !clear(from, out[i + 1])) { sm.push(out[i]); from = out[i] } }
+    return sm.length ? sm : [[tx, tz]];
   }
-  // 線分が壁（見えない物：建物・壁）をさえぎるか
-  function hsSeg(M, x1, y1, x2, y2) {
-    for (const o of M.solid) {
-      let t0 = 0, t1 = 1; const dx = x2 - x1, dy = y2 - y1; let ok = true;
-      for (const [p, q] of [[-dx, x1 - o.x], [dx, o.x + o.w - x1], [-dy, y1 - o.y], [dy, o.y + o.h - y1]]) { if (p === 0) { if (q < 0) { ok = false; break } } else { const tt = q / p; if (p < 0) { if (tt > t1) { ok = false; break } if (tt > t0) t0 = tt } else { if (tt < t0) { ok = false; break } if (tt < t1) t1 = tt } } }
-      if (ok && t0 <= t1) return true;
+  // 床の模様（その場で絵を描いてテクスチャにする）
+  function phTex(kind) {
+    const T = THREE, S = 256, cv = document.createElement("canvas"); cv.width = cv.height = S; const c = cv.getContext("2d"), r = rng(kind.length * 977 + kind.charCodeAt(0));
+    const noise = (base, cols, n, len, wid) => { c.fillStyle = base; c.fillRect(0, 0, S, S); for (let i = 0; i < n; i++) { c.fillStyle = cols[Math.floor(r() * cols.length)]; const x = r() * S, y = r() * S; c.fillRect(x, y, wid || 2, len || 2); if (x > S - 4) c.fillRect(x - S, y, wid || 2, len || 2); if (y > S - (len || 2)) c.fillRect(x, y - S, wid || 2, len || 2) } };
+    if (kind === "grass" || kind === "grass2") noise(kind === "grass" ? "#5DA83A" : "#4E9A34", ["#4C9A30", "#6CB848", "#7BC455", "#438C2C", "#58A23A"], 9000, 5, 2);
+    else if (kind === "dirt" || kind === "sand") {
+      // ひび割れた土（ボロノイ）
+      const pts = []; for (let i = 0; i < (kind === "dirt" ? 26 : 0); i++) pts.push([r() * S, r() * S, .88 + r() * .2]);
+      const im = c.createImageData(S, S), base = kind === "dirt" ? [196, 146, 92] : [232, 214, 160];
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        let d1 = 1e9, d2 = 1e9, sh = 1; for (const p of pts) { let dx = Math.abs(x - p[0]), dy = Math.abs(y - p[1]); if (dx > S / 2) dx = S - dx; if (dy > S / 2) dy = S - dy; const d = Math.hypot(dx, dy); if (d < d1) { d2 = d1; d1 = d; sh = p[2] } else if (d < d2) d2 = d }
+        const crack = pts.length && d2 - d1 < 1.8, n = .92 + Math.random() * .14, k = crack ? .58 : sh * n, o = (y * S + x) * 4;
+        im.data[o] = base[0] * k; im.data[o + 1] = base[1] * k; im.data[o + 2] = base[2] * k; im.data[o + 3] = 255;
+      }
+      c.putImageData(im, 0, 0);
+    } else if (kind === "paving" || kind === "stone") {
+      c.fillStyle = kind === "paving" ? "#8C857A" : "#7E7A74"; c.fillRect(0, 0, S, S); const tw = 32, th = kind === "paving" ? 16 : 32;
+      for (let y = 0; y < S; y += th) for (let x = -tw; x < S; x += tw) { const ox = (y / th) % 2 ? tw / 2 : 0, v = 0.86 + r() * .18; const b = kind === "paving" ? [214, 204, 186] : [190, 186, 178]; c.fillStyle = `rgb(${b[0] * v | 0},${b[1] * v | 0},${b[2] * v | 0})`; c.fillRect(x + ox + 1.5, y + 1.5, tw - 3, th - 3) }
+    } else if (kind === "wood") {
+      for (let x = 0; x < S; x += 32) { const v = .85 + r() * .2; c.fillStyle = `rgb(${190 * v | 0},${135 * v | 0},${85 * v | 0})`; c.fillRect(x, 0, 32, S); c.fillStyle = "rgba(90,55,30,.25)"; for (let i = 0; i < 6; i++) c.fillRect(x + 3 + r() * 26, 0, 1, S); c.fillStyle = "rgba(60,35,20,.6)"; c.fillRect(x, 0, 1.5, S); const cut = r() * S; c.fillRect(x, cut, 32, 1.5) }
+    } else if (kind === "tile") { for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { c.fillStyle = (x + y) % 2 ? "#222326" : "#F2F2EE"; c.fillRect(x * 32, y * 32, 32, 32) } }
+    else if (kind === "tile2") { c.fillStyle = "#9FC8D8"; c.fillRect(0, 0, S, S); for (let y = 0; y < S; y += 32) for (let x = 0; x < S; x += 32) { const v = .92 + r() * .1; c.fillStyle = `rgb(${200 * v | 0},${232 * v | 0},${242 * v | 0})`; c.fillRect(x + 1.5, y + 1.5, 29, 29) } }
+    else if (kind === "asphalt") noise("#55565C", ["#4A4B50", "#606168", "#5A5B60", "#45464A"], 14000, 2, 2);
+    else if (kind.startsWith("rug")) { const cl = { rug: ["#B03A3A", "#E8C27A"], rug2: ["#3A5AB0", "#E8E0C8"], rug3: ["#3AA07A", "#F5E6A0"] }[kind]; c.fillStyle = cl[0]; c.fillRect(0, 0, S, S); c.strokeStyle = cl[1]; c.lineWidth = 10; c.strokeRect(14, 14, S - 28, S - 28); c.lineWidth = 4; c.strokeRect(34, 34, S - 68, S - 68); c.fillStyle = cl[1]; c.beginPath(); c.arc(S / 2, S / 2, 40, 0, 7); c.fill() }
+    else if (kind === "line") { c.fillStyle = "#F2F2EE"; c.fillRect(0, 0, S, S) }
+    else if (kind === "water") { c.fillStyle = "#3E8FD0"; c.fillRect(0, 0, S, S); c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2; for (let i = 0; i < 40; i++) { const x = r() * S, y = r() * S; c.beginPath(); c.arc(x, y, 6 + r() * 10, 3.6, 5.8); c.stroke() } }
+    const tx = new T.CanvasTexture(cv); tx.wrapS = tx.wrapT = T.RepeatWrapping; tx.anisotropy = 4; return tx;
+  }
+  const PH_TS = { grass: 4, grass2: 4, dirt: 7, sand: 5, paving: 4, stone: 5, wood: 3, tile: 2.4, tile2: 1.6, asphalt: 7, line: 1, water: 9 };
+  // 見た目を作る：静かな物は全部1つの形にまとめる（スマホでも軽く）
+  function phBuild(M, scene) {
+    const T = THREE, B = phParts(), ms = [];
+    const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .86, metalness: 0 });
+    // 地面と床
+    const texs = {}; const tex = (k) => texs[k] || (texs[k] = phTex(k));
+    const plane = (x0, z0, x1, z1, k, y, m) => {
+      const w = x1 - x0, d = z1 - z0, g = new T.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); g.translate((x0 + x1) / 2, y, (z0 + z1) / 2);
+      if (!k.startsWith("rug")) { const uv = g.attributes.uv, s = PH_TS[k] || 4; for (let i = 0; i < uv.count; i++) uv.setXY(i, (x0 + uv.getX(i) * w) / s, (z0 + uv.getY(i) * d) / s) }
+      const mesh = new T.Mesh(g, m || new T.MeshStandardMaterial({ map: tex(k), roughness: .95 })); mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh); return mesh;
+    };
+    const ex = M.indoor ? 2 : 90; plane(-ex, -ex, M.W + ex, M.D + ex, M.ground, 0);
+    M.floors.forEach((f, i) => plane(f.x0, f.z0, f.x1, f.z1, f.t, .012 + (i % 40) * .0025));
+    const wmat = new T.MeshStandardMaterial({ map: tex("water"), roughness: .15, metalness: .2, transparent: true, opacity: .88 });
+    for (const w of M.water) { plane(w.x0, w.z0, w.x1, w.z1, "water", .06, wmat); B.box(w.x1 - w.x0 + .5, .25, .25, "#9A968C", (w.x0 + w.x1) / 2, .1, w.z0); B.box(w.x1 - w.x0 + .5, .25, .25, "#9A968C", (w.x0 + w.x1) / 2, .1, w.z1); B.box(.25, .25, w.z1 - w.z0, "#9A968C", w.x0, .1, (w.z0 + w.z1) / 2); B.box(.25, .25, w.z1 - w.z0, "#9A968C", w.x1, .1, (w.z0 + w.z1) / 2) }
+    // 変身できる物
+    const q = new T.Matrix4();
+    const addProp = (type, x, z, ry) => { const b2 = phParts(); PH_PROPS[type].b(b2); q.makeRotationY(ry).setPosition(x, 0, z); for (const p of b2.L) { p.g.applyMatrix4(q); B.L.push(p) } };
+    for (const p of M.props) addProp(p.type, p.x, p.z, p.ry);
+    // 四角い物
+    for (const b of M.boxes) {
+      const v = b.vis || {}, w = b.x1 - b.x0, d = b.z1 - b.z0, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, h = b.h;
+      if (v.k === "wall") {
+        B.box(w, h, d, "#EFE6D6", cx, h / 2, cz); B.box(w + .04, .14, d + .04, "#8B6A4A", cx, .07, cz); B.box(w + .04, .08, d + .04, "#FFFFFF", cx, h - .04, cz);
+        if (v.win) { const along = w > d, L = along ? w : d; for (let s = 3; s < L - 1.5; s += 5) { const px = along ? b.x0 + s : cx, pz = along ? cz : b.z0 + s; B.box(along ? 1.5 : d + .06, 1.3, along ? d + .06 : 1.5, "#FFFFFF", px, 1.7, pz); B.box(along ? 1.3 : d + .1, 1.1, along ? d + .1 : 1.3, "#BFE6FA", px, 1.7, pz) } }
+      } else if (v.k === "fence") {
+        const along = w > d, L = along ? w : d;
+        for (let s = 0; s <= L; s += 2) { const px = along ? b.x0 + s : cx, pz = along ? cz : b.z0 + s; B.box(.14, 1.2, .14, "#7A4E2E", px, .6, pz) }
+        for (const y of [.45, .9]) B.box(along ? w : .08, .14, along ? .08 : d, "#8E5E36", cx, y, cz);
+      } else if (v.k === "hedge") { B.box(w, h, d, "#3B8436", cx, h / 2, cz); B.box(w + .1, .25, d + .1, "#4C9A44", cx, h - .1, cz) }
+      else if (v.k === "counter") { B.box(w, h - .05, d, v.col || "#E8E0D2", cx, (h - .05) / 2, cz); B.box(w + .04, .05, d + .04, "#6E6A66", cx, h - .025, cz); for (let s = .4; s < Math.max(w, d) - .2; s += .8) B.box(w > d ? .02 : d + .02, .5, w > d ? d + .02 : .02, "#B8AE9E", w > d ? b.x0 + s : cx, .45, w > d ? cz : b.z0 + s) }
+      else if (v.k === "tub") { B.box(w, h, d, "#F5F5F5", cx, h / 2, cz); B.box(w - .3, .05, d - .3, "#9FD4EA", cx, h - .08, cz) }
+      else if (v.k === "furn") { B.box(w, h, d, v.col, cx, h / 2, cz); B.box(.04, .3, .04, "#E3C089", cx + .2, h * .55, cz - d / 2 - .02); B.box(.04, .3, .04, "#E3C089", cx - .2, h * .55, cz - d / 2 - .02) }
+      else if (v.k === "car") {
+        const L = v.ax ? w : d, Wd = v.ax ? d : w, ry = v.ax ? Math.PI / 2 : 0, b2 = phParts();
+        b2.box(Wd, .65, L, v.col, 0, .55, 0); b2.box(Wd - .15, .55, L * .5, phShade(v.col, -.1), 0, 1.15, -.1); b2.box(Wd - .1, .42, L * .46, "#2A3442", 0, 1.15, -.1);
+        for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) b2.cyl(.34, .34, .25, "#1C1C1E", sx * (Wd / 2 - .05), .34, sz * (L / 2 - .7), 12, 0, Math.PI / 2);
+        for (const sx of [-1, 1]) { b2.box(.25, .14, .05, "#FFF6C8", sx * (Wd / 2 - .3), .62, -L / 2); b2.box(.25, .12, .05, "#D92C2C", sx * (Wd / 2 - .3), .62, L / 2) }
+        if (v.col === "#F2C230") b2.box(.5, .18, .3, "#222", 0, 1.5, 0);
+        q.makeRotationY(ry).setPosition(cx, 0, cz); for (const p of b2.L) { p.g.applyMatrix4(q); B.L.push(p) }
+      } else if (v.k === "slide") {
+        const tall = h; B.box(1.2, .1, 1.2, "#DDD", b.x0 + .7, tall, b.z0 + .6); for (const [x, z] of [[.15, .05], [1.25, .05], [.15, 1.15], [1.25, 1.15]]) B.cyl(.05, .05, tall, v.c1, b.x0 + x, tall / 2, b.z0 + z, 8);
+        for (let y = .35; y < tall; y += .35) B.box(1.1, .05, .06, "#DDD", b.x0 + .7, y, b.z0 + .05); B.seg(b.x0 + .7, tall, b.z0 + 1.2, b.x0 + .7, .2, b.z1, 1.0, .08, v.c2); B.seg(b.x0 + .2, tall + .3, b.z0 + 1.2, b.x0 + .2, .5, b.z1, .06, .2, v.c2); B.seg(b.x0 + 1.2, tall + .3, b.z0 + 1.2, b.x0 + 1.2, .5, b.z1, .06, .2, v.c2);
+      } else if (v.k === "swing") {
+        for (const x of [b.x0 + .2, b.x1 - .2]) { B.seg(x, h, cz, x - .1, 0, b.z0, .12, .12, "#D9443B"); B.seg(x, h, cz, x - .1, 0, b.z1, .12, .12, "#D9443B") } B.cyl(.07, .07, w, "#D9443B", cx, h, cz, 8, 0, Math.PI / 2);
+        for (const x of [b.x0 + 1.5, b.x1 - 1.5]) { B.box(.6, .06, .25, "#2F6FD0", x, .55, cz); for (const dx of [-.27, .27]) B.seg(x + dx, h, cz, x + dx, .58, cz, .02, .02, "#888") }
+      } else if (v.k === "jungle") { for (let i = 0; i <= 3; i++) for (let j = 0; j <= 3; j++) B.cyl(.04, .04, h, "#2FA04A", b.x0 + i * w / 3, h / 2, b.z0 + j * d / 3, 6); for (let y = .6; y <= h; y += .8) { for (let i = 0; i <= 3; i++) { B.box(w, .06, .06, "#F2C230", cx, y, b.z0 + i * d / 3); B.box(.06, .06, d, "#F2C230", b.x0 + i * w / 3, y, cz) } } }
+      else if (v.k === "ship") {
+        B.box(w, 2.4, d, "#7A4A2A", cx, 1.2, cz); B.box(w - .4, .2, d - .4, "#B08050", cx, 2.45, cz); B.box(w * .2, 1.4, d - .4, "#6A3E22", b.x1 - w * .12, 3.2, cz);
+        for (const fx of [.35, .65]) { const mx = b.x0 + w * fx; B.cyl(.15, .18, 11, "#5A3A22", mx, 7.5, cz, 8); B.box(.1, 4.2, d + 1.5, "#F4F0E2", mx + .25, 8, cz); B.box(.1, 2.6, d + .5, "#F4F0E2", mx + .25, 11.6, cz) }
+        B.box(.8, .6, .05, "#111", cx, 12.8, cz);
+      } else if (v.k === "bld" || v.k === "stall") {
+        const col = v.col || "#DDD";
+        if (v.k === "stall") {
+          B.box(w, 1.0, d, phShade(col, -.1), cx, .5, cz); B.box(w + .1, .08, d + .1, "#FFFFFF", cx, 1.04, cz); for (const [x, z] of [[b.x0 + .1, b.z0 + .1], [b.x1 - .1, b.z0 + .1], [b.x0 + .1, b.z1 - .1], [b.x1 - .1, b.z1 - .1]]) B.box(.1, h, .1, "#FFFFFF", x, h / 2, z);
+          const n = Math.max(4, Math.round(w / .6)); for (let i = 0; i < n; i++) B.box(w / n + .01, .1, d + .8, i % 2 ? "#FFFFFF" : v.aw, b.x0 + (i + .5) * w / n, h + .2, cz, 0, 0); B.box(w * .8, .5, .05, col, cx, h + .6, b.z0 - .4);
+          continue;
+        }
+        B.box(w, h, d, col, cx, h / 2, cz); B.box(w + .12, .5, d + .12, phShade(col, -.28), cx, .25, cz);
+        if (v.stripe) B.box(w + .06, .5, d + .06, v.stripe, cx, h - .9, cz);
+        // 窓
+        const wc = v.wc || "#BFE3F5", fl = Math.max(1, Math.floor((h - 1) / 3.2));
+        const face = (len, fn) => { const n = Math.max(1, Math.floor(len / 3)); for (let i = 0; i < n; i++) for (let f = 0; f < fl; f++) { const t = (i + .5) / n * len, y = 1.9 + f * 3.2; if (y > h - .8) continue; fn(t, y) } };
+        face(w, (t, y) => { for (const [z, s] of [[b.z0, -1], [b.z1, 1]]) { B.box(1.3, 1.5, .1, "#F7F5EF", b.x0 + t, y, z + s * .03); B.box(1.1, 1.3, .12, wc, b.x0 + t, y, z + s * .04) } });
+        face(d, (t, y) => { for (const [x, s] of [[b.x0, -1], [b.x1, 1]]) { B.box(.1, 1.5, 1.3, "#F7F5EF", x + s * .03, y, b.z0 + t); B.box(.12, 1.3, 1.1, wc, x + s * .04, y, b.z0 + t) } });
+        if (v.door === "big") { B.box(w * .5, Math.min(6, h - 1.5), .14, "#6E747C", cx, Math.min(6, h - 1.5) / 2, b.z1 + .02); for (let y = .6; y < Math.min(6, h - 1.5); y += .5) B.box(w * .5, .05, .16, "#5E646C", cx, y, b.z1 + .03) }
+        else { B.box(1.3, 2.2, .14, "#6E4524", cx, 1.1, b.z1 + .03); B.box(1.3, 2.2, .14, "#6E4524", cx, 1.1, b.z0 - .03) }
+        if (v.aw) { const n = Math.max(4, Math.round(w / .7)); for (let i = 0; i < n; i++) B.box(w / n + .01, .08, 1.4, i % 2 ? "#FFFFFF" : v.aw, b.x0 + (i + .5) * w / n, 3.1, b.z1 + .6, 0, .35) }
+        if (v.roof === "gable") { const rh = d * .32, a = Math.atan2(rh, d / 2), Ls = Math.hypot(rh, d / 2) + .5; B.gable(w, d, rh, col, cx, h, cz); for (const s of [-1, 1]) B.box(w + .7, .2, Ls, v.rc || "#8B3A2A", cx, h + rh / 2 + .08, cz + s * d / 4, 0, s * a) }
+        else if (v.roof === "arch") { const g = new T.CylinderGeometry(d / 2, d / 2, w, 16, 1, false, 0, Math.PI); g.rotateZ(Math.PI / 2); const gg = g.toNonIndexed(); gg.translate(cx, h, cz); B.L.push({ g: gg, col: v.rc }) }
+        else { B.box(w + .1, .5, .3, phShade(col, -.15), cx, h + .25, b.z0); B.box(w + .1, .5, .3, phShade(col, -.15), cx, h + .25, b.z1); B.box(.3, .5, d, phShade(col, -.15), b.x0, h + .25, cz); B.box(.3, .5, d, phShade(col, -.15), b.x1, h + .25, cz); B.box(1.6, 1, 1.6, "#9AA0A6", cx + w * .2, h + .5, cz) }
+      }
     }
-    return false;
+    // そのほかの物
+    for (const o of M.objs) {
+      if (o.k === "tree") {
+        const s = o.s, gcs = [["#2E8B3E", "#3FA04E", "#4DB05A"], ["#3A7F2E", "#4A9A3A", "#5CB048"], ["#2F7A44", "#3D9A55", "#52AE62"]][o.c];
+        B.cyl(.18 * s, .3 * s, 2.6 * s, "#7A5230", o.x, 1.3 * s, o.z, 7);
+        if (o.kind === "pine") { for (let i = 0; i < 3; i++) B.cone((1.9 - i * .45) * s, 2.2 * s, gcs[i], o.x, (2.5 + i * 1.3) * s, o.z, 8) }
+        else { B.sph(1.55 * s, gcs[0], o.x, 3.2 * s, o.z, 1, .9, 1); B.sph(1.05 * s, gcs[1], o.x + .7 * s, 3.8 * s, o.z + .3 * s); B.sph(.95 * s, gcs[2], o.x - .6 * s, 3.9 * s, o.z - .4 * s); B.sph(.8 * s, gcs[1], o.x + .1 * s, 4.5 * s, o.z) }
+      } else if (o.k === "bigrock") { B.sph(o.s, "#8A847A", o.x, o.s * .45, o.z, 1.1, .95, 1, 0); B.sph(o.s * .6, "#9C968A", o.x + o.s * .5, o.s * .9, o.z - o.s * .2, 1, 1, 1, 0); B.sph(o.s * .3, "#4C9A44", o.x - o.s * .3, o.s * 1.25, o.z, 1.4, .5, 1.4, 1) }
+      else if (o.k === "fountain") { B.cyl(3.6, 3.8, .7, "#C9C2B6", o.x, .35, o.z, 24); B.cyl(3.2, 3.2, .1, "#5AA8E0", o.x, .68, o.z, 24); B.cyl(.4, .6, 1.6, "#C9C2B6", o.x, 1.4, o.z, 12); B.cyl(1.4, .5, .3, "#C9C2B6", o.x, 2.2, o.z, 16); B.cyl(1.2, 1.2, .05, "#5AA8E0", o.x, 2.36, o.z, 16); B.sph(.35, "#BDE6FA", o.x, 2.7, o.z, 1, 1.6, 1) }
+      else if (o.k === "carousel") {
+        B.cyl(6, 6.2, .6, "#E8D6B0", o.x, .3, o.z, 28); B.cyl(1, 1, 5.5, "#F2C230", o.x, 3.2, o.z, 12); B.cone(6.6, 2.4, "#D9302C", o.x, 7, o.z, 16); B.cone(6.65, 2.4, "#FFFFFF", o.x, 6.95, o.z, 8); B.cyl(6.6, 6.6, .5, "#F2C230", o.x, 5.7, o.z, 28); B.sph(.4, "#F2C230", o.x, 8.4, o.z);
+        for (let i = 0; i < 10; i++) { const a = i / 10 * 6.28, x = o.x + Math.cos(a) * 4.6, z = o.z + Math.sin(a) * 4.6; B.cyl(.05, .05, 5.2, "#E8C870", x, 3.2, z, 6); B.box(.35, .55, 1.1, i % 2 ? "#FFFFFF" : "#E8A0C0", x, 1.6 + (i % 3) * .3, z, -a); B.box(.25, .45, .3, i % 2 ? "#FFFFFF" : "#E8A0C0", x + Math.cos(a + 1.57) * .5, 2.1 + (i % 3) * .3, z + Math.sin(a + 1.57) * .5, -a) }
+      } else if (o.k === "teacups") {
+        B.cyl(7, 7, .35, "#F2B8D0", o.x, .18, o.z, 32); B.sph(1.4, "#F5F0FF", o.x, 1.6, o.z, 1, .9, 1); B.cone(.6, .8, "#E86AC0", o.x, 3, o.z, 12);
+        const cs = ["#E84A4A", "#3B8FE0", "#F2C230", "#4CC46A", "#9A6AE0", "#F28A3C"]; for (let i = 0; i < 6; i++) { const a = i / 6 * 6.28, x = o.x + Math.cos(a) * 4.5, z = o.z + Math.sin(a) * 4.5; B.cyl(1.25, .85, 1.0, cs[i], x, .85, z, 18); B.cyl(1.05, 1.05, .05, "#FFFFFF", x, 1.34, z, 18); B.cyl(.12, .12, .6, "#DDD", x, 1.2, z, 8) }
+      } else if (o.k === "ferris") {
+        const H = 15, R0 = 12; for (const dz of [-1.4, 1.4]) { B.seg(o.x - 6.5, 0, o.z + dz, o.x, H, o.z + dz, .35, .35, "#E8E8E8"); B.seg(o.x + 6.5, 0, o.z + dz, o.x, H, o.z + dz, .35, .35, "#E8E8E8"); B.tor(R0, .18, "#F2F2F2", o.x, H, o.z + dz, 0, 0) }
+        B.cyl(.5, .5, 3.2, "#AAAAAA", o.x, H, o.z, 12, Math.PI / 2); const cs = ["#E84A4A", "#3B8FE0", "#F2C230", "#4CC46A", "#9A6AE0", "#F28A3C"];
+        for (let i = 0; i < 16; i++) { const a = i / 16 * 6.28, x = o.x + Math.cos(a) * R0, y = H + Math.sin(a) * R0; B.seg(o.x, H, o.z - 1.4, x, y, o.z - 1.4, .1, .1, "#DDDDDD"); B.seg(o.x, H, o.z + 1.4, x, y, o.z + 1.4, .1, .1, "#DDDDDD"); if (i % 2 === 0) { B.box(1.4, 1.3, 1.4, cs[(i / 2) % 6], x, y - 1.2, o.z); B.box(1.5, .1, 1.5, "#FFFFFF", x, y - .5, o.z) } }
+      } else if (o.k === "coaster") {
+        const P = o.pts; for (let i = 0; i < P.length - 1; i++) { const [x1, y1, z1] = P[i], [x2, y2, z2] = P[i + 1]; for (const dz of [-.5, .5]) B.seg(x1, y1, z1 + dz, x2, y2, z2 + dz, .12, .12, "#D9302C"); B.seg(x1, y1 - .1, z1, x2, y2 - .1, z2, .2, .15, "#B0B0B0"); if (i % 3 === 0) B.cyl(.2, .25, y1, "#E8E8E8", x1, y1 / 2, z1, 8) }
+        for (let k = 0; k < 4; k++) { const [x, y, z] = P[20 + k]; B.box(1.4, .8, 1.1, ["#2F6FD0", "#F2C230", "#2FA04A", "#E86AC0"][k], x, y + .5, z) }
+      } else if (o.k === "castle") {
+        const x0 = 52, z0 = 32, x1 = 78, z1 = 56, cw = "#EFE6F0", rf = "#4A78D0";
+        B.box(x1 - x0, 10, z1 - z0, cw, 65, 5, 44); for (let x = x0; x <= x1; x += 1.6) { B.box(.8, .8, .8, cw, x, 10.4, z0); B.box(.8, .8, .8, cw, x, 10.4, z1) } for (let z = z0; z <= z1; z += 1.6) { B.box(.8, .8, .8, cw, x0, 10.4, z); B.box(.8, .8, .8, cw, x1, 10.4, z) }
+        for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { B.cyl(3, 3.2, 17, "#F5EEF6", x, 8.5, z, 16); B.cyl(3.3, 3.3, .6, "#E0D4E6", x, 17.2, z, 16); B.cone(3.6, 7, rf, x, 21, z, 16); B.sph(.3, "#F2C230", x, 24.7, z) }
+        B.box(14, 14, 12, "#F5EEF6", 65, 17, 44); B.cone(5, 9, rf, 65, 28.5, 44, 16); for (const [x, z] of [[59, 39], [71, 39], [59, 49], [71, 49]]) { B.cyl(1.6, 1.6, 22, "#F5EEF6", x, 11, z, 12); B.cone(2, 6, "#5A88E0", x, 25, z, 12) } B.cyl(1.4, 1.4, 6, "#F5EEF6", 65, 33, 44, 12); B.cone(1.8, 8, rf, 65, 40, 44, 12); B.sph(.4, "#F2C230", 65, 44.2, 44);
+        B.box(5, 6.5, .4, "#4A3020", 65, 3.25, z1 + .1); B.cyl(2.5, 2.5, .41, "#4A3020", 65, 6.5, z1 + .1, 16, Math.PI / 2);
+        for (let x = 55; x < 77; x += 4) for (const y of [6, 13, 20]) { if (y > 10 && (x < 58 || x > 72)) continue; B.box(1, 1.8, .2, "#3A5A9A", x, y, y > 10 ? 37.9 : z1 + .05); B.box(1, 1.8, .2, "#3A5A9A", x, y, y > 10 ? 50.1 : z0 - .05) }
+      } else if (o.k === "tower") { for (const [dx, dz] of [[-2, -2], [2, -2], [-2, 2], [2, 2]]) B.seg(o.x + dx, 0, o.z + dz, o.x + dx * .7, 11, o.z + dz * .7, .3, .3, "#6A5A4A"); B.cyl(3, 3, 4, "#8A6A4A", o.x, 13, o.z, 16); B.cone(3.3, 1.6, "#5A4A3A", o.x, 15.8, o.z, 16) }
+    }
+    // 空と天井
+    if (M.indoor) { const cg = new T.PlaneGeometry(M.W, M.D); cg.rotateX(Math.PI / 2); cg.translate(M.W / 2, 3, M.D / 2); const cm = new T.Mesh(cg, new T.MeshStandardMaterial({ color: "#F7F4EE", roughness: 1 })); scene.add(cm); ms.push(cm); for (let x = 4; x < M.W; x += 8) for (let z = 4; z < M.D; z += 8) B.cyl(.35, .35, .06, "#FFFBEA", x, 2.97, z, 12) }
+    const g = phMerge(B.L, true), mesh = new T.Mesh(g, mat); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); ms.push(mesh);
+    // 草むら・花（たくさん並べる）
+    if (!M.indoor) {
+      const grassy = (x, z) => (M.ground === "grass" ? !M.floors.some((f) => x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1 && f.t !== "grass2" && f.t !== "grass") : M.floors.some((f) => (f.t === "grass" || f.t === "grass2") && x > f.x0 && x < f.x1 && z > f.z0 && z < f.z1)) && !M.water.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
+      const tg = new T.BufferGeometry(), tp = [], tc = []; for (let k = 0; k < 3; k++) { const a = k * 2.1, cx = Math.cos(a) * .12, cz = Math.sin(a) * .12, ox = Math.cos(a + 1.57) * .08, oz = Math.sin(a + 1.57) * .08; tp.push(cx - ox, 0, cz - oz, cx + ox, 0, cz + oz, cx * 1.8, .38, cz * 1.8); tc.push(.22, .45, .15, .22, .45, .15, .5, .8, .3) }
+      tg.setAttribute("position", new T.Float32BufferAttribute(tp, 3)); tg.setAttribute("color", new T.Float32BufferAttribute(tc, 3)); tg.computeVertexNormals();
+      const n = Math.min(6000, Math.floor(M.W * M.D / 3)), im = new T.InstancedMesh(tg, new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide }), n), m4 = new T.Matrix4(); let k = 0;
+      for (let t = 0; t < n * 3 && k < n; t++) { const x = Math.random() * M.W, z = Math.random() * M.D; if (!grassy(x, z)) continue; const s = .45 + Math.random() * .6; m4.makeRotationY(Math.random() * 6.28).scale(new T.Vector3(s, s, s)).setPosition(x, 0, z); im.setMatrixAt(k++, m4) }
+      im.count = k; im.instanceMatrix.needsUpdate = true; scene.add(im); ms.push(im);
+      const fg = new T.IcosahedronGeometry(.07, 0), nf = Math.min(1500, Math.floor(M.W * M.D / 12)), fm = new T.InstancedMesh(fg, new T.MeshLambertMaterial(), nf), fc = ["#FFFFFF", "#F2D230", "#E86AC0", "#E84A4A", "#9A6AE0"].map((h) => new T.Color(h)); k = 0;
+      for (let t = 0; t < nf * 3 && k < nf; t++) { const x = Math.random() * M.W, z = Math.random() * M.D; if (!grassy(x, z)) continue; m4.makeTranslation(x, .25 + Math.random() * .1, z); fm.setMatrixAt(k, m4); fm.setColorAt(k, fc[k % 5]); k++ }
+      fm.count = k; fm.instanceMatrix.needsUpdate = true; if (fm.instanceColor) fm.instanceColor.needsUpdate = true; scene.add(fm); ms.push(fm);
+      // 雲
+      const cl = phParts(); for (let i = 0; i < 14; i++) { const a = i / 14 * 6.28 + .3, R0 = 140 + (i % 3) * 30, x = M.W / 2 + Math.cos(a) * R0, z = M.D / 2 + Math.sin(a) * R0, y = 45 + (i % 4) * 8; for (let j = 0; j < 4; j++) cl.sph(6 + (j % 2) * 3, "#FFFFFF", x + j * 6 - 9, y + (j % 2) * 2, z, 1.2, .55, 1) }
+      const cm = new T.Mesh(phMerge(cl.L, false), new T.MeshBasicMaterial({ vertexColors: true, fog: false })); scene.add(cm); ms.push(cm);
+    }
+    return { ms, mat, wmat, texs };
+  }
+  // 人の形（鬼＝黒と赤の服とリュック、隠れる人＝青い服）。正面は +z
+  function phChar(kind) {
+    const T = THREE, g = new T.Group(), mats = {};
+    const P = kind === "hunt" ? { top: "#2A2B30", pants: "#1E1F24", acc: "#D92C2C", cap: "#D92C2C", shoe: "#D92C2C" } : { top: "#3A7BD5", pants: "#2B4A7A", acc: "#F2C230", cap: "#F2C230", shoe: "#F5F5F5" };
+    const mesh = (geo, col, x, y, z, parent = g) => { const m = new T.Mesh(geo, mats[col] || (mats[col] = new T.MeshStandardMaterial({ color: col, roughness: .75 }))); m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m };
+    const pivot = (x, y, z) => { const p = new T.Group(); p.position.set(x, y, z); g.add(p); return p };
+    const legL = pivot(-.13, .86, 0), legR = pivot(.13, .86, 0);
+    for (const L of [legL, legR]) { mesh(new T.BoxGeometry(.2, .78, .22), P.pants, 0, -.4, 0, L); mesh(new T.BoxGeometry(.22, .13, .34), P.shoe, 0, -.8, .05, L) }
+    mesh(new T.BoxGeometry(.5, .62, .3), P.top, 0, 1.17, 0); mesh(new T.BoxGeometry(.52, .1, .32), P.pants, 0, .87, 0);
+    mesh(new T.BoxGeometry(.44, .52, .22), P.acc, 0, 1.18, -.25); if (kind === "hunt") { mesh(new T.BoxGeometry(.46, .07, .23), "#151517", 0, 1.32, -.26); mesh(new T.BoxGeometry(.46, .07, .23), "#151517", 0, 1.06, -.26) }
+    const armL = pivot(-.34, 1.43, 0), armR = pivot(.34, 1.43, 0);
+    for (const A of [armL, armR]) { mesh(new T.BoxGeometry(.15, .58, .17), P.top, 0, -.28, 0, A); mesh(new T.BoxGeometry(.13, .12, .13), "#F2C9A0", 0, -.62, 0, A) }
+    mesh(new T.BoxGeometry(.14, .1, .14), "#F2C9A0", 0, 1.51, 0); mesh(new T.SphereGeometry(.19, 16, 12), "#F2C9A0", 0, 1.69, 0);
+    mesh(new T.SphereGeometry(.2, 16, 8, 0, Math.PI * 2, 0, 1.55), P.cap, 0, 1.72, 0); mesh(new T.BoxGeometry(.25, .03, .2), P.cap, 0, 1.75, .2);
+    for (const x of [-.07, .07]) mesh(new T.SphereGeometry(.026, 8, 6), "#222", x, 1.7, .175);
+    const tip = new T.Object3D();
+    if (kind === "hunt") { mesh(new T.BoxGeometry(.11, .6, .15), "#222226", 0, -.78, .02, armR); mesh(new T.BoxGeometry(.12, .2, .2), "#D92C2C", 0, -.62, .08, armR); tip.position.set(0, -1.1, 0); armR.add(tip) }
+    return { g, legL, legR, armL, armR, tip };
+  }
+  // 変身した物につく目（隠れる側の画面だけに出る）
+  function phEyes() {
+    const T = THREE, g = new T.Group(), wm = new T.MeshStandardMaterial({ color: "#FFFFFF", roughness: .4 }), bm = new T.MeshStandardMaterial({ color: "#111111", roughness: .4 });
+    for (const x of [-.11, .11]) { const e = new T.Mesh(new T.SphereGeometry(.09, 12, 10), wm); e.position.set(x, 0, 0); g.add(e); const p = new T.Mesh(new T.SphereGeometry(.045, 8, 6), bm); p.position.set(x, .01, -.07); g.add(p) }
+    return g;
+  }
+  const PH_KEYS = Object.keys(PH_PROPS);
+  const phAng = (a) => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a };
+  function phRayBox(o, d, b, tmax) {
+    let t0 = 0, t1 = tmax;
+    for (const [oo, dd, lo, hi] of [[o.x, d.x, b.x0, b.x1], [o.y, d.y, 0, b.h], [o.z, d.z, b.z0, b.z1]]) {
+      if (Math.abs(dd) < 1e-9) { if (oo < lo || oo > hi) return -1; continue }
+      let ta = (lo - oo) / dd, tb = (hi - oo) / dd; if (ta > tb) [ta, tb] = [tb, ta]; if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) return -1;
+    }
+    return t0;
+  }
+  function phRayCyl(o, d, cx, cz, rr, y0, hh, tmax) {
+    const ox = o.x - cx, oz = o.z - cz, A = d.x * d.x + d.z * d.z, Bq = 2 * (ox * d.x + oz * d.z), Cq = ox * ox + oz * oz - rr * rr; let best = -1;
+    if (Cq <= 0 && o.y >= y0 && o.y <= y0 + hh) return 0;
+    if (A > 1e-9) { const disc = Bq * Bq - 4 * A * Cq; if (disc >= 0) { const t = (-Bq - Math.sqrt(disc)) / (2 * A); if (t > 0 && t < tmax) { const y = o.y + d.y * t; if (y >= y0 && y <= y0 + hh) best = t } } }
+    if (d.y < -1e-6) { const t = (y0 + hh - o.y) / d.y; if (t > 0 && t < tmax && (best < 0 || t < best)) { const x = ox + d.x * t, z = oz + d.z * t; if (x * x + z * z <= rr * rr) best = t } }
+    return best;
   }
   ACTION.hide = {
     full: true,
     shell() {
-      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("かくれんぼ", "隠れて、探して、2ラウンド勝負")}
-        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="かくれんぼのマップ"></canvas><div id="act-msg"></div>
-        <p class="muted">画面をなぞると動きます。2ラウンドで鬼を交代。<b>隠れる番</b>：はじめの${HS_HIDE_T}秒で隠れる場所へ。茂み・箱・クローゼットなどに入ると、鬼がすぐ近くに来ないかぎり見つかりません。鬼の赤い範囲に入ると見つかります（壁のかげは安全）。見つかった仲間は「おり」にさわると助けられます。<b>鬼の番</b>：赤い範囲で見つけよう。隠れている場所は近づくと見えます。時間内に全員見つけたら鬼の勝ち。</p></section></section>`;
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("かくれんぼ", "物に変身して隠れる・撃って探す")}
+        <section class="card act" style="padding:12px;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:relative;z-index:1" aria-label="かくれんぼの3Dマップ"></canvas><div id="act-msg"></div>
+        <div class="kpad" style="z-index:3"><div class="grp"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
+          <div class="grp col"><button class="kbtn small" id="b-jump">ジャンプ</button><button class="kbtn big" id="b-act" style="font-size:17px;line-height:1.15">撃つ</button></div></div>
+        <p class="muted">左下のスティックで歩き、画面をなぞると向きが変わります。2ラウンドで鬼を交代。<b>隠れる番</b>：まん中の点を近くの物（ゴミ箱・ベンチ・たる・ソファなど）に合わせて「へんしん」すると、その物になれます。同じ物のとなりでじっとしていると見つかりにくい。動くとばれやすく、ときどき「ピーッ」と音が出ます。3回撃たれると見つかります。<b>鬼の番</b>：はじめの${PH_HIDE}秒は目かくし。あやしい物をねらって「撃つ」。本物の物を撃つと体力が減り、0になると負け。時間内に全員見つけたら鬼の勝ち。パソコンは WASD で歩く・←→で向き・スペースでへんしん／撃つ・J でジャンプ。</p></section></section>`;
     },
     mount() {
-      const host = isFirst();
-      const ST = HS_STAGES[me.m.stage || 0] || HS_STAGES[0];
-      const M = hsMap(ST, me.m.seed % 1000);
-      const cv = $("#cv"); const { c, w, h, top } = fullCanvas(cv);
-      const VIEW = ST.id === "house" ? 470 : 540, k = w / VIEW;
-      const two = () => !!realOppPeer();
-      // 登場人物：0=ホスト、1=あいて（ふたりのとき）かCPU、2・3=CPU
-      const E = [0, 1, 2, 3].map((i) => ({ i, x: M.spawnHide.x, y: M.spawnHide.y, fa: 0, caught: false, hid: false, tp: 0, path: null, pathT: 0, goal: null, cpuT: 0, catchT: null, vx: 0, vy: 0 }));
-      const myIdx = host ? 0 : 1;
-      let S = { round: 0, ph: "lobby", t: 0, seeker: 0, res: [], msg: "", msgT: 0 }, lastSend = "", seenTp = -1, inp = { x: 0, y: 0 }, drag = null, flash = null;
-      const isHuman = (i) => i === 0 || (i === 1 && two());
-      const seekerOf = (round) => round === 0 ? 0 : 1;
-      cv.addEventListener("pointerdown", (e) => { e.preventDefault(); const rc = cv.getBoundingClientRect(); drag = { id: e.pointerId, x: e.clientX, y: e.clientY, ox: e.clientX - rc.left, oy: e.clientY - rc.top }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
-      cv.addEventListener("pointermove", (e) => { if (!drag || e.pointerId !== drag.id) return; let dx = e.clientX - drag.x, dy = e.clientY - drag.y; const d = Math.hypot(dx, dy), R = 44; if (d > R) { dx *= R / d; dy *= R / d } inp = { x: dx / R, y: dy / R } });
-      const end = () => { drag = null; inp = { x: 0, y: 0 } }; cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
-      const hit = (x, y) => M.block.some((o) => x + HS_R > o.x && x - HS_R < o.x + o.w && y + HS_R > o.y && y - HS_R < o.y + o.h);
-      function moveE(e, dx, dy) { if (!hit(e.x + dx, e.y)) e.x += dx; if (!hit(e.x, e.y + dy)) e.y += dy; e.x = clamp(e.x, 20, M.W - 20); e.y = clamp(e.y, 20, M.H - 20) }
-      const inHide = (e) => M.hides.some((q) => Math.hypot(q.x - e.x, q.y - e.y) < q.r);
-      const CONE = 210, CANG = 0.62;
-      // 鬼から見えるか（赤い範囲の中・壁にさえぎられない・隠れ場所の中ならすぐ近くだけ）
-      function sees(sk, e) {
-        const dx = e.x - sk.x, dy = e.y - sk.y, d = Math.hypot(dx, dy);
-        if (d < 34) return true;
-        if (d > CONE) return false;
-        let da = Math.atan2(dy, dx) - sk.fa; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
-        if (Math.abs(da) > CANG) return false;
-        if (hsSeg(M, sk.x, sk.y, e.x, e.y)) return false;
-        return !e.hid || d < 70;
-      }
-      function placeAll() {
-        E.forEach((e, i) => {
-          const sk = i === S.seeker; const sp = sk ? M.spawnSeek : M.spawnHide;
-          e.x = sp.x + (sk ? 0 : (i - 1.5) * 40); e.y = sp.y + (sk ? 0 : (i % 2) * 30); if (hit(e.x, e.y)) { e.x = sp.x; e.y = sp.y }
-          e.caught = false; e.hid = false; e.tp++; e.path = null; e.goal = null; e.catchT = null; e.fa = -Math.PI / 2; e.target = null; e.rescue = false; e.visit = null; e.lastSeen = null;
-        });
-      }
-      // ---- コンピューター
-      function goTo(e, tx, ty, sp, dt) {
-        e.pathT -= dt;
-        if (!e.path || e.pathT <= 0 || !e.goal || Math.hypot(e.goal[0] - tx, e.goal[1] - ty) > 40) { e.path = hsPath(M, e.x, e.y, tx, ty); e.goal = [tx, ty]; e.pathT = 0.8 }
-        while (e.path.length && Math.hypot(e.path[0][0] - e.x, e.path[0][1] - e.y) < 14) e.path.shift();
-        if (!e.path.length) return true;
-        const [px, py] = e.path[0], dx = px - e.x, dy = py - e.y, d = Math.hypot(dx, dy) || 1, s = Math.min(d, sp * dt);
-        moveE(e, (dx / d) * s, (dy / d) * s); e.fa = Math.atan2(dy, dx); return false;
-      }
-      function cpuHider(e, dt, sk) {
-        if (e.caught) return;
-        const ds = Math.hypot(sk.x - e.x, sk.y - e.y), danger = S.ph === "seek" && ds < 230 && !hsSeg(M, sk.x, sk.y, e.x, e.y);
-        e.cpuT -= dt;
-        if (!e.target || (danger && e.cpuT <= 0)) {
-          // 鬼から遠い隠れ場所を選ぶ
-          let best = null, bs = -1e9;
-          for (let j = 0; j < 8; j++) { const q = M.hides[Math.floor(Math.random() * M.hides.length)]; const sc = Math.hypot(q.x - sk.x, q.y - sk.y) - Math.hypot(q.x - e.x, q.y - e.y) * 0.5 + Math.random() * 120; if (sc > bs && !E.some((o) => o !== e && o.target === q)) { bs = sc; best = q } }
-          e.target = best; e.cpuT = 2 + Math.random() * 2;
-        }
-        const jailed = E.some((o) => o.caught && o.i !== S.seeker);
-        if (jailed && S.ph === "seek" && Math.hypot(sk.x - M.jail.x, sk.y - M.jail.y) > 420 && Math.random() < 0.004) e.rescue = true;
-        if (e.rescue) { if (goTo(e, M.jail.x, M.jail.y, 150, dt) || !jailed) e.rescue = false; return }
-        if (e.target) goTo(e, e.target.x, e.target.y, danger ? 150 : 120, dt);
-      }
-      function cpuSeeker(e, dt) {
-        if (S.ph !== "seek") return;
-        const vis = E.filter((o) => o !== e && !o.caught && sees(e, o));
-        if (vis.length) { const t = vis[0]; goTo(e, t.x, t.y, 138, dt); e.lastSeen = [t.x, t.y]; return }
-        if (e.lastSeen) { if (goTo(e, e.lastSeen[0], e.lastSeen[1], 132, dt)) e.lastSeen = null; return }
-        if (!e.visit || !e.target) { e.visit = e.visit || new Set(); const cand = M.hides.filter((q, qi) => !e.visit.has(qi)); if (!cand.length) e.visit.clear(); let best = null, bd = 1e9; for (const q of cand) { const d = Math.hypot(q.x - e.x, q.y - e.y) + Math.random() * 200; if (d < bd) { bd = d; best = q } } e.target = best }
-        if (e.target && goTo(e, e.target.x, e.target.y, 125, dt)) { e.visit.add(M.hides.indexOf(e.target)); e.target = null; e.fa += Math.PI }
-      }
-      // ---- ホストの計算
-      function hostStep(dt, gx) {
-        const sk = E[S.seeker];
-        if (S.ph === "lobby") { if (me.s.rdy && (!opp() || !realOppPeer() || (oppS() && oppS().rdy))) { S.ph = "hide"; S.t = HS_HIDE_T; S.seeker = seekerOf(S.round); placeAll() } return }
-        if (S.ph === "rres") { S.t -= dt; if (S.t <= 0) { if (S.round === 0) { S.round = 1; S.seeker = seekerOf(1); S.ph = "hide"; S.t = HS_HIDE_T; placeAll() } else S.ph = "end" } return }
-        if (S.ph === "end") return;
-        S.t -= dt;
-        if (S.ph === "hide" && S.t <= 0) { S.ph = "seek"; S.t = ST.seek }
-        // あいて（ふたりのとき）
-        if (two() && gx && gx.px != null) { const g = E[1]; if (!g.caught && !(S.ph === "hide" && S.seeker === 1)) { g.x = gx.px; g.y = gx.py; g.fa = gx.fa } }
-        for (const e of E) { if (!isHuman(e.i)) { if (e.i === S.seeker) cpuSeeker(e, dt); else if (S.ph !== "lobby") cpuHider(e, dt, sk) } e.hid = !e.caught && e.i !== S.seeker && inHide(e) }
-        if (S.ph === "seek") {
-          for (const e of E) {
-            if (e.i === S.seeker || e.caught) continue;
-            if (sees(sk, e)) { e.caught = true; e.catchT = ST.seek - S.t; e.x = M.jail.x + (e.i - 1.5) * 18; e.y = M.jail.y; e.tp++; S.msg = `${nameOf(e.i)}を見つけた！`; S.msgT = 1.6 }
-            else if (E.some((o) => o.caught && o.i !== S.seeker) && Math.hypot(e.x - M.jail.x, e.y - M.jail.y) < 42) {
-              E.forEach((o) => { if (o.caught && o.i !== S.seeker) { o.caught = false; o.x = M.jail.x + (Math.random() - 0.5) * 60; o.y = M.jail.y + 46; o.tp++ } }); S.msg = `${nameOf(e.i)}が仲間を助けた！`; S.msgT = 1.6;
-            }
-          }
-          const left = E.filter((e) => e.i !== S.seeker && !e.caught).length;
-          if (left === 0 || S.t <= 0) {
-            const humanHider = two() ? (S.seeker === 0 ? 1 : 0) : (S.seeker === 0 ? null : 0);
-            S.res = [...S.res, { seeker: S.seeker, caught: E.filter((e) => e.i !== S.seeker && e.caught).length, total: E.length - 1, hh: humanHider, hhCaught: humanHider != null ? E[humanHider].caught : null, hhT: humanHider != null ? E[humanHider].catchT : null }];
-            S.ph = "rres"; S.t = 4.5;
-          }
-        }
-        S.msgT = Math.max(0, S.msgT - dt);
-      }
-      const nameOf = (i) => (i === myIdx ? "あなた" : isHuman(i) ? oppName() : "CPU");
-      // ---- 描画
-      const rr = (x, y, w2, h2, col) => { c.fillStyle = col; c.fillRect(x, y, w2, h2) };
-      function drawSpot(q) {
-        const x = q.x, y = q.y, s = q.r;
-        if (q.k === "bush" || q.k === "fern" || q.k === "plant") { c.fillStyle = q.k === "fern" ? "#2F8A3A" : "#3E9E45"; for (const [ox, oy, rad] of [[-0.45, 0.1, 0.6], [0.45, 0.1, 0.6], [0, -0.35, 0.65], [0, 0.3, 0.6]]) { c.beginPath(); c.arc(x + ox * s, y + oy * s, rad * s, 0, 7); c.fill() } c.fillStyle = "rgba(255,255,255,.15)"; c.beginPath(); c.arc(x - 0.2 * s, y - 0.45 * s, 0.25 * s, 0, 7); c.fill() }
-        else if (q.k === "tree") { c.fillStyle = "#7A5230"; c.fillRect(x - 5, y, 10, s * 0.6); c.fillStyle = "#2E8B3E"; c.beginPath(); c.arc(x, y - 4, s, 0, 7); c.fill(); c.fillStyle = "#3FA04E"; c.beginPath(); c.arc(x - s * 0.3, y - s * 0.35, s * 0.55, 0, 7); c.fill() }
-        else if (q.k === "box") { rr(x - s, y - s * 0.8, s * 2, s * 1.6, "#C9965C"); rr(x - s, y - s * 0.15, s * 2, s * 0.25, "#E3C089"); c.strokeStyle = "#8E6236"; c.lineWidth = 2; c.strokeRect(x - s, y - s * 0.8, s * 2, s * 1.6) }
-        else if (q.k === "barrel") { c.fillStyle = "#8E5A2F"; c.beginPath(); c.ellipse(x, y, s * 0.8, s, 0, 0, 7); c.fill(); c.strokeStyle = "#5E3A1A"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - s * 0.8, y - s * 0.3); c.lineTo(x + s * 0.8, y - s * 0.3); c.moveTo(x - s * 0.8, y + s * 0.3); c.lineTo(x + s * 0.8, y + s * 0.3); c.stroke() }
-        else if (q.k === "trash") { rr(x - s * 0.6, y - s * 0.7, s * 1.2, s * 1.4, "#5E8C6A"); rr(x - s * 0.7, y - s * 0.85, s * 1.4, s * 0.25, "#46705A") }
-        else if (q.k === "costume") { rr(x - s, y - s * 0.7, s * 2, s * 1.4, "#E8E0F0"); c.fillStyle = "#C89BE0"; c.beginPath(); c.arc(x, y - s * 0.1, s * 0.5, 0, 7); c.fill() }
-        else if (q.k === "closet") { rr(x - s, y - s * 0.9, s * 2, s * 1.8, "#8A5A34"); c.fillStyle = "#E3C089"; c.fillRect(x - 2, y - s * 0.7, 4, s * 1.4) }
-        else if (q.k === "curtain") { rr(x - s, y - s * 0.9, s * 2, s * 1.8, "#D96C8A"); c.strokeStyle = "#B04D6B"; c.lineWidth = 2; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(x + i * s * 0.35, y - s * 0.9); c.lineTo(x + i * s * 0.35, y + s * 0.9); c.stroke() } }
-        else { rr(x - s, y - s * 0.6, s * 2, s * 1.2, "#7A6A9A") }
-      }
-      function person(e, col, alpha, label, isSeeker) {
-        c.globalAlpha = alpha;
-        c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(e.x, e.y + 11, 12, 5, 0, 0, 7); c.fill();
-        c.fillStyle = col; c.beginPath(); c.arc(e.x, e.y + 2, 11, 0, 7); c.fill();
-        c.fillStyle = "#F2C9A0"; c.beginPath(); c.arc(e.x, e.y - 10, 8.5, 0, 7); c.fill();
-        const fx = Math.cos(e.fa), fy = Math.sin(e.fa); c.fillStyle = "#222"; c.fillRect(e.x + fx * 3 - 3 - fy * 3, e.y - 12 + fy * 2, 2, 2.5); c.fillRect(e.x + fx * 3 + 1 + fy * 3, e.y - 12 + fy * 2, 2, 2.5);
-        if (isSeeker) { c.fillStyle = "#D92C2C"; c.beginPath(); c.arc(e.x, e.y - 13, 8.5, Math.PI, 0); c.fill() }
-        c.globalAlpha = 1;
-        if (label) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "rgba(20,18,42,.7)"; const tw = c.measureText(label).width + 8; c.fillRect(e.x - tw / 2, e.y - 34, tw, 14); c.fillStyle = "#fff"; c.fillText(label, e.x, e.y - 27) }
-      }
-      function cone(sk) {
-        const pts = [[sk.x, sk.y]];
-        for (let i = 0; i <= 24; i++) {
-          const a = sk.fa - CANG + (2 * CANG * i) / 24, ex = sk.x + Math.cos(a) * CONE, ey = sk.y + Math.sin(a) * CONE;
-          let lo = 0, hi = 1; if (hsSeg(M, sk.x, sk.y, ex, ey)) { for (let j = 0; j < 9; j++) { const mid = (lo + hi) / 2; if (hsSeg(M, sk.x, sk.y, sk.x + (ex - sk.x) * mid, sk.y + (ey - sk.y) * mid)) hi = mid; else lo = mid } } else lo = 1;
-          pts.push([sk.x + (ex - sk.x) * lo, sk.y + (ey - sk.y) * lo]);
-        }
-        c.fillStyle = "rgba(255,40,40,.28)"; c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.closePath(); c.fill();
-        c.strokeStyle = "rgba(255,60,60,.55)"; c.lineWidth = 2; c.stroke();
-        c.fillStyle = "rgba(255,40,40,.18)"; c.beginPath(); c.arc(sk.x, sk.y, 34, 0, 7); c.fill();
-      }
-      function draw() {
-        const meE = E[myIdx], iSeek = S.seeker === myIdx && S.ph !== "lobby";
-        c.fillStyle = "#3B3B45"; c.fillRect(0, 0, w, h);
-        c.save(); c.translate(w / 2, top + (h - top) * 0.5); c.scale(k, k); c.translate(-meE.x, -meE.y);
-        rr(0, 0, M.W, M.H, ST.ground);
-        for (const d of M.decor) rr(d.x, d.y, d.w, d.h, d.col);
-        for (const o of M.water) { rr(o.x, o.y, o.w, o.h, o.col); c.fillStyle = "rgba(255,255,255,.25)"; for (let i = 0; i < 4; i++) c.fillRect(o.x + 20 + i * o.w / 4, o.y + o.h / 2 + Math.sin(performance.now() / 500 + i) * 6, 22, 3) }
-        for (const o of M.low) { rr(o.x, o.y, o.w, o.h, o.col); rr(o.x, o.y + o.h - 6, o.w, 6, "rgba(0,0,0,.18)") }
-        // おり
-        c.strokeStyle = "#555"; c.lineWidth = 3; c.fillStyle = "rgba(80,80,80,.18)"; c.beginPath(); c.arc(M.jail.x, M.jail.y, 40, 0, 7); c.fill(); for (let a = 0; a < 12; a++) { const an = (a / 12) * Math.PI * 2; c.beginPath(); c.moveTo(M.jail.x + Math.cos(an) * 34, M.jail.y + Math.sin(an) * 34); c.lineTo(M.jail.x + Math.cos(an) * 42, M.jail.y + Math.sin(an) * 42); c.stroke() }
-        c.font = `12px ${DISP}`; c.textAlign = "center"; c.fillStyle = "#444"; c.fillText("おり", M.jail.x, M.jail.y - 50);
-        for (const q of M.hides) drawSpot(q);
-        if (S.ph === "seek" || S.ph === "hide") cone(E[S.seeker]);
-        // 人（鬼から見えない人は鬼の画面には出さない）
-        for (const e of [...E].sort((a, b) => a.y - b.y)) {
-          const isSk = e.i === S.seeker && S.ph !== "lobby";
-          const visible = !iSeek || e.i === myIdx || e.caught || isSk || (S.ph === "seek" && sees(E[S.seeker], e)) || S.ph === "rres" || S.ph === "end";
-          if (!visible) continue;
-          const col = isSk ? "#D92C2C" : e.i === myIdx ? "#2E7BE6" : isHuman(e.i) ? "#F08A3C" : ["#3DBE5A", "#A45BE0", "#F2B233", "#3DBE5A"][e.i];
-          person(e, col, e.hid ? 0.5 : 1, e.i === myIdx ? "あなた" : isHuman(e.i) ? oppName().slice(0, 5) : isSk ? "鬼" : "", isSk);
-        }
-        // 建物（上に重ねて、うしろに隠れられるように少し透かす）
-        for (const o of M.solid) { rr(o.x, o.y, o.w, o.h, o.col); rr(o.x, o.y + o.h - 10, o.w, 10, "rgba(0,0,0,.22)"); c.strokeStyle = "rgba(0,0,0,.25)"; c.lineWidth = 2; c.strokeRect(o.x, o.y, o.w, o.h) }
-        c.font = `22px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; for (const l of M.labels) { c.fillStyle = "rgba(20,18,42,.55)"; c.fillText(l.t, l.x, l.y) }
-        // 建物のうしろにいても自分の位置はうすく見せる
-        if (M.solid.some((o) => meE.x > o.x && meE.x < o.x + o.w && meE.y - 20 > o.y && meE.y - 20 < o.y + o.h)) person(meE, iSeek ? "#D92C2C" : "#2E7BE6", 0.45, "", iSeek);
-        c.restore();
-        // 隠れる時間は鬼の画面を暗くする
-        if (S.ph === "hide" && iSeek) { c.fillStyle = "rgba(10,10,20,.88)"; c.fillRect(0, 0, w, h); bigText(c, "目をつぶって数えています", w / 2, h * 0.42, 22, "#fff"); bigText(c, String(Math.ceil(S.t)), w / 2, h * 0.52, 60, "#FFE14D") }
-        // 上の表示
-        const HY = top + 50;
-        c.fillStyle = "rgba(20,18,42,.75)"; c.fillRect(8, HY, 170, S.ph === "seek" ? 70 : 52);
-        c.font = `13px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D";
-        c.fillText(S.ph === "lobby" ? ST.name : `ラウンド${S.round + 1}/2　${iSeek ? "あなたが鬼" : "隠れる番"}`, 14, HY + 14);
-        c.fillStyle = "#fff"; c.font = `18px ${DISP}`;
-        const left = E.filter((e) => e.i !== S.seeker && !e.caught).length;
-        c.fillText(S.ph === "hide" ? `隠れる ${Math.ceil(S.t)}秒` : S.ph === "seek" ? `のこり ${Math.ceil(S.t)}秒` : "", 14, HY + 36);
-        if (S.ph === "seek") { c.font = `13px ${DISP}`; c.fillStyle = "#FF9B91"; c.fillText(`隠れている ${left}人`, 14, HY + 58) }
-        // 小さい地図
-        const mw = 92, mh = mw * M.H / M.W, mx = w - mw - 8, my = HY;
-        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(mx, my, mw, mh); const ms = mw / M.W;
-        c.fillStyle = "rgba(255,255,255,.35)"; for (const o of M.solid) c.fillRect(mx + o.x * ms, my + o.y * ms, Math.max(1, o.w * ms), Math.max(1, o.h * ms));
-        c.fillStyle = "#4FA3E0"; for (const o of M.water) c.fillRect(mx + o.x * ms, my + o.y * ms, o.w * ms, o.h * ms);
-        c.fillStyle = "#888"; c.fillRect(mx + M.jail.x * ms - 2, my + M.jail.y * ms - 2, 4, 4);
-        for (const e of E) { const isSk = e.i === S.seeker && S.ph !== "lobby"; if (iSeek && !isSk && e.i !== myIdx && !e.caught) continue; c.fillStyle = e.i === myIdx ? "#46CBF3" : isSk ? "#FF4D4D" : "#7CF59A"; c.beginPath(); c.arc(mx + e.x * ms, my + e.y * ms, e.i === myIdx ? 3 : 2.4, 0, 7); c.fill() }
-        if (S.msgT > 0 && S.msg) bigText(c, S.msg, w / 2, top + (h - top) * 0.3, 24, "#FFE14D");
-        if (meE.caught && S.ph === "seek") bigText(c, "見つかった！仲間を待とう", w / 2, top + (h - top) * 0.72, 20, "#FF9B91");
-        if (drag) { c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; c.beginPath(); c.arc(drag.ox, drag.oy, 44, 0, 7); c.stroke(); c.fillStyle = "rgba(255,255,255,.5)"; c.beginPath(); c.arc(drag.ox + inp.x * 44, drag.oy + inp.y * 44, 15, 0, 7); c.fill() }
-      }
-      function roundText(r, idx) {
-        const mineSeek = r.seeker === myIdx;
-        if (two()) { const won = mineSeek ? r.hhCaught : !r.hhCaught; return `ラウンド${idx + 1}（${mineSeek ? "あなたが鬼" : "あなたが隠れる"}）：${won ? "勝ち" : "負け"}` }
-        return mineSeek ? `ラウンド${idx + 1}（あなたが鬼）：${r.caught}/${r.total}人 見つけた${r.caught === r.total ? "（勝ち）" : ""}` : `ラウンド${idx + 1}（あなたが隠れる）：${r.hhCaught ? "見つかった（負け）" : "逃げきった（勝ち）"}`;
-      }
-      function frame(dt) {
-        const op = rtOppPeer(), ox = op ? op.presence.x : null;
-        if (!host && ox && ox.S) { S = Object.assign({}, ox.S) }
-        // 自分を動かす
-        const meE = E[myIdx];
-        let ix = inp.x, iy = inp.y;
-        if (keys.has("ArrowLeft") || keys.has("a")) ix = -1; if (keys.has("ArrowRight") || keys.has("d")) ix = 1; if (keys.has("ArrowUp") || keys.has("w")) iy = -1; if (keys.has("ArrowDown") || keys.has("s")) iy = 1;
-        const m = Math.hypot(ix, iy); if (m > 1) { ix /= m; iy /= m }
-        const frozen = meE.caught || S.ph === "lobby" || S.ph === "rres" || S.ph === "end" || (S.ph === "hide" && S.seeker === myIdx);
-        if (!frozen && m > 0.1) { const sp = S.seeker === myIdx ? 140 : 150; moveE(meE, ix * sp * dt, iy * sp * dt); meE.fa = Math.atan2(iy, ix) }
-        if (host) {
-          hostStep(dt, ox);
-          const out = { E: E.map((e) => [Math.round(e.x), Math.round(e.y), r2(e.fa), (e.caught ? 1 : 0) | (e.hid ? 2 : 0), e.tp]), S: { round: S.round, ph: S.ph, t: Math.round(S.t * 10) / 10, seeker: S.seeker, res: S.res, msg: S.msg, msgT: Math.round(S.msgT * 10) / 10 } };
-          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        } else {
-          if (ox && ox.E) ox.E.forEach((a, i) => { const e = E[i]; if (i === myIdx) { if (a[4] !== seenTp) { seenTp = a[4]; e.x = a[0]; e.y = a[1] } e.caught = !!(a[3] & 1); e.hid = !!(a[3] & 2); return } const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.y += (a[1] - e.y) * al; e.fa = a[2]; e.caught = !!(a[3] & 1); e.hid = !!(a[3] & 2) });
-          const out = { px: Math.round(meE.x), py: Math.round(meE.y), fa: r2(meE.fa) }, js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        }
-        draw();
-        if (S.ph === "lobby") {
-          if (!me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${HS_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="hide-stage" data-i="${i}">${st.name}</button>`).join("")}</div><button class="btn" data-act="act-ready">準備OK</button><p class="muted">${realOppPeer() ? "ふたりとも押すとスタート。1ラウンド目は" + (host ? "あなた" : esc(oppName())) + "が鬼" : "1ラウンド目はあなたが鬼、2ラウンド目はあなたが隠れる番"}</p>`);
-          else setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
-        } else if (S.ph === "rres") {
-          const r = S.res[S.res.length - 1]; setMsg(`<p class="verdict">${roundText(r, S.res.length - 1)}</p><p class="muted">${S.round === 0 ? "まもなく鬼を交代します" : ""}</p>`);
-        } else if (S.ph === "end") {
-          let msg = S.res.map((r, i) => `<p>${roundText(r, i)}</p>`).join("");
-          let verdict = "";
-          if (two()) {
-            const myWins = S.res.filter((r) => (r.seeker === myIdx ? r.hhCaught : !r.hhCaught)).length, opWins = 2 - myWins;
-            if (myWins !== opWins) verdict = myWins > opWins ? "あなたの勝ち！" : "あなたの負け…";
-            else { const mine = S.res.find((r) => r.seeker === myIdx), theirs = S.res.find((r) => r.seeker !== myIdx); if (mine.hhCaught && theirs.hhCaught) verdict = mine.hhT < theirs.hhT ? "あなたの勝ち！（早く見つけた）" : mine.hhT > theirs.hhT ? "あなたの負け…（見つけるのがおそかった）" : "引き分け！"; else verdict = "引き分け！" }
-          } else { const wins = S.res.filter((r) => (r.seeker === myIdx ? r.caught === r.total : !r.hhCaught)).length; verdict = `${wins}勝${2 - wins}敗` }
-          setMsg(`<p class="verdict ${verdict.includes("勝ち") ? "good" : verdict.includes("負け") ? "bad" : ""}">${verdict}</p>${msg}${againBtns("hide")}`);
-        } else setMsg("");
-      }
-      return loop(frame);
+      let alive = true, stop = null;
+      setMsg(`<p class="wait">3Dのマップを読み込んでいます</p>`);
+      phLoad().then(() => { if (!alive) return; try { stop = phRun() } catch (e) { console.error(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("hide")}`) } })
+        .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("hide")}`) });
+      return () => { alive = false; if (stop) stop() };
     },
   };
+  function phRun() {
+    const T = THREE, host = isFirst(), ST = PH_STAGES[me.m.stage || 0] || PH_STAGES[0], M = phMap(ST, (me.m.seed || 1) % 100000);
+    const cv = $("#cv"), gl = $("#gl"); const { c, w, h, top, bottom } = fullCanvas(cv);
+    gl.style.width = w + "px"; gl.style.height = h + "px";
+    const mobile = matchMedia("(pointer: coarse)").matches;
+    const renderer = new T.WebGLRenderer({ canvas: gl, antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.6 : 2)); renderer.setSize(w, h, false);
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene();
+    const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#9CCDF3"); gr.addColorStop(1, "#E4F2FA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
+    scene.background = new T.CanvasTexture(skc);
+    scene.fog = M.indoor ? new T.Fog("#E9E2D6", 22, 55) : new T.Fog("#CFE5F5", 60, 175);
+    const camera = new T.PerspectiveCamera(60, w / h, .08, 420);
+    scene.add(new T.HemisphereLight(M.indoor ? "#FFF6E6" : "#D8ECFF", M.indoor ? "#8A7058" : "#5E7F3E", M.indoor ? .9 : .72));
+    const sun = new T.DirectionalLight("#FFF0D6", M.indoor ? .55 : 1.0); sun.castShadow = true; const SR = M.indoor ? 22 : 34;
+    sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048); Object.assign(sun.shadow.camera, { left: -SR, right: SR, top: SR, bottom: -SR, near: 1, far: 160 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
+    scene.add(sun, sun.target);
+    const W3 = phBuild(M, scene);
+    // ---- 登場人物：0=ホスト、1=あいて（ふたりのとき）かCPU、2・3=CPU
+    const E = [0, 1, 2, 3].map((i) => ({ i, x: M.spawnHide.x + (i - 1.5) * 1.2, z: M.spawnHide.z, y: 0, vy: 0, yaw: Math.PI, form: -1, hp: 100, caught: false, tp: 0, mv: false, taunt: 0, tauntAt: 99, path: null, pathT: 0, goal: null, plan: null, sus: {}, fireCd: 0, decT: 0, inv: null, wander: null, catchT: null, hitT: 0, lastHp: 100 }));
+    const myIdx = host ? 0 : 1, two = () => !!realOppPeer(), isHuman = (i) => i === 0 || (i === 1 && two());
+    const nameOf = (i) => (i === myIdx ? "あなた" : isHuman(i) ? oppName() : "CPU");
+    let S = { round: 0, ph: "lobby", t: 0, seeker: 0, res: [], msg: "", msgT: 0 }, fxList = [], fxId = 0, lastGuestShot = 0, seenFx = 0, seenTp = -1, lastSend = "";
+    let camYaw = Math.PI, camPitch = -.2, fireCd = 0, shotId = 0, myShots = [], floats = [], hurtT = 0, aimProp = -1, lastBtn = "", myHpSeen = 100, prevTaunt = [0, 0, 0, 0];
+    const vis = E.map(() => { const root = new T.Group(); scene.add(root); const hunt = phChar("hunt"), hide = phChar("hide"); root.add(hunt.g, hide.g); const pg = new T.Group(); root.add(pg); const eyes = phEyes(); pg.add(eyes); return { root, hunt, hide, pg, eyes, forms: {}, form: null, formMesh: null, px: 0, pz: 0, ph: 0 } });
+    function setForm(v, type) {
+      if (v.form === type) return; if (v.formMesh) v.formMesh.visible = false; v.formMesh = null;
+      if (type) { let m = v.forms[type]; if (!m) { const b2 = phParts(); PH_PROPS[type].b(b2); m = new T.Mesh(phMerge(b2.L, true), W3.mat); m.castShadow = m.receiveShadow = true; v.pg.add(m); v.forms[type] = m } m.visible = true; v.formMesh = m; const P = PH_PROPS[type]; v.eyes.position.set(0, Math.max(.22, P.h * .7), -P.r * .8) }
+      v.form = type;
+    }
+    const ring = new T.Mesh(new T.RingGeometry(.88, 1, 32), new T.MeshBasicMaterial({ color: "#7CF59A", transparent: true, opacity: .85, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.visible = false; scene.add(ring);
+    // ---- 効果（弾の線・当たったときの煙）
+    const fxs = [];
+    function showShot(a, b, code) {
+      const lg = new T.BufferGeometry().setFromPoints([new T.Vector3(...a), new T.Vector3(...b)]), ln = new T.Line(lg, new T.LineBasicMaterial({ color: "#FFE680", transparent: true }));
+      const fl = new T.Mesh(new T.SphereGeometry(.12, 8, 6), new T.MeshBasicMaterial({ color: "#FFE680", transparent: true })); fl.position.set(...a);
+      const pf = new T.Group(), col = code >= 100 ? "#EAF2FF" : code >= 0 ? "#FF5A5A" : "#C8C0B0", pm = new T.MeshLambertMaterial({ color: col, transparent: true });
+      for (let i = 0; i < 7; i++) { const s = new T.Mesh(new T.IcosahedronGeometry(.1 + Math.random() * .14, 0), i % 2 && code >= 100 ? new T.MeshLambertMaterial({ color: "#6FA8F0", transparent: true }) : pm); s.position.set((Math.random() - .5) * .5, (Math.random() - .5) * .4, (Math.random() - .5) * .5); pf.add(s) }
+      pf.position.set(...b); scene.add(ln, fl, pf); fxs.push({ ln, fl, pf, t: 0 });
+      const me2 = E[myIdx], dd = Math.hypot(a[0] - me2.x, a[2] - me2.z); sfx("shot", clamp(1.2 - dd / 40, 0, 1));
+    }
+    function stepFx(dt) {
+      for (let i = fxs.length - 1; i >= 0; i--) {
+        const f = fxs[i]; f.t += dt; f.ln.material.opacity = Math.max(0, 1 - f.t / .12); f.fl.material.opacity = Math.max(0, 1 - f.t / .08);
+        const k = f.t / .6; f.pf.scale.setScalar(.4 + k * 1.6); f.pf.position.y += dt * .6; f.pf.children.forEach((s) => (s.material.opacity = Math.max(0, 1 - k)));
+        if (f.t > .6) { scene.remove(f.ln, f.fl, f.pf); f.ln.geometry.dispose(); f.ln.material.dispose(); f.fl.geometry.dispose(); f.fl.material.dispose(); f.pf.children.forEach((s) => { s.geometry.dispose(); s.material.dispose() }); fxs.splice(i, 1) }
+      }
+    }
+    // ---- 音
+    let actx = null;
+    const au = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume() } catch (_) {} return actx };
+    function sfx(kind, vol = 1) {
+      const a = actx; if (!a || vol <= .03) return; const t = a.currentTime, g = a.createGain(); g.connect(a.destination);
+      if (kind === "shot") { const n = Math.floor(a.sampleRate * .12), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); const s = a.createBufferSource(); s.buffer = buf; g.gain.value = .3 * vol; s.connect(g); s.start(t) }
+      else { const o = a.createOscillator(); o.type = kind === "taunt" ? "sine" : "triangle"; const f0 = kind === "taunt" ? 1400 : kind === "pop" ? 520 : 260, f1 = kind === "taunt" ? 2400 : kind === "pop" ? 980 : 110, len = kind === "taunt" ? .45 : .16; o.frequency.setValueAtTime(f0, t); o.frequency.linearRampToValueAtTime(f1, t + len * .45); if (kind === "taunt") o.frequency.linearRampToValueAtTime(1500, t + len); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime((kind === "taunt" ? .16 : .22) * vol, t + .02); g.gain.linearRampToValueAtTime(0, t + len); o.connect(g); o.start(t); o.stop(t + len + .05) }
+    }
+    // ---- 当たり判定
+    const blocked = (x, z, rad) => {
+      if (x < rad || z < rad || x > M.W - rad || z > M.D - rad) return true;
+      for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
+      for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
+      for (const cc of M.circles) { const dx = cc.x - x, dz = cc.z - z, rr = cc.r + rad; if (dx * dx + dz * dz < rr * rr) return true }
+      for (const p of M.props) { const dx = p.x - x, dz = p.z - z, rr = p.cr + rad; if (dx * dx + dz * dz < rr * rr) return true }
+      return false;
+    };
+    const radOf = (e) => (e.form >= 0 ? Math.min(.45, PH_PROPS[PH_KEYS[e.form]].r * .9) : .34);
+    function moveE(e, dx, dz) { const rad = radOf(e); if (!blocked(e.x + dx, e.z, rad)) e.x += dx; if (!blocked(e.x, e.z + dz, rad)) e.z += dz }
+    const losClear = (ax, az, bx, bz) => { const o = { x: ax, y: 1.4, z: az }, d = { x: bx - ax, y: 0, z: bz - az }; for (const b of M.boxes) { if (b.h < 1.5) continue; const t = phRayBox(o, d, b, 1); if (t >= 0 && t < 1) return false } return true };
+    function castRay(o, d, maxT, minT, forTransform) {
+      let best = maxT, code = -9;
+      for (const b of M.boxes) { const t = phRayBox(o, d, b, best); if (t >= minT && t < best) { best = t; code = -2 } }
+      for (const cc of M.circles) { const t = phRayCyl(o, d, cc.x, cc.z, cc.r, 0, cc.h, best); if (t >= minT && t < best) { best = t; code = -2 } }
+      M.props.forEach((p, k) => { const P = PH_PROPS[p.type], t = phRayCyl(o, d, p.x, p.z, P.r * .82, 0, P.h, best); if (t >= minT && t < best) { best = t; code = 100 + k } });
+      if (!forTransform) for (const e of E) { if (e.i === S.seeker || e.caught || S.ph === "lobby") continue; const P = e.form >= 0 ? PH_PROPS[PH_KEYS[e.form]] : null, t = phRayCyl(o, d, e.x, e.z, P ? P.r * .85 : .36, e.y, P ? P.h : 1.8, best); if (t >= minT && t < best) { best = t; code = e.i } }
+      if (d.y < 0) { const t = -o.y / d.y; if (t >= minT && t < best) { best = t; code = -1 } }
+      return { t: best, code, p: [o.x + d.x * best, o.y + d.y * best, o.z + d.z * best] };
+    }
+    // ---- コンピューター
+    function goTo(e, tx, tz, sp, dt, keepYaw) {
+      e.pathT -= dt;
+      if (!e.path || e.pathT <= 0 || !e.goal || Math.hypot(e.goal[0] - tx, e.goal[1] - tz) > 1.5) { e.path = phPath(M, e.x, e.z, tx, tz); e.goal = [tx, tz]; e.pathT = 1.6 }
+      while (e.path.length && Math.hypot(e.path[0][0] - e.x, e.path[0][1] - e.z) < .35) e.path.shift();
+      const [px, pz] = e.path.length ? e.path[0] : [tx, tz], dx = px - e.x, dz = pz - e.z, d = Math.hypot(dx, dz);
+      if (!e.path.length && d < .2) return true;
+      const s = Math.min(d, sp * dt), ox = e.x, oz = e.z; moveE(e, (dx / (d || 1)) * s, (dz / (d || 1)) * s);
+      if (Math.hypot(e.x - ox, e.z - oz) < s * .25) { e.stuck = (e.stuck || 0) + dt; if (e.stuck > .8) { e.stuck = 0; e.path = null; moveE(e, (Math.random() - .5) * .6, (Math.random() - .5) * .6); if (!e.path && e.plan && !e.path) e.plan.tries = (e.plan.tries || 0) + 1 } } else e.stuck = 0;
+      if (!keepYaw && d > .05) e.yaw = Math.atan2(dx, dz);
+      return false;
+    }
+    function cpuPick(e) {
+      const hn = E[S.seeker]; let best = null, bs = -1e9;
+      for (let k = 0; k < 50; k++) {
+        const p = M.props[Math.floor(Math.random() * M.props.length)], d0 = Math.hypot(p.x - e.x, p.z - e.z); if (d0 > (S.ph === "hide" ? 50 : 30)) continue;
+        const type = Math.random() < .8 ? p.type : M.types[Math.floor(Math.random() * M.types.length)], P = PH_PROPS[type];
+        const a = Math.random() * 6.28, dd = PH_PROPS[p.type].r + P.r + .2 + Math.random() * 1.4, x = p.x + Math.cos(a) * dd, z = p.z + Math.sin(a) * dd;
+        if (blocked(x, z, Math.min(.45, P.r * .9) + .05) || M.props.some((q) => Math.hypot(q.x - x, q.z - z) < PH_PROPS[q.type].r + P.r * .9)) continue;
+        if (E.some((o) => o !== e && o.plan && Math.hypot(o.plan.x - x, o.plan.z - z) < 5)) continue;
+        const sc = Math.hypot(x - hn.x, z - hn.z) * .5 + Math.random() * 14 - d0 * .2;
+        if (sc > bs) { bs = sc; best = { x, z, type, yaw: p.ry } }
+      }
+      return best;
+    }
+    function cpuHider(e, dt) {
+      if (e.caught) { e.mv = false; return }
+      if (e.hp !== e.lastHp) { if (Math.random() < .6) e.flee = true; e.lastHp = e.hp }
+      if (!e.plan || e.flee || (e.plan.tries || 0) > 3) { const pl = cpuPick(e); if (pl) { e.plan = pl; e.form = PH_KEYS.indexOf(pl.type); e.yaw = pl.yaw; e.path = null } e.flee = false }
+      if (!e.plan) return;
+      if (goTo(e, e.plan.x, e.plan.z, 4.0, dt, true)) e.mv = false; else e.mv = true;
+    }
+    function cpuHunter(e, dt) {
+      if (S.ph !== "seek") return;
+      e.fireCd -= dt; e.decT -= dt;
+      const hs = E.filter((o) => o.i !== e.i && !o.caught);
+      for (const o of hs) if (o.taunt > 1.4 && Math.hypot(o.x - e.x, o.z - e.z) < 45) e.inv = { x: o.x + (Math.random() - .5) * 8, z: o.z + (Math.random() - .5) * 8 };
+      let best = null;
+      for (const o of hs) {
+        const d = Math.hypot(o.x - e.x, o.z - e.z), ang = Math.abs(phAng(Math.atan2(o.x - e.x, o.z - e.z) - e.yaw)); let s = e.sus[o.i] || 0;
+        if (d < 17 && (ang < 1.1 || d < 3) && losClear(e.x, e.z, o.x, o.z)) s += (o.form < 0 ? 5 : o.mv ? 1.7 : o.taunt > 0 ? 1.3 : .3 * (1 - d / 17) + (o.hp < 100 ? .35 : 0)) * dt;
+        else s = Math.max(0, s - dt * .06);
+        e.sus[o.i] = s; if (s > 1 && (!best || s > e.sus[best.i])) best = o;
+      }
+      const gun = () => [e.x + Math.sin(e.yaw) * .55 + Math.cos(e.yaw) * .3, 1.35, e.z + Math.cos(e.yaw) * .55 - Math.sin(e.yaw) * .3];
+      if (best) {
+        const d = Math.hypot(best.x - e.x, best.z - e.z), want = Math.atan2(best.x - e.x, best.z - e.z);
+        if (d > 6) goTo(e, best.x, best.z, 4.2, dt); e.mv = d > 6;
+        e.yaw += clamp(phAng(want - e.yaw), -dt * 6, dt * 6);
+        if (e.fireCd <= 0 && Math.abs(phAng(want - e.yaw)) < .3) { e.fireCd = .6; const P = best.form >= 0 ? PH_PROPS[PH_KEYS[best.form]] : null; if (Math.random() < .7) applyShot(e.i, best.i, gun(), [best.x, best.y + (P ? P.h * .5 : 1), best.z]); else applyShot(e.i, -1, gun(), [best.x + (Math.random() - .5) * 2.5, 0, best.z + (Math.random() - .5) * 2.5]) }
+        return;
+      }
+      if (e.decT <= 0) {
+        e.decT = 2 + Math.random() * 3.5; const cand = [];
+        M.props.forEach((p, k) => { const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < 9 && d > 1.5 && Math.abs(phAng(Math.atan2(p.x - e.x, p.z - e.z) - e.yaw)) < 1 && losClear(e.x, e.z, p.x, p.z)) cand.push(k) });
+        if (cand.length && Math.random() < .4) { const k = cand[Math.floor(Math.random() * cand.length)], p = M.props[k]; e.yaw = Math.atan2(p.x - e.x, p.z - e.z); e.mv = false; applyShot(e.i, 100 + k, gun(), [p.x, PH_PROPS[p.type].h * .5, p.z]); return }
+      }
+      if (!e.inv && !e.wander) { const p = M.props[Math.floor(Math.random() * M.props.length)]; e.wander = { x: p.x + 1.4, z: p.z + 1.4 } }
+      const tg = e.inv || e.wander; e.mv = true;
+      if (goTo(e, tg.x, tg.z, 3.8, dt) || (e.stuck || 0) > .7) { e.inv = null; e.wander = null; e.decT = Math.min(e.decT, .4) }
+    }
+    // ---- ホストの計算
+    function applyShot(sh, code, a, b) {
+      if (S.ph !== "seek" || sh !== S.seeker) return; const hn = E[sh];
+      if (code >= 100) hn.hp = Math.max(0, hn.hp - PH_MISS);
+      else if (code >= 0) { const t = E[code]; if (t && t.i !== S.seeker && !t.caught) { t.hp = Math.max(0, t.hp - PH_HIT); t.hitT = .4; if (t.hp <= 0) { t.caught = true; t.catchT = ST.seek - S.t; t.mv = false; S.msg = `${nameOf(t.i)}を見つけた！`; S.msgT = 2.2 } } }
+      fxList.push([++fxId, sh, ...a.map(r2), ...b.map(r2), code]); if (fxList.length > 8) fxList.shift();
+      if (sh !== myIdx) showShot(a, b, code);
+    }
+    function startRound(rn) {
+      S.round = rn; S.seeker = rn === 0 ? 0 : 1; S.ph = "hide"; S.t = PH_HIDE;
+      E.forEach((e, i) => {
+        const sk = i === S.seeker, sp = sk ? M.spawnHunt : M.spawnHide; let x = sp.x + (sk ? 0 : (i - 1.5) * 1.3), z = sp.z + (sk ? 0 : (i % 2) * 1.2); if (blocked(x, z, .4)) { x = sp.x; z = sp.z }
+        Object.assign(e, { x, z, y: 0, vy: 0, yaw: Math.PI, form: -1, hp: 100, caught: false, mv: false, taunt: 0, tauntAt: 99, path: null, goal: null, plan: null, sus: {}, fireCd: 0, decT: 2, inv: null, wander: null, catchT: null, hitT: 0, lastHp: 100, flee: false }); e.tp++;
+      });
+      { const m = E[myIdx]; camYaw = Math.atan2(M.W / 2 - m.x, M.D / 2 - m.z) }
+    }
+    function hostStep(dt, gx) {
+      if (S.ph === "lobby") { if (me.s.rdy && (!two() || (oppS() && oppS().rdy))) startRound(0); return }
+      if (S.ph === "rres") { S.t -= dt; if (S.t <= 0) { if (S.round === 0) startRound(1); else S.ph = "end" } return }
+      if (S.ph === "end") return;
+      S.t -= dt; S.msgT = Math.max(0, S.msgT - dt);
+      if (S.ph === "hide" && S.t <= 0) { S.ph = "seek"; S.t = ST.seek; E.forEach((e) => (e.tauntAt = 12 + e.i * 4 + Math.random() * 6)) }
+      if (two() && gx && gx.px != null) {
+        const g = E[1]; if (!g.caught) { g.x = gx.px; g.z = gx.pz; g.y = gx.y || 0; g.yaw = gx.yaw; g.form = gx.form; g.mv = !!gx.mv }
+        for (const s of gx.sh || []) if (s[0] > lastGuestShot) { lastGuestShot = s[0]; applyShot(1, s[1], s.slice(2, 5), s.slice(5, 8)) }
+      }
+      for (const e of E) { e.hitT = Math.max(0, e.hitT - dt); if (!isHuman(e.i)) { if (e.i === S.seeker) cpuHunter(e, dt); else cpuHider(e, dt) } }
+      if (S.ph === "seek") {
+        for (const e of E) { if (e.i === S.seeker || e.caught) { e.taunt = 0; continue } e.taunt = Math.max(0, e.taunt - dt); e.tauntAt -= dt; if (e.tauntAt <= 0) { e.taunt = 1.6; e.tauntAt = 17 + Math.random() * 10 } }
+        const hn = E[S.seeker], left = E.filter((e) => e.i !== S.seeker && !e.caught).length;
+        if (left === 0 || S.t <= 0 || hn.hp <= 0) {
+          const hh = two() ? (S.seeker === 0 ? 1 : 0) : S.seeker === 0 ? null : 0;
+          if (hn.hp <= 0) { S.msg = "鬼の体力がなくなった！"; S.msgT = 2.5 }
+          S.res = [...S.res, { seeker: S.seeker, caught: 3 - left, total: 3, hh, hhCaught: hh != null ? E[hh].caught : null, hhT: hh != null ? E[hh].catchT : null, dead: hn.hp <= 0 }];
+          S.ph = "rres"; S.t = 5;
+        }
+      }
+    }
+    // ---- 操作
+    const stickInp = controlPad($("#stick"), $("#knob"));
+    let look = null;
+    cv.addEventListener("pointerdown", (e) => { au(); if (look) return; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
+    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; camYaw -= (e.clientX - look.x) * .0075; camPitch = clamp(camPitch - (e.clientY - look.y) * .005, -.8, .45); look.x = e.clientX; look.y = e.clientY });
+    const lend = (e) => { if (look && e.pointerId === look.id) look = null }; cv.addEventListener("pointerup", lend); cv.addEventListener("pointercancel", lend);
+    const bAct = $("#b-act"), bJump = $("#b-jump");
+    const actSt = holdBtn(bAct, () => { au(); onAct() }); holdBtn(bJump, () => { au(); jump() });
+    const onKey = (e) => { if (e.target.tagName === "INPUT") return; if (e.key === " " && !e.repeat) { e.preventDefault(); au(); onAct() } if ((e.key === "j" || e.key === "J") && !e.repeat) jump() };
+    addEventListener("keydown", onKey);
+    const iHunt = () => S.seeker === myIdx && S.ph !== "lobby";
+    function jump() { const m = E[myIdx]; if (m.y <= .01 && !m.caught && S.ph !== "lobby" && !(S.ph === "hide" && iHunt())) m.vy = 5.2 }
+    function onAct() {
+      const m = E[myIdx]; if (m.caught) return;
+      if (iHunt()) { if (S.ph === "seek") fire() }
+      else if (S.ph === "hide" || S.ph === "seek") { if (aimProp >= 0) { const p = M.props[aimProp]; m.form = PH_KEYS.indexOf(p.type); m.yaw = p.ry; sfx("pop"); floats.push({ txt: `${PH_PROPS[p.type].n}になった！`, col: "#7CF59A", t: 0 }) } }
+    }
+    let camDist = 3;
+    function aim() { return { o: camera.position.clone(), d: new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion) } }
+    function fire() {
+      if (fireCd > 0) return; fireCd = .32; const m = E[myIdx];
+      const { o, d } = aim(), hit = castRay(o, d, 60, camDist - .1, false);
+      const tp = new T.Vector3(); vis[myIdx].hunt.tip.getWorldPosition(tp); const a = [tp.x, tp.y, tp.z];
+      showShot(a, hit.p, hit.code);
+      if (hit.code >= 100) floats.push({ txt: `ちがう！ 体力 -${PH_MISS}`, col: "#FF8A80", t: 0 }); else if (hit.code >= 0) floats.push({ txt: "あたり！", col: "#FFE14D", t: 0 });
+      if (host) applyShot(myIdx, hit.code, a, hit.p); else { myShots.push([++shotId, hit.code, ...a.map(r2), ...hit.p.map(r2)]); if (myShots.length > 8) myShots.shift() }
+      m.recoil = .12;
+    }
+    // ---- 表示の更新
+    const tmpV = new T.Vector3();
+    function updVis(dt, t) {
+      const iH = iHunt();
+      for (const e of E) {
+        const v = vis[e.i], isHn = e.i === S.seeker && S.ph !== "lobby";
+        const show = S.ph === "lobby" ? e.i === myIdx : !e.caught;
+        v.hunt.g.visible = show && isHn; v.hide.g.visible = show && !isHn && e.form < 0;
+        setForm(v, show && !isHn && e.form >= 0 ? PH_KEYS[e.form] : null); v.eyes.visible = !iH && !!v.form;
+        v.root.position.set(e.x, e.y, e.z); v.hunt.g.rotation.y = v.hide.g.rotation.y = v.pg.rotation.y = e.yaw;
+        const sp = Math.hypot(e.x - v.px, e.z - v.pz) / Math.max(dt, 1e-3); v.px = e.x; v.pz = e.z; const k = clamp(sp / 3.5, 0, 1); v.ph += sp * dt * 3.4;
+        const ch = isHn ? v.hunt : v.hide, sw = Math.sin(v.ph) * .7 * k, air = e.y > .05;
+        ch.legL.rotation.x = air ? -.5 : sw; ch.legR.rotation.x = air ? .3 : -sw;
+        if (isHn) { const pitch = e.i === myIdx ? camPitch : 0, rc = e.recoil || 0; ch.armR.rotation.x = -1.5 - pitch - rc * 2; ch.armL.rotation.x = -1.3 - pitch; ch.armL.rotation.z = -.45; e.recoil = Math.max(0, rc - dt) }
+        else { ch.armL.rotation.x = -sw * .8; ch.armR.rotation.x = sw * .8 }
+        v.pg.position.y = e.taunt > 0 ? Math.abs(Math.sin(t * 18)) * .12 : 0;
+        const hs = e.hitT > 0 ? 1 + Math.sin(e.hitT * 40) * .06 : 1; v.pg.scale.set(hs, 1 / hs, hs);
+        // ピーッの音（立ち上がりで1回）
+        if (e.taunt > 0 && !prevTaunt[e.i] && !e.caught) { const m = E[myIdx]; sfx("taunt", e.i === myIdx ? .7 : clamp(1.1 - Math.hypot(e.x - m.x, e.z - m.z) / 45, 0, 1)) }
+        prevTaunt[e.i] = e.taunt > 0 ? 1 : 0;
+      }
+    }
+    function project(x, y, z) { tmpV.set(x, y, z).project(camera); if (tmpV.z > 1 || tmpV.z < -1) return null; return [(tmpV.x + 1) / 2 * w, (1 - tmpV.y) / 2 * h] }
+    function updCam(dt) {
+      const m = E[myIdx], iH = iHunt(), P = m.form >= 0 && !iH ? PH_PROPS[PH_KEYS[m.form]] : null;
+      const th = P ? Math.max(1.05, P.h + .45) : 1.85, d0 = iH ? 4.4 : P ? 3.4 + P.r * 1.5 : 4.2;
+      const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), sh = iH ? .7 : 0;
+      const tg = new T.Vector3(m.x + rx * sh, m.y + th, m.z + rz * sh), back = dir.clone().negate();
+      // カメラが壁の向こうに出ないように、少しずらした5本の線で確かめる（ドアのすきまを通りぬけない）
+      let dist = d0; for (const [ox, oy] of M.indoor ? [[0, 0], [.95, 0], [-.95, 0], [0, .35], [0, -.35]] : [[0, 0], [.4, 0], [-.4, 0], [0, .35], [0, -.35]]) { const o2 = new T.Vector3(tg.x + rx * ox, tg.y + oy, tg.z + rz * ox); for (const b of M.boxes) { const t = phRayBox(o2, back, b, dist); if (t >= 0 && t < dist) dist = t } for (const cc of M.circles) { const t = phRayCyl(o2, back, cc.x, cc.z, cc.r, 0, cc.h, dist); if (t >= 0 && t < dist) dist = t } }
+      dist = Math.max(.5, dist - .25); camDist = dist;
+      camera.position.copy(tg).addScaledVector(back, dist); if (camera.position.y < .3) camera.position.y = .3; if (M.indoor && camera.position.y > 2.7) camera.position.y = 2.7;
+      camera.lookAt(tg.clone().addScaledVector(dir, 8));
+      sun.position.set(m.x + 22, 42, m.z + 14); sun.target.position.set(m.x, 0, m.z); sun.target.updateMatrixWorld();
+    }
+    function wins() { const my = S.res.filter((r) => (r.seeker === myIdx ? (two() ? r.hhCaught : r.caught === r.total) : !r.hhCaught)).length; return [my, S.res.length - my] }
+    function hud(dt) {
+      c.clearRect(0, 0, w, h); const iH = iHunt(), m = E[myIdx];
+      if (S.ph === "hide" && iH) { c.fillStyle = "rgba(6,6,14,.94)"; c.fillRect(0, 0, w, h); bigText(c, "目かくし中…", w / 2, h * .38, 22, "#fff"); bigText(c, "みんなが物に変身して隠れています", w / 2, h * .44, 13, "#ccc"); bigText(c, String(Math.ceil(S.t)), w / 2, h * .54, 64, "#FFE14D") }
+      if (S.ph === "lobby") return;
+      const y0 = top + 46, cx0 = w / 2, left = E.filter((e) => e.i !== S.seeker && !e.caught).length, [a, b] = wins();
+      const pill = (x, wd, col, txt) => { c.fillStyle = col; c.beginPath(); c.roundRect ? c.roundRect(x, y0, wd, 26, 8) : c.rect(x, y0, wd, 26); c.fill(); c.font = `14px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(txt, x + wd / 2, y0 + 14) };
+      pill(cx0 - 124, 94, "#2E7BE6", `かくれ ${left}`); pill(cx0 - 28, 56, "rgba(20,18,42,.8)", `${a} : ${b}`); pill(cx0 + 30, 94, "#E5483B", "オニ 1");
+      const tt = Math.max(0, Math.ceil(S.t)); if (S.ph === "seek" || S.ph === "hide") bigText(c, `${String(Math.floor(tt / 60)).padStart(2, "0")}:${String(tt % 60).padStart(2, "0")}`, cx0, y0 + 44, 20, S.ph === "hide" ? "#9FE0FF" : tt <= 10 ? "#FF8A80" : "#fff");
+      c.font = `12px ${DISP}`; c.textAlign = "center"; c.fillStyle = "rgba(255,255,255,.92)"; c.strokeStyle = "rgba(20,18,42,.8)"; c.lineWidth = 3; const lab = `ラウンド${S.round + 1}/2　${iH ? "あなたが鬼" : S.ph === "hide" ? "隠れる時間！ 物に変身しよう" : "あなたは隠れる番"}`; c.strokeText(lab, cx0, y0 + 66); c.fillText(lab, cx0, y0 + 66);
+      // ねらい
+      if ((S.ph === "seek" && iH) || (!iH && !m.caught && (S.ph === "hide" || S.ph === "seek"))) {
+        c.strokeStyle = iH ? "rgba(255,255,255,.95)" : aimProp >= 0 ? "#7CF59A" : "rgba(255,255,255,.7)"; c.lineWidth = 2;
+        if (iH) { c.beginPath(); c.arc(w / 2, h / 2, 11, 0, 7); c.stroke(); c.fillStyle = "#fff"; c.fillRect(w / 2 - 1.5, h / 2 - 1.5, 3, 3) } else { c.beginPath(); c.arc(w / 2, h / 2, 5, 0, 7); c.stroke(); if (aimProp >= 0) bigText(c, PH_PROPS[M.props[aimProp].type].n, w / 2, h / 2 + 22, 13, "#7CF59A") }
+      }
+      // 体力
+      if (S.ph === "seek" || S.ph === "hide") { const hy = h - bottom - 26, hp = clamp(m.hp, 0, 100); c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(14, hy, 150, 16); c.fillStyle = hp > 50 ? "#4CD964" : hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(16, hy + 2, 146 * hp / 100, 12); bigText(c, "♥", 12, hy + 8, 18, "#FF5A5A"); c.font = `11px ${DISP}`; c.textAlign = "right"; c.fillStyle = "#fff"; c.fillText(String(Math.round(hp)), 160, hy + 9) }
+      // ピーッ・仲間の名前
+      for (const e of E) {
+        if (e.caught || e.i === S.seeker || S.ph === "lobby") continue; const P = e.form >= 0 ? PH_PROPS[PH_KEYS[e.form]] : null, hh = P ? P.h : 1.8;
+        if (e.taunt > 0) { const p = project(e.x, e.y + hh + .7, e.z); if (p) bigText(c, "♪", p[0] + Math.sin(e.taunt * 9) * 5, p[1] - (1.6 - e.taunt) * 14, 26, "#FFE14D") }
+        if (!iH && e.i !== myIdx) { const p = project(e.x, e.y + hh + .35, e.z); if (p) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.fillStyle = "rgba(20,18,42,.6)"; const tx = nameOf(e.i).slice(0, 6), tw = c.measureText(tx).width + 8; c.fillRect(p[0] - tw / 2, p[1] - 8, tw, 15); c.fillStyle = "#fff"; c.fillText(tx, p[0], p[1]) } }
+      }
+      floats = floats.filter((f) => (f.t += dt) < 1.3); floats.forEach((f, i) => bigText(c, f.txt, w / 2, h * .4 - f.t * 30 - i * 26, 18, f.col));
+      if (hurtT > 0) { hurtT -= dt; const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, "rgba(255,0,0,0)"); g.addColorStop(1, `rgba(255,30,30,${hurtT * 1.2})`); c.fillStyle = g; c.fillRect(0, 0, w, h) }
+      if (S.msgT > 0 && S.msg) bigText(c, S.msg, w / 2, h * .3, 22, "#FFE14D");
+      if (m.caught && S.ph === "seek") bigText(c, "見つかった…　仲間を応援しよう", w / 2, h * .62, 17, "#FF9B91");
+    }
+    function roundText(r, idx) {
+      const mineSeek = r.seeker === myIdx, dead = r.dead ? "（鬼の体力切れ）" : "";
+      if (two()) { const won = mineSeek ? r.hhCaught : !r.hhCaught; return `ラウンド${idx + 1}（${mineSeek ? "あなたが鬼" : "あなたが隠れる"}）：${won ? "勝ち" : "負け"}${dead}` }
+      return mineSeek ? `ラウンド${idx + 1}（あなたが鬼）：${r.caught}/${r.total}人 見つけた${r.caught === r.total ? "（勝ち）" : "（負け）"}${dead}` : `ラウンド${idx + 1}（あなたが隠れる）：${r.hhCaught ? "見つかった（負け）" : "逃げきった（勝ち）"}${dead}`;
+    }
+    function panel() {
+      if (S.ph === "lobby") {
+        if (!me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${PH_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="hide-stage" data-i="${i}">${st.name}</button>`).join("")}</div><button class="btn" data-act="act-ready">準備OK</button><p class="muted">${two() ? "ふたりとも押すとスタート。1ラウンド目は" + (host ? "あなた" : esc(oppName())) + "が鬼" : "1ラウンド目はあなたが鬼（CPU 3人を探す）、2ラウンド目はあなたが物に変身して隠れる"}</p>`);
+        else setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+      } else if (S.ph === "rres") { const r = S.res[S.res.length - 1]; setMsg(`<p class="verdict">${roundText(r, S.res.length - 1)}</p><p class="muted">${S.round === 0 ? "まもなく鬼を交代します" : ""}</p>`) }
+      else if (S.ph === "end") {
+        let verdict = "";
+        if (two()) {
+          const myWins = S.res.filter((r) => (r.seeker === myIdx ? r.hhCaught : !r.hhCaught)).length, opWins = S.res.length - myWins;
+          if (myWins !== opWins) verdict = myWins > opWins ? "あなたの勝ち！" : "あなたの負け…";
+          else { const mine = S.res.find((r) => r.seeker === myIdx), theirs = S.res.find((r) => r.seeker !== myIdx); verdict = mine && theirs && mine.hhCaught && theirs.hhCaught && mine.hhT !== theirs.hhT ? (mine.hhT < theirs.hhT ? "あなたの勝ち！（早く見つけた）" : "あなたの負け…（見つけるのがおそかった）") : "引き分け！" }
+        } else { const wn = S.res.filter((r) => (r.seeker === myIdx ? r.caught === r.total : !r.hhCaught)).length; verdict = `${wn}勝${S.res.length - wn}敗` }
+        setMsg(`<p class="verdict ${verdict.includes("勝ち") || verdict.startsWith("2勝") ? "good" : verdict.includes("負け") || verdict.startsWith("0勝") ? "bad" : ""}">${verdict}</p>${S.res.map((r, i) => `<p>${roundText(r, i)}</p>`).join("")}${againBtns("hide")}`);
+      } else setMsg("");
+    }
+    // ---- 毎フレーム
+    let tAll = 0;
+    const stopLoop = loop((dt) => {
+      tAll += dt; fireCd = Math.max(0, fireCd - dt);
+      const op = rtOppPeer(), ox = op ? op.presence.x : null;
+      if (!host && ox && ox.S) S = Object.assign({}, ox.S);
+      const m = E[myIdx], iH = iHunt();
+      // 自分を動かす
+      let ix = stickInp.x, iz = stickInp.y;
+      if (keys.has("a") || keys.has("A")) ix = -1; if (keys.has("d") || keys.has("D")) ix = 1; if (keys.has("w") || keys.has("W") || keys.has("ArrowUp")) iz = -1; if (keys.has("s") || keys.has("S") || keys.has("ArrowDown")) iz = 1;
+      if (keys.has("ArrowLeft")) camYaw += dt * 2.2; if (keys.has("ArrowRight")) camYaw -= dt * 2.2;
+      let mg = Math.hypot(ix, iz); if (mg > 1) { ix /= mg; iz /= mg; mg = 1 }
+      const frozen = m.caught || S.ph === "rres" || S.ph === "end" || (S.ph === "hide" && iH);
+      if (S.ph === "lobby") camYaw += dt * .12;
+      else if (!frozen && mg > .12) {
+        const sp = iH ? 4.6 : m.form >= 0 ? 4.1 : 4.8, fx = Math.sin(camYaw), fz = Math.cos(camYaw), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
+        moveE(m, mx * sp * dt, mz * sp * dt); if (!iH && m.form < 0) m.yaw = Math.atan2(mx, mz); m.mv = true;
+      } else m.mv = false;
+      if (iH) m.yaw = camYaw;
+      m.vy -= 15 * dt; m.y = Math.max(0, m.y + m.vy * dt); if (m.y <= 0) m.vy = 0;
+      if (iH && actSt.down && S.ph === "seek") fire();
+      if (host) {
+        hostStep(dt, ox);
+        const out = { E: E.map((e) => [r2(e.x), r2(e.z), r2(e.yaw), e.form, Math.round(e.hp), (e.caught ? 1 : 0) | (e.mv ? 2 : 0) | (e.taunt > 0 ? 4 : 0), e.tp, r2(e.y)]), S: { round: S.round, ph: S.ph, t: Math.round(S.t * 10) / 10, seeker: S.seeker, res: S.res, msg: S.msg, msgT: Math.round(S.msgT * 10) / 10 }, fx: fxList };
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      } else {
+        if (ox && ox.E) ox.E.forEach((a, i) => {
+          const e = E[i]; e.caught = !!(a[5] & 1); e.taunt = a[5] & 4 ? (e.taunt > 0 ? Math.max(.01, e.taunt - dt) : 1.6) : 0; e.hp = a[4];
+          if (i === myIdx) { if (a[6] !== seenTp) { seenTp = a[6]; e.x = a[0]; e.z = a[1]; e.yaw = a[2]; e.form = -1; e.y = 0; camYaw = Math.atan2(M.W / 2 - e.x, M.D / 2 - e.z) } return }
+          const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.z += (a[1] - e.z) * al; e.y = a[7] || 0; e.yaw = a[2]; e.form = a[3]; e.mv = !!(a[5] & 2);
+        });
+        if (ox && ox.fx) for (const f of ox.fx) if (f[0] > seenFx) { seenFx = f[0]; if (f[1] !== myIdx) showShot(f.slice(2, 5), f.slice(5, 8), f[8]) }
+        const out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), form: m.form, mv: m.mv ? 1 : 0, sh: myShots }, js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      }
+      if (m.hp < myHpSeen && !iH) { hurtT = .45; sfx("hit") } myHpSeen = m.hp;
+      updVis(dt, tAll); updCam(dt);
+      // 変身できる物をねらっているか
+      aimProp = -1;
+      if (!iH && !m.caught && (S.ph === "hide" || S.ph === "seek")) { const { o, d } = aim(), hit = castRay(o, d, camDist + 8, camDist - .1, true); if (hit.code >= 100) { const p = M.props[hit.code - 100]; if (Math.hypot(p.x - m.x, p.z - m.z) < 8) aimProp = hit.code - 100 }
+        // スマホ向け：近くの物のうち、向いている方にあるものを自動でえらぶ
+        if (aimProp < 0) { let bs = 1e9; M.props.forEach((p, k) => { const d = Math.hypot(p.x - m.x, p.z - m.z); if (d > 6.5) return; const an = Math.abs(phAng(Math.atan2(p.x - m.x, p.z - m.z) - camYaw)); if (an > .8 && d > 1.6) return; const sc = an * 4 + d * .4; if (sc < bs) { bs = sc; aimProp = k } }) } }
+      if (aimProp >= 0) { const p = M.props[aimProp]; ring.position.set(p.x, .06, p.z); ring.scale.setScalar(PH_PROPS[p.type].r + .25); ring.visible = true } else ring.visible = false;
+      const lbl = iH ? (S.ph === "seek" ? "撃つ" : "撃つ ") : aimProp >= 0 ? `へんしん<br><small style="font-size:11px">${PH_PROPS[M.props[aimProp].type].n.slice(0, 7)}</small>` : "へんしん";
+      if (lbl !== lastBtn) { lastBtn = lbl; bAct.innerHTML = lbl } bAct.disabled = m.caught || (iH ? S.ph !== "seek" : aimProp < 0 || !(S.ph === "hide" || S.ph === "seek"));
+      W3.wmat.map.offset.x = (tAll * .02) % 1; W3.wmat.map.offset.y = (tAll * .013) % 1;
+      stepFx(dt);
+      renderer.render(scene, camera);
+      hud(dt); panel();
+    });
+    return () => {
+      stopLoop(); removeEventListener("keydown", onKey);
+      scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
+      Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
+      if (actx) try { actx.close() } catch (_) {}
+    };
+  }
   // ----- 木こりタイクーン（ふたりで協力） -----
   // 先に始めた人(ホスト)が木・お金・お客さん・買ったものをぜんぶ計算して送る。あいては自分の位置だけ送る。
   const TW = 36, TH = 52, TY_PRICE = 10;
