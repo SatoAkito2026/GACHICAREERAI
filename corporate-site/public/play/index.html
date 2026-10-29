@@ -1045,12 +1045,15 @@ html.br-portrait .br-ui { display: none }
   const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const gfxLevel = () => { const v = ls.get("gfx") || "auto"; if (v !== "auto") return v; return matchMedia("(pointer: coarse)").matches ? "mid" : "high" };
   const GFX = () => ({ high: { pr: 2, sh: 2048, aa: true, far: 300, grass: 5000 }, mid: { pr: 1.3, sh: 1024, aa: true, far: 230, grass: 3000 }, low: { pr: 1, sh: 0, aa: false, far: 170, grass: 1200 } })[gfxLevel()];
+  // 照準の色（白い壁などで見えなくならないように選べる。いつも黒いふちをつける）
+  const XH_COLORS = [["red", "赤", "#FF3B3B"], ["green", "緑", "#4CFF6A"], ["yellow", "黄", "#FFE14D"], ["cyan", "水色", "#4DE3FF"], ["white", "白", "#FFFFFF"]];
+  const xhCol = () => (XH_COLORS.find((x) => x[0] === (ls.get("xhair") || "red")) || XH_COLORS[0])[2];
   const SENS = Object.fromEntries(["look", "scope", "stick", "steer"].map((k) => [k, clamp(Number(ls.get("sens_" + k)) || 1, .3, 2.5)]));
   function sensPanel(open) {
     let el = $("#sens"); if (!open) { if (el) el.remove(); return } if (el) return;
     el = document.createElement("div"); el.id = "sens";
     const rows = [["look", "視点（画面をなぞって向きを変える）"], ["scope", "スコープをのぞいている時の視点"], ["stick", "スティック（少したおすだけで速く動く）"], ["steer", "カートのハンドル（曲がる速さ）"]];
-    el.innerHTML = `<div class="sens-box"><p class="eyebrow">感度設定（すべてのゲーム共通）</p>${rows.map(([k, t]) => `<label class="sens-row"><span>${t}</span><input type="range" min="0.3" max="2.5" step="0.1" value="${SENS[k]}" data-sens="${k}"><b>${SENS[k].toFixed(1)}</b></label>`).join("")}<p class="muted" style="font-size:12px;margin:0">1.0 がふつう。大きいほど少しの操作でよく動きます</p><p class="eyebrow" style="margin-top:4px">画質（3Dのゲーム）</p><div class="stages" style="grid-template-columns:repeat(4,1fr)">${[["auto", "自動"], ["high", "高"], ["mid", "中"], ["low", "低"]].map(([k, t]) => `<button class="chipbtn ${(ls.get("gfx") || "auto") === k ? "on" : ""}" data-act="gfx" data-v="${k}">${t}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">カクカクする・止まるときは「低」に。次にゲームを開いたときから変わります</p><div class="row"><button class="btn ghost" data-act="sens-reset">もとにもどす</button><button class="btn grow" data-act="sens">とじる</button></div></div>`;
+    el.innerHTML = `<div class="sens-box"><p class="eyebrow">感度設定（すべてのゲーム共通）</p>${rows.map(([k, t]) => `<label class="sens-row"><span>${t}</span><input type="range" min="0.3" max="2.5" step="0.1" value="${SENS[k]}" data-sens="${k}"><b>${SENS[k].toFixed(1)}</b></label>`).join("")}<p class="muted" style="font-size:12px;margin:0">1.0 がふつう。大きいほど少しの操作でよく動きます</p><p class="eyebrow" style="margin-top:4px">照準の色</p><div class="stages" style="grid-template-columns:repeat(5,1fr)">${XH_COLORS.map(([k, t, col]) => `<button class="chipbtn ${(ls.get("xhair") || "red") === k ? "on" : ""}" data-act="xhair" data-v="${k}"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${col};border:2px solid #222;vertical-align:-2px;margin-right:4px"></span>${t}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">画質（3Dのゲーム）</p><div class="stages" style="grid-template-columns:repeat(4,1fr)">${[["auto", "自動"], ["high", "高"], ["mid", "中"], ["low", "低"]].map(([k, t]) => `<button class="chipbtn ${(ls.get("gfx") || "auto") === k ? "on" : ""}" data-act="gfx" data-v="${k}">${t}</button>`).join("")}</div><p class="muted" style="font-size:12px;margin:0">カクカクする・止まるときは「低」に。次にゲームを開いたときから変わります</p><div class="row"><button class="btn ghost" data-act="sens-reset">もとにもどす</button><button class="btn grow" data-act="sens">とじる</button></div></div>`;
     document.body.appendChild(el);
     el.addEventListener("input", (e) => { const k = e.target.dataset.sens; if (!k) return; SENS[k] = Number(e.target.value); ls.set("sens_" + k, SENS[k]); e.target.nextElementSibling.textContent = SENS[k].toFixed(1) });
     el.addEventListener("click", (e) => { if (e.target === el) sensPanel(false) });
@@ -3391,7 +3394,7 @@ html.br-portrait .br-ui { display: none }
       // ねらい
       if ((S.ph === "seek" && iH) || (!iH && !m.caught && (S.ph === "hide" || S.ph === "seek"))) {
         c.strokeStyle = iH ? "rgba(255,255,255,.95)" : aimProp >= 0 ? "#7CF59A" : "rgba(255,255,255,.7)"; c.lineWidth = 2;
-        if (iH) { c.beginPath(); c.arc(w / 2, h / 2, 11, 0, 7); c.stroke(); c.fillStyle = "#fff"; c.fillRect(w / 2 - 1.5, h / 2 - 1.5, 3, 3) } else { c.beginPath(); c.arc(w / 2, h / 2, 5, 0, 7); c.stroke(); if (aimProp >= 0) bigText(c, PH_PROPS[M.props[aimProp].type].n, w / 2, h / 2 + 22, 13, "#7CF59A") }
+        if (iH) { const xc = xhCol(); for (const [lw, col] of [[4.5, "rgba(0,0,0,.8)"], [2, xc]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); c.arc(w / 2, h / 2, 11, 0, 7); c.stroke() } c.fillStyle = "rgba(0,0,0,.8)"; c.fillRect(w / 2 - 2.5, h / 2 - 2.5, 5, 5); c.fillStyle = xc; c.fillRect(w / 2 - 1.5, h / 2 - 1.5, 3, 3) } else { c.beginPath(); c.arc(w / 2, h / 2, 5, 0, 7); c.stroke(); if (aimProp >= 0) bigText(c, PH_PROPS[M.props[aimProp].type].n, w / 2, h / 2 + 22, 13, "#7CF59A") }
       }
       // 体力
       if (S.ph === "seek" || S.ph === "hide") { const hy = h - bottom - 26, hp = clamp(m.hp, 0, 100); c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(14, hy, 150, 16); c.fillStyle = hp > 50 ? "#4CD964" : hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(16, hy + 2, 146 * hp / 100, 12); bigText(c, "♥", 12, hy + 8, 18, "#FF5A5A"); c.font = `11px ${DISP}`; c.textAlign = "right"; c.fillStyle = "#fff"; c.fillText(String(Math.round(hp)), 160, hy + 9) }
@@ -4029,7 +4032,7 @@ html.br-portrait .br-ui { display: none }
       if (S.ph === "lobby" || !m) return;
       const z = adsOn ? zoomOf(m) : 1, scoped = adsOn && z >= 3.5 && m.alive;
       if (scoped) { const R = Math.min(w, h) * .46; c.fillStyle = "#000"; c.beginPath(); c.rect(0, 0, w, h); c.arc(w / 2, h / 2, R, 0, Math.PI * 2); c.fill("evenodd"); c.strokeStyle = "rgba(0,0,0,.85)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w / 2 - R, h / 2); c.lineTo(w / 2 + R, h / 2); c.moveTo(w / 2, h / 2 - R); c.lineTo(w / 2, h / 2 + R); c.stroke(); c.fillStyle = "#E23A3A"; c.beginPath(); c.arc(w / 2, h / 2, 2.5, 0, 7); c.fill(); bigText(c, `${z}倍`, w / 2, h / 2 - R + 22, 14, "#fff") }
-      else if (m.alive && m.landed) { const sl = curW(m), Wp = sl ? BR_W[sl.w] : null, sp = Wp ? (adsOn ? Wp.spr * .45 : Wp.hip || Wp.spr) * (m.mv ? 1.5 : 1) : .03, R = 6 + sp * h * 1.2; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * R, h / 2 + dy * R); c.lineTo(w / 2 + dx * (R + 7), h / 2 + dy * (R + 7)); c.stroke() } c.fillStyle = "#fff"; c.fillRect(w / 2 - 1, h / 2 - 1, 2, 2) }
+      else if (m.alive && m.landed) { const sl = curW(m), Wp = sl ? BR_W[sl.w] : null, sp = Wp ? (adsOn ? Wp.spr * .45 : Wp.hip || Wp.spr) * (m.mv ? 1.5 : 1) : .03, R = 6 + sp * h * 1.2; const xc = xhCol(); for (const [lw, col] of [[4.5, "rgba(0,0,0,.8)"], [2, xc]]) { c.strokeStyle = col; c.lineWidth = lw; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * R, h / 2 + dy * R); c.lineTo(w / 2 + dx * (R + 8), h / 2 + dy * (R + 8)); c.stroke() } } c.fillStyle = "rgba(0,0,0,.8)"; c.fillRect(w / 2 - 2.5, h / 2 - 2.5, 5, 5); c.fillStyle = xc; c.fillRect(w / 2 - 1.5, h / 2 - 1.5, 3, 3) }
       if (hitT > 0) { hitT -= dt; c.strokeStyle = "#FF4D4D"; c.lineWidth = 2.5; for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { c.beginPath(); c.moveTo(w / 2 + dx * 6, h / 2 + dy * 6); c.lineTo(w / 2 + dx * 13, h / 2 + dy * 13); c.stroke() } }
       // 画面の表示（地図・体力など）は「ボタン配置」で動かせる。位置と大きさは hudBox で読む
       const IB = hudBox("hud-info"), L = 0;
@@ -4651,6 +4654,7 @@ html.br-portrait .br-ui { display: none }
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
     else if (act === "sens") sensPanel(!$("#sens"));
+    else if (act === "xhair") { ls.set("xhair", t.dataset.v); sensPanel(false); sensPanel(true) }
     else if (act === "gfx") { ls.set("gfx", t.dataset.v); sensPanel(false); sensPanel(true) }
     else if (act === "sens-reset") { for (const k in SENS) { SENS[k] = 1; ls.set("sens_" + k, 1) } sensPanel(false); sensPanel(true) }
     else if (act === "install") {
@@ -4727,7 +4731,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1029-1708";
+  const APP_VER = "1029-1720";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
