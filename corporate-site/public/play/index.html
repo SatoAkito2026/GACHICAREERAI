@@ -3648,7 +3648,7 @@ html.br-portrait .br-ui { display: none }
     let S = { ph: "lobby", n: 12, names: [], zone: null, feed: [], fx: [], grl: [], tk: [], plane: null, winner: -1 }, E = [];
     const vis = [], taken = new Set();
     let fxId = 0, feedId = 0, grId = 0, lastSend = "", seenFx = 0, seenFeed = 0, seenGr = new Set(), lastGuestShot = 0, lastGuestHeal = 0, lastGuestPick = new Set(), myShots = [], myGren = [], myPicks = [], myHeal = [0, 0], shotSeq = 0;
-    let cullT = 0, specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
+    let hitFrom = null, cullT = 0, specI = -1, camYaw = 0, camPitch = -.12, camDist = 3, adsOn = false, crOn = false, watching = false, hurtT = 0, hitT = 0, floats = [], tAll = 0, lastBtn = "", myHpSeen = 100, killedBy = -1, specIdx = -1, endShown = false;
     const nm = (i) => (i === myIdx ? "あなた" : S.names[i] || "");
     const fmt = (t) => String(t).replace(/\{(\d+)\}/g, (_, i) => nm(Number(i)));
     function mkE(i) { return { i, x: C0, z: C0, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
@@ -3676,7 +3676,11 @@ html.br-portrait .br-ui { display: none }
     const jitter = (d, s) => { const v = new T.Vector3(d.x + (Math.random() - .5) * 2 * s, d.y + (Math.random() - .5) * 2 * s, d.z + (Math.random() - .5) * 2 * s); return v.normalize() };
     // ---- 効果
     const fxs = [];
+    // 聞こえた銃声・爆発（地図と画面のふちに出す）
+    const heard = [];
+    const hear = (x, z, k) => { const m = meE(); if (!m) return; const d = Math.hypot(x - m.x, z - m.z); if (d < 3 || d > 260) return; heard.push({ x, z, k, t: 0 }); if (heard.length > 24) heard.shift() };
     function shotFx(a, b, kind, big) {
+      hear(a[0], a[2], big ? "sr" : "shot");
       const ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(...a), new T.Vector3(...b)]), new T.LineBasicMaterial({ color: big ? "#FFFFFF" : "#FFE680", transparent: true }));
       const pf = new T.Mesh(new T.IcosahedronGeometry(kind ? .22 : .16, 0), new T.MeshBasicMaterial({ color: kind ? "#D92C2C" : "#CBB79A", transparent: true })); pf.position.set(...b);
       const fl = new T.Mesh(new T.SphereGeometry(.1, 6, 5), new T.MeshBasicMaterial({ color: "#FFD86B", transparent: true })); fl.position.set(...a);
@@ -3684,6 +3688,7 @@ html.br-portrait .br-ui { display: none }
       const m = E[myIdx]; if (m) sfx(big ? "sr" : "shot", clamp(1.2 - Math.hypot(a[0] - m.x, a[2] - m.z) / 90, 0, 1));
     }
     function boomFx(x, y, z) {
+      hear(x, z, "boom");
       const s = new T.Mesh(new T.SphereGeometry(1, 16, 12), new T.MeshBasicMaterial({ color: "#FF9A3C", transparent: true })), sm = new T.Mesh(new T.IcosahedronGeometry(1.4, 1), new T.MeshLambertMaterial({ color: "#6A6560", transparent: true }));
       s.position.set(x, y + .5, z); sm.position.set(x, y + 1, z); scene.add(s, sm);
       fxs.push({ o: [s, sm], t: 0, life: 1.4, upd(k) { s.scale.setScalar(1 + k * 9); s.material.opacity = Math.max(0, 1 - k * 2.5); sm.scale.setScalar(1.5 + k * 4); sm.position.y = y + 1 + k * 3; sm.material.opacity = Math.max(0, .8 - k * .8) } });
@@ -3849,8 +3854,9 @@ html.br-portrait .br-ui { display: none }
     addEventListener("keydown", onKey); addEventListener("keyup", onKeyUp);
     // Android は、ホーム画面に入れたアプリが前の「縦固定」の設定のままのことがあるので、ゲーム中だけ横に固定する
     // （ブラウザでは全画面にしないと固定できないので、さわった時に全画面→横固定の順でためす）
-    const lockLand = async () => { try { if (screen.orientation && screen.orientation.lock) { if (!document.fullscreenElement && !matchMedia("(display-mode: standalone)").matches && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }); await screen.orientation.lock("landscape") } } catch (_) {} };
-    lockLand(); cardEl.addEventListener("pointerdown", lockLand, { once: true });
+    // 全画面にして、スマホの上の時計・電池などの表示と、戻る・ホームのボタンを消す（さわった時にためす。アプリでも同じ）
+    const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
+    lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     // ---- ボタンの配置と大きさ（端末に保存）
     const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-rl", "b-gr", "b-med", "br-slots"], uiEl = $(".br-ui");
     let lay = {}; try { lay = JSON.parse(ls.get("brLayout") || "{}") || {} } catch (_) {}
@@ -3953,6 +3959,8 @@ html.br-portrait .br-ui { display: none }
       c.fillStyle = "rgba(90,80,70,.9)"; for (const b of M.boxes) if (b.h > 2) c.fillRect(mx + b.x0 * ms, my + b.z0 * ms, Math.max(1, (b.x1 - b.x0) * ms), Math.max(1, (b.z1 - b.z0) * ms));
       if (Z) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.beginPath(); c.arc(mx + Z.cx * ms, my + Z.cz * ms, Z.r * ms, 0, 7); c.stroke(); if (Z.st === "wait") { c.setLineDash([3, 3]); c.strokeStyle = "#7CF59A"; c.beginPath(); c.arc(mx + Z.tx * ms, my + Z.tz * ms, Z.tr * ms, 0, 7); c.stroke(); c.setLineDash([]) } }
       if (S.plane && S.plane.t < (M.W + 80) / PSP) { c.fillStyle = "#fff"; c.fillText("✈", mx + (S.plane.dir > 0 ? -40 + S.plane.t * PSP : M.W + 40 - S.plane.t * PSP) * ms - 6, my + S.plane.z * ms) }
+      // 地図：銃声（オレンジ）・スナイパー（赤）・爆発（黄色）の場所
+      for (const hd of heard) { const k = 1 - hd.t / 4; if (k <= 0) continue; c.globalAlpha = k; c.strokeStyle = c.fillStyle = hd.k === "sr" ? "#FF4D4D" : hd.k === "boom" ? "#FFE14D" : "#FF9F43"; c.lineWidth = 2; c.beginPath(); c.arc(mx + hd.x * ms, my + hd.z * ms, 2.5 + (hd.t % 1) * 7, 0, 7); c.stroke(); c.beginPath(); c.arc(mx + hd.x * ms, my + hd.z * ms, 2.2, 0, 7); c.fill() } c.globalAlpha = 1;
       c.restore(); { const px = mx + m.x * ms, pz = my + m.z * ms; c.save(); c.translate(px, pz); c.rotate(-camYaw + Math.PI); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(0, -6); c.lineTo(4, 4); c.lineTo(-4, 4); c.closePath(); c.fill(); c.restore() }
       // たおした・たおされたのお知らせ
       c.font = `12px ${DISP}`; c.textAlign = "left"; S.feed.slice(-4).forEach((f, i) => { const tx = fmt(f[1]), tw = c.measureText(tx).width + 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(L, 42 + i * 20, tw, 18); c.fillStyle = "#fff"; c.fillText(tx, L + 6, 51 + i * 20) });
@@ -3962,6 +3970,12 @@ html.br-portrait .br-ui { display: none }
       if (m.rl > 0) bigText(c, "リロード中…", w / 2, h * .62, 15, "#fff");
       if (m.healT > 0) bigText(c, `回復中… ${m.healT.toFixed(1)}`, w / 2, h * .62, 15, "#7CF59A");
       floats = floats.filter((f) => (f.t += dt) < 1.6); floats.forEach((f, i) => bigText(c, f.txt, w / 2, h * .42 - f.t * 22 - i * 24, 15, f.col));
+      // 画面のふち：どっちから音がしたか・どっちから撃たれたか
+      const ring = (x, z, col, wd, len, label) => { const ph = -phAng(Math.atan2(x - m.x, z - m.z) - camYaw), Rx = w * .3, Ry = h * .3; c.strokeStyle = col; c.lineWidth = wd; c.beginPath(); c.ellipse(w / 2, h / 2, Rx, Ry, 0, -Math.PI / 2 + ph - len, -Math.PI / 2 + ph + len); c.stroke(); if (label) { c.font = `11px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = 3; c.strokeStyle = "rgba(20,18,42,.8)"; const lx = w / 2 + Math.sin(ph) * (Rx - 30), ly = h / 2 - Math.cos(ph) * (Ry - 16); c.strokeText(label, lx, ly); c.fillStyle = col; c.fillText(label, lx, ly) } };
+      const usedDir = new Set(); for (const hd of heard) hd.t += dt;
+      for (let i = heard.length - 1; i >= 0; i--) { const hd = heard[i]; if (hd.t >= 2.2 || !m.alive) continue; const sec = Math.round(phAng(Math.atan2(hd.x - m.x, hd.z - m.z) - camYaw) / .5), lab = !usedDir.has(sec); usedDir.add(sec); c.globalAlpha = Math.max(0, 1 - hd.t / 2.2); ring(hd.x, hd.z, hd.k === "sr" ? "#FF4D4D" : hd.k === "boom" ? "#FFE14D" : "#FFB066", 4, .12, lab ? `${hd.k === "boom" ? "爆発" : hd.k === "sr" ? "スナイパー" : "銃声"} ${Math.round(Math.hypot(hd.x - m.x, hd.z - m.z))}m` : ""); c.globalAlpha = 1 }
+      for (let i = heard.length - 1; i >= 0; i--) if (heard[i].t > 4) heard.splice(i, 1);
+      if (hitFrom && m.alive) { hitFrom.t += dt; if (hitFrom.t < 1.6) { c.globalAlpha = 1 - hitFrom.t / 1.6; ring(hitFrom.x, hitFrom.z, "#FF2A2A", 9, .3, "ここから撃たれた"); c.globalAlpha = 1 } else hitFrom = null }
       if (hurtT > 0) { hurtT -= dt; const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, "rgba(255,0,0,0)"); g.addColorStop(1, `rgba(255,30,30,${hurtT * 1.3})`); c.fillStyle = g; c.fillRect(0, 0, w, h) }
       // 相手（人）の名前
       if (S.h1) { const o = E[1 - myIdx]; if (o && o.alive && m) { const p = project(o.x, o.y + 2.2, o.z); if (p && Math.hypot(o.x - m.x, o.z - m.z) < 80) bigText(c, nm(o.i), p[0], p[1], 12, "#FFE14D") } }
@@ -3989,7 +4003,7 @@ html.br-portrait .br-ui { display: none }
         if (pS === "lobby" && S.ph === "play") { taken.clear(); seenGr.clear() }
         (ox.tk || []).forEach((id) => taken.add(id));
         if (ox.E) ox.E.forEach((a, i) => {
-          const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13];
+          const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13]; e.lastHit = a[15];
           if (i === myIdx) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(C0 - e.x, C0 - e.z) } return }
           const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.z += (a[1] - e.z) * al; e.y += (a[2] - e.y) * al; e.yaw = a[3]; e.pitch = a[4];
           e.cr = !!(a[6] & 2); e.ads = !!(a[6] & 4); e.para = !!(a[6] & 16); e.landed = !!(a[6] & 32); e.w = [a[7] >= 0 ? { w: a[7], lv: a[8], ammo: 1 } : null, null]; e.cur = 0; e.vest = a[9]; e.helm = a[10];
@@ -4029,13 +4043,13 @@ html.br-portrait .br-ui { display: none }
           for (const e of E) if (!isHuman(e.i) || (e.i === 1 && !two())) bot(e, dt);
         }
         const out = { S: { ph: S.ph, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1 },
-          E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp] }), fx: S.fx, grl: S.grl, tk: [...taken] };
+          E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp, e.lastHit ?? -1] }), fx: S.fx, grl: S.grl, tk: [...taken] };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else if (m) {
         const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), cr: m.cr ? 1 : 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       }
-      if (m && m.hp < myHpSeen - .5) { hurtT = .45 } if (m) myHpSeen = m.hp;
+      if (m && m.hp < myHpSeen - .5) { hurtT = .45; const at = E[m.lastHit]; hitFrom = at && at !== m ? { x: at.x, z: at.z, t: 0 } : null } if (m) myHpSeen = m.hp;
       stepGren(dt); updVis(dt); updCam(dt); stepFx(dt);
       W3.wmat.map.offset.x = (tAll * .02) % 1;
       renderer.render(scene, camera); hud(dt); panel();
@@ -4052,7 +4066,7 @@ html.br-portrait .br-ui { display: none }
       }
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
