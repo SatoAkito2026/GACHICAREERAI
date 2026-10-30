@@ -248,6 +248,11 @@ html.playing.full .card.act > p.muted, html.playing.full #act-msg, #sens, #sens 
 .sens-box p { margin: 0 }
 .sens-row { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; font-size: 13px; align-items: center }
 .sens-row span { grid-column: 1 / -1 } .sens-row input { width: 100%; accent-color: var(--pink) } .sens-row b { font-family: var(--display); text-align: right }
+/* カートレース（横画面） */
+html.playing .kt #act-msg { top: 50%; left: 50%; right: auto; width: min(560px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
+.kt .stages { grid-template-columns: repeat(3, 1fr); gap: 6px } .kt .stages .chipbtn { padding: 8px 4px; font-size: 13px }
+.kt .kbtn { width: 84px; height: 84px } .kt .kbtn.small { width: 66px; height: 66px }
+.kt .kpad { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)) }
 /* 荒野バトル（横画面） */
 .br-gl, .br-cv { position: absolute; left: 0; top: 0; border-radius: 0 !important }
 .br-cv { z-index: 1 }
@@ -1988,19 +1993,30 @@ html.br-portrait .br-ui { display: none }
   // コースは制御点をなめらかにつないだ線（kartTrack）。コーナーには縁石、外側にバリア。バリアの外へは出られない。
   // ホストがコンピューターを動かし、順位はホストの画面でゴールした順番で決める（ふたりの画面で結果がずれない）。
   const KT_LAPS = 3, KT_VMAX = 250, KT_RW = 46, KT_WALL = 30, KS = .1;
-  const KT_ITEMS = { turbo: "ターボ", banana: "バナナ", rocket: "ロケット", shield: "シールド" };
+  const KT_ITEMS = { turbo: "ターボ", banana: "バナナ", rocket: "ロケット", shield: "シールド", jet: "ジェット" };
+  // コースの高さ（坂）。hills の [はじめ, おわり, 高さm] をなめらかな山にする
+  // コースは制御点の KT_SCALE 倍の大きさ（長めのコース）。坂は1.5倍の高さにする
+  const KT_SCALE = 1.9;
+  function ktHeights(ST, NS) {
+    const H = new Float32Array(NS);
+    for (const [t0, t1, hh] of ST.hills || []) for (let i = 0; i < NS; i++) { const t = i / NS; if (t < t0 || t > t1) continue; const u = (t - t0) / (t1 - t0); H[i] += hh * 1.5 * (1 - Math.cos(u * Math.PI * 2)) / 2 }
+    // ジャンプ台は短い坂（0.9m）、大ジャンプ台は長い坂（5m）。どちらも先は段差で下がる
+    for (const [t, k] of ST.ramps || []) { const ri = Math.floor(t * NS), L = k === "glide" ? Math.round(NS * .045) : 6, hh = k === "glide" ? 5 : .9; for (let a = 0; a <= L; a++) { const u = 1 - a / L, i = (ri - a + NS) % NS; H[i] += hh * (k === "glide" ? u * u * (3 - 2 * u) : u) } }
+    return H;
+  }
   const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"]];
   const KT_DRIVERS = ["ハヤト", "リン", "ゴウ", "ミナ", "ケイ"];
   const KT_STAGES = [
-    { name: "グランプリ", theme: "gp", ground: "grass", pts: [[200, 700], [200, 360], [330, 210], [700, 180], [1050, 200], [1210, 320], [1150, 480], [950, 520], [900, 650], [1100, 770], [1400, 810], [1500, 1000], [1380, 1180], [1000, 1220], [700, 1150], [500, 1210], [300, 1100]], sky: ["#3F8FE0", "#CFE6F6"], fog: "#CFE6F6", wall: "tire" },
-    { name: "海岸ハイウェイ", theme: "coast", ground: "grass", pts: [[250, 320], [650, 190], [1100, 230], [1380, 380], [1460, 700], [1340, 1000], [1100, 1150], [800, 1080], [680, 860], [470, 950], [240, 1100], [150, 800], [210, 520]], sky: ["#4FA3E8", "#F6E2C6"], fog: "#EADBC8", wall: "rail" },
-    { name: "雪の峠", theme: "alpine", ground: "snow", pts: [[300, 260], [700, 200], [1000, 300], [1180, 190], [1450, 260], [1500, 560], [1250, 660], [1400, 910], [1300, 1180], [950, 1150], [800, 950], [600, 1150], [300, 1110], [190, 800], [340, 550]], sky: ["#7FA6D6", "#E8EEF5"], fog: "#E4EBF2", wall: "fence" },
-    { name: "ナイトシティ", theme: "night", ground: "asphalt", pts: [[260, 260], [800, 250], [1300, 260], [1450, 410], [1450, 700], [1300, 830], [950, 830], [850, 960], [850, 1150], [700, 1260], [360, 1250], [220, 1100], [220, 600]], sky: ["#060818", "#2A2050"], fog: "#1A1838", wall: "neon" },
+    { name: "グランプリ", theme: "gp", ground: "grass", pts: [[200, 700], [200, 360], [330, 210], [700, 180], [1050, 200], [1210, 320], [1150, 480], [950, 520], [900, 650], [1100, 770], [1400, 810], [1500, 1000], [1380, 1180], [1000, 1220], [700, 1150], [500, 1210], [300, 1100]], sky: ["#3F8FE0", "#CFE6F6"], fog: "#CFE6F6", wall: "tire", hills: [[.27, .43, 4]], ramps: [[.35, "jump"], [.66, "glide"]], pads: [[.08, 0], [.52, -18], [.52, 18], [.86, 0]] },
+    { name: "海岸ハイウェイ", theme: "coast", ground: "grass", pts: [[250, 320], [650, 190], [1100, 230], [1380, 380], [1460, 700], [1340, 1000], [1100, 1150], [800, 1080], [680, 860], [470, 950], [240, 1100], [150, 800], [210, 520]], sky: ["#4FA3E8", "#F6E2C6"], fog: "#EADBC8", wall: "rail", tunnels: [[.72, .8]], hills: [[.48, .66, 6]], ramps: [[.57, "glide"], [.25, "jump"]], pads: [[.1, 0], [.4, 16], [.8, -16]] },
+    { name: "雪の峠", theme: "alpine", ground: "snow", pts: [[300, 260], [700, 200], [1000, 300], [1180, 190], [1450, 260], [1500, 560], [1250, 660], [1400, 910], [1300, 1180], [950, 1150], [800, 950], [600, 1150], [300, 1110], [190, 800], [340, 550]], sky: ["#7FA6D6", "#E8EEF5"], fog: "#E4EBF2", wall: "fence", tunnels: [[.4, .5]], hills: [[.14, .3, 5], [.6, .76, 7]], ramps: [[.22, "jump"], [.68, "glide"]], pads: [[.05, 0], [.45, 0], [.88, 18]] },
+    { name: "ナイトシティ", theme: "night", ground: "asphalt", pts: [[260, 260], [800, 250], [1300, 260], [1450, 410], [1450, 700], [1300, 830], [950, 830], [850, 960], [850, 1150], [700, 1260], [360, 1250], [220, 1100], [220, 600]], sky: ["#060818", "#2A2050"], fog: "#1A1838", wall: "neon", hills: [[.38, .54, 4]], ramps: [[.46, "jump"], [.8, "glide"]], pads: [[.12, 0], [.3, -16], [.64, 16]] },
+    { name: "ネオンクラブ", theme: "club", ground: "asphalt", pts: [[250, 300], [700, 220], [1150, 280], [1450, 380], [1460, 700], [1180, 780], [900, 660], [620, 780], [560, 1020], [860, 1180], [1250, 1120], [1480, 1220], [1300, 1420], [700, 1450], [260, 1250], [170, 800]], sky: ["#0A0218", "#3A0E5A"], fog: "#1A0830", wall: "neon", hills: [[.26, .4, 5], [.7, .84, 4]], ramps: [[.33, "glide"], [.77, "jump"]], pads: [[.06, 0], [.18, -18], [.18, 18], [.5, 0], [.62, 0], [.92, -16]] },
   ];
-  function kartTrack(P) {
-    const out = [], n = P.length, SEG = 40;
+  function kartTrack(P0) {
+    const P = P0.map(([x, y]) => [x * KT_SCALE, y * KT_SCALE]), out = [], n = P.length;
     for (let i = 0; i < n; i++) {
-      const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+      const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n], SEG = Math.max(8, Math.round(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 7));
       for (let j = 0; j < SEG; j++) {
         const t = j / SEG, t2 = t * t, t3 = t2 * t;
         const f = (a, b, c2, d) => 0.5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t2 + (-a + 3 * b - 3 * c2 + d) * t3);
@@ -2015,6 +2031,7 @@ html.br-portrait .br-ui { display: none }
     if (k === "turbo") { c.fillStyle = "#2E6FD0"; c.fillRect(-r * .45, -r * .8, r * .9, r * 1.6); c.fillStyle = "#9FC8FF"; c.fillRect(-r * .45, -r * .8, r * .9, r * .22); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(r * .1, -r * .45); c.lineTo(-r * .25, r * .1); c.lineTo(0, r * .1); c.lineTo(-r * .1, r * .55); c.lineTo(r * .28, -r * .05); c.lineTo(r * .02, -r * .05); c.closePath(); c.fill() }
     else if (k === "banana") { c.rotate(-.5); c.fillStyle = "#F7D23E"; c.beginPath(); c.arc(0, -r * .35, r * .85, .35, Math.PI - .35); c.arc(0, -r * .95, r * 1.2, Math.PI - .55, .55, true); c.fill(); c.fillStyle = "#6B4A1A"; c.fillRect(r * .62, -r * .05, r * .16, r * .2) }
     else if (k === "rocket") { c.rotate(-.6); c.fillStyle = "#E23A3A"; c.fillRect(-r * .22, -r * .5, r * .44, r * 1.1); c.fillStyle = "#F2F2F2"; c.beginPath(); c.moveTo(-r * .22, -r * .5); c.lineTo(0, -r * .95); c.lineTo(r * .22, -r * .5); c.fill(); c.fillStyle = "#555"; c.fillRect(-r * .45, r * .3, r * .23, r * .32); c.fillRect(r * .22, r * .3, r * .23, r * .32); c.fillStyle = "#FFB040"; c.beginPath(); c.moveTo(-r * .15, r * .6); c.lineTo(0, r * .98); c.lineTo(r * .15, r * .6); c.fill() }
+    else if (k === "jet") { c.rotate(-.6); c.fillStyle = "#F2F4F8"; c.beginPath(); c.ellipse(0, 0, r * .38, r * .85, 0, 0, 7); c.fill(); c.fillStyle = "#2E6FD0"; c.fillRect(-r * .38, r * .1, r * .76, r * .18); c.fillStyle = "#1A2230"; c.beginPath(); c.ellipse(0, -r * .4, r * .2, r * .22, 0, 0, 7); c.fill(); c.fillStyle = "#2E6FD0"; c.beginPath(); c.moveTo(-r * .38, r * .5); c.lineTo(-r * .7, r * .9); c.lineTo(-r * .3, r * .78); c.fill(); c.beginPath(); c.moveTo(r * .38, r * .5); c.lineTo(r * .7, r * .9); c.lineTo(r * .3, r * .78); c.fill(); c.fillStyle = "#7FD0FF"; c.beginPath(); c.moveTo(-r * .18, r * .85); c.lineTo(0, r * 1.15); c.lineTo(r * .18, r * .85); c.fill() }
     else if (k === "shield") { c.fillStyle = "rgba(80,220,255,.35)"; c.strokeStyle = "#4DE3FF"; c.lineWidth = Math.max(1.5, r * .12); c.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 - Math.PI / 2; c.lineTo(Math.cos(a) * r * .85, Math.sin(a) * r * .85) } c.closePath(); c.fill(); c.stroke(); c.fillStyle = "#fff"; c.beginPath(); c.arc(-r * .25, -r * .25, r * .14, 0, 7); c.fill() }
     c.restore();
   }
@@ -2044,7 +2061,13 @@ html.br-portrait .br-ui { display: none }
     const flame = new T.Mesh(new T.ConeGeometry(.09, .45, 8), new T.MeshBasicMaterial({ color: "#FFA040", transparent: true, opacity: .85 })); flame.rotation.x = -Math.PI / 2; flame.position.set(.42, .42, -1.12); flame.visible = false; g.add(flame);
     const sparks = [-1, 1].map((sx) => { const s = new T.Mesh(new T.SphereGeometry(.07, 6, 5), new T.MeshBasicMaterial({ color: "#7FD0FF" })); s.position.set(sx * .58, .06, -.85); s.visible = false; g.add(s); return s });
     const shield = new T.Mesh(new T.SphereGeometry(1.25, 16, 12), new T.MeshBasicMaterial({ color: "#4DE3FF", transparent: true, opacity: .22, depthWrite: false })); shield.position.y = .55; shield.visible = false; g.add(shield);
-    return { g, fl, fr, rl, rr, flame, sparks, shield };
+    // グライダー（大ジャンプで開く）とジェットの外がわ（オリジナル）
+    const glider = new T.Group(); glider.position.set(0, 1.6, -.15); g.add(glider);
+    part((B) => { for (let k = 0; k < 7; k++) B.box(.42, .05, 1.05, k % 2 ? "#F4F4F4" : c1, -1.26 + k * .42, -Math.abs(k - 3) * .07, 0, 0, 0, (k - 3) * .12); B.box(2.9, .06, .12, c2, 0, -.2, .5); for (const sx of [-1, 0, 1]) { B.seg(sx * 1.25, -.2, .3, sx * .4, -1.05, .1, .02, .02, "#333"); B.seg(sx * 1.25, -.2, -.3, sx * .4, -1.05, -.3, .02, .02, "#333") } }, glider); glider.visible = false;
+    const jet = new T.Group(); g.add(jet);
+    part((B) => { B.sph(.92, "#F2F4F8", 0, .64, .05, .86, .72, 1.8, 2); B.sph(.44, "#2E6FD0", 0, .64, 1.5, 1, 1, 1.35, 2); B.sph(.36, "#1A2230", 0, 1.06, .62, 1.25, .6, 1.1, 2); B.box(1.62, .14, 1.2, "#2E6FD0", 0, .64, -.2); B.box(.07, .75, .7, "#2E6FD0", 0, 1.28, -1.2); for (const sx of [-1, 1]) B.box(.75, .07, .55, "#2E6FD0", sx * .9, .55, -1.12); B.cyl(.36, .46, .32, "#555", 0, .64, -1.62, 12, Math.PI / 2) }, jet); jet.visible = false;
+    g.rotation.order = "YXZ";
+    return { g, fl, fr, rl, rr, flame, sparks, shield, glider, jet };
   }
   // コースの3D：道路・縁石・白線・スタートライン・バリア・まわりの景色（テーマごと）
   function ktWorld(ST, TR, scene, Q) {
@@ -2053,24 +2076,37 @@ html.br-portrait .br-ui { display: none }
     const ang = P.map((_, i) => { const a = P[i], b = P[(i + 1) % NS]; return Math.atan2(b[1] - a[1], b[0] - a[0]) });
     const curv = P.map((_, i) => { let s = 0; for (let k = -6; k < 6; k++) s += phAng(ang[(i + k + 1 + NS) % NS] - ang[(i + k + NS) % NS]); return s });
     const xs = P.map((p) => p[0]), zs = P.map((p) => p[1]), bx0 = Math.min(...xs), bx1 = Math.max(...xs), bz0 = Math.min(...zs), bz1 = Math.max(...zs), cx = (bx0 + bx1) / 2, cz = (bz0 + bz1) / 2;
-    const night = ST.theme === "night", r = rng(ST.name.length * 31 + 7);
+    const club = ST.theme === "club", night = ST.theme === "night" || club, r = rng(ST.name.length * 31 + 7), HT = ktHeights(ST, NS), WO = RW + KT_WALL * KS + .4;
+    const R0 = Math.max(bx1 - bx0, bz1 - bz0) * .5 + 110, cum = [0]; for (let i = 1; i <= NS; i++) cum.push(cum[i - 1] + Math.hypot(P[i % NS][0] - P[i - 1][0], P[i % NS][1] - P[i - 1][1]));
     const trackDist = (x, z) => { let d = 1e9; for (let i = 0; i < NS; i += 2) { const dx = P[i][0] - x, dz = P[i][1] - z, q = dx * dx + dz * dz; if (q < d) d = q } return Math.sqrt(d) };
-    const place = (build, x, z, yaw, L = B) => { const b2 = phParts(); build(b2); const m4 = new T.Matrix4().makeRotationY(yaw).setPosition(x, 0, z); for (const p of b2.L) { p.g.applyMatrix4(m4); L.L.push(p) } };
+    const yawAt = (i) => Math.atan2(P[(i + 1) % NS][0] - P[i][0], P[(i + 1) % NS][1] - P[i][1]);
+    const place = (build, x, z, yaw, L = B, y = 0) => { const b2 = phParts(); build(b2); const m4 = new T.Matrix4().makeRotationY(yaw).setPosition(x, y, z); for (const p of b2.L) { p.g.applyMatrix4(m4); L.L.push(p) } };
     // 地面
-    const gtex = phTex(ST.ground), g0 = new T.PlaneGeometry(900, 900); g0.rotateX(-Math.PI / 2); g0.translate(cx, 0, cz); const uvg = g0.attributes.uv; for (let i = 0; i < uvg.count; i++) uvg.setXY(i, uvg.getX(i) * 900 / (PH_TS[ST.ground] || 4), uvg.getY(i) * 900 / (PH_TS[ST.ground] || 4));
-    const gm = new T.Mesh(g0, new T.MeshStandardMaterial({ map: gtex, roughness: .95, color: night ? "#55586A" : "#FFFFFF" })); gm.receiveShadow = true; scene.add(gm); ms.push(gm);
+    let gtex = phTex(ST.ground), gts = PH_TS[ST.ground] || 4;
+    if (club) { const gc = document.createElement("canvas"); gc.width = gc.height = 128; const g2 = gc.getContext("2d"); g2.fillStyle = "#0B0616"; g2.fillRect(0, 0, 128, 128); g2.strokeStyle = "#8A2BFF"; g2.lineWidth = 4; g2.strokeRect(0, 0, 128, 128); g2.strokeStyle = "rgba(255,63,208,.35)"; g2.lineWidth = 2; g2.strokeRect(32, 32, 64, 64); gtex = new T.CanvasTexture(gc); gtex.wrapS = gtex.wrapT = T.RepeatWrapping; gts = 8 }
+    const g0 = new T.PlaneGeometry(900, 900); g0.rotateX(-Math.PI / 2); g0.translate(cx, 0, cz); const uvg = g0.attributes.uv; for (let i = 0; i < uvg.count; i++) uvg.setXY(i, uvg.getX(i) * 900 / gts, uvg.getY(i) * 900 / gts);
+    const gm = new T.Mesh(g0, club ? new T.MeshStandardMaterial({ map: gtex, emissive: "#FFFFFF", emissiveMap: gtex, emissiveIntensity: .8, roughness: .5 }) : new T.MeshStandardMaterial({ map: gtex, roughness: .95, color: night ? "#55586A" : "#FFFFFF" })); gm.receiveShadow = true; scene.add(gm); ms.push(gm);
     // 道路（なめらかな帯）
     const pos = [], uv = [], idx = []; let acc = 0;
-    for (let i = 0; i <= NS; i++) { const k = i % NS, [x, z] = P[k], [nx, nz] = N[k]; if (i) acc += Math.hypot(x - P[(i - 1) % NS][0], z - P[(i - 1) % NS][1]); pos.push(x + nx * RW, .03, z + nz * RW, x - nx * RW, .03, z - nz * RW); uv.push(0, acc / 8, RW * 2 / 8, acc / 8); if (i) { const a = (i - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3) } }
+    for (let i = 0; i <= NS; i++) { const k = i % NS, [x, z] = P[k], [nx, nz] = N[k]; if (i) acc += Math.hypot(x - P[(i - 1) % NS][0], z - P[(i - 1) % NS][1]); pos.push(x + nx * RW, .03 + HT[k], z + nz * RW, x - nx * RW, .03 + HT[k], z - nz * RW); uv.push(0, acc / 8, RW * 2 / 8, acc / 8); if (i) { const a = (i - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3) } }
     const rg = new T.BufferGeometry(); rg.setAttribute("position", new T.Float32BufferAttribute(pos, 3)); rg.setAttribute("uv", new T.Float32BufferAttribute(uv, 2)); rg.setIndex(idx); rg.computeVertexNormals();
-    const atex = phTex("asphalt"), road = new T.Mesh(rg, new T.MeshStandardMaterial({ map: atex, roughness: night ? .45 : .88, metalness: night ? .25 : 0, color: night ? "#9A9AB0" : "#C8C8CC", side: T.DoubleSide })); road.receiveShadow = true; scene.add(road); ms.push(road);
+    const atex = phTex("asphalt"), road = new T.Mesh(rg, new T.MeshStandardMaterial({ map: atex, roughness: club ? .28 : night ? .45 : .88, metalness: club ? .45 : night ? .25 : 0, color: club ? "#A898D8" : night ? "#9A9AB0" : "#C8C8CC", side: T.DoubleSide })); road.receiveShadow = true; scene.add(road); ms.push(road);
+    // 坂のところ：道のわき（かべまで）の地面と、下までのかべ
+    { const tp = [], tu = [], wp = [], wu = [], q = (a, s, o) => [P[a][0] + N[a][0] * s * o, P[a][1] + N[a][1] * s * o];
+      for (let i = 0; i < NS; i++) { const j = (i + 1) % NS; if (HT[i] < .05 && HT[j] < .05) continue;
+        for (const s of [1, -1]) { const a = q(i, s, RW - .05), b = q(i, s, WO + .7), c2 = q(j, s, RW - .05), d = q(j, s, WO + .7), h1 = HT[i] + .02, h2 = HT[j] + .02;
+          for (const [v, h] of [[a, h1], [b, h1], [d, h2], [a, h1], [d, h2], [c2, h2]]) { tp.push(v[0], h, v[1]); tu.push(v[0] / gts, v[1] / gts) }
+          for (const [v, h, u] of [[b, h1, cum[i]], [b, 0, cum[i]], [d, 0, cum[i + 1]], [b, h1, cum[i]], [d, 0, cum[i + 1]], [d, h2, cum[i + 1]]]) { wp.push(v[0], h, v[1]); wu.push(u / 3, h / 3) } } }
+      if (tp.length) { const mk = (pp, uu, mat) => { const g2 = new T.BufferGeometry(); g2.setAttribute("position", new T.Float32BufferAttribute(pp, 3)); g2.setAttribute("uv", new T.Float32BufferAttribute(uu, 2)); g2.computeVertexNormals(); const m = new T.Mesh(g2, mat); m.receiveShadow = m.castShadow = true; scene.add(m); ms.push(m) };
+        mk(tp, tu, new T.MeshStandardMaterial({ map: gtex, roughness: .95, side: T.DoubleSide, color: night && !club ? "#55586A" : "#FFFFFF", ...(club ? { emissive: "#FFFFFF", emissiveMap: gtex, emissiveIntensity: .8 } : {}) }));
+        mk(wp, wu, new T.MeshStandardMaterial({ map: phTex("stone"), roughness: .9, side: T.DoubleSide, color: club ? "#3A2E5A" : night ? "#6A6A80" : "#B8B2A8" })) } }
     // 縁石（コーナーだけ）と白線（まっすぐのところ）
-    const curbCols = { gp: ["#E23A3A", "#F4F4F4"], coast: ["#2E8BE6", "#F4F4F4"], alpine: ["#E23A3A", "#F4F4F4"], night: ["#FF3FD0", "#33E6FF"] }[ST.theme];
+    const curbCols = { gp: ["#E23A3A", "#F4F4F4"], coast: ["#2E8BE6", "#F4F4F4"], alpine: ["#E23A3A", "#F4F4F4"], night: ["#FF3FD0", "#33E6FF"], club: ["#FF3FD0", "#FFE14D"] }[ST.theme];
     for (let i = 0; i < NS; i++) {
       const j = (i + 1) % NS, corner = Math.abs(curv[i]) > .1;
       for (const s of [1, -1]) {
-        if (corner) { const o = RW + .5; (night ? NE : B).seg(P[i][0] + N[i][0] * s * o, .06, P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .06, P[j][1] + N[j][1] * s * o, 1.0, .07, curbCols[Math.floor(i / 3) % 2]) }
-        else { const o = RW - .25; B.seg(P[i][0] + N[i][0] * s * o, .045, P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .045, P[j][1] + N[j][1] * s * o, .2, .01, "#F2F2EE") }
+        if (corner) { const o = RW + .5; (night ? NE : B).seg(P[i][0] + N[i][0] * s * o, .06 + HT[i], P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .06 + HT[j], P[j][1] + N[j][1] * s * o, 1.0, .07, curbCols[Math.floor(i / 3) % 2]) }
+        else { const o = RW - .25; (night ? NE : B).seg(P[i][0] + N[i][0] * s * o, .045 + HT[i], P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .045 + HT[j], P[j][1] + N[j][1] * s * o, .2, .01, night ? ["#FF3FD0", "#33E6FF", "#B05CFF", "#FFE14D"][Math.floor(i / 24) % 4] : "#F2F2EE") }
       }
     }
     // スタートライン（市松）・スタート位置の枠
@@ -2080,17 +2116,37 @@ html.br-portrait .br-ui { display: none }
     { const [x, z] = P[0], yaw = Math.atan2(P[1][0] - x, P[1][1] - z), W2 = RW + KT_WALL * KS + 1.2; place((b2) => { for (const sx of [-1, 1]) b2.box(.5, 6, .5, "#3A3E46", sx * W2, 3, 0); b2.box(W2 * 2 + .5, 1.2, .6, night ? "#22243A" : "#2A2E36", 0, 6.2, 0); b2.box(W2 * 1.6, .7, .05, "#F2F2F2", 0, 6.2, -.32); for (let a = 0; a < 8; a++) b2.box(W2 * 1.6 / 8, .35, .06, a % 2 ? "#111" : "#F2F2F2", -W2 * .8 + (a + .5) * W2 * 1.6 / 8, 6.2, -.33) }, x, z, yaw);
       place((b2) => { for (let a = 0; a < 5; a++) b2.sph(.17, "#FF2A2A", -1.2 + a * .6, 5.45, -.32) }, x, z, yaw, NE) }
     // バリア（コースのほかの部分にかぶるところは置かない）
-    const WO = RW + KT_WALL * KS + .4, okW = (q, i) => { for (let j = 0; j < NS; j += 2) { if (Math.abs(((j - i + NS + NS / 2) % NS) - NS / 2) < 40) continue; if (Math.hypot(P[j][0] - q[0], P[j][1] - q[1]) < RW + 3) return false } return true };
+    const okW = (q, i) => { for (let j = 0; j < NS; j += 2) { if (Math.abs(((j - i + NS + NS / 2) % NS) - NS / 2) < 40) continue; if (Math.hypot(P[j][0] - q[0], P[j][1] - q[1]) < RW + 3) return false } return true };
     for (const s of [1, -1]) {
       const Q2 = P.map((p, i) => [p[0] + N[i][0] * s * WO, p[1] + N[i][1] * s * WO]), ok = Q2.map((q, i) => okW(q, i));
       for (let i = 0; i < NS; i++) {
         const j = (i + 1) % NS; if (!ok[i] || !ok[j]) continue; const [x1, z1] = Q2[i], [x2, z2] = Q2[j];
-        if (ST.wall === "tire") { B.seg(x1, .38, z1, x2, .38, z2, .8, .76, "#1C1C1E"); B.seg(x1, .55, z1, x2, .55, z2, .82, .14, Math.floor(i / 5) % 2 ? "#E23A3A" : "#F4F4F4") }
-        else if (ST.wall === "rail") { B.seg(x1, .62, z1, x2, .62, z2, .08, .32, "#D8DCE0"); if (i % 4 === 0) B.box(.12, .75, .12, "#9A9EA4", x1, .37, z1) }
-        else if (ST.wall === "fence") { B.seg(x1, .55, z1, x2, .55, z2, .07, .1, "#7A5230"); B.seg(x1, .95, z1, x2, .95, z2, .07, .1, "#7A5230"); if (i % 4 === 0) B.box(.14, 1.2, .14, "#6A4428", x1, .6, z1); B.seg(x1, .15, z1, x2, .15, z2, .9, .3, "#F4F7FA") }
-        else { B.seg(x1, .5, z1, x2, .5, z2, .45, 1.0, "#55586A"); NE.seg(x1, .9, z1, x2, .9, z2, .47, .08, Math.floor(i / 20) % 2 ? "#FF3FD0" : "#33E6FF") }
+        const y1 = HT[i], y2 = HT[j];
+        if (ST.wall === "tire") { B.seg(x1, .38 + y1, z1, x2, .38 + y2, z2, .8, .76, "#1C1C1E"); B.seg(x1, .55 + y1, z1, x2, .55 + y2, z2, .82, .14, Math.floor(i / 5) % 2 ? "#E23A3A" : "#F4F4F4") }
+        else if (ST.wall === "rail") { B.seg(x1, .62 + y1, z1, x2, .62 + y2, z2, .08, .32, "#D8DCE0"); if (i % 4 === 0) B.box(.12, .75, .12, "#9A9EA4", x1, .37 + y1, z1) }
+        else if (ST.wall === "fence") { B.seg(x1, .55 + y1, z1, x2, .55 + y2, z2, .07, .1, "#7A5230"); B.seg(x1, .95 + y1, z1, x2, .95 + y2, z2, .07, .1, "#7A5230"); if (i % 4 === 0) B.box(.14, 1.2, .14, "#6A4428", x1, .6 + y1, z1); B.seg(x1, .15 + y1, z1, x2, .15 + y2, z2, .9, .3, "#F4F7FA") }
+        else { B.seg(x1, .5 + y1, z1, x2, .5 + y2, z2, .45, 1.0, club ? "#1E1830" : "#55586A"); NE.seg(x1, .9 + y1, z1, x2, .9 + y2, z2, .47, .08, club ? ["#FF3FD0", "#33E6FF", "#B05CFF", "#FFE14D"][Math.floor(i / 12) % 4] : Math.floor(i / 20) % 2 ? "#FF3FD0" : "#33E6FF") }
       }
     }
+    // ジャンプ台（黄と黒のしま）と大ジャンプ台（虹色のしま・門）
+    const signTex = (text, c1, c2) => { const sc = document.createElement("canvas"); sc.width = 512; sc.height = 64; const s2 = sc.getContext("2d"), gr = s2.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, c1); gr.addColorStop(1, c2); s2.fillStyle = gr; s2.fillRect(0, 0, 512, 64); s2.fillStyle = "#FFFFFF"; s2.font = "900 40px sans-serif"; s2.textAlign = "center"; s2.textBaseline = "middle"; s2.fillText(text, 256, 34); return new T.CanvasTexture(sc) };
+    for (const [t, k] of ST.ramps || []) {
+      const ri = Math.floor(t * NS), L = k === "glide" ? Math.round(NS * .045) : 6;
+      for (let a = 0; a < L; a++) { const i = (ri - a + NS) % NS; if (k === "glide" && a % 2) continue; const col = k === "glide" ? ["#FF3FD0", "#FFE14D", "#33E6FF", "#7CF59A"][Math.floor(a / 2) % 4] : a % 2 ? "#1C1C1E" : "#FFE14D"; (k === "glide" ? NE : B).seg(P[i][0] + N[i][0] * RW * .98, HT[i] + .06, P[i][1] + N[i][1] * RW * .98, P[i][0] - N[i][0] * RW * .98, HT[i] + .06, P[i][1] - N[i][1] * RW * .98, .45, .04, col) }
+      if (k === "glide") { const W2 = WO + .7, y0 = HT[ri]; place((b2) => { for (const sx of [-1, 1]) { b2.box(.6, 9, .6, "#2A2E36", sx * W2, 4.5, 0); b2.box(.9, .5, .9, "#2A2E36", sx * W2, .25 - y0, 0) } b2.box(W2 * 2 + .6, 1.6, .5, "#1A1C2A", 0, 9.2, 0) }, P[ri][0], P[ri][1], yawAt(ri), B, y0);
+        place((b2) => { b2.box(W2 * 2 + .7, .14, .56, "#33E6FF", 0, 10.05, 0); b2.box(W2 * 2 + .7, .14, .56, "#FF3FD0", 0, 8.35, 0) }, P[ri][0], P[ri][1], yawAt(ri), NE, y0);
+        const sm = new T.Mesh(new T.PlaneGeometry(W2 * 2 - .4, 1.3), new T.MeshBasicMaterial({ map: signTex("大ジャンプ → グライダー", "#FF3FD0", "#7A2AFF"), side: T.DoubleSide })); sm.position.set(P[ri][0], y0 + 9.2, P[ri][1]); sm.rotation.y = yawAt(ri) + Math.PI; sm.translateZ(.27); scene.add(sm); ms.push(sm) }
+    }
+    // ダッシュパネル（矢印が流れる）
+    const pc = document.createElement("canvas"); pc.width = 64; pc.height = 64; { const p2 = pc.getContext("2d"); p2.fillStyle = "#14246A"; p2.fillRect(0, 0, 64, 64); p2.fillStyle = "#FFE14D"; p2.fillRect(0, 0, 6, 64); p2.fillRect(58, 0, 6, 64); p2.fillStyle = "#4DE3FF"; p2.beginPath(); p2.moveTo(10, 46); p2.lineTo(32, 14); p2.lineTo(54, 46); p2.lineTo(44, 46); p2.lineTo(32, 29); p2.lineTo(20, 46); p2.closePath(); p2.fill() }
+    const padTex = new T.CanvasTexture(pc); padTex.wrapT = T.RepeatWrapping; padTex.repeat.set(1, 2); const padMat = new T.MeshBasicMaterial({ map: padTex }), padGeo = new T.PlaneGeometry(2.4, 3.6); padGeo.rotateX(-Math.PI / 2);
+    for (const [t, o] of ST.pads || []) { const i = Math.floor(t * NS), j = (i + 1) % NS, m = new T.Mesh(padGeo, padMat); m.position.set(P[i][0] + N[i][0] * o * KS, HT[i] + .06, P[i][1] + N[i][1] * o * KS); m.rotation.y = Math.atan2(-(P[j][0] - P[i][0]), -(P[j][1] - P[i][1])); scene.add(m); ms.push(m) }
+    // トンネル（電気つき）
+    for (const [t0, t1] of ST.tunnels || []) { const i0 = Math.floor(t0 * NS), i1 = Math.floor(t1 * NS), TW = WO + .9, tc = ST.theme === "alpine" ? "#7A7E86" : "#9A8C78";
+      for (let i = i0; i < i1; i++) { const j = i + 1; for (const s of [1, -1]) B.seg(P[i][0] + N[i][0] * s * TW, HT[i] + 3, P[i][1] + N[i][1] * s * TW, P[j][0] + N[j][0] * s * TW, HT[j] + 3, P[j][1] + N[j][1] * s * TW, 1.2, 6, tc); B.seg(P[i][0], HT[i] + 6.3, P[i][1], P[j][0], HT[j] + 6.3, P[j][1], TW * 2 + 1.4, .6, tc); if ((i - i0) % 8 === 0) for (const s of [1, -1]) NE.box(.3, .2, 1.2, "#FFE9A0", P[i][0] + N[i][0] * s * (TW - .7), HT[i] + 5.7, P[i][1] + N[i][1] * s * (TW - .7)) }
+      for (const ie of [i0, i1]) place((b2) => { for (const sx of [-1, 1]) b2.box(2.4, 8, 1.6, tc, sx * (TW + .9), 4, 0); b2.box(TW * 2 + 4.2, 2, 1.6, tc, 0, 7.2, 0); b2.box(TW * 2 + 4.6, .4, 1.8, ST.theme === "alpine" ? "#F4F7FA" : "#7A6A54", 0, 8.4, 0) }, P[ie][0], P[ie][1], yawAt(ie), B, HT[ie]) }
+    // 道の上の橋の看板（グランプリ）
+    if (ST.theme === "gp") for (const [t, txt, c1, c2] of [[.2, "WAIT BATTLE GP", "#2E8BE6", "#1B5FA8"], [.6, "FULL THROTTLE", "#E5413B", "#A82C25"], [.9, "FINAL SECTOR", "#3DBE5A", "#26853A"]]) { const i = Math.floor(t * NS), W2 = WO + 1, y0 = HT[i]; place((b2) => { for (const sx of [-1, 1]) b2.box(.7, 7.5, .7, "#D8DCE0", sx * W2, 3.75, 0); b2.box(W2 * 2 + .8, 1.8, .7, "#D8DCE0", 0, 7.4, 0) }, P[i][0], P[i][1], yawAt(i), B, y0); for (const f of [0, Math.PI]) { const sm = new T.Mesh(new T.PlaneGeometry(W2 * 2 - .6, 1.4), new T.MeshBasicMaterial({ map: signTex(txt, c1, c2) })); sm.position.set(P[i][0], y0 + 7.4, P[i][1]); sm.rotation.y = yawAt(i) + f; sm.translateZ(.37); scene.add(sm); ms.push(sm) } }
     // 景色を置ける場所（コースから十分はなれた所）
     const spot = (minD, maxD = 120) => { for (let t = 0; t < 60; t++) { const x = bx0 - 60 + r() * (bx1 - bx0 + 120), z = bz0 - 60 + r() * (bz1 - bz0 + 120), d = trackDist(x, z); if (d > minD && d < maxD) return [x, z, d] } return null };
     const trees = [];
@@ -2099,8 +2155,8 @@ html.br-portrait .br-ui { display: none }
       for (const [i0, s] of [[NS - 60, 1], [NS - 20, 1]]) { const i = (i0 + NS) % NS, [x, z] = P[i], o = WO + 4.5, yaw = Math.atan2(P[(i + 1) % NS][0] - x, P[(i + 1) % NS][1] - z); place((b2) => { for (let k = 0; k < 6; k++) { b2.box(14, .6 * (k + 1), 1.2, "#8A8E96", 0, .3 * (k + 1), s * (k * 1.2)); for (let a = 0; a < 16; a++) if (r() < .8) b2.box(.35, .45, .3, ["#E23A3A", "#2E8BE6", "#F2B233", "#F4F4F4", "#3DBE5A", "#E86AC0"][Math.floor(r() * 6)], -6.6 + a * .88, .6 * (k + 1) + .25, s * (k * 1.2 - .2)) } for (const px of [-6.8, 6.8]) b2.box(.25, 6, .25, "#555", px, 3, s * 7); b2.box(14.6, .2, 8, "#F4F4F4", 0, 6.1, s * 3.6) }, x + N[i][0] * s * o, z + N[i][1] * s * o, yaw) }
       { const i = (NS - 40) % NS, [x, z] = P[i], o = WO + 5, yaw = Math.atan2(P[(i + 1) % NS][0] - x, P[(i + 1) % NS][1] - z); place((b2) => { b2.box(30, 5, 7, "#E8EAEE", 0, 2.5, -3.5); b2.box(30.4, .4, 7.4, "#2E8BE6", 0, 5.2, -3.5); for (let a = 0; a < 7; a++) { b2.box(3.2, 3, .1, "#3A3E46", -12 + a * 4, 1.5, .02); b2.box(3.2, .9, .12, "#BFE3F5", -12 + a * 4, 4, .03) } }, x - N[i][0] * o, z - N[i][1] * o, yaw) }
       for (let k = 0; k < 10; k++) { const sp = spot(WO + 2, WO + 6); if (!sp) continue; const [x, z] = sp; place((b2) => { b2.box(4, 1.4, .12, ["#E23A3A", "#2E8BE6", "#F2B233", "#3DBE5A"][k % 4], 0, 1.4, 0); b2.box(3.6, .25, .14, "#F4F4F4", 0, 1.4, 0); for (const px of [-1.6, 1.6]) b2.box(.12, 1.4, .12, "#555", px, .7, 0) }, x, z, Math.atan2(cx - x, cz - z)) }
-      for (let k = 0; k < 260; k++) { const sp = spot(WO + 6, 110); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .6, kind: r() < .3 ? "pine" : "round", c: Math.floor(r() * 3) }) }
-      for (let k = 0; k < 8; k++) { const a = k / 8 * 6.28, x = cx + Math.cos(a) * 200, z = cz + Math.sin(a) * 180; B.sph(40 + r() * 25, ["#5E9E4A", "#6BAA52", "#548F42"][k % 3], x, -8, z, 1.4, .45, 1.2, 1) }
+      for (let k = 0; k < 420; k++) { const sp = spot(WO + 6, 110); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .6, kind: r() < .3 ? "pine" : "round", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 8; k++) { const a = k / 8 * 6.28, x = cx + Math.cos(a) * R0, z = cz + Math.sin(a) * R0 * .9; B.sph(40 + r() * 25, ["#5E9E4A", "#6BAA52", "#548F42"][k % 3], x, -8, z, 1.4, .45, 1.2, 1) }
     } else if (ST.theme === "coast") {
       const sea = bx1 + 18; const wm = new T.Mesh(new T.PlaneGeometry(500, 900), new T.MeshStandardMaterial({ map: phTex("water"), color: "#7FC0F0", roughness: .2, metalness: .2, transparent: true, opacity: .92 })); wm.geometry.rotateX(-Math.PI / 2); wm.geometry.translate(sea + 250, .05, cz); const wuv = wm.geometry.attributes.uv; for (let i = 0; i < wuv.count; i++) wuv.setXY(i, wuv.getX(i) * 40, wuv.getY(i) * 70); scene.add(wm); ms.push(wm); ms.water = wm;
       const sand = new T.Mesh(new T.PlaneGeometry(26, 900), new T.MeshStandardMaterial({ map: phTex("sand"), roughness: 1 })); sand.geometry.rotateX(-Math.PI / 2); sand.geometry.translate(sea - 6, .02, cz); scene.add(sand); ms.push(sand);
@@ -2109,19 +2165,43 @@ html.br-portrait .br-ui { display: none }
       for (let k = 0; k < 60; k++) { const sp = spot(WO + 4, 100); if (sp && sp[0] < sea - 14) place((b2) => palm(b2, .8 + r() * .5), sp[0], sp[1], r() * 6.28) }
       { const x = sea + 20, z = cz - 40; place((b2) => { b2.cyl(6, 7, 3, "#8A847A", 0, 1.5, 0, 12); for (let k = 0; k < 6; k++) b2.cyl(1.9 - k * .1, 2 - k * .1, 3, k % 2 ? "#E23A3A" : "#F4F4F4", 0, 4.5 + k * 3, 0, 16); b2.cyl(1.7, 1.7, 2, "#BFE3F5", 0, 22.5, 0, 12); b2.cone(2.1, 2, "#C0473B", 0, 24.5, 0, 12) }, x, z, 0) }
       for (let k = 0; k < 5; k++) place((b2) => { b2.box(2, .8, 6, "#F4F4F4", 0, .4, 0); b2.cyl(.06, .06, 7, "#888", 0, 4, 0, 6); b2.seg(0, 7, 0, 0, 1.2, 2.5, .03, .03, "#888"); b2.box(.05, 5, 2.4, "#F4F4F4", 0, 3.8, 1.2) }, sea + 40 + r() * 120, bz0 + r() * (bz1 - bz0), r() * 6.28);
-      for (let k = 0; k < 140; k++) { const sp = spot(WO + 6, 110); if (sp && sp[0] < sea - 20) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .5, kind: "round", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 240; k++) { const sp = spot(WO + 6, 110); if (sp && sp[0] < sea - 20) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .5, kind: "round", c: Math.floor(r() * 3) }) }
       for (let k = 0; k < 6; k++) { const z = cz + (k - 2.5) * 70; B.sph(45 + r() * 20, "#6BAA52", bx0 - 90, -10, z, 1.2, .5, 1.3, 1) }
     } else if (ST.theme === "alpine") {
-      for (let k = 0; k < 520; k++) { const sp = spot(WO + 4, 120); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .8, kind: "pine", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 800; k++) { const sp = spot(WO + 4, 120); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .8, kind: "pine", c: Math.floor(r() * 3) }) }
       for (let k = 0; k < 30; k++) { const sp = spot(WO + 4, 90); if (sp) { const s = 1 + r() * 2.5; B.sph(s, "#8A8E96", sp[0], s * .35, sp[1], 1.2, .8, 1, 0); B.sph(s * .6, "#F4F7FA", sp[0], s * .8, sp[1], 1.3, .4, 1.1, 1) } }
       for (let k = 0; k < 8; k++) { const sp = spot(WO + 8, 60); if (sp) place((b2) => { b2.box(6, 3, 5, "#7A5230", 0, 1.5, 0); b2.gable(6, 5, 2, "#7A5230", 0, 3, 0); for (const sg of [-1, 1]) b2.box(6.6, .3, 3.4, "#F4F7FA", 0, 4, sg * 1.25, 0, sg * .67); b2.box(1, 2, .1, "#4A3020", 0, 1, 2.52); b2.box(1.1, .9, .1, "#FFE9A0", 1.8, 1.8, 2.52) }, sp[0], sp[1], Math.atan2(cx - sp[0], cz - sp[1])) }
-      for (let k = 0; k < 12; k++) { const a = k / 12 * 6.28, x = cx + Math.cos(a) * 230, z = cz + Math.sin(a) * 210, s = 50 + r() * 40; B.cone(s, s * 1.3, "#7A8494", x, s * .55, z, 9); B.cone(s * .4, s * .52, "#F4F7FA", x, s * 1.02, z, 9) }
+      for (let k = 0; k < 12; k++) { const a = k / 12 * 6.28, x = cx + Math.cos(a) * (R0 + 40), z = cz + Math.sin(a) * (R0 + 20), s = 50 + r() * 40; B.cone(s, s * 1.3, "#7A8494", x, s * .55, z, 9); B.cone(s * .4, s * .52, "#F4F7FA", x, s * 1.02, z, 9) }
+    } else if (club) {
+      // ネオンクラブ：巨大モニター・スピーカー・光の柱・レーザー・ミラーボール・ネオンのアーチ・踊る観客
+      const mc = document.createElement("canvas"); mc.width = 256; mc.height = 144; const mt = new T.CanvasTexture(mc); ms.mon = { c: mc, t: mt };
+      const monMat = new T.MeshBasicMaterial({ map: mt, fog: false }), monGeo = new T.PlaneGeometry(24, 13.5), NC = ["#FF3FD0", "#33E6FF", "#B05CFF", "#FFE14D", "#7CF59A"];
+      const mons = []; for (let k = 0; k < 400 && mons.length < 10; k++) { const sp = spot(WO + 14, WO + 34); if (!sp || mons.some((q) => Math.hypot(q[0] - sp[0], q[1] - sp[1]) < 55)) continue; mons.push(sp) }
+      mons.forEach(([x, z], n) => { let bi = 0, bd = 1e12; for (let i = 0; i < NS; i += 3) { const d = (P[i][0] - x) ** 2 + (P[i][1] - z) ** 2; if (d < bd) { bd = d; bi = i } } const yaw = Math.atan2(P[bi][0] - x, P[bi][1] - z), col = NC[n % 5];
+        place((b2) => { b2.box(25.6, 15.2, .9, "#120E1C", 0, 12, -.55); for (const sx of [-1, 1]) { b2.box(1, 5, 1, "#2A2638", sx * 8, 2.5, -.7); b2.box(3.4, 9, 3.2, "#0E0C14", sx * 16, 4.5, 0); for (const yy of [2.2, 5, 7.6]) b2.cyl(1.05, 1.05, .12, "#2A2A30", sx * 16, yy, 1.62, 16, Math.PI / 2) } }, x, z, yaw);
+        place((b2) => { b2.box(25.8, .3, .3, col, 0, 19.65, -.1); b2.box(25.8, .3, .3, col, 0, 4.35, -.1); for (const sx of [-1, 1]) { b2.box(.3, 15.6, .3, col, sx * 12.9, 12, -.1); for (const yy of [2.2, 5, 7.6]) b2.tor(.9, .08, col, sx * 16, yy, 1.7) } }, x, z, yaw, NE);
+        for (const f of [0, Math.PI]) { const m = new T.Mesh(monGeo, monMat); m.position.set(x, 12, z); m.rotation.y = yaw + f; if (f) m.translateZ(1.02); scene.add(m); ms.push(m) } });
+      // 光の柱（スポットライト）
+      const bgeo = new T.ConeGeometry(5, 80, 18, 1, true); bgeo.rotateX(Math.PI); bgeo.translate(0, 40, 0); ms.beams = [];
+      for (let k = 0; k < 14; k++) { const sp = spot(WO + 6, WO + 50); if (!sp) continue; const col = NC[k % 5]; B.box(1.3, 14, 1.3, "#2A2638", sp[0], 7, sp[1]); NE.box(1.6, .5, 1.6, col, sp[0], 14.1, sp[1]); const piv = new T.Group(); piv.position.set(sp[0], 14.4, sp[1]); piv.add(new T.Mesh(bgeo, new T.MeshBasicMaterial({ color: col, transparent: true, opacity: .14, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, fog: false }))); scene.add(piv); ms.beams.push({ g: piv, ph: r() * 6.28 }) }
+      // ミラーボールとレーザー
+      { const bg = new T.IcosahedronGeometry(5, 2).toNonIndexed(), cols = []; for (let i = 0; i < bg.attributes.position.count; i += 3) { const v = .55 + r() * .45, tint = r() < .15 ? [1, .5, .9] : r() < .3 ? [.5, .9, 1] : [1, 1, 1]; for (let k = 0; k < 3; k++) cols.push(v * tint[0], v * tint[1], v * tint[2]) } bg.setAttribute("color", new T.Float32BufferAttribute(cols, 3));
+        const ball = new T.Mesh(bg, new T.MeshBasicMaterial({ vertexColors: true, fog: false })); ball.position.set(cx, 36, cz); scene.add(ball); ms.ball = ball; B.seg(cx, 41, cz, cx, 90, cz, .25, .25, "#555");
+        const lz = new T.Group(); lz.position.set(cx, 36, cz); for (let k = 0; k < 10; k++) { const lg = new T.BoxGeometry(.12, .12, 200); lg.translate(0, 0, 100); const l = new T.Mesh(lg, new T.MeshBasicMaterial({ color: NC[k % 5], transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false, fog: false })); l.rotation.set(.16 + (k % 3) * .05, k / 10 * 6.28, 0); lz.add(l) } scene.add(lz); ms.laser = lz }
+      // 空にうかぶネオンの輪
+      for (let k = 0; k < 6; k++) { const a = k / 6 * 6.28; NE.tor(14 + r() * 8, .35, NC[k % 5], cx + Math.cos(a) * R0 * .55, 30 + r() * 15, cz + Math.sin(a) * R0 * .5, Math.PI / 2 + (r() - .5) * .6, a) }
+      // コースの上のネオンのアーチ
+      for (let n = 1; n < 16; n++) { const i = Math.floor(n / 16 * NS), Ra = WO + .8, col = NC[n % 5]; place((b2) => { for (let a = 0; a < 14; a++) { const a1 = a / 14 * Math.PI, a2 = (a + 1) / 14 * Math.PI; b2.seg(Math.cos(a1) * Ra, Math.sin(a1) * Ra * .55, 0, Math.cos(a2) * Ra, Math.sin(a2) * Ra * .55, 0, .35, .35, a % 2 ? col : "#FFFFFF") } }, P[i][0], P[i][1], yawAt(i), NE, HT[i]) }
+      // 踊る観客（かべの外）
+      { const CR = phParts(); for (let n = 0; n < 10; n++) { const i0 = Math.floor((n + .5) / 10 * NS), s = n % 2 ? 1 : -1; for (let k = 0; k < 26; k++) { const i = (i0 + k * 2) % NS, o = WO + 1.6 + (k % 3) * .9, x = P[i][0] + N[i][0] * s * o, z = P[i][1] + N[i][1] * s * o; if (!okW([x, z], i)) continue; const y0 = HT[i], col = NC[Math.floor(r() * 5)]; CR.cyl(.22, .26, .9, col, x, y0 + .75, z, 6); CR.sph(.17, "#E3B48C", x, y0 + 1.4, z); if (r() < .6) CR.seg(x - .2, y0 + 1.1, z, x - .35, y0 + 1.75, z, .08, .08, col) } }
+        if (CR.L.length) { const cm = new T.Mesh(phMerge(CR.L, false), new T.MeshBasicMaterial({ vertexColors: true })); scene.add(cm); ms.crowd = cm } }
     } else {
       // 夜の街：ビル（窓が光る）・街灯・ネオン
       const wc = document.createElement("canvas"); wc.width = 64; wc.height = 128; { const w2 = wc.getContext("2d"); w2.fillStyle = "#14162A"; w2.fillRect(0, 0, 64, 128); for (let y = 4; y < 128; y += 12) for (let x = 4; x < 64; x += 10) { w2.fillStyle = r() < .55 ? ["#FFE9A0", "#BFE3FF", "#FFD27A"][Math.floor(r() * 3)] : "#1E2240"; w2.fillRect(x, y, 6, 7) } }
       const wt = new T.CanvasTexture(wc); wt.wrapS = wt.wrapT = T.RepeatWrapping; ms.tex = wt;
-      for (let k = 0; k < 70; k++) { const sp = spot(WO + 7, 110); if (!sp) continue; const w = 8 + r() * 14, d = 8 + r() * 14, h = 12 + r() * 40, geo = new T.BoxGeometry(w, h, d), u = geo.attributes.uv; for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * Math.max(w, d) / 6, u.getY(i) * h / 8); const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: "#2A2E40", map: wt, emissive: "#FFFFFF", emissiveMap: wt, emissiveIntensity: .9, roughness: .6 })); m.position.set(sp[0], h / 2, sp[1]); scene.add(m); ms.push(m); if (r() < .4) NE.box(w * .6, 1.6, .2, ["#FF3FD0", "#33E6FF", "#FFE14D", "#7CF59A"][k % 4], sp[0], h * .7, sp[1] + d / 2 + .15) }
-      for (let i = 0; i < NS; i += 18) for (const s of [1, -1]) { const q = [P[i][0] + N[i][0] * s * (WO + 1), P[i][1] + N[i][1] * s * (WO + 1)]; if (!okW(q, i)) continue; B.box(.18, 6, .18, "#3A3E46", q[0], 3, q[1]); B.seg(q[0], 6, q[1], q[0] - N[i][0] * s * 1.6, 6, q[1] - N[i][1] * s * 1.6, .12, .12, "#3A3E46"); NE.sph(.28, "#FFF2C8", q[0] - N[i][0] * s * 1.6, 5.8, q[1] - N[i][1] * s * 1.6) }
+      const bmat = new T.MeshStandardMaterial({ color: "#2A2E40", map: wt, emissive: "#FFFFFF", emissiveMap: wt, emissiveIntensity: .9, roughness: .6 });
+      for (let k = 0; k < 100; k++) { const sp = spot(WO + 7, 110); if (!sp) continue; const w = 8 + r() * 14, d = 8 + r() * 14, h = 12 + r() * 40, geo = new T.BoxGeometry(w, h, d), u = geo.attributes.uv; for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * Math.max(w, d) / 6, u.getY(i) * h / 8); const m = new T.Mesh(geo, bmat); m.position.set(sp[0], h / 2, sp[1]); scene.add(m); ms.push(m); if (r() < .4) NE.box(w * .6, 1.6, .2, ["#FF3FD0", "#33E6FF", "#FFE14D", "#7CF59A"][k % 4], sp[0], h * .7, sp[1] + d / 2 + .15) }
+      for (let i = 0; i < NS; i += 18) for (const s of [1, -1]) { const q = [P[i][0] + N[i][0] * s * (WO + 1), P[i][1] + N[i][1] * s * (WO + 1)]; if (!okW(q, i)) continue; const y0 = HT[i]; B.box(.18, 6, .18, "#3A3E46", q[0], 3 + y0, q[1]); B.seg(q[0], 6 + y0, q[1], q[0] - N[i][0] * s * 1.6, 6 + y0, q[1] - N[i][1] * s * 1.6, .12, .12, "#3A3E46"); NE.sph(.28, "#FFF2C8", q[0] - N[i][0] * s * 1.6, 5.8 + y0, q[1] - N[i][1] * s * 1.6) }
       const sg = new T.BufferGeometry(), sp2 = []; for (let k = 0; k < 400; k++) { const a = r() * 6.28, e = .15 + r() * 1.2, R = 380; sp2.push(cx + Math.cos(a) * Math.cos(e) * R, Math.sin(e) * R, cz + Math.sin(a) * Math.cos(e) * R) } sg.setAttribute("position", new T.Float32BufferAttribute(sp2, 3)); const stars = new T.Points(sg, new T.PointsMaterial({ color: "#FFFFFF", size: 1.5, sizeAttenuation: false, fog: false })); scene.add(stars); ms.push(stars);
     }
     // 木（同じ形をたくさん並べる）
@@ -2132,35 +2212,42 @@ html.br-portrait .br-ui { display: none }
     // ？の箱の絵
     const qc = document.createElement("canvas"); qc.width = qc.height = 64; { const q2 = qc.getContext("2d"), gr = q2.createLinearGradient(0, 0, 64, 64); gr.addColorStop(0, "#FF6FB0"); gr.addColorStop(.5, "#7FD0FF"); gr.addColorStop(1, "#FFE14D"); q2.fillStyle = gr; q2.fillRect(0, 0, 64, 64); q2.strokeStyle = "#FFFFFF"; q2.lineWidth = 6; q2.strokeRect(3, 3, 58, 58); q2.fillStyle = "#FFFFFF"; q2.font = "900 44px sans-serif"; q2.textAlign = "center"; q2.textBaseline = "middle"; q2.fillText("?", 32, 35) }
     const boxMat = new T.MeshStandardMaterial({ map: new T.CanvasTexture(qc), emissive: "#FFFFFF", emissiveIntensity: .35, transparent: true, opacity: .9 });
-    return { ms, boxMat, P, N, bounds: [bx0, bz0, bx1, bz1] };
+    return { ms, boxMat, padTex, P, N, bounds: [bx0, bz0, bx1, bz1] };
   }
   ACTION.kart = {
     full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("カートレース", `${KT_LAPS}周で先にゴールしたら勝ち`)}
         <section class="card act kt" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="レースのコース"></canvas><div id="act-msg"></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="kpad" style="z-index:3"><div class="grp"><button class="kbtn" id="k-left" aria-label="左へ">◀</button><button class="kbtn" id="k-right" aria-label="右へ">▶</button></div>
           <div class="grp col"><button class="kbtn small" id="k-item">アイテム</button><button class="kbtn" id="k-drift" style="font-size:14px">ドリフト</button></div></div>
-        <p class="muted">ステージはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ（火花が青→オレンジでもっと長く）。虹色の「？」の箱でアイテム：ターボ（加速）・シールド（当たっても平気で少し速い）・バナナ（後ろに置く）・ロケット（コースにそって前へ飛ぶ）。芝生や砂は遅く、外側のかべにぶつかると減速します。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
+        <p class="muted">横画面であそびます。コースはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ（火花が青→オレンジでもっと長く）。道の青い矢印（ダッシュパネル）にのると加速。黄色と黒のジャンプ台でとんだら、空中で「ドリフト」を押すとトリック（着地でダッシュ）。虹色の大ジャンプ台ではグライダーが開いて遠くまで飛べます（◀ ▶ で向きを変えられる）。虹色の「？」の箱でアイテム：ターボ（加速）・シールド（当たっても平気で少し速い）・バナナ（後ろに置く）・ロケット（コースにそって前へ飛ぶ）・ジェット（自動でコースを猛スピードで進み、ぶつかった相手をはね飛ばす）。芝生や砂は遅く、外側のかべにぶつかると減速します。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
       setMsg(`<p class="wait">3Dのコースを読み込んでいます</p>`);
       phLoad().then(() => { if (!alive) return; try { stop = ktRun() } catch (e) { console.error(e); showErr(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("kart")}`) } })
         .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("kart")}`) });
-      return () => { alive = false; if (stop) stop() };
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-fake", "br-on"); ROT90 = false };
     },
   };
   function ktRun() {
     const T = THREE, host = isFirst(), ST = KT_STAGES[me.m.stage || 0] || KT_STAGES[0], cardEl = $(".card.act.kt"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
-    const TR = kartTrack(ST.pts), NS = TR.length, Q = GFX(), night = ST.theme === "night";
+    const TR = kartTrack(ST.pts), NS = TR.length, Q = GFX(), club = ST.theme === "club", night = ST.theme === "night" || club;
+    const HT = ktHeights(ST, NS), GH = (i) => HT[((i % NS) + NS) % NS], ahead = (a, b) => (b - a + NS) % NS;
+    const RAMPS = (ST.ramps || []).map(([t, k]) => ({ i: Math.floor(t * NS), k })), PADS = (ST.pads || []).map(([t, o]) => ({ i: Math.floor(t * NS), o }));
+    // 荒野バトルと同じく横画面・全画面であそぶ（横にならないスマホは画面ごと90度まわす）
+    document.documentElement.classList.add("br-on");
+    const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
+    lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     const renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" }); watchLost(gl, "kart");
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.shadowMap.enabled = Q.sh > 0 && !night; renderer.shadowMap.type = T.PCFSoftShadowMap;
     const scene = new T.Scene(), skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, ST.sky[0]); gr.addColorStop(1, ST.sky[1]); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
     scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(ST.fog, 70, night ? 260 : 330);
     const camera = new T.PerspectiveCamera(65, 1, .1, 700);
-    scene.add(new T.HemisphereLight(night ? "#6A7AC0" : "#DCEEFF", night ? "#1A1830" : "#5E7F3E", night ? .55 : .75));
-    const sun = new T.DirectionalLight(night ? "#8899DD" : "#FFF0D6", night ? .35 : 1.0); sun.castShadow = Q.sh > 0 && !night; sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 150 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
+    scene.add(new T.HemisphereLight(club ? "#E0B8FF" : night ? "#6A7AC0" : "#DCEEFF", club ? "#40205A" : night ? "#1A1830" : "#5E7F3E", club ? 1.0 : night ? .55 : .75));
+    const sun = new T.DirectionalLight(club ? "#FFC0F0" : night ? "#8899DD" : "#FFF0D6", club ? .7 : night ? .35 : 1.0); sun.castShadow = Q.sh > 0 && !night; sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 150 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
     const W = ktWorld(ST, TR, scene, Q);
     // ---- 計算（前のカートレースと同じ平面の計算）
     const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
@@ -2171,8 +2258,8 @@ html.br-portrait .br-ui { display: none }
       if (guess == null) scan(0, NS - 1); else scan(guess - 25, guess + 45);
       return [best, Math.sqrt(bd)];
     }
-    const BOXES = []; for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0 }) }
-    const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, driftT: 0, item: null, fin: 0, col, prog: 0, wall: 0 });
+    const BOXES = []; for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0, i: bi }) }
+    const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, jet: 0, driftT: 0, item: null, fin: 0, col, prog: 0, wall: 0, h: 0, vh: 0, air: false, glide: false, trick: 0, trickT: 0 });
     const meSlot = host ? 0 : 1, K = newKart(meSlot, host ? 0 : 1);
     let cpus = []; const nCpu = () => (realOppPeer() ? 2 : 3);
     function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = .86 + Math.random() * .08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
@@ -2186,6 +2273,7 @@ html.br-portrait .br-ui { display: none }
       const it = kk.item; kk.item = null;
       if (it === "turbo") kk.boost = 1.3;
       else if (it === "shield") kk.star = 4.5;
+      else if (it === "jet") { kk.jet = 3.4; kk.spin = 0; if (kk === K) say("ジェット！", "#7FD0FF") }
       else if (it === "banana") owner.push({ id: `${cid}-${++itSeq}`, k: "b", x: kk.x - Math.cos(kk.ang) * 20, y: kk.y - Math.sin(kk.ang) * 20, vx: 0, vy: 0, life: 40, from: kk, t: 0 });
       else if (it === "rocket") owner.push({ id: `${cid}-${++itSeq}`, k: "s", x: kk.x + Math.cos(kk.ang) * 18, y: kk.y + Math.sin(kk.ang) * 18, vx: Math.cos(kk.ang) * 440, vy: Math.sin(kk.ang) * 440, life: 3.2, from: kk, t: 0, idx: kk.idx });
     };
@@ -2194,7 +2282,8 @@ html.br-portrait .br-ui { display: none }
     function rankOf(kk, all) { return 1 + all.filter((o) => o !== kk && (o.fin && (!kk.fin || o.fin < kk.fin) || (!o.fin && !kk.fin && o.prog > kk.prog))).length }
     function pickItem(kk, rank, total) {
       const r = Math.random(), back = (rank - 1) / Math.max(1, total - 1);
-      return back > .6 ? (r < .4 ? "shield" : r < .75 ? "turbo" : "rocket") : back > .3 ? (r < .4 ? "rocket" : r < .7 ? "turbo" : "banana") : (r < .5 ? "banana" : r < .8 ? "rocket" : "turbo");
+      if (back > .6 && r < .2) return "jet";
+      return back > .6 ? (r < .45 ? "shield" : r < .78 ? "turbo" : "rocket") : back > .3 ? (r < .4 ? "rocket" : r < .7 ? "turbo" : "banana") : (r < .5 ? "banana" : r < .8 ? "rocket" : "turbo");
     }
     function physics(kk, dt, steer, driftOn) {
       let [idx, dd] = nearest(kk.x, kk.y, kk.idx);
@@ -2204,32 +2293,47 @@ html.br-portrait .br-ui { display: none }
       const prev = kk.idx; kk.idx = idx;
       if (prev > NS * .8 && idx < NS * .2) kk.lap++; else if (prev < NS * .2 && idx > NS * .8) kk.lap--;
       kk.prog = kk.lap * NS + idx;
-      const off = dd > KT_RW + 4;
-      kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt); kk.roul = Math.max(0, (kk.roul || 0) - dt);
+      // 高さ：ジャンプ台・大ジャンプ台をこえたら空へ。大ジャンプ台はグライダーでゆっくり落ちる
+      const gnd = GH(idx), step = ahead(prev, idx);
+      if (!kk.air && step > 0 && step < 40) for (const r of RAMPS) { const a = ahead(prev, r.i); if (a > 0 && a <= step) { kk.air = true; kk.h = Math.max(kk.h, GH(r.i)); kk.vh = r.k === "glide" ? 5.5 : 5.5; kk.glide = r.k === "glide"; kk.trick = 0; kk.trickT = 0; if (kk !== K && Math.random() < .55) kk.trick = 1; if (kk === K) say(kk.glide ? "グライダー！" : "ジャンプ！", kk.glide ? "#7FD0FF" : "#FFE14D"); break } }
+      if (kk.air) { kk.vh -= (kk.glide ? 4.6 : 18) * dt; kk.h += kk.vh * dt; if (kk.trick) kk.trickT += dt; if (kk.h <= gnd && kk.vh < 0) { kk.h = gnd; kk.air = kk.glide = false; kk.vh = 0; if (kk.trick) { kk.boost = Math.max(kk.boost, .8); if (kk === K) say("トリック！", "#FFE14D") } kk.trick = 0; kk.trickT = 0 } }
+      else kk.h = gnd;
+      const low = kk.h - gnd < 1.5;
+      // ダッシュパネル
+      if (!kk.air) { const [nx, ny] = norm(idx), lat = (kk.x - TR[idx][0]) * nx + (kk.y - TR[idx][1]) * ny; for (const pd of PADS) { if (Math.min(ahead(idx, pd.i), ahead(pd.i, idx)) <= 3 && Math.abs(lat - pd.o) < 14) { if (kk === K && kk.boost < .4) say("ダッシュパネル！", "#7FD0FF"); kk.boost = Math.max(kk.boost, .85) } } }
+      const off = dd > KT_RW + 4 && !kk.air;
+      kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt); kk.jet = Math.max(0, (kk.jet || 0) - dt); kk.roul = Math.max(0, (kk.roul || 0) - dt);
       if (kk.fin) kk.v *= Math.pow(.3, dt);
+      else if (kk.jet > 0) {
+        // ジェット：自動でコースの真ん中を猛スピードで進む
+        const tg = TR[(idx + 16) % NS], da = phAng(Math.atan2(tg[1] - kk.y, tg[0] - kk.x) - kk.ang); kk.ang += clamp(da * 5, -4, 4) * dt; kk.spin = 0; kk.driftT = 0;
+        kk.v += (KT_VMAX * 1.85 - kk.v) * Math.min(1, dt * 3);
+      }
       else if (kk.spin > 0) { kk.v *= Math.pow(.15, dt); kk.ang += 11 * dt }
       else {
         const vm = KT_VMAX * (off && kk.star <= 0 ? .45 : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
-        kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
-        const tr = (driftOn ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1);
+        if (!kk.air) kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
+        const tr = (driftOn && !kk.air ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1) * (kk.air ? (kk.glide ? .9 : .5) : 1);
         kk.ang += steer * tr * dt;
-        if (driftOn && Math.abs(steer) > .3) kk.driftT += dt; else { if (kk.driftT > .9) { kk.boost = Math.max(kk.boost, kk.driftT > 1.8 ? 1.4 : .9); if (kk === K) say(kk.driftT > 1.8 ? "スーパーダッシュ！" : "ダッシュ！", "#FFE14D") } kk.driftT = 0 }
+        if (driftOn && Math.abs(steer) > .3 && !kk.air) kk.driftT += dt; else if (!kk.air) { if (kk.driftT > .9) { kk.boost = Math.max(kk.boost, kk.driftT > 1.8 ? 1.4 : .9); if (kk === K) say(kk.driftT > 1.8 ? "スーパーダッシュ！" : "ダッシュ！", "#FFE14D") } kk.driftT = 0 }
       }
-      const slide = driftOn && kk.spin <= 0 ? .88 : 1;
+      const slide = driftOn && kk.spin <= 0 && !kk.air ? .88 : 1;
       kk.x += Math.cos(kk.ang) * kk.v * dt * slide; kk.y += Math.sin(kk.ang) * kk.v * dt * slide;
-      for (const b of BOXES) { if (b.re > 0) continue; if (Math.hypot(b.x - kk.x, b.y - kk.y) < 15 && !kk.item && !kk.fin) { b.re = 3; return "box" } }
+      if (low) for (const b of BOXES) { if (b.re > 0) continue; if (Math.hypot(b.x - kk.x, b.y - kk.y) < 15 && !kk.item && !kk.fin) { b.re = 3; return "box" } }
       return null;
     }
     function hitTest(kk, list, isOwn) {
       for (const p of list) {
         if (p.dead || removedByHit.has(p.id)) continue;
         if (isOwn && p.from === kk && p.t < .5) continue;
-        if (Math.hypot(p.x - kk.x, p.y - kk.y) < 14) {
-          if (kk.star <= 0) { kk.spin = 1.1; if (kk === K) say(p.k === "b" ? "バナナでスリップ！" : "ロケットが当たった！", "#FF8A80") }
+        if (Math.hypot(p.x - kk.x, p.y - kk.y) < 14 && (kk.h || 0) - GH(kk.idx) < 1.5) {
+          if (kk.star <= 0 && !(kk.jet > 0)) { kk.spin = 1.1; if (kk === K) say(p.k === "b" ? "バナナでスリップ！" : "ロケットが当たった！", "#FF8A80") }
           if (isOwn) p.dead = true; else { hits.push(p.id); if (hits.length > 16) hits.shift(); removedByHit.add(p.id) }
         }
       }
     }
+    // ジェットのカートにぶつかると、はね飛ばされる
+    function jetBump(kk, all) { if (kk.star > 0 || kk.jet > 0 || kk.spin > 0 || kk.fin) return; for (const o of all) if (o !== kk && o.jet > 0 && Math.hypot(o.x - kk.x, o.y - kk.y) < 20 && Math.abs((o.h || 0) - (kk.h || 0)) < 2) { kk.spin = 1.0; kk.v *= .5; if (kk === K) say("ジェットにはね飛ばされた！", "#FF8A80"); break } }
     // ロケットはコースにそって飛ぶ
     function moveIt(list, dt) { for (const p of list) { p.t += dt; p.life -= dt; if (p.k === "s") { const [ix] = nearest(p.x, p.y, p.idx); p.idx = ix; const tg = TR[(ix + 10) % NS], want = Math.atan2(tg[1] - p.y, tg[0] - p.x), cur = Math.atan2(p.vy, p.vx), na = cur + clamp(phAng(want - cur), -5 * dt, 5 * dt); p.vx = Math.cos(na) * 440; p.vy = Math.sin(na) * 440 } p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) p.dead = true } return list.filter((p) => !p.dead) }
     function foreignItems(ox, age) { if (!ox || !ox.it) return []; return ox.it.map((a) => ({ id: a[0], k: a[1], x: a[2] + a[4] * age, y: a[3] + a[5] * age, vx: a[4], vy: a[5] })) }
@@ -2249,48 +2353,74 @@ html.br-portrait .br-ui { display: none }
     const modelFor = (key, col) => { let m = models.get(key); if (!m) { const cc = KT_COLORS[col] || KT_COLORS[0]; m = ktKartModel(cc, ["#F4F4F4", "#2A2A2E", "#F2F2F2", "#1E2A44", "#F4F4F4"][col % 5]); scene.add(m.g); models.set(key, m) } m.seen = true; return m };
     const boxMeshes = BOXES.map((b) => { const m = new T.Mesh(new T.BoxGeometry(1.1, 1.1, 1.1), W.boxMat); m.position.set(b.x * KS, .9, b.y * KS); m.castShadow = true; scene.add(m); return m });
     const itemMesh = (p) => { let m = itemMeshes.get(p.id); if (m) return m; const B = phParts(); if (p.k === "b") { B.sph(.22, "#F7D23E", 0, .12, 0, 1.2, .4, .7, 1); for (const a of [0, 2.1, 4.2]) B.seg(0, .12, 0, Math.cos(a) * .35, .02, Math.sin(a) * .35, .1, .04, "#E8C230") } else { B.cyl(.12, .12, .8, "#E23A3A", 0, .45, 0, 12, Math.PI / 2); B.sph(.12, "#F2F2F2", 0, .45, .42, 1, 1, 1.8); for (const a of [0, 1.57, 3.14, 4.71]) B.box(.02, .18, .2, "#555", Math.cos(a) * .14, .45 + Math.sin(a) * .14, -.3); B.cone(.1, .35, "#FFB040", 0, .45, -.6) } m = new T.Mesh(phMerge(B.L, false), brCharMat || new T.MeshStandardMaterial({ vertexColors: true })); m.castShadow = true; scene.add(m); itemMeshes.set(p.id, m); return m };
+    // 巨大モニター：順位・ラップ・イコライザー
+    let monT = 0;
+    const kName = (kk) => kk === K ? "あなた" : kk.key === "opp" ? oppName() : KT_DRIVERS[kk.col % KT_DRIVERS.length];
+    function drawMon(allKarts, tt) {
+      const M = W.ms.mon, g2 = M.c.getContext("2d"), hue = (tt * 40) % 360, gr = g2.createLinearGradient(0, 0, 256, 144); gr.addColorStop(0, `hsl(${hue},80%,22%)`); gr.addColorStop(1, `hsl(${(hue + 120) % 360},80%,12%)`); g2.fillStyle = gr; g2.fillRect(0, 0, 256, 144);
+      for (let b = 0; b < 12; b++) { const hh = 14 + 56 * Math.abs(Math.sin(tt * 6 + b * 1.3) * Math.sin(tt * 2.3 + b)); g2.fillStyle = `hsl(${(hue + b * 22) % 360},100%,62%)`; g2.fillRect(150 + b * 8.5, 138 - hh, 6, hh) }
+      g2.textAlign = "left"; g2.textBaseline = "middle";
+      if (Math.floor(tt / 5) % 3 === 2) { g2.fillStyle = "#FFFFFF"; g2.font = "900 30px sans-serif"; g2.fillText("NEON", 12, 38); g2.fillText("CLUB", 12, 72); g2.font = "bold 15px sans-serif"; g2.fillStyle = "#FFE14D"; g2.fillText(ph === "race" ? `ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}` : "まもなくスタート", 12, 104) }
+      else { const sorted = [...allKarts].sort((a, b) => rankOf(a, allKarts) - rankOf(b, allKarts)).slice(0, 5); sorted.forEach((kk, i) => { const y = 30 + i * 22; g2.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; g2.fillRect(8, y - 8, 6, 16); g2.fillStyle = kk === K ? "#FFE14D" : "#FFFFFF"; g2.font = "bold 15px sans-serif"; g2.fillText(`${i + 1}  ${kName(kk)}`.slice(0, 12), 20, y + 1) }) }
+      g2.fillStyle = "#FF3355"; g2.beginPath(); g2.arc(236, 12, 5, 0, 7); g2.fill(); g2.fillStyle = "#FFFFFF"; g2.font = "bold 11px sans-serif"; g2.textAlign = "right"; g2.fillText("LIVE", 228, 13);
+      M.t.needsUpdate = true;
+    }
     let VW = 0, VH = 0;
-    function resize() { const w = cardEl.clientWidth || innerWidth, h = cardEl.clientHeight || innerHeight; if (w === VW && h === VH) return; VW = w; VH = h; renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px"; const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.fov = w < h ? 72 : 58; camera.updateProjectionMatrix() }
+    function resize() {
+      const fake = innerHeight > innerWidth, w = fake ? innerHeight : innerWidth, h = fake ? innerWidth : innerHeight;
+      ROT90 = fake; document.documentElement.classList.toggle("br-fake", fake);
+      if (w === VW && h === VH) return; VW = w; VH = h;
+      Object.assign(cardEl.style, fake ? { position: "fixed", inset: "auto", left: "0px", top: "0px", width: w + "px", height: h + "px", transformOrigin: "0 0", transform: `translate(${innerWidth}px,0) rotate(90deg)` } : { position: "fixed", inset: "0px", left: "", top: "", width: "", height: "", transformOrigin: "", transform: "" }); renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px"; const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.fov = w < h ? 72 : 62; camera.updateProjectionMatrix() }
     const camPos = new T.Vector3(K.x * KS - Math.cos(K.ang) * 6, 3, K.y * KS - Math.sin(K.ang) * 6), camLook = new T.Vector3();
     function draw3d(allKarts, items, dt) {
       for (const m of models.values()) m.seen = false;
       allKarts.forEach((kk) => {
         const key = kk === K ? "me" : kk.key, m = modelFor(key, kk.col);
-        m.g.position.set(kk.x * KS, 0, kk.y * KS); m.g.rotation.y = Math.PI / 2 - kk.ang;
+        const ih = kk.idx || 0, hh = kk.h != null ? kk.h : GH(ih), a0 = TR[(ih - 4 + NS) % NS], b0 = TR[(ih + 4) % NS], air = hh - GH(ih) > .25;
+        const pt = air ? clamp((kk.vh || 0) * .04, -.35, .35) : Math.atan((GH(ih + 4) - GH(ih - 4)) / (Math.hypot(b0[0] - a0[0], b0[1] - a0[1]) * KS || 1)); m.pv = (m.pv ?? pt) + (pt - (m.pv ?? pt)) * Math.min(1, dt * 8);
+        m.g.position.set(kk.x * KS, hh, kk.y * KS); m.g.rotation.y = Math.PI / 2 - kk.ang; m.g.rotation.x = -m.pv;
         const st = kk === K ? steerVis : kk.steerV != null ? kk.steerV : clamp(phAng(kk.ang - (kk.pa ?? kk.ang)) / Math.max(dt, .001) / 2.3, -1, 1); kk.pa = kk.ang;
         m.fl.p.rotation.y = m.fr.p.rotation.y = -st * .45; const spin = (kk.v || KT_VMAX * .8) * KS * dt; for (const wh of [m.fl, m.fr, m.rl, m.rr]) wh.w.rotation.x += spin / .15;
-        m.g.rotation.z = kk.spin > 0 ? Math.sin(raceT * 30) * .05 : st * .03;
-        m.flame.visible = kk.boost > 0; if (kk.boost > 0) m.flame.scale.set(1, .7 + Math.random() * .6, 1);
+        m.g.rotation.z = (kk.spin > 0 ? Math.sin(raceT * 30) * .05 : st * .03) + (kk.trick ? Math.min(1, (kk.trickT || 0) / .45) * Math.PI * 2 : 0);
+        if (kk.glide) { m.gs = Math.min(1, (m.gs || 0) + dt * 4); m.glider.visible = true; m.glider.scale.set(m.gs, 1, m.gs) } else { m.gs = 0; m.glider.visible = false }
+        m.jet.visible = kk.jet > 0;
+        m.flame.visible = kk.boost > 0 || kk.jet > 0; if (m.flame.visible) { const fs = kk.jet > 0 ? 2.4 : 1; m.flame.scale.set(fs, (.7 + Math.random() * .6) * fs, fs) }
         const dr = kk === K ? K.driftT : 0; m.sparks.forEach((s) => { s.visible = dr > .3; s.material.color.set(dr > 1.8 ? "#FFB040" : dr > .9 ? "#FF7A2A" : "#7FD0FF"); s.scale.setScalar(.6 + Math.random() * .8) });
         m.shield.visible = kk.star > 0; if (kk.star > 0) m.shield.material.opacity = .15 + Math.sin(raceT * 10) * .07;
       });
       for (const [k, m] of models) if (!m.seen) { m.g.visible = false } else m.g.visible = true;
       const live = new Set();
-      for (const p of items) { if (p.dead) continue; live.add(p.id); const m = itemMesh(p); m.position.set(p.x * KS, 0, p.y * KS); m.rotation.y = p.k === "s" ? Math.atan2(p.vx, p.vy) : (raceT * 1.5) % 6.28 }
+      for (const p of items) { if (p.dead) continue; live.add(p.id); const m = itemMesh(p); if (p.idx == null) p.idx = nearest(p.x, p.y, null)[0]; m.position.set(p.x * KS, GH(p.idx), p.y * KS); m.rotation.y = p.k === "s" ? Math.atan2(p.vx, p.vy) : (raceT * 1.5) % 6.28 }
       for (const [id, m] of itemMeshes) if (!live.has(id)) { scene.remove(m); m.geometry.dispose(); itemMeshes.delete(id) }
-      boxMeshes.forEach((m, i) => { m.visible = BOXES[i].re <= 0; m.rotation.set(raceT * .7, raceT * 1.1, 0); m.position.y = .95 + Math.sin(raceT * 2 + i) * .12 });
+      boxMeshes.forEach((m, i) => { m.visible = BOXES[i].re <= 0; m.rotation.set(raceT * .7, raceT * 1.1, 0); m.position.y = .95 + GH(BOXES[i].i) + Math.sin(raceT * 2 + i) * .12 });
       // カメラ：カートの後ろから追いかける（ターボで少し広く）
-      const fx = Math.cos(K.ang), fz = Math.sin(K.ang), kx = K.x * KS, kz = K.y * KS, back = K.spin > 0 ? 5 : 5.6;
-      const want = new T.Vector3(kx - fx * back - steerVis * fz * .6, 2.5, kz - fz * back + steerVis * fx * .6); camPos.lerp(want, Math.min(1, dt * 7)); camera.position.copy(camPos);
-      camLook.set(kx + fx * 5, .9, kz + fz * 5); camera.lookAt(camLook);
-      const fov = (VW < VH ? 72 : 58) + (K.boost > 0 ? 9 : 0); if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() }
+      const fx = Math.cos(K.ang), fz = Math.sin(K.ang), kx = K.x * KS, kz = K.y * KS, kh = K.h || 0, back = (K.spin > 0 ? 5 : 5.6) + (K.glide ? 2 : 0) + (K.jet > 0 ? 1 : 0);
+      const want = new T.Vector3(kx - fx * back - steerVis * fz * .6, kh + 2.5 + (K.glide ? 1.6 : 0), kz - fz * back + steerVis * fx * .6); camPos.lerp(want, Math.min(1, dt * 7)); camera.position.copy(camPos);
+      camLook.set(kx + fx * 5, kh + .9, kz + fz * 5); camera.lookAt(camLook);
+      const fov = (VW < VH ? 72 : 62) + (K.boost > 0 || K.jet > 0 ? 9 : 0); if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() }
       sun.position.set(kx + 30, 60, kz + 20); sun.target.position.set(kx, 0, kz); sun.target.updateMatrixWorld();
       if (W.ms.water) { const t = W.ms.water.material.map; t.offset.x = (raceT * .01) % 1; t.offset.y = (raceT * .02) % 1 }
+      const tt = performance.now() / 1000; W.padTex.offset.y = (tt * -1.6) % 1;
+      if (club) {
+        for (const b of W.ms.beams) { b.g.rotation.x = Math.sin(tt * .7 + b.ph) * .55; b.g.rotation.z = Math.cos(tt * .9 + b.ph * 1.3) * .55 }
+        W.ms.ball.rotation.y = tt * .5; W.ms.laser.rotation.y = tt * .6; if (W.ms.crowd) W.ms.crowd.position.y = Math.abs(Math.sin(tt * 4.4)) * .22;
+        monT -= dt; if (monT <= 0) { monT = .12; drawMon(allKarts, tt) }
+      }
       renderer.render(scene, camera);
     }
     function hud(allKarts) {
       const w = VW, h = VH; c.clearRect(0, 0, w, h);
-      const T0 = (parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0) + 50, rk = rankOf(K, allKarts);
-      c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, T0, 92, 58); c.font = `30px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 14, T0 + 20); c.font = `11px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`/${allKarts.length}`, 72, T0 + 26); c.font = `13px ${DISP}`; c.fillText(`ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}`, 14, T0 + 45);
-      const ix = 8, iy = T0 + 64, isz = 58; c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
-      const shown = K.roul > 0 ? ["turbo", "banana", "rocket", "shield"][Math.floor(performance.now() / 70) % 4] : K.item; if (shown) ktIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 20);
+      const T0 = 8, SL = w > h * 1.9 ? 38 : 8, rk = rankOf(K, allKarts);
+      c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(SL, T0, 92, 58); c.font = `30px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, SL + 6, T0 + 20); c.font = `11px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`/${allKarts.length}`, SL + 64, T0 + 26); c.font = `13px ${DISP}`; c.fillText(`ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}`, SL + 6, T0 + 45);
+      const ix = SL + 100, iy = T0, isz = 58; c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
+      const shown = K.roul > 0 ? ["turbo", "banana", "rocket", "shield", "jet"][Math.floor(performance.now() / 70) % 5] : K.item; if (shown) ktIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 20);
       // 小さい地図
-      const [bx0, bz0, bx1, bz1] = W.bounds, mw = 96, mh = 80, mx = w - mw - 8, my = T0, ms2 = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (bz1 - bz0));
+      const [bx0, bz0, bx1, bz1] = W.bounds, mw = 130, mh = 110, mx = w - mw - SL, my = T0, ms2 = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (bz1 - bz0));
       const MX = (x) => mx + 5 + (x * KS - bx0) * ms2, MY = (y) => my + 5 + (y * KS - bz0) * ms2;
       c.fillStyle = "rgba(20,18,42,.5)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "#E8E8E8"; c.lineWidth = 3; c.beginPath(); TR.forEach((p, i) => (i ? c.lineTo(MX(p[0]), MY(p[1])) : c.moveTo(MX(p[0]), MY(p[1])))); c.closePath(); c.stroke();
       for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4.5 : 3.2, 0, 7); c.fill(); if (kk === K) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.stroke() } }
       // 速さ
-      const kmh = Math.round(K.v * .36 * 1.1); c.textAlign = "right"; c.font = `26px ${DISP}`; c.fillStyle = "#fff"; c.strokeStyle = "rgba(20,18,42,.8)"; c.lineWidth = 4; c.strokeText(String(kmh), w - 50, h * .62); c.fillText(String(kmh), w - 50, h * .62); c.font = `11px ${DISP}`; c.fillText("km/h", w - 14, h * .62 + 4);
+      const kmh = Math.round(K.v * .36 * 1.1); c.textAlign = "right"; c.font = `26px ${DISP}`; c.fillStyle = "#fff"; c.strokeStyle = "rgba(20,18,42,.8)"; c.lineWidth = 4; c.strokeText(String(kmh), w - SL - 40, my + mh + 22); c.fillText(String(kmh), w - SL - 40, my + mh + 22); c.font = `11px ${DISP}`; c.fillText("km/h", w - SL, my + mh + 26);
       // スタートのライト
       if (ph === "count") { const lit = Math.min(3, Math.floor(3 - cd) + 1); c.fillStyle = "rgba(20,18,42,.85)"; c.fillRect(w / 2 - 80, h * .22, 160, 52); for (let i = 0; i < 3; i++) { c.fillStyle = i < lit ? "#FF2A2A" : "#3A2A2A"; c.beginPath(); c.arc(w / 2 - 50 + i * 50, h * .22 + 26, 17, 0, 7); c.fill() } }
       if (ph === "race" && raceT < 1.2) bigText(c, "GO!", w / 2, h * .28, 56, "#7CF59A");
@@ -2308,16 +2438,17 @@ html.br-portrait .br-ui { display: none }
       for (const b of BOXES) b.re = Math.max(0, b.re - dt);
       let steer = 0; if (Lb.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (Rb.down || keys.has("ArrowRight") || keys.has("d")) steer += 1; steer *= SENS.steer;
       steerVis += (clamp(steer, -1, 1) - steerVis) * Math.min(1, dt * 10);
-      drift = Db.down || keys.has("Shift");
+      const dPrev = drift; drift = Db.down || keys.has("Shift");
+      if (drift && !dPrev && K.air && !K.trick && ph === "race") { K.trick = 1; K.trickT = 0 }
       if (ph === "race" || ph === "done") {
         const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
         if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); K.roul = 1.1 }
         if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
       }
       let oppKart = null;
-      if (ox && ox.k) { const a = ox.k; oppKart = { key: "opp", x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: host ? 1 : 0, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, item: null } }
+      if (ox && ox.k) { const a = ox.k; oppKart = { key: "opp", x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: host ? 1 : 0, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, h: (a[9] || 0) / 10, glide: !!((a[10] || 0) & 1), jet: (a[10] || 0) & 2 ? 1 : 0, item: null } }
       if (host) { const all = [K, ...cpus, ...(oppKart ? [oppKart] : [])]; for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT } }
-      else if (ox && ox.ck) guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { key: "c" + i, x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, v: a[9] || 0, pa: g.pa }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
+      else if (ox && ox.ck) guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { key: "c" + i, x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, v: a[9] || 0, h: (a[10] || 0) / 10, glide: !!((a[11] || 0) & 1), jet: (a[11] || 0) & 2 ? 1 : 0, pa: g.pa }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
       cpus.forEach((kk, i) => (kk.key = "c" + i));
       myIt = moveIt(myIt, dt); ownCpuIt = moveIt(ownCpuIt, dt);
       const foreign = foreignItems(ox, age), oppHits = new Set(ox && ox.hit ? ox.hit : []);
@@ -2325,6 +2456,7 @@ html.br-portrait .br-ui { display: none }
       hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
       if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
       const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
+      if (ph === "race") { jetBump(K, allKarts); if (host) for (const kk of cpus) jetBump(kk, allKarts) }
       if (host) {
         if (oppKart && oppKart.fin && gFin == null) gFin = raceT - age;
         const fins = [{ t: K.fin || null }, ...cpus.map((kk) => ({ t: kk.fin || null })), ...(realOppPeer() ? [{ t: gFin }] : [])];
@@ -2336,8 +2468,8 @@ html.br-portrait .br-ui { display: none }
       } else { if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) }); finRank = (os && os.rkG) || null }
       if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
       itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
-      const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
-      if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v)]);
+      const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0, Math.round(K.h * 10), (K.glide ? 1 : 0) | (K.jet > 0 ? 2 : 0)], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
+      if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v), Math.round(kk.h * 10), (kk.glide ? 1 : 0) | (kk.jet > 0 ? 2 : 0)]);
       const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       draw3d(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))], dt); hud(allKarts);
       if (ph === "idle" && !me.s.rdy) setMsg(`<p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
@@ -2353,7 +2485,7 @@ html.br-portrait .br-ui { display: none }
     }
     const stopLoop = loop(frame);
     return () => {
-      stopLoop(); actKey = null;
+      stopLoop(); actKey = null; cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); if (mm !== brCharMat) mm.dispose() }) });
       scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
     };
@@ -4778,7 +4910,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1755";
+  const APP_VER = "1030-1822";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
