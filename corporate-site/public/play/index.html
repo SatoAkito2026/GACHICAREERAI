@@ -634,11 +634,11 @@ html.br-portrait .br-ui { display: none }
     tycoon: { grp: "body", name: "木こりタイクーン", ico: "木", c: "var(--ok)", desc: "ふたりで協力。木を切って売って、お店を広げてお城をたてよう" },
     sumo: { grp: "body", name: "連打すもう", ico: "力", c: "var(--pink)", desc: "ひたすら連打して相手を押し出せ。15秒の真剣勝負" },
     cards: { name: "トランプ", ico: "♠", c: "var(--ok)", desc: "大富豪・ババ抜き・七並べ・神経衰弱・ブラックジャック。人数もえらべて、足りない席はコンピューター" },
-    ishin: { name: "以心伝心", ico: "♡", c: "var(--pink)", desc: "同じお題にふたりで答えて、答えがそろうか挑戦。協力プレイ" },
-    quiz: { name: "ディズニークイズ", ico: "?", c: "var(--sky)", desc: "全10問の4択。正解が多いほうが勝ち" },
-    reflex: { name: "反射神経", ico: "!", c: "var(--ok)", desc: "画面が緑になったら即タップ。5回の合計タイムで勝負" },
-    four: { name: "4目並べ", ico: "●", c: "var(--gold)", desc: "コインを落として、縦・横・ななめに4つそろえたら勝ち" },
-    hb: { name: "数当て", ico: "#", c: "var(--muted)", desc: "相手の秘密の3ケタを、ヒントから先に当てたほうが勝ち" },
+    ishin: { off: 1, name: "以心伝心", ico: "♡", c: "var(--pink)", desc: "同じお題にふたりで答えて、答えがそろうか挑戦。協力プレイ" },
+    quiz: { off: 1, name: "ディズニークイズ", ico: "?", c: "var(--sky)", desc: "全10問の4択。正解が多いほうが勝ち" },
+    reflex: { off: 1, name: "反射神経", ico: "!", c: "var(--ok)", desc: "画面が緑になったら即タップ。5回の合計タイムで勝負" },
+    four: { off: 1, name: "4目並べ", ico: "●", c: "var(--gold)", desc: "コインを落として、縦・横・ななめに4つそろえたら勝ち" },
+    hb: { off: 1, name: "数当て", ico: "#", c: "var(--muted)", desc: "相手の秘密の3ケタを、ヒントから先に当てたほうが勝ち" },
   };
 
   function render() {
@@ -749,7 +749,7 @@ html.br-portrait .br-ui { display: none }
     notice += cpuRow + `<div class="note row" style="justify-content:space-between;flex-wrap:nowrap"><span style="flex:1;min-width:0">操作の<b>感度</b>（カート・サッカー・荒野バトルなど全部に効く）</span><button class="btn small ghost" data-act="sens">感度設定</button></div>`;
     if (lobby) notice = renderInvite() + notice;
     if (SITE && !isStandalone()) notice = renderInstall() + notice;
-    const cards = (grp) => Object.entries(GAMES).filter(([, g]) => (g.grp || "brain") === grp).map(([k, g], i) => `
+    const cards = (grp) => Object.entries(GAMES).filter(([, g]) => (g.grp || "brain") === grp && !g.off).map(([k, g], i) => `
       <button class="game ${i === 0 ? "wide" : ""}" style="--c:${g.c}" data-act="start" data-g="${k}">
         <span class="ico">${g.ico}</span><b>${g.name}</b><span>${g.desc}</span>
       </button>`).join("");
@@ -1111,16 +1111,25 @@ html.br-portrait .br-ui { display: none }
     // 音の高さ f0→f1、長さ、波の形、大きさ、遅れ
     function tone(f0, f1, dur, type, vol, dl = 0) { const t = A.currentTime + dl, o = A.createOscillator(), g = A.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * V, t + .008); g.gain.exponentialRampToValueAtTime(.0005, t + dur); o.connect(g); g.connect(A.destination); o.start(t); o.stop(t + dur + .02) }
     function nz(dur, vol, ft, f0, f1, dl = 0, att = .005, q = 1) { const t = A.currentTime + dl, s2 = A.createBufferSource(), f = A.createBiquadFilter(), g = A.createGain(); s2.buffer = noise(); s2.loop = true; f.type = ft; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1 || f0), t + dur); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * V, t + att); g.gain.exponentialRampToValueAtTime(.0005, t + dur); s2.connect(f); f.connect(g); g.connect(A.destination); s2.start(t, Math.random()); s2.stop(t + dur + .02) }
+    // 審判の笛：中の玉が回ってふるえる音（約30回/秒の強弱）
+    function trill(dur, dl = 0, vol = .14) { const t = A.currentTime + dl, o = A.createOscillator(), o2 = A.createOscillator(), g = A.createGain(), lfo = A.createOscillator(), lg = A.createGain(); o.type = "sine"; o2.type = "sine"; o.frequency.value = 2950; o2.frequency.value = 5900; lfo.frequency.value = 31; lg.gain.value = vol * V * .45; lfo.connect(lg); lg.connect(g.gain); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * V * .6, t + .02); g.gain.setValueAtTime(vol * V * .6, t + dur - .04); g.gain.linearRampToValueAtTime(0, t + dur); const g2 = A.createGain(); g2.gain.value = .12; o.connect(g); o2.connect(g2); g2.connect(g); g.connect(A.destination); for (const x of [o, o2, lfo]) { x.start(t); x.stop(t + dur + .05) } nz(dur, vol * .25, "bandpass", 3000, 3000, dl, .02, 3) }
     const K = {
       tap: () => tone(760, 900, .05, "square", .04),
-      kick: () => { tone(170, 55, .13, "sine", .55); nz(.05, .22, "bandpass", 1600, 900) },
-      whistle: () => { for (const [d0, l] of [[0, .16], [.2, .5]]) { tone(2950, 2900, l, "sine", .13, d0); tone(3080, 3030, l, "sine", .06, d0) } },
-      whistle1: () => { tone(2950, 2900, .35, "sine", .13); tone(3080, 3030, .35, "sine", .06) },
-      goal: () => { nz(2.6, .32, "bandpass", 700, 1100, 0, .35, .5); nz(2.2, .18, "bandpass", 2200, 1800, .1, .3, .7); tone(523, 523, .25, "square", .06, .1); tone(659, 659, .25, "square", .06, .3); tone(784, 784, .5, "square", .06, .5) },
-      cheer: () => nz(1.4, .2, "bandpass", 800, 1000, 0, .25, .5),
-      ohh: () => { nz(1.2, .18, "bandpass", 500, 350, 0, .15, .8); tone(220, 160, 1, "sine", .05) },
-      post: () => { tone(1250, 1180, .5, "triangle", .2); tone(1870, 1800, .35, "sine", .08) },
-      save: () => { nz(.12, .3, "lowpass", 900, 400); tone(140, 70, .15, "sine", .3) },
+      // ボールを蹴る：革のボールのポンという音＋足の当たる低い音
+      kick: () => { tone(115, 55, .11, "sine", .55); nz(.025, .3, "highpass", 2800, 2000, 0, .001, .7); nz(.07, .25, "bandpass", 700, 400, 0, .002, 1.2) },
+      whistle: () => { trill(.18); trill(.55, .26) },
+      whistle1: () => trill(.4),
+      // ゴール：スタジアム全体がわく（低い・中くらい・高い声を重ねて、ゆっくり大きくなって長く続く）
+      goal: () => { nz(4, .34, "bandpass", 420, 380, 0, .35, .5); nz(3.6, .26, "bandpass", 950, 850, .05, .3, .6); nz(3.2, .16, "bandpass", 2300, 2000, .1, .25, .8); nz(.4, .18, "highpass", 3500, 3000, 0, .01) },
+      cheer: () => { nz(1.6, .2, "bandpass", 800, 900, 0, .25, .5); nz(1.4, .12, "bandpass", 2000, 1800, .05, .2, .7) },
+      // 「あー」というため息
+      ohh: () => { nz(1.6, .22, "bandpass", 520, 300, 0, .12, 1.4); nz(1.4, .1, "bandpass", 1100, 600, .05, .1, 1.2) },
+      // ゴールポスト：金属が響く
+      post: () => { for (const [f, v, l] of [[1180, .2, .9], [2710, .1, .6], [4130, .05, .4], [590, .08, .7]]) tone(f, f * .99, l, "sine", v); nz(.03, .3, "highpass", 3000, 3000) },
+      // キーパーのグローブで止める
+      save: () => { nz(.06, .45, "bandpass", 1300, 800, 0, .001, 1.4); tone(130, 70, .14, "sine", .35) },
+      // ネットにささる
+      net: () => { nz(.35, .22, "highpass", 2600, 1500, 0, .01, .6); nz(.25, .12, "bandpass", 600, 300, .02, .02) },
       jump: () => tone(320, 760, .16, "square", .06),
       land: () => nz(.09, .2, "lowpass", 500, 200),
       coin: () => { tone(988, 988, .07, "square", .06); tone(1319, 1319, .22, "square", .06, .07) },
@@ -1145,7 +1154,7 @@ html.br-portrait .br-ui { display: none }
     function loop(kind) {
       let n = null; const mk = () => { const a = ctx(); if (!a) return null; const g = a.createGain(); g.gain.value = 0; g.connect(a.destination);
         if (kind === "engine") { const o = a.createOscillator(), o2 = a.createOscillator(), f = a.createBiquadFilter(); o.type = "sawtooth"; o2.type = "square"; f.type = "lowpass"; f.frequency.value = 900; o.connect(f); o2.connect(f); f.connect(g); o.start(); o2.start(); return { g, o, o2, f, src: [o, o2] } }
-        const b = a.createBufferSource(), f = a.createBiquadFilter(); b.buffer = noise(); b.loop = true; f.type = "bandpass"; f.frequency.value = 650; f.Q.value = .4; b.connect(f); f.connect(g); b.start(); return { g, f, src: [b] } };
+        const b = a.createBufferSource(), f = a.createBiquadFilter(), lfo = a.createOscillator(), lg = a.createGain(); b.buffer = noise(); b.loop = true; f.type = "bandpass"; f.frequency.value = 650; f.Q.value = .4; lfo.frequency.value = .23; lg.gain.value = 180; lfo.connect(lg); lg.connect(f.frequency); b.connect(f); f.connect(g); b.start(); lfo.start(); return { g, f, src: [b, lfo] } };
       return {
         set(vol, pitch = 1) { if (!on) { if (n) n.g.gain.value = 0; return } if (!n) n = mk(); if (!n) return; const t = A.currentTime; n.g.gain.setTargetAtTime(vol * (kind === "engine" ? .05 : .06), t, .08); if (kind === "engine") { n.o.frequency.setTargetAtTime(55 + 120 * pitch, t, .05); n.o2.frequency.setTargetAtTime(27 + 60 * pitch, t, .05); n.f.frequency.setTargetAtTime(500 + 1200 * pitch, t, .05) } },
         stop() { if (!n) return; try { n.src.forEach((x) => x.stop()); n.g.disconnect() } catch (_) {} n = null },
@@ -1157,7 +1166,9 @@ html.br-portrait .br-ui { display: none }
       let last = ""; new MutationObserver(() => { const el = document.querySelector(".verdict.good, .verdict.bad"), tx = el ? el.className + el.textContent : ""; if (tx === last) return; last = tx; if (!el || /3D|読み込め|止まりました/.test(el.textContent) || !ctx()) return; const good = el.classList.contains("good"), big = /勝|位|クリア|ゴール|結果/.test(el.textContent) || el.closest(".tc-over"); V = 1; try { (good ? (big ? K.win : K.ok) : big ? K.lose : K.ng)() } catch (_) {} }).observe(document.body, { childList: true, subtree: true, characterData: true });
     };
     if (document.body) hook(); else addEventListener("DOMContentLoaded", hook);
-    return { play(k, vol = 1) { if (!K[k] || vol <= .02 || !ctx()) return; V = Math.min(1.5, vol); try { K[k]() } catch (_) {} V = 1 }, loop, get on() { return on }, set(v) { on = !!v; ls.set("snd", on ? "on" : "off"); if (!on && A) A.suspend(); else ctx() } };
+    return { play(k, vol = 1) { if (!K[k] || vol <= .02 || !ctx()) return; V = Math.min(1.5, vol); try { K[k]() } catch (_) {} V = 1 }, loop,
+      // ゲームごとの音を作る道具：tone(高さはじめ, 高さおわり, 長さ, 波の形, 大きさ, 遅れ)・noise(長さ, 大きさ, フィルター, 高さはじめ, 高さおわり, 遅れ, 立ち上がり, Q)。ctx() は音が使えるときだけ AudioContext を返す
+      tone(...a) { if (ctx()) try { V = 1; tone(...a) } catch (_) {} }, noise(...a) { if (ctx()) try { V = 1; nz(...a) } catch (_) {} }, ctx, get on() { return on }, set(v) { on = !!v; ls.set("snd", on ? "on" : "off"); if (!on && A) A.suspend(); else ctx() } };
   })();
   function sensPanel(open) {
     let el = $("#sens"); if (!open) { if (el) el.remove(); return } if (el) return;
@@ -3085,10 +3096,10 @@ html.br-portrait .br-ui { display: none }
         const slow = ia.out !== "whiff" && ia.out !== "short" && tf0 > Pt * .45 && tf0 < Pt + .35 ? .4 : 1; anim.t += dt * slow; anim.dt = dt * slow;
         if (!anim.resAt) { const tf = anim.t - KICK_T, o = ia.out; if ((o === "goal" && anim.net && tf > Pt + .25) || (o === "save" && tf > Pt + .7) || ((o === "post" || o === "miss") && tf > Pt + .8) || (o === "wall" && tf > Pt * .6 + .9) || ((o === "short" || o === "whiff") && tf > 1.6)) anim.resAt = anim.t }
         // 音：蹴る・ポスト／キーパー・結果（ゴールの歓声・ため息）
-        { const tk = anim.t - KICK_T; if (tk >= 0 && !anim.sk) { anim.sk = 1; if (ia.out !== "whiff") SND.play("kick") } if (!anim.sp && tk >= Pt && ia.out !== "whiff" && ia.out !== "short") { anim.sp = 1; if (ia.out === "post") SND.play("post"); else if (ia.out === "save" || ia.out === "wall") SND.play("save") } if (anim.resAt && !anim.sr) { anim.sr = 1; SND.play(ia.out === "goal" ? "goal" : "ohh") } }
+        { const tk = anim.t - KICK_T; if (tk >= 0 && !anim.sk) { anim.sk = 1; if (ia.out !== "whiff") SND.play("kick") } if (!anim.sp && tk >= Pt && ia.out !== "whiff" && ia.out !== "short") { anim.sp = 1; if (ia.out === "post") SND.play("post"); else if (ia.out === "save" || ia.out === "wall") SND.play("save") } if (!anim.sn && ia.out === "goal" && anim.net) { anim.sn = 1; SND.play("net") } if (anim.resAt && !anim.sr) { anim.sr = 1; SND.play(ia.out === "goal" ? "goal" : "ohh") } }
         if (anim.resAt && anim.t > anim.resAt + 2.2) { shown++; anim = null; lastTap = null; trailPts.length = 0 }
       }
-      pkCrowd.set(1);
+      pkCrowd.set(anim ? (anim.t < KICK_T ? 1 + anim.t / KICK_T * 1.5 : anim.resAt && st.res[anim.r] && st.res[anim.r].out === "goal" ? 2.5 : 1.3) : 1);
       const curR = anim ? anim.r : st.n, SC = pkScene(me.m.seed, curR), SP = pkSpot(SC), info = anim ? st.res[anim.r] : null;
       const view = anim ? (info.iKick ? "kick" : "keep") : roleNow(), iKickNow = anim ? info.iKick : roleNow() === "kick";
       const atk = iKickNow ? "blue" : "red", def = iKickNow ? "red" : "blue", t = anim ? anim.t : 0;
@@ -4406,14 +4417,64 @@ html.br-portrait .br-ui { display: none }
       const pf = new T.Mesh(new T.IcosahedronGeometry(kind ? .22 : .16, 0), new T.MeshBasicMaterial({ color: kind ? "#D92C2C" : "#CBB79A", transparent: true })); pf.position.set(...b);
       const fl = new T.Mesh(new T.SphereGeometry(.1, 6, 5), new T.MeshBasicMaterial({ color: "#FFD86B", transparent: true })); fl.position.set(...a);
       scene.add(ln, pf, fl); fxs.push({ o: [ln, pf, fl], t: 0, life: .35, upd(k) { ln.material.opacity = Math.max(0, 1 - k * 4); fl.material.opacity = Math.max(0, 1 - k * 6); pf.scale.setScalar(1 + k * 2); pf.material.opacity = 1 - k } });
-      const m = E[myIdx]; if (m) sfx(big ? "sr" : "shot", clamp(1.2 - Math.hypot(a[0] - m.x, a[2] - m.z) / 90, 0, 1));
+      gunSnd(big0 >> 2 || (big ? 4 : 0), !!(big0 & 2), a[0], a[2]);
     }
+    // ---- 本物らしい音：武器ごとの銃声（遠いほど小さく・こもって・少し遅れて届く）、左右の向き、爆発、リロード、足音、風、車
+    let nbuf = null;
+    const nzb = (a) => nbuf || (nbuf = (() => { const b = a.createBuffer(1, a.sampleRate * 2, a.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b })());
+    // 音の出口：大きさと左右（-1 左〜1 右）
+    function sOut(a, vol, pan) { const g = a.createGain(); g.gain.value = vol; if (a.createStereoPanner) { const p = a.createStereoPanner(); p.pan.value = clamp(pan || 0, -1, 1); g.connect(p); p.connect(a.destination) } else g.connect(a.destination); return g }
+    function sNz(a, dst, t, dur, vol, ft, f0, f1, q = 1, att = .002) { const s2 = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(); s2.buffer = nzb(a); f.type = ft; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0004, t + dur); s2.connect(f); f.connect(g); g.connect(dst); s2.start(t, Math.random() * 1.5); s2.stop(t + dur + .05) }
+    function sOsc(a, dst, t, dur, vol, type, f0, f1) { const o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .003); g.gain.exponentialRampToValueAtTime(.0004, t + dur); o.connect(g); g.connect(dst); o.start(t); o.stop(t + dur + .05) }
+    // 自分から見て右なら +、左なら −
+    const panOf = (x, z) => { const m = meE(); if (!m) return 0; const dx = x - m.x, dz = z - m.z, d = Math.hypot(dx, dz); return d < 1 ? 0 : (dx * -Math.cos(camYaw) + dz * Math.sin(camYaw)) / d * .85 };
+    const distOf = (x, z) => { const m = meE(); return m ? Math.hypot(x - m.x, z - m.z) : 0 };
+    // 武器ごとの音：はじける高さ・胴の高さ・低いドン・長さ・こだま・大きさ
+    const GUN_SND = [{ cr: 2600, bd: 1000, th: 150, len: .14, tl: .35, v: .5 }, { cr: 3300, bd: 1400, th: 130, len: .08, tl: .22, v: .42 }, { cr: 1700, bd: 650, th: 85, len: .3, tl: .7, v: .8 }, { cr: 3000, bd: 1150, th: 105, len: .14, tl: .5, v: .62 }, { cr: 4200, bd: 900, th: 75, len: .26, tl: 1.4, v: .9 }];
+    const gunLast = {};
+    function gunSnd(wi, sup, x, z) {
+      // ショットガンの粒ごとに何回も鳴らさない
+      const gk = wi + ":" + Math.round(x) + ":" + Math.round(z), now = performance.now(); if (now - (gunLast[gk] || 0) < 45) return; gunLast[gk] = now;
+      const a = SND.ctx(); if (!a) return; const G = GUN_SND[wi] || GUN_SND[0], d = distOf(x, z), far = wi === 4 ? 320 : 200;
+      let vol = G.v * clamp(1.1 - d / far, 0, 1) * (sup ? .32 : 1); if (vol < .015) return;
+      const t = a.currentTime + Math.min(.5, d / 340), lp = a.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = sup ? 1300 : clamp(11000 - d * 70, 600, 11000); lp.connect(sOut(a, vol, panOf(x, z)));
+      if (!sup) sNz(a, lp, t, .025, 1, "highpass", G.cr, G.cr * .8, .7, .0008);
+      sNz(a, lp, t, G.len, sup ? .7 : .85, "bandpass", G.bd * (sup ? .55 : 1), G.bd * .45, .9);
+      sOsc(a, lp, t, G.len * .9, sup ? .35 : .8, "sine", G.th * 1.7, G.th * .5);
+      if (!sup) sNz(a, lp, t + .03 + d / 2000, G.tl * (d > 70 ? 1.5 : 1), .22, "lowpass", 1400, 250, .5, .04);
+    }
+    function boomSnd(x, z) {
+      const a = SND.ctx(); if (!a) return; const d = distOf(x, z), vol = clamp(1.25 - d / 260, 0, 1) * .9; if (vol < .02) return;
+      const t = a.currentTime + Math.min(.6, d / 340), lp = a.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = clamp(6000 - d * 30, 400, 6000); lp.connect(sOut(a, vol, panOf(x, z)));
+      if (d < 60) sNz(a, lp, t, .06, 1, "highpass", 1800, 900, .6, .001);
+      sNz(a, lp, t, 1.6, .9, "lowpass", 1400, 90, .7, .005); sOsc(a, lp, t, 1.3, .9, "sine", 70, 24); sNz(a, lp, t + .25, 2.2, .3, "lowpass", 500, 80, .5, .2);
+    }
+    // 自分だけに聞こえる音（ヒットの手ごたえ・撃たれた・リロード・拾う・足音）
+    function meSnd(k, pan = 0) {
+      const a = SND.ctx(); if (!a) return; const t = a.currentTime, o = sOut(a, 1, pan);
+      if (k === "tick") { sOsc(a, o, t, .035, .12, "square", 2400, 2200); sNz(a, o, t, .03, .1, "highpass", 4000, 4000) }
+      else if (k === "head") { sOsc(a, o, t, .05, .14, "square", 3000, 2800); sOsc(a, o, t + .05, .08, .12, "square", 3600, 3400) }
+      else if (k === "hurt") { sOsc(a, o, t, .18, .35, "sine", 140, 60); sNz(a, o, t, .12, .25, "lowpass", 900, 200) }
+      else if (k === "magout") { sNz(a, o, t, .05, .3, "bandpass", 2400, 1800, 2); sOsc(a, o, t, .03, .12, "square", 900, 700) }
+      else if (k === "magin") { sNz(a, o, t, .06, .35, "bandpass", 1600, 1200, 2); sOsc(a, o, t + .04, .03, .18, "square", 1800, 1500) }
+      else if (k === "bolt") { sNz(a, o, t, .05, .3, "bandpass", 3000, 2000, 2); sNz(a, o, t + .12, .05, .3, "bandpass", 2600, 1800, 2) }
+      else if (k === "pick") { sNz(a, o, t, .12, .18, "bandpass", 1200, 700, .8, .02); sOsc(a, o, t + .05, .04, .08, "triangle", 1100, 900) }
+      else if (k === "step") sNz(a, o, t, .07, .09, "lowpass", 700 + Math.random() * 300, 200, .8, .004);
+      else if (k === "splash") { sNz(a, o, t, .3, .14, "bandpass", 1100, 500, .6, .03); sNz(a, o, t + .08, .2, .08, "highpass", 3000, 2000) }
+      else if (k === "door") { sNz(a, o, t, .08, .3, "lowpass", 900, 300); sOsc(a, o, t, .1, .2, "sine", 120, 70) }
+      else if (k === "heal") { sNz(a, o, t, .25, .12, "bandpass", 2500, 1500, 1, .05) }
+      else if (k === "kill") { sOsc(a, o, t, .09, .1, "square", 880, 880); sOsc(a, o, t + .09, .16, .1, "square", 1320, 1320) }
+      else if (k === "siren") { for (let i = 0; i < 3; i++) { sOsc(a, o, t + i * .7, .35, .07, "sawtooth", 600, 900); sOsc(a, o, t + i * .7 + .35, .35, .07, "sawtooth", 900, 600) } }
+      else if (k === "alert") { for (let i = 0; i < 3; i++) sOsc(a, o, t + i * .22, .14, .07, "square", 1050, 1050) }
+    }
+    // 落ちてくる爆弾のヒューという音（場所から聞こえる）
+    function whistleSnd(x, z, dur) { const a = SND.ctx(); if (!a) return; const d = distOf(x, z), vol = clamp(1 - d / 120, 0, 1) * .12; if (vol < .01) return; const o = sOut(a, vol, panOf(x, z)); sOsc(a, o, a.currentTime, dur, 1, "sine", 1800, 500) }
     function boomFx(x, y, z) {
       hear(x, z, "boom");
       const s = new T.Mesh(new T.SphereGeometry(1, 16, 12), new T.MeshBasicMaterial({ color: "#FF9A3C", transparent: true })), sm = new T.Mesh(new T.IcosahedronGeometry(1.4, 1), new T.MeshLambertMaterial({ color: "#6A6560", transparent: true }));
       s.position.set(x, y + .5, z); sm.position.set(x, y + 1, z); scene.add(s, sm);
       fxs.push({ o: [s, sm], t: 0, life: 1.4, upd(k) { s.scale.setScalar(1 + k * 9); s.material.opacity = Math.max(0, 1 - k * 2.5); sm.scale.setScalar(1.5 + k * 4); sm.position.y = y + 1 + k * 3; sm.material.opacity = Math.max(0, .8 - k * .8) } });
-      const m = E[myIdx]; if (m) { const d = Math.hypot(x - m.x, z - m.z); sfx("boom", clamp(1.3 - d / 70, 0, 1)); if (d < 14) hurtT = Math.max(hurtT, .25) }
+      const m = E[myIdx]; boomSnd(x, z); if (m) { const d = Math.hypot(x - m.x, z - m.z); if (d < 14) hurtT = Math.max(hurtT, .25) }
     }
     function stepFx(dt) { for (let i = fxs.length - 1; i >= 0; i--) { const f = fxs[i]; f.t += dt; const k = f.t / f.life; f.upd(Math.min(1, k)); if (k >= 1) { f.o.forEach((o) => { scene.remove(o); o.geometry.dispose(); o.material.dispose() }); fxs.splice(i, 1) } } }
     // 手榴弾（投げた時の速さから、みんな同じ動きを計算する）
@@ -4459,7 +4520,7 @@ html.br-portrait .br-ui { display: none }
     function putDyn(it) { it.id = ++dynId; addDyn(it); S.dyn = [...(S.dyn || []), it].slice(-90) }
     // ---- 武器
     const curW = (e) => e.w[e.cur] || e.w[1 - e.cur];
-    function startReload(e) { const sl = curW(e); if (!sl || e.rl > 0 || sl.ammo >= brMag(sl)) return; e.rl = BR_W[sl.w].rl }
+    function startReload(e) { const sl = curW(e); if (!sl || e.rl > 0 || sl.ammo >= brMag(sl)) return; e.rl = BR_W[sl.w].rl; if (e.i === myIdx) { const R = e.rl; meSnd("magout"); setTimeout(() => meSnd("magin"), R * 550); setTimeout(() => meSnd("bolt"), R * 880) } }
     function fire(e, o, d) {
       const sl = curW(e); if (!sl || !e.alive || !e.landed || e.rl > 0 || e.healT > 0 || e.fireCd > 0) return null;
       if (sl.ammo <= 0) { startReload(e); return null }
@@ -4467,7 +4528,7 @@ html.br-portrait .br-ui { display: none }
       let spr = e.ads ? Wp.spr * .45 : (Wp.hip || Wp.spr); if (e.mv) spr *= 1.5; if (e.cr) spr *= .75; if (e.pr) spr *= .5; if (sl.gr) spr *= .72; if (e.y > .05) spr *= 2.5; if (e.i !== myIdx && !isHuman(e.i)) spr += e.err;
       const hits = []; for (let k = 0; k < (Wp.pel || 1); k++) { const dd = jitter(d, spr), h = castRay(o, dd, Wp.rng * 1.3, e.i); let dmg = Wp.dmg * lv.m * (h.head ? (Wp.k === "sr" ? 2.4 : 1.8) : 1); if (Wp.k === "sg") dmg *= clamp(1.4 - h.t / 18, .2, 1.25); hits.push({ code: h.code, dmg, head: h.head, p: h.p }) }
       if (sl.ammo <= 0) startReload(e);
-      return { hits, wk: Wp.n, sr: (Wp.k === "sr" ? 1 : 0) | (sl.sup ? 2 : 0) };
+      return { hits, wk: Wp.n, sr: (Wp.k === "sr" ? 1 : 0) | (sl.sup ? 2 : 0) | (sl.w << 2) };
     }
     const isHuman = (i) => i < (S.hum ? S.hum.length : 1);
     const humPeer = (i) => { const id = S.hum && S.hum[i]; return id ? matchPeers().find((p) => p.presence.cid === id) || null : null };
@@ -4542,7 +4603,7 @@ html.br-portrait .br-ui { display: none }
     function bombsStep() {
       const now = S.plane ? S.plane.t : 0;
       for (const b of S.bm || []) { if (boomed.has(b[0])) continue;
-        if (!bmMark.has(b[0])) { const rg = new T.Mesh(new T.RingGeometry(2.6, 3.2, 24), new T.MeshBasicMaterial({ color: "#FF2A2A", transparent: true, opacity: .7, side: T.DoubleSide, depthWrite: false })); rg.rotation.x = -Math.PI / 2; rg.position.set(b[1], .08, b[2]); scene.add(rg); bmMark.set(b[0], rg) }
+        if (!bmMark.has(b[0])) { const rg = new T.Mesh(new T.RingGeometry(2.6, 3.2, 24), new T.MeshBasicMaterial({ color: "#FF2A2A", transparent: true, opacity: .7, side: T.DoubleSide, depthWrite: false })); rg.rotation.x = -Math.PI / 2; rg.position.set(b[1], .08, b[2]); scene.add(rg); bmMark.set(b[0], rg); whistleSnd(b[1], b[2], Math.max(.3, b[3] - now)) }
         if (now < b[3]) continue; boomed.add(b[0]); const rg = bmMark.get(b[0]); if (rg) { scene.remove(rg); rg.geometry.dispose(); rg.material.dispose(); bmMark.delete(b[0]) } boomFx(b[1], 0, b[2]);
         if (host) for (const e of E) { if (!e.alive || !e.landed || indoor(e.x, e.z)) continue; const d = Math.hypot(e.x - b[1], e.z - b[2]); if (d < 7) hurt(e, 130 * (1 - d / 7) + 15, -1, false, "爆撃") } }
     }
@@ -4670,7 +4731,7 @@ html.br-portrait .br-ui { display: none }
       const mm = new T.Mesh(phMerge(B.L, false), W3.mat); mm.castShadow = true; scene.add(mm); return mm });
     const resetCars = () => cars.forEach((c) => { c.x = c.x0; c.z = c.z0; c.yaw = c.y0; c.v = 0; c.dr = -1 });
     const nearCar = (m) => { let best = null, bd = 3.2; for (const c of cars) { const d = Math.hypot(c.x - m.x, c.z - m.z); if (d < bd && c.dr < 0) { bd = d; best = c } } return best };
-    function enterCar(m) { const c = nearCar(m); if (!c || !m.alive || !m.landed || m.sw) return; c.dr = m.i; c.v = 0; m.car = c.id; prOn = crOn = adsOn = false; lnOn = 0; camYaw = c.yaw; sfx("hit", .4) }
+    function enterCar(m) { const c = nearCar(m); if (!c || !m.alive || !m.landed || m.sw) return; c.dr = m.i; c.v = 0; m.car = c.id; prOn = crOn = adsOn = false; lnOn = 0; camYaw = c.yaw; meSnd("door") }
     function exitCar(m) { const c = cars[m.car]; m.car = null; if (!c) return; c.dr = -1; c.v = 0; const rx = -Math.cos(c.yaw), rz = Math.sin(c.yaw); for (const sd of [-1, 1, 0]) { const x = c.x + rx * sd * 2.2 + (sd ? 0 : Math.sin(c.yaw) * 3.2), z = c.z + rz * sd * 2.2 + (sd ? 0 : Math.cos(c.yaw) * 3.2); if (!blocked(x, z, .5)) { m.x = x; m.z = z; break } } m.y = 0 }
     function driveCar(m, ix, iz, dt) {
       const c = cars[m.car]; if (!c) { m.car = null; return }
@@ -4693,7 +4754,7 @@ html.br-portrait .br-ui { display: none }
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false; prOn = false } }
     function swapTo(k) { const m = meE(); if (!m || !m.w[k]) return; if (m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false; return } const sl = m.w[k]; if (BR_W[sl.w].auto) { sl.semi = !sl.semi; floats.push({ txt: sl.semi ? "単発にした（指切り）" : "連射にした（フルオート）", col: "#7FD0FF", t: 0 }) } }
     // 回復ボタン：体力が少ないと救急箱、まだあるときは包帯、なければドリンク（自動でえらぶ）
-    function heal() { const m = meE(); if (!m || !m.alive || !m.landed || m.healT > 0 || m.hp >= 100) return; const k = m.hp <= 60 && m.med > 0 ? "med" : m.band > 0 && m.hp < 75 ? "band" : m.drk > 0 && !(m.reg > 0) ? "drk" : m.med > 0 ? "med" : null; if (!k) { floats.push({ txt: m.band > 0 ? "包帯は体力75まで" : "回復アイテムがない", col: "#fff", t: 0 }); return } m.healK = k; m.healT = k === "med" ? 4 : k === "band" ? 2 : 1.5; adsOn = false }
+    function heal() { const m = meE(); if (!m || !m.alive || !m.landed || m.healT > 0 || m.hp >= 100) return; const k = m.hp <= 60 && m.med > 0 ? "med" : m.band > 0 && m.hp < 75 ? "band" : m.drk > 0 && !(m.reg > 0) ? "drk" : m.med > 0 ? "med" : null; if (!k) { floats.push({ txt: m.band > 0 ? "包帯は体力75まで" : "回復アイテムがない", col: "#fff", t: 0 }); return } m.healK = k; m.healT = k === "med" ? 4 : k === "band" ? 2 : 1.5; adsOn = false; meSnd("heal") }
     function addHp(m, v) { v = Math.max(0, v); if (v <= 0) return; if (host) m.hp = Math.min(100, m.hp + v); else { m.hp = Math.min(100, m.hp + v); myHeal = [myHeal[0] + 1, r2(myHeal[1] + v)] } }
     function throwGren(kind) {
       kind = kind === 1 ? 1 : 0; const m = meE(); if (!m || !m.alive || !m.landed || (kind ? m.smk : m.gren) <= 0) return; if (kind) m.smk--; else m.gren--; const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = eyeOf(m).addScaledVector(d, .6), v = [d.x * 16, d.y * 16 + 4.5, d.z * 16];
@@ -4704,12 +4765,12 @@ html.br-portrait .br-ui { display: none }
       const m = meE(); if (!m || !m.alive || S.ph !== "play") return;
       const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = camera.position.clone().addScaledVector(d, camDist * .9), r = fire(m, o, d); if (!r) return;
       const tp = new T.Vector3(); vis[myIdx].tip.getWorldPosition(tp); const tip = [tp.x, tp.y, tp.z];
-      r.hits.forEach((h, k) => { if (k < 3) shotFx(tip, h.p, h.code >= 0, r.sr); if (h.code >= 0) { hitT = .25; sfx("hit", .8) } });
+      r.hits.forEach((h, k) => { if (k < 3) shotFx(tip, h.p, h.code >= 0, r.sr); if (h.code >= 0) { hitT = .25; meSnd(h.head ? "head" : "tick") } });
       if (host) applyShot(m, r, tip); else r.hits.forEach((h) => { myShots = [...myShots, [++shotSeq, h.code, r2(h.dmg), h.head ? 1 : 0, ...tip.map(r2), ...h.p.map(r2), r.wk, r.sr]].slice(-16) });
       m.recoil = .12;
     }
     let pickTarget = -1;
-    function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; take(m, it); taken.add(it.id); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
+    function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; take(m, it); taken.add(it.id); meSnd("pick"); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
     // スコープ・ドットサイトはショットガン以外につく（スナイパーは4倍より下にはならない）
     const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; if ((sl.sc || 1) > 1) return Wp.k === "sr" ? Math.max(4, sl.sc) : sl.sc; return Wp.zoom };
     // ---- 表示
@@ -4852,6 +4913,24 @@ html.br-portrait .br-ui { display: none }
         setMsg(`<p class="verdict ${won ? "good" : "bad"}">${won ? "勝ち残った！ 1位" : `${rank}位`}</p><p>キル ${m.kills}　／　${S.n}人中</p>${S.ph === "end" && !won ? `<p class="muted">優勝：${esc(nm(S.winner))}</p>` : ""}${againBtns("br")}${S.ph !== "end" ? `<button class="btn ghost" data-br="watch">観戦する</button>` : ""}`);
       } else setMsg("");
     }
+    // 毎フレームの音
+    const wind = SND.loop("crowd"), carEng = SND.loop("engine"), sndS = { step: 0, kills: 0, zst: "", rz: null, oSteps: {} };
+    function brSndFrame(m, dt) {
+      const play = S.ph === "play";
+      // 降下中の風（落ちる速さで大きく）
+      wind.set(play && m.alive && !m.landed ? (m.para ? .8 : 2.2) : 0);
+      // 車のエンジン（自分が乗っている車）
+      const c0 = m.car != null ? cars[m.car] : null; carEng.set(c0 && play ? .9 : 0, c0 ? clamp(Math.abs(c0.v) / 18, 0, 1.2) : 0);
+      // 自分の足音・泳ぐ音
+      if (play && m.alive && m.landed && m.car == null && m.mv && m.y < .05) { sndS.step -= dt; if (sndS.step <= 0) { const sp = m.spd || 4; sndS.step = m.sw ? .7 : clamp(2.2 / Math.max(1, sp), .26, .55); if (!(m.cr || m.pr) || m.sw) meSnd(m.sw ? "splash" : "step") } }
+      // 近くの人の足音（向きつき。しゃがみは聞こえない）
+      for (const o of E) { if (o === m || !o.alive || !o.landed || o.cr || o.pr || (o.spd || 0) < 1.2 || o.car != null) continue; const d = distOf(o.x, o.z), lim = o.spd > 6 ? 45 : 30; if (d > lim) continue; const k = sndS.oSteps; k[o.i] = (k[o.i] || 0) - dt; if (k[o.i] <= 0) { k[o.i] = clamp(2.2 / o.spd, .26, .55); const a = SND.ctx(); if (a) { const g = sOut(a, .5 * (1 - d / lim), panOf(o.x, o.z)); sNz(a, g, a.currentTime, .07, .16, "lowpass", 650, 180, .8, .004) } } }
+      // キルした
+      if (m.kills > sndS.kills) meSnd("kill"); sndS.kills = m.kills;
+      // 安全地帯が縮みはじめた・レッドゾーンが出た
+      const zs = S.zone ? S.zone.st + S.zone.k : ""; if (play && sndS.zst && zs !== sndS.zst && S.zone.st === "shrink") meSnd("alert"); sndS.zst = zs;
+      const rzk = S.rz ? S.rz[3] : null; if (play && rzk != null && rzk !== sndS.rz) meSnd("siren"); sndS.rz = rzk;
+    }
     // ---- 毎フレーム
     const stopLoop = loop((dt) => {
       tAll += dt; resize();
@@ -4917,7 +4996,8 @@ html.br-portrait .br-ui { display: none }
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       }
       if (m && m.car != null && (!m.alive || S.ph !== "play")) exitCar(m);
-      if (m && m.hp < myHpSeen - .5) { hurtT = .45; const at = E[m.lastHit]; hitFrom = at && at !== m ? { x: at.x, z: at.z, t: 0 } : null } if (m) myHpSeen = m.hp;
+      if (m) brSndFrame(m, dt);
+      if (m && m.hp < myHpSeen - .5) { meSnd("hurt", m.lastHit >= 0 && E[m.lastHit] ? panOf(E[m.lastHit].x, E[m.lastHit].z) : 0); hurtT = .45; const at = E[m.lastHit]; hitFrom = at && at !== m ? { x: at.x, z: at.z, t: 0 } : null } if (m) myHpSeen = m.hp;
       stepGren(dt); if (S.ph !== "lobby") { bombsStep(); supplyVis() } stepSmoke(dt); updVis(dt); updCam(dt); stepFx(dt);
       W3.wmat.map.offset.x = (tAll * .02) % 1;
       renderer.render(scene, camera); hud(dt); panel();
@@ -4934,7 +5014,7 @@ html.br-portrait .br-ui { display: none }
       }
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      wind.stop(); carEng.stop(); stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -5518,7 +5598,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0128";
+  const APP_VER = "1031-0145";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
