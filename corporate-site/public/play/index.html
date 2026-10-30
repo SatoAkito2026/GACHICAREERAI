@@ -267,6 +267,7 @@ html.playing .sc3 #act-msg { top: 50%; left: 50%; right: auto; width: min(760px,
 .sc-team span { display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 3px } .sc-team em { font-style: normal; font-size: 9px; color: var(--muted) }
 .sc-team s { display: block; height: 6px; background: color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 3px; overflow: hidden; text-decoration: none } .sc-team u { display: block; height: 100%; background: linear-gradient(90deg, #4DE3FF, #2E8BE6) }
 .sc-ui .kbtn { position: absolute; border-width: 4px; font-size: 15px; line-height: 1.1; color: #fff }
+.sc-ui .kbtn[data-m="def1"] { border-color: #E5483B !important; background: rgba(70,15,15,.6) !important } .sc-ui .kbtn[data-m="def2"] { border-color: #A45BE0 !important; background: rgba(40,15,60,.55) !important } .sc-ui .kbtn[data-m="def3"] { border-color: #F2B233 !important; background: rgba(60,45,10,.55) !important } .sc-ui .kbtn[data-m="def4"] { border-color: #2E8BE6 !important; background: rgba(10,30,60,.6) !important } .sc-ui .kbtn[data-m="off"] { opacity: .35 !important }
 #b-shoot { right: max(18px, env(safe-area-inset-right, 0px)); bottom: 150px; width: 86px; height: 86px; background: rgba(60,20,20,.55); border-color: #D9483B }
 #b-thru { right: calc(max(18px, env(safe-area-inset-right, 0px)) + 98px); bottom: 118px; width: 78px; height: 78px; background: rgba(50,45,10,.55); border-color: #C9B23A }
 #b-pass { right: calc(max(18px, env(safe-area-inset-right, 0px)) + 112px); bottom: 26px; width: 78px; height: 78px; background: rgba(10,40,60,.55); border-color: #2EA6C9 }
@@ -1174,7 +1175,7 @@ html.br-portrait .br-ui { display: none }
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-ui sc-ui"><div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
           <button class="kbtn sc-b" id="b-shoot">シュート</button><button class="kbtn sc-b" id="b-thru">スルー</button><button class="kbtn sc-b" id="b-pass">パス</button><button class="kbtn sc-b" id="b-dash">ダッシュ<br><small>＆スキル</small></button></div>
-        <p class="muted">横画面であそびます。左のスティックで選手を動かします（三角のついた選手）。<b>ボールを持っているとき</b>：「シュート」は長押しで強く（スティックを上・下にたおすとゴールの奥・手前のすみをねらう）、「パス」はスティックの向きの味方へ、「スルー」は味方の前のあいている所へ出す、「ダッシュ＆スキル」は押している間ダッシュ、ボールを持って押した瞬間に相手をかわすフェイント。<b>守るとき</b>：「タックル」でボールをうばう、「切り替え」でボールに近い味方に代わる、「プレス」で近くの味方もボールを取りに行く。チームによって攻撃・守備・スピード・キック力・テクニックがちがいます。前半・後半あわせて約5分。</p></section></section>`;
+        <p class="muted">横画面であそびます。左のスティックで、三角のついた選手を動かします。<br><b>攻撃（ボールを持っているとき）</b>　パス：タップ＝近くの味方、長押し＝遠くの味方、上にスワイプ＝浮かせたロブパス、下にスワイプ＝パス＆ゴー（出したあと前へ走る）。スルー：タップ＝味方の前のスペースへ、上にスワイプ＝DFの頭をこえるロブスルー。シュート：長押しで強く（ゲージが赤まで行くと浮きすぎる）、下にスワイプ＝コースをねらって巻いて曲げる、上にスワイプ＝前に出たGKの上をこえるループ、左にスワイプ＝シュートフェイント。ダッシュ＆スキル：長押し＝ダッシュ、タップ＝相手をかわすスキル。自分の陣地では、シュートがクリア（大きくけり出す）になります。<br><b>守備</b>　ダッシュ＆タックル：タップ＝タックル、長押し＝ボールを持った相手に自動で寄せる。スライディング：うばいやすいが、うしろからだとファウルになりやすい。2nd DF：近くの味方もボールを取りに行く（押すたびにオン・オフ）。切り替え：ボールに近い味方に代わる。<br><b>フリーキック・PK</b>　蹴るとき：ボールからゴールへ画面をなぞってシュート（曲げてなぞると曲がる）。パスでつなぐこともできます。守るとき：壁ジャンプ・壁突進、スティックで壁を左右に動かす。<br>チームによって攻撃・守備・スピード・キック力・テクニックがちがいます。前半・後半あわせて約5分。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
@@ -1225,20 +1226,19 @@ html.br-portrait .br-ui { display: none }
     const bc = document.createElement("canvas"); bc.width = 256; bc.height = 128; { const b2 = bc.getContext("2d"); b2.fillStyle = "#F8F8F8"; b2.fillRect(0, 0, 256, 128); b2.fillStyle = "#1A1A1A"; for (let i = 0; i < 12; i++) { const cx = (i % 6) * 43 + (i < 6 ? 10 : 32), cy = i < 6 ? 34 : 94; b2.beginPath(); for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28 - 1.57; b2.lineTo(cx + Math.cos(a) * 12, cy + Math.sin(a) * 12) } b2.fill() } }
     const ballM = new T.Mesh(new T.SphereGeometry(.22, 20, 14), new T.MeshStandardMaterial({ map: new T.CanvasTexture(bc), roughness: .45 })); ballM.castShadow = true; scene.add(ballM);
     // ---- 試合の状態（ホストが計算）
-    let S = { ph: "lobby", clk: 0, half: 1, sc: [0, 0], teams: [0, 1], ko: 0, t: 0, msg: "" };
-    const P = [], BL = { x: 0, y: .11, z: 0, vx: 0, vy: 0, vz: 0, own: -1, last: 0, cool: {} };
+    let S = { ph: "lobby", clk: 0, half: 1, sc: [0, 0], teams: [0, 1], ko: 0, t: 0, msg: "", mt: 0, fk: null, sec: [0, 0] };
+    const P = [], BL = { x: 0, y: .22, z: 0, vx: 0, vy: 0, vz: 0, own: -1, last: 0, cool: {}, curve: null };
     const nameOf = (i) => SC_NAMES[(i * 7 + (me.m.seed || 1)) % SC_NAMES.length];
-    for (let i = 0; i < 22; i++) { const t = i < 11 ? 0 : 1, r = i % 11; P.push({ i, t, r, gk: r === 0, x: 0, z: 0, vx: 0, vz: 0, f: t ? Math.PI * 1.5 : Math.PI / 2, stun: 0, run: null, skill: 0, sp: 0 }) }
+    for (let i = 0; i < 22; i++) { const t = i < 11 ? 0 : 1, r = i % 11; P.push({ i, t, r, gk: r === 0, x: 0, z: 0, vx: 0, vz: 0, f: t ? Math.PI : 0, stun: 0, run: null, skill: 0, sp: 0, kick: 0, slide: 0, dive: 0, jy: 0 }) }
     const dirOf = (t) => (t === 0 ? 1 : -1), stOf = (p) => SC_TEAMS[S.teams[p.t]].st;
     const home = (p) => { const [hx, hz] = SC_FORM[p.r]; return [hx * dirOf(p.t), hz] };
-    function placeKickoff(kt) { for (const p of P) { const [hx, hz] = home(p); p.x = Math.max(-SC_PL + 1, Math.min(SC_PL - 1, hx * (p.gk ? 1 : .9))); p.z = hz; if (!p.gk && Math.sign(p.x) !== -dirOf(p.t) && p.x !== 0) p.x = -dirOf(p.t) * 1; p.vx = p.vz = 0; p.stun = 0; p.run = null; p.f = p.t ? -Math.PI / 2 : Math.PI / 2 } const k = P[kt * 11 + 10]; k.x = -dirOf(kt) * .6; k.z = 0; Object.assign(BL, { x: 0, y: .11, z: 0, vx: 0, vy: 0, vz: 0, own: k.i, last: kt, cool: {} }); act[0] = 10; act[1] = 21 }
-    // 人が動かす選手（チームごと）。ひとりのときチーム1はCPU
     const act = [10, 21], human = () => [true, !!realOppPeer()];
-    // 入力：自分の分はここ、あいての分は送られてくる
-    const inp = [{ sx: 0, sy: 0, dash: 0, ev: {} }, { sx: 0, sy: 0, dash: 0, ev: {} }], seen = [{}, {}];
-    let myEv = { sh: 0, shp: 0, ps: 0, th: 0, sk: 0, sw: 0 };
+    function placeKickoff(kt) { for (const p of P) { const [hx, hz] = home(p); p.x = p.gk ? hx : clamp(hx * .9, -50, 50); p.z = hz; if (!p.gk && p.x * dirOf(p.t) > -1) p.x = -dirOf(p.t) * 1.5; p.vx = p.vz = 0; p.stun = p.slide = p.dive = p.kick = 0; p.run = null; p.f = p.t ? Math.PI : 0 } const k = P[kt * 11 + 10]; k.x = -dirOf(kt) * .6; k.z = 0; Object.assign(BL, { x: 0, y: .22, z: 0, vx: 0, vy: 0, vz: 0, own: k.i, last: kt, cool: {}, curve: null }); act[0] = 10; act[1] = 21; S.fk = null }
+    // 入力：ボタンは「どのボタンを・どう押したか（タップ・長押し・スワイプ）」を番号つきで送る。ホストが1回だけ実行する
+    const inp = [{ sx: 0, sy: 0, hold: 0, q: [] }, { sx: 0, sy: 0, hold: 0, q: [] }], seenQ = [0, 0];
+    let myQ = [], qn = 0; const pushEv = (o) => { myQ = [...myQ, Object.assign({ n: ++qn }, o)].slice(-8) };
     const myTeam = host ? 0 : 1;
-    // ---- 3Dの選手（荒野と同じ人のモデル。ユニフォームはチームの色、キーパーは別の色）
+    // ---- 3Dの選手
     let vis = [];
     function buildVis() {
       for (const v of vis) { scene.remove(v.g); v.g.traverse((o) => { if (o.geometry) o.geometry.dispose() }) }
@@ -1255,153 +1255,314 @@ html.br-portrait .br-ui { display: none }
       renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px";
       const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
-    // ---- 操作
+    const local = (e) => { const r = cardEl.getBoundingClientRect(); return ROT90 ? { x: e.clientY - r.top, y: r.right - e.clientX } : { x: e.clientX - r.left, y: e.clientY - r.top } };
+    // ---- 操作：4つのボタンはタップ・長押し・上下左右のスワイプを見分ける
     const stickInp = controlPad($("#stick"), $("#knob"));
-    let shootT = null;
-    holdBtn($("#b-shoot"), () => { shootT = performance.now() }, () => { if (shootT == null) return; const pw = clamp((performance.now() - shootT) / 900, 0, 1); shootT = null; myEv.sh++; myEv.shp = r2(pw) });
-    holdBtn($("#b-pass"), () => { myEv.ps++ }); holdBtn($("#b-thru"), () => { myEv.th++ });
-    const dashB = holdBtn($("#b-dash"), () => { myEv.sk++ });
-    const onKey = (e) => { if (e.repeat || e.target.tagName === "INPUT") return; const k = e.key.toLowerCase(); if (k === "j") myEv.ps++; else if (k === "k") myEv.th++; else if (k === "l") { myEv.sh++; myEv.shp = .6 } else if (k === "shift") myEv.sk++ };
+    let chargeT = null; const held = { b4: false };
+    function gestBtn(el, slot) {
+      let st = null;
+      el.addEventListener("pointerdown", (e) => { e.preventDefault(); st = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId }; if (slot === 1) chargeT = performance.now(); if (slot === 4) held.b4 = true; try { el.setPointerCapture(e.pointerId) } catch (_) {} });
+      const up = (e) => { if (!st || e.pointerId !== st.id) return; let dx = e.clientX - st.x, dy = e.clientY - st.y; if (ROT90) [dx, dy] = [dy, -dx]; const dt2 = (performance.now() - st.t) / 1000; st = null; if (slot === 1) chargeT = null; if (slot === 4) held.b4 = false;
+        const g = Math.abs(dy) > 26 && Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? "up" : "down") : Math.abs(dx) > 26 ? (dx < 0 ? "left" : "right") : dt2 > .3 ? "hold" : "tap"; pushEv({ s: slot, g, p: r2(Math.min(1, dt2 / .9)) }) };
+      el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    }
+    gestBtn($("#b-shoot"), 1); gestBtn($("#b-thru"), 2); gestBtn($("#b-pass"), 3); gestBtn($("#b-dash"), 4);
+    const onKey = (e) => { if (e.repeat || e.target.tagName === "INPUT") return; const k = e.key.toLowerCase(); if (k === "j") pushEv({ s: 3, g: "tap", p: 0 }); else if (k === "k") pushEv({ s: 2, g: "tap", p: 0 }); else if (k === "l") pushEv({ s: 1, g: "hold", p: .6 }); else if (k === "u") pushEv({ s: 1, g: "down", p: .5 }); else if (k === "i") pushEv({ s: 3, g: "up", p: 0 }); else if (k === " ") pushEv({ s: 4, g: "tap", p: 0 }) };
     addEventListener("keydown", onKey);
+    // フリーキック・PK：ボールからゴールへ画面をなぞってシュート（PKと同じく、なぞった先がねらう所、曲げると曲がる）
+    let fkSwipe = null;
+    const ray = new T.Raycaster(), hitV = new T.Vector3();
+    cv.addEventListener("pointerdown", (e) => { if (S.ph !== "fk" || !S.fk || S.fk.t !== myTeam || S.fk.done) return; const q = local(e); fkSwipe = { id: e.pointerId, pts: [{ x: q.x, y: q.y, t: performance.now() }] }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
+    cv.addEventListener("pointermove", (e) => { if (!fkSwipe || e.pointerId !== fkSwipe.id) return; const q = local(e); fkSwipe.pts.push({ x: q.x, y: q.y, t: performance.now() }) });
+    const endFk = (e) => {
+      if (!fkSwipe || e.pointerId !== fkSwipe.id) return; const pts = fkSwipe.pts; fkSwipe = null; if (pts.length < 3) return;
+      const S0 = pts[0], E = pts[pts.length - 1]; if (E.y > S0.y - 30) return; const Ln = Math.hypot(E.x - S0.x, E.y - S0.y), pw = clamp(Ln / Math.max(.05, (E.t - S0.t) / 1000) / (VH * 3.2), .25, 1.45);
+      const gx = SC_PL * dirOf(S.fk.t), plane = new T.Plane(new T.Vector3(1, 0, 0), -gx);
+      const hit = (sx, sy) => { ray.setFromCamera(new T.Vector2(sx / VW * 2 - 1, -(sy / VH) * 2 + 1), camera); return ray.ray.intersectPlane(plane, hitV) ? { z: hitV.z, y: hitV.y } : null };
+      let g = hit(E.x, E.y); for (let k = 1.25; (!g || g.y < .4) && k <= 6; k += .25) g = hit(S0.x + (E.x - S0.x) * k, S0.y + (E.y - S0.y) * k); if (!g) g = { z: 0, y: 1 };
+      const M = pts[Math.floor(pts.length / 2)], cross = ((E.x - S0.x) * (M.y - S0.y) - (E.y - S0.y) * (M.x - S0.x)) / (Ln * Ln);
+      pushEv({ s: 9, tz: r2(clamp(g.z, -6, 6)), ty: r2(clamp(g.y + (pw > 1.2 ? (pw - 1.2) * 4 : 0), 0, 4)), p: r2(pw), cv: r2(clamp(cross * 2.4, -.5, .5)) });
+    };
+    cv.addEventListener("pointerup", endFk); cv.addEventListener("pointercancel", endFk);
     // ---- 計算（ホスト）
     const near = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
     const owner = () => (BL.own >= 0 ? P[BL.own] : null);
-    function kick(p, vx, vy, vz) { BL.own = -1; BL.vx = vx; BL.vy = vy; BL.vz = vz; BL.y = Math.max(BL.y, .15); BL.cool = { [p.i]: .35 }; BL.last = p.t }
-    function shoot(p, pw, aimY) {
-      const st = stOf(p), gx = SC_PL * dirOf(p.t), tz = clamp(aimY != null ? -aimY * 3.1 : (Math.random() < .5 ? -1 : 1) * (1.2 + Math.random() * 2), -3.4, 3.4), ty = .35 + pw * 2.3 + (pw > .92 ? (pw - .92) * 6 : 0);
-      const sp = 17 + pw * 11 + st.kick * 1.6, err = (.012 + (5 - st.tec) * .012) * (.6 + pw * .6), dx = gx - BL.x, dz = tz - BL.z, D = Math.hypot(dx, dz), a = Math.atan2(dz, dx) + (Math.random() * 2 - 1) * err, tt = D / sp;
-      kick(p, Math.cos(a) * sp, (ty - BL.y + 4.9 * tt * tt) / tt, Math.sin(a) * sp);
+    function kick(p, vx, vy, vz, curve) { BL.gk = null; BL.own = -1; BL.vx = vx; BL.vy = vy; BL.vz = vz; BL.y = Math.max(BL.y, .22); BL.cool = { [p.i]: .35 }; BL.last = p.t; BL.curve = curve || null; p.kick = .35 }
+    // ねらった点へ、速さと曲がり（m）を決めて蹴る（曲がりは横向きの力で、とちゅうでふくらんでねらった点にもどる）
+    function launch(p, tx, ty, tz, sp, bend) {
+      const dx = tx - BL.x, dz = tz - BL.z, D = Math.hypot(dx, dz) || 1, tt = D / sp, ux = dx / D, uz = dz / D, a = -8 * (bend || 0) / (tt * tt), ax = -uz * a, az = ux * a;
+      kick(p, ux * sp - .5 * ax * tt, (ty - BL.y + 4.9 * tt * tt) / tt, uz * sp - .5 * az * tt, bend ? { ax, az, t: tt } : null);
     }
-    function passTo(p, m, lead, thru) {
-      const st = stOf(p); let tx = m.x + (thru ? dirOf(p.t) * 9 : m.vx * .5), tz = m.z + (thru ? 0 : m.vz * .5); tx = clamp(tx, -SC_PL + 1, SC_PL - 1); tz = clamp(tz, -SC_PW + 1, SC_PW - 1);
-      const D = Math.hypot(tx - BL.x, tz - BL.z), sp = clamp(8 + D * .7, 10, 26), err = (5 - st.tec) * .02, a = Math.atan2(tz - BL.z, tx - BL.x) + (Math.random() * 2 - 1) * err, tt = D / sp, lob = D > 28;
-      kick(p, Math.cos(a) * sp * (lob ? .8 : 1), lob ? 4.9 * (tt / .8) : .6, Math.sin(a) * sp * (lob ? .8 : 1)); if (thru) m.run = { x: tx, z: tz, t: 2.5 }
+    function shoot(p, pw, aimY, kind) {
+      const st = stOf(p), d = dirOf(p.t), gx = SC_PL * d, keeper = P[(1 - p.t) * 11];
+      let tz = aimY != null ? clamp(-aimY * 3.0, -3.1, 3.1) : (Math.random() < .5 ? -1 : 1) * (1.6 + Math.random() * 1.4);
+      if (kind === "finesse") tz = (Math.abs(BL.z) > 2 ? -Math.sign(BL.z) : Math.random() < .5 ? -1 : 1) * 3.1;
+      let ty = .35 + pw * 2.2 + (pw > .92 ? (pw - .92) * 6 : 0), sp = 17 + pw * 11 + st.kick * 1.6, bend = 0;
+      if (kind === "finesse") { sp *= .8; ty = .6 + pw * 1.4; bend = -Math.sign(tz) * d * 1.4 * (st.tec / 5) }
+      if (kind === "chip") { sp = 11 + st.kick; ty = 2.2 }
+      const err = (.006 + (5 - st.tec) * .008) * (.6 + pw * .6) * (kind === "finesse" ? .45 : 1);
+      tz += (Math.random() * 2 - 1) * err * Math.hypot(gx - BL.x, tz - BL.z);
+      if (kind === "chip") { const D = Math.hypot(gx - BL.x, tz - BL.z), tt = D / sp; kick(p, (gx - BL.x) / tt, 4.9 * tt * .95, (tz - BL.z) / tt); return }
+      launch(p, gx + d * .5, ty, tz, sp, bend);
     }
-    function bestMate(p, dx, dz, fwd) {
-      let best = null, bs = -1e9; for (const m of P) { if (m.t !== p.t || m === p || m.gk) continue; const vx = m.x - p.x, vz = m.z - p.z, d = Math.hypot(vx, vz); if (d < 4 || d > 45) continue; const cosA = (vx * dx + vz * dz) / (d * (Math.hypot(dx, dz) || 1)); let free = 99; for (const o of P) if (o.t !== p.t) free = Math.min(free, Math.hypot(o.x - m.x, o.z - m.z)); const sc2 = (dx || dz ? cosA * 30 : 0) + (fwd ? vx * dirOf(p.t) * .6 : 0) + Math.min(free, 8) * 2 - d * .25; if (sc2 > bs) { bs = sc2; best = m } } return best;
+    function passTo(p, m, mode) {
+      const st = stOf(p), d = dirOf(p.t), thru = mode === "thru" || mode === "lobthru", lob = mode === "lob" || mode === "lobthru" || mode === "long";
+      let tx = m.x + (thru ? d * 9 : m.vx * .6), tz = m.z + (thru ? m.vz * .4 : m.vz * .6); tx = clamp(tx, -SC_PL + 1, SC_PL - 1); tz = clamp(tz, -SC_PW + 1, SC_PW - 1);
+      const D = Math.hypot(tx - BL.x, tz - BL.z), err = (5 - st.tec) * .018, a = Math.atan2(tz - BL.z, tx - BL.x) + (Math.random() * 2 - 1) * err;
+      if (lob || D > 30) { const sp = clamp(9 + D * .42, 12, 24), tt = D / sp; kick(p, Math.cos(a) * sp, 4.9 * tt * .92, Math.sin(a) * sp) }
+      else { const sp = clamp(8 + D * .72, 10, 26); kick(p, Math.cos(a) * sp, .4, Math.sin(a) * sp) }
+      if (thru) m.run = { x: tx, z: tz, t: 2.6 };
+      if (mode === "go") p.run = { x: clamp(p.x + d * 14, -50, 50), z: p.z * .8, t: 2.4 };
     }
-    function nearestTo(t, x, z, skipGk) { let b = null, bd = 1e9; for (const p of P) { if (p.t !== t || (skipGk && p.gk)) continue; const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; b = p } } return b }
-    function tackle(p, power) { const o = owner(); if (!o || o.t === p.t || near(p, o) > 1.7 || o.skill > 0) return false; const ok = Math.random() < .42 + (stOf(p).def - stOf(o).tec) * .08 + power; if (ok) { if (Math.random() < .55) { BL.own = p.i; BL.last = p.t } else { BL.own = -1; BL.vx = (Math.random() - .5) * 8; BL.vz = (Math.random() - .5) * 8; BL.vy = 1; BL.cool = { [o.i]: .5 } } } else p.stun = .7; return ok }
+    function bestMate(p, dx, dz, opt) {
+      opt = opt || {}; let best = null, bs = -1e9;
+      for (const m of P) { if (m.t !== p.t || m === p || m.gk) continue; const vx = m.x - p.x, vz = m.z - p.z, d = Math.hypot(vx, vz); if (d < 4 || d > (opt.far ? 60 : 40)) continue; const cosA = (vx * dx + vz * dz) / (d * (Math.hypot(dx, dz) || 1)); let free = 99; for (const o of P) if (o.t !== p.t) free = Math.min(free, Math.hypot(o.x - m.x, o.z - m.z)); const sc2 = (dx || dz ? cosA * 30 : 0) + (opt.fwd ? vx * dirOf(p.t) * .6 : 0) + Math.min(free, 8) * 2 + (opt.far ? d * .4 : -d * .25); if (sc2 > bs) { bs = sc2; best = m } }
+      return best;
+    }
+    function nearestTo(t, x, z, skipGk, skip) { let b = null, bd = 1e9; for (const p of P) { if (p.t !== t || (skipGk && p.gk) || p === skip) continue; const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; b = p } } return b }
+    // ファウル：うしろからのタックル・スライディングはファウルになりやすい。ペナルティエリアの中ならPK
+    function foul(by, on) {
+      const att = on.t, d = dirOf(att), inBox = Math.abs(on.x - SC_PL * d) < 16.5 && Math.abs(on.z) < 20.16 && on.x * d > 0;
+      S.msg = inBox ? "ファウル！ PK" : "ファウル！ フリーキック"; S.mt = 1.6; BL.own = -1; BL.vx = BL.vy = BL.vz = 0; BL.curve = null;
+      const fx = inBox ? SC_PL * d - 11 * d : clamp(on.x, -SC_PL + 2, SC_PL - 2), fz = inBox ? 0 : clamp(on.z, -SC_PW + 1, SC_PW - 1), dist = Math.hypot(SC_PL * d - fx, fz);
+      Object.assign(BL, { x: fx, y: .22, z: fz });
+      if (!inBox && dist > 32) { const k = nearestTo(att, fx, fz, true); BL.own = k.i; k.x = fx - d * .6; k.z = fz; act[att] = k.i; return }
+      setupFk(att, fx, fz, inBox);
+    }
+    function setupFk(att, fx, fz, pk) {
+      const d = dirOf(att), gx = SC_PL * d, kk = nearestTo(att, fx, fz, true), dl = Math.hypot(gx - fx, fz) || 1, ux = (gx - fx) / dl, uz = -fz / dl;
+      kk.x = fx - ux * 1.8 - uz * .6; kk.z = fz - uz * 1.8 + ux * .6; kk.vx = kk.vz = 0; act[att] = kk.i;
+      const wall = [];
+      if (!pk) { const defs = P.filter((q) => q.t !== att && !q.gk).sort((a, b) => Math.hypot(a.x - fx, a.z - fz) - Math.hypot(b.x - fx, b.z - fz)).slice(0, dl < 22 ? 4 : 3); defs.forEach((q, k) => { const off = (k - (defs.length - 1) / 2) * .62 + (fz > 0 ? -.5 : .5); q.x = fx + ux * 9.15 - uz * off; q.z = fz + uz * 9.15 + ux * off; q.vx = q.vz = 0; wall.push(q.i) }) }
+      for (const q of P) { if (q === kk || q.gk || wall.includes(q.i)) continue; if (Math.hypot(q.x - fx, q.z - fz) < 9.5) { q.x -= ux * 6; q.z += (Math.random() - .5) * 6 } if (pk && Math.abs(q.x - gx) < 18 && Math.abs(q.z) < 21) q.x = gx - d * 19 }
+      const g = P[(1 - att) * 11]; g.x = gx - d * .4; g.z = 0;
+      S.fk = { t: att, x: fx, z: fz, pk: !!pk, wall, k: kk.i, t0: 0, sh: 0, jump: 0, charge: 0, done: false }; S.ph = "fk";
+    }
+    function tackle(p, slide) {
+      const o = owner(); if (!o || o.t === p.t || o.skill > 0) return false;
+      const dd = near(p, o), reach = slide ? 2.6 : 1.7; if (slide) { p.slide = .8; p.vx = Math.cos(p.f) * 7; p.vz = Math.sin(p.f) * 7 } if (dd > reach) { if (!slide) p.stun = .25; return false }
+      const behind = (Math.cos(o.f) * (p.x - o.x) + Math.sin(o.f) * (p.z - o.z)) < -.3 * dd, sdef = stOf(p).def, stec = stOf(o).tec;
+      if (Math.random() < (slide ? .3 : .12) + (behind ? .35 : 0) - sdef * .03) { foul(p, o); return false }
+      const ok = Math.random() < (slide ? .55 : .42) + (sdef - stec) * .08;
+      if (ok) { if (!slide && Math.random() < .6) { BL.own = p.i; BL.last = p.t } else { BL.own = -1; BL.vx = Math.cos(p.f) * 7 + (Math.random() - .5) * 4; BL.vz = Math.sin(p.f) * 7 + (Math.random() - .5) * 4; BL.vy = 1; BL.cool = { [o.i]: .6, [p.i]: .25 }; BL.last = p.t } o.stun = .5 } else p.stun = slide ? 1.1 : .6;
+      return ok;
+    }
+    // 選手の動き：急には止まれない・曲がれない（加速と向きの変わり方はテクニックとスピードで変わる）
+    function steer(p, dvx, dvz, dt) {
+      const st = stOf(p), acc = (10 + st.tec * 1.2) * (p.slide > 0 ? 0 : 1), ex = dvx - p.vx, ez = dvz - p.vz, el = Math.hypot(ex, ez);
+      if (el > 1e-3) { const turn = p.vx * dvx + p.vz * dvz < 0 ? 1.6 : 1, k = Math.min(el, acc * turn * dt); p.vx += ex / el * k; p.vz += ez / el * k }
+    }
     function humanStep(t, dt) {
       if (!P[act[t]]) act[t] = t * 11 + 10;
-      const ip = inp[t], ev = ip.ev || {}, sn = seen[t], p = P[act[t]], hasBall = BL.own === p.i, st = stOf(p), mine = owner() && owner().t === t;
-      const fire = (k) => { const n = ev[k] || 0, d = n - (sn[k] ?? n); sn[k] = n; return d > 0 };
-      // スティックの向き：画面の右＝+x、画面の上＝-z（カメラはスタンドの上から見ている）
-      const mx = ip.sx, mz = ip.sy, mg = Math.min(1, Math.hypot(mx, mz));
-      const spd = (5.4 + st.spd * .45) * (ip.dash ? 1.3 : 1) * (p.stun > 0 ? .4 : 1) * (hasBall ? .92 : 1);
-      p.vx = mg > .15 ? mx / (Math.hypot(mx, mz) || 1) * spd * mg : 0; p.vz = mg > .15 ? mz / (Math.hypot(mx, mz) || 1) * spd * mg : 0;
+      const ip = inp[t], p = P[act[t]], st = stOf(p), d = dirOf(t);
+      const mx = ip.sx, mz = ip.sy, mg = Math.min(1, Math.hypot(mx, mz)), hasBall = BL.own === p.i, o = owner(), defending = !o || o.t !== t;
+      const top = (5.4 + st.spd * .45) * (ip.hold ? 1.3 : 1) * (p.stun > 0 ? .4 : 1) * (hasBall ? .93 : 1);
+      if (ip.hold && defending && o && o.t !== t) { const dx = o.x - p.x, dz = o.z - p.z, dl = Math.hypot(dx, dz) || 1; steer(p, dx / dl * top * .95, dz / dl * top * .95, dt) } // 長押し：自動で寄せる
+      else steer(p, mg > .15 ? mx / (Math.hypot(mx, mz) || 1) * top * mg : 0, mg > .15 ? mz / (Math.hypot(mx, mz) || 1) * top * mg : 0, dt);
       const ax = mg > .15 ? mx : Math.cos(p.f), az = mg > .15 ? mz : Math.sin(p.f);
-      if (fire("sh")) { if (hasBall) shoot(p, ev.shp ?? .6, mg > .3 ? mz : null); else tackle(p, 0) }
-      if (fire("ps")) { if (hasBall) { const m = bestMate(p, ax, az, false); if (m) passTo(p, m) } else { const b = nearestTo(t, BL.x, BL.z, true); if (b) act[t] = b.i } }
-      if (fire("th")) { if (hasBall) { const m = bestMate(p, ax * .5 + dirOf(t), az * .5, true); if (m) passTo(p, m, true, true) } else { const o = owner(), b = o ? P.filter((q) => q.t === t && !q.gk && q !== p).sort((a, b2) => near(a, o) - near(b2, o))[0] : null; if (b) b.press = 2.5 } }
-      if (fire("sk") && hasBall) { p.skill = .6; const sd = Math.random() < .5 ? -1 : 1; p.x += -Math.sin(p.f) * sd * 1.2; p.z += Math.cos(p.f) * sd * 1.2 }
-      // ボールを取られた・パスが味方に届いたら、ボールに近い選手に切りかえ
-      if (!hasBall && !mine && BL.own >= 0) { const b = nearestTo(t, BL.x, BL.z, true); if (b && near(b, BL) + 3 < near(p, BL)) act[t] = b.i }
-      if (BL.own >= 0 && P[BL.own].t === t && BL.own !== act[t]) act[t] = BL.own;
-    }
-    function aiStep(p, dt) {
-      const st = stOf(p), o = owner(), d = dirOf(p.t), gx = SC_PL * d, mineBall = o && o.t === p.t;
-      let tx, tz, spdK = 1;
-      if (p.gk) { const gl2 = -SC_PL * d, lead = BL.own < 0 ? BL.z + BL.vz * .4 : BL.z; tx = gl2 + d * clamp(1.2 + Math.abs(BL.x - gl2) * .03, 1, 4); tz = clamp(lead * .35, -3, 3); spdK = 1.1 }
-      else if (BL.own === p.i) {
-        // ボールを持ったCPU：シュート・パス・ドリブルを選ぶ
-        p.think = (p.think || 0) - dt;
-        const dg = Math.hypot(gx - p.x, p.z), opp = P.filter((q) => q.t !== p.t).reduce((a, q) => Math.min(a, near(q, p)), 99);
-        if (p.think <= 0) { p.think = .35 + Math.random() * .3; if (dg < 21 + st.atk && Math.random() < .55 + st.atk * .05) { shoot(p, .55 + Math.random() * .35); return } if (opp < 3.2 && Math.random() < .7) { const m = bestMate(p, d, 0, true); if (m) { passTo(p, m, true, Math.random() < .25); return } } if (Math.random() < .08) { const m = bestMate(p, d, 0, true); if (m) { passTo(p, m); return } } }
-        let near1 = null, nd = 1e9; for (const q of P) if (q.t !== p.t) { const dd = near(q, p); if (dd < nd) { nd = dd; near1 = q } }
-        tx = gx; tz = p.z * .7; if (near1 && nd < 6) tz += (p.z - near1.z >= 0 ? 1 : -1) * 6; spdK = .9;
-      } else if (p.run && p.run.t > 0) { p.run.t -= dt; tx = p.run.x; tz = p.run.z; spdK = 1.25 }
-      else {
-        const [hx, hz] = home(p), bx = BL.x, bz = BL.z;
-        if (mineBall) { tx = hx * .55 + bx * .45 + d * 10; tz = hz * .8 + bz * .2 }
-        else {
-          tx = hx * .65 + bx * .35 - d * 2; tz = hz * .75 + bz * .25;
-          const chasers = P.filter((q) => q.t === p.t && !q.gk && (!human()[p.t] || q.i !== act[p.t])).sort((a, b) => near(a, BL) - near(b, BL));
-          if (chasers[0] === p || (chasers[1] === p && near(p, BL) < 12) || p.press > 0) { tx = BL.x + BL.vx * .3; tz = BL.z + BL.vz * .3; spdK = 1.15 }
+      for (const e of ip.q || []) {
+        if (e.n <= seenQ[t]) continue; seenQ[t] = e.n;
+        const p2 = P[act[t]], has2 = BL.own === p2.i, own2 = owner(), def2 = !own2 || own2.t !== t;
+        if (e.s === 9) { if (S.ph === "fk" && S.fk && S.fk.t === t && !S.fk.done) fkKick(e.tz, e.ty, e.p, e.cv); continue }
+        if (S.ph === "fk" && S.fk) { fkButton(t, e); continue }
+        if (has2) {
+          const ownHalf = p2.x * d < -18;
+          if (e.s === 1) { if (e.g === "left") { p2.skill = .5; for (const q of P) if (q.t !== t && near(q, p2) < 3) q.stun = .6; continue } if (ownHalf && e.g !== "down" && e.g !== "up") { const sp = 24, tt = 2.2; kick(p2, d * sp * .85, 4.9 * tt * .5, (Math.random() - .5) * 8); S.msg = "クリア"; S.mt = .8; continue } shoot(p2, e.g === "tap" ? .35 : e.p, mg > .3 ? mz : null, e.g === "down" ? "finesse" : e.g === "up" ? "chip" : null) }
+          else if (e.s === 3) { const m = e.g === "hold" ? bestMate(p2, ax, az, { far: true }) : bestMate(p2, ax, az); if (m) passTo(p2, m, e.g === "up" ? "lob" : e.g === "down" ? "go" : e.g === "hold" ? "long" : "ground") }
+          else if (e.s === 2) { if (e.g === "down") { p2.skill = 0; } else { const m = bestMate(p2, ax * .5 + d, az * .5, { fwd: true }); if (m) passTo(p2, m, e.g === "up" ? "lobthru" : "thru") } }
+          else if (e.s === 4 && e.g === "tap") { p2.skill = .6; const sd = Math.random() < .5 ? -1 : 1; p2.vx += -Math.sin(p2.f) * sd * 4; p2.vz += Math.cos(p2.f) * sd * 4 }
+        } else if (def2) {
+          if (e.s === 1) tackle(p2, true); // スライディング
+          else if (e.s === 2) S.sec[t] = S.sec[t] ? 0 : 1; // 2nd DF
+          else if (e.s === 3) { const b = nearestTo(t, BL.x, BL.z, true, p2); if (b) act[t] = b.i } // 切り替え
+          else if (e.s === 4 && e.g === "tap") tackle(p2, false);
         }
       }
-      p.press = Math.max(0, (p.press || 0) - dt);
-      const dx = tx - p.x, dz = tz - p.z, dl = Math.hypot(dx, dz), spd = (5 + st.spd * .42) * spdK * (p.stun > 0 ? .4 : 1);
-      if (dl > .4) { const k = Math.min(1, dl / 3); p.vx += (dx / dl * spd * k - p.vx) * Math.min(1, dt * 4); p.vz += (dz / dl * spd * k - p.vz) * Math.min(1, dt * 4) } else { p.vx *= .8; p.vz *= .8 }
-      // CPUのタックル
-      if (o && o.t !== p.t && !p.gk && near(p, o) < 1.3 && Math.random() < dt * (.8 + st.def * .15)) tackle(p, 0);
+      if (BL.own >= 0 && P[BL.own].t === t && BL.own !== act[t]) act[t] = BL.own;
+      const o2 = owner(); if (!o2 && BL.own < 0) { const b = nearestTo(t, BL.x + BL.vx * .4, BL.z + BL.vz * .4, true); if (b && b !== P[act[t]] && near(b, BL) + 4 < near(P[act[t]], BL) && Math.hypot(BL.vx, BL.vz) > 6) act[t] = b.i }
+      if (o2 && o2.t !== t) { const b = nearestTo(t, o2.x, o2.z, true); if (b && near(b, o2) + 6 < near(P[act[t]], o2)) act[t] = b.i }
+    }
+    // CPUの動き：ディフェンスラインをそろえる・マークにつく・前へ走る・サイドからクロス
+    function aiStep(p, dt) {
+      const st = stOf(p), o = owner(), d = dirOf(p.t), gx = SC_PL * d, mineBall = o ? o.t === p.t : BL.last === p.t;
+      let tx, tz, spdK = 1;
+      if (p.gk) { const gl2 = -SC_PL * d, lead = BL.own < 0 ? BL.z + BL.vz * .35 : BL.z; tx = gl2 + d * clamp(1 + Math.abs(BL.x - gl2) * .025, .8, 3.5); tz = clamp(lead * .32, -3, 3); spdK = 1.15 }
+      else if (BL.own === p.i) {
+        p.think = (p.think || 0) - dt;
+        const dg = Math.hypot(gx - p.x, p.z), opp = P.filter((q) => q.t !== p.t).reduce((a, q) => Math.min(a, near(q, p)), 99), wing = Math.abs(p.z) > 20 && (gx - p.x) * d < 18;
+        if (p.think <= 0) {
+          p.think = .3 + Math.random() * .3;
+          if (dg < 20 + st.atk && Math.random() < .5 + st.atk * .06) { shoot(p, .5 + Math.random() * .4, null, Math.random() < .3 ? "finesse" : null); return }
+          if (wing && Math.random() < .5) { const m = P.filter((q) => q.t === p.t && !q.gk && Math.abs(q.x - gx) < 16 && Math.abs(q.z) < 14).sort(() => Math.random() - .5)[0]; if (m) { passTo(p, m, "lob"); return } }
+          if (opp < 3 && Math.random() < .7) { const m = bestMate(p, d, 0, { fwd: true }); if (m) { passTo(p, m, Math.random() < .25 ? "thru" : "ground"); return } }
+          if (Math.random() < .07) { const m = bestMate(p, d, 0, { fwd: true }); if (m) { passTo(p, m, "ground"); return } }
+        }
+        let near1 = null, nd = 1e9; for (const q of P) if (q.t !== p.t) { const dd = near(q, p); if (dd < nd) { nd = dd; near1 = q } }
+        tx = gx; tz = p.z * (Math.abs(p.z) > 22 ? .95 : .75); if (near1 && nd < 6) tz += (p.z - near1.z >= 0 ? 1 : -1) * 7; spdK = .92;
+      } else if (p.run && p.run.t > 0) { p.run.t -= dt; tx = p.run.x; tz = p.run.z; spdK = 1.25 }
+      else {
+        const [hx, hz] = home(p), line = p.r <= 4 ? 0 : p.r <= 8 ? 1 : 2;
+        // ディフェンスライン（自分のゴールから見たボールの位置で上げ下げ）
+        const bAdv = BL.x * d, defLine = clamp(bAdv - (mineBall ? 6 : 14), -44, mineBall ? 8 : -6);
+        tx = d * (defLine + [0, 13, mineBall ? 30 : 24][line]); tz = hz * .8 + BL.z * .22;
+        if (mineBall && line === 2) { const oppLine = Math.max(...P.filter((q) => q.t !== p.t && !q.gk).map((q) => q.x * d)); tx = d * Math.min(oppLine + 1, SC_PL - 6); if (Math.random() < dt * .25) p.run = { x: d * Math.min(oppLine + 9, SC_PL - 4), z: hz * .6, t: 2 } }
+        if (mineBall && line === 1) { tx = BL.x + d * (hz > 0 ? 4 : -2) ; tz = BL.z + (hz > 0 ? 9 : -9) }
+        if (!mineBall) {
+          // マーク：近くの相手（ボールを持っていない）と自分のゴールの間に入る
+          let mk = null, md = 12; for (const q of P) if (q.t !== p.t && !q.gk && q.i !== BL.own) { const dd = Math.hypot(q.x - tx, q.z - tz); if (dd < md) { md = dd; mk = q } }
+          if (mk && line === 0) { tx = mk.x - d * 1.6; tz = mk.z * .9 }
+          const sec = S.sec[p.t] && human()[p.t], chasers = P.filter((q) => q.t === p.t && !q.gk && (!human()[p.t] || q.i !== act[p.t])).sort((a, b) => near(a, BL) - near(b, BL));
+          if (chasers[0] === p && (!human()[p.t] || sec || near(p, BL) < 5)) { tx = BL.x + BL.vx * .3; tz = BL.z + BL.vz * .3; spdK = 1.12 }
+          else if (!human()[p.t] && chasers[1] === p && near(p, BL) < 10) { tx = BL.x - d * 3; tz = BL.z; spdK = 1 }
+        }
+      }
+      const dx = tx - p.x, dz = tz - p.z, dl = Math.hypot(dx, dz), top = (5 + st.spd * .42) * spdK * (p.stun > 0 ? .4 : 1);
+      if (dl > .5) { const k = Math.min(1, dl / 4); steer(p, dx / dl * top * k, dz / dl * top * k, dt) } else steer(p, 0, 0, dt);
+      if (o && o.t !== p.t && !p.gk && near(p, o) < 1.4 && Math.random() < dt * (.7 + st.def * .14)) tackle(p, Math.random() < .12);
     }
     function physics(dt) {
-      for (const p of P) { p.stun = Math.max(0, p.stun - dt); p.skill = Math.max(0, p.skill - dt); p.x = clamp(p.x + p.vx * dt, -SC_PL - 3, SC_PL + 3); p.z = clamp(p.z + p.vz * dt, -SC_PW - 2, SC_PW + 2); const sp = Math.hypot(p.vx, p.vz); p.sp = sp; if (sp > .3) p.f = Math.atan2(p.vz, p.vx) }
+      for (const p of P) {
+        p.stun = Math.max(0, p.stun - dt); p.skill = Math.max(0, p.skill - dt); p.kick = Math.max(0, p.kick - dt); p.slide = Math.max(0, p.slide - dt); p.dive = Math.max(0, p.dive - dt); p.jy = Math.max(0, p.jy - dt);
+        if (p.slide > 0) { p.vx *= Math.exp(-2.2 * dt); p.vz *= Math.exp(-2.2 * dt) }
+        p.x = clamp(p.x + p.vx * dt, -SC_PL - 3, SC_PL + 3); p.z = clamp(p.z + p.vz * dt, -SC_PW - 2, SC_PW + 2); const sp = Math.hypot(p.vx, p.vz); p.sp = sp;
+        if (sp > .4 && p.slide <= 0) p.f += phAng(Math.atan2(p.vz, p.vx) - p.f) * Math.min(1, dt * 10); else if (sp <= .4) p.f += phAng(Math.atan2(BL.z - p.z, BL.x - p.x) - p.f) * Math.min(1, dt * 3);
+      }
       for (const k in BL.cool) { BL.cool[k] -= dt; if (BL.cool[k] <= 0) delete BL.cool[k] }
       const o = owner();
-      if (o) { // ドリブル：ボールは足もとの少し前
-        BL.x = o.x + Math.cos(o.f) * .62; BL.z = o.z + Math.sin(o.f) * .62; BL.y = .22; BL.vx = o.vx; BL.vz = o.vz; BL.vy = 0;
+      if (o) { // ドリブル：速く走るほどボールは足から離れる（さわるたびに前へ出る）
+        const off = .55 + o.sp * .07 + Math.max(0, Math.sin(o.ph2 = (o.ph2 || 0) + dt * (4 + o.sp))) * o.sp * .03;
+        BL.x = o.x + Math.cos(o.f) * off; BL.z = o.z + Math.sin(o.f) * off; BL.y = .22; BL.vx = o.vx; BL.vz = o.vz; BL.vy = 0; BL.curve = null;
       } else {
-        const sp = Math.hypot(BL.vx, BL.vy, BL.vz), kd = .012 * sp;
+        const sp = Math.hypot(BL.vx, BL.vy, BL.vz), kd = .012 * sp * (BL.curve ? .4 : 1);
+        if (BL.curve) { BL.vx += BL.curve.ax * dt; BL.vz += BL.curve.az * dt; BL.curve.t -= dt; if (BL.curve.t <= 0) BL.curve = null }
         BL.vx -= BL.vx * kd * dt; BL.vz -= BL.vz * kd * dt; BL.vy -= (BL.vy * kd + 9.8) * dt;
         BL.x += BL.vx * dt; BL.y += BL.vy * dt; BL.z += BL.vz * dt;
         if (BL.y < .22) { BL.y = .22; if (BL.vy < -1.5) BL.vy = -BL.vy * .5; else { BL.vy = 0; const k = Math.exp(-.55 * dt); BL.vx *= k; BL.vz *= k } }
         // ポストとバー
-        for (const d of [-1, 1]) { const gx = d * SC_PL; for (const sz of [-1, 1]) { const dx = BL.x - gx, dz = BL.z - sz * SC_GW, dd = Math.hypot(dx, dz); if (dd < .28 && BL.y < SC_GH) { const nx = dx / dd, nz = dz / dd, vn = BL.vx * nx + BL.vz * nz; if (vn < 0) { BL.vx -= 1.7 * vn * nx; BL.vz -= 1.7 * vn * nz } } } if (Math.abs(BL.x - gx) < .3 && Math.abs(BL.z) < SC_GW && Math.abs(BL.y - SC_GH) < .25) BL.vy = -Math.abs(BL.vy) * .6 }
-        // 拾う（キーパーは手で取れるので高いボールも、遠くまで）
-        let best = null, bd = 1e9; const bsp = Math.hypot(BL.vx, BL.vz);
-        for (const p of P) { if (BL.cool[p.i] || p.stun > 0) continue; const inBox = p.gk && Math.abs(p.x - -dirOf(p.t) * SC_PL) < 16.5 && Math.abs(p.z) < 20; const reach = inBox ? 1.6 + stOf(p).def * .12 : .9, hmax = inBox ? 2.6 : 1.1; const d = Math.hypot(p.x - BL.x, p.z - BL.z); if (d < reach && BL.y < hmax && (bsp < 24 || inBox) && d < bd) { bd = d; best = p } }
-        if (best) { const st = stOf(best); if (best.gk && bsp > 22 && Math.random() < .5) { BL.vx = -BL.vx * .35; BL.vz = (Math.random() - .5) * 10; BL.vy = 3; BL.cool = { [best.i]: .6 } } else if (!best.gk && bsp > 16 && Math.random() > .5 + st.tec * .08) { BL.vx *= .4; BL.vz *= .4; BL.cool = { [best.i]: .3 } } else { BL.own = best.i; BL.last = best.t; if (best.gk) best.hold = 1.2 } }
+        for (const d of [-1, 1]) { const gx = d * SC_PL; for (const sz of [-1, 1]) { const dx = BL.x - gx, dz = BL.z - sz * SC_GW, dd = Math.hypot(dx, dz); if (dd < .28 && BL.y < SC_GH) { const nx = dx / dd, nz = dz / dd, vn = BL.vx * nx + BL.vz * nz; if (vn < 0) { BL.vx -= 1.7 * vn * nx; BL.vz -= 1.7 * vn * nz; BL.curve = null } } } if (Math.abs(BL.x - gx) < .3 && Math.abs(BL.z) < SC_GW && Math.abs(BL.y - SC_GH) < .25) BL.vy = -Math.abs(BL.vy) * .6 }
+        // 体に当たる（壁・ブロック）：蹴った側でない選手の体にぶつかると、はね返る
+        const bsp = Math.hypot(BL.vx, BL.vz);
+        if (bsp > 9) for (const p of P) { if (p.gk || p.t === BL.last || BL.cool[p.i]) continue; const hgt = 1.85 + (p.jy > 0 ? .55 : 0); if (BL.y < hgt && Math.hypot(p.x - BL.x, p.z - BL.z) < .45) { BL.vx = -BL.vx * .3 + (Math.random() - .5) * 4; BL.vz = -BL.vz * .3 + (Math.random() - .5) * 4; BL.vy = Math.abs(BL.vy) * .3 + 1; BL.curve = null; BL.last = p.t; BL.cool = { [p.i]: .3 }; break } }
+        // 拾う・キーパーのセーブ
+        let best = null, bd = 1e9;
+        for (const p of P) { if (BL.cool[p.i] || p.stun > 0 || p.slide > .3) continue; const inBox = p.gk && Math.abs(p.x - -dirOf(p.t) * SC_PL) < 16.5 && Math.abs(p.z) < 20; const reach = inBox ? 1.5 + stOf(p).def * .14 : .9, hmax = inBox ? 2.7 : 1.1; const dd = Math.hypot(p.x - BL.x, p.z - BL.z); if (dd < reach && BL.y < hmax && (bsp < 24 || inBox) && dd < bd) { bd = dd; best = p } }
+        if (best && best.gk && BL.gk && BL.gk.t === best.t && !BL.gk.ok && bsp > 12) best = null;
+        if (best) { const st = stOf(best); if (best.gk) { best.dive = .7; best.diveZ = BL.z - best.z } if (best.gk && bsp > 20 && BL.gk && !BL.gk.catchIt) { BL.vx = -BL.vx * .3; BL.vz = (Math.random() - .5) * 12; BL.vy = 3.5; BL.curve = null; BL.cool = { [best.i]: .7 }; BL.last = best.t } else if (!best.gk && bsp > 16 && Math.random() > .5 + st.tec * .08) { BL.vx *= .4; BL.vz *= .4; BL.cool = { [best.i]: .3 } } else { BL.own = best.i; BL.last = best.t; BL.curve = null; if (best.gk) best.hold = 1.3 } }
+        // キーパーはシュートに飛びつく（届く所までだけ動く）
+        for (const t of [0, 1]) {
+          const g = P[t * 11], gx = -dirOf(t) * SC_PL; if (BL.last === t || Math.abs(BL.vx) < 8 || Math.sign(BL.vx) !== -dirOf(t)) continue;
+          const tt = (gx - BL.x) / BL.vx; if (!(tt > 0 && tt < 1)) continue; const zc = BL.z + BL.vz * tt, yc = BL.y + BL.vy * tt - 4.9 * tt * tt; if (Math.abs(zc) > SC_GW + .6) continue;
+          // 1本のシュートに1回だけ決める：近いほど・ゆるいほど止めやすい。すみ（体から遠い）への強いシュートは届かない
+          if (!BL.gk) { const need = Math.abs(zc - g.z) + Math.max(0, yc - 1.6) * .8, reach = 1.4 + stOf(g).def * .22, fast = clamp((Math.hypot(BL.vx, BL.vz) - 18) / 14, 0, 1), pSave = need > reach ? 0 : clamp(.95 - need / reach * .7 - fast * .25, .08, .92); BL.gk = { t, ok: Math.random() < pSave, catchIt: Math.random() > fast * .7 } }
+          if (BL.gk.t !== t) continue; const dz = clamp(zc - g.z, -2.6, 2.6) * (BL.gk.ok ? 1 : .6); g.vz = dz / Math.max(.15, tt); g.vx = (gx + dirOf(t) * .6 - g.x) * 2; g.dive = .6; g.diveZ = dz;
+        }
       }
-      // キーパーはボールを持ったら、少しして味方へけり出す
-      const go = owner(); if (go && go.gk && !(human()[go.t] && act[go.t] === go.i)) { go.hold = (go.hold || 1.2) - dt; if (go.hold <= 0) { go.hold = 0; const m = bestMate(go, dirOf(go.t), 0, true); if (m) passTo(go, m) } }
+      const go = owner(); if (go && go.gk && !(human()[go.t] && act[go.t] === go.i)) { go.hold = (go.hold || 1.3) - dt; if (go.hold <= 0) { go.hold = 0; const m = bestMate(go, dirOf(go.t), 0, { fwd: true }); if (m) passTo(go, m, Math.random() < .5 ? "long" : "ground") } }
     }
     function rules(dt) {
-      // ゴール・タッチライン・ゴールライン
       for (const d of [-1, 1]) if (BL.x * d > SC_PL + .1) {
-        if (Math.abs(BL.z) < SC_GW && BL.y < SC_GH) { const t = d === 1 ? 0 : 1; S.sc[t]++; S.ph = "goal"; S.t = 3; S.msg = `ゴール！ ${SC_TEAMS[S.teams[t]].name}`; S.ko = 1 - t; BL.own = -1; return }
-        const def = d === 1 ? 1 : 0; if (BL.last === def) { const att = 1 - def, cz = Math.sign(BL.z || 1) * (SC_PW - .5), k = nearestTo(att, d * SC_PL, cz, true); Object.assign(BL, { x: d * (SC_PL - .5), z: cz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i }); k.x = BL.x - d * .6; k.z = cz; S.msg = "コーナーキック"; S.mt = 1.5 }
-        else { const g = P[def * 11]; Object.assign(BL, { x: d * (SC_PL - 5.5), z: 0, y: .22, vx: 0, vy: 0, vz: 0, own: g.i }); g.x = BL.x - d * .6; g.z = 0; g.hold = 1.2; S.msg = "ゴールキック"; S.mt = 1.5 }
+        if (Math.abs(BL.z) < SC_GW && BL.y < SC_GH) { const t = d === 1 ? 0 : 1; S.sc[t]++; S.ph = "goal"; S.t = 3.2; S.msg = `ゴール！ ${SC_TEAMS[S.teams[t]].name}`; S.ko = 1 - t; BL.own = -1; BL.vx *= .2; BL.vz *= .2; return }
+        const def = d === 1 ? 1 : 0; BL.curve = null;
+        if (BL.last === def) { const att = 1 - def, cz = Math.sign(BL.z || 1) * (SC_PW - .5), k = nearestTo(att, d * SC_PL, cz, true); Object.assign(BL, { x: d * (SC_PL - .5), z: cz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i }); k.x = BL.x - d * .6; k.z = cz; S.msg = "コーナーキック"; S.mt = 1.5 }
+        else { const g = P[def * 11]; Object.assign(BL, { x: d * (SC_PL - 5.5), z: 0, y: .22, vx: 0, vy: 0, vz: 0, own: g.i }); g.x = BL.x - d * .6; g.z = 0; g.hold = 1.3; S.msg = "ゴールキック"; S.mt = 1.5 }
       }
-      if (Math.abs(BL.z) > SC_PW + .1 && BL.own < 0) { const t = 1 - BL.last, k = nearestTo(t, BL.x, BL.z, true), sz = Math.sign(BL.z) * (SC_PW - .3); Object.assign(BL, { z: sz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i }); k.x = BL.x; k.z = sz - Math.sign(sz) * .6; S.msg = "スローイン"; S.mt = 1.2 }
+      if (Math.abs(BL.z) > SC_PW + .1 && BL.own < 0) { const t = 1 - BL.last, k = nearestTo(t, BL.x, BL.z, true), sz = Math.sign(BL.z) * (SC_PW - .3); Object.assign(BL, { z: sz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i, curve: null }); k.x = BL.x; k.z = sz - Math.sign(sz) * .6; S.msg = "スローイン"; S.mt = 1.2 }
+    }
+    // ---- フリーキック・PK
+    function fkKick(tz, ty, pw, cvv) {
+      const F = S.fk, k = P[F.k], d = dirOf(F.t), st = stOf(k), gx = SC_PL * d, sp = 13 + clamp(pw, .25, 1.45) * 14 + st.kick * 1.4, bend = cvv * (.6 + Math.hypot(gx - BL.x, tz - BL.z) * .09) * -d;
+      F.done = true; k.x = BL.x - d * .5; launch(k, gx + d * .3, ty, tz + (Math.random() * 2 - 1) * (5 - st.tec) * .08, sp, bend);
+      // 壁：突進ならボールの方へ出る、ジャンプなら高いボールに届く
+      for (const wi of F.wall) { const q = P[wi]; if (F.charge) { q.x += (BL.x - q.x) * .3; q.z += (BL.z - q.z) * .3 } if (F.jump > 0) q.jy = .7 }
+      F.after = 0;
+    }
+    function fkButton(t, e) {
+      const F = S.fk; if (!F) return;
+      if (F.t === t) { if (e.s === 3 && !F.done) { const k = P[F.k], m = bestMate(k, dirOf(t), 0); F.done = true; if (m) passTo(k, m, "ground"); S.ph = "play"; S.fk = null } return }
+      if (e.s === 1) { F.jump = .9; for (const wi of F.wall) P[wi].jy = .7 } // 壁ジャンプ
+      else if (e.s === 2) F.charge = 1; // 壁突進
+    }
+    function fkStep(dt) {
+      const F = S.fk; F.t0 += dt; F.jump = Math.max(0, F.jump - dt);
+      const k = P[F.k], d = dirOf(F.t);
+      if (!F.done) {
+        BL.x = F.x; BL.z = F.z; BL.y = .22; BL.own = -1; BL.vx = BL.vy = BL.vz = 0;
+        for (const p of P) { p.vx *= .8; p.vz *= .8 }
+        // 守る人：スティックで壁を左右に動かす
+        const dt2 = 1 - F.t; if (human()[dt2] && F.wall.length) { const ip = inp[dt2], dl = Math.hypot(SC_PL * d - F.x, F.z) || 1, ux = (SC_PL * d - F.x) / dl, uz = -F.z / dl; for (const wi of F.wall) { const q = P[wi]; q.x += -uz * ip.sx * 1.5 * dt * (ROT90 ? 1 : 1); q.z += ux * ip.sx * 1.5 * dt } }
+        // CPUが蹴る（人が蹴る番でないとき）
+        if (!human()[F.t] && F.t0 > 2.6) { const corner = Math.random() < .5 ? -1 : 1; fkKick(corner * (2 + Math.random() * 1.3), 1.4 + Math.random() * .9, .75 + Math.random() * .4, (Math.random() < .6 ? corner * .35 : 0) * d) }
+        if (human()[F.t] && F.t0 > 25) { const m = bestMate(k, d, 0); F.done = true; if (m) passTo(k, m, "ground"); S.ph = "play"; S.fk = null }
+        return;
+      }
+      F.after += dt; physics(dt); rules(dt);
+      if (S.ph === "fk" && (F.after > 1.2 || BL.own >= 0)) { S.ph = "play"; S.fk = null }
     }
     function hostStep(dt) {
       if (S.ph === "lobby") return;
       S.mt = Math.max(0, (S.mt || 0) - dt);
-      if (S.ph === "ko" || S.ph === "goal" || S.ph === "half") { S.t -= dt; if (S.t <= 0) { if (S.ph === "goal" || S.ph === "half") { placeKickoff(S.ko); S.ph = "ko"; S.t = 1.6; S.msg = "キックオフ" } else S.ph = "play" } if (S.ph !== "play") { physics(0); return } }
+      if (S.ph === "ko" || S.ph === "goal" || S.ph === "half") { S.t -= dt; if (S.ph === "goal") physics(dt); if (S.t <= 0) { if (S.ph === "goal" || S.ph === "half") { placeKickoff(S.ko); S.ph = "ko"; S.t = 1.6; S.msg = "キックオフ" } else S.ph = "play" } return }
       if (S.ph === "end") return;
+      const hm = human();
+      if (S.ph === "fk") { for (let t = 0; t < 2; t++) if (hm[t]) humanStep(t, 0); fkStep(dt); return }
       S.clk += dt * (45 / SC_HALF);
       if (S.half === 1 && S.clk >= 45) { S.half = 2; S.clk = 45; S.ph = "half"; S.t = 3; S.msg = "ハーフタイム"; S.ko = 1; return }
       if (S.clk >= 90) { S.clk = 90; S.ph = "end"; return }
-      const hm = human();
       for (let t = 0; t < 2; t++) if (hm[t]) humanStep(t, dt);
       for (const p of P) if (!(hm[p.t] && act[p.t] === p.i)) aiStep(p, dt);
-      physics(dt); rules(dt);
+      physics(dt); if (S.ph === "play") rules(dt);
     }
-    // ---- 表示用の位置（あいては送られてきた位置へなめらかに寄せる）
+    // ---- 表示用（あいては送られてきた位置へなめらかに寄せる）
     const show = P.map((p) => ({ x: p.x, z: p.z, f: p.f, sp: 0 })), showB = { x: 0, y: .22, z: 0 };
-    let lastSend = "", net = null;
-    function applyNet(x) { if (!x || !x.S) return; const prevTeams = String(S.teams); S = Object.assign({}, S, x.S); if (String(S.teams) !== builtFor) { builtFor = String(S.teams); buildVis() } if (x.P) x.P.forEach((a, i) => { const p = P[i]; p.x = a[0]; p.z = a[1]; p.f = a[2]; p.sp = a[3] }); if (x.B) { BL.x = x.B[0]; BL.y = x.B[1]; BL.z = x.B[2]; BL.own = x.B[3] } if (x.A) { act[0] = x.A[0]; act[1] = x.A[1] } }
-    // ---- カメラ：スタンドの上から、ボールを追う（中継のような見下ろし）
+    let lastSend = "";
+    function applyNet(x) { if (!x || !x.S) return; S = Object.assign({}, S, x.S); if (String(S.teams) !== builtFor) { builtFor = String(S.teams); buildVis() } if (x.P) x.P.forEach((a, i) => { const p = P[i]; p.x = a[0]; p.z = a[1]; p.f = a[2]; p.sp = a[3]; p.anim = a[4] }); if (x.B) { BL.x = x.B[0]; BL.y = x.B[1]; BL.z = x.B[2]; BL.own = x.B[3] } if (x.A) { act[0] = x.A[0]; act[1] = x.A[1] } }
     const camLook = new T.Vector3(), camPos = new T.Vector3(0, 30, 50);
     function frame(dt) {
       resize();
       const hp = host ? null : hostPeer(), hx = peerX(hp);
-      // 入力
       let ix = stickInp.x, iy = stickInp.y; if (keys.has("a") || keys.has("A") || keys.has("ArrowLeft")) ix = -1; if (keys.has("d") || keys.has("D") || keys.has("ArrowRight")) ix = 1; if (keys.has("w") || keys.has("W") || keys.has("ArrowUp")) iy = -1; if (keys.has("s") || keys.has("S") || keys.has("ArrowDown")) iy = 1;
-      const myIn = { sx: r2(ix), sy: r2(iy), dash: dashB.down || keys.has("Shift") ? 1 : 0, ev: myEv };
+      const myIn = { sx: r2(ix), sy: r2(iy), hold: held.b4 || keys.has("Shift") ? 1 : 0, q: myQ };
       if (host) {
         inp[0] = myIn; const gp = realOppPeer() ? matchPeers()[0] : null, gx = peerX(gp); if (gx && gx.in) inp[1] = gx.in;
-        if (S.ph === "lobby" && allReady()) { const gs = gp ? peerS(gp) || {} : {}; S.teams = [me.s.team ?? 0, gp ? gs.team ?? 1 : me.s.cpuTeam ?? 1]; if (S.teams[1] === S.teams[0] && !gp) S.teams[1] = (S.teams[0] + 1) % 5; builtFor = String(S.teams); buildVis(); S.sc = [0, 0]; S.clk = 0; S.half = 1; placeKickoff(0); S.ph = "ko"; S.t = 2; S.msg = "キックオフ" }
+        if (S.ph === "lobby" && allReady()) { const gs = gp ? peerS(gp) || {} : {}; S.teams = [me.s.team ?? 0, gp ? gs.team ?? 1 : me.s.cpuTeam ?? 1]; if (S.teams[1] === S.teams[0] && !gp) S.teams[1] = (S.teams[0] + 1) % 5; builtFor = String(S.teams); buildVis(); S.sc = [0, 0]; S.clk = 0; S.half = 1; S.sec = [0, 0]; placeKickoff(0); S.ph = "ko"; S.t = 2; S.msg = "キックオフ" }
         hostStep(dt);
-        const out = { S: { ph: S.ph, clk: Math.round(S.clk * 100) / 100, half: S.half, sc: S.sc, teams: S.teams, t: r2(S.t), msg: S.msg, mt: r2(S.mt || 0) }, P: P.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.z * 10) / 10, r2(p.f), Math.round(p.sp * 10) / 10]), B: [r2(BL.x), r2(BL.y), r2(BL.z), BL.own], A: act };
+        const out = { S: { ph: S.ph, clk: Math.round(S.clk * 100) / 100, half: S.half, sc: S.sc, teams: S.teams, t: r2(S.t), msg: S.msg, mt: r2(S.mt || 0), sec: S.sec, fk: S.fk && { t: S.fk.t, x: r2(S.fk.x), z: r2(S.fk.z), pk: S.fk.pk, done: S.fk.done, t0: r2(S.fk.t0) } }, P: P.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.z * 10) / 10, r2(p.f), Math.round(p.sp * 10) / 10, (p.kick > 0 ? 1 : 0) | (p.slide > 0 ? 2 : 0) | (p.dive > 0 ? 4 : 0) | (p.jy > 0 ? 8 : 0) | (p.skill > 0 ? 16 : 0)]), B: [r2(BL.x), r2(BL.y), r2(BL.z), BL.own], A: act };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else {
         applyNet(hx);
         const js = JSON.stringify({ in: myIn }); if (js !== lastSend) { lastSend = js; sendX({ in: myIn }) }
       }
-      // 表示
+      // 選手の表示：走る・蹴る・スライディング・キーパーが飛ぶ・壁のジャンプ
       const al = host ? 1 : Math.min(1, dt * 10);
-      P.forEach((p, i) => { const s2 = show[i]; s2.x += (p.x - s2.x) * al; s2.z += (p.z - s2.z) * al; s2.f += phAng(p.f - s2.f) * Math.min(1, dt * 12); s2.sp = host ? p.sp : p.sp; const v = vis[i]; if (!v) return; v.g.position.set(s2.x, 0, s2.z); v.g.rotation.y = Math.PI / 2 - s2.f; v.ph += s2.sp * dt * 2.2; const k = clamp(s2.sp / 6, 0, 1), sw = Math.sin(v.ph) * .9 * k; v.legL.rotation.x = sw; v.legR.rotation.x = -sw; v.kneeL.rotation.x = Math.max(0, sw) * 1.2 + .05; v.kneeR.rotation.x = Math.max(0, -sw) * 1.2 + .05; v.armL.rotation.set(-sw * .8, 0, -.15); v.armR.rotation.set(sw * .8, 0, .15); v.elbowL.rotation.set(-.5 - k * .6, 0, 0); v.elbowR.rotation.set(-.5 - k * .6, 0, 0) });
+      P.forEach((p, i) => {
+        const s2 = show[i]; s2.x += (p.x - s2.x) * al; s2.z += (p.z - s2.z) * al; s2.f += phAng(p.f - s2.f) * Math.min(1, dt * 12); s2.sp = p.sp; const v = vis[i]; if (!v) return;
+        const an = host ? (p.kick > 0 ? 1 : 0) | (p.slide > 0 ? 2 : 0) | (p.dive > 0 ? 4 : 0) | (p.jy > 0 ? 8 : 0) : p.anim || 0;
+        v.g.position.set(s2.x, an & 8 ? .45 : 0, s2.z); v.g.rotation.set(0, Math.PI / 2 - s2.f, 0); v.body.rotation.set(0, 0, 0); v.body.position.set(0, 0, 0);
+        v.ph += s2.sp * dt * 2.3; const k = clamp(s2.sp / 6.5, 0, 1), sw = Math.sin(v.ph) * .95 * k;
+        v.legL.rotation.x = sw; v.legR.rotation.x = -sw; v.kneeL.rotation.x = Math.max(0, sw) * 1.25 + .05; v.kneeR.rotation.x = Math.max(0, -sw) * 1.25 + .05;
+        v.armL.rotation.set(-sw * .8, 0, -.15); v.armR.rotation.set(sw * .8, 0, .15); v.elbowL.rotation.set(-.5 - k * .7, 0, 0); v.elbowR.rotation.set(-.5 - k * .7, 0, 0);
+        if (an & 1) { v.legR.rotation.x = -1.1; v.kneeR.rotation.x = .2; v.armL.rotation.set(-.3, 0, -.6); v.armR.rotation.set(.3, 0, .6) }
+        if (an & 2) { v.body.rotation.x = -1.2; v.body.position.set(0, .35, .4); v.legR.rotation.x = -1.4; v.legL.rotation.x = -.6 }
+        if (an & 4) { const side = p.diveZ ? Math.sign(p.diveZ) : 1; v.g.rotation.z = -side * 1.1 * (p.t ? -1 : 1); v.g.position.y = .5; v.armL.rotation.set(0, 0, -2.9); v.armR.rotation.set(0, 0, 2.9) }
+        if (an & 8) { v.armL.rotation.set(-.4, 0, .5); v.armR.rotation.set(-.4, 0, -.5); v.elbowL.rotation.set(-1.6, 0, 0); v.elbowR.rotation.set(-1.6, 0, 0) }
+      });
       showB.x += (BL.x - showB.x) * al; showB.y += (BL.y - showB.y) * al; showB.z += (BL.z - showB.z) * al; ballM.position.set(showB.x, showB.y, showB.z); { const o = BL.own >= 0 ? P[BL.own] : null, bv = o ? o.sp : Math.hypot(BL.vx, BL.vz); if (bv > .2) ballM.rotation.z -= bv * dt / .22 }
-      const ax2 = clamp(showB.x, -SC_PL + 10, SC_PL - 10), az2 = clamp(showB.z, -24, 24);
-      camLook.lerp(new T.Vector3(ax2, 0, az2 * .7 - 2), Math.min(1, dt * 3)); camPos.lerp(new T.Vector3(ax2 * .95, 16.5, az2 * .45 + 25), Math.min(1, dt * 3)); camera.position.copy(camPos); camera.lookAt(camLook);
+      // カメラ：ふだんはスタンドの上から（中継のよう）。フリーキック・PKは、蹴る人ならボールのうしろ、守る人なら壁のうしろの上から
+      if (S.ph === "fk" && S.fk && !S.fk.done) {
+        const F = S.fk, d = dirOf(F.t), gx = SC_PL * d, dl = Math.hypot(gx - F.x, F.z) || 1, ux = (gx - F.x) / dl, uz = -F.z / dl;
+        const want = F.t === myTeam ? new T.Vector3(F.x - ux * 7, 4.2, F.z - uz * 7) : new T.Vector3(gx + ux * 6, 6.5, uz * 6 * 0 + F.z * .25), look = F.t === myTeam ? new T.Vector3(gx, 1, 0) : new T.Vector3(F.x, .5, F.z);
+        camPos.lerp(want, Math.min(1, dt * 4)); camLook.lerp(look, Math.min(1, dt * 4));
+      } else {
+        const ax2 = clamp(showB.x, -SC_PL + 10, SC_PL - 10), az2 = clamp(showB.z, -24, 24);
+        camLook.lerp(new T.Vector3(ax2, 0, az2 * .7 - 2), Math.min(1, dt * 3)); camPos.lerp(new T.Vector3(ax2 * .95, 16.5, az2 * .45 + 25), Math.min(1, dt * 3));
+      }
+      camera.position.copy(camPos); camera.lookAt(camLook);
       sun.target.position.copy(camLook); sun.position.set(camLook.x - 30, 60, camLook.z + 40); sun.target.updateMatrixWorld();
       renderer.render(scene, camera); hud();
       panel();
     }
     const proj = (x, y, z) => { const v = new T.Vector3(x, y, z).project(camera); return v.z > 1 ? null : [(v.x + 1) / 2 * VW, (1 - v.y) / 2 * VH] };
+    let lastLbl = "", lastMsg = "";
     function hud() {
       const w = VW, h = VH; c.clearRect(0, 0, w, h);
       if (S.ph === "lobby") return;
@@ -1410,22 +1571,23 @@ html.br-portrait .br-ui { display: none }
       c.font = `bold 14px sans-serif`; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.textAlign = "left"; c.fillText(t0.sh, x + 30, y + 16); c.textAlign = "right"; c.fillText(t1.sh, x + 152, y + 16);
       c.fillStyle = "#F2C233"; c.fillRect(x + 72, y + 4, 44, 22); c.fillStyle = "#111"; c.textAlign = "center"; c.font = `16px ${DISP}`; c.fillText(`${S.sc[0]} - ${S.sc[1]}`, x + 94, y + 16);
       const mm = Math.floor(S.clk), ss = Math.floor((S.clk - mm) * 60); c.fillStyle = "#fff"; c.fillRect(x + 184, y + 3, 62, 24); c.fillStyle = "#111"; c.font = `bold 15px sans-serif`; c.fillText(`${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`, x + 215, y + 16);
-      // 動かしている選手（自分のチームの色の三角と名前）と、相手のボール持ち（赤い三角）
-      const mine = P[act[myTeam]], o = BL.own >= 0 ? P[BL.own] : null;
+      const mine = P[act[myTeam]], o = BL.own >= 0 ? P[BL.own] : null, attacking = o ? o.t === myTeam : BL.last === myTeam;
+      if (S.sec[myTeam] && !attacking) { c.fillStyle = "rgba(10,12,24,.75)"; c.fillRect(x, y + 34, 86, 18); c.fillStyle = "#7CF59A"; c.font = `bold 11px sans-serif`; c.textAlign = "left"; c.fillText("2nd DF オン", x + 6, y + 43) }
       const tag = (p, col, nm) => { const s2 = show[p.i], q = proj(s2.x, 2.25, s2.z), q2 = proj(s2.x, 0, s2.z); if (!q) return; c.fillStyle = col; c.beginPath(); c.moveTo(q[0] - 7, q[1] - 10); c.lineTo(q[0] + 7, q[1] - 10); c.lineTo(q[0], q[1]); c.fill(); if (nm && q2) { c.font = `bold 12px sans-serif`; c.textAlign = "center"; c.fillStyle = "rgba(0,0,0,.5)"; c.fillText(nm, q2[0] + 1, q2[1] + 15); c.fillStyle = "#fff"; c.fillText(nm, q2[0], q2[1] + 14) } };
       if (S.ph !== "end") { tag(mine, "#4DE3FF", nameOf(mine.i)); if (o && o.t !== myTeam) tag(o, "#FF5A4A", nameOf(o.i)) }
-      // 小さい地図（下のまん中）
       const mw = Math.min(170, w * .22), mh = mw * 68 / 105, mx = w / 2 - mw / 2, my = h - mh - 8, MX = (x2) => mx + (x2 + SC_PL) / (SC_PL * 2) * mw, MY = (z2) => my + (z2 + SC_PW) / (SC_PW * 2) * mh;
       c.fillStyle = "rgba(30,90,40,.75)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1; c.strokeRect(mx, my, mw, mh); c.beginPath(); c.moveTo(mx + mw / 2, my); c.lineTo(mx + mw / 2, my + mh); c.stroke();
       P.forEach((p, i) => { const s2 = show[i]; c.fillStyle = p.t === myTeam ? "#FFFFFF" : SC_TEAMS[S.teams[p.t]].c1; c.beginPath(); c.arc(MX(s2.x), MY(s2.z), i === act[myTeam] ? 3.6 : 2.4, 0, 7); c.fill(); if (i === act[myTeam]) { c.strokeStyle = "#4DE3FF"; c.lineWidth = 1.5; c.stroke() } });
       c.fillStyle = "#FFE14D"; c.beginPath(); c.arc(MX(showB.x), MY(showB.z), 2.6, 0, 7); c.fill();
-      if (shootT != null) { const pw = clamp((performance.now() - shootT) / 900, 0, 1); c.fillStyle = "rgba(0,0,0,.5)"; c.fillRect(w / 2 - 80, h * .62, 160, 12); c.fillStyle = pw > .92 ? "#FF5A4A" : "#FFE14D"; c.fillRect(w / 2 - 80, h * .62, 160 * pw, 12) }
-      if ((S.ph === "goal" || S.ph === "ko" || S.ph === "half" || S.mt > 0) && S.msg) bigText(c, S.msg, w / 2, h * .3, S.ph === "goal" ? 40 : 24, S.ph === "goal" ? "#FFE14D" : "#fff");
-      // ボタンの名前：ボールを持っているかで変える
-      const hasMine = o && o.t === myTeam, lbl = hasMine ? ["シュート", "スルー", "パス", "ダッシュ<br><small>＆スキル</small>"] : ["タックル", "プレス", "切り替え", "ダッシュ"], key = lbl.join();
-      if (key !== lastLbl) { lastLbl = key; ["b-shoot", "b-thru", "b-pass", "b-dash"].forEach((id, k) => ($("#" + id).innerHTML = lbl[k])) }
+      if (chargeT != null && attacking) { const pw = clamp((performance.now() - chargeT) / 900, 0, 1); c.fillStyle = "rgba(0,0,0,.5)"; c.fillRect(w / 2 - 80, h * .62, 160, 12); c.fillStyle = pw > .92 ? "#FF5A4A" : "#FFE14D"; c.fillRect(w / 2 - 80, h * .62, 160 * pw, 12) }
+      if (fkSwipe && fkSwipe.pts.length > 1) { c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 7; c.lineCap = "round"; c.beginPath(); fkSwipe.pts.forEach((q, k2) => (k2 ? c.lineTo(q.x, q.y) : c.moveTo(q.x, q.y))); c.stroke(); c.lineCap = "butt" }
+      if (S.ph === "fk" && S.fk && !S.fk.done) { const mineFk = S.fk.t === myTeam; bigText(c, S.fk.pk ? "PK" : "フリーキック", w / 2, h * .2, 24, "#FFE14D"); bigText(c, mineFk ? "ボールからゴールへなぞってシュート（パスでつなぐ）" : S.fk.pk ? "相手のPK" : "壁ジャンプ・壁突進・スティックで壁を動かす", w / 2, h - 30, 15, "#fff") }
+      else if ((S.ph === "goal" || S.ph === "ko" || S.ph === "half" || S.mt > 0) && S.msg) bigText(c, S.msg, w / 2, h * .3, S.ph === "goal" ? 40 : 24, S.ph === "goal" ? "#FFE14D" : "#fff");
+      // ボタン：攻撃と守備、フリーキックで役わりと色が変わる
+      const mode = S.ph === "fk" && S.fk ? (S.fk.t === myTeam ? "fka" : "fkd") : attacking ? "atk" : "def";
+      const L = { atk: [["シュート", "atk1"], ["スルー", "atk2"], ["パス", "atk3"], ["ダッシュ<br><small>＆スキル</small>", "atk4"]], def: [["スライ<br>ディング", "def1"], ["2nd DF", "def2"], ["切り替え", "def3"], ["ダッシュ<br><small>＆タックル</small>", "def4"]], fka: [["—", "off"], ["—", "off"], ["パス", "atk3"], ["—", "off"]], fkd: [["壁<br>ジャンプ", "def1"], ["壁突進", "def2"], ["—", "off"], ["—", "off"]] }[mode], key = mode;
+      if (key !== lastLbl) { lastLbl = key; ["b-shoot", "b-thru", "b-pass", "b-dash"].forEach((id, k2) => { const el = $("#" + id); el.innerHTML = L[k2][0]; el.dataset.m = L[k2][1] }) }
     }
-    let lastLbl = "", lastMsg = "";
     function panel() {
       let html = "";
       if (S.ph === "lobby") {
@@ -5163,7 +5325,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0019";
+  const APP_VER = "1031-0041";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
