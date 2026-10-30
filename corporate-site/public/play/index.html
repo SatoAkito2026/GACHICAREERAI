@@ -258,6 +258,20 @@ html.playing .kt #act-msg, html.playing .hd #act-msg { top: 50%; left: 50%; righ
 html.playing .br.picking #act-msg, html.playing .kt.picking #act-msg { left: auto; right: 10px; transform: translateY(-50%); width: min(470px, 58%) }
 .kt .kbtn { width: 84px; height: 84px } .kt .kbtn.small { width: 66px; height: 66px }
 .kt .kpad { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)) }
+/* 11人サッカー */
+html.playing .sc3 #act-msg { top: 50%; left: 50%; right: auto; width: min(760px, calc(100% - 20px)); transform: translate(-50%, -50%); max-height: calc(100% - 20px); overflow: auto; padding: 10px 12px; gap: 6px }
+.sc-teams { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px } .sc-teams.sm .chipbtn { padding: 6px 2px; font-size: 11px }
+.sc-team { appearance: none; border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; text-align: left; font: inherit }
+.sc-team.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, var(--surface)) }
+.sc-team b { font-size: 11px; display: flex; gap: 4px; align-items: center; white-space: nowrap; overflow: hidden } .sc-team b i { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; flex: none }
+.sc-team span { display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 3px } .sc-team em { font-style: normal; font-size: 9px; color: var(--muted) }
+.sc-team s { display: block; height: 6px; background: color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 3px; overflow: hidden; text-decoration: none } .sc-team u { display: block; height: 100%; background: linear-gradient(90deg, #4DE3FF, #2E8BE6) }
+.sc-ui .kbtn { position: absolute; border-width: 4px; font-size: 15px; line-height: 1.1; color: #fff }
+#b-shoot { right: max(18px, env(safe-area-inset-right, 0px)); bottom: 150px; width: 86px; height: 86px; background: rgba(60,20,20,.55); border-color: #D9483B }
+#b-thru { right: calc(max(18px, env(safe-area-inset-right, 0px)) + 98px); bottom: 118px; width: 78px; height: 78px; background: rgba(50,45,10,.55); border-color: #C9B23A }
+#b-pass { right: calc(max(18px, env(safe-area-inset-right, 0px)) + 112px); bottom: 26px; width: 78px; height: 78px; background: rgba(10,40,60,.55); border-color: #2EA6C9 }
+#b-dash { right: max(18px, env(safe-area-inset-right, 0px)); bottom: 22px; width: 98px; height: 98px; background: rgba(10,50,40,.55); border-color: #2FAE7A }
+.sc-lobby .sc-ui { display: none }
 /* 荒野バトル（横画面） */
 .br-gl, .br-cv { position: absolute; left: 0; top: 0; border-radius: 0 !important }
 .br-cv { z-index: 1 }
@@ -569,7 +583,7 @@ html.br-portrait .br-ui { display: none }
           : (rnd() < 0.2 ? { u: 0, v: 0.4 } : { u: rr((rnd() < 0.5 ? -1 : 1) * (0.35 + rnd() * 0.55)), v: rr(rnd() * 0.85) });
         cpuSet({ p: [...cp, a] });
       }
-    } else if (g === "run" || g === "sumo" || g === "army" || g === "kart" || g === "hide") {
+    } else if (g === "run" || g === "sumo" || g === "army" || g === "kart" || g === "hide" || g === "soccer") {
       if (me.s.rdy && !s.rdy && later("rdy", 700)) cpuSet({ rdy: true });
     }
   }
@@ -603,7 +617,7 @@ html.br-portrait .br-ui { display: none }
   // ---------- rendering ----------
   const GAMES = {
     br: { grp: "body", name: "荒野バトル", ico: "銃", c: "var(--ng)", desc: "横画面のバトルロイヤル。空から降りて、武器を拾って強化。手榴弾・スナイパーもあり。人数もえらべる" },
-    soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
+    soccer: { grp: "body", name: "11人サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
     hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "3Dのおうち・公園・遊園地・テーマパークで、物に変身して隠れる。鬼は撃って探す" },
     pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
     kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "3Dのサーキット・海岸・雪の峠・夜の街。ドリフトでダッシュ、アイテムで妨害。3周で勝負" },
@@ -1137,330 +1151,302 @@ html.br-portrait .br-ui { display: none }
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
     return st;
   }
+  // ----- 11人サッカー（3D） -----
+  // 11対11。チーム（オリジナル5チーム）を選んで、攻撃・守備・スピード・キック力・テクニックの差が試合に出る。
+  // ホストが全員とボールを計算して送り、あいてはスティックとボタンだけを送る（ひとりのときは相手チームはCPU）。
+  // 座標はメートル。x：ゴールからゴール（-52.5〜52.5）、z：タッチラインからタッチライン（-34〜34）。チーム0は +x のゴールをねらう
+  const SC_TEAMS = [
+    { name: "サンライズFC", sh: "SUN", c1: "#D93A33", c2: "#F2F2F2", st: { atk: 5, def: 2, spd: 3, kick: 4, tec: 3 } },
+    { name: "アクアウェーブ", sh: "AQW", c1: "#2E8BE6", c2: "#F2F2F2", st: { atk: 3, def: 3, spd: 5, kick: 3, tec: 3 } },
+    { name: "アイアンウォール", sh: "IRW", c1: "#4A4E5A", c2: "#F2B233", st: { atk: 2, def: 5, spd: 3, kick: 3, tec: 3 } },
+    { name: "グリーンスターズ", sh: "GRS", c1: "#2FA04A", c2: "#1E2F25", st: { atk: 3, def: 3, spd: 3, kick: 3, tec: 5 } },
+    { name: "ゴールデンキャノン", sh: "GDC", c1: "#F2C233", c2: "#2A2A30", st: { atk: 4, def: 3, spd: 2, kick: 5, tec: 3 } },
+  ];
+  const SC_STATS = [["atk", "攻撃"], ["def", "守備"], ["spd", "スピード"], ["kick", "キック力"], ["tec", "テクニック"]];
+  const SC_FORM = [[-50, 0], [-36, -22], [-38, -7.5], [-38, 7.5], [-36, 22], [-18, -24], [-20, -8], [-20, 8], [-18, 24], [-5, -8], [-5, 8]]; // 4-4-2
+  const SC_NAMES = ["タカハシ", "ヤマモト", "ナカムラ", "コバヤシ", "サトウ", "イトウ", "ワタナベ", "スズキ", "モリ", "アベ", "シミズ", "ハヤシ", "マツダ", "イシイ", "オカダ", "フジタ", "キムラ", "ハセガワ", "ムラカミ", "サカモト", "エンドウ", "アオキ"];
+  const SC_HALF = 150, SC_PL = 52.5, SC_PW = 34, SC_GW = 3.66, SC_GH = 2.44;
   ACTION.soccer = {
     full: true,
     shell() {
-      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("3対3サッカー", "青があなたのチーム。上のゴールをねらえ")}
-        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="サッカーのフィールド"></canvas><div id="act-msg"></div>
-        <div class="kpad"><div class="grp"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
-          <div class="grp col"><div class="grp"><button class="kbtn small" id="b-dash">ダッシュ</button><button class="kbtn small" id="b-tackle">タックル</button></div><button class="kbtn big" id="b-shoot">シュート</button></div></div>
-        <p class="muted">黄色い三角が動かしている選手。ボールにさわると自分のボールになります。「シュート」は長押しで強く。ボールがないときは「切替」で近くの味方に代わります。相手がボールを持っていたら「タックル」でうばえます。パソコンは矢印キー・Shift（ダッシュ）・X（タックル）・スペース（シュート）。</p></section></section>`;
+      return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("11人サッカー", "チームを選んで11対11")}
+        <section class="card act sc3" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="サッカーのスタジアム"></canvas><div id="act-msg"></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
+        <div class="br-ui sc-ui"><div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
+          <button class="kbtn sc-b" id="b-shoot">シュート</button><button class="kbtn sc-b" id="b-thru">スルー</button><button class="kbtn sc-b" id="b-pass">パス</button><button class="kbtn sc-b" id="b-dash">ダッシュ<br><small>＆スキル</small></button></div>
+        <p class="muted">横画面であそびます。左のスティックで選手を動かします（三角のついた選手）。<b>ボールを持っているとき</b>：「シュート」は長押しで強く（スティックを上・下にたおすとゴールの奥・手前のすみをねらう）、「パス」はスティックの向きの味方へ、「スルー」は味方の前のあいている所へ出す、「ダッシュ＆スキル」は押している間ダッシュ、ボールを持って押した瞬間に相手をかわすフェイント。<b>守るとき</b>：「タックル」でボールをうばう、「切り替え」でボールに近い味方に代わる、「プレス」で近くの味方もボールを取りに行く。チームによって攻撃・守備・スピード・キック力・テクニックがちがいます。前半・後半あわせて約5分。</p></section></section>`;
     },
     mount() {
-      const host = isFirst();
-      const myTeam = host ? 0 : 1, mates = host ? [0, 1, 2] : [3, 4, 5];
-      const cv = $("#cv");
-      const VW = FW + 8, VH = FH + 14;
-      const { c, w, h, top, bottom } = fullCanvas(cv);
-      // フィールドは、上のバーと下のボタンのあいだに収める
-      const areaH = Math.max(100, h - top - 44 - bottom - 6), k = Math.min(w / VW, areaH / VH);
-      const OX = (w - VW * k) / 2, OY = top + 44 + Math.max(0, (areaH - VH * k) / 2);
-      const T = (x, y) => (host ? [OX + (x + 4) * k, OY + (y + 7) * k] : [OX + (FW - x + 4) * k, OY + (FH - y + 7) * k]);
-      const rectW = (x0, y0, x1, y1) => { const [a, b] = T(x0, y0), [cc, d] = T(x1, y1); return [Math.min(a, cc), Math.min(b, d), Math.abs(cc - a), Math.abs(d - b)] };
-      const Pl = []; for (let i = 0; i < 6; i++) Pl.push(Object.assign(sHome(i), { fx: 0, fy: i < 3 ? -1 : 1, stun: 0, tkT: 0, tkCd: 0, grab: 0, team: i < 3 ? 0 : 1, role: i % 3 }));
-      let ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0, own: -1 };
-      let S = { s0: 0, s1: 0, t: SOCCER_T, st: "count", ko: 0, gt: 3, last: -1 };
-      let active = host ? 2 : 5, switchCd = 0, stamina = 1, charge = -1, seenKo = 0, kpTry = 0;
-      let tkN = 0, shN = 0, shPw = 0, lastG = { tk: null, sh: null }, lastSend = "", oppAct = -1;
-      const inp = controlPad($("#stick"), $("#knob"));
-      const dashB = holdBtn($("#b-dash"));
-      holdBtn($("#b-tackle"), () => doTackle());
-      const shootBtn = $("#b-shoot");
-      holdBtn(shootBtn, () => { if (ball.own === active) charge = 0; else doSwitch() }, () => { if (charge >= 0) { doShoot(Math.min(1, charge / 0.8)); charge = -1 } });
-      actKey = () => { if (ball.own === active) doShoot(0.7); else doSwitch() };
-      const kd = (e) => { if (e.repeat) return; if (e.key === "x" || e.key === "X") doTackle() };
-      addEventListener("keydown", kd);
-
-      const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-      const goalY = (t) => (t === 0 ? -3 : FH + 3), ownGoalY = (t) => (t === 0 ? FH : 0);
-      function doSwitch() {
-        let best = active, bd = 1e9;
-        for (const i of mates) { if (i === active) continue; const d = dist(Pl[i], ball); if (d < bd) { bd = d; best = i } }
-        active = best; switchCd = 0.6;
-      }
-      function doTackle() {
-        const p = Pl[active]; if (p.tkCd > 0 || p.stun > 0) return;
-        p.tkT = 0.22; p.tkCd = 1.1; tkN++;
-        if (host) tackleCheck(active, 1.5);
-      }
-      function doShoot(pw) {
-        if (ball.own !== active) return;
-        shN++; shPw = r2(pw);
-        if (host) kick(active, pw);
-      }
-      function kick(i, pw) {
-        if (ball.own !== i) return;
-        const p = Pl[i], sp = 50 + 62 * pw;
-        ball.own = -1; ball.vx = p.fx * sp; ball.vy = p.fy * sp; p.grab = 0.35; kpTry = 0;
-      }
-      function pass(i) {
-        const p = Pl[i], dirY = p.team === 0 ? -1 : 1;
-        let best = null, bs = -1e9;
-        for (const j of (p.team === 0 ? [0, 1, 2] : [3, 4, 5])) { if (j === i) continue; const q = Pl[j]; const sc = (q.y - p.y) * dirY - dist(p, q) * 0.2; if (sc > bs) { bs = sc; best = q } }
-        if (!best) return;
-        const dx = best.x - p.x, dy = best.y - p.y, d = Math.hypot(dx, dy) || 1;
-        p.fx = dx / d; p.fy = dy / d; kick(i, clamp(d / 70, 0.2, 0.6));
-      }
-      function tackleCheck(i, slack) {
-        const p = Pl[i]; if (ball.own < 0) return;
-        const o = Pl[ball.own]; if (o.team === p.team) return;
-        if (dist(p, o) < PR * 2 + 1.5 + slack) { o.stun = 0.9; ball.own = i; p.tkT = 0; p.grab = 0 }
-      }
-      function moveTo(p, tx, ty, sp, dt) {
-        const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
-        if (d > 0.4) { const s = Math.min(d, sp * dt); p.x += (dx / d) * s; p.y += (dy / d) * s; p.fx = dx / d; p.fy = dy / d }
-      }
-      function ai(i, dt) {
-        const p = Pl[i], t = p.team, dirY = t === 0 ? -1 : 1, gy = goalY(t);
-        if (p.stun > 0) return;
-        if (p.tkT > 0) { p.x += p.fx * 55 * dt; p.y += p.fy * 55 * dt; tackleCheck(i, 0); return }
-        const bo = ball.own, owner = bo >= 0 ? Pl[bo] : null;
-        const shift = (ball.y - FH / 2) * 0.45;
-        const hm = sHome(i); let tx = hm.x + (ball.x - FW / 2) * 0.35, ty = hm.y + shift, sp = AI_SPD;
-        if (p.role === 0) { tx = clamp(ball.x, FW / 2 - 9, FW / 2 + 9); ty = t === 0 ? FH - 3 : 3; if (dist(p, ball) < 13 && (!owner || owner.team !== t)) { tx = ball.x; ty = ball.y } }
-        if (bo === i) {
-          // ボールを持っている：ゴールへ向かって、近づいたらシュート。前に相手がいたらパス
-          p.wv = (p.wv || 0) + dt; tx = FW / 2 + Math.sin(p.wv * 1.3 + i) * 12; ty = gy; sp = AI_SPD * 0.88;
-          if (p.role === 0) { pass(i); return }
-          const dg = Math.abs(p.y - gy);
-          const blocker = Pl.some((q) => q.team !== t && Math.abs(q.x - p.x) < 5 && (q.y - p.y) * dirY > 0 && (q.y - p.y) * dirY < 9);
-          if (dg < 30 && Math.random() < dt * 1.6) { const ox = FW / 2 + (Math.random() - 0.5) * 18 - p.x, oy = gy - p.y, d = Math.hypot(ox, oy) || 1; p.fx = ox / d; p.fy = oy / d; kick(i, 0.55 + Math.random() * 0.45); return }
-          if (blocker && Math.random() < dt * 1.2) { pass(i); return }
-        } else if (owner && owner.team === t) {
-          if (p.role === 2) { tx = clamp(owner.x + (owner.x < FW / 2 ? 14 : -14), 6, FW - 6); ty = owner.y + dirY * 16 }
-          else if (p.role === 1) { tx = clamp(owner.x + (owner.x < FW / 2 ? 10 : -10), 6, FW - 6); ty = owner.y - dirY * 6 }
-        } else {
-          // 相手が持っている・だれも持っていない：いちばん近い1人が取りに行く
-          let chaser = -1, cd = 1e9;
-          for (const j of (t === 0 ? [0, 1, 2] : [3, 4, 5])) { const q = Pl[j]; if (q.role === 0 && dist(q, ball) > 13) continue; const d = dist(q, ball); if (d < cd) { cd = d; chaser = j } }
-          if (chaser === i) { tx = ball.x; ty = ball.y; sp = AI_SPD * 1.05; if (owner && dist(p, owner) < 4.5 && p.tkCd <= 0 && Math.random() < dt * 2.2) { p.tkT = 0.22; p.tkCd = 1.4; const dx = owner.x - p.x, dy = owner.y - p.y, d = Math.hypot(dx, dy) || 1; p.fx = dx / d; p.fy = dy / d } }
-        }
-        moveTo(p, clamp(tx, PR, FW - PR), clamp(ty, PR, FH - PR), sp, dt);
-      }
-      function controlMine(dt) {
-        const p = Pl[active];
-        let ix = inp.x, iy = inp.y;
-        if (keys.has("ArrowLeft") || keys.has("a")) ix = -1; if (keys.has("ArrowRight") || keys.has("d")) ix = 1;
-        if (keys.has("ArrowUp") || keys.has("w")) iy = -1; if (keys.has("ArrowDown") || keys.has("s")) iy = 1;
-        const m = Math.hypot(ix, iy); if (m > 1) { ix /= m; iy /= m }
-        if (!host) { ix = -ix; iy = -iy }
-        const dashing = (dashB.down || keys.has("Shift")) && stamina > 0.05 && m > 0.2;
-        stamina = clamp(stamina + (dashing ? -0.45 : 0.22) * dt, 0, 1);
-        if (S.st === "end") return;
-        if (p.stun > 0) return;
-        if (p.tkT > 0) { p.x += p.fx * 60 * dt; p.y += p.fy * 60 * dt }
-        else { const sp = (dashing ? DASH : SPD) * (ball.own === active ? 0.9 : 1); p.x += ix * sp * dt; p.y += iy * sp * dt; if (m > 0.2) { const n = Math.hypot(ix, iy); p.fx = ix / n; p.fy = iy / n } }
-        p.x = clamp(p.x, PR, FW - PR); p.y = clamp(p.y, PR, FH - PR);
-      }
-      function autoSwitch(dt) {
-        switchCd -= dt;
-        if (ball.own >= 0 && mates.includes(ball.own)) { if (ball.own !== active) active = ball.own; return }
-        if (switchCd > 0) return;
-        let best = active, bd = dist(Pl[active], ball);
-        for (const i of mates) { if (i === active || Pl[i].role === 0) continue; const d = dist(Pl[i], ball); if (d < bd - 7) { bd = d; best = i } }
-        if (best !== active) { active = best; switchCd = 0.8 }
-      }
-      function stepBall(dt) {
-        if (ball.own >= 0) { const o = Pl[ball.own]; ball.x = clamp(o.x + o.fx * (PR + BR + 0.3), BR, FW - BR); ball.y = o.y + o.fy * (PR + BR + 0.3); ball.vx = ball.vy = 0 }
-        else {
-          ball.x += ball.vx * dt; ball.y += ball.vy * dt; const f = Math.pow(0.45, dt); ball.vx *= f; ball.vy *= f;
-          const inMouth = Math.abs(ball.x - FW / 2) < GW / 2 - BR;
-          if (ball.x < BR) { ball.x = BR; ball.vx = Math.abs(ball.vx) * 0.8 } if (ball.x > FW - BR) { ball.x = FW - BR; ball.vx = -Math.abs(ball.vx) * 0.8 }
-          if (!inMouth && ball.y < BR) { ball.y = BR; ball.vy = Math.abs(ball.vy) * 0.8 } if (!inMouth && ball.y > FH - BR) { ball.y = FH - BR; ball.vy = -Math.abs(ball.vy) * 0.8 }
-          // 拾う（キーパーは手が届く範囲が広い。速いシュートは止められないこともある）
-          kpTry -= dt; let best = -1, bd = 1e9; const spd = Math.hypot(ball.vx, ball.vy);
-          for (let i = 0; i < 6; i++) {
-            const p = Pl[i]; if (p.stun > 0 || p.grab > 0) continue;
-            const reach = PR + BR + 0.6 + (p.role === 0 ? 1.4 : 0), d = dist(p, ball);
-            if (d < reach && d < bd) {
-              if (p.role === 0 && spd > 70) { if (kpTry > 0) continue; kpTry = 0.6; if (Math.random() < 0.45) { ball.vx = -ball.vx * 0.4 + (Math.random() - 0.5) * 30; ball.vy = -ball.vy * 0.5; continue } }
-              else if (spd > 75 && p.role !== 0) continue;
-              bd = d; best = i;
-            }
-          }
-          if (best >= 0) ball.own = best;
-        }
-        if (ball.y < -2.5 && Math.abs(ball.x - FW / 2) < GW / 2) goal(0); else if (ball.y > FH + 2.5 && Math.abs(ball.x - FW / 2) < GW / 2) goal(1);
-      }
-      function goal(t) { if (S.st !== "play") return; if (t === 0) S.s0++; else S.s1++; S.last = t; S.st = "goal"; S.gt = 2; ball.own = -1 }
-      function kickoff(conceded) {
-        for (let i = 0; i < 6; i++) Object.assign(Pl[i], sHome(i), { stun: 0, tkT: 0, fx: 0, fy: i < 3 ? -1 : 1 });
-        const fw = conceded === 0 ? 2 : 5; Pl[fw].x = FW / 2; Pl[fw].y = FH / 2 + (conceded === 0 ? 3 : -3);
-        ball = { x: FW / 2, y: FH / 2, vx: 0, vy: 0, own: fw }; S.ko++; S.st = "count"; S.gt = 2;
-      }
-      function hostStep(dt, gx) {
-        if (S.st === "count") { S.gt -= dt; if (S.gt <= 0) S.st = "play" }
-        else if (S.st === "goal") { S.gt -= dt; if (S.gt <= 0) { if (S.t <= 0) S.st = "end"; else kickoff(S.last === 0 ? 1 : 0) } }
-        else if (S.st === "play") { S.t -= dt; if (S.t <= 0) { S.t = 0; S.st = "end" } }
-        const gAct = gx && gx.ai >= 3 ? gx.ai : -1;
-        for (let i = 0; i < 6; i++) { const p = Pl[i]; p.stun = Math.max(0, p.stun - dt); p.tkT = Math.max(0, p.tkT - dt); p.tkCd = Math.max(0, p.tkCd - dt); p.grab = Math.max(0, p.grab - dt) }
-        if (S.st === "play") {
-          for (let i = 0; i < 6; i++) {
-            if (i === active) continue;
-            if (i === gAct) { const p = Pl[i]; p.x = gx.px; p.y = gx.py; p.fx = gx.fx; p.fy = gx.fy; continue }
-            ai(i, dt);
-          }
-          if (Pl[active].tkT > 0) tackleCheck(active, 0);
-          if (gx && gAct >= 0) {
-            if (lastG.tk === null) { lastG.tk = gx.tk || 0; lastG.sh = gx.sh || 0 }
-            if ((gx.tk || 0) > lastG.tk) { lastG.tk = gx.tk; Pl[gAct].tkCd = 1.1; tackleCheck(gAct, 4) }
-            if ((gx.sh || 0) > lastG.sh) { lastG.sh = gx.sh; if (ball.own === gAct) kick(gAct, gx.pw || 0.6) }
-          }
-          stepBall(dt);
-        }
-      }
-      // あいて側：ホストの計算した位置へなめらかに近づける
-      function applySnap(hx, dt) {
-        const Sn = hx.S; S = Object.assign({}, Sn);
-        const arr = hx.P;
-        for (let i = 0; i < 6; i++) {
-          if (i === active && S.ko === seenKo) continue;
-          const p = Pl[i], tx = arr[i * 4], ty = arr[i * 4 + 1];
-          const a = Math.min(1, dt * 14); p.x += (tx - p.x) * a; p.y += (ty - p.y) * a; p.fx = arr[i * 4 + 2]; p.fy = arr[i * 4 + 3];
-        }
-        oppAct = hx.a;
-        const b = hx.b; ball.own = b[4];
-        if (ball.own < 0) { const age = Math.min(0.15, Math.max(0, (Date.now() - hx._t) / 1000)); ball.x = b[0] + b[2] * age; ball.y = b[1] + b[3] * age; ball.vx = b[2]; ball.vy = b[3] }
-        else { const o = Pl[ball.own]; ball.x = o.x + o.fx * (PR + BR + 0.3); ball.y = o.y + o.fy * (PR + BR + 0.3) }
-      }
-
-      function frame(dt) {
-        const op = rtOppPeer(); const ox = op ? op.presence.x : null;
-        if (charge >= 0) charge += dt;
-        if (S.ko !== seenKo) { seenKo = S.ko; Object.assign(Pl[active], sHome(active)) }
-        controlMine(dt);
-        if (host) {
-          hostStep(dt, ox && ox.px != null ? ox : null);
-          autoSwitch(dt);
-          const P = []; for (const p of Pl) P.push(r2(p.x), r2(p.y), r2(p.fx), r2(p.fy));
-          const out = { P, a: active, b: [r2(ball.x), r2(ball.y), r2(ball.vx), r2(ball.vy), ball.own], S: { s0: S.s0, s1: S.s1, t: Math.round(S.t * 10) / 10, st: S.st, ko: S.ko, gt: Math.round(S.gt * 10) / 10, last: S.last } };
-          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        } else {
-          if (ox && ox.P) { applySnap(Object.assign({ _t: op.updatedAt }, ox), dt); autoSwitch(dt) }
-          else S = Object.assign({}, S, { st: "wait" });
-          Pl[active].tkT = Math.max(0, Pl[active].tkT - dt); Pl[active].tkCd = Math.max(0, Pl[active].tkCd - dt);
-          const p = Pl[active];
-          const out = { ai: active, px: r2(p.x), py: r2(p.y), fx: r2(p.fx), fy: r2(p.fy), tk: tkN, sh: shN, pw: shPw };
-          const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        }
-        shootBtn.textContent = ball.own === active ? "シュート" : "切替";
-        draw();
-        const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
-        if (S.st === "end") setMsg(`<p class="verdict ${mine >= theirs ? "good" : "bad"}">${mine > theirs ? "あなたのチームの勝ち！" : mine < theirs ? "あなたのチームの負け…" : "引き分け！"}　${mine} − ${theirs}</p>${againBtns("soccer")}`);
-        else setMsg("");
-      }
-      // 描画：テレビ中継のように、自分のゴール側の斜め上からボールを追いかけるカメラ
-      const F3 = w * 1.1, CAMH3 = 38, BACK3 = 60, HZ3 = top + 74;
-      let camX = FW / 2, camY = FH / 2, camT = performance.now();
-      // 自分が上（奥）に向かって攻める向きの座標にそろえる
-      const vx_ = (x) => (host ? x : FW - x), vy_ = (y) => (host ? y : FH - y);
-      function pv(vx, vy, ht) { const z = camY + BACK3 - vy; if (z < 7) return null; const s = F3 / z; return { sx: w / 2 + (vx - camX) * s, sy: HZ3 + CAMH3 * s - (ht || 0) * s, s, z } }
-      const pw = (x, y, ht) => pv(vx_(x), vy_(y), ht);
-      const nearVy = () => camY + BACK3 - 7;
-      function quad(x0, y0, x1, y1, col) {
-        y1 = Math.min(y1, nearVy()); if (y0 >= y1) return;
-        const a = pv(x0, y0), b = pv(x1, y0), cc = pv(x1, y1), d = pv(x0, y1); if (!a || !b || !cc || !d) return;
-        c.fillStyle = col; c.beginPath(); c.moveTo(a.sx, a.sy); c.lineTo(b.sx, b.sy); c.lineTo(cc.sx, cc.sy); c.lineTo(d.sx, d.sy); c.closePath(); c.fill();
-      }
-      function seg(ax, ay, bx, by, ha, hb) {
-        const n = 10, h0 = ha || 0, h1 = hb == null ? h0 : hb; let prev = null;
-        for (let i = 0; i <= n; i++) {
-          const t = i / n, p = pv(ax + (bx - ax) * t, ay + (by - ay) * t, h0 + (h1 - h0) * t);
-          if (p && prev) { c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() }
-          prev = p;
-        }
-      }
-      function goal3(gy, dir) {
-        const x0 = FW / 2 - GW / 2, x1 = FW / 2 + GW / 2, GH = 6.5, back = gy - dir * 4;
-        c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 1;
-        for (let x = x0; x <= x1 + 0.01; x += 2) seg(x, back, x, back, 0, GH);
-        for (let hh = 0; hh <= GH + 0.01; hh += 1.6) seg(x0, back, x1, back, hh, hh);
-        c.strokeStyle = "#fff"; c.lineWidth = 3;
-        seg(x0, gy, x0, gy, 0, GH); seg(x1, gy, x1, gy, 0, GH); seg(x0, gy, x1, gy, GH, GH);
-        c.lineWidth = 1.5; seg(x0, gy, x0, back, GH, GH); seg(x1, gy, x1, back, GH, GH); seg(x0, back, x1, back, GH, GH);
-      }
-      function drawPlayer(i) {
-        const pl = Pl[i]; const p = pw(pl.x, pl.y, 0); if (!p) return;
-        const s = p.s, mineTeam = pl.team === myTeam;
-        const col = mineTeam ? ["#46CBF3", "#2390BA", "#16627F"] : ["#EA4A40", "#A82C25", "#6E1914"];
-        if (pl.role === 0) col[0] = mineTeam ? "#8FE3FF" : "#FF9A8F";
-        const run = Math.sin(performance.now() / 90 + i) * 0.35 * s;
-        c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, 1.6 * s, 0.5 * s, 0, 0, 7); c.fill();
-        c.globalAlpha = pl.stun > 0 ? 0.55 : 1;
-        c.fillStyle = "#EDBE8F"; c.fillRect(p.sx - 0.75 * s + run, p.sy - 2.2 * s, 0.6 * s, 2.2 * s); c.fillRect(p.sx + 0.15 * s - run, p.sy - 2.2 * s, 0.6 * s, 2.2 * s);
-        c.fillStyle = "#fff"; c.fillRect(p.sx - 0.8 * s + run, p.sy - 0.5 * s, 0.7 * s, 0.5 * s); c.fillRect(p.sx + 0.1 * s - run, p.sy - 0.5 * s, 0.7 * s, 0.5 * s);
-        c.fillStyle = col[2]; c.fillRect(p.sx - 0.95 * s, p.sy - 3.2 * s, 1.9 * s, 1.1 * s);
-        c.fillStyle = col[0]; c.fillRect(p.sx - 1.05 * s, p.sy - 5.2 * s, 2.1 * s, 2.1 * s);
-        c.fillStyle = col[1]; c.fillRect(p.sx - 1.05 * s, p.sy - 5.2 * s, 2.1 * s, 0.4 * s);
-        c.fillStyle = "#EDBE8F"; c.fillRect(p.sx - 0.6 * s, p.sy - 6.4 * s, 1.2 * s, 1.2 * s);
-        c.fillStyle = "#3A2A1E"; c.fillRect(p.sx - 0.65 * s, p.sy - 6.6 * s, 1.3 * s, 0.45 * s);
-        c.globalAlpha = 1;
-        if (i === active) {
-          c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(p.sx - 0.7 * s, p.sy - 8 * s); c.lineTo(p.sx + 0.7 * s, p.sy - 8 * s); c.lineTo(p.sx, p.sy - 7 * s); c.fill();
-          c.strokeStyle = "rgba(255,225,77,.8)"; c.lineWidth = 2; c.beginPath(); c.ellipse(p.sx, p.sy, 2 * s, 0.65 * s, 0, 0, 7); c.stroke();
-          c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s, 2.8 * s, 3); c.fillStyle = stamina > 0.25 ? "#7CF59A" : "#FF8A80"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s, 2.8 * s * stamina, 3);
-          if (charge >= 0) { c.fillStyle = "#FFE14D"; c.fillRect(p.sx - 1.4 * s, p.sy + 0.9 * s + 4, 2.8 * s * Math.min(1, charge / 0.8), 3) }
-        }
-        const ox = rtOppPeer() && rtOppPeer().presence.x;
-        if ((host && ox && i === ox.ai) || (!host && i === oppAct)) { c.fillStyle = "#fff"; c.beginPath(); c.moveTo(p.sx - 0.55 * s, p.sy - 7.8 * s); c.lineTo(p.sx + 0.55 * s, p.sy - 7.8 * s); c.lineTo(p.sx, p.sy - 7 * s); c.fill() }
-        if (pl.tkT > 0) { c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 2; c.beginPath(); c.ellipse(p.sx, p.sy, 2.6 * s, 0.9 * s, 0, 0, 7); c.stroke() }
-      }
-      function draw() {
-        // カメラはボールを追う
-        const now = performance.now(), cdt = Math.min(0.1, (now - camT) / 1000); camT = now;
-        const tx = FW / 2 + (vx_(ball.x) - FW / 2) * 0.55, ty = clamp(vy_(ball.y), 8, FH - 4);
-        camX += (tx - camX) * Math.min(1, cdt * 3); camY += (ty - camY) * Math.min(1, cdt * 2.5);
-        // スタンドと空
-        // スタンドはフィールドの奥のはしまでのばす
-        const fe = pv(FW / 2, -10), SB = fe ? Math.max(HZ3, fe.sy) : HZ3;
-        c.fillStyle = "#1F7A36"; c.fillRect(0, 0, w, h);
-        const g = c.createLinearGradient(0, 0, 0, SB); g.addColorStop(0, "#1B2340"); g.addColorStop(1, "#46557F"); c.fillStyle = g; c.fillRect(0, 0, w, SB);
-        const rows = Math.max(6, Math.floor((SB - top) / 9));
-        for (let r = 0; r < rows; r++) for (let i = 0; i < 46; i++) { const hue = (i * 47 + r * 13) % 5; c.fillStyle = ["#E8E8F0", "#46CBF3", "#EA4A40", "#FFE14D", "#9AA6C8"][hue]; c.fillRect((i * w) / 46 + ((r * 7) % 9), SB - 12 - r * 9, 4, 4) }
-        c.fillStyle = "#5A6684"; c.fillRect(0, SB - 4, w, 4);
-        // 芝のしま
-        quad(-8, -10, FW + 8, FH + 10, "#2C9A45");
-        for (let i = 0; i < 12; i++) if (i % 2 === 0) quad(-4, (i * FH) / 12, FW + 4, ((i + 1) * FH) / 12, "#36AE51");
-        // 白線
-        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2;
-        seg(0, 0, FW, 0); seg(FW, 0, FW, FH); seg(FW, FH, 0, FH); seg(0, FH, 0, 0); seg(0, FH / 2, FW, FH / 2);
-        for (const [y0, y1] of [[0, 15], [FH, FH - 15]]) { seg(FW / 2 - 18, y0, FW / 2 - 18, y1); seg(FW / 2 + 18, y0, FW / 2 + 18, y1); seg(FW / 2 - 18, y1, FW / 2 + 18, y1) }
-        { let prev = null; for (let i = 0; i <= 40; i++) { const a = (i / 40) * Math.PI * 2, p = pv(FW / 2 + Math.cos(a) * 9, FH / 2 + Math.sin(a) * 9); if (p && prev) { c.beginPath(); c.moveTo(prev.sx, prev.sy); c.lineTo(p.sx, p.sy); c.stroke() } prev = p } }
-        goal3(0, 1);
-        // 選手とボール（奥から順に）
-        const ents = [];
-        for (let i = 0; i < 6; i++) { const p = pw(Pl[i].x, Pl[i].y); if (p) ents.push({ z: p.z, f: () => drawPlayer(i) }) }
-        const bp = pw(ball.x, ball.y, 0);
-        if (bp) ents.push({ z: bp.z - 0.01, f: () => {
-          const r = 0.9 * bp.s; c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(bp.sx, bp.sy, r * 1.1, r * 0.35, 0, 0, 7); c.fill();
-          c.fillStyle = "#fff"; c.beginPath(); c.arc(bp.sx, bp.sy - r, r, 0, 7); c.fill();
-          c.fillStyle = "#222"; c.beginPath(); c.arc(bp.sx - r * 0.2, bp.sy - r * 1.1, r * 0.35, 0, 7); c.fill();
-        } });
-        ents.sort((a, b) => b.z - a.z).forEach((e) => e.f());
-        goal3(FH, -1);
-        // 点・時間・レーダー
-        const mine = host ? S.s0 : S.s1, theirs = host ? S.s1 : S.s0;
-        const tt = Math.ceil(S.t), mm = Math.floor(tt / 60), ssec = String(tt % 60).padStart(2, "0");
-        const HY = top + 4;
-        c.fillStyle = "rgba(20,18,42,.72)"; c.fillRect(4, HY, 70, 26); c.fillRect(4, HY + 30, 70, 22);
-        c.font = `15px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle";
-        c.fillStyle = "#46CBF3"; c.fillText(String(mine), 18, HY + 14); c.fillStyle = "#fff"; c.fillText("−", 39, HY + 14); c.fillStyle = "#FF7B70"; c.fillText(String(theirs), 60, HY + 14);
-        c.font = `13px ${DISP}`; c.fillStyle = "#FFE14D"; c.fillText(`${mm}:${ssec}`, 39, HY + 41);
-        const rw = 54, rh = rw * FH / FW, rx = w - rw - 6, ry = HY;
-        c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(rx, ry, rw, rh); c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 1; c.strokeRect(rx + 0.5, ry + 0.5, rw - 1, rh - 1);
-        c.beginPath(); c.moveTo(rx, ry + rh / 2); c.lineTo(rx + rw, ry + rh / 2); c.stroke();
-        const R = (x, y) => [rx + (vx_(x) / FW) * rw, ry + (vy_(y) / FH) * rh];
-        for (let i = 0; i < 6; i++) { const [x, y] = R(Pl[i].x, Pl[i].y); c.fillStyle = Pl[i].team === myTeam ? (i === active ? "#FFE14D" : "#46CBF3") : "#FF7B70"; c.beginPath(); c.arc(x, y, i === active ? 3 : 2.4, 0, 7); c.fill() }
-        { const [x, y] = R(ball.x, ball.y); c.fillStyle = "#fff"; c.fillRect(x - 1.5, y - 1.5, 3, 3) }
-        if (S.st === "wait") bigText(c, "あいて待ち", w / 2, h * 0.4, 26);
-        else if (S.st === "count") bigText(c, String(Math.max(1, Math.ceil(S.gt))), w / 2, h * 0.4, 64, "#FFE14D");
-        else if (S.st === "goal") bigText(c, S.last === myTeam ? "ゴール！" : "やられた…", w / 2, h * 0.4, 42, S.last === myTeam ? "#FFE14D" : "#FF9B91");
-        else if (S.st === "end") bigText(c, "しゅうりょう", w / 2, h * 0.4, 34);
-      }
-      const stop = loop(frame);
-      return () => { stop(); removeEventListener("keydown", kd) };
+      let alive = true, stop = null;
+      setMsg(`<p class="wait">3Dのスタジアムを読み込んでいます</p>`);
+      phLoad().then(() => { if (!alive) return; try { stop = scRun() } catch (e) { console.error(e); showErr(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("soccer")}`) } })
+        .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("soccer")}`) });
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-fake", "br-on"); ROT90 = false };
     },
   };
+  function scRun() {
+    const T = THREE, host = isFirst(), cardEl = $(".card.act.sc3"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
+    document.documentElement.classList.add("br-on");
+    const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
+    lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
+    const LE = layoutEditor(cardEl, ["stick", "b-shoot", "b-thru", "b-pass", "b-dash"], "scLayout");
+    const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" }); watchLost(gl, "soccer");
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.shadowMap.enabled = Q.sh > 0; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene(), skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F7FD0"); gr.addColorStop(1, "#BFDCF2"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog("#9CC2E6", 120, 260);
+    const camera = new T.PerspectiveCamera(38, 2, .5, 500);
+    scene.add(new T.HemisphereLight("#EAF2FF", "#3A6A30", .75));
+    const sun = new T.DirectionalLight("#FFF6E6", .9); sun.position.set(-30, 60, 40); sun.castShadow = Q.sh > 0; sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 160 }); sun.shadow.bias = -.0006; scene.add(sun, sun.target);
+    // ---- スタジアム：芝（しま模様）・白線・ゴール・スタンド
+    { const gc = document.createElement("canvas"); gc.width = 128; gc.height = 128; const g2 = gc.getContext("2d"); g2.fillStyle = "#3E9A3C"; g2.fillRect(0, 0, 64, 128); g2.fillStyle = "#4AAE46"; g2.fillRect(64, 0, 64, 128);
+      for (let i = 0; i < 1500; i++) { g2.fillStyle = `rgba(${Math.random() < .5 ? "20,60,20" : "130,200,110"},${.07 + Math.random() * .1})`; g2.fillRect(Math.random() * 128, Math.random() * 128, 1 + Math.random() * 2, 1 + Math.random() * 3) }
+      const gt = new T.CanvasTexture(gc); gt.wrapS = gt.wrapT = T.RepeatWrapping; gt.repeat.set(130 / 11, 10); gt.anisotropy = 4;
+      const pg = new T.PlaneGeometry(130, 90); pg.rotateX(-Math.PI / 2); const pm = new T.Mesh(pg, new T.MeshStandardMaterial({ map: gt, roughness: .95 })); pm.receiveShadow = true; scene.add(pm) }
+    const B = phParts(), L = (x0, z0, x1, z1) => B.seg(x0, .015, z0, x1, .015, z1, .14, .01, "#F4F4F4");
+    L(-SC_PL, -SC_PW, SC_PL, -SC_PW); L(-SC_PL, SC_PW, SC_PL, SC_PW); L(-SC_PL, -SC_PW, -SC_PL, SC_PW); L(SC_PL, -SC_PW, SC_PL, SC_PW); L(0, -SC_PW, 0, SC_PW);
+    for (let a = 0; a < 6.28; a += .2) L(Math.cos(a) * 9.15, Math.sin(a) * 9.15, Math.cos(a + .2) * 9.15, Math.sin(a + .2) * 9.15);
+    for (const d of [-1, 1]) { const gx = d * SC_PL; L(gx, -20.16, gx - d * 16.5, -20.16); L(gx - d * 16.5, -20.16, gx - d * 16.5, 20.16); L(gx - d * 16.5, 20.16, gx, 20.16); L(gx, -9.16, gx - d * 5.5, -9.16); L(gx - d * 5.5, -9.16, gx - d * 5.5, 9.16); L(gx - d * 5.5, 9.16, gx, 9.16);
+      for (let a = -.93; a < .93; a += .1) L(gx - d * (11 + Math.cos(a) * 9.15), Math.sin(a) * 9.15, gx - d * (11 + Math.cos(a + .1) * 9.15), Math.sin(a + .1) * 9.15);
+      for (const sz of [-1, 1]) B.cyl(.06, .06, SC_GH, "#F8F8F8", gx, SC_GH / 2, sz * SC_GW, 10); B.seg(gx, SC_GH, -SC_GW - .06, gx, SC_GH, SC_GW + .06, .12, .12, "#F8F8F8");
+      for (const sz of [-1, 1]) { B.seg(gx, SC_GH, sz * SC_GW, gx + d * 2, SC_GH * .8, sz * SC_GW, .04, .04, "#DDD"); B.seg(gx + d * 2, SC_GH * .8, sz * SC_GW, gx + d * 2, 0, sz * SC_GW, .04, .04, "#DDD") } B.seg(gx + d * 2, 0, -SC_GW, gx + d * 2, 0, SC_GW, .04, .04, "#DDD") }
+    // 広告ボードとスタンド
+    const adc = document.createElement("canvas"); adc.width = 512; adc.height = 64; { const a2 = adc.getContext("2d"), cols = ["#1E3A8A", "#B91C1C", "#0E7490", "#6D28D9"]; for (let i = 0; i < 4; i++) { a2.fillStyle = cols[i]; a2.fillRect(i * 128, 0, 128, 64) } a2.fillStyle = "#fff"; a2.font = "900 24px sans-serif"; a2.textAlign = "center"; a2.textBaseline = "middle"; for (let i = 0; i < 4; i++) a2.fillText(["待ち時間バトル", "FOOTBALL CUP", "待ち時間バトル", "ELEVEN"][i], i * 128 + 64, 34) }
+    const adt = new T.CanvasTexture(adc); adt.wrapS = T.RepeatWrapping; adt.repeat.set(8, 1); const adm = new T.MeshBasicMaterial({ map: adt });
+    for (const [x, z, len, yaw] of [[0, -SC_PW - 4, 120, 0], [0, SC_PW + 4, 120, Math.PI], [-SC_PL - 5, 0, 80, Math.PI / 2], [SC_PL + 5, 0, 80, -Math.PI / 2]]) { const m = new T.Mesh(new T.PlaneGeometry(len, 1), adm); m.position.set(x, .5, z); m.rotation.y = yaw; scene.add(m) }
+    const crc = document.createElement("canvas"); crc.width = 256; crc.height = 128; { const k2 = crc.getContext("2d"); k2.fillStyle = "#2A2E3A"; k2.fillRect(0, 0, 256, 128); for (let y = 0; y < 128; y += 8) for (let x = 0; x < 256; x += 6) { if (Math.random() < .12) continue; k2.fillStyle = ["#2F5FD0", "#D93A33", "#F2F2F2", "#FFE14D", "#2FA04A", "#1E2A44", "#E86AC0", "#F2C233"][Math.floor(Math.random() * 8)]; k2.fillRect(x + 1, y + 3, 4, 5); k2.fillStyle = ["#E3B48C", "#C9A26B", "#8A5A3B", "#F1C7A0"][Math.floor(Math.random() * 4)]; k2.fillRect(x + 2, y, 3, 3) } }
+    const crt = new T.CanvasTexture(crc); crt.wrapS = crt.wrapT = T.RepeatWrapping;
+    for (const [x, z, len, yaw] of [[0, -SC_PW - 8, 140, 0], [0, SC_PW + 8, 140, Math.PI], [-SC_PL - 9, 0, 96, Math.PI / 2], [SC_PL + 9, 0, 96, -Math.PI / 2]]) {
+      const grp = new T.Group(), t2 = crt.clone(); t2.needsUpdate = true; t2.repeat.set(len / 15, 1.6); const m = new T.Mesh(new T.PlaneGeometry(len, 22), new T.MeshStandardMaterial({ map: t2, roughness: 1 })); m.rotation.x = -.6; m.position.set(0, 22 / 2 * Math.sin(.6) + 1, -22 / 2 * Math.cos(.6)); grp.add(m);
+      const st2 = phParts(); st2.box(len + 2, 1.2, 1, "#3A3E48", 0, .6, 0); st2.box(len + 2, 3, 1, "#2A2E38", 0, 22 * Math.sin(.6) + 2, -22 * Math.cos(.6) - .5); grp.add(new T.Mesh(phMerge(st2.L, false), new T.MeshStandardMaterial({ vertexColors: true, roughness: .8 }))); grp.position.set(x, 0, z); grp.rotation.y = yaw; scene.add(grp) }
+    { const big = new T.Mesh(phMerge(B.L, false), new T.MeshStandardMaterial({ vertexColors: true, roughness: .6 })); big.castShadow = true; big.receiveShadow = true; scene.add(big) }
+    const netM = new T.MeshBasicMaterial({ color: "#FFFFFF", wireframe: true, transparent: true, opacity: .5 });
+    for (const d of [-1, 1]) { const bg = new T.PlaneGeometry(SC_GW * 2, SC_GH * .8, 24, 8); bg.rotateY(Math.PI / 2); bg.translate(d * (SC_PL + 2), SC_GH * .4, 0); scene.add(new T.Mesh(bg, netM)); const tg = new T.PlaneGeometry(2.06, SC_GW * 2, 8, 24); tg.rotateX(-Math.PI / 2); tg.rotateZ(d * .1); tg.translate(d * (SC_PL + 1), SC_GH * .9, 0); scene.add(new T.Mesh(tg, netM)) }
+    // ボール
+    const bc = document.createElement("canvas"); bc.width = 256; bc.height = 128; { const b2 = bc.getContext("2d"); b2.fillStyle = "#F8F8F8"; b2.fillRect(0, 0, 256, 128); b2.fillStyle = "#1A1A1A"; for (let i = 0; i < 12; i++) { const cx = (i % 6) * 43 + (i < 6 ? 10 : 32), cy = i < 6 ? 34 : 94; b2.beginPath(); for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28 - 1.57; b2.lineTo(cx + Math.cos(a) * 12, cy + Math.sin(a) * 12) } b2.fill() } }
+    const ballM = new T.Mesh(new T.SphereGeometry(.22, 20, 14), new T.MeshStandardMaterial({ map: new T.CanvasTexture(bc), roughness: .45 })); ballM.castShadow = true; scene.add(ballM);
+    // ---- 試合の状態（ホストが計算）
+    let S = { ph: "lobby", clk: 0, half: 1, sc: [0, 0], teams: [0, 1], ko: 0, t: 0, msg: "" };
+    const P = [], BL = { x: 0, y: .11, z: 0, vx: 0, vy: 0, vz: 0, own: -1, last: 0, cool: {} };
+    const nameOf = (i) => SC_NAMES[(i * 7 + (me.m.seed || 1)) % SC_NAMES.length];
+    for (let i = 0; i < 22; i++) { const t = i < 11 ? 0 : 1, r = i % 11; P.push({ i, t, r, gk: r === 0, x: 0, z: 0, vx: 0, vz: 0, f: t ? Math.PI * 1.5 : Math.PI / 2, stun: 0, run: null, skill: 0, sp: 0 }) }
+    const dirOf = (t) => (t === 0 ? 1 : -1), stOf = (p) => SC_TEAMS[S.teams[p.t]].st;
+    const home = (p) => { const [hx, hz] = SC_FORM[p.r]; return [hx * dirOf(p.t), hz] };
+    function placeKickoff(kt) { for (const p of P) { const [hx, hz] = home(p); p.x = Math.max(-SC_PL + 1, Math.min(SC_PL - 1, hx * (p.gk ? 1 : .9))); p.z = hz; if (!p.gk && Math.sign(p.x) !== -dirOf(p.t) && p.x !== 0) p.x = -dirOf(p.t) * 1; p.vx = p.vz = 0; p.stun = 0; p.run = null; p.f = p.t ? -Math.PI / 2 : Math.PI / 2 } const k = P[kt * 11 + 10]; k.x = -dirOf(kt) * .6; k.z = 0; Object.assign(BL, { x: 0, y: .11, z: 0, vx: 0, vy: 0, vz: 0, own: k.i, last: kt, cool: {} }); act[0] = 10; act[1] = 21 }
+    // 人が動かす選手（チームごと）。ひとりのときチーム1はCPU
+    const act = [10, 21], human = () => [true, !!realOppPeer()];
+    // 入力：自分の分はここ、あいての分は送られてくる
+    const inp = [{ sx: 0, sy: 0, dash: 0, ev: {} }, { sx: 0, sy: 0, dash: 0, ev: {} }], seen = [{}, {}];
+    let myEv = { sh: 0, shp: 0, ps: 0, th: 0, sk: 0, sw: 0 };
+    const myTeam = host ? 0 : 1;
+    // ---- 3Dの選手（荒野と同じ人のモデル。ユニフォームはチームの色、キーパーは別の色）
+    let vis = [];
+    function buildVis() {
+      for (const v of vis) { scene.remove(v.g); v.g.traverse((o) => { if (o.geometry) o.geometry.dispose() }) }
+      vis = P.map((p) => { const tm = SC_TEAMS[S.teams[p.t]], kit = p.gk ? [p.t ? "#F28C28" : "#7BE33B", "#2A2A30", "#2A2A30"] : [tm.c1, tm.c2, tm.c1]; const v = brChar({ o: 0, h: (p.i * 3) % 10, a: 1, kit }); v.guns.forEach((g) => (g.visible = false)); v.cap.visible = false; v.g.scale.setScalar(1.05); scene.add(v.g); return Object.assign(v, { ph: 0 }) });
+    }
+    buildVis(); let builtFor = "0,1";
+    // ---- 画面の大きさ（横画面。縦持ちなら90度まわす）
+    let VW = 0, VH = 0;
+    function resize() {
+      const fake = innerHeight > innerWidth, w = fake ? innerHeight : innerWidth, h = fake ? innerWidth : innerHeight;
+      ROT90 = fake; document.documentElement.classList.toggle("br-fake", fake);
+      if (w === VW && h === VH) return; VW = w; VH = h;
+      Object.assign(cardEl.style, fake ? { position: "fixed", inset: "auto", left: "0px", top: "0px", width: w + "px", height: h + "px", transformOrigin: "0 0", transform: `translate(${innerWidth}px,0) rotate(90deg)` } : { position: "fixed", inset: "0px", left: "", top: "", width: "", height: "", transformOrigin: "", transform: "" });
+      renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px";
+      const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    // ---- 操作
+    const stickInp = controlPad($("#stick"), $("#knob"));
+    let shootT = null;
+    holdBtn($("#b-shoot"), () => { shootT = performance.now() }, () => { if (shootT == null) return; const pw = clamp((performance.now() - shootT) / 900, 0, 1); shootT = null; myEv.sh++; myEv.shp = r2(pw) });
+    holdBtn($("#b-pass"), () => { myEv.ps++ }); holdBtn($("#b-thru"), () => { myEv.th++ });
+    const dashB = holdBtn($("#b-dash"), () => { myEv.sk++ });
+    const onKey = (e) => { if (e.repeat || e.target.tagName === "INPUT") return; const k = e.key.toLowerCase(); if (k === "j") myEv.ps++; else if (k === "k") myEv.th++; else if (k === "l") { myEv.sh++; myEv.shp = .6 } else if (k === "shift") myEv.sk++ };
+    addEventListener("keydown", onKey);
+    // ---- 計算（ホスト）
+    const near = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+    const owner = () => (BL.own >= 0 ? P[BL.own] : null);
+    function kick(p, vx, vy, vz) { BL.own = -1; BL.vx = vx; BL.vy = vy; BL.vz = vz; BL.y = Math.max(BL.y, .15); BL.cool = { [p.i]: .35 }; BL.last = p.t }
+    function shoot(p, pw, aimY) {
+      const st = stOf(p), gx = SC_PL * dirOf(p.t), tz = clamp(aimY != null ? -aimY * 3.1 : (Math.random() < .5 ? -1 : 1) * (1.2 + Math.random() * 2), -3.4, 3.4), ty = .35 + pw * 2.3 + (pw > .92 ? (pw - .92) * 6 : 0);
+      const sp = 17 + pw * 11 + st.kick * 1.6, err = (.012 + (5 - st.tec) * .012) * (.6 + pw * .6), dx = gx - BL.x, dz = tz - BL.z, D = Math.hypot(dx, dz), a = Math.atan2(dz, dx) + (Math.random() * 2 - 1) * err, tt = D / sp;
+      kick(p, Math.cos(a) * sp, (ty - BL.y + 4.9 * tt * tt) / tt, Math.sin(a) * sp);
+    }
+    function passTo(p, m, lead, thru) {
+      const st = stOf(p); let tx = m.x + (thru ? dirOf(p.t) * 9 : m.vx * .5), tz = m.z + (thru ? 0 : m.vz * .5); tx = clamp(tx, -SC_PL + 1, SC_PL - 1); tz = clamp(tz, -SC_PW + 1, SC_PW - 1);
+      const D = Math.hypot(tx - BL.x, tz - BL.z), sp = clamp(8 + D * .7, 10, 26), err = (5 - st.tec) * .02, a = Math.atan2(tz - BL.z, tx - BL.x) + (Math.random() * 2 - 1) * err, tt = D / sp, lob = D > 28;
+      kick(p, Math.cos(a) * sp * (lob ? .8 : 1), lob ? 4.9 * (tt / .8) : .6, Math.sin(a) * sp * (lob ? .8 : 1)); if (thru) m.run = { x: tx, z: tz, t: 2.5 }
+    }
+    function bestMate(p, dx, dz, fwd) {
+      let best = null, bs = -1e9; for (const m of P) { if (m.t !== p.t || m === p || m.gk) continue; const vx = m.x - p.x, vz = m.z - p.z, d = Math.hypot(vx, vz); if (d < 4 || d > 45) continue; const cosA = (vx * dx + vz * dz) / (d * (Math.hypot(dx, dz) || 1)); let free = 99; for (const o of P) if (o.t !== p.t) free = Math.min(free, Math.hypot(o.x - m.x, o.z - m.z)); const sc2 = (dx || dz ? cosA * 30 : 0) + (fwd ? vx * dirOf(p.t) * .6 : 0) + Math.min(free, 8) * 2 - d * .25; if (sc2 > bs) { bs = sc2; best = m } } return best;
+    }
+    function nearestTo(t, x, z, skipGk) { let b = null, bd = 1e9; for (const p of P) { if (p.t !== t || (skipGk && p.gk)) continue; const d = Math.hypot(p.x - x, p.z - z); if (d < bd) { bd = d; b = p } } return b }
+    function tackle(p, power) { const o = owner(); if (!o || o.t === p.t || near(p, o) > 1.7 || o.skill > 0) return false; const ok = Math.random() < .42 + (stOf(p).def - stOf(o).tec) * .08 + power; if (ok) { if (Math.random() < .55) { BL.own = p.i; BL.last = p.t } else { BL.own = -1; BL.vx = (Math.random() - .5) * 8; BL.vz = (Math.random() - .5) * 8; BL.vy = 1; BL.cool = { [o.i]: .5 } } } else p.stun = .7; return ok }
+    function humanStep(t, dt) {
+      if (!P[act[t]]) act[t] = t * 11 + 10;
+      const ip = inp[t], ev = ip.ev || {}, sn = seen[t], p = P[act[t]], hasBall = BL.own === p.i, st = stOf(p), mine = owner() && owner().t === t;
+      const fire = (k) => { const n = ev[k] || 0, d = n - (sn[k] ?? n); sn[k] = n; return d > 0 };
+      // スティックの向き：画面の右＝+x、画面の上＝-z（カメラはスタンドの上から見ている）
+      const mx = ip.sx, mz = ip.sy, mg = Math.min(1, Math.hypot(mx, mz));
+      const spd = (5.4 + st.spd * .45) * (ip.dash ? 1.3 : 1) * (p.stun > 0 ? .4 : 1) * (hasBall ? .92 : 1);
+      p.vx = mg > .15 ? mx / (Math.hypot(mx, mz) || 1) * spd * mg : 0; p.vz = mg > .15 ? mz / (Math.hypot(mx, mz) || 1) * spd * mg : 0;
+      const ax = mg > .15 ? mx : Math.cos(p.f), az = mg > .15 ? mz : Math.sin(p.f);
+      if (fire("sh")) { if (hasBall) shoot(p, ev.shp ?? .6, mg > .3 ? mz : null); else tackle(p, 0) }
+      if (fire("ps")) { if (hasBall) { const m = bestMate(p, ax, az, false); if (m) passTo(p, m) } else { const b = nearestTo(t, BL.x, BL.z, true); if (b) act[t] = b.i } }
+      if (fire("th")) { if (hasBall) { const m = bestMate(p, ax * .5 + dirOf(t), az * .5, true); if (m) passTo(p, m, true, true) } else { const o = owner(), b = o ? P.filter((q) => q.t === t && !q.gk && q !== p).sort((a, b2) => near(a, o) - near(b2, o))[0] : null; if (b) b.press = 2.5 } }
+      if (fire("sk") && hasBall) { p.skill = .6; const sd = Math.random() < .5 ? -1 : 1; p.x += -Math.sin(p.f) * sd * 1.2; p.z += Math.cos(p.f) * sd * 1.2 }
+      // ボールを取られた・パスが味方に届いたら、ボールに近い選手に切りかえ
+      if (!hasBall && !mine && BL.own >= 0) { const b = nearestTo(t, BL.x, BL.z, true); if (b && near(b, BL) + 3 < near(p, BL)) act[t] = b.i }
+      if (BL.own >= 0 && P[BL.own].t === t && BL.own !== act[t]) act[t] = BL.own;
+    }
+    function aiStep(p, dt) {
+      const st = stOf(p), o = owner(), d = dirOf(p.t), gx = SC_PL * d, mineBall = o && o.t === p.t;
+      let tx, tz, spdK = 1;
+      if (p.gk) { const gl2 = -SC_PL * d, lead = BL.own < 0 ? BL.z + BL.vz * .4 : BL.z; tx = gl2 + d * clamp(1.2 + Math.abs(BL.x - gl2) * .03, 1, 4); tz = clamp(lead * .35, -3, 3); spdK = 1.1 }
+      else if (BL.own === p.i) {
+        // ボールを持ったCPU：シュート・パス・ドリブルを選ぶ
+        p.think = (p.think || 0) - dt;
+        const dg = Math.hypot(gx - p.x, p.z), opp = P.filter((q) => q.t !== p.t).reduce((a, q) => Math.min(a, near(q, p)), 99);
+        if (p.think <= 0) { p.think = .35 + Math.random() * .3; if (dg < 21 + st.atk && Math.random() < .55 + st.atk * .05) { shoot(p, .55 + Math.random() * .35); return } if (opp < 3.2 && Math.random() < .7) { const m = bestMate(p, d, 0, true); if (m) { passTo(p, m, true, Math.random() < .25); return } } if (Math.random() < .08) { const m = bestMate(p, d, 0, true); if (m) { passTo(p, m); return } } }
+        let near1 = null, nd = 1e9; for (const q of P) if (q.t !== p.t) { const dd = near(q, p); if (dd < nd) { nd = dd; near1 = q } }
+        tx = gx; tz = p.z * .7; if (near1 && nd < 6) tz += (p.z - near1.z >= 0 ? 1 : -1) * 6; spdK = .9;
+      } else if (p.run && p.run.t > 0) { p.run.t -= dt; tx = p.run.x; tz = p.run.z; spdK = 1.25 }
+      else {
+        const [hx, hz] = home(p), bx = BL.x, bz = BL.z;
+        if (mineBall) { tx = hx * .55 + bx * .45 + d * 10; tz = hz * .8 + bz * .2 }
+        else {
+          tx = hx * .65 + bx * .35 - d * 2; tz = hz * .75 + bz * .25;
+          const chasers = P.filter((q) => q.t === p.t && !q.gk && (!human()[p.t] || q.i !== act[p.t])).sort((a, b) => near(a, BL) - near(b, BL));
+          if (chasers[0] === p || (chasers[1] === p && near(p, BL) < 12) || p.press > 0) { tx = BL.x + BL.vx * .3; tz = BL.z + BL.vz * .3; spdK = 1.15 }
+        }
+      }
+      p.press = Math.max(0, (p.press || 0) - dt);
+      const dx = tx - p.x, dz = tz - p.z, dl = Math.hypot(dx, dz), spd = (5 + st.spd * .42) * spdK * (p.stun > 0 ? .4 : 1);
+      if (dl > .4) { const k = Math.min(1, dl / 3); p.vx += (dx / dl * spd * k - p.vx) * Math.min(1, dt * 4); p.vz += (dz / dl * spd * k - p.vz) * Math.min(1, dt * 4) } else { p.vx *= .8; p.vz *= .8 }
+      // CPUのタックル
+      if (o && o.t !== p.t && !p.gk && near(p, o) < 1.3 && Math.random() < dt * (.8 + st.def * .15)) tackle(p, 0);
+    }
+    function physics(dt) {
+      for (const p of P) { p.stun = Math.max(0, p.stun - dt); p.skill = Math.max(0, p.skill - dt); p.x = clamp(p.x + p.vx * dt, -SC_PL - 3, SC_PL + 3); p.z = clamp(p.z + p.vz * dt, -SC_PW - 2, SC_PW + 2); const sp = Math.hypot(p.vx, p.vz); p.sp = sp; if (sp > .3) p.f = Math.atan2(p.vz, p.vx) }
+      for (const k in BL.cool) { BL.cool[k] -= dt; if (BL.cool[k] <= 0) delete BL.cool[k] }
+      const o = owner();
+      if (o) { // ドリブル：ボールは足もとの少し前
+        BL.x = o.x + Math.cos(o.f) * .62; BL.z = o.z + Math.sin(o.f) * .62; BL.y = .22; BL.vx = o.vx; BL.vz = o.vz; BL.vy = 0;
+      } else {
+        const sp = Math.hypot(BL.vx, BL.vy, BL.vz), kd = .012 * sp;
+        BL.vx -= BL.vx * kd * dt; BL.vz -= BL.vz * kd * dt; BL.vy -= (BL.vy * kd + 9.8) * dt;
+        BL.x += BL.vx * dt; BL.y += BL.vy * dt; BL.z += BL.vz * dt;
+        if (BL.y < .22) { BL.y = .22; if (BL.vy < -1.5) BL.vy = -BL.vy * .5; else { BL.vy = 0; const k = Math.exp(-.55 * dt); BL.vx *= k; BL.vz *= k } }
+        // ポストとバー
+        for (const d of [-1, 1]) { const gx = d * SC_PL; for (const sz of [-1, 1]) { const dx = BL.x - gx, dz = BL.z - sz * SC_GW, dd = Math.hypot(dx, dz); if (dd < .28 && BL.y < SC_GH) { const nx = dx / dd, nz = dz / dd, vn = BL.vx * nx + BL.vz * nz; if (vn < 0) { BL.vx -= 1.7 * vn * nx; BL.vz -= 1.7 * vn * nz } } } if (Math.abs(BL.x - gx) < .3 && Math.abs(BL.z) < SC_GW && Math.abs(BL.y - SC_GH) < .25) BL.vy = -Math.abs(BL.vy) * .6 }
+        // 拾う（キーパーは手で取れるので高いボールも、遠くまで）
+        let best = null, bd = 1e9; const bsp = Math.hypot(BL.vx, BL.vz);
+        for (const p of P) { if (BL.cool[p.i] || p.stun > 0) continue; const inBox = p.gk && Math.abs(p.x - -dirOf(p.t) * SC_PL) < 16.5 && Math.abs(p.z) < 20; const reach = inBox ? 1.6 + stOf(p).def * .12 : .9, hmax = inBox ? 2.6 : 1.1; const d = Math.hypot(p.x - BL.x, p.z - BL.z); if (d < reach && BL.y < hmax && (bsp < 24 || inBox) && d < bd) { bd = d; best = p } }
+        if (best) { const st = stOf(best); if (best.gk && bsp > 22 && Math.random() < .5) { BL.vx = -BL.vx * .35; BL.vz = (Math.random() - .5) * 10; BL.vy = 3; BL.cool = { [best.i]: .6 } } else if (!best.gk && bsp > 16 && Math.random() > .5 + st.tec * .08) { BL.vx *= .4; BL.vz *= .4; BL.cool = { [best.i]: .3 } } else { BL.own = best.i; BL.last = best.t; if (best.gk) best.hold = 1.2 } }
+      }
+      // キーパーはボールを持ったら、少しして味方へけり出す
+      const go = owner(); if (go && go.gk && !(human()[go.t] && act[go.t] === go.i)) { go.hold = (go.hold || 1.2) - dt; if (go.hold <= 0) { go.hold = 0; const m = bestMate(go, dirOf(go.t), 0, true); if (m) passTo(go, m) } }
+    }
+    function rules(dt) {
+      // ゴール・タッチライン・ゴールライン
+      for (const d of [-1, 1]) if (BL.x * d > SC_PL + .1) {
+        if (Math.abs(BL.z) < SC_GW && BL.y < SC_GH) { const t = d === 1 ? 0 : 1; S.sc[t]++; S.ph = "goal"; S.t = 3; S.msg = `ゴール！ ${SC_TEAMS[S.teams[t]].name}`; S.ko = 1 - t; BL.own = -1; return }
+        const def = d === 1 ? 1 : 0; if (BL.last === def) { const att = 1 - def, cz = Math.sign(BL.z || 1) * (SC_PW - .5), k = nearestTo(att, d * SC_PL, cz, true); Object.assign(BL, { x: d * (SC_PL - .5), z: cz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i }); k.x = BL.x - d * .6; k.z = cz; S.msg = "コーナーキック"; S.mt = 1.5 }
+        else { const g = P[def * 11]; Object.assign(BL, { x: d * (SC_PL - 5.5), z: 0, y: .22, vx: 0, vy: 0, vz: 0, own: g.i }); g.x = BL.x - d * .6; g.z = 0; g.hold = 1.2; S.msg = "ゴールキック"; S.mt = 1.5 }
+      }
+      if (Math.abs(BL.z) > SC_PW + .1 && BL.own < 0) { const t = 1 - BL.last, k = nearestTo(t, BL.x, BL.z, true), sz = Math.sign(BL.z) * (SC_PW - .3); Object.assign(BL, { z: sz, y: .22, vx: 0, vy: 0, vz: 0, own: k.i }); k.x = BL.x; k.z = sz - Math.sign(sz) * .6; S.msg = "スローイン"; S.mt = 1.2 }
+    }
+    function hostStep(dt) {
+      if (S.ph === "lobby") return;
+      S.mt = Math.max(0, (S.mt || 0) - dt);
+      if (S.ph === "ko" || S.ph === "goal" || S.ph === "half") { S.t -= dt; if (S.t <= 0) { if (S.ph === "goal" || S.ph === "half") { placeKickoff(S.ko); S.ph = "ko"; S.t = 1.6; S.msg = "キックオフ" } else S.ph = "play" } if (S.ph !== "play") { physics(0); return } }
+      if (S.ph === "end") return;
+      S.clk += dt * (45 / SC_HALF);
+      if (S.half === 1 && S.clk >= 45) { S.half = 2; S.clk = 45; S.ph = "half"; S.t = 3; S.msg = "ハーフタイム"; S.ko = 1; return }
+      if (S.clk >= 90) { S.clk = 90; S.ph = "end"; return }
+      const hm = human();
+      for (let t = 0; t < 2; t++) if (hm[t]) humanStep(t, dt);
+      for (const p of P) if (!(hm[p.t] && act[p.t] === p.i)) aiStep(p, dt);
+      physics(dt); rules(dt);
+    }
+    // ---- 表示用の位置（あいては送られてきた位置へなめらかに寄せる）
+    const show = P.map((p) => ({ x: p.x, z: p.z, f: p.f, sp: 0 })), showB = { x: 0, y: .22, z: 0 };
+    let lastSend = "", net = null;
+    function applyNet(x) { if (!x || !x.S) return; const prevTeams = String(S.teams); S = Object.assign({}, S, x.S); if (String(S.teams) !== builtFor) { builtFor = String(S.teams); buildVis() } if (x.P) x.P.forEach((a, i) => { const p = P[i]; p.x = a[0]; p.z = a[1]; p.f = a[2]; p.sp = a[3] }); if (x.B) { BL.x = x.B[0]; BL.y = x.B[1]; BL.z = x.B[2]; BL.own = x.B[3] } if (x.A) { act[0] = x.A[0]; act[1] = x.A[1] } }
+    // ---- カメラ：スタンドの上から、ボールを追う（中継のような見下ろし）
+    const camLook = new T.Vector3(), camPos = new T.Vector3(0, 30, 50);
+    function frame(dt) {
+      resize();
+      const hp = host ? null : hostPeer(), hx = peerX(hp);
+      // 入力
+      let ix = stickInp.x, iy = stickInp.y; if (keys.has("a") || keys.has("A") || keys.has("ArrowLeft")) ix = -1; if (keys.has("d") || keys.has("D") || keys.has("ArrowRight")) ix = 1; if (keys.has("w") || keys.has("W") || keys.has("ArrowUp")) iy = -1; if (keys.has("s") || keys.has("S") || keys.has("ArrowDown")) iy = 1;
+      const myIn = { sx: r2(ix), sy: r2(iy), dash: dashB.down || keys.has("Shift") ? 1 : 0, ev: myEv };
+      if (host) {
+        inp[0] = myIn; const gp = realOppPeer() ? matchPeers()[0] : null, gx = peerX(gp); if (gx && gx.in) inp[1] = gx.in;
+        if (S.ph === "lobby" && allReady()) { const gs = gp ? peerS(gp) || {} : {}; S.teams = [me.s.team ?? 0, gp ? gs.team ?? 1 : me.s.cpuTeam ?? 1]; if (S.teams[1] === S.teams[0] && !gp) S.teams[1] = (S.teams[0] + 1) % 5; builtFor = String(S.teams); buildVis(); S.sc = [0, 0]; S.clk = 0; S.half = 1; placeKickoff(0); S.ph = "ko"; S.t = 2; S.msg = "キックオフ" }
+        hostStep(dt);
+        const out = { S: { ph: S.ph, clk: Math.round(S.clk * 100) / 100, half: S.half, sc: S.sc, teams: S.teams, t: r2(S.t), msg: S.msg, mt: r2(S.mt || 0) }, P: P.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.z * 10) / 10, r2(p.f), Math.round(p.sp * 10) / 10]), B: [r2(BL.x), r2(BL.y), r2(BL.z), BL.own], A: act };
+        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      } else {
+        applyNet(hx);
+        const js = JSON.stringify({ in: myIn }); if (js !== lastSend) { lastSend = js; sendX({ in: myIn }) }
+      }
+      // 表示
+      const al = host ? 1 : Math.min(1, dt * 10);
+      P.forEach((p, i) => { const s2 = show[i]; s2.x += (p.x - s2.x) * al; s2.z += (p.z - s2.z) * al; s2.f += phAng(p.f - s2.f) * Math.min(1, dt * 12); s2.sp = host ? p.sp : p.sp; const v = vis[i]; if (!v) return; v.g.position.set(s2.x, 0, s2.z); v.g.rotation.y = Math.PI / 2 - s2.f; v.ph += s2.sp * dt * 2.2; const k = clamp(s2.sp / 6, 0, 1), sw = Math.sin(v.ph) * .9 * k; v.legL.rotation.x = sw; v.legR.rotation.x = -sw; v.kneeL.rotation.x = Math.max(0, sw) * 1.2 + .05; v.kneeR.rotation.x = Math.max(0, -sw) * 1.2 + .05; v.armL.rotation.set(-sw * .8, 0, -.15); v.armR.rotation.set(sw * .8, 0, .15); v.elbowL.rotation.set(-.5 - k * .6, 0, 0); v.elbowR.rotation.set(-.5 - k * .6, 0, 0) });
+      showB.x += (BL.x - showB.x) * al; showB.y += (BL.y - showB.y) * al; showB.z += (BL.z - showB.z) * al; ballM.position.set(showB.x, showB.y, showB.z); { const o = BL.own >= 0 ? P[BL.own] : null, bv = o ? o.sp : Math.hypot(BL.vx, BL.vz); if (bv > .2) ballM.rotation.z -= bv * dt / .22 }
+      const ax2 = clamp(showB.x, -SC_PL + 10, SC_PL - 10), az2 = clamp(showB.z, -24, 24);
+      camLook.lerp(new T.Vector3(ax2, 0, az2 * .7 - 2), Math.min(1, dt * 3)); camPos.lerp(new T.Vector3(ax2 * .95, 16.5, az2 * .45 + 25), Math.min(1, dt * 3)); camera.position.copy(camPos); camera.lookAt(camLook);
+      sun.target.position.copy(camLook); sun.position.set(camLook.x - 30, 60, camLook.z + 40); sun.target.updateMatrixWorld();
+      renderer.render(scene, camera); hud();
+      panel();
+    }
+    const proj = (x, y, z) => { const v = new T.Vector3(x, y, z).project(camera); return v.z > 1 ? null : [(v.x + 1) / 2 * VW, (1 - v.y) / 2 * VH] };
+    function hud() {
+      const w = VW, h = VH; c.clearRect(0, 0, w, h);
+      if (S.ph === "lobby") return;
+      const t0 = SC_TEAMS[S.teams[0]], t1 = SC_TEAMS[S.teams[1]], x = 10, y = 8;
+      c.fillStyle = "rgba(10,12,24,.88)"; c.fillRect(x, y, 250, 30); c.fillStyle = t0.c1; c.fillRect(x + 4, y + 4, 22, 22); c.fillStyle = t1.c1; c.fillRect(x + 156, y + 4, 22, 22);
+      c.font = `bold 14px sans-serif`; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.textAlign = "left"; c.fillText(t0.sh, x + 30, y + 16); c.textAlign = "right"; c.fillText(t1.sh, x + 152, y + 16);
+      c.fillStyle = "#F2C233"; c.fillRect(x + 72, y + 4, 44, 22); c.fillStyle = "#111"; c.textAlign = "center"; c.font = `16px ${DISP}`; c.fillText(`${S.sc[0]} - ${S.sc[1]}`, x + 94, y + 16);
+      const mm = Math.floor(S.clk), ss = Math.floor((S.clk - mm) * 60); c.fillStyle = "#fff"; c.fillRect(x + 184, y + 3, 62, 24); c.fillStyle = "#111"; c.font = `bold 15px sans-serif`; c.fillText(`${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`, x + 215, y + 16);
+      // 動かしている選手（自分のチームの色の三角と名前）と、相手のボール持ち（赤い三角）
+      const mine = P[act[myTeam]], o = BL.own >= 0 ? P[BL.own] : null;
+      const tag = (p, col, nm) => { const s2 = show[p.i], q = proj(s2.x, 2.25, s2.z), q2 = proj(s2.x, 0, s2.z); if (!q) return; c.fillStyle = col; c.beginPath(); c.moveTo(q[0] - 7, q[1] - 10); c.lineTo(q[0] + 7, q[1] - 10); c.lineTo(q[0], q[1]); c.fill(); if (nm && q2) { c.font = `bold 12px sans-serif`; c.textAlign = "center"; c.fillStyle = "rgba(0,0,0,.5)"; c.fillText(nm, q2[0] + 1, q2[1] + 15); c.fillStyle = "#fff"; c.fillText(nm, q2[0], q2[1] + 14) } };
+      if (S.ph !== "end") { tag(mine, "#4DE3FF", nameOf(mine.i)); if (o && o.t !== myTeam) tag(o, "#FF5A4A", nameOf(o.i)) }
+      // 小さい地図（下のまん中）
+      const mw = Math.min(170, w * .22), mh = mw * 68 / 105, mx = w / 2 - mw / 2, my = h - mh - 8, MX = (x2) => mx + (x2 + SC_PL) / (SC_PL * 2) * mw, MY = (z2) => my + (z2 + SC_PW) / (SC_PW * 2) * mh;
+      c.fillStyle = "rgba(30,90,40,.75)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1; c.strokeRect(mx, my, mw, mh); c.beginPath(); c.moveTo(mx + mw / 2, my); c.lineTo(mx + mw / 2, my + mh); c.stroke();
+      P.forEach((p, i) => { const s2 = show[i]; c.fillStyle = p.t === myTeam ? "#FFFFFF" : SC_TEAMS[S.teams[p.t]].c1; c.beginPath(); c.arc(MX(s2.x), MY(s2.z), i === act[myTeam] ? 3.6 : 2.4, 0, 7); c.fill(); if (i === act[myTeam]) { c.strokeStyle = "#4DE3FF"; c.lineWidth = 1.5; c.stroke() } });
+      c.fillStyle = "#FFE14D"; c.beginPath(); c.arc(MX(showB.x), MY(showB.z), 2.6, 0, 7); c.fill();
+      if (shootT != null) { const pw = clamp((performance.now() - shootT) / 900, 0, 1); c.fillStyle = "rgba(0,0,0,.5)"; c.fillRect(w / 2 - 80, h * .62, 160, 12); c.fillStyle = pw > .92 ? "#FF5A4A" : "#FFE14D"; c.fillRect(w / 2 - 80, h * .62, 160 * pw, 12) }
+      if ((S.ph === "goal" || S.ph === "ko" || S.ph === "half" || S.mt > 0) && S.msg) bigText(c, S.msg, w / 2, h * .3, S.ph === "goal" ? 40 : 24, S.ph === "goal" ? "#FFE14D" : "#fff");
+      // ボタンの名前：ボールを持っているかで変える
+      const hasMine = o && o.t === myTeam, lbl = hasMine ? ["シュート", "スルー", "パス", "ダッシュ<br><small>＆スキル</small>"] : ["タックル", "プレス", "切り替え", "ダッシュ"], key = lbl.join();
+      if (key !== lastLbl) { lastLbl = key; ["b-shoot", "b-thru", "b-pass", "b-dash"].forEach((id, k) => ($("#" + id).innerHTML = lbl[k])) }
+    }
+    let lastLbl = "", lastMsg = "";
+    function panel() {
+      let html = "";
+      if (S.ph === "lobby") {
+        const gp = matchPeers()[0], mineT = me.s.team ?? (host ? 0 : 1), cpuT = me.s.cpuTeam ?? ((mineT + 1) % 5);
+        const card = (i, sel, act2) => { const tm = SC_TEAMS[i]; return `<button class="sc-team ${sel ? "on" : ""}" data-act="${act2}" data-i="${i}"><b><i style="background:${tm.c1};border-color:${tm.c2}"></i>${tm.name}</b>${SC_STATS.map(([k, n]) => `<span><em>${n}</em><s><u style="width:${tm.st[k] * 20}%"></u></s></span>`).join("")}</button>` };
+        if (!me.s.rdy) html = `<p class="eyebrow">あなたのチーム</p><div class="sc-teams">${SC_TEAMS.map((_, i) => card(i, i === mineT, "sc-team")).join("")}</div>` + (gp ? `<p class="muted" style="margin:0">相手：${esc(pName(gp))}（${(peerS(gp) || {}).team != null ? SC_TEAMS[peerS(gp).team].name : "えらんでいます"}）</p>` : `<p class="eyebrow">相手（CPU）のチーム</p><div class="sc-teams sm">${SC_TEAMS.map((tm, i) => `<button class="chipbtn ${i === cpuT ? "on" : ""}" data-act="sc-cpu" data-i="${i}">${tm.name}</button>`).join("")}</div>`) + `<button class="btn" data-act="act-ready">キックオフ</button>`;
+        else html = `<p class="wait">${gp ? esc(pName(gp)) + "の準備を待っています" : "まもなくキックオフ"}</p>`;
+      } else if (S.ph === "end") { const my = S.sc[myTeam], th = S.sc[1 - myTeam]; html = `<p class="verdict ${my > th ? "good" : my < th ? "bad" : ""}">${my > th ? "勝ち！" : my < th ? "負け…" : "引き分け"}　${S.sc[0]} - ${S.sc[1]}</p><p class="muted">${SC_TEAMS[S.teams[0]].name} 対 ${SC_TEAMS[S.teams[1]].name}</p>${againBtns("soccer")}` }
+      if (html !== lastMsg) { lastMsg = html; setMsg(html) }
+      cardEl.classList.toggle("sc-lobby", S.ph === "lobby");
+    }
+    const onAct = (ev) => { const t = ev.target.closest("[data-act]"); if (!t) return; const a = t.dataset.act; if (a === "sc-team") setS({ team: Number(t.dataset.i) }); else if (a === "sc-cpu") setS({ cpuTeam: Number(t.dataset.i) }) };
+    cardEl.addEventListener("click", onAct);
+    if (me.s.team == null) setTimeout(() => setS({ team: host ? 0 : 1 }), 0);
+    const stopLoop = loop(frame);
+    return () => {
+      stopLoop(); LE.stop(); removeEventListener("keydown", onKey); cardEl.removeEventListener("click", onAct); cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); if (mm !== brCharMat) mm.dispose() }) });
+      scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
+    };
+  }
   // ----- ジャンプ走（レース） -----
   // 同じコースを同時に走って、先にゴールしたほうが勝ち。？ブロックからアイテムが出る。こうらを投げると相手が転ぶ
   const RUN_LEN = 15000, RUN_SPD = 340;
@@ -4000,7 +3986,7 @@ html.br-portrait .br-ui { display: none }
       for (const x of [-.042, .042]) { B.sph(.017, "#FFFFFF", x, 1.675, .1, 1, .8, .6, 1); B.sph(.01, "#222", x, 1.675, .11, 1, 1, .5, 1) }
       B.sph(.018, phShade(skin, -.08), 0, 1.645, .115, .8, 1, 1.2, 1); B.box(.05, .008, .01, "#9A5A4A", 0, 1.605, .105);
       for (const x of [-.115, .115]) B.sph(.025, skin, x, 1.66, 0, .5, 1, .8, 1);
-      B.sph(.16, acc, 0, 1.24, -.2, 1, 1.15, .55, 2); B.box(.04, .4, .03, phShade(acc, -.3), -.12, 1.3, .14); B.box(.04, .4, .03, phShade(acc, -.3), .12, 1.3, .14);
+      if (!look.kit) { B.sph(.16, acc, 0, 1.24, -.2, 1, 1.15, .55, 2); B.box(.04, .4, .03, phShade(acc, -.3), -.12, 1.3, .14); B.box(.04, .4, .03, phShade(acc, -.3), .12, 1.3, .14); }
     }, body);
     const vest = part((B) => { B.cyl(.215, .19, .42, "#4C5236", 0, 1.24, .005, 16); for (const x of [-.09, .09]) B.box(.09, .08, .03, "#3C4228", x, 1.12, .2) }, body); vest.visible = false;
     const helm = part((B) => { B.sph(.135, "#4C5A3C", 0, 1.7, 0, 1.05, .8, 1.1, 2); B.box(.27, .02, .05, "#3C4A2C", 0, 1.66, .12) }, body); helm.visible = false;
@@ -5177,7 +5163,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0007";
+  const APP_VER = "1031-0019";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
