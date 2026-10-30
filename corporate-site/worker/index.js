@@ -387,7 +387,8 @@ async function rows(env, path) {
 
 async function sendDailySummary(env) {
   if (!Number(env.CAMPAIGN_DAILY || 0) || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY) return;
-  const since = new Date(Date.now() - 24 * 3600000).toISOString();
+  // 前の日の送信を数えないよう、23時間前から（毎朝の送信は数分かかるため、24時間だと前の日の分が入る）
+  const since = new Date(Date.now() - 23 * 3600000).toISOString();
   const [sent, failed, clicked, applied, stopped, followed, left, totalSent, totalClicked, totalApplied] = await Promise.all([
     countRows(env, `posupos_leads?sent_at=gte.${since}`),
     rows(env, `posupos_leads?select=shop_name,email,error&status=eq.failed&order=created_at.desc&limit=20`),
