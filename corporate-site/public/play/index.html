@@ -576,7 +576,7 @@ html.br-portrait .br-ui { display: none }
     soccer: { grp: "body", name: "3対3サッカー", ico: "⚽", c: "var(--ok)", desc: "ダッシュ・タックル・シュートで点をうばいあう。2分で点が多いチームの勝ち" },
     hide: { grp: "body", name: "かくれんぼ", ico: "鬼", c: "var(--pink)", desc: "3Dのおうち・公園・遊園地・テーマパークで、物に変身して隠れる。鬼は撃って探す" },
     pk: { grp: "body", name: "PK対決", ico: "⚽", c: "var(--gold)", desc: "なぞってシュート、予想してセーブ。交代で5本ずつ蹴りあう" },
-    kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "ドリフトでダッシュ、アイテムで妨害。3周して先にゴールしたら勝ち" },
+    kart: { grp: "body", name: "カートレース", ico: "車", c: "var(--pink)", desc: "3Dのサーキット・海岸・雪の峠・夜の街。ドリフトでダッシュ、アイテムで妨害。3周で勝負" },
     run: { grp: "body", name: "ジャンプ走", ico: "↑", c: "var(--sky)", desc: "？ブロックのアイテムでレース。こうらで相手を転ばせろ" },
     army: { grp: "body", name: "軍団ラン", ico: "兵", c: "var(--sky)", desc: "道中で軍団を強くして、最後はふたりの軍団で決戦" },
     tycoon: { grp: "body", name: "木こりタイクーン", ico: "木", c: "var(--ok)", desc: "ふたりで協力。木を切って売って、お店を広げてお城をたてよう" },
@@ -1983,49 +1983,20 @@ html.br-portrait .br-ui { display: none }
       return loop(frame);
     },
   };
-  // ----- カートレース -----
-  // 3周レース。自分のカートは自分の画面で動かし、コンピューターのカートは先に始めた人(ホスト)が動かす。
-  // 投げたアイテム（バナナ・こうら）は投げた人の画面が持ち主。当たった側が「当たった」を送り、持ち主が消す。
-  const KT_LAPS = 3, KT_VMAX = 250, KT_RW = 46;
-  const KT_ITEMS = { mush: "キノコ", banana: "バナナ", shell: "こうら", star: "スター" };
+  // ----- カートレース（3D） -----
+  // 計算は前と同じく平面（1単位＝10cm）。3D の表示だけ 1/10 にして描く（KS）。キャラ・アイテムはオリジナル。
+  // コースは制御点をなめらかにつないだ線（kartTrack）。コーナーには縁石、外側にバリア。バリアの外へは出られない。
+  // ホストがコンピューターを動かし、順位はホストの画面でゴールした順番で決める（ふたりの画面で結果がずれない）。
+  const KT_LAPS = 3, KT_VMAX = 250, KT_RW = 46, KT_WALL = 30, KS = .1;
+  const KT_ITEMS = { turbo: "ターボ", banana: "バナナ", rocket: "ロケット", shield: "シールド" };
   const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"]];
+  const KT_DRIVERS = ["ハヤト", "リン", "ゴウ", "ミナ", "ケイ"];
   const KT_STAGES = [
-    { name: "グリーンサーキット", pts: [[300, 250], [800, 180], [1250, 260], [1420, 520], [1250, 760], [950, 700], [750, 850], [900, 1050], [600, 1180], [280, 1050], [200, 700]],
-      off: ["#58B04A", "#4E9F42"], road: "#76767F", curb: ["#fff", "#E23B2E"], line: "rgba(255,255,255,.7)", sky: [[110, 170, 235], [168, 214, 240]], hill: ["#8FB8D8", "#3E9A4C"], slow: 0.45 },
-    { name: "サンセットビーチ", pts: [[250, 300], [600, 200], [1000, 260], [1400, 220], [1450, 600], [1150, 700], [1300, 1000], [1000, 1180], [600, 1050], [350, 1150], [200, 800]],
-      off: ["#E9D29C", "#DFC48A"], road: "#8A7F74", curb: ["#fff", "#2BA7D8"], line: "rgba(255,255,255,.6)", sky: [[250, 140, 90], [255, 214, 160]], hill: ["#E59B7A", "#2E9AA8"], slow: 0.5 },
-    { name: "スノーマウンテン", pts: [[300, 200], [1300, 200], [1450, 450], [1100, 500], [1350, 800], [1300, 1150], [900, 1000], [500, 1180], [200, 950], [450, 650], [200, 450]],
-      off: ["#F2F6FA", "#E1EAF2"], road: "#5E6670", curb: ["#fff", "#2E6FD0"], line: "rgba(255,255,255,.75)", sky: [[150, 180, 215], [225, 236, 246]], hill: ["#C7D5E6", "#F7FBFF"], slow: 0.4 },
-    { name: "ナイトシティ", pts: [[250, 250], [700, 400], [1100, 180], [1450, 400], [1250, 650], [1450, 950], [1050, 1200], [800, 900], [500, 1150], [200, 900], [400, 600]],
-      off: ["#1A1E3A", "#22284A"], road: "#3A3A4A", curb: ["#FF3FD0", "#33E6FF"], line: "rgba(200,220,255,.45)", sky: [[10, 12, 40], [60, 40, 110]], hill: ["#2B2560", "#3E3480"], slow: 0.45 },
+    { name: "グランプリ", theme: "gp", ground: "grass", pts: [[200, 700], [200, 360], [330, 210], [700, 180], [1050, 200], [1210, 320], [1150, 480], [950, 520], [900, 650], [1100, 770], [1400, 810], [1500, 1000], [1380, 1180], [1000, 1220], [700, 1150], [500, 1210], [300, 1100]], sky: ["#3F8FE0", "#CFE6F6"], fog: "#CFE6F6", wall: "tire" },
+    { name: "海岸ハイウェイ", theme: "coast", ground: "grass", pts: [[250, 320], [650, 190], [1100, 230], [1380, 380], [1460, 700], [1340, 1000], [1100, 1150], [800, 1080], [680, 860], [470, 950], [240, 1100], [150, 800], [210, 520]], sky: ["#4FA3E8", "#F6E2C6"], fog: "#EADBC8", wall: "rail" },
+    { name: "雪の峠", theme: "alpine", ground: "snow", pts: [[300, 260], [700, 200], [1000, 300], [1180, 190], [1450, 260], [1500, 560], [1250, 660], [1400, 910], [1300, 1180], [950, 1150], [800, 950], [600, 1150], [300, 1110], [190, 800], [340, 550]], sky: ["#7FA6D6", "#E8EEF5"], fog: "#E4EBF2", wall: "fence" },
+    { name: "ナイトシティ", theme: "night", ground: "asphalt", pts: [[260, 260], [800, 250], [1300, 260], [1450, 410], [1450, 700], [1300, 830], [950, 830], [850, 960], [850, 1150], [700, 1260], [360, 1250], [220, 1100], [220, 600]], sky: ["#060818", "#2A2050"], fog: "#1A1838", wall: "neon" },
   ];
-  // アイテムの絵（ルーレット・持っているアイテムの表示・コースの上で使う）
-  function kartItemIcon(c, k, x, y, r) {
-    c.save(); c.translate(x, y);
-    if (k === "mush") {
-      c.fillStyle = "#F4E2C6"; c.fillRect(-r * 0.42, -r * 0.05, r * 0.84, r * 0.75);
-      c.fillStyle = "#111"; c.fillRect(-r * 0.22, r * 0.12, r * 0.1, r * 0.22); c.fillRect(r * 0.12, r * 0.12, r * 0.1, r * 0.22);
-      c.fillStyle = "#E23B2E"; c.beginPath(); c.arc(0, 0, r * 0.82, Math.PI, 0); c.fill();
-      c.fillStyle = "#fff"; for (const [px, py, pr] of [[0, -0.5, 0.2], [-0.5, -0.22, 0.16], [0.5, -0.22, 0.16]]) { c.beginPath(); c.arc(px * r, py * r, pr * r, 0, 7); c.fill() }
-    } else if (k === "banana") {
-      c.rotate(-0.5); c.fillStyle = "#F7D23E"; c.beginPath(); c.arc(0, -r * 0.35, r * 0.85, 0.35, Math.PI - 0.35); c.arc(0, -r * 0.95, r * 1.2, Math.PI - 0.55, 0.55, true); c.fill();
-      c.fillStyle = "#6B4A1A"; c.fillRect(r * 0.62, -r * 0.05, r * 0.16, r * 0.2); c.fillRect(-r * 0.78, -r * 0.05, r * 0.16, r * 0.2);
-      c.strokeStyle = "rgba(160,110,20,.6)"; c.lineWidth = Math.max(1, r * 0.06); c.beginPath(); c.arc(0, -r * 0.35, r * 0.6, 0.6, Math.PI - 0.6); c.stroke();
-    } else if (k === "shell") {
-      c.fillStyle = "#fff"; c.beginPath(); c.ellipse(0, r * 0.25, r * 0.85, r * 0.42, 0, 0, 7); c.fill();
-      c.fillStyle = "#24A148"; c.beginPath(); c.arc(0, r * 0.12, r * 0.8, Math.PI, 0); c.fill();
-      c.strokeStyle = "#E9F7EC"; c.lineWidth = Math.max(1, r * 0.08);
-      c.beginPath(); c.moveTo(-r * 0.32, r * 0.1); c.lineTo(-r * 0.2, -r * 0.4); c.lineTo(r * 0.2, -r * 0.4); c.lineTo(r * 0.32, r * 0.1); c.closePath(); c.stroke();
-      c.beginPath(); c.moveTo(-r * 0.2, -r * 0.4); c.lineTo(-r * 0.62, -r * 0.2); c.moveTo(r * 0.2, -r * 0.4); c.lineTo(r * 0.62, -r * 0.2); c.stroke();
-      c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.ellipse(-r * 0.3, -r * 0.35, r * 0.18, r * 0.1, -0.5, 0, 7); c.fill();
-    } else if (k === "star") {
-      c.fillStyle = "#FFD23A"; c.strokeStyle = "#D99A00"; c.lineWidth = Math.max(1, r * 0.08); c.beginPath();
-      for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? r * 0.42 : r * 0.95; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) }
-      c.closePath(); c.fill(); c.stroke();
-      c.fillStyle = "#111"; c.fillRect(-r * 0.2, -r * 0.18, r * 0.1, r * 0.26); c.fillRect(r * 0.1, -r * 0.18, r * 0.1, r * 0.26);
-    }
-    c.restore();
-  }
   function kartTrack(P) {
     const out = [], n = P.length, SEG = 40;
     for (let i = 0; i < n; i++) {
@@ -2038,293 +2009,355 @@ html.br-portrait .br-ui { display: none }
     }
     return out;
   }
+  // アイテムの絵（オリジナル）：ターボ＝青い缶、バナナ、ロケット、シールド＝水色の六角形
+  function ktIcon(c, k, x, y, r) {
+    c.save(); c.translate(x, y);
+    if (k === "turbo") { c.fillStyle = "#2E6FD0"; c.fillRect(-r * .45, -r * .8, r * .9, r * 1.6); c.fillStyle = "#9FC8FF"; c.fillRect(-r * .45, -r * .8, r * .9, r * .22); c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(r * .1, -r * .45); c.lineTo(-r * .25, r * .1); c.lineTo(0, r * .1); c.lineTo(-r * .1, r * .55); c.lineTo(r * .28, -r * .05); c.lineTo(r * .02, -r * .05); c.closePath(); c.fill() }
+    else if (k === "banana") { c.rotate(-.5); c.fillStyle = "#F7D23E"; c.beginPath(); c.arc(0, -r * .35, r * .85, .35, Math.PI - .35); c.arc(0, -r * .95, r * 1.2, Math.PI - .55, .55, true); c.fill(); c.fillStyle = "#6B4A1A"; c.fillRect(r * .62, -r * .05, r * .16, r * .2) }
+    else if (k === "rocket") { c.rotate(-.6); c.fillStyle = "#E23A3A"; c.fillRect(-r * .22, -r * .5, r * .44, r * 1.1); c.fillStyle = "#F2F2F2"; c.beginPath(); c.moveTo(-r * .22, -r * .5); c.lineTo(0, -r * .95); c.lineTo(r * .22, -r * .5); c.fill(); c.fillStyle = "#555"; c.fillRect(-r * .45, r * .3, r * .23, r * .32); c.fillRect(r * .22, r * .3, r * .23, r * .32); c.fillStyle = "#FFB040"; c.beginPath(); c.moveTo(-r * .15, r * .6); c.lineTo(0, r * .98); c.lineTo(r * .15, r * .6); c.fill() }
+    else if (k === "shield") { c.fillStyle = "rgba(80,220,255,.35)"; c.strokeStyle = "#4DE3FF"; c.lineWidth = Math.max(1.5, r * .12); c.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 - Math.PI / 2; c.lineTo(Math.cos(a) * r * .85, Math.sin(a) * r * .85) } c.closePath(); c.fill(); c.stroke(); c.fillStyle = "#fff"; c.beginPath(); c.arc(-r * .25, -r * .25, r * .14, 0, 7); c.fill() }
+    c.restore();
+  }
+  // カートと運転する人（オリジナル）。正面は +z。前輪は向きが変わる
+  function ktKartModel(col, suit) {
+    const T = THREE, mat = brCharMat || (brCharMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .78 })), g = new T.Group();
+    const part = (build, parent = g) => { const B = phParts(); build(B); const m = new T.Mesh(phMerge(B.L, false), mat); m.castShadow = true; parent.add(m); return m };
+    const [c1, c2] = col;
+    part((B) => {
+      // 車体：床・横のポッド・前のノーズ・後ろのバンパー・エンジン・シート・ハンドル
+      B.box(.95, .06, 1.7, "#2A2A2E", 0, .13, 0); B.seg(-.46, .16, -.82, -.46, .16, .82, .05, .05, "#555"); B.seg(.46, .16, -.82, .46, .16, .82, .05, .05, "#555");
+      for (const sx of [-1, 1]) { B.box(.22, .2, .95, c1, sx * .56, .24, -.02); B.box(.23, .05, .96, c2, sx * .56, .35, -.02) }
+      B.sph(.34, c1, 0, .26, .78, 1.45, .5, 1.05, 2); B.box(.62, .05, .16, "#F2F2F2", 0, .43, .78); B.box(1.12, .08, .1, "#1C1C1E", 0, .16, 1.08); B.box(1.18, .12, .12, "#1C1C1E", 0, .2, -1.0);
+      B.box(.36, .3, .34, "#6A6E74", .24, .36, -.66); B.cyl(.045, .045, .3, "#333", .42, .42, -.85, 8, Math.PI / 2 - .4); B.box(.16, .2, .2, "#3A3A40", -.18, .34, -.66);
+      B.box(.48, .1, .42, "#1E1E22", 0, .32, -.32); B.box(.48, .48, .1, "#1E1E22", 0, .55, -.52, 0, -.3);
+      B.seg(0, .3, .62, 0, .62, .32, .04, .04, "#333"); B.tor(.15, .025, "#222", 0, .64, .3, -1.0, 0);
+      // 運転する人：レーシングスーツ・ヘルメット（バイザー）・手と足
+      B.sph(.17, suit, 0, .48, -.34, 1.1, .7, .9, 2); B.cyl(.17, .15, .42, suit, 0, .74, -.3, 14); B.sph(.17, suit, 0, .93, -.29, 1.05, .5, .85, 2);
+      for (const sx of [-1, 1]) { B.seg(sx * .1, .42, -.24, sx * .14, .5, .2, .12, .12, suit); B.seg(sx * .14, .5, .2, sx * .14, .3, .55, .1, .1, suit); B.box(.1, .1, .2, "#222", sx * .14, .26, .63);
+        B.seg(sx * .19, .9, -.28, sx * .2, .76, .02, .09, .09, suit); B.seg(sx * .2, .76, .02, sx * .14, .66, .28, .08, .08, suit); B.sph(.045, "#222", sx * .13, .66, .3) }
+      B.cyl(.05, .055, .08, "#E3B48C", 0, 1.0, -.28, 10); B.sph(.155, c1, 0, 1.13, -.27, 1, 1.05, 1.08, 2); B.sph(.157, "#FFFFFF", 0, 1.17, -.29, .98, .55, 1.06, 2);
+      B.box(.22, .08, .05, "#1A2230", 0, 1.13, -.13); B.box(.08, .22, .02, c2, 0, 1.18, -.43);
+    });
+    const wheel = (r, wd, x, z) => { const p = new T.Group(); p.position.set(x, r, z); g.add(p); const w = part((B) => { B.cyl(r, r, wd, "#151517", 0, 0, 0, 16, 0, Math.PI / 2); B.cyl(r * .55, r * .55, wd + .01, "#C8CCD2", 0, 0, 0, 10, 0, Math.PI / 2) }, p); return { p, w } };
+    const fl = wheel(.14, .15, -.55, .62), fr = wheel(.14, .15, .55, .62), rl = wheel(.16, .22, -.58, -.62), rr = wheel(.16, .22, .58, -.62);
+    // ターボの火・ドリフトの火花・シールド
+    const flame = new T.Mesh(new T.ConeGeometry(.09, .45, 8), new T.MeshBasicMaterial({ color: "#FFA040", transparent: true, opacity: .85 })); flame.rotation.x = -Math.PI / 2; flame.position.set(.42, .42, -1.12); flame.visible = false; g.add(flame);
+    const sparks = [-1, 1].map((sx) => { const s = new T.Mesh(new T.SphereGeometry(.07, 6, 5), new T.MeshBasicMaterial({ color: "#7FD0FF" })); s.position.set(sx * .58, .06, -.85); s.visible = false; g.add(s); return s });
+    const shield = new T.Mesh(new T.SphereGeometry(1.25, 16, 12), new T.MeshBasicMaterial({ color: "#4DE3FF", transparent: true, opacity: .22, depthWrite: false })); shield.position.y = .55; shield.visible = false; g.add(shield);
+    return { g, fl, fr, rl, rr, flame, sparks, shield };
+  }
+  // コースの3D：道路・縁石・白線・スタートライン・バリア・まわりの景色（テーマごと）
+  function ktWorld(ST, TR, scene, Q) {
+    const T = THREE, NS = TR.length, P = TR.map(([x, y]) => [x * KS, y * KS]), RW = KT_RW * KS, B = phParts(), NE = phParts(), ms = [], cull = [];
+    const N = P.map((_, i) => { const a = P[(i - 1 + NS) % NS], b = P[(i + 1) % NS], dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz) || 1; return [-dz / l, dx / l] });
+    const ang = P.map((_, i) => { const a = P[i], b = P[(i + 1) % NS]; return Math.atan2(b[1] - a[1], b[0] - a[0]) });
+    const curv = P.map((_, i) => { let s = 0; for (let k = -6; k < 6; k++) s += phAng(ang[(i + k + 1 + NS) % NS] - ang[(i + k + NS) % NS]); return s });
+    const xs = P.map((p) => p[0]), zs = P.map((p) => p[1]), bx0 = Math.min(...xs), bx1 = Math.max(...xs), bz0 = Math.min(...zs), bz1 = Math.max(...zs), cx = (bx0 + bx1) / 2, cz = (bz0 + bz1) / 2;
+    const night = ST.theme === "night", r = rng(ST.name.length * 31 + 7);
+    const trackDist = (x, z) => { let d = 1e9; for (let i = 0; i < NS; i += 2) { const dx = P[i][0] - x, dz = P[i][1] - z, q = dx * dx + dz * dz; if (q < d) d = q } return Math.sqrt(d) };
+    const place = (build, x, z, yaw, L = B) => { const b2 = phParts(); build(b2); const m4 = new T.Matrix4().makeRotationY(yaw).setPosition(x, 0, z); for (const p of b2.L) { p.g.applyMatrix4(m4); L.L.push(p) } };
+    // 地面
+    const gtex = phTex(ST.ground), g0 = new T.PlaneGeometry(900, 900); g0.rotateX(-Math.PI / 2); g0.translate(cx, 0, cz); const uvg = g0.attributes.uv; for (let i = 0; i < uvg.count; i++) uvg.setXY(i, uvg.getX(i) * 900 / (PH_TS[ST.ground] || 4), uvg.getY(i) * 900 / (PH_TS[ST.ground] || 4));
+    const gm = new T.Mesh(g0, new T.MeshStandardMaterial({ map: gtex, roughness: .95, color: night ? "#55586A" : "#FFFFFF" })); gm.receiveShadow = true; scene.add(gm); ms.push(gm);
+    // 道路（なめらかな帯）
+    const pos = [], uv = [], idx = []; let acc = 0;
+    for (let i = 0; i <= NS; i++) { const k = i % NS, [x, z] = P[k], [nx, nz] = N[k]; if (i) acc += Math.hypot(x - P[(i - 1) % NS][0], z - P[(i - 1) % NS][1]); pos.push(x + nx * RW, .03, z + nz * RW, x - nx * RW, .03, z - nz * RW); uv.push(0, acc / 8, RW * 2 / 8, acc / 8); if (i) { const a = (i - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3) } }
+    const rg = new T.BufferGeometry(); rg.setAttribute("position", new T.Float32BufferAttribute(pos, 3)); rg.setAttribute("uv", new T.Float32BufferAttribute(uv, 2)); rg.setIndex(idx); rg.computeVertexNormals();
+    const atex = phTex("asphalt"), road = new T.Mesh(rg, new T.MeshStandardMaterial({ map: atex, roughness: night ? .45 : .88, metalness: night ? .25 : 0, color: night ? "#9A9AB0" : "#C8C8CC", side: T.DoubleSide })); road.receiveShadow = true; scene.add(road); ms.push(road);
+    // 縁石（コーナーだけ）と白線（まっすぐのところ）
+    const curbCols = { gp: ["#E23A3A", "#F4F4F4"], coast: ["#2E8BE6", "#F4F4F4"], alpine: ["#E23A3A", "#F4F4F4"], night: ["#FF3FD0", "#33E6FF"] }[ST.theme];
+    for (let i = 0; i < NS; i++) {
+      const j = (i + 1) % NS, corner = Math.abs(curv[i]) > .1;
+      for (const s of [1, -1]) {
+        if (corner) { const o = RW + .5; (night ? NE : B).seg(P[i][0] + N[i][0] * s * o, .06, P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .06, P[j][1] + N[j][1] * s * o, 1.0, .07, curbCols[Math.floor(i / 3) % 2]) }
+        else { const o = RW - .25; B.seg(P[i][0] + N[i][0] * s * o, .045, P[i][1] + N[i][1] * s * o, P[j][0] + N[j][0] * s * o, .045, P[j][1] + N[j][1] * s * o, .2, .01, "#F2F2EE") }
+      }
+    }
+    // スタートライン（市松）・スタート位置の枠
+    { const [x, z] = P[0], [nx, nz] = N[0], tx = -nz, tz = nx; for (let a = 0; a < 12; a++) for (let b = 0; b < 2; b++) { const o = -RW + (a + .5) * RW * 2 / 12, f = (b - .5) * .8; B.box(RW * 2 / 12, .02, .8, (a + b) % 2 ? "#111" : "#F4F4F4", x + nx * o + tx * f, .05, z + nz * o + tz * f, Math.atan2(tx, tz)) } }
+    for (let n = 0; n < 6; n++) { const i = NS - 8 - Math.floor(n / 2) * 14, [x, z] = P[i], [nx, nz] = N[i], o = (n % 2 ? 18 : -18) * KS, px = x + nx * o, pz = z + nz * o, yaw = Math.atan2(-nz, nx) + Math.PI / 2; place((b2) => { b2.box(1.6, .015, .1, "#F2F2EE", 0, .05, .9); b2.box(.1, .015, 1.8, "#F2F2EE", -.8, .05, 0); b2.box(.1, .015, 1.8, "#F2F2EE", .8, .05, 0) }, px, pz, Math.atan2(P[(i + 1) % NS][0] - x, P[(i + 1) % NS][1] - z)) }
+    // スタートの門（ライトつき）
+    { const [x, z] = P[0], yaw = Math.atan2(P[1][0] - x, P[1][1] - z), W2 = RW + KT_WALL * KS + 1.2; place((b2) => { for (const sx of [-1, 1]) b2.box(.5, 6, .5, "#3A3E46", sx * W2, 3, 0); b2.box(W2 * 2 + .5, 1.2, .6, night ? "#22243A" : "#2A2E36", 0, 6.2, 0); b2.box(W2 * 1.6, .7, .05, "#F2F2F2", 0, 6.2, -.32); for (let a = 0; a < 8; a++) b2.box(W2 * 1.6 / 8, .35, .06, a % 2 ? "#111" : "#F2F2F2", -W2 * .8 + (a + .5) * W2 * 1.6 / 8, 6.2, -.33) }, x, z, yaw);
+      place((b2) => { for (let a = 0; a < 5; a++) b2.sph(.17, "#FF2A2A", -1.2 + a * .6, 5.45, -.32) }, x, z, yaw, NE) }
+    // バリア（コースのほかの部分にかぶるところは置かない）
+    const WO = RW + KT_WALL * KS + .4, okW = (q, i) => { for (let j = 0; j < NS; j += 2) { if (Math.abs(((j - i + NS + NS / 2) % NS) - NS / 2) < 40) continue; if (Math.hypot(P[j][0] - q[0], P[j][1] - q[1]) < RW + 3) return false } return true };
+    for (const s of [1, -1]) {
+      const Q2 = P.map((p, i) => [p[0] + N[i][0] * s * WO, p[1] + N[i][1] * s * WO]), ok = Q2.map((q, i) => okW(q, i));
+      for (let i = 0; i < NS; i++) {
+        const j = (i + 1) % NS; if (!ok[i] || !ok[j]) continue; const [x1, z1] = Q2[i], [x2, z2] = Q2[j];
+        if (ST.wall === "tire") { B.seg(x1, .38, z1, x2, .38, z2, .8, .76, "#1C1C1E"); B.seg(x1, .55, z1, x2, .55, z2, .82, .14, Math.floor(i / 5) % 2 ? "#E23A3A" : "#F4F4F4") }
+        else if (ST.wall === "rail") { B.seg(x1, .62, z1, x2, .62, z2, .08, .32, "#D8DCE0"); if (i % 4 === 0) B.box(.12, .75, .12, "#9A9EA4", x1, .37, z1) }
+        else if (ST.wall === "fence") { B.seg(x1, .55, z1, x2, .55, z2, .07, .1, "#7A5230"); B.seg(x1, .95, z1, x2, .95, z2, .07, .1, "#7A5230"); if (i % 4 === 0) B.box(.14, 1.2, .14, "#6A4428", x1, .6, z1); B.seg(x1, .15, z1, x2, .15, z2, .9, .3, "#F4F7FA") }
+        else { B.seg(x1, .5, z1, x2, .5, z2, .45, 1.0, "#55586A"); NE.seg(x1, .9, z1, x2, .9, z2, .47, .08, Math.floor(i / 20) % 2 ? "#FF3FD0" : "#33E6FF") }
+      }
+    }
+    // 景色を置ける場所（コースから十分はなれた所）
+    const spot = (minD, maxD = 120) => { for (let t = 0; t < 60; t++) { const x = bx0 - 60 + r() * (bx1 - bx0 + 120), z = bz0 - 60 + r() * (bz1 - bz0 + 120), d = trackDist(x, z); if (d > minD && d < maxD) return [x, z, d] } return null };
+    const trees = [];
+    if (ST.theme === "gp") {
+      // 観客席（スタートの直線の外）と、反対側のピットの建物
+      for (const [i0, s] of [[NS - 60, 1], [NS - 20, 1]]) { const i = (i0 + NS) % NS, [x, z] = P[i], o = WO + 4.5, yaw = Math.atan2(P[(i + 1) % NS][0] - x, P[(i + 1) % NS][1] - z); place((b2) => { for (let k = 0; k < 6; k++) { b2.box(14, .6 * (k + 1), 1.2, "#8A8E96", 0, .3 * (k + 1), s * (k * 1.2)); for (let a = 0; a < 16; a++) if (r() < .8) b2.box(.35, .45, .3, ["#E23A3A", "#2E8BE6", "#F2B233", "#F4F4F4", "#3DBE5A", "#E86AC0"][Math.floor(r() * 6)], -6.6 + a * .88, .6 * (k + 1) + .25, s * (k * 1.2 - .2)) } for (const px of [-6.8, 6.8]) b2.box(.25, 6, .25, "#555", px, 3, s * 7); b2.box(14.6, .2, 8, "#F4F4F4", 0, 6.1, s * 3.6) }, x + N[i][0] * s * o, z + N[i][1] * s * o, yaw) }
+      { const i = (NS - 40) % NS, [x, z] = P[i], o = WO + 5, yaw = Math.atan2(P[(i + 1) % NS][0] - x, P[(i + 1) % NS][1] - z); place((b2) => { b2.box(30, 5, 7, "#E8EAEE", 0, 2.5, -3.5); b2.box(30.4, .4, 7.4, "#2E8BE6", 0, 5.2, -3.5); for (let a = 0; a < 7; a++) { b2.box(3.2, 3, .1, "#3A3E46", -12 + a * 4, 1.5, .02); b2.box(3.2, .9, .12, "#BFE3F5", -12 + a * 4, 4, .03) } }, x - N[i][0] * o, z - N[i][1] * o, yaw) }
+      for (let k = 0; k < 10; k++) { const sp = spot(WO + 2, WO + 6); if (!sp) continue; const [x, z] = sp; place((b2) => { b2.box(4, 1.4, .12, ["#E23A3A", "#2E8BE6", "#F2B233", "#3DBE5A"][k % 4], 0, 1.4, 0); b2.box(3.6, .25, .14, "#F4F4F4", 0, 1.4, 0); for (const px of [-1.6, 1.6]) b2.box(.12, 1.4, .12, "#555", px, .7, 0) }, x, z, Math.atan2(cx - x, cz - z)) }
+      for (let k = 0; k < 260; k++) { const sp = spot(WO + 6, 110); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .6, kind: r() < .3 ? "pine" : "round", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 8; k++) { const a = k / 8 * 6.28, x = cx + Math.cos(a) * 200, z = cz + Math.sin(a) * 180; B.sph(40 + r() * 25, ["#5E9E4A", "#6BAA52", "#548F42"][k % 3], x, -8, z, 1.4, .45, 1.2, 1) }
+    } else if (ST.theme === "coast") {
+      const sea = bx1 + 18; const wm = new T.Mesh(new T.PlaneGeometry(500, 900), new T.MeshStandardMaterial({ map: phTex("water"), color: "#7FC0F0", roughness: .2, metalness: .2, transparent: true, opacity: .92 })); wm.geometry.rotateX(-Math.PI / 2); wm.geometry.translate(sea + 250, .05, cz); const wuv = wm.geometry.attributes.uv; for (let i = 0; i < wuv.count; i++) wuv.setXY(i, wuv.getX(i) * 40, wuv.getY(i) * 70); scene.add(wm); ms.push(wm); ms.water = wm;
+      const sand = new T.Mesh(new T.PlaneGeometry(26, 900), new T.MeshStandardMaterial({ map: phTex("sand"), roughness: 1 })); sand.geometry.rotateX(-Math.PI / 2); sand.geometry.translate(sea - 6, .02, cz); scene.add(sand); ms.push(sand);
+      const palm = (b2, s) => { let px = 0, py = 0; for (let k = 0; k < 6; k++) { const nx2 = px + .18 * s, ny = py + 1.1 * s; b2.seg(px, py, 0, nx2, ny, 0, .3 * s, .3 * s, "#8A6A44"); px = nx2; py = ny } for (let k = 0; k < 7; k++) { const a = k / 7 * 6.28; b2.seg(px, py, 0, px + Math.cos(a) * 2.6 * s, py - .9 * s, Math.sin(a) * 2.6 * s, .7 * s, .06, k % 2 ? "#3E9E45" : "#2F8A3A") } b2.sph(.3 * s, "#6A4A2A", px, py - .1, 0) };
+      for (let k = 0; k < 40; k++) { const z = bz0 - 40 + r() * (bz1 - bz0 + 80), x = sea - 10 + r() * 8; if (trackDist(x, z) > WO + 2) place((b2) => palm(b2, .9 + r() * .4), x, z, r() * 6.28) }
+      for (let k = 0; k < 60; k++) { const sp = spot(WO + 4, 100); if (sp && sp[0] < sea - 14) place((b2) => palm(b2, .8 + r() * .5), sp[0], sp[1], r() * 6.28) }
+      { const x = sea + 20, z = cz - 40; place((b2) => { b2.cyl(6, 7, 3, "#8A847A", 0, 1.5, 0, 12); for (let k = 0; k < 6; k++) b2.cyl(1.9 - k * .1, 2 - k * .1, 3, k % 2 ? "#E23A3A" : "#F4F4F4", 0, 4.5 + k * 3, 0, 16); b2.cyl(1.7, 1.7, 2, "#BFE3F5", 0, 22.5, 0, 12); b2.cone(2.1, 2, "#C0473B", 0, 24.5, 0, 12) }, x, z, 0) }
+      for (let k = 0; k < 5; k++) place((b2) => { b2.box(2, .8, 6, "#F4F4F4", 0, .4, 0); b2.cyl(.06, .06, 7, "#888", 0, 4, 0, 6); b2.seg(0, 7, 0, 0, 1.2, 2.5, .03, .03, "#888"); b2.box(.05, 5, 2.4, "#F4F4F4", 0, 3.8, 1.2) }, sea + 40 + r() * 120, bz0 + r() * (bz1 - bz0), r() * 6.28);
+      for (let k = 0; k < 140; k++) { const sp = spot(WO + 6, 110); if (sp && sp[0] < sea - 20) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .5, kind: "round", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 6; k++) { const z = cz + (k - 2.5) * 70; B.sph(45 + r() * 20, "#6BAA52", bx0 - 90, -10, z, 1.2, .5, 1.3, 1) }
+    } else if (ST.theme === "alpine") {
+      for (let k = 0; k < 520; k++) { const sp = spot(WO + 4, 120); if (sp) trees.push({ x: sp[0], z: sp[1], s: .9 + r() * .8, kind: "pine", c: Math.floor(r() * 3) }) }
+      for (let k = 0; k < 30; k++) { const sp = spot(WO + 4, 90); if (sp) { const s = 1 + r() * 2.5; B.sph(s, "#8A8E96", sp[0], s * .35, sp[1], 1.2, .8, 1, 0); B.sph(s * .6, "#F4F7FA", sp[0], s * .8, sp[1], 1.3, .4, 1.1, 1) } }
+      for (let k = 0; k < 8; k++) { const sp = spot(WO + 8, 60); if (sp) place((b2) => { b2.box(6, 3, 5, "#7A5230", 0, 1.5, 0); b2.gable(6, 5, 2, "#7A5230", 0, 3, 0); for (const sg of [-1, 1]) b2.box(6.6, .3, 3.4, "#F4F7FA", 0, 4, sg * 1.25, 0, sg * .67); b2.box(1, 2, .1, "#4A3020", 0, 1, 2.52); b2.box(1.1, .9, .1, "#FFE9A0", 1.8, 1.8, 2.52) }, sp[0], sp[1], Math.atan2(cx - sp[0], cz - sp[1])) }
+      for (let k = 0; k < 12; k++) { const a = k / 12 * 6.28, x = cx + Math.cos(a) * 230, z = cz + Math.sin(a) * 210, s = 50 + r() * 40; B.cone(s, s * 1.3, "#7A8494", x, s * .55, z, 9); B.cone(s * .4, s * .52, "#F4F7FA", x, s * 1.02, z, 9) }
+    } else {
+      // 夜の街：ビル（窓が光る）・街灯・ネオン
+      const wc = document.createElement("canvas"); wc.width = 64; wc.height = 128; { const w2 = wc.getContext("2d"); w2.fillStyle = "#14162A"; w2.fillRect(0, 0, 64, 128); for (let y = 4; y < 128; y += 12) for (let x = 4; x < 64; x += 10) { w2.fillStyle = r() < .55 ? ["#FFE9A0", "#BFE3FF", "#FFD27A"][Math.floor(r() * 3)] : "#1E2240"; w2.fillRect(x, y, 6, 7) } }
+      const wt = new T.CanvasTexture(wc); wt.wrapS = wt.wrapT = T.RepeatWrapping; ms.tex = wt;
+      for (let k = 0; k < 70; k++) { const sp = spot(WO + 7, 110); if (!sp) continue; const w = 8 + r() * 14, d = 8 + r() * 14, h = 12 + r() * 40, geo = new T.BoxGeometry(w, h, d), u = geo.attributes.uv; for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * Math.max(w, d) / 6, u.getY(i) * h / 8); const m = new T.Mesh(geo, new T.MeshStandardMaterial({ color: "#2A2E40", map: wt, emissive: "#FFFFFF", emissiveMap: wt, emissiveIntensity: .9, roughness: .6 })); m.position.set(sp[0], h / 2, sp[1]); scene.add(m); ms.push(m); if (r() < .4) NE.box(w * .6, 1.6, .2, ["#FF3FD0", "#33E6FF", "#FFE14D", "#7CF59A"][k % 4], sp[0], h * .7, sp[1] + d / 2 + .15) }
+      for (let i = 0; i < NS; i += 18) for (const s of [1, -1]) { const q = [P[i][0] + N[i][0] * s * (WO + 1), P[i][1] + N[i][1] * s * (WO + 1)]; if (!okW(q, i)) continue; B.box(.18, 6, .18, "#3A3E46", q[0], 3, q[1]); B.seg(q[0], 6, q[1], q[0] - N[i][0] * s * 1.6, 6, q[1] - N[i][1] * s * 1.6, .12, .12, "#3A3E46"); NE.sph(.28, "#FFF2C8", q[0] - N[i][0] * s * 1.6, 5.8, q[1] - N[i][1] * s * 1.6) }
+      const sg = new T.BufferGeometry(), sp2 = []; for (let k = 0; k < 400; k++) { const a = r() * 6.28, e = .15 + r() * 1.2, R = 380; sp2.push(cx + Math.cos(a) * Math.cos(e) * R, Math.sin(e) * R, cz + Math.sin(a) * Math.cos(e) * R) } sg.setAttribute("position", new T.Float32BufferAttribute(sp2, 3)); const stars = new T.Points(sg, new T.PointsMaterial({ color: "#FFFFFF", size: 1.5, sizeAttenuation: false, fog: false })); scene.add(stars); ms.push(stars);
+    }
+    // 木（同じ形をたくさん並べる）
+    if (trees.length) { const groups = {}; for (const t of trees) (groups[t.kind + t.c] = groups[t.kind + t.c] || []).push(t); const m4 = new T.Matrix4(), q = new T.Quaternion(), up = new T.Vector3(0, 1, 0); for (const L of Object.values(groups)) { const b2 = phParts(); phTree(b2, { x: 0, z: 0, s: 1, kind: L[0].kind, c: L[0].c }); const geo = phMerge(b2.L, true), mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .85 }), im = new T.InstancedMesh(geo, mat, L.length); L.forEach((t, i) => { q.setFromAxisAngle(up, (t.x * 3.1 + t.z) % 6.28); m4.compose(new T.Vector3(t.x, 0, t.z), q, new T.Vector3(t.s, t.s, t.s)); im.setMatrixAt(i, m4) }); im.instanceMatrix.needsUpdate = true; im.castShadow = Q.sh > 0; im.frustumCulled = false; scene.add(im); ms.push(im) } }
+    const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .82 });
+    const big = new T.Mesh(phMerge(B.L, true), mat); big.castShadow = big.receiveShadow = true; scene.add(big); ms.push(big);
+    if (NE.L.length) { const nm = new T.Mesh(phMerge(NE.L, false), new T.MeshBasicMaterial({ vertexColors: true })); scene.add(nm); ms.push(nm) }
+    // ？の箱の絵
+    const qc = document.createElement("canvas"); qc.width = qc.height = 64; { const q2 = qc.getContext("2d"), gr = q2.createLinearGradient(0, 0, 64, 64); gr.addColorStop(0, "#FF6FB0"); gr.addColorStop(.5, "#7FD0FF"); gr.addColorStop(1, "#FFE14D"); q2.fillStyle = gr; q2.fillRect(0, 0, 64, 64); q2.strokeStyle = "#FFFFFF"; q2.lineWidth = 6; q2.strokeRect(3, 3, 58, 58); q2.fillStyle = "#FFFFFF"; q2.font = "900 44px sans-serif"; q2.textAlign = "center"; q2.textBaseline = "middle"; q2.fillText("?", 32, 35) }
+    const boxMat = new T.MeshStandardMaterial({ map: new T.CanvasTexture(qc), emissive: "#FFFFFF", emissiveIntensity: .35, transparent: true, opacity: .9 });
+    return { ms, boxMat, P, N, bounds: [bx0, bz0, bx1, bz1] };
+  }
   ACTION.kart = {
+    full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("カートレース", `${KT_LAPS}周で先にゴールしたら勝ち`)}
-        <section class="card act" style="padding:12px;position:relative"><canvas id="cv" aria-label="レースのコース"></canvas><div id="act-msg"></div>
-        <div class="kpad"><div class="grp"><button class="kbtn" id="k-left" aria-label="左へ">◀</button><button class="kbtn" id="k-right" aria-label="右へ">▶</button></div>
+        <section class="card act kt" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="レースのコース"></canvas><div id="act-msg"></div>
+        <div class="kpad" style="z-index:3"><div class="grp"><button class="kbtn" id="k-left" aria-label="左へ">◀</button><button class="kbtn" id="k-right" aria-label="右へ">▶</button></div>
           <div class="grp col"><button class="kbtn small" id="k-item">アイテム</button><button class="kbtn" id="k-drift" style="font-size:14px">ドリフト</button></div></div>
-        <p class="muted">ステージはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ。虹色の？箱でアイテム：キノコ（ダッシュ）・スター（無敵で速い）・バナナ（後ろに置く）・こうら（前にとばす）。芝生は遅くなります。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
+        <p class="muted">ステージはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ（火花が青→オレンジでもっと長く）。虹色の「？」の箱でアイテム：ターボ（加速）・シールド（当たっても平気で少し速い）・バナナ（後ろに置く）・ロケット（コースにそって前へ飛ぶ）。芝生や砂は遅く、外側のかべにぶつかると減速します。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
     },
-    full: true,
     mount() {
-      const host = isFirst();
-      const ST = KT_STAGES[me.m.stage || 0] || KT_STAGES[0];
-      const cv = $("#cv");
-      // ゲーム中は画面いっぱいに広げる（奥行きの画面は縦横の比がちがっても描ける）
-      const ab = isPlaying() ? availBox(cv) : null;
-      const { c, w, h } = canvasFor(cv, ab ? clamp(ab.h / ab.w, 1.05, 2.6) : 1.05);
-      const safeTop = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
-      const TR = kartTrack(ST.pts), NS = TR.length;
-      const bx0 = Math.min(...TR.map((p) => p[0])), by0 = Math.min(...TR.map((p) => p[1])), bx1 = Math.max(...TR.map((p) => p[0])), by1 = Math.max(...TR.map((p) => p[1]));
-      const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
-      const slot = (n) => { const i = NS - 8 - Math.floor(n / 2) * 14; const [nx, ny, tx, ty] = norm(i); const off = n % 2 ? 18 : -18; return { x: TR[i][0] + nx * off, y: TR[i][1] + ny * off, ang: Math.atan2(ty, tx), idx: i } };
-      function nearest(x, y, guess) {
-        let best = guess, bd = 1e12;
-        const scan = (from, to) => { for (let j = from; j <= to; j++) { const i = ((j % NS) + NS) % NS; const d = (TR[i][0] - x) ** 2 + (TR[i][1] - y) ** 2; if (d < bd) { bd = d; best = i } } };
-        if (guess == null) scan(0, NS - 1); else scan(guess - 25, guess + 45);
-        return [best, Math.sqrt(bd)];
-      }
-      const BOXES = []; for (const bi of [70, 200, 320]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0 }) }
-      const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, driftT: 0, item: null, fin: 0, col, prog: 0 });
-      const meSlot = host ? 0 : 1;
-      const K = newKart(meSlot, 0);
-      let cpus = [];
-      const nCpu = () => (realOppPeer() ? 2 : 3);
-      function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = 0.86 + Math.random() * 0.08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
-      if (host) makeCpus();
-      let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = null, finRank = null;
-      let myIt = [], itSeq = 0, hits = [], drift = false, lastDrift = false, msg = null, guestCpus = [], ownCpuIt = [];
-      const removedByHit = new Set();
-      const L = holdBtn($("#k-left")), R = holdBtn($("#k-right"));
-      const D = holdBtn($("#k-drift"));
-      const itemBtn = $("#k-item");
-      const useItem = (kk, owner) => {
-        if (!kk.item || ph !== "race" || kk.roul > 0) return;
-        const it = kk.item; kk.item = null;
-        if (it === "mush") kk.boost = 1.3;
-        else if (it === "star") kk.star = 4.5;
-        else if (it === "banana") owner.push({ id: `${cid}-${++itSeq}`, k: "b", x: kk.x - Math.cos(kk.ang) * 20, y: kk.y - Math.sin(kk.ang) * 20, vx: 0, vy: 0, life: 40, from: kk, t: 0 });
-        else if (it === "shell") owner.push({ id: `${cid}-${++itSeq}`, k: "s", x: kk.x + Math.cos(kk.ang) * 18, y: kk.y + Math.sin(kk.ang) * 18, vx: Math.cos(kk.ang) * 440, vy: Math.sin(kk.ang) * 440, life: 2.8, from: kk, t: 0 });
-      };
-      holdBtn(itemBtn, () => useItem(K, myIt));
-      actKey = () => useItem(K, myIt);
-      const say = (text, col) => { msg = { text, col, t: 1.3 } };
-      function rankOf(kk, all) { return 1 + all.filter((o) => o !== kk && (o.fin && (!kk.fin || o.fin < kk.fin) || (!o.fin && !kk.fin && o.prog > kk.prog))).length }
-      function pickItem(kk, rank, total) {
-        const r = Math.random(), back = (rank - 1) / Math.max(1, total - 1);
-        return back > 0.6 ? (r < 0.4 ? "star" : r < 0.75 ? "mush" : "shell") : back > 0.3 ? (r < 0.4 ? "shell" : r < 0.7 ? "mush" : "banana") : (r < 0.5 ? "banana" : r < 0.8 ? "shell" : "mush");
-      }
-      function physics(kk, dt, steer, driftOn) {
-        const [idx, dd] = nearest(kk.x, kk.y, kk.idx);
-        const prev = kk.idx; kk.idx = idx;
-        if (prev > NS * 0.8 && idx < NS * 0.2) kk.lap++; else if (prev < NS * 0.2 && idx > NS * 0.8) kk.lap--;
-        kk.prog = kk.lap * NS + idx;
-        const off = dd > KT_RW;
-        kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt); kk.roul = Math.max(0, (kk.roul || 0) - dt);
-        if (kk.fin) { kk.v *= Math.pow(0.3, dt); }
-        else if (kk.spin > 0) { kk.v *= Math.pow(0.15, dt); kk.ang += 11 * dt }
-        else {
-          const vm = KT_VMAX * (off && kk.star <= 0 ? ST.slow : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
-          kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
-          const tr = (driftOn ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1);
-          kk.ang += steer * tr * dt;
-          if (driftOn && Math.abs(steer) > 0.3) kk.driftT += dt; else { if (kk.driftT > 0.9) { kk.boost = Math.max(kk.boost, 0.9); if (kk === K) say("ダッシュ！", "#FFE14D") } kk.driftT = 0 }
-        }
-        const slide = driftOn && kk.spin <= 0 ? 0.88 : 1;
-        kk.x += Math.cos(kk.ang) * kk.v * dt * slide; kk.y += Math.sin(kk.ang) * kk.v * dt * slide;
-        // ？箱
-        for (const b of BOXES) { if (b.re > 0) continue; if (Math.hypot(b.x - kk.x, b.y - kk.y) < 15 && !kk.item && !kk.fin) { b.re = 3; return "box" } }
-        return null;
-      }
-      function hitTest(kk, list, isOwn) {
-        for (const p of list) {
-          if (p.dead || removedByHit.has(p.id)) continue;
-          if (isOwn && p.from === kk && p.t < 0.5) continue;
-          if (Math.hypot(p.x - kk.x, p.y - kk.y) < 14) {
-            if (kk.star <= 0) { kk.spin = 1.1; if (kk === K) say(p.k === "b" ? "バナナでスリップ！" : "こうらが当たった！", "#FF8A80") }
-            if (isOwn) p.dead = true; else { hits.push(p.id); if (hits.length > 16) hits.shift(); removedByHit.add(p.id) }
-          }
-        }
-      }
-      function moveIt(list, dt) { for (const p of list) { p.t += dt; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) p.dead = true } return list.filter((p) => !p.dead) }
-      function foreignItems(ox, age) { if (!ox || !ox.it) return []; return ox.it.map((a) => ({ id: a[0], k: a[1], x: a[2] + a[4] * age, y: a[3] + a[5] * age, vx: a[4], vy: a[5] })) }
-      const packIt = (list) => list.map((p) => [p.id, p.k, Math.round(p.x), Math.round(p.y), Math.round(p.vx), Math.round(p.vy)]);
-      function cpuDrive(kk, dt, all) {
-        if (ph !== "race" && ph !== "done") return;
-        if (kk.fin) { physics(kk, dt, 0, false); return }
-        const ti = (kk.idx + 14) % NS, tx = TR[ti][0] - kk.x, ty = TR[ti][1] - kk.y;
-        let da = Math.atan2(ty, tx) - kk.ang; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
-        const leader = Math.max(...all.map((o) => o.prog));
-        kk.skill = clamp((kk.skill0 || (kk.skill0 = kk.skill)) + (leader - kk.prog > 60 ? 0.07 : 0), 0.8, 1.02);
-        const r = physics(kk, dt, clamp(da * 2.2, -1, 1), false);
-        if (r === "box") { kk.item = pickItem(kk, rankOf(kk, all), all.length); kk.useAt = raceT + 1 + Math.random() * 2.5 }
-        if (kk.item && raceT > kk.useAt) useItem(kk, ownCpuIt);
-      }
-      // 描画：カートの後ろから見た奥行きのある画面（床は真上から描いたコースの絵を、行ごとに遠近をつけて写す）
-      const TEX_W = 1650, TEX_H = 1350;
-      const tex = (() => {
-        const tc = document.createElement("canvas"); tc.width = TEX_W; tc.height = TEX_H; const t = tc.getContext("2d");
-        t.fillStyle = ST.off[0]; t.fillRect(0, 0, TEX_W, TEX_H);
-        t.fillStyle = ST.off[1]; for (let gx = 0; gx < TEX_W; gx += 60) for (let gy = 0; gy < TEX_H; gy += 60) if (((gx + gy) / 60) % 2 === 0) t.fillRect(gx, gy, 60, 60);
-        const path = () => { t.beginPath(); t.moveTo(TR[0][0], TR[0][1]); for (let i = 1; i < NS; i++) t.lineTo(TR[i][0], TR[i][1]); t.closePath() };
-        t.lineJoin = "round";
-        path(); t.strokeStyle = ST.curb[0]; t.lineWidth = KT_RW * 2 + 12; t.stroke();
-        path(); t.strokeStyle = ST.curb[1]; t.setLineDash([16, 16]); t.lineWidth = KT_RW * 2 + 12; t.stroke(); t.setLineDash([]);
-        path(); t.strokeStyle = ST.road; t.lineWidth = KT_RW * 2; t.stroke();
-        path(); t.strokeStyle = ST.line; t.setLineDash([12, 20]); t.lineWidth = 2.5; t.stroke(); t.setLineDash([]);
-        const [nx, ny] = norm(0);
-        for (let j = -5; j < 5; j++) for (let r = 0; r < 3; r++) { t.fillStyle = (j + r) % 2 ? "#fff" : "#111"; t.save(); t.translate(TR[0][0] + nx * j * 9.2, TR[0][1] + ny * j * 9.2); t.rotate(Math.atan2(ny, nx)); t.fillRect(0, r * 5 - 7.5, 9.2, 5); t.restore() }
-        return new Uint32Array(t.getImageData(0, 0, TEX_W, TEX_H).data.buffer);
-      })();
-      const RW7 = 200, RH7 = Math.round(200 * (h / w)), HZ = Math.round(RH7 * 0.36), CAMH = 26, FOC = RW7 * 0.85, CAMD = 62;
-      const buf7 = document.createElement("canvas"); buf7.width = RW7; buf7.height = RH7;
-      const b7 = buf7.getContext("2d"), img7 = b7.createImageData(RW7, RH7), px7 = new Uint32Array(img7.data.buffer);
-      const le = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
-      const rgba = (r, g, b) => (le ? (255 << 24) | (b << 16) | (g << 8) | r : (r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
-      const hex = (hs) => [parseInt(hs.slice(1, 3), 16), parseInt(hs.slice(3, 5), 16), parseInt(hs.slice(5, 7), 16)];
-      const GRASS = rgba(...hex(ST.off[0])), FOG = ST.sky[1], SKY0 = ST.sky[0];
-      const SC = w / RW7;
-      let cam = { x: 0, y: 0, dx: 1, dy: 0, rx: 0, ry: 1 };
-      function floor() {
-        const a = K.ang, dx = Math.cos(a), dy = Math.sin(a);
-        cam = { x: K.x - dx * CAMD, y: K.y - dy * CAMD, dx, dy, rx: -dy, ry: dx };
-        for (let y = 0; y < RH7; y++) {
-          if (y <= HZ) { const t = y / HZ; const col = rgba(SKY0[0] + (FOG[0] - SKY0[0]) * t | 0, SKY0[1] + (FOG[1] - SKY0[1]) * t | 0, SKY0[2] + (FOG[2] - SKY0[2]) * t | 0); px7.fill(col, y * RW7, y * RW7 + RW7); continue }
-          const z = (CAMH * FOC) / (y - HZ), k = z / FOC, fog = clamp((z - 260) / 500, 0, 1);
-          const bx = cam.x + dx * z - cam.rx * k * (RW7 / 2), by = cam.y + dy * z - cam.ry * k * (RW7 / 2), sx = cam.rx * k, sy = cam.ry * k;
-          let wx = bx, wy = by, o = y * RW7;
-          for (let x = 0; x < RW7; x++, wx += sx, wy += sy) {
-            const ix = wx | 0, iy = wy | 0;
-            let c0 = ix >= 0 && iy >= 0 && ix < TEX_W && iy < TEX_H ? tex[iy * TEX_W + ix] : GRASS;
-            if (fog > 0) { const r = c0 & 255, g = (c0 >>> 8) & 255, b = (c0 >>> 16) & 255; c0 = le ? rgba(r + (FOG[0] - r) * fog | 0, g + (FOG[1] - g) * fog | 0, b + (FOG[2] - b) * fog | 0) : c0 }
-            px7[o + x] = c0;
-          }
-        }
-        b7.putImageData(img7, 0, 0);
-        c.imageSmoothingEnabled = false; c.drawImage(buf7, 0, 0, w, h); c.imageSmoothingEnabled = true;
-      }
-      function proj(x, y) {
-        const vx = x - cam.x, vy = y - cam.y, z = vx * cam.dx + vy * cam.dy, lat = vx * cam.rx + vy * cam.ry;
-        if (z < 6) return null;
-        const s = FOC / z;
-        return { sx: (RW7 / 2 + lat * s) * SC, sy: (HZ + CAMH * s) * SC, s: s * SC, z };
-      }
-      function hills() {
-        const hy = HZ * SC, off = ((-K.ang / (Math.PI * 2)) * w * 3) % w;
-        c.fillStyle = ST.hill[0];
-        for (let i = -1; i < 3; i++) { const bx = off + i * w; c.beginPath(); c.moveTo(bx, hy); c.lineTo(bx + w * 0.18, hy - h * 0.1); c.lineTo(bx + w * 0.34, hy - h * 0.04); c.lineTo(bx + w * 0.55, hy - h * 0.13); c.lineTo(bx + w * 0.78, hy - h * 0.03); c.lineTo(bx + w, hy); c.fill() }
-        const off2 = ((-K.ang / (Math.PI * 2)) * w * 5) % w;
-        c.fillStyle = ST.hill[1];
-        for (let i = -1; i < 3; i++) { const bx = off2 + i * w; for (const [px, r] of [[0.1, 0.07], [0.32, 0.05], [0.5, 0.09], [0.76, 0.06]]) { c.beginPath(); c.arc(bx + w * px, hy, w * r, Math.PI, 0); c.fill() } }
-      }
-      function kartSprite(kk, p, isMe) {
-        const [b1, b2] = KT_COLORS[kk.col] || KT_COLORS[0];
-        const rel = (kk.ang || 0) - K.ang + (kk.spin > 0 ? performance.now() / 60 : 0), side = Math.abs(Math.sin(rel)), s = p.s;
-        const W = (18 + side * 8) * s, cx = p.sx + (isMe ? (L.down ? -3 : R.down ? 3 : 0) : 0), by = p.sy;
-        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(cx, by, W * 0.62, 3 * s, 0, 0, 7); c.fill();
-        c.fillStyle = "#1c1c1c"; c.fillRect(cx - W / 2, by - 6 * s, 5 * s, 6 * s); c.fillRect(cx + W / 2 - 5 * s, by - 6 * s, 5 * s, 6 * s);
-        c.fillStyle = b2; c.fillRect(cx - W / 2 + 3 * s, by - 9 * s, W - 6 * s, 6 * s);
-        c.fillStyle = b1; c.fillRect(cx - W / 2 + 4 * s, by - 12 * s, W - 8 * s, 4 * s);
-        c.fillStyle = "#333"; c.fillRect(cx - 4 * s, by - 6 * s, 8 * s, 2.5 * s);
-        c.fillStyle = "#EDBE8F"; c.beginPath(); c.arc(cx, by - 16 * s, 4.2 * s, 0, 7); c.fill();
-        c.fillStyle = b2; c.beginPath(); c.arc(cx, by - 17 * s, 4.6 * s, Math.PI, 0); c.fill(); c.fillRect(cx - 4.6 * s, by - 17.5 * s, 9.2 * s, 2.5 * s);
-        if (kk.star > 0) { c.strokeStyle = `hsl(${(performance.now() / 3) % 360},90%,60%)`; c.lineWidth = Math.max(2, 1.5 * s); c.strokeRect(cx - W / 2 - 2 * s, by - 22 * s, W + 4 * s, 23 * s) }
-        if (isMe && kk.driftT > 0) { c.fillStyle = kk.driftT > 0.9 ? "#FFB020" : "rgba(255,255,255,.8)"; for (const sgn of [-1, 1]) { c.beginPath(); c.arc(cx + sgn * W * 0.45, by - 1 * s, (1.5 + Math.random() * 1.5) * s, 0, 7); c.fill() } }
-      }
-      function draw(allKarts, items) {
-        floor(); hills();
-        if (ST.name === "ナイトシティ") { c.fillStyle = "rgba(255,255,255,.8)"; for (let i = 0; i < 40; i++) { const sx = ((i * 97 + (-K.ang / (Math.PI * 2)) * w * 2) % w + w) % w, sy = (i * 53) % (HZ * SC * 0.8); c.fillRect(sx, sy, 2, 2) } }
-        const spr = [];
-        for (const b of BOXES) {
-          if (b.re > 0) continue; const p = proj(b.x, b.y); if (!p) continue;
-          spr.push({ z: p.z, f: () => {
-            const sz = 12 * p.s, bob = Math.sin(performance.now() / 300 + b.x) * 1.5 * p.s, y0 = p.sy - 11 * p.s + bob, hue = (performance.now() / 8 + b.x) % 360;
-            c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, sz * 0.45, sz * 0.12, 0, 0, 7); c.fill();
-            c.save(); c.translate(p.sx, y0);
-            const g = c.createLinearGradient(-sz / 2, -sz / 2, sz / 2, sz / 2); g.addColorStop(0, `hsla(${hue},90%,70%,.85)`); g.addColorStop(1, `hsla(${(hue + 120) % 360},90%,55%,.85)`);
-            c.fillStyle = g; c.fillRect(-sz / 2, -sz / 2, sz, sz);
-            c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.moveTo(-sz / 2, -sz / 2); c.lineTo(sz / 2, -sz / 2); c.lineTo(sz * 0.3, -sz * 0.3); c.lineTo(-sz * 0.3, -sz * 0.3); c.fill();
-            c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = Math.max(1, p.s * 0.8); c.strokeRect(-sz / 2, -sz / 2, sz, sz);
-            c.fillStyle = "#fff"; c.font = `${Math.max(8, 8 * p.s) | 0}px ${DISP}`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineWidth = Math.max(1, p.s * 0.6); c.strokeStyle = "rgba(0,0,0,.35)"; c.strokeText("?", 0, 1); c.fillText("?", 0, 1);
-            c.restore();
-          } });
-        }
-        for (const it of items) {
-          if (it.dead) continue; const p = proj(it.x, it.y); if (!p) continue;
-          spr.push({ z: p.z, f: () => { c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(p.sx, p.sy, 6 * p.s, 1.8 * p.s, 0, 0, 7); c.fill(); kartItemIcon(c, it.k === "b" ? "banana" : "shell", p.sx, p.sy - 4.5 * p.s, 6 * p.s) } });
-        }
-        for (const kk of allKarts) { const p = proj(kk.x, kk.y); if (p) spr.push({ z: p.z - (kk === K ? 0.01 : 0), f: () => { if (kk.boost > 0) { c.fillStyle = `rgba(255,${120 + Math.random() * 100 | 0},40,.85)`; c.beginPath(); c.ellipse(p.sx - 5 * p.s, p.sy - 3 * p.s, 2.5 * p.s, (4 + Math.random() * 4) * p.s, 0, 0, 7); c.ellipse(p.sx + 5 * p.s, p.sy - 3 * p.s, 2.5 * p.s, (4 + Math.random() * 4) * p.s, 0, 0, 7); c.fill() } kartSprite(kk, p, kk === K) } }) }
-        spr.sort((a, b) => b.z - a.z).forEach((o) => o.f());
-        if (K.star > 0) { c.fillStyle = `hsla(${(performance.now() / 3) % 360},90%,60%,.12)`; c.fillRect(0, 0, w, h) }
-        const T0 = safeTop + 6;
-        // 小さい地図
-        const mw = 86, mh = 70, mx = w - mw - 6, my = T0;
-        c.fillStyle = "rgba(20,18,42,.5)"; c.fillRect(mx, my, mw, mh);
-        const ms = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (by1 - by0));
-        const MX = (x) => mx + 5 + (x - bx0) * ms, MY = (y) => my + 5 + (y - by0) * ms;
-        c.strokeStyle = "#ddd"; c.lineWidth = 2; c.beginPath(); TR.forEach((p, i) => { i ? c.lineTo(MX(p[0]), MY(p[1])) : c.moveTo(MX(p[0]), MY(p[1])) }); c.closePath(); c.stroke();
-        for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4 : 3, 0, 7); c.fill() }
-        // 順位・周回・アイテム
-        const rk = rankOf(K, allKarts);
-        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(6, T0, 70, 50);
-        c.font = `24px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 12, T0 + 17);
-        c.font = `12px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}周`, 12, T0 + 39);
-        const ix = 6, iy = T0 + 56, isz = 54;
-        c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
-        const shown = K.roul > 0 ? ["mush", "banana", "shell", "star"][Math.floor(performance.now() / 70) % 4] : K.item;
-        if (shown) kartItemIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 18);
-        if (msg) bigText(c, msg.text, w / 2, h * 0.24, 24, msg.col);
-        if (ph === "count") bigText(c, String(Math.max(1, Math.ceil(cd))), w / 2, h * 0.3, 64, "#FFE14D");
-        if (K.fin) bigText(c, finRank ? `${finRank}位でゴール！` : "ゴール！", w / 2, h * 0.3, 34, "#FFE14D");
-      }
-      function frame(dt) {
-        const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
-        const age = op ? Math.min(0.2, Math.max(0, (Date.now() - op.updatedAt) / 1000)) : 0;
-        if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3; if (host) makeCpus() }
-        if (ph === "count") { cd -= dt; if (cd <= 0) ph = "race" }
-        if (ph === "race" || ph === "done") raceT += dt;
-        for (const b of BOXES) b.re = Math.max(0, b.re - dt);
-        // 自分のカート
-        let steer = 0; if (L.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (R.down || keys.has("ArrowRight") || keys.has("d")) steer += 1; steer *= SENS.steer;
-        drift = D.down || keys.has("Shift");
-        if (ph === "race" || ph === "done") {
-          const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
-          if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); K.roul = 1.1 }
-          if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
-        }
-        // あいてのカート（表示用）
-        let oppKart = null;
-        if (ox && ox.k) { const a = ox.k; oppKart = { x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: 1, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], item: null } }
-        // コンピューター
-        if (host) {
-          const all = [K, ...cpus, ...(oppKart ? [oppKart] : [])];
-          for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT }
-        } else if (ox && ox.ck) {
-          guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7] }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
-        }
-        // アイテム
-        myIt = moveIt(myIt, dt); ownCpuIt = moveIt(ownCpuIt, dt);
-        const foreign = foreignItems(ox, age);
-        const oppHits = new Set(ox && ox.hit ? ox.hit : []);
-        myIt = myIt.filter((p) => !oppHits.has(p.id)); ownCpuIt = ownCpuIt.filter((p) => !oppHits.has(p.id));
-        hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
-        if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
-        const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
-        // 順位はホストが、ゴールした順番（ホストの画面で見た時間）で決める。あいては、ホストが決めた順位を出す（ふたりの画面で結果がずれない）
-        if (host) {
-          if (oppKart && oppKart.fin && gFin == null) gFin = raceT - age;
-          const fins = [{ t: K.fin || null }, ...cpus.map((kk) => ({ t: kk.fin || null })), ...(realOppPeer() ? [{ t: gFin }] : [])];
-          const rankAt = (t0) => 1 + fins.filter((f) => f.t != null && f.t < t0).length;
-          const patch = {};
-          if (K.fin && me.s.rkH == null) Object.assign(patch, { res: Math.round(K.fin * 1000), rkH: rankAt(K.fin) });
-          if (gFin != null && me.s.rkG == null) patch.rkG = rankAt(gFin);
-          if (Object.keys(patch).length) setS(patch);
-          finRank = me.s.rkH || null;
-        } else {
-          if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) });
-          finRank = (os && os.rkG) || null;
-        }
-        if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
-        itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
-        const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
-        if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0]);
-        const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-        draw(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))]);
-        if (ph === "idle" && !me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
-          <button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート（ステージを変えると相手も同じステージになります）" : "押すとスタート"}</p>`);
-        else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
-        else if (ph === "done" && me.s.res != null) {
-          const hs = host ? me.s : os || {}, mine = host ? hs.rkH : hs.rkG, theirs = host ? hs.rkG : hs.rkH, t = (me.s.res / 1000).toFixed(1);
-          if (realOppPeer() && mine != null && theirs != null) setMsg(`<p class="verdict ${mine < theirs ? "good" : "bad"}">${mine < theirs ? "あなたの勝ち！" : "あなたの負け…"}　あなた${mine}位・${esc(oppName())}${theirs}位</p>${againBtns("kart")}`);
-          else if (realOppPeer() && mine != null) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
-          else if (realOppPeer()) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
-          else setMsg(`<p class="verdict good">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
-        } else setMsg("");
-      }
-      return loop(frame);
+      let alive = true, stop = null;
+      setMsg(`<p class="wait">3Dのコースを読み込んでいます</p>`);
+      phLoad().then(() => { if (!alive) return; try { stop = ktRun() } catch (e) { console.error(e); showErr(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("kart")}`) } })
+        .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("kart")}`) });
+      return () => { alive = false; if (stop) stop() };
     },
   };
+  function ktRun() {
+    const T = THREE, host = isFirst(), ST = KT_STAGES[me.m.stage || 0] || KT_STAGES[0], cardEl = $(".card.act.kt"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
+    const TR = kartTrack(ST.pts), NS = TR.length, Q = GFX(), night = ST.theme === "night";
+    const renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" }); watchLost(gl, "kart");
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.shadowMap.enabled = Q.sh > 0 && !night; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene(), skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, ST.sky[0]); gr.addColorStop(1, ST.sky[1]); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
+    scene.background = new T.CanvasTexture(skc); scene.fog = new T.Fog(ST.fog, 70, night ? 260 : 330);
+    const camera = new T.PerspectiveCamera(65, 1, .1, 700);
+    scene.add(new T.HemisphereLight(night ? "#6A7AC0" : "#DCEEFF", night ? "#1A1830" : "#5E7F3E", night ? .55 : .75));
+    const sun = new T.DirectionalLight(night ? "#8899DD" : "#FFF0D6", night ? .35 : 1.0); sun.castShadow = Q.sh > 0 && !night; sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 150 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03; scene.add(sun, sun.target);
+    const W = ktWorld(ST, TR, scene, Q);
+    // ---- 計算（前のカートレースと同じ平面の計算）
+    const norm = (i) => { const a = TR[(i - 1 + NS) % NS], b = TR[(i + 1) % NS]; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [-dy / l, dx / l, dx / l, dy / l] };
+    const slot = (n) => { const i = NS - 8 - Math.floor(n / 2) * 14; const [nx, ny, tx, ty] = norm(i); const off = n % 2 ? 18 : -18; return { x: TR[i][0] + nx * off, y: TR[i][1] + ny * off, ang: Math.atan2(ty, tx), idx: i } };
+    function nearest(x, y, guess) {
+      let best = guess, bd = 1e12;
+      const scan = (from, to) => { for (let j = from; j <= to; j++) { const i = ((j % NS) + NS) % NS; const d = (TR[i][0] - x) ** 2 + (TR[i][1] - y) ** 2; if (d < bd) { bd = d; best = i } } };
+      if (guess == null) scan(0, NS - 1); else scan(guess - 25, guess + 45);
+      return [best, Math.sqrt(bd)];
+    }
+    const BOXES = []; for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0 }) }
+    const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, driftT: 0, item: null, fin: 0, col, prog: 0, wall: 0 });
+    const meSlot = host ? 0 : 1, K = newKart(meSlot, host ? 0 : 1);
+    let cpus = []; const nCpu = () => (realOppPeer() ? 2 : 3);
+    function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = .86 + Math.random() * .08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
+    if (host) makeCpus();
+    let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = null, finRank = null;
+    let myIt = [], itSeq = 0, hits = [], drift = false, msg = null, guestCpus = [], ownCpuIt = [], steerVis = 0;
+    const removedByHit = new Set();
+    const Lb = holdBtn($("#k-left")), Rb = holdBtn($("#k-right")), Db = holdBtn($("#k-drift")), itemBtn = $("#k-item");
+    const useItem = (kk, owner) => {
+      if (!kk.item || ph !== "race" || kk.roul > 0) return;
+      const it = kk.item; kk.item = null;
+      if (it === "turbo") kk.boost = 1.3;
+      else if (it === "shield") kk.star = 4.5;
+      else if (it === "banana") owner.push({ id: `${cid}-${++itSeq}`, k: "b", x: kk.x - Math.cos(kk.ang) * 20, y: kk.y - Math.sin(kk.ang) * 20, vx: 0, vy: 0, life: 40, from: kk, t: 0 });
+      else if (it === "rocket") owner.push({ id: `${cid}-${++itSeq}`, k: "s", x: kk.x + Math.cos(kk.ang) * 18, y: kk.y + Math.sin(kk.ang) * 18, vx: Math.cos(kk.ang) * 440, vy: Math.sin(kk.ang) * 440, life: 3.2, from: kk, t: 0, idx: kk.idx });
+    };
+    holdBtn(itemBtn, () => useItem(K, myIt)); actKey = () => useItem(K, myIt);
+    const say = (text, col) => { msg = { text, col, t: 1.3 } };
+    function rankOf(kk, all) { return 1 + all.filter((o) => o !== kk && (o.fin && (!kk.fin || o.fin < kk.fin) || (!o.fin && !kk.fin && o.prog > kk.prog))).length }
+    function pickItem(kk, rank, total) {
+      const r = Math.random(), back = (rank - 1) / Math.max(1, total - 1);
+      return back > .6 ? (r < .4 ? "shield" : r < .75 ? "turbo" : "rocket") : back > .3 ? (r < .4 ? "rocket" : r < .7 ? "turbo" : "banana") : (r < .5 ? "banana" : r < .8 ? "rocket" : "turbo");
+    }
+    function physics(kk, dt, steer, driftOn) {
+      let [idx, dd] = nearest(kk.x, kk.y, kk.idx);
+      // 外側のかべ：はみ出したら押し戻して減速
+      if (dd > KT_RW + KT_WALL) { const dx = kk.x - TR[idx][0], dy = kk.y - TR[idx][1], l = Math.hypot(dx, dy) || 1; kk.x = TR[idx][0] + dx / l * (KT_RW + KT_WALL - 1); kk.y = TR[idx][1] + dy / l * (KT_RW + KT_WALL - 1); if (kk.wall <= 0) { kk.v *= .55; kk.wall = .4; if (kk === K) say("かべにぶつかった！", "#FFB4A8") } dd = KT_RW + KT_WALL - 1 }
+      kk.wall = Math.max(0, kk.wall - dt);
+      const prev = kk.idx; kk.idx = idx;
+      if (prev > NS * .8 && idx < NS * .2) kk.lap++; else if (prev < NS * .2 && idx > NS * .8) kk.lap--;
+      kk.prog = kk.lap * NS + idx;
+      const off = dd > KT_RW + 4;
+      kk.spin = Math.max(0, kk.spin - dt); kk.boost = Math.max(0, kk.boost - dt); kk.star = Math.max(0, kk.star - dt); kk.roul = Math.max(0, (kk.roul || 0) - dt);
+      if (kk.fin) kk.v *= Math.pow(.3, dt);
+      else if (kk.spin > 0) { kk.v *= Math.pow(.15, dt); kk.ang += 11 * dt }
+      else {
+        const vm = KT_VMAX * (off && kk.star <= 0 ? .45 : 1) * (kk.boost > 0 ? 1.55 : 1) * (kk.star > 0 ? 1.3 : 1) * (kk.skill || 1);
+        kk.v += (vm - kk.v) * Math.min(1, dt * (vm > kk.v ? 1.4 : 3));
+        const tr = (driftOn ? 3.2 : 2.3) * clamp(kk.v / 120, 0, 1);
+        kk.ang += steer * tr * dt;
+        if (driftOn && Math.abs(steer) > .3) kk.driftT += dt; else { if (kk.driftT > .9) { kk.boost = Math.max(kk.boost, kk.driftT > 1.8 ? 1.4 : .9); if (kk === K) say(kk.driftT > 1.8 ? "スーパーダッシュ！" : "ダッシュ！", "#FFE14D") } kk.driftT = 0 }
+      }
+      const slide = driftOn && kk.spin <= 0 ? .88 : 1;
+      kk.x += Math.cos(kk.ang) * kk.v * dt * slide; kk.y += Math.sin(kk.ang) * kk.v * dt * slide;
+      for (const b of BOXES) { if (b.re > 0) continue; if (Math.hypot(b.x - kk.x, b.y - kk.y) < 15 && !kk.item && !kk.fin) { b.re = 3; return "box" } }
+      return null;
+    }
+    function hitTest(kk, list, isOwn) {
+      for (const p of list) {
+        if (p.dead || removedByHit.has(p.id)) continue;
+        if (isOwn && p.from === kk && p.t < .5) continue;
+        if (Math.hypot(p.x - kk.x, p.y - kk.y) < 14) {
+          if (kk.star <= 0) { kk.spin = 1.1; if (kk === K) say(p.k === "b" ? "バナナでスリップ！" : "ロケットが当たった！", "#FF8A80") }
+          if (isOwn) p.dead = true; else { hits.push(p.id); if (hits.length > 16) hits.shift(); removedByHit.add(p.id) }
+        }
+      }
+    }
+    // ロケットはコースにそって飛ぶ
+    function moveIt(list, dt) { for (const p of list) { p.t += dt; p.life -= dt; if (p.k === "s") { const [ix] = nearest(p.x, p.y, p.idx); p.idx = ix; const tg = TR[(ix + 10) % NS], want = Math.atan2(tg[1] - p.y, tg[0] - p.x), cur = Math.atan2(p.vy, p.vx), na = cur + clamp(phAng(want - cur), -5 * dt, 5 * dt); p.vx = Math.cos(na) * 440; p.vy = Math.sin(na) * 440 } p.x += p.vx * dt; p.y += p.vy * dt; if (p.life <= 0) p.dead = true } return list.filter((p) => !p.dead) }
+    function foreignItems(ox, age) { if (!ox || !ox.it) return []; return ox.it.map((a) => ({ id: a[0], k: a[1], x: a[2] + a[4] * age, y: a[3] + a[5] * age, vx: a[4], vy: a[5] })) }
+    const packIt = (list) => list.map((p) => [p.id, p.k, Math.round(p.x), Math.round(p.y), Math.round(p.vx), Math.round(p.vy)]);
+    function cpuDrive(kk, dt, all) {
+      if (ph !== "race" && ph !== "done") return;
+      if (kk.fin) { physics(kk, dt, 0, false); return }
+      const ti = (kk.idx + 14) % NS, tx = TR[ti][0] - kk.x, ty = TR[ti][1] - kk.y;
+      const da = phAng(Math.atan2(ty, tx) - kk.ang), leader = Math.max(...all.map((o) => o.prog));
+      kk.skill = clamp((kk.skill0 || (kk.skill0 = kk.skill)) + (leader - kk.prog > 60 ? .07 : 0), .8, 1.02);
+      const r = physics(kk, dt, clamp(da * 2.2, -1, 1), false); kk.steerV = clamp(da * 2.2, -1, 1);
+      if (r === "box") { kk.item = pickItem(kk, rankOf(kk, all), all.length); kk.useAt = raceT + 1 + Math.random() * 2.5 }
+      if (kk.item && raceT > kk.useAt) useItem(kk, ownCpuIt);
+    }
+    // ---- 3Dの物
+    const models = new Map(), itemMeshes = new Map();
+    const modelFor = (key, col) => { let m = models.get(key); if (!m) { const cc = KT_COLORS[col] || KT_COLORS[0]; m = ktKartModel(cc, ["#F4F4F4", "#2A2A2E", "#F2F2F2", "#1E2A44", "#F4F4F4"][col % 5]); scene.add(m.g); models.set(key, m) } m.seen = true; return m };
+    const boxMeshes = BOXES.map((b) => { const m = new T.Mesh(new T.BoxGeometry(1.1, 1.1, 1.1), W.boxMat); m.position.set(b.x * KS, .9, b.y * KS); m.castShadow = true; scene.add(m); return m });
+    const itemMesh = (p) => { let m = itemMeshes.get(p.id); if (m) return m; const B = phParts(); if (p.k === "b") { B.sph(.22, "#F7D23E", 0, .12, 0, 1.2, .4, .7, 1); for (const a of [0, 2.1, 4.2]) B.seg(0, .12, 0, Math.cos(a) * .35, .02, Math.sin(a) * .35, .1, .04, "#E8C230") } else { B.cyl(.12, .12, .8, "#E23A3A", 0, .45, 0, 12, Math.PI / 2); B.sph(.12, "#F2F2F2", 0, .45, .42, 1, 1, 1.8); for (const a of [0, 1.57, 3.14, 4.71]) B.box(.02, .18, .2, "#555", Math.cos(a) * .14, .45 + Math.sin(a) * .14, -.3); B.cone(.1, .35, "#FFB040", 0, .45, -.6) } m = new T.Mesh(phMerge(B.L, false), brCharMat || new T.MeshStandardMaterial({ vertexColors: true })); m.castShadow = true; scene.add(m); itemMeshes.set(p.id, m); return m };
+    let VW = 0, VH = 0;
+    function resize() { const w = cardEl.clientWidth || innerWidth, h = cardEl.clientHeight || innerHeight; if (w === VW && h === VH) return; VW = w; VH = h; renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px"; const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0); camera.aspect = w / h; camera.fov = w < h ? 72 : 58; camera.updateProjectionMatrix() }
+    const camPos = new T.Vector3(K.x * KS - Math.cos(K.ang) * 6, 3, K.y * KS - Math.sin(K.ang) * 6), camLook = new T.Vector3();
+    function draw3d(allKarts, items, dt) {
+      for (const m of models.values()) m.seen = false;
+      allKarts.forEach((kk) => {
+        const key = kk === K ? "me" : kk.key, m = modelFor(key, kk.col);
+        m.g.position.set(kk.x * KS, 0, kk.y * KS); m.g.rotation.y = Math.PI / 2 - kk.ang;
+        const st = kk === K ? steerVis : kk.steerV != null ? kk.steerV : clamp(phAng(kk.ang - (kk.pa ?? kk.ang)) / Math.max(dt, .001) / 2.3, -1, 1); kk.pa = kk.ang;
+        m.fl.p.rotation.y = m.fr.p.rotation.y = -st * .45; const spin = (kk.v || KT_VMAX * .8) * KS * dt; for (const wh of [m.fl, m.fr, m.rl, m.rr]) wh.w.rotation.x += spin / .15;
+        m.g.rotation.z = kk.spin > 0 ? Math.sin(raceT * 30) * .05 : st * .03;
+        m.flame.visible = kk.boost > 0; if (kk.boost > 0) m.flame.scale.set(1, .7 + Math.random() * .6, 1);
+        const dr = kk === K ? K.driftT : 0; m.sparks.forEach((s) => { s.visible = dr > .3; s.material.color.set(dr > 1.8 ? "#FFB040" : dr > .9 ? "#FF7A2A" : "#7FD0FF"); s.scale.setScalar(.6 + Math.random() * .8) });
+        m.shield.visible = kk.star > 0; if (kk.star > 0) m.shield.material.opacity = .15 + Math.sin(raceT * 10) * .07;
+      });
+      for (const [k, m] of models) if (!m.seen) { m.g.visible = false } else m.g.visible = true;
+      const live = new Set();
+      for (const p of items) { if (p.dead) continue; live.add(p.id); const m = itemMesh(p); m.position.set(p.x * KS, 0, p.y * KS); m.rotation.y = p.k === "s" ? Math.atan2(p.vx, p.vy) : (raceT * 1.5) % 6.28 }
+      for (const [id, m] of itemMeshes) if (!live.has(id)) { scene.remove(m); m.geometry.dispose(); itemMeshes.delete(id) }
+      boxMeshes.forEach((m, i) => { m.visible = BOXES[i].re <= 0; m.rotation.set(raceT * .7, raceT * 1.1, 0); m.position.y = .95 + Math.sin(raceT * 2 + i) * .12 });
+      // カメラ：カートの後ろから追いかける（ターボで少し広く）
+      const fx = Math.cos(K.ang), fz = Math.sin(K.ang), kx = K.x * KS, kz = K.y * KS, back = K.spin > 0 ? 5 : 5.6;
+      const want = new T.Vector3(kx - fx * back - steerVis * fz * .6, 2.5, kz - fz * back + steerVis * fx * .6); camPos.lerp(want, Math.min(1, dt * 7)); camera.position.copy(camPos);
+      camLook.set(kx + fx * 5, .9, kz + fz * 5); camera.lookAt(camLook);
+      const fov = (VW < VH ? 72 : 58) + (K.boost > 0 ? 9 : 0); if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() }
+      sun.position.set(kx + 30, 60, kz + 20); sun.target.position.set(kx, 0, kz); sun.target.updateMatrixWorld();
+      if (W.ms.water) { const t = W.ms.water.material.map; t.offset.x = (raceT * .01) % 1; t.offset.y = (raceT * .02) % 1 }
+      renderer.render(scene, camera);
+    }
+    function hud(allKarts) {
+      const w = VW, h = VH; c.clearRect(0, 0, w, h);
+      const T0 = (parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0) + 50, rk = rankOf(K, allKarts);
+      c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, T0, 92, 58); c.font = `30px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, 14, T0 + 20); c.font = `11px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`/${allKarts.length}`, 72, T0 + 26); c.font = `13px ${DISP}`; c.fillText(`ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}`, 14, T0 + 45);
+      const ix = 8, iy = T0 + 64, isz = 58; c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
+      const shown = K.roul > 0 ? ["turbo", "banana", "rocket", "shield"][Math.floor(performance.now() / 70) % 4] : K.item; if (shown) ktIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 20);
+      // 小さい地図
+      const [bx0, bz0, bx1, bz1] = W.bounds, mw = 96, mh = 80, mx = w - mw - 8, my = T0, ms2 = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (bz1 - bz0));
+      const MX = (x) => mx + 5 + (x * KS - bx0) * ms2, MY = (y) => my + 5 + (y * KS - bz0) * ms2;
+      c.fillStyle = "rgba(20,18,42,.5)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "#E8E8E8"; c.lineWidth = 3; c.beginPath(); TR.forEach((p, i) => (i ? c.lineTo(MX(p[0]), MY(p[1])) : c.moveTo(MX(p[0]), MY(p[1])))); c.closePath(); c.stroke();
+      for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4.5 : 3.2, 0, 7); c.fill(); if (kk === K) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.stroke() } }
+      // 速さ
+      const kmh = Math.round(K.v * .36 * 1.1); c.textAlign = "right"; c.font = `26px ${DISP}`; c.fillStyle = "#fff"; c.strokeStyle = "rgba(20,18,42,.8)"; c.lineWidth = 4; c.strokeText(String(kmh), w - 50, h * .62); c.fillText(String(kmh), w - 50, h * .62); c.font = `11px ${DISP}`; c.fillText("km/h", w - 14, h * .62 + 4);
+      // スタートのライト
+      if (ph === "count") { const lit = Math.min(3, Math.floor(3 - cd) + 1); c.fillStyle = "rgba(20,18,42,.85)"; c.fillRect(w / 2 - 80, h * .22, 160, 52); for (let i = 0; i < 3; i++) { c.fillStyle = i < lit ? "#FF2A2A" : "#3A2A2A"; c.beginPath(); c.arc(w / 2 - 50 + i * 50, h * .22 + 26, 17, 0, 7); c.fill() } }
+      if (ph === "race" && raceT < 1.2) bigText(c, "GO!", w / 2, h * .28, 56, "#7CF59A");
+      if (msg) bigText(c, msg.text, w / 2, h * .2, 22, msg.col);
+      if (K.fin) bigText(c, finRank ? `${finRank}位でゴール！` : "ゴール！", w / 2, h * .3, 32, "#FFE14D");
+      if (K.lap === KT_LAPS && !K.fin && ph === "race" && K.idx < 60) bigText(c, "ファイナルラップ！", w / 2, h * .34, 22, "#FFB4A8");
+    }
+    function frame(dt) {
+      resize();
+      const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
+      const age = op ? Math.min(.2, Math.max(0, (Date.now() - op.updatedAt) / 1000)) : 0;
+      if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3; if (host) makeCpus() }
+      if (ph === "count") { cd -= dt; if (cd <= 0) ph = "race" }
+      if (ph === "race" || ph === "done") raceT += dt; else raceT += 0;
+      for (const b of BOXES) b.re = Math.max(0, b.re - dt);
+      let steer = 0; if (Lb.down || keys.has("ArrowLeft") || keys.has("a")) steer -= 1; if (Rb.down || keys.has("ArrowRight") || keys.has("d")) steer += 1; steer *= SENS.steer;
+      steerVis += (clamp(steer, -1, 1) - steerVis) * Math.min(1, dt * 10);
+      drift = Db.down || keys.has("Shift");
+      if (ph === "race" || ph === "done") {
+        const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
+        if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); K.roul = 1.1 }
+        if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
+      }
+      let oppKart = null;
+      if (ox && ox.k) { const a = ox.k; oppKart = { key: "opp", x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: host ? 1 : 0, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, item: null } }
+      if (host) { const all = [K, ...cpus, ...(oppKart ? [oppKart] : [])]; for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT } }
+      else if (ox && ox.ck) guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { key: "c" + i, x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, v: a[9] || 0, pa: g.pa }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
+      cpus.forEach((kk, i) => (kk.key = "c" + i));
+      myIt = moveIt(myIt, dt); ownCpuIt = moveIt(ownCpuIt, dt);
+      const foreign = foreignItems(ox, age), oppHits = new Set(ox && ox.hit ? ox.hit : []);
+      myIt = myIt.filter((p) => !oppHits.has(p.id)); ownCpuIt = ownCpuIt.filter((p) => !oppHits.has(p.id));
+      hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
+      if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
+      const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
+      if (host) {
+        if (oppKart && oppKart.fin && gFin == null) gFin = raceT - age;
+        const fins = [{ t: K.fin || null }, ...cpus.map((kk) => ({ t: kk.fin || null })), ...(realOppPeer() ? [{ t: gFin }] : [])];
+        const rankAt = (t0) => 1 + fins.filter((f) => f.t != null && f.t < t0).length, patch = {};
+        if (K.fin && me.s.rkH == null) Object.assign(patch, { res: Math.round(K.fin * 1000), rkH: rankAt(K.fin) });
+        if (gFin != null && me.s.rkG == null) patch.rkG = rankAt(gFin);
+        if (Object.keys(patch).length) setS(patch);
+        finRank = me.s.rkH || null;
+      } else { if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) }); finRank = (os && os.rkG) || null }
+      if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
+      itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
+      const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
+      if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v)]);
+      const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
+      draw3d(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))], dt); hud(allKarts);
+      if (ph === "idle" && !me.s.rdy) setMsg(`<p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
+          <button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート（コースを変えると相手も同じコースになります）" : "押すとスタート"}</p>`);
+      else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+      else if (ph === "done" && me.s.res != null) {
+        const hs = host ? me.s : os || {}, mine = host ? hs.rkH : hs.rkG, theirs = host ? hs.rkG : hs.rkH, t = (me.s.res / 1000).toFixed(1);
+        if (realOppPeer() && mine != null && theirs != null) setMsg(`<p class="verdict ${mine < theirs ? "good" : "bad"}">${mine < theirs ? "あなたの勝ち！" : "あなたの負け…"}　あなた${mine}位・${esc(oppName())}${theirs}位</p>${againBtns("kart")}`);
+        else if (realOppPeer() && mine != null) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
+        else if (realOppPeer()) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
+        else setMsg(`<p class="verdict ${mine === 1 ? "good" : ""}">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
+      } else setMsg("");
+    }
+    const stopLoop = loop(frame);
+    return () => {
+      stopLoop(); actKey = null;
+      scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); if (mm !== brCharMat) mm.dispose() }) });
+      scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
+    };
+  }
   // ----- PK対決 -----
   // 交代で蹴る。蹴る人は画面をなぞってシュート、キーパーは蹴られる場所を予想してゴールをタップ。
   // ふたりとも「その回に選んだもの」を s.p[回] に入れ、両方そろったら同じ計算（pkJudge）で結果を出すので、ふたりの画面で結果がずれない。
@@ -4745,7 +4778,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1029-1734";
+  const APP_VER = "1030-1755";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
