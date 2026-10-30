@@ -251,7 +251,7 @@ html.playing .br #act-msg .chipbtn { padding: 6px 4px; font-size: 12px } html.pl
 .sens-row { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; font-size: 13px; align-items: center }
 .sens-row span { grid-column: 1 / -1 } .sens-row input { width: 100%; accent-color: var(--pink) } .sens-row b { font-family: var(--display); text-align: right }
 /* カートレース（横画面） */
-html.playing .kt #act-msg { top: 50%; left: 50%; right: auto; width: min(560px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
+html.playing .kt #act-msg, html.playing .hd #act-msg { top: 50%; left: 50%; right: auto; width: min(560px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
 .kt .stages { grid-template-columns: repeat(3, 1fr); gap: 6px } .kt .stages .chipbtn { padding: 8px 4px; font-size: 13px }
 .kt-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px } .kt-pick .chipbtn { padding: 5px 2px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap }
 .kt-pick .chipbtn i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,.3); flex: none }
@@ -3200,7 +3200,7 @@ html.br-portrait .br-ui { display: none }
       const v = b.vis || {}, w = b.x1 - b.x0, d = b.z1 - b.z0, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, h = b.h;
       if (v.k === "wall") {
         B.box(w, h, d, "#EFE6D6", cx, h / 2, cz); B.box(w + .04, .14, d + .04, "#8B6A4A", cx, .07, cz); B.box(w + .04, .08, d + .04, "#FFFFFF", cx, h - .04, cz);
-        if (v.win) { const along = w > d, L = along ? w : d; for (let s = 3; s < L - 1.5; s += 5) { const px = along ? b.x0 + s : cx, pz = along ? cz : b.z0 + s; B.box(along ? 1.5 : d + .06, 1.3, along ? d + .06 : 1.5, "#FFFFFF", px, 1.7, pz); B.box(along ? 1.3 : d + .1, 1.1, along ? d + .1 : 1.3, "#BFE6FA", px, 1.7, pz) } }
+        if (v.win) { const along = w > d, L = along ? w : d; for (let s = 3; s < L - 1.5; s += 5) { const px = along ? b.x0 + s : cx, pz = along ? cz : b.z0 + s; B.box(along ? 1.5 : w + .06, 1.3, along ? d + .06 : 1.5, "#FFFFFF", px, 1.7, pz); B.box(along ? 1.3 : w + .1, 1.1, along ? d + .1 : 1.3, "#BFE6FA", px, 1.7, pz) } }
       } else if (v.k === "fence") {
         const along = w > d, L = along ? w : d;
         for (let s = 0; s <= L; s += 2) { const px = along ? b.x0 + s : cx, pz = along ? cz : b.z0 + s; B.box(.14, 1.2, .14, "#7A4E2E", px, .6, pz) }
@@ -3229,7 +3229,7 @@ html.br-portrait .br-ui { display: none }
         B.box(.8, .6, .05, "#111", cx, 12.8, cz);
       } else if (v.k === "hwall") {
         B.box(w, h, d, v.col, cx, h / 2, cz); B.box(w + .04, .16, d + .04, phShade(v.col, -.35), cx, .08, cz); B.box(w + .06, .14, d + .06, phShade(v.col, -.2), cx, h - .07, cz);
-        const along = w > d, L = along ? w : d; if (L > 2.6 && !v.inner) for (let t = 1.6; t < L - 1.2; t += 3.4) { const px = along ? b.x0 + t : cx, pz = along ? cz : b.z0 + t; B.box(along ? 1.3 : d + .08, 1.1, along ? d + .08 : 1.3, "#F2F0EA", px, 1.65, pz); B.box(along ? 1.1 : d + .12, .9, along ? d + .12 : 1.1, "#9FCBE6", px, 1.65, pz) }
+        const along = w > d, L = along ? w : d; if (L > 2.6 && !v.inner) for (let t = 1.6; t < L - 1.2; t += 3.4) { const px = along ? b.x0 + t : cx, pz = along ? cz : b.z0 + t; B.box(along ? 1.3 : w + .08, 1.1, along ? d + .08 : 1.3, "#F2F0EA", px, 1.65, pz); B.box(along ? 1.1 : w + .12, .9, along ? d + .12 : 1.1, "#9FCBE6", px, 1.65, pz) }
       } else if (v.k === "container") {
         B.box(w, h, d, v.col, cx, h / 2, cz); const L = v.ax ? w : d; for (let s2 = .3; s2 < L; s2 += .45) { if (v.ax) B.box(.07, h - .2, d + .06, phShade(v.col, -.2), b.x0 + s2, h / 2, cz); else B.box(w + .06, h - .2, .07, phShade(v.col, -.2), cx, h / 2, b.z0 + s2) } B.box(w + .04, .1, d + .04, phShade(v.col, -.32), cx, h - .05, cz);
       } else if (v.k === "sandbag") { const along = w > d, L = along ? w : d; for (let y = 0; y < 3; y++) for (let s2 = .3 + (y % 2) * .25; s2 < L - .15; s2 += .52) B.sph(.3, y % 2 ? "#B8A27A" : "#A8926A", along ? b.x0 + s2 : cx, .16 + y * .3, along ? cz : b.z0 + s2, along ? 1 : .6, .5, along ? .6 : 1, 1) }
@@ -3382,32 +3382,47 @@ html.br-portrait .br-ui { display: none }
     full: true,
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("かくれんぼ", "物に変身して隠れる・撃って探す")}
-        <section class="card act" style="padding:12px;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:relative;z-index:1" aria-label="かくれんぼの3Dマップ"></canvas><div id="act-msg"></div>
+        <section class="card act hd" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="かくれんぼの3Dマップ"></canvas><div id="act-msg"></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="kpad" style="z-index:3"><div class="grp"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
-          <div class="grp col"><button class="kbtn small" id="b-jump">ジャンプ</button><button class="kbtn big" id="b-act" style="font-size:17px;line-height:1.15">撃つ</button></div></div>
-        <p class="muted">左下のスティックで歩き、画面をなぞると向きが変わります。2ラウンドで鬼を交代。<b>隠れる番</b>：まん中の点を近くの物（ゴミ箱・ベンチ・たる・ソファなど）に合わせて「へんしん」すると、その物になれます。同じ物のとなりでじっとしていると見つかりにくい。動くとばれやすく、ときどき「ピーッ」と音が出ます。3回撃たれると見つかります。<b>鬼の番</b>：はじめの${PH_HIDE}秒は目かくし。あやしい物をねらって「撃つ」。本物の物を撃つと体力が減り、0になると負け。時間内に全員見つけたら鬼の勝ち。パソコンは WASD で歩く・←→で向き・スペースでへんしん／撃つ・J でジャンプ。</p></section></section>`;
+          <div class="grp col"><button class="kbtn small" id="b-jump">ジャンプ</button><button class="kbtn small" id="b-dash">ダッシュ</button><button class="kbtn big" id="b-act" style="font-size:17px;line-height:1.15">撃つ</button></div></div>
+        <p class="muted">横画面であそびます。左下のスティックで歩き（大きくたおすか「ダッシュ」を押すと走る）、画面をなぞると向きが変わります。2ラウンドで鬼を交代。<b>隠れる番</b>：まん中の点を近くの物（ゴミ箱・ベンチ・たる・ソファなど）に合わせて「へんしん」すると、その物になれます。同じ物のとなりでじっとしていると見つかりにくい。動くとばれやすく、ときどき「ピーッ」と音が出ます。3回撃たれると見つかります。<b>鬼の番</b>：はじめの${PH_HIDE}秒は目かくし。あやしい物をねらって「撃つ」。本物の物を撃つと体力が減り、0になると負け。時間内に全員見つけたら鬼の勝ち。パソコンは WASD で歩く・←→で向き・スペースでへんしん／撃つ・J でジャンプ。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
       setMsg(`<p class="wait">3Dのマップを読み込んでいます</p>`);
       phLoad().then(() => { if (!alive) return; try { stop = phRun() } catch (e) { console.error(e); setMsg(`<p class="verdict bad">3Dを表示できませんでした</p>${againBtns("hide")}`) } })
         .catch(() => { if (alive) setMsg(`<p class="verdict bad">3Dを読み込めませんでした</p><p class="muted">電波のよいところで、もう一度ためしてください</p>${againBtns("hide")}`) });
-      return () => { alive = false; if (stop) stop() };
+      return () => { alive = false; if (stop) stop(); document.documentElement.classList.remove("br-fake", "br-on"); ROT90 = false };
     },
   };
   function phRun() {
     const T = THREE, host = isFirst(), ST = PH_STAGES[me.m.stage || 0] || PH_STAGES[0], M = phMap(ST, (me.m.seed || 1) % 100000);
-    const cv = $("#cv"), gl = $("#gl"); const { c, w, h, top, bottom } = fullCanvas(cv);
-    gl.style.width = w + "px"; gl.style.height = h + "px";
+    // 荒野・カートと同じく横画面・全画面（横にならないスマホは画面ごと90度まわす）
+    const cv = $("#cv"), gl = $("#gl"), cardEl = $(".card.act.hd"), c = cv.getContext("2d"), top = 0; let w = innerWidth, h = innerHeight, bottom = 0;
+    document.documentElement.classList.add("br-on");
+    const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
+    lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     const mobile = matchMedia("(pointer: coarse)").matches;
     const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.setSize(w, h, false);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr));
     renderer.shadowMap.enabled = Q.sh > 0; renderer.shadowMap.type = T.PCFSoftShadowMap; watchLost(gl, "hide");
+    let VW = 0, VH = 0;
+    function resize() {
+      const fake = innerHeight > innerWidth, w2 = fake ? innerHeight : innerWidth, h2 = fake ? innerWidth : innerHeight;
+      ROT90 = fake; document.documentElement.classList.toggle("br-fake", fake);
+      if (w2 === VW && h2 === VH) return; VW = w = w2; VH = h = h2;
+      Object.assign(cardEl.style, fake ? { position: "fixed", inset: "auto", left: "0px", top: "0px", width: w + "px", height: h + "px", transformOrigin: "0 0", transform: `translate(${innerWidth}px,0) rotate(90deg)` } : { position: "fixed", inset: "0px", left: "", top: "", width: "", height: "", transformOrigin: "", transform: "" });
+      renderer.setSize(w, h, false); gl.style.width = cv.style.width = w + "px"; gl.style.height = cv.style.height = h + "px";
+      const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (camera) { camera.aspect = w / h; camera.updateProjectionMatrix() }
+      const pad = cardEl.querySelector(".kpad"); bottom = pad ? pad.offsetHeight : 0;
+    }
     const scene = new T.Scene();
     const skc = document.createElement("canvas"); skc.width = 2; skc.height = 256; { const sg = skc.getContext("2d"), gr = sg.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#3F8FE0"); gr.addColorStop(.55, "#9CCDF3"); gr.addColorStop(1, "#E4F2FA"); sg.fillStyle = gr; sg.fillRect(0, 0, 2, 256) }
     scene.background = new T.CanvasTexture(skc);
     scene.fog = M.indoor ? new T.Fog("#E9E2D6", 22, 55) : new T.Fog("#CFE5F5", 60, 175);
-    const camera = new T.PerspectiveCamera(60, w / h, .08, 420);
+    var camera = new T.PerspectiveCamera(60, w / h, .08, 420); resize();
     scene.add(new T.HemisphereLight(M.indoor ? "#FFF6E6" : "#D8ECFF", M.indoor ? "#8A7058" : "#5E7F3E", M.indoor ? .9 : .72));
     const sun = new T.DirectionalLight("#FFF0D6", M.indoor ? .55 : 1.0); sun.castShadow = true; const SR = M.indoor ? 22 : 34;
     sun.shadow.mapSize.set(Q.sh || 512, Q.sh || 512); Object.assign(sun.shadow.camera, { left: -SR, right: SR, top: SR, bottom: -SR, near: 1, far: 160 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
@@ -3461,7 +3476,12 @@ html.br-portrait .br-ui { display: none }
       return false;
     };
     const radOf = (e) => (e.form >= 0 ? Math.min(.45, PH_PROPS[PH_KEYS[e.form]].r * .9) : .34);
-    function moveE(e, dx, dz) { const rad = radOf(e); if (!blocked(e.x + dx, e.z, rad)) e.x += dx; if (!blocked(e.x, e.z + dz, rad)) e.z += dz }
+    function moveE(e, dx, dz) {
+      const rad = radOf(e);
+      // 物にへんしんして大きくなった・押し込まれたなどで、もう何かに重なっているときは、近くのあいている所へ出す（動けなくならないように）
+      if (blocked(e.x, e.z, rad)) { outer: for (let r = .15; r < 3; r += .15) for (let a = 0; a < 6.28; a += .52) { const x = e.x + Math.cos(a) * r, z = e.z + Math.sin(a) * r; if (!blocked(x, z, rad)) { e.x = x; e.z = z; break outer } } }
+      if (!blocked(e.x + dx, e.z, rad)) e.x += dx; if (!blocked(e.x, e.z + dz, rad)) e.z += dz;
+    }
     const losClear = (ax, az, bx, bz) => { const o = { x: ax, y: 1.4, z: az }, d = { x: bx - ax, y: 0, z: bz - az }; for (const b of M.boxes) { if (b.h < 1.5) continue; const t = phRayBox(o, d, b, 1); if (t >= 0 && t < 1) return false } return true };
     function castRay(o, d, maxT, minT, forTransform) {
       let best = maxT, code = -9;
@@ -3575,10 +3595,10 @@ html.br-portrait .br-ui { display: none }
     const stickInp = controlPad($("#stick"), $("#knob"));
     let look = null;
     cv.addEventListener("pointerdown", (e) => { au(); if (look) return; look = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { cv.setPointerCapture(e.pointerId) } catch (_) {} });
-    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; camYaw -= (e.clientX - look.x) * .0075 * SENS.look; camPitch = clamp(camPitch - (e.clientY - look.y) * .005 * SENS.look, -.8, .45); look.x = e.clientX; look.y = e.clientY });
+    cv.addEventListener("pointermove", (e) => { if (!look || e.pointerId !== look.id) return; let dx = e.clientX - look.x, dy = e.clientY - look.y; if (ROT90) [dx, dy] = [dy, -dx]; camYaw -= dx * .0075 * SENS.look; camPitch = clamp(camPitch - dy * .005 * SENS.look, -.8, .45); look.x = e.clientX; look.y = e.clientY });
     const lend = (e) => { if (look && e.pointerId === look.id) look = null }; cv.addEventListener("pointerup", lend); cv.addEventListener("pointercancel", lend);
     const bAct = $("#b-act"), bJump = $("#b-jump");
-    const actSt = holdBtn(bAct, () => { au(); onAct() }); holdBtn(bJump, () => { au(); jump() });
+    const actSt = holdBtn(bAct, () => { au(); onAct() }); holdBtn(bJump, () => { au(); jump() }); const dashB = holdBtn($("#b-dash"));
     const onKey = (e) => { if (e.target.tagName === "INPUT") return; if (e.key === " " && !e.repeat) { e.preventDefault(); au(); onAct() } if ((e.key === "j" || e.key === "J") && !e.repeat) jump() };
     addEventListener("keydown", onKey);
     const iHunt = () => S.seeker === myIdx && S.ph !== "lobby";
@@ -3685,7 +3705,7 @@ html.br-portrait .br-ui { display: none }
     // ---- 毎フレーム
     let tAll = 0;
     const stopLoop = loop((dt) => {
-      tAll += dt; fireCd = Math.max(0, fireCd - dt);
+      resize(); tAll += dt; fireCd = Math.max(0, fireCd - dt);
       const op = rtOppPeer(), ox = op ? op.presence.x : null;
       if (!host && ox && ox.S) S = Object.assign({}, ox.S);
       const m = E[myIdx], iH = iHunt();
@@ -3697,7 +3717,7 @@ html.br-portrait .br-ui { display: none }
       const frozen = m.caught || S.ph === "rres" || S.ph === "end" || (S.ph === "hide" && iH);
       if (S.ph === "lobby") camYaw += dt * .12;
       else if (!frozen && mg > .12) {
-        const sp = iH ? 4.6 : m.form >= 0 ? 4.1 : 4.8, fx = Math.sin(camYaw), fz = Math.cos(camYaw), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
+        const dash = dashB.down || keys.has("Shift") || mg > .95, sp = (iH ? 4.6 : m.form >= 0 ? 4.1 : 4.8) * (dash ? 1.55 : 1), fx = Math.sin(camYaw), fz = Math.cos(camYaw), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
         moveE(m, mx * sp * dt, mz * sp * dt); if (!iH && m.form < 0) m.yaw = Math.atan2(mx, mz); m.mv = true;
       } else m.mv = false;
       if (iH) m.yaw = camYaw;
@@ -3732,7 +3752,7 @@ html.br-portrait .br-ui { display: none }
       hud(dt); panel();
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey);
+      stopLoop(); removeEventListener("keydown", onKey); cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -5095,7 +5115,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1930";
+  const APP_VER = "1030-1938";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
