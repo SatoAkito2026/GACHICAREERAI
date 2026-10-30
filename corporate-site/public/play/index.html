@@ -419,6 +419,10 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
 .hd-tbl tr.me { background: rgba(255,225,77,.3); font-weight: 900 }
 .hd-tbl.big { font-size: 15px }
 /* ==== hide 追加ここまで ==== */
+/* ==== soccer 追加 ==== */
+.sc-ui .kbtn.sc-glow { box-shadow: 0 0 0 4px rgba(255,225,77,.95), 0 0 24px rgba(255,225,77,.9) !important; animation: sc-glow .3s ease-in-out infinite alternate }
+@keyframes sc-glow { from { filter: brightness(1) } to { filter: brightness(1.45) } }
+/* ==== soccer 追加ここまで ==== */
 </style>
 
 <div class="wrap">
@@ -1320,7 +1324,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-ui sc-ui"><div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
           <button class="kbtn sc-b" id="b-shoot">シュート</button><button class="kbtn sc-b" id="b-thru">スルー</button><button class="kbtn sc-b" id="b-pass">パス</button><button class="kbtn sc-b" id="b-dash">ダッシュ<br><small>＆スキル</small></button></div>
-        <p class="muted">横画面であそびます。左のスティックで、足もとに水色の輪がある選手を動かします。<br><b>攻撃（ボールを持っているとき）</b>　パス：スティックを向けた方の味方へ（走る先に合わせてとどきます。間に相手がいると自動で浮かせます）。タップ＝近くの味方、長押し＝遠くの味方、上にスワイプ＝浮かせたロブパス、下にスワイプ＝パス＆ゴー（出したあと前へ走る）。スルー：前へ走る味方の前のスペースへ、上にスワイプ＝DFの頭をこえるロブスルー。<br><b>シュート</b>　押している長さで強さ（ゲージが赤まで行くと浮きすぎる）。スティックの上・下でゴールの奥・手前のすみをねらいます（ゴールに印が出ます）。下にスワイプ＝巻いて曲げる、上にスワイプ＝前に出たGKの上をこえるループ、左にスワイプ＝シュートフェイント。自分の陣地の深い所では、シュートがクリア（大きくけり出す）になります。ダッシュ＆スキル：長押し＝ダッシュ（ボールを大きく前に出して運ぶ）、タップ＝相手をかわすスキル。<br><b>守備</b>　ダッシュ＆タックル：タップ＝タックル、長押し＝ボールを持った相手に自動で寄せる。スライディング：うばいやすいが、うしろからだとファウルになりやすい。2nd DF：近くの味方もボールを取りに行く（押すたびにオン・オフ）。切り替え：ボールに近い味方に代わる。<br><b>ファウル</b>　うしろからのタックルや、ボールに届かないスライディングで相手をたおすとファウル。笛が鳴って、フリーキック（ペナルティエリアの中ならPK）になります。<br><b>フリーキック・PK</b>　蹴るとき：ボールからゴールへ画面をなぞってシュート（曲げてなぞると曲がる）。シュートボタン（スティックでねらう）でも蹴れます。パスでつなぐこともできます。守るとき：壁ジャンプ・壁突進、スティックで壁を左右に動かす。相手のPKでは、スティックの上・下でキーパーがとぶ方向を決めてボタンを押します。<br><b>スローイン・コーナー・ゴールキック</b>　パスで近くの味方へ、スルーで遠くへ（スティックで方向）。コーナーはシュートボタンでゴール前へクロス。<br>チームによって攻撃・守備・スピード・キック力・テクニックがちがいます。前半・後半あわせて約5分。</p></section></section>`;
+        <p class="muted">横画面であそびます。左のスティックで、足もとに水色の輪がある選手を動かします。<br><b>攻撃（ボールを持っているとき）</b>　パス：ボールを持っている間、足もとにスティックの向き（さわっていなければ体の向き）の矢印が出て、パスが出る味方に黄色い印がつきます。押している長さで強さが変わり（ゲージ。右はしまでためるとロングパス）、味方の走る先に合わせて必ず届く強さで出ます。その向きに味方がいなければ、強さに合わせてその方向へ蹴り出します。間に相手がいると自動で浮かせます。上にスワイプ＝浮かせたロブパス、下にスワイプ＝パス＆ゴー（出したあと前へ走る）。スルー：前へ走る味方の前のスペースへ、上にスワイプ＝DFの頭をこえるロブスルー。<br><b>シュート</b>　押している長さで強さ（ゲージが赤まで行くと浮きすぎる）。スティックの上・下でゴールの奥・手前のすみをねらいます（ゴールに印が出ます）。下にスワイプ＝巻いて曲げる、上にスワイプ＝前に出たGKの上をこえるループ、左にスワイプ＝シュートフェイント。自分の陣地の深い所では、シュートがクリア（大きくけり出す）になります。ダッシュ＆スキル：長押し＝ダッシュ（ボールを大きく前に出して運ぶ）、タップ＝相手をかわすスキル。<br><b>守備</b>　ダッシュ＆タックル：タップ＝タックル（近くで正面・横から押すと奪いやすく、うしろからはファウルになりやすい）、長押し＝ボールを持った相手に自動で寄せる。スライディング：うばいやすいが、うしろからだとファウルになりやすい。2nd DF：近くの味方もボールを取りに行く（押すたびにオン・オフ）。切り替え：ボールに近い味方に代わる。<br><b>ファウル</b>　うしろからのタックルや、ボールに届かないスライディングで相手をたおすとファウル。笛が鳴って、フリーキック（ペナルティエリアの中ならPK）になります。<br><b>フリーキック・PK</b>　蹴るとき：ボールからゴールへ画面をなぞってシュート（曲げてなぞると曲がる）。シュートボタン（スティックでねらう）でも蹴れます。パスでつなぐこともできます。守るとき：壁ジャンプ・壁突進、スティックで壁を左右に動かす。<br><b>相手のPK</b>　ゴールのうしろからの画面になります。相手が助走を始めると「3・2・1」とボタンが光るので、「1 いま！」で「◀ 左にとぶ」（パスのボタン）・「右にとぶ ▶」（ダッシュのボタン）・「まん中」（シュート・スルーのボタン）を押します。上にスワイプして押すと高くとびます。早く決めすぎると、相手に読まれて逆をつかれます。<br><b>スローイン・コーナー・ゴールキック・フリーキックのパス</b>　左のスティックをたおした方向に矢印が出て、その先の味方（いなければその方向のあいている所）へ投げる・蹴ります。押す長さで強さ。スルーは遠くへ。コーナーはシュートボタンでゴール前へクロス。<br>チームによって攻撃・守備・スピード・キック力・テクニックがちがいます。前半・後半あわせて約5分。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
@@ -1418,11 +1422,11 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     const stickInp = controlPad($("#stick"), $("#knob"));
     const curStick = () => { let ix = stickInp.x, iy = stickInp.y; if (keys.has("a") || keys.has("A") || keys.has("ArrowLeft")) ix = -1; if (keys.has("d") || keys.has("D") || keys.has("ArrowRight")) ix = 1; if (keys.has("w") || keys.has("W") || keys.has("ArrowUp")) iy = -1; if (keys.has("s") || keys.has("S") || keys.has("ArrowDown")) iy = 1; return [r2(ix), r2(iy)] };
     const pushEv = (o) => { const [x, y] = curStick(); myQ = [...myQ, Object.assign({ n: ++qn, x, y }, o)].slice(-8) };
-    let chargeT = null; const held = { b4: false };
+    let chargeT = null, passT = null; const held = { b4: false };
     function gestBtn(el, slot) {
       let st = null;
-      el.addEventListener("pointerdown", (e) => { e.preventDefault(); st = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId }; if (slot === 1) chargeT = performance.now(); if (slot === 4) held.b4 = true; try { el.setPointerCapture(e.pointerId) } catch (_) {} });
-      const up = (e) => { if (!st || e.pointerId !== st.id) return; let dx = e.clientX - st.x, dy = e.clientY - st.y; if (ROT90) [dx, dy] = [dy, -dx]; const dt2 = (performance.now() - st.t) / 1000; st = null; if (slot === 1) chargeT = null; if (slot === 4) held.b4 = false;
+      el.addEventListener("pointerdown", (e) => { e.preventDefault(); st = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId }; if (slot === 1) chargeT = performance.now(); if (slot === 3) passT = performance.now(); if (slot === 4) held.b4 = true; try { el.setPointerCapture(e.pointerId) } catch (_) {} });
+      const up = (e) => { if (!st || e.pointerId !== st.id) return; let dx = e.clientX - st.x, dy = e.clientY - st.y; if (ROT90) [dx, dy] = [dy, -dx]; const dt2 = (performance.now() - st.t) / 1000; st = null; if (slot === 1) chargeT = null; if (slot === 3) passT = null; if (slot === 4) held.b4 = false;
         const g = Math.abs(dy) > 26 && Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? "up" : "down") : Math.abs(dx) > 26 ? (dx < 0 ? "left" : "right") : dt2 > .3 ? "hold" : "tap"; pushEv({ s: slot, g, p: r2(Math.min(1, dt2 / .9)) }) };
       el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
     }
@@ -1462,9 +1466,9 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     // パスの通り道に、ボールより先に相手が入れるか（入れるなら浮かせる）。v はボールのだいたいの速さ
     function laneBlocked(t, x0, z0, tx, tz, v) { const dx = tx - x0, dz = tz - z0, D = Math.hypot(dx, dz) || 1; v = v || 13; for (const q of P) { if (q.t === t || q.gk) continue; const s = ((q.x - x0) * dx + (q.z - z0) * dz) / (D * D); if (s <= 0 || s > 1.05) continue; const perp = Math.hypot(x0 + dx * s - q.x, z0 + dz * s - q.z); if (perp < .75 + 4 * Math.max(0, s * D / v - .25)) return true } return false }
     // ボールが s 秒後にどこにあるか（転がる・空中）
-    function ballAt(s) { const sp = Math.hypot(BL.vx, BL.vz); if (sp < .05) return { x: BL.x, z: BL.z }; let dist; if (BL.y > SC_BR + .05 || BL.vy > .3) dist = sp * (1 - Math.exp(-SC_CA * s)) / SC_CA; else { const k = SC_AG / SC_CG, ts = Math.log((sp + k) / k) / SC_CG; dist = s >= ts ? sp / SC_CG - k * ts : (sp + k) * (1 - Math.exp(-SC_CG * s)) / SC_CG - k * s } return { x: BL.x + BL.vx / sp * dist, z: BL.z + BL.vz / sp * dist } }
+    function ballAt(s) { const sp = Math.hypot(BL.vx, BL.vz); if (sp < .05) return { x: BL.x, z: BL.z, y: BL.y }; let dist, y = SC_BR; if (BL.y > SC_BR + .05 || BL.vy > .3) { dist = sp * (1 - Math.exp(-SC_CA * s)) / SC_CA; y = Math.max(SC_BR, BL.y + BL.vy * s - 4.9 * s * s); if (y <= SC_BR && BL.vy * s > 0) y = SC_BR + Math.abs(BL.vy) * .12 } else { const k = SC_AG / SC_CG, ts = Math.log((sp + k) / k) / SC_CG; dist = s >= ts ? sp / SC_CG - k * ts : (sp + k) * (1 - Math.exp(-SC_CG * s)) / SC_CG - k * s } return { x: BL.x + BL.vx / sp * dist, z: BL.z + BL.vz / sp * dist, y } }
     // 走って間に合う、いちばん早いボールの位置（パスの受け手・こぼれ球を取りに行く人）
-    function intercept(p) { const top = 5.2 + stOf(p).spd * .45; let b = null; for (let s = .1; s <= 3; s += .1) { b = ballAt(s); if (Math.hypot(b.x - p.x, b.z - p.z) / top <= s + .1) return { x: b.x, z: b.z, s } } return { x: b.x, z: b.z, s: 3 } }
+    function intercept(p) { const top = 5.2 + stOf(p).spd * .45; let b = null; for (let s = .1; s <= 3.5; s += .1) { b = ballAt(s); if (b.y < 1.4 && Math.hypot(b.x - p.x, b.z - p.z) / top <= s + .1) return { x: b.x, z: b.z, s } } return { x: b.x, z: b.z, s: 3.5 } } // 高いボールは落ちてくる所へ
     const freeOf = (m) => { let f = 99; for (const o of P) if (o.t !== m.t) f = Math.min(f, near(o, m)); return f };
     // スティックを向けた方の味方。向けていなければ、体の向き・前・あいている味方を選ぶ
     function bestMate(p, dx, dz, opt) {
@@ -1472,8 +1476,10 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       for (const m of P) {
         if (m.t !== p.t || m === p || m.gk || m.fall > 0) continue;
         const vx = m.x - p.x, vz = m.z - p.z, D = Math.hypot(vx, vz); if (D < 3.5 || D > (opt.far ? 62 : 40)) continue;
-        const cosA = dl > .1 ? (vx * dx + vz * dz) / (D * dl) : 0; if (dl > .1 && !opt.loose && cosA < .45) continue;
-        const sc = cosA * (opt.loose ? 12 : 45) + Math.min(freeOf(m), 9) * 2 + (opt.fwd ? vx * d * .55 : 0) + (opt.far ? Math.min(D, 40) * .35 : -Math.abs(D - 13) * .45) - (!opt.far && laneBlocked(p.t, BL.x, BL.z, m.x, m.z) ? 16 : 0);
+        const cosA = dl > .1 ? (vx * dx + vz * dz) / (D * dl) : 0, ang = Math.acos(clamp(cosA, -1, 1)); if (dl > .1 && ang > (opt.loose ? 1.75 : opt.fwd ? 1.1 : .87)) continue;
+        // スティックを向けたときは、向きのずれをいちばん重く見る（10°ずれると、フリーで6mあいているのと同じくらい）。次に近さ・フリー
+        const lane = laneBlocked(p.t, BL.x, BL.z, m.x, m.z) ? 1 : 0;
+        const sc = dl > .1 && !opt.fwd ? -ang * 60 + Math.min(freeOf(m), 6) * 1.2 - D * .12 - lane * 5 + (opt.far ? Math.min(D, 40) * .25 : 0) : cosA * (opt.loose ? 12 : 45) + Math.min(freeOf(m), 9) * 2 + (opt.fwd ? vx * d * .55 : 0) + (opt.far ? Math.min(D, 40) * .35 : -Math.abs(D - 13) * .45) - (!opt.far && lane ? 16 : 0);
         if (sc > bs) { bs = sc; best = m }
       }
       if (!best && dl > .1 && !opt.loose) return bestMate(p, dx, dz, Object.assign({}, opt, { loose: true }));
@@ -1481,27 +1487,52 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     }
     // ゴール前の味方（クロスの相手）
     function boxMate(p) { const d = dirOf(p.t), gx = SC_PL * d; let best = null, bs = -1e9; for (const m of P) { if (m.t !== p.t || m === p || m.gk) continue; const ax = Math.abs(gx - m.x); if (ax > 20 || Math.abs(m.z) > 16) continue; const sc = Math.min(freeOf(m), 6) * 2 - ax * .3 - Math.abs(m.z) * .25 + Math.random() * 3; if (sc > bs) { bs = sc; best = m } } return best }
-    // パス：受け手の走る先に合わせる（スルーは前のスペースへ）。通り道に相手がいれば浮かせる
-    function passTo(p, m, mode) {
+    // パスの向き：スティックをたおしていればその向き、なければ体の向き（セットプレーは決まった向き）。矢印の表示とホストの計算で同じものを使う
+    function aimDir(t, sx, sz) {
+      const l0 = Math.hypot(sx, sz); if (l0 > .3) return [sx / l0, sz / l0];
+      const F = S.ph === "set" && S.set && S.set.t === t ? S.set : null, d = dirOf(t);
+      if (F) { let ax = d, az = 0; if (F.k === "ti") { ax = d * .5; az = -Math.sign(F.z) } else if (F.k === "ck") { ax = SC_PL * d - d * 11 - F.x; az = -F.z } else if (F.k === "fk") { ax = SC_PL * d - F.x; az = -F.z } const l = Math.hypot(ax, az) || 1; return [ax / l, az / l] }
+      const p = P[act[t]]; return [Math.cos(p.f), Math.sin(p.f)];
+    }
+    // 矢印の先にいちばん合う味方（向きのずれをいちばん重く見る。35°より外の味方は選ばない）
+    function aimMate(t, bx, bz, ux, uz, far, skip) {
+      let best = null, bs = 1e9;
+      for (const m of P) { if (m.t !== t || m.gk || m.i === skip || m.fall > 0) continue; const vx = m.x - bx, vz = m.z - bz, D = Math.hypot(vx, vz); if (D < 2.5 || D > (far ? 65 : 45)) continue; const ang = Math.acos(clamp((vx * ux + vz * uz) / D, -1, 1)); if (ang > .62) continue; let fr = 99; for (const o of P) if (o.t !== t) fr = Math.min(fr, Math.hypot(o.x - m.x, o.z - m.z)); const sc = ang * 45 + D * .1 - Math.min(fr, 6) * .6 - (far ? Math.min(D, 40) * .2 : 0); if (sc < bs) { bs = sc; best = m } }
+      return best;
+    }
+    // スローイン：味方の走る先へ、強さ（0〜1）に合わせた距離まで投げる
+    function throwTo(kk, m, pw) { let tx = m.x + m.vx * .5, tz = m.z + m.vz * .5; const l0 = Math.hypot(tx - kk.x, tz - kk.z) || 1, D = clamp(l0, 4, 9 + pw * 17); tx = kk.x + (tx - kk.x) / l0 * D; tz = clamp(kk.z + (tz - kk.z) / l0 * D, -SC_PW + 1, SC_PW - 1); BL.y = 2.05; loftTo(kk, tx, tz, .45 + D / 20, SC_BR); BL.pass = { to: m.i, x: tx, z: tz, t: 2 }; BL.cool[kk.i] = .7; if (human()[kk.t]) act[kk.t] = m.i }
+    // 矢印の方向へパス（スローインなら投げる）。味方がいればその味方へ、いなければ強さに合わせてその方向のあいている所へ
+    function aimPass(p, ux, uz, pw, mode) {
+      const thr = S.ph === "set" && S.set && S.set.k === "ti", m = aimMate(p.t, BL.x, BL.z, ux, uz, pw >= .85, p.i);
+      if (m) { if (thr) throwTo(p, m, pw); else passTo(p, m, mode || (pw >= .85 ? "long" : "ground"), pw); return }
+      const D = thr ? 6 + pw * 18 : 8 + pw * 34, tx = clamp(BL.x + ux * D, -SC_PL + 1, SC_PL - 1), tz = clamp(BL.z + uz * D, -SC_PW + 1, SC_PW - 1);
+      if (thr) { BL.y = 2.05; loftTo(p, tx, tz, .45 + D / 20, SC_BR); BL.cool[p.i] = .7 } else if (pw >= .85 || mode === "lob") loftTo(p, tx, tz, clamp(.55 + D * .045, .8, 2.4), SC_BR); else rollTo(p, tx, tz, 2.5);
+      BL.pass = null; if (mode === "go") p.run = { x: clamp(p.x + dirOf(p.t) * 14, -50, 50), z: p.z * .85, t: 2.4 };
+    }
+    // パス：受け手の走る先に合わせる（スルーは前のスペースへ）。通り道に相手がいれば浮かせる。pw（押した長さ）が大きいほど強く速いパス
+    function passTo(p, m, mode, pw) {
       const st = stOf(p), d = dirOf(p.t), thru = mode === "thru" || mode === "lobthru";
       let air = mode === "lob" || mode === "lobthru" || mode === "long" || mode === "cross";
+      // 着いたときに残る速さ：ふつうは受けやすい速さ、強く押すほど速い（どちらも計算で必ず届く）
+      const veOf = (D) => pw != null ? clamp(4.5 + pw * 8 + D * .12, 4.5, 14) : clamp(3 + D * .1, 4, 8);
       const plan = () => {
         let tx = m.x, tz = m.z, t = 1;
         for (let k = 0; k < 3; k++) {
           if (thru) { tx = m.x + d * (7 + m.sp * .7); tz = m.z + clamp(-m.z * .18, -3, 3) } else if (mode === "cross") { tx = SC_PL * d - d * (6 + Math.random() * 4); tz = clamp(m.z, -6, 6) } else { tx = m.x + clamp(m.vx * t, -4.5, 4.5); tz = m.z + clamp(m.vz * t, -4.5, 4.5) }
           tx = clamp(tx, -SC_PL + 2, SC_PL - 2); tz = clamp(tz, -SC_PW + 1.5, SC_PW - 1.5);
-          const D = Math.hypot(tx - BL.x, tz - BL.z), ve = clamp(3.5 + D * .12, 4, 9);
+          const D = Math.hypot(tx - BL.x, tz - BL.z), ve = veOf(D);
           t = air ? clamp(.55 + D * .045, .8, 2.4) + (mode === "lob" || mode === "lobthru" ? .35 : 0) + (mode === "cross" ? .3 : 0) : scRoll(Math.min(34, scRollV0(D, ve)), ve).t;
         }
         return { tx, tz, t };
       };
       let pl = plan(); const D0 = Math.hypot(pl.tx - BL.x, pl.tz - BL.z);
-      if (!air && (D0 > 36 || (D0 > 8 && laneBlocked(p.t, BL.x, BL.z, pl.tx, pl.tz, D0 / pl.t)))) { air = true; pl = plan() }
+      if (!air && (D0 > 42 || (D0 > 8 && laneBlocked(p.t, BL.x, BL.z, pl.tx, pl.tz, D0 / pl.t)))) { air = true; pl = plan() }
       // テクニックが低い・相手が近いと、少しずれる
-      const press = freeOf(p) < 2.5 ? 1.5 : 1, D = Math.hypot(pl.tx - BL.x, pl.tz - BL.z), e = (Math.random() * 2 - 1) * ((5 - st.tec) * .011 + .005) * D * press, ux = (pl.tx - BL.x) / (D || 1), uz = (pl.tz - BL.z) / (D || 1);
+      const press = freeOf(p) < 2.5 ? 1.5 : 1, D = Math.hypot(pl.tx - BL.x, pl.tz - BL.z), e = (Math.random() * 2 - 1) * ((5 - st.tec) * .006 + .003) * D * press, ux = (pl.tx - BL.x) / (D || 1), uz = (pl.tz - BL.z) / (D || 1);
       pl.tx += -uz * e; pl.tz += ux * e;
-      const t = air ? loftTo(p, pl.tx, pl.tz, pl.t, mode === "cross" ? 1.5 : SC_BR) : rollTo(p, pl.tx, pl.tz, clamp(3.5 + D * .12, 4, 9));
-      BL.pass = { to: m.i, x: pl.tx, z: pl.tz, t: t + 2 }; BL.cool[p.i] = .45;
+      const t = air ? loftTo(p, pl.tx, pl.tz, pl.t, mode === "cross" ? 1.5 : SC_BR) : rollTo(p, pl.tx, pl.tz, veOf(D));
+      BL.pass = { to: m.i, x: pl.tx, z: pl.tz, t: t + 3.5 }; BL.cool[p.i] = .45;
       if (thru || mode === "cross") m.run = { x: pl.tx, z: pl.tz, t: t + .4 };
       if (mode === "go") p.run = { x: clamp(p.x + d * 14, -50, 50), z: p.z * .85, t: 2.4 };
       if (human()[p.t]) { act[p.t] = m.i; swc[p.t] = .6 }
@@ -1526,7 +1557,8 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const v = g.dv; v.t += dt; const u = Math.min(1, v.t / v.dur), e = 1 - (1 - u) * (1 - u);
       g.z = v.z0 + (v.z1 - v.z0) * e; g.vx = g.vz = 0;
       const lie = v.t - v.dur, up = lie > .7 ? Math.min(1, (lie - .7) / .45) : 0;
-      g.roll = v.rs * (1.15 + v.h * .12) * Math.min(1, u * 1.5) * (1 - up); g.lift = lie < 0 ? Math.sin(u * Math.PI) * (.15 + v.h * .35) + v.h * .2 * u : Math.max(0, .1 - lie * .3);
+      // 低いボールは体を横にのばして低く、高いボールは体を立て気味にして手を上へ
+      g.roll = v.rs * (1.45 - clamp(v.h, .3, 2.3) * .28) * Math.min(1, u * 1.6) * (1 - up); g.lift = lie < 0 ? Math.sin(u * Math.PI) * (.18 + v.h * .3) + v.h * .16 * u : Math.max(0, .1 - lie * .3);
       if (lie > 1.15) { g.dv = null; g.roll = g.lift = 0 }
     }
     // シュートが来たら、1本に1回だけ止められるかを決める：近いほど・ゆるいほど止めやすく、すみの強いシュートは届かない
@@ -1572,9 +1604,10 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     }
     // ---- 選手の動き：急には止まれない・曲がれない。逆へは一度ふみとどまってから
     function steer(p, dvx, dvz, dt) {
-      const st = stOf(p), want = Math.hypot(dvx, dvz), sp = Math.hypot(p.vx, p.vz);
+      const st = stOf(p), want = Math.hypot(dvx, dvz), own = BL.own === p.i; let sp = Math.hypot(p.vx, p.vz);
       let h = sp > .05 ? Math.atan2(p.vz, p.vx) : want > .05 ? Math.atan2(dvz, dvx) : p.f, tsp = want;
-      if (want > .05) { const df = phAng(Math.atan2(dvz, dvx) - h), turn = (sp < 1.5 ? 16 : 8 - sp * .45 + st.tec * .3) * dt; if (Math.abs(df) > 2.3 && sp > 2.5) tsp = 0; else { h += clamp(df, -turn, turn); if (Math.abs(df) > .9) tsp = want * Math.max(.35, Math.cos(df) * .5 + .5) } }
+      // ボールを持っているときは切り返しができる（向きをすぐ変えて、少し遅くなる）
+      if (want > .05) { const df = phAng(Math.atan2(dvz, dvx) - h), turn = (sp < 1.5 ? 16 : 8 - sp * .45 + st.tec * .3) * (own ? 1.7 : 1) * dt; if (Math.abs(df) > 2.3 && sp > 2.5) { if (own) { h += df; sp *= .42 } else tsp = 0 } else { h += clamp(df, -turn, turn); if (Math.abs(df) > .9) tsp = want * Math.max(own ? .55 : .35, Math.cos(df) * .5 + .5) } }
       const acc = (tsp > sp ? 5.5 + st.spd * .7 : 12) * dt, ns = Math.max(0, sp + clamp(tsp - sp, -acc, acc));
       p.vx = Math.cos(h) * ns; p.vz = Math.sin(h) * ns;
     }
@@ -1594,28 +1627,30 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       S.pend = inBox ? { k: "pk", t: att, x: gx - d * 11, z: 0 } : { k: "fk", t: att, x: clamp(on.x, -SC_PL + 2, SC_PL - 2), z: clamp(on.z, -SC_PW + 1, SC_PW - 1) };
       BL.own = -1; BL.vx *= .3; BL.vz *= .3; BL.spin = null; BL.pass = null; BL.shot = null; BL.gk = null;
     }
+    // 正面・横からのタックルは成功しやすく、うしろからはファウルになりやすい。人が押したタックルは、CPUより少し強い
     function challenge(p, o, slide) {
-      const dx = p.x - o.x, dz = p.z - o.z, dd = Math.hypot(dx, dz) || 1, behind = (Math.cos(o.f) * dx + Math.sin(o.f) * dz) / dd < -.35;
-      const sd = stOf(p).def, ot = stOf(o).tec, win = (slide ? .62 : .5) + (sd - ot) * .07 - (o.skill > 0 ? .4 : 0) - (behind ? .3 : 0);
+      const dx = p.x - o.x, dz = p.z - o.z, dd = Math.hypot(dx, dz) || 1, behind = (Math.cos(o.f) * dx + Math.sin(o.f) * dz) / dd < -.35, me2 = human()[p.t] && act[p.t] === p.i;
+      const sd = stOf(p).def, ot = stOf(o).tec, win = (slide ? .76 : .78) - (me2 ? 0 : .3) + (sd - ot) * .06 - (o.skill > 0 ? .45 : 0) - (behind ? .38 : 0);
       if (Math.random() < win) {
-        o.stun = .45;
-        if (!slide && Math.random() < .55) { BL.own = p.i; BL.last = p.t; BL.lp = p.i; p.bh = p.f; BL.pass = null; return true }
+        o.stun = .6; o.vx *= .5; o.vz *= .5;
+        if (!slide && (me2 || Math.random() < .7)) { BL.own = p.i; BL.last = p.t; BL.lp = p.i; p.bh = Math.atan2(BL.z - p.z, BL.x - p.x); p.dph = 0; BL.pass = null; BL.shot = null; return true } // 奪ったらすぐ自分のボール
         Object.assign(BL, { own: -1, vx: Math.cos(p.f) * 7 + (Math.random() - .5) * 4, vz: Math.sin(p.f) * 7 + (Math.random() - .5) * 4, vy: .8, spin: null, last: p.t, lp: p.i, pass: null }); BL.cool = { [o.i]: .6, [p.i]: .25 }; return true;
       }
       // ボールに届かず、相手に当たった：うしろからはたいていファウル
-      if (Math.random() < (behind ? .8 : slide ? .45 : .1)) { foul(p, o); return false }
-      p.stun = slide ? .9 : .55; return false;
+      if (Math.random() < (behind ? .75 : slide ? .4 : .06)) { foul(p, o); return false }
+      p.stun = slide ? .8 : .35; return false;
     }
     function tackle(p, slide) {
-      if (p.tk > 0 || p.slide > 0 || p.fall > 0) return; p.tk = .6;
+      if (p.tk > 0 || p.slide > 0 || p.fall > 0) return; const me2 = human()[p.t] && act[p.t] === p.i; p.tk = me2 ? .45 : 1.1;
       if (slide) { p.slide = .75; p.sdone = false; const sp = Math.max(7.5, p.sp + 2); p.vx = Math.cos(p.f) * sp; p.vz = Math.sin(p.f) * sp; return }
-      const o = owner(); p.kick = .25; if (!o || o.t === p.t || o.gk) return; if (near(p, o) > 1.7) { p.stun = .3; return }
+      const o = owner(); p.kick = .25; if (!o || o.t === p.t || o.gk) return; const dd = near(p, o); if (dd > 2.3) return; // 遠いときは足を出すだけ
+      if (dd > .7) { const k = Math.min(.8, dd - .6) / dd; p.x += (o.x - p.x) * k; p.z += (o.z - p.z) * k } // ひと足ふみこむ
       challenge(p, o, false);
     }
     function slideStep(p) {
       if (p.sdone || p.slide < .12) return; const o = owner();
-      if (o && o.t !== p.t && !o.gk && near(p, o) < 1.3) { p.sdone = true; challenge(p, o, true); return }
-      if (BL.own < 0 && BL.y < .7 && Math.hypot(p.x - BL.x, p.z - BL.z) < 1.1) { p.sdone = true; Object.assign(BL, { vx: Math.cos(p.f) * 9, vz: Math.sin(p.f) * 9, vy: 1, last: p.t, lp: p.i, spin: null, pass: null, shot: null }); BL.cool = { [p.i]: .4 }; return }
+      if (o && o.t !== p.t && !o.gk && Math.min(near(p, o), Math.hypot(p.x - BL.x, p.z - BL.z)) < 1.6) { p.sdone = true; challenge(p, o, true); return }
+      if (BL.own < 0 && BL.y < .7 && Math.hypot(p.x - BL.x, p.z - BL.z) < 1.4) { p.sdone = true; Object.assign(BL, { vx: Math.cos(p.f) * 9, vz: Math.sin(p.f) * 9, vy: 1, last: p.t, lp: p.i, spin: null, pass: null, shot: null }); BL.cool = { [p.i]: .4 }; return }
       for (const q of P) if (q.t !== p.t && !q.gk && q.fall <= 0 && near(p, q) < .85) { p.sdone = true; if (Math.random() < .55) foul(p, q); return } // おそいスライディング
     }
     // ---- 人が動かす選手
@@ -1635,7 +1670,8 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const st = stOf(p), hasBall = BL.own === p.i, dash = !!ip.hold;
       const top = (5.4 + st.spd * .45) * (dash ? 1.28 : 1) * (p.stun > 0 ? .45 : 1) * (hasBall ? .93 : 1);
       p.dash = dash && mg > .2;
-      if (dash && mg < .3 && o && o.t !== t && !o.gk) { const gx = -SC_PL * dirOf(t), gz = 0, dl = Math.hypot(gx - o.x, gz - o.z) || 1, tx = o.x + (gx - o.x) / dl * .9, tz = o.z + (gz - o.z) / dl * .9; moveTo(p, tx, tz, 1.15, dt, top) } // 長押し：ゴール側から相手に寄せる
+      if (BL.pass && BL.pass.to === p.i && BL.own < 0) { const it = intercept(p); moveTo(p, it.x, it.z, 1.2, dt) } // パスを受けるときは、ボールへ自動で向かう
+      else if (dash && mg < .3 && o && o.t !== t && !o.gk) { const gx = -SC_PL * dirOf(t), gz = 0, dl = Math.hypot(gx - o.x, gz - o.z) || 1, tx = o.x + (gx - o.x) / dl * .55, tz = o.z + (gz - o.z) / dl * .55; moveTo(p, tx, tz, 1.25, dt, top) } // 長押し：ゴール側から相手に寄せる
       else if (mg > .15) { const m = Math.hypot(ip.sx, ip.sy); steer(p, ip.sx / m * top * mg, ip.sy / m * top * mg, dt) }
       else if (BL.pass && BL.pass.to === p.i && BL.own < 0) { const it = intercept(p); moveTo(p, it.x, it.z, 1.15, dt) } // パスを受けに行く
       else steer(p, 0, 0, dt);
@@ -1649,7 +1685,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
           if (e.g === "left") { p.skill = .5; for (const q of P) if (q.t !== t && near(q, p) < 3) q.stun = .6; return }
           if (p.x * d < -20 && e.g !== "down" && e.g !== "up") return clearBall(p);
           shoot(p, e.g === "tap" ? .35 : e.g === "up" ? .5 : e.g === "down" ? Math.max(.45, e.p) : e.p, ez, e.g === "down" ? "finesse" : e.g === "up" ? "chip" : null);
-        } else if (e.s === 3) { const m = bestMate(p, ax, az, { far: e.g === "hold" }); if (m) passTo(p, m, e.g === "up" ? "lob" : e.g === "down" ? "go" : e.g === "hold" ? "long" : "ground") }
+        } else if (e.s === 3) { const [ux, uz] = aimDir(t, ex, ez); aimPass(p, ux, uz, e.g === "tap" ? 0 : e.g === "hold" ? e.p : .35, e.g === "up" ? "lob" : e.g === "down" ? "go" : null) } // 矢印の方向へ。押す長さで強さ（いちばん長いとロングパス）
         else if (e.s === 2) { const m = sm > .3 ? bestMate(p, ex, ez, { fwd: true }) : bestMate(p, d, 0, { fwd: true }); if (m) passTo(p, m, e.g === "up" ? "lobthru" : "thru") }
         else if (e.s === 4 && e.g === "tap") { p.skill = .5; const sd = (ez * Math.cos(p.f) - ex * Math.sin(p.f)) > 0 ? 1 : ez || ex ? -1 : Math.random() < .5 ? -1 : 1; p.vx += -Math.sin(p.f) * sd * 3.5; p.vz += Math.cos(p.f) * sd * 3.5; for (const q of P) if (q.t !== t && near(q, p) < 2.6) q.stun = Math.max(q.stun, .45) }
       } else if (!o || o.t !== t) {
@@ -1660,19 +1696,20 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       }
     }
     // ---- CPU：ポジション取り。ボールの位置で全体が上下し、守るときはマーク、攻めるときは広がってパスコースを作る
-    let chaser = [-1, -1], presser = [-1, -1];
+    let chaser = [-1, -1], presser = [-1, -1], cover = [-1, -1];
     function roles() {
       const hm = human(), o = owner();
       for (const t of [0, 1]) {
-        chaser[t] = presser[t] = -1;
-        if (o && o.t !== t && !o.gk) { const cand = P.filter((q) => q.t === t && !q.gk && q.fall <= 0 && (!hm[t] || q.i !== act[t])).sort((a, b) => near(a, o) - near(b, o)); if (cand[0] && (!hm[t] || S.sec[t] || near(cand[0], o) < 6)) presser[t] = cand[0].i }
+        chaser[t] = presser[t] = cover[t] = -1;
+        if (o && o.t !== t && !o.gk) { const cand = P.filter((q) => q.t === t && !q.gk && q.fall <= 0 && (!hm[t] || q.i !== act[t])).sort((a, b) => near(a, o) - near(b, o)); if (cand[0] && (!hm[t] || S.sec[t] || near(cand[0], o) < 6)) presser[t] = cand[0].i; cover[t] = -1; const og = -SC_PL * dirOf(t); if (Math.hypot(o.x - og, o.z) < 32) { const c2 = cand.find((q) => q.i !== presser[t] && q.r <= 4); if (c2) cover[t] = c2.i } } // ゴールに近づかれたら、DFがもう1人カバーに入る
         if (BL.own < 0 && !(BL.pass && P[BL.pass.to].t === t)) { let bt = 1e9; for (const q of P) { if (q.t !== t || q.gk || q.fall > 0 || (hm[t] && q.i === act[t])) continue; const it = intercept(q); if (it.s < bt) { bt = it.s; chaser[t] = q.i; q.ix = it.x; q.iz = it.z } } }
       }
     }
     function aiTarget(p) {
       const t = p.t, d = dirOf(t), o = owner(), poss = o ? o.t : BL.pass ? P[BL.pass.to].t : BL.last, adv = BL.x * d, line = p.r <= 4 ? 0 : p.r <= 8 ? 1 : 2, [, fz] = SC_FORM[p.r];
       if (S.ph === "play" && chaser[t] === p.i) return { x: p.ix, z: p.iz, k: 1.25 };
-      if (S.ph === "play" && presser[t] === p.i && o) { const gx = -SC_PL * d, dl = Math.hypot(gx - o.x, o.z) || 1; return { x: o.x + (gx - o.x) / dl * 1.1, z: o.z - o.z / dl * 1.1, k: 1.2 } }
+      if (S.ph === "play" && cover[t] === p.i && o) { const gx = -SC_PL * d, dl = Math.hypot(gx - o.x, o.z) || 1; return { x: o.x + (gx - o.x) / dl * 3.5, z: o.z - o.z / dl * 3.5, k: 1.15 } }
+      if (S.ph === "play" && presser[t] === p.i && o) { const gx = -SC_PL * d, dl = Math.hypot(gx - o.x, o.z) || 1; return { x: o.x + (gx - o.x) / dl * .75, z: o.z - o.z / dl * .75, k: 1.2 } }
       let x, z, k = .8;
       if (poss === t) {
         const oppLine = Math.max(...P.filter((q) => q.t !== t && !q.gk).map((q) => q.x * d));
@@ -1705,17 +1742,18 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       if (S.ph === "play" && BL.own < 0 && (BL.pass ? BL.pass.to === p.i : chaser[p.t] === p.i)) { const it = intercept(p); tx = it.x; tz = it.z; k = 1.2 } // パス・こぼれ球はボールに向かって取りに行く
       else if (p.run && p.run.t > 0) { p.run.t -= dt; tx = p.run.x; tz = p.run.z; k = 1.2 } else p.run = null;
       moveTo(p, tx, tz, k, dt);
-      const o = owner(); if (S.ph === "play" && o && o.t !== p.t && !o.gk && p.tk <= 0 && p.stun <= 0 && near(p, o) < 1.5 && Math.random() < dt * (1.1 + stOf(p).def * .22)) tackle(p, Math.random() < .12);
+      const o = owner(); if (S.ph === "play" && o && o.t !== p.t && !o.gk && p.tk <= 0 && p.stun <= 0 && near(p, o) < 1.5 && Math.random() < dt * (1.4 + stOf(p).def * .2)) tackle(p, Math.random() < .12);
     }
     // ボールを持ったCPU：シュート・クロス・パス・ドリブル（近くの相手をよける）
     function carrierStep(p, dt) {
       const st = stOf(p), d = dirOf(p.t), gx = SC_PL * d, dg = Math.hypot(gx - p.x, p.z), adv = p.x * d;
       let nq = null, nd = 99; for (const q of P) if (q.t !== p.t) { const dd = near(q, p); if (dd < nd) { nd = dd; nq = q } }
       if (S.ph !== "play") return steer(p, 0, 0, dt);
+      if (p.koPass) { p.koPass = false; const m = bestMate(p, -d, (Math.random() - .5) * .6, {}); if (m) return passTo(p, m, "ground") } // キックオフは後ろへつなぐ
       p.think -= dt;
       if (p.think <= 0) {
         p.think = .3 + Math.random() * .3; const g = P[(1 - p.t) * 11];
-        if (dg < 15 + st.atk * 1.4 && Math.abs(p.z) < 16 && (nd > 1.8 || dg < 11) && Math.random() < .4 + st.atk * .07) return shoot(p, .45 + Math.random() * .4, (g.z > 0 ? -1 : 1) * (.5 + Math.random() * .3), Math.random() < .25 ? "finesse" : null);
+        if (dg < 14 + st.atk * 1.2 && Math.abs(p.z) < 16 && (nd > 1.8 || dg < 11) && Math.random() < (.18 + st.atk * .05) * (dg < 13 ? 2 : 1)) return shoot(p, .45 + Math.random() * .4, (g.z > 0 ? -1 : 1) * (.5 + Math.random() * .3), Math.random() < .25 ? "finesse" : null);
         if (adv > 33 && Math.abs(p.z) > 13 && Math.random() < .55) { const m = boxMate(p); if (m) return passTo(p, m, "cross") }
         if (nd < 4.5 && Math.random() < .5 + st.tec * .06) { const m = bestMate(p, d * .6, 0, { fwd: true }); if (m && freeOf(m) > 2.5) return passTo(p, m, "ground") }
         if (Math.random() < .3 - st.atk * .02) { const m = bestMate(p, d, 0, { fwd: true, far: Math.random() < .25 }); if (m && freeOf(m) > 4 && (m.x - p.x) * d > -6) return passTo(p, m, m.run && (m.x - p.x) * d > 4 ? "thru" : "ground") }
@@ -1738,7 +1776,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         else if (p.gk || p.sp < 1.3) fa = Math.atan2(BL.z - p.z, BL.x - p.x); // 止まっているときはボールを見る
         else if (o && o.t !== p.t && near(p, o) < 5 && p.sp < 5.5) fa = Math.atan2(o.z - p.z, o.x - p.x); // 守るときは相手を見ながら下がる
         else fa = Math.atan2(p.vz, p.vx);
-        p.f = phAng(p.f + phAng(fa - p.f) * Math.min(1, dt * (p.sp > 3 ? 10 : 6)));
+        p.f = phAng(p.f + phAng(fa - p.f) * Math.min(1, dt * (BL.own === p.i ? 18 : p.sp > 3 ? 10 : 6)));
       }
       // 体どうしが重ならない
       for (let i = 0; i < 22; i++) for (let j = i + 1; j < 22; j++) { const a = P[i], b = P[j], dx = b.x - a.x, dz = b.z - a.z, dd = Math.hypot(dx, dz); if (dd < .62 && dd > 1e-4) { const k = (.62 - dd) / dd * .5; a.x -= dx * k; a.z -= dz * k; b.x += dx * k; b.z += dz * k } }
@@ -1746,12 +1784,14 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     // ドリブル：ボールは足もとにくっついて、さわるたびに少し前へ出る（ダッシュでは大きく出す）。向きを変えるとボールも少しおくれてついてくる
     function dribble(o, dt) {
       if (o.gk) { Object.assign(BL, { x: o.x + Math.cos(o.f) * .32, z: o.z + Math.sin(o.f) * .32, y: 1.05, vx: o.vx, vz: o.vz, vy: 0 }); return }
-      o.bh = phAng(o.bh + phAng(o.f - o.bh) * Math.min(1, dt * 9));
-      o.dph += dt / clamp(.6 - o.sp * .035, .3, .6); if (o.dph >= 1) o.dph -= 1;
-      const push = o.sp < .4 ? 0 : .1 + o.sp * .045 + (o.dash ? .5 : 0), off = .45 + push * Math.pow(Math.sin(Math.PI * o.dph), .7), lat = .1;
+      o.bh = phAng(o.bh + phAng(o.f - o.bh) * Math.min(1, dt * (Math.abs(phAng(o.f - o.bh)) > 1 ? 24 : 15)));
+      o.dph += dt / clamp(.4 - o.sp * .025, .22, .4); if (o.dph >= 1) o.dph -= 1;
+      const push = o.sp < .4 ? 0 : .03 + o.sp * .018 + (o.dash ? .32 : 0), off = .36 + push * Math.pow(Math.sin(Math.PI * o.dph), .7), lat = .08;
       Object.assign(BL, { x: o.x + Math.cos(o.bh) * off - Math.sin(o.bh) * lat, z: o.z + Math.sin(o.bh) * off + Math.cos(o.bh) * lat, y: SC_BR, vx: o.vx, vz: o.vz, vy: 0 });
       // 大きく出したボールは、近くの相手に取られることがある
-      if (off > .8) for (const q of P) if (q.t !== o.t && !q.gk && q.stun <= 0 && q.fall <= 0 && Math.hypot(q.x - BL.x, q.z - BL.z) < .55) { BL.own = q.i; BL.last = q.t; BL.lp = q.i; q.bh = q.f; o.stun = .3; return }
+      if (off > .7) for (const q of P) if (q.t !== o.t && !q.gk && q.stun <= 0 && q.fall <= 0 && Math.hypot(q.x - BL.x, q.z - BL.z) < .55) { BL.own = q.i; BL.last = q.t; BL.lp = q.i; q.bh = q.f; o.stun = .3; return }
+      // 相手がボールのすぐそばまで体を入れてきたら、ときどき足を出して取られる（テクニックが高いほど取られにくい。相手が近くにいなければ取られない）
+      for (const q of P) if (q.t !== o.t && !q.gk && q.stun <= 0 && q.fall <= 0 && q.tk <= 0 && !(human()[q.t] && act[q.t] === q.i) && Math.hypot(q.x - BL.x, q.z - BL.z) < .75 && Math.random() < dt * clamp(2.2 + (stOf(q).def - stOf(o).tec) * .4 - (o.skill > 0 ? 2 : 0), .3, 3.5)) { BL.own = q.i; BL.last = q.t; BL.lp = q.i; q.bh = q.f; q.dph = 0; o.stun = .35; q.tk = .8; return }
     }
     function goalFor(d) {
       const t = d === 1 ? 0 : 1; S.sc = S.sc.slice(); S.sc[t]++; S.ph = "goal"; S.t = 3.8; const sc = BL.lp >= 0 && P[BL.lp].t === t ? nameOf(BL.lp) : ""; S.msg = `ゴール！ ${sc || SC_TEAMS[S.teams[t]].name}`; S.mt = 3; S.ko = 1 - t;
@@ -1807,7 +1847,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         if (BL.cool[p.i] || p.stun > 0 || p.fall > 0 || p.dv || p.slide > .1) continue;
         const dd = Math.hypot(p.x - BL.x, p.z - BL.z), mine = BL.pass && BL.pass.to === p.i;
         if (p.gk) { const gl = -SC_PL * dirOf(p.t), inBox = Math.abs(p.x - gl) < 16.5 && Math.abs(p.z) < 20.2; if (inBox && dd < 1.15 && BL.y < 2.5 && !(BL.gk && BL.gk.t === p.t && !BL.gk.ok && !BL.gk.off && bsp > 9) && dd < bd) { bd = dd; best = p; how = 3 } continue }
-        if (BL.y < 1.0 && dd < (mine ? 1.05 : BL.age < .2 && p.t !== BL.last ? .45 : .8) && dd < bd) { bd = dd; best = p; how = 1 } // 蹴った直後は、すぐ前の相手に当たったときだけ
+        if (BL.y < (mine ? 1.5 : 1.0) && dd < (mine ? 1.35 : BL.age < .2 && p.t !== BL.last ? .45 : .8) && dd < bd) { bd = dd; best = p; how = 1 } // 受け手は胸までの高さを確実にトラップ // 蹴った直後は、すぐ前の相手に当たったときだけ
         else if (BL.y > 1.2 && BL.y < 2.45 && dd < .8 && dd < bd) { bd = dd; best = p; how = 2 }
       }
       if (!best) return;
@@ -1848,7 +1888,8 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       let ax = gx - x, az = -z * .3; if (k === "ck") { ax = gx - d * 11 - x; az = -z } else if (k === "gk") { ax = d; az = 0 } else if (k === "ti") { ax = d * .4; az = -Math.sign(z) }
       const al = Math.hypot(ax, az) || 1, ux = ax / al, uz = az / al, dist = Math.hypot(gx - x, z);
       if (k === "ti") { kk.x = x; kk.z = z + Math.sign(z) * .25 } else { const so = k === "fk" || k === "pk" ? (z >= 0 ? -.9 : .9) : 0; kk.x = x - ux * 1.4 + uz * so; kk.z = z - uz * 1.4 - ux * so } kk.f = Math.atan2(z - kk.z, x - kk.x);
-      const F = { k, t, x, z, kk: kk.i, t0: 0, wall: [], pkg: null, ch: 0, jp: 0 };
+      const F = { k, t, x, z, kk: kk.i, t0: 0, wall: [], pkg: null, pkh: 0, pkT: -9, ch: 0, jp: 0, cpu: !human()[t], w: k === "fk" ? 2.6 : k === "pk" ? 3.4 : k === "ck" ? 2 : 1.4 };
+      if (k === "pk" && F.cpu) { F.r1 = [kk.x, kk.z]; kk.x = x - ux * 4.2 - uz * 1.6; kk.z = z - uz * 4.2 + ux * 1.6; F.r0 = [kk.x, kk.z] } // CPUのPKは助走する
       const atk = P.filter((q) => q.t === t && !q.gk && q !== kk), dfs = P.filter((q) => q.t !== t && !q.gk);
       // ゴール前に入る人と、そのマーク
       const boxIn = (n) => { const sp = [[7, -4], [9, 3], [12, -8], [11, 7], [14, 0]]; atk.sort((a, b) => b.r - a.r).slice(0, n).forEach((q, i) => { q.x = gx - d * sp[i][0]; q.z = sp[i][1] + (Math.random() - .5) * 2 }); return atk.slice(0, n) };
@@ -1873,9 +1914,10 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       tz += (Math.random() * 2 - 1) * (5 - st.tec) * .1; const tt = launch(kk, gx + d * .4, ty, tz, sp, bend); BL.shot = { t: F.t }; fx(3);
       if (F.k === "fk") { const cpuDef = !human()[1 - F.t]; for (const wi of F.wall) { const q = P[wi]; if (F.ch) { q.x += (BL.x - q.x) * .12; q.z += (BL.z - q.z) * .12 } if (F.jp > 0 || (cpuDef && Math.random() < .55)) q.jy = .75 } }
       if (F.k === "pk") { // PK：キーパーは蹴った瞬間に、決めておいた方へとぶ
-        const guess = F.pkg != null ? F.pkg : [-1, -1, 0, 1, 1][Math.floor(Math.random() * 5)], onT = Math.abs(tz) < SC_GW + .2 && ty < SC_GH + .2;
-        const ok = onT && (guess === 0 ? Math.abs(tz) < 1.1 && Math.random() < .9 : Math.sign(tz) === guess && Math.abs(tz) > .7 && Math.abs(tz) < 3.25 && ty < 2.15 && Math.random() < .78);
-        BL.gk = { t: g.t, ok, c: ok && Math.random() < .35 }; if (guess) startDive(g, ok ? tz : guess * 2.4, ty, tt * .9);
+        const guess = F.pkg != null ? F.pkg : [-1, -1, 0, 1, 1][Math.floor(Math.random() * 5)], hi = F.pkg != null ? F.pkh : ty > 1.6 && Math.random() < .5, onT = Math.abs(tz) < SC_GW + .2 && ty < SC_GH + .2;
+        // 高くとぶ・低くとぶで止められる高さがちがう。届かないすみ（|z|>3.25）は止められない
+        const ok = onT && (guess === 0 ? Math.abs(tz) < 1.1 && (hi || ty < 1.9) && Math.random() < .9 : Math.sign(tz) === guess && Math.abs(tz) > .7 && Math.abs(tz) < 3.25 && (hi ? ty > .9 : ty < 1.7) && Math.random() < .8);
+        BL.gk = { t: g.t, ok, c: ok && Math.random() < .35 }; if (guess) startDive(g, ok ? tz : guess * 2.5, hi ? Math.max(ty, 2) : Math.min(ty, 1), clamp(tt * .9, .35, .55)); else if (hi) g.jy = .6;
       }
       goPlay();
     }
@@ -1884,15 +1926,17 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const F = S.set; if (!F || F.t0 < .5) return; const kk = P[F.kk], d = dirOf(t), gx = SC_PL * d, ex = e.x || 0, ez = e.y || 0, sm = Math.hypot(ex, ez), dist = Math.hypot(gx - F.x, F.z);
       if (F.t !== t) { // 守る側
         if (F.k === "fk") { if (e.s === 1) { F.jp = .9; for (const wi of F.wall) P[wi].jy = .75 } else if (e.s === 2) F.ch = 1 }
-        else if (F.k === "pk" && (e.s === 1 || e.s === 2 || e.s === 3 || e.s === 4)) F.pkg = Math.abs(ez) > .3 ? Math.sign(ez) : 0;
+        else if (F.k === "pk") { const da = dirOf(F.t); F.pkg = e.s === 3 ? da : e.s === 4 ? -da : 0; F.pkh = e.g === "up" ? 1 : 0; F.pkT = F.t0 } // ゴールのうしろから見て：パス＝左、ダッシュ＝右、ほか＝まん中。上にスワイプ＝高く
         return;
       }
-      const st = stOf(kk);
+      const st = stOf(kk), pwE = e.g === "tap" ? 0 : e.g === "hold" ? e.p : .35;
+      // 人が蹴る・投げる：スティックの向き（矢印）へ。押す長さで強さ
+      if (human()[t] && F.k !== "pk" && (e.s === 3 || ((F.k === "ti" || F.k === "gk") && (e.s === 1 || e.s === 2)))) { const [ux, uz] = aimDir(t, ex, ez); aimPass(kk, ux, uz, e.s === 3 ? pwE : Math.max(pwE, .9)); return goPlay() }
       if (e.s === 9 && (F.k === "fk" || F.k === "pk")) return setShot(13 + clamp(e.p, .25, 1.45) * 14 + st.kick * 1.4, e.ty, e.tz, e.cv * (.6 + dist * .09) * -d);
       if (F.k === "fk" || F.k === "pk") {
         if (e.s === 1 && (F.k === "pk" || dist < 34)) { const pw = e.g === "tap" ? .4 : clamp(e.p, 0, 1); return setShot(16 + pw * 10 + st.kick * 1.5, .4 + pw * 1.5 + (pw > .9 ? (pw - .9) * 9 : 0), Math.abs(ez) > .3 ? clamp(ez * 3.9, -3.05, 3.05) : (F.z >= 0 ? -1 : 1) * 2.4, e.g === "down" ? -d * Math.sign(F.z >= 0 ? -1 : 1) * 1.4 : 0) }
         if (e.s === 1 || e.s === 2) { const m = boxMate(kk) || bestMate(kk, d, 0, { far: true, fwd: true }); if (m) { passTo(kk, m, "cross"); return goPlay() } }
-        if (e.s === 3) { const m = bestMate(kk, sm > .3 ? ex : d, sm > .3 ? ez : 0, {}); if (m) { passTo(kk, m, "ground"); return goPlay() } }
+        if (e.s === 3 || e.s === 1 || e.s === 2) { const m = bestMate(kk, sm > .3 ? ex : d, sm > .3 ? ez : 0, {}) || nearestTo(t, kk.x, kk.z, true, kk); if (m) { passTo(kk, m, "ground"); return goPlay() } }
         return;
       }
       if (F.k === "ck") { if (e.s === 3 && e.g === "tap") { const m = nearestTo(t, kk.x, kk.z, true, kk); if (m) passTo(kk, m, "ground") } else { const m = boxMate(kk); if (m) passTo(kk, m, "cross") } return goPlay() }
@@ -1910,11 +1954,13 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       // 守る人：スティックで壁を左右に動かす
       const dfT = 1 - F.t; if (hm[dfT] && F.wall.length) { const ip = inp[dfT], w = (Math.abs(ip.sy) > Math.abs(ip.sx) ? ip.sy : -ip.sx * dirOf(F.t)) * 2 * dt; for (const wi of F.wall) { const q = P[wi]; q.z = clamp(q.z + w, -SC_PW, SC_PW) } }
       movePlayers(dt); kk.x = F.k === "ti" ? F.x : kk.x; kk.z = F.k === "ti" ? F.z + Math.sign(F.z) * .25 : kk.z;
+      if (F.r0) { const u = clamp(F.t0 - (F.w - 1), 0, 1); kk.x = F.r0[0] + (F.r1[0] - F.r0[0]) * u; kk.z = F.r0[1] + (F.r1[1] - F.r0[1]) * u; kk.sp = u > 0 && u < 1 ? 3.8 : 0; kk.f = Math.atan2(F.z - kk.z, F.x - kk.x) } // 助走
       // CPU が蹴る
-      const wait = F.k === "fk" || F.k === "pk" ? 2.6 : F.k === "ck" ? 2 : 1.4;
+      const wait = F.w;
+      if (F.t0 > 18) { const [ux, uz] = aimDir(F.t, 0, 0); aimPass(kk, ux, uz, .5); return goPlay() } // どうしても蹴れないときの保険
       if ((!hm[F.t] && F.t0 > wait) || F.t0 > 15) {
         const st = stOf(kk), d = dirOf(F.t), gx = SC_PL * d, dist = Math.hypot(gx - F.x, F.z);
-        if (F.k === "pk" || (F.k === "fk" && dist < 30 && Math.random() < .75)) { const side = Math.random() < .5 ? -1 : 1; return setShot(23 + Math.random() * 5 + st.kick, .5 + Math.random() * 1.3, side * (1.6 + Math.random() * 1.4), F.k === "fk" ? -d * side * (.6 + Math.random() * .8) : 0) }
+        if (F.k === "pk" || (F.k === "fk" && dist < 30 && Math.random() < .75)) { let side = Math.random() < .5 ? -1 : 1; if (F.k === "pk" && F.pkg && F.t0 - F.pkT > 1 && Math.random() < .7) side = -F.pkg; /* 早く決めすぎると読まれる */ return setShot(23 + Math.random() * 5 + st.kick, .5 + Math.random() * 1.3, side * (1.6 + Math.random() * 1.4), F.k === "fk" ? -d * side * (.6 + Math.random() * .8) : 0) }
         const m = F.k === "ck" || F.k === "fk" ? boxMate(kk) : null;
         if (m) { passTo(kk, m, "cross"); return goPlay() }
         return setEvent(F.t, { s: F.k === "gk" && Math.random() < .5 ? 3 : Math.random() < .35 ? 2 : 3, g: "tap", p: 0, x: 0, y: 0 });
@@ -1926,7 +1972,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const hm = human();
       for (let t = 0; t < 2; t++) if (hm[t] && S.ph !== "play") humanStep(t, dt);
       for (const p of P) p.cel = Math.max(0, p.cel - dt);
-      if (S.ph === "ko") { S.t -= dt; for (const p of P) steer(p, 0, 0, dt); movePlayers(dt); if (owner()) dribble(owner(), 0); if (S.t <= 0) { S.ph = "play"; whistle("whistle1") } return }
+      if (S.ph === "ko") { S.t -= dt; for (const p of P) steer(p, 0, 0, dt); movePlayers(dt); if (owner()) dribble(owner(), 0); if (S.t <= 0) { S.ph = "play"; whistle("whistle1"); const k = owner(); if (k) k.koPass = true } return }
       if (S.ph === "goal" || S.ph === "half" || S.ph === "stop") {
         S.t -= dt; for (const p of P) if (!p.dv) { if (p.cel > 0 && S.ph === "goal") { const sc = P.find((q) => q.i === BL.lp) || p; moveTo(p, sc.x, sc.z, .9, dt) } else steer(p, 0, 0, dt) } else diveStep(p, dt);
         physics(dt);
@@ -1948,7 +1994,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     function applyNet(x) { if (!x || !x.S) return; S = Object.assign({}, S, x.S); if (String(S.teams) !== builtFor) { builtFor = String(S.teams); buildVis() } if (x.P) x.P.forEach((a, i) => { const p = P[i]; p.x = a[0]; p.z = a[1]; p.f = a[2]; p.sp = a[3]; p.anim = a[4]; p.roll = a[5]; p.lift = a[6] }); if (x.B) { BL.x = x.B[0]; BL.y = x.B[1]; BL.z = x.B[2]; BL.own = x.B[3]; BL.vx = x.B[4]; BL.vz = x.B[5]; BL.last = x.B[6] } if (x.A) { act[0] = x.A[0]; act[1] = x.A[1] } }
     const camLook = new T.Vector3(0, 0, 0), camPos = new T.Vector3(0, 18, 30), CAM = new T.Vector3(0, 15.5, 33), crowd = scCrowd();
     const sndW = { k: [], s: [], sc: "", wh: -1, fx: null, ph: "" };
-    let fade = 0, lastCut = 0, fkCamT = 0, nowT = 0;
+    let fade = 0, lastCut = 0, fkCamT = 0, pkCamT = 0, pkCamD = 1, nowT = 0, glowOn = "";
     const flagsOf = (p) => (p.kick > 0 ? 1 : 0) | (p.slide > 0 ? 2 : 0) | (p.dv ? 4 : 0) | (p.jy > 0 ? 8 : 0) | (p.skill > 0 ? 16 : 0) | (p.fall > 0 ? 32 : 0) | (S.ph === "set" && S.set && S.set.k === "ti" && S.set.kk === p.i ? 64 : 0) | (BL.own === p.i && p.gk ? 128 : 0) | (p.cel > 0 ? 256 : 0) | (p.gk && !p.dv && p.sp < 2 && BL.own !== p.i && Math.hypot(BL.x - p.x, BL.z - p.z) < 28 ? 512 : 0);
     function frame(dt) {
       resize(); nowT += dt;
@@ -1958,7 +2004,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         inp[0] = myIn; const gp = realOppPeer() ? matchPeers()[0] : null, gxx = peerX(gp); if (gxx && gxx.in) inp[1] = gxx.in;
         if (S.ph === "lobby" && allReady()) { const gs = gp ? peerS(gp) || {} : {}; S.teams = [me.s.team ?? 0, gp ? gs.team ?? 1 : me.s.cpuTeam ?? 1]; if (S.teams[1] === S.teams[0] && !gp) S.teams[1] = (S.teams[0] + 1) % 5; builtFor = String(S.teams); buildVis(); S.sc = [0, 0]; S.clk = 0; S.half = 1; S.sec = [0, 0]; placeKickoff(0); S.ph = "ko"; S.t = 2; S.msg = "キックオフ"; S.mt = 1.6 }
         hostStep(dt);
-        const out = { S: { ph: S.ph, clk: Math.round(S.clk * 100) / 100, half: S.half, sc: S.sc, teams: S.teams, t: r2(S.t), msg: S.msg, mt: r2(S.mt || 0), sec: S.sec, set: S.set && { k: S.set.k, t: S.set.t, x: r2(S.set.x), z: r2(S.set.z), kk: S.set.kk, t0: r2(S.set.t0) }, cut: S.cut, wh: S.wh, fx: S.fx }, P: P.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.z * 10) / 10, r2(p.f), Math.round(p.sp * 10) / 10, flagsOf(p), r2(p.roll), r2(p.lift)]), B: [r2(BL.x), r2(BL.y), r2(BL.z), BL.own, Math.round(BL.vx), Math.round(BL.vz), BL.last], A: act };
+        const out = { S: { ph: S.ph, clk: Math.round(S.clk * 100) / 100, half: S.half, sc: S.sc, teams: S.teams, t: r2(S.t), msg: S.msg, mt: r2(S.mt || 0), sec: S.sec, set: S.set && { k: S.set.k, t: S.set.t, x: r2(S.set.x), z: r2(S.set.z), kk: S.set.kk, t0: r2(S.set.t0), pkg: S.set.pkg, pkh: S.set.pkh, cpu: S.set.cpu, w: S.set.w }, cut: S.cut, wh: S.wh, fx: S.fx }, P: P.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.z * 10) / 10, r2(p.f), Math.round(p.sp * 10) / 10, flagsOf(p), r2(p.roll), r2(p.lift)]), B: [r2(BL.x), r2(BL.y), r2(BL.z), BL.own, Math.round(BL.vx), Math.round(BL.vz), BL.last], A: act };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else {
         applyNet(hx);
@@ -1989,7 +2035,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         if (v.kt < .42) { const u = v.kt / .42, sw = u < .3 ? .75 * (u / .3) : .75 - 2 * Math.min(1, (u - .3) / .25) + Math.max(0, u - .55) * 1.8; v.legR.rotation.x = sw; v.kneeR.rotation.x = u < .3 ? 1.3 * (u / .3) : Math.max(.1, 1.3 - (u - .3) * 6); v.armL.rotation.set(-.3, 0, -.7); v.armR.rotation.set(.3, 0, .7); v.body.rotation.x = .1 } // 蹴る：ふりかぶって、ふりぬく
         if (an & 2) { v.body.rotation.set(-1.12, 0, 0); v.body.position.set(0, .1, .5); v.legR.rotation.x = -.42; v.kneeR.rotation.x = .05; v.legL.rotation.x = .25; v.kneeL.rotation.x = 1.25; v.armL.rotation.set(.9, 0, -.5); v.armR.rotation.set(-.5, 0, .6); v.elbowL.rotation.x = v.elbowR.rotation.x = -.3 } // スライディング：片足をのばして芝をすべる
         if (an & 32) { v.body.rotation.set(-1.42, 0, 0); v.body.position.set(0, .08, .2); v.legL.rotation.x = .15; v.legR.rotation.x = .35; v.kneeL.rotation.x = .3; v.kneeR.rotation.x = .9; v.armL.rotation.set(.4, 0, -1.1); v.armR.rotation.set(.2, 0, 1.2) } // たおれる
-        if (an & 4 || p.roll) { v.g.rotation.set(0, Math.PI / 2 - s2.f, p.roll || 0); v.g.position.y = p.lift || 0; v.armL.rotation.set(0, 0, -2.85); v.armR.rotation.set(0, 0, 2.85); v.elbowL.rotation.x = v.elbowR.rotation.x = -.15; v.legL.rotation.x = .2; v.legR.rotation.x = -.15; v.kneeL.rotation.x = v.kneeR.rotation.x = .3 }
+        if (an & 4 || p.roll) { v.g.rotation.set(0, Math.PI / 2 - s2.f, p.roll || 0); v.g.position.y = p.lift || 0; v.armL.rotation.set(0, 0, -2.85); v.armR.rotation.set(0, 0, 2.85); v.elbowL.rotation.x = v.elbowR.rotation.x = -.1; v.legL.rotation.set(.15, 0, .22); v.legR.rotation.set(-.1, 0, -.22); v.kneeL.rotation.x = .45; v.kneeR.rotation.x = .15; v.body.rotation.x = .05 }
         if (an & 8 && v.jt < .6) { v.g.position.y = Math.sin(v.jt / .6 * Math.PI) * .45; v.armL.rotation.set(-.5, 0, .3); v.armR.rotation.set(-.5, 0, -.3); v.elbowL.rotation.x = v.elbowR.rotation.x = -1.4 }
         if (an & 64) { v.armL.rotation.set(-2.9, 0, -.15); v.armR.rotation.set(-2.9, 0, .15); v.elbowL.rotation.x = v.elbowR.rotation.x = -.7 } // スローイン：ボールを頭の上に
         if (an & 128) { v.armL.rotation.set(-1.1, 0, .2); v.armR.rotation.set(-1.1, 0, -.2); v.elbowL.rotation.x = v.elbowR.rotation.x = -.6 } // キーパーがボールを持つ
@@ -1997,9 +2043,11 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       });
       { const own = BL.own >= 0 && fade <= .3; if (fade > .3) { showB.x = BL.x; showB.y = BL.y; showB.z = BL.z } else { const ab = own || host ? 1 : Math.min(1, dt * 14); showB.x += (BL.x - showB.x) * ab; showB.y += (BL.y - showB.y) * ab; showB.z += (BL.z - showB.z) * ab } ballM.position.set(showB.x, showB.y, showB.z); const bv = BL.own >= 0 ? P[BL.own].sp : Math.hypot(BL.vx, BL.vz); if (bv > .2) { ballM.rotation.z -= bv * dt / SC_BR * Math.cos(Math.atan2(BL.vz, BL.vx)); ballM.rotation.x += bv * dt / SC_BR * Math.sin(Math.atan2(BL.vz, BL.vx)) } }
       // カメラ：テレビ中継の角度のまま、ボールに合わせて横・前後に平行移動するだけ。手前でもボールが画面の少し上に来るように
-      const mineFk = S.ph === "set" && S.set && S.set.t === myTeam && (S.set.k === "fk" || S.set.k === "pk");
+      const mineFk = S.ph === "set" && S.set && S.set.t === myTeam && (S.set.k === "fk" || S.set.k === "pk"), defPk = S.ph === "set" && S.set && S.set.k === "pk" && S.set.t !== myTeam;
       if (mineFk) fkCamT = 1.3; else fkCamT = Math.max(0, fkCamT - dt);
-      if (mineFk || (fkCamT > 0 && S.ph === "play")) {
+      if (defPk) { pkCamT = 1.6; pkCamD = dirOf(S.set.t) } else pkCamT = Math.max(0, pkCamT - dt);
+      if (defPk || (pkCamT > 0 && S.ph === "play")) { const gx = SC_PL * pkCamD, k = fade > 0 ? 1 : Math.min(1, dt * 5); camPos.lerp(new T.Vector3(gx + pkCamD * 8.5, 5.4, 0), k); camLook.lerp(new T.Vector3(gx - pkCamD * 10, .4, 0), k) } // 相手のPK：キーパーのうしろ（ゴールの裏）から。画面の左右＝とぶ左右
+      else if (mineFk || (fkCamT > 0 && S.ph === "play")) {
         const F = S.set || { x: showB.x, z: showB.z, t: myTeam }, d = dirOf(F.t), gx = SC_PL * d, fx2 = mineFk ? F.x : camLook.x, fz = mineFk ? F.z : camLook.z, dl = Math.hypot(gx - fx2, fz) || 1, ux = (gx - fx2) / dl, uz = -fz / dl;
         if (mineFk) { const sd = F.z >= 0 ? 1 : -1; camPos.lerp(new T.Vector3(F.x - ux * 6.5 - uz * 1.3 * sd, 3, F.z - uz * 6.5 + ux * 1.3 * sd), fade > 0 ? 1 : Math.min(1, dt * 4)); camLook.lerp(new T.Vector3(F.x + ux * Math.min(13, dl * .6), 1, F.z + uz * Math.min(13, dl * .6)), fade > 0 ? 1 : Math.min(1, dt * 4)) }
         else { camLook.lerp(new T.Vector3(showB.x, showB.y * .5, showB.z), Math.min(1, dt * 3)) }
@@ -2007,7 +2055,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         const lx = clamp(showB.x, -SC_PL + 9, SC_PL - 9), lz = clamp(showB.z + 3.2, -24, 33), k = fade > .3 ? 1 : Math.min(1, dt * 2.6);
         camLook.lerp(new T.Vector3(lx, 0, lz), k); camPos.lerp(new T.Vector3(camLook.x + CAM.x, CAM.y, camLook.z + CAM.z), fade > .3 ? 1 : Math.min(1, dt * 6));
       }
-      { const fv = mineFk || (fkCamT > 0 && S.ph === "play") ? 50 : 30; if (Math.abs(camera.fov - fv) > .05) { camera.fov = fade > 0 ? fv : camera.fov + (fv - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() } } // フリーキックは広く
+      { const fv = defPk || mineFk || ((fkCamT > 0 || pkCamT > 0) && S.ph === "play") ? 50 : 30; if (Math.abs(camera.fov - fv) > .05) { camera.fov = fade > 0 ? fv : camera.fov + (fv - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() } } // フリーキックは広く
       camera.position.copy(camPos); camera.lookAt(camLook);
       sun.target.position.copy(camLook); sun.position.set(camLook.x - 30, 60, camLook.z + 40); sun.target.updateMatrixWorld();
       renderer.render(scene, camera); hud();
@@ -2021,8 +2069,21 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       if (S.ph === "lobby") return;
       const mine = P[act[myTeam]], o = BL.own >= 0 ? P[BL.own] : null, attacking = S.ph === "set" && S.set ? S.set.t === myTeam : o ? o.t === myTeam : BL.last === myTeam;
       // 足もとの輪（動かす選手・ボールを持った相手）とパスの受け手
-      if (S.ph !== "end" && mine && !mySetShot()) { const s2 = show[mine.i]; ring(s2.x, s2.z, .75, "rgba(77,227,255,.95)", 3); const q = proj(s2.x, 2.3, s2.z); if (q) { c.fillStyle = "#4DE3FF"; c.beginPath(); c.moveTo(q[0] - 7, q[1] - 10); c.lineTo(q[0] + 7, q[1] - 10); c.lineTo(q[0], q[1]); c.fill() } const q2 = proj(s2.x, 0, s2.z); if (q2) { c.font = `bold 12px sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "rgba(0,0,0,.55)"; c.fillText(nameOf(mine.i), q2[0] + 1, q2[1] + 17); c.fillStyle = "#fff"; c.fillText(nameOf(mine.i), q2[0], q2[1] + 16) } }
+      const pkNow = (S.ph === "set" && S.set && S.set.k === "pk") || pkCamT > 0;
+      if (S.ph !== "end" && mine && !mySetShot() && !pkNow) { const s2 = show[mine.i]; ring(s2.x, s2.z, .75, "rgba(77,227,255,.95)", 3); const q = proj(s2.x, 2.3, s2.z); if (q) { c.fillStyle = "#4DE3FF"; c.beginPath(); c.moveTo(q[0] - 7, q[1] - 10); c.lineTo(q[0] + 7, q[1] - 10); c.lineTo(q[0], q[1]); c.fill() } const q2 = proj(s2.x, 0, s2.z); if (q2) { c.font = `bold 12px sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "rgba(0,0,0,.55)"; c.fillText(nameOf(mine.i), q2[0] + 1, q2[1] + 17); c.fillStyle = "#fff"; c.fillText(nameOf(mine.i), q2[0], q2[1] + 16) } }
       if (o && o.t !== myTeam && S.ph === "play") { const s2 = show[o.i]; ring(s2.x, s2.z, .7, "rgba(255,90,74,.9)", 2.5) }
+      // パスの矢印：ボールを持っている間（スローインなどで蹴る・投げる番も）、スティックの向き（さわっていなければ体の向き）へ。押している長さで長さと色が変わり、パスが出る味方に印
+      const Fs = S.set, mySet = S.ph === "set" && Fs && Fs.t === myTeam && Fs.k !== "pk", myBall = (S.ph === "play" && o && o.i === act[myTeam]) || mySet;
+      const ppw = passT != null ? clamp((performance.now() - passT) / 900, 0, 1) : 0;
+      if (myBall && !(mySet && Fs.k === "fk" && passT == null && Math.hypot(...curStick()) < .3) && fade <= 0) {
+        const [sx, sy] = curStick(), [ux, uz] = aimDir(myTeam, sx, sy), bx = showB.x, bz = showB.z, len = 3 + ppw * 11, col = ppw >= .85 ? "#FF8A3D" : ppw > .02 ? "#FFE14D" : "rgba(255,255,255,.9)";
+        const a0 = proj(bx + ux * .5, .05, bz + uz * .5), a1 = proj(bx + ux * len, .05, bz + uz * len), a2 = proj(bx + ux * (len - 1.1) - uz * .7, .05, bz + uz * (len - 1.1) + ux * .7), a3 = proj(bx + ux * (len - 1.1) + uz * .7, .05, bz + uz * (len - 1.1) - ux * .7);
+        if (a0 && a1 && a2 && a3) { c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 8; c.lineCap = "round"; c.beginPath(); c.moveTo(a0[0], a0[1]); c.lineTo(a1[0], a1[1]); c.stroke(); c.strokeStyle = col; c.lineWidth = 5; c.beginPath(); c.moveTo(a0[0], a0[1]); c.lineTo(a1[0], a1[1]); c.stroke(); c.lineCap = "butt"; c.fillStyle = col; c.beginPath(); c.moveTo(a1[0] + (a1[0] - a0[0]) * .08, a1[1] + (a1[1] - a0[1]) * .08); c.lineTo(a2[0], a2[1]); c.lineTo(a3[0], a3[1]); c.fill() }
+        const tm = aimMate(myTeam, bx, bz, ux, uz, ppw >= .85, mySet ? Fs.kk : o.i);
+        if (tm) { const s3 = show[tm.i]; ring(s3.x, s3.z, .95, "#FFE14D", 3.5); const q = proj(s3.x, 2.5, s3.z); if (q) { c.fillStyle = "#FFE14D"; c.beginPath(); c.moveTo(q[0] - 8, q[1] - 12); c.lineTo(q[0] + 8, q[1] - 12); c.lineTo(q[0], q[1]); c.fill() } }
+        // パスの強さのゲージ（右はしまで＝ロングパス）
+        if (passT != null) { const gx0 = w / 2 - 90, gy0 = h * .62; c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(gx0, gy0, 180, 12); c.fillStyle = col; c.fillRect(gx0, gy0, 180 * ppw, 12); c.fillStyle = "#fff"; c.fillRect(gx0 + 180 * .85, gy0 - 3, 2, 18); c.font = "bold 11px sans-serif"; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText(Fs && Fs.k === "ti" && mySet ? "投げる強さ" : "パスの強さ", gx0, gy0 - 9); c.textAlign = "right"; c.fillText("ロング", gx0 + 180, gy0 - 9) }
+      }
       // シュートをためているとき：ゴールにねらう所の印
       if (chargeT != null && attacking && o && o.i === act[myTeam]) {
         const pw = clamp((performance.now() - chargeT) / 900, 0, 1), d = dirOf(myTeam), [, sy] = curStick(), g = P[(1 - myTeam) * 11], tz = Math.abs(sy) > .3 ? clamp(sy * 3.9, -3.05, 3.05) : (Math.abs(g.z) > .4 ? -Math.sign(g.z) : BL.z >= 0 ? -1 : 1) * 2.3, ty = Math.min(2.9, .35 + pw * 1.5 + (pw > .9 ? (pw - .9) * 9 : 0));
@@ -2037,7 +2098,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const mm = Math.floor(S.clk), ss = Math.floor((S.clk - mm) * 60); c.fillStyle = "#fff"; c.fillRect(x + 184, y + 3, 62, 24); c.fillStyle = "#111"; c.font = `bold 15px sans-serif`; c.fillText(`${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`, x + 215, y + 16);
       if (S.sec[myTeam] && !attacking) { c.fillStyle = "rgba(10,12,24,.75)"; c.fillRect(x, y + 34, 86, 18); c.fillStyle = "#7CF59A"; c.font = `bold 11px sans-serif`; c.textAlign = "left"; c.fillText("2nd DF オン", x + 6, y + 43) }
       // 地図（自分のフリーキック・PKでは、なぞる所にかぶるので出さない）
-      if (!mySetShot()) { const mw = Math.min(170, w * .22), mh = mw * 68 / 105, mx = w / 2 - mw / 2, my = h - mh - 8, MX = (x2) => mx + (x2 + SC_PL) / (SC_PL * 2) * mw, MY = (z2) => my + (z2 + SC_PW) / (SC_PW * 2) * mh;
+      if (!mySetShot() && !pkNow) { const mw = Math.min(170, w * .22), mh = mw * 68 / 105, mx = w / 2 - mw / 2, my = h - mh - 8, MX = (x2) => mx + (x2 + SC_PL) / (SC_PL * 2) * mw, MY = (z2) => my + (z2 + SC_PW) / (SC_PW * 2) * mh;
       c.fillStyle = "rgba(30,90,40,.75)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1; c.strokeRect(mx, my, mw, mh); c.beginPath(); c.moveTo(mx + mw / 2, my); c.lineTo(mx + mw / 2, my + mh); c.stroke();
       P.forEach((p, i) => { const s2 = show[i]; c.fillStyle = p.t === myTeam ? "#FFFFFF" : SC_TEAMS[S.teams[p.t]].c1; c.beginPath(); c.arc(MX(s2.x), MY(s2.z), i === act[myTeam] ? 3.6 : 2.4, 0, 7); c.fill(); if (i === act[myTeam]) { c.strokeStyle = "#4DE3FF"; c.lineWidth = 1.5; c.stroke() } });
       c.fillStyle = "#FFE14D"; c.beginPath(); c.arc(MX(showB.x), MY(showB.z), 2.6, 0, 7); c.fill() }
@@ -2045,14 +2106,23 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const F = S.set;
       if (S.ph === "set" && F) {
         const mineF = F.t === myTeam, nm = { fk: "フリーキック", pk: "PK", ck: "コーナーキック", gk: "ゴールキック", ti: "スローイン" }[F.k];
-        const help = mineF ? { fk: "ボールからゴールへなぞってシュート（シュートボタンも・パスでつなぐ）", pk: "ボールからゴールへなぞってシュート（シュートボタンも）", ck: "シュートでゴール前へクロス・パスで近くへ", gk: "パスで近くへ・スルーで遠くへ", ti: "パスで近くへ・スルーで前へ投げる" }[F.k] : { fk: "壁ジャンプ・壁突進・スティックで壁を動かす", pk: "スティック上下でとぶ方向を決めてボタン", ck: "相手のコーナーキック", gk: "相手のゴールキック", ti: "相手のスローイン" }[F.k];
+        const help = mineF ? { fk: "ボールからゴールへなぞってシュート（シュートボタンも・パスは矢印の向きへ）", pk: "ボールからゴールへなぞってシュート（シュートボタンも）", ck: "シュートでゴール前へクロス・パスは矢印の向きへ（押す長さで強さ）", gk: "スティックの向きへパス（押す長さで強さ）・ロングで遠くへ", ti: "スティックの向きへ投げる（押す長さで強さ）" }[F.k] : { fk: "相手がける瞬間に壁ジャンプ・壁突進。スティックで壁を動かす", pk: "相手がける瞬間に、とぶ方向のボタンを押そう（上にスワイプ＝高くとぶ）", ck: "相手のコーナーキック", gk: "相手のゴールキック", ti: "相手のスローイン" }[F.k];
         bigText(c, nm, w / 2, h * .2, 24, "#FFE14D"); bigText(c, help, w / 2, h * .2 + 30, 14, "#fff");
+        // 相手のPK・フリーキック：助走が始まったら 3・2・1 の合図（人が蹴るときは、いつ来てもいいように光らせる）
+        if (!mineF && (F.k === "pk" || F.k === "fk")) {
+          const rem = F.cpu ? (F.w || 2.6) - F.t0 : 9;
+          if (rem < 1.05 && rem > 0) bigText(c, rem > .7 ? "3" : rem > .35 ? "2" : "1 いま！", w / 2, h * .48, rem > .35 ? 48 : 40, rem > .35 ? "#fff" : "#FFE14D");
+          else if (!F.cpu && F.t0 > .6) bigText(c, "相手がねらっています…", w / 2, h * .48, 18, "#fff");
+          if (F.k === "pk" && F.pkg != null) bigText(c, "えらんだ：" + (F.pkg === 0 ? "まん中" : F.pkg === dirOf(F.t) ? "◀ 左にとぶ" : "右にとぶ ▶") + (F.pkh ? "（高く）" : ""), w / 2, h * .2 + 54, 15, "#7CF59A");
+        }
       } else if ((S.ph === "goal" || S.ph === "ko" || S.ph === "half" || S.ph === "stop" || S.mt > 0) && S.msg) bigText(c, S.msg, w / 2, h * .3, S.ph === "goal" ? 40 : 24, S.ph === "goal" ? "#FFE14D" : "#fff");
       if (fade > 0) { c.fillStyle = `rgba(8,10,20,${Math.min(1, fade / .3)})`; c.fillRect(0, 0, w, h) }
       // ボタン：攻撃と守備、セットプレーで役わりと色が変わる
       const mode = S.ph === "set" && F ? (F.t === myTeam ? "set" + F.k : F.k === "fk" ? "fkd" : F.k === "pk" ? "pkd" : "def") : attacking ? "atk" : "def";
       const A4 = ["ダッシュ<br><small>＆スキル</small>", "atk4"], OFF = ["—", "off"];
-      const Lb = { atk: [["シュート", "atk1"], ["スルー", "atk2"], ["パス", "atk3"], A4], def: [["スライ<br>ディング", "def1"], ["2nd DF", "def2"], ["切り替え", "def3"], ["ダッシュ<br><small>＆タックル</small>", "def4"]], setfk: [["シュート", "atk1"], ["ロング", "atk2"], ["パス", "atk3"], OFF], setpk: [["シュート", "atk1"], OFF, OFF, OFF], setck: [["クロス", "atk1"], ["クロス", "atk2"], ["パス", "atk3"], OFF], setgk: [["ロング", "atk1"], ["ロング", "atk2"], ["パス", "atk3"], OFF], setti: [["遠くへ", "atk1"], ["遠くへ", "atk2"], ["近くへ", "atk3"], OFF], fkd: [["壁<br>ジャンプ", "def1"], ["壁突進", "def2"], OFF, OFF], pkd: [["とぶ", "def1"], ["とぶ", "def2"], ["とぶ", "def3"], ["とぶ", "def4"]] }[mode];
+      const Lb = { atk: [["シュート", "atk1"], ["スルー", "atk2"], ["パス", "atk3"], A4], def: [["スライ<br>ディング", "def1"], ["2nd DF", "def2"], ["切り替え", "def3"], ["ダッシュ<br><small>＆タックル</small>", "def4"]], setfk: [["シュート", "atk1"], ["ロング", "atk2"], ["パス", "atk3"], OFF], setpk: [["シュート", "atk1"], OFF, OFF, OFF], setck: [["クロス", "atk1"], ["クロス", "atk2"], ["パス", "atk3"], OFF], setgk: [["ロング", "atk1"], ["ロング", "atk2"], ["パス", "atk3"], OFF], setti: [["遠くへ", "atk1"], ["遠くへ", "atk2"], ["投げる", "atk3"], OFF], fkd: [["壁<br>ジャンプ", "def1"], ["壁突進", "def2"], OFF, OFF], pkd: [["まん中", "def3"], ["まん中", "def3"], ["◀ 左に<br>とぶ", "def4"], ["右に<br>とぶ ▶", "def4"]] }[mode];
+      // 押す時をボタンの光で知らせる
+      { const g2 = S.ph === "set" && F && F.t !== myTeam && (F.k === "pk" || F.k === "fk") && (F.cpu ? (F.w || 2.6) - F.t0 < 1.05 : F.t0 > .6) ? (F.k === "pk" ? "1111" : "1100") : ""; if (g2 !== glowOn) { glowOn = g2; ["b-shoot", "b-thru", "b-pass", "b-dash"].forEach((id, k2) => $("#" + id).classList.toggle("sc-glow", g2[k2] === "1")) } }
       if (mode !== lastLbl) { lastLbl = mode; ["b-shoot", "b-thru", "b-pass", "b-dash"].forEach((id, k2) => { const el = $("#" + id); el.innerHTML = Lb[k2][0]; el.dataset.m = Lb[k2][1] }) }
     }
     function panel() {
@@ -8318,7 +8388,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0254";
+  const APP_VER = "1031-0324";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
