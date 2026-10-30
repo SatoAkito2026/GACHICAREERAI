@@ -241,7 +241,9 @@ html.playing.full .card.act canvas { border-radius: 0 }
 /* ゲーム中は、2本指でさわってもページが拡大・選択されないようにする（iPhone で画面がずれてボタンが消えるのを防ぐ） */
 html.playing.full, html.playing.full body { touch-action: none; overscroll-behavior: none }
 html.playing.full .card.act, html.playing.full .card.act * { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
-html.playing.full .card.act > p.muted, html.playing.full #act-msg, #sens, #sens * { touch-action: pan-y }
+html.playing.full .card.act > p.muted, html.playing.full #act-msg, html.playing.full #act-msg *, #sens, #sens * { touch-action: pan-y }
+html.playing .br #act-msg [data-br="start"], html.playing .kt #act-msg [data-act="act-ready"] { position: sticky; bottom: 0; box-shadow: 0 -6px 12px color-mix(in srgb, var(--surface) 90%, transparent) }
+html.playing .br #act-msg .chipbtn { padding: 6px 4px; font-size: 12px } html.playing .br #act-msg .eyebrow { margin: 0 }
 /* 感度設定 */
 #sens { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px }
 .sens-box { max-height: calc(100% - 8px); overflow: auto; background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.3) }
@@ -251,6 +253,9 @@ html.playing.full .card.act > p.muted, html.playing.full #act-msg, #sens, #sens 
 /* カートレース（横画面） */
 html.playing .kt #act-msg { top: 50%; left: 50%; right: auto; width: min(560px, calc(100% - 24px)); transform: translate(-50%, -50%); max-height: calc(100% - 24px); overflow: auto; padding: 10px 14px; gap: 6px }
 .kt .stages { grid-template-columns: repeat(3, 1fr); gap: 6px } .kt .stages .chipbtn { padding: 8px 4px; font-size: 13px }
+.kt-pick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px } .kt-pick .chipbtn { padding: 5px 2px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap }
+.kt-pick .chipbtn i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,.3); flex: none }
+html.playing .kt.picking #act-msg { left: auto; right: 10px; transform: translateY(-50%); width: min(470px, 58%) }
 .kt .kbtn { width: 84px; height: 84px } .kt .kbtn.small { width: 66px; height: 66px }
 .kt .kpad { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)) }
 /* 荒野バトル（横画面） */
@@ -564,14 +569,26 @@ html.br-portrait .br-ui { display: none }
   function opp() { const p = oppPeer(); return p ? p.presence : null }
   function oppS() { const o = opp(); return o && o.s && o.s.e === me.m.e && o.m && o.m.e === me.m.e ? o.s : null }
   function adopt() {
-    const o = opp();
-    if (!o || !o.m) return;
-    const om = o.m;
-    if (om.e > me.m.e || (om.e === me.m.e && om.host !== me.m.host && String(om.host) > String(me.m.host))) {
-      me.m = om; me.s = { e: om.e }; ui.draft = ""; ui.hbEntry = "";
-      push();
+    // 部屋の中でいちばん新しい試合に合わせる（招待コードが同じなら何人でも同じ試合に入る）
+    const list = peers.filter((p) => p.presence && p.presence.cid && p.presence.cid !== cid && p.presence.m).map((p) => p.presence.m), o = opp();
+    if (!list.length && o && o.m) list.push(o.m);
+    for (const om of list) {
+      if (om.e > me.m.e || (om.e === me.m.e && om.host !== me.m.host && String(om.host) > String(me.m.host))) {
+        me.m = om; me.s = { e: om.e }; ui.draft = ""; ui.hbEntry = "";
+        push();
+      }
     }
   }
+  // ---------- 3人以上（荒野バトル・カート・ジャンプ走） ----------
+  // 同じ試合にいる人（自分以外）。cid の順にならべるので、全員の画面で同じ順番になる
+  function matchPeers() { return peers.filter((p) => p.presence && p.presence.cid && p.presence.cid !== cid && p.presence.m && p.presence.m.e === me.m.e).sort((a, b) => (a.presence.cid < b.presence.cid ? -1 : 1)) }
+  const peerX = (p) => { const x = p && p.presence.x; return x && x.e === me.m.e ? x : null };
+  const peerS = (p) => { const st = p && p.presence.s; return st && st.e === me.m.e ? st : null };
+  const pName = (p) => { const n = p && p.presence.n; return !n || n === "プレイヤー" ? "なかま" : n };
+  const hostPeer = () => matchPeers().find((p) => p.presence.cid === me.m.host) || null;
+  // 参加する人の cid（ホストが先頭、あとは cid の順）
+  const humList = () => [me.m.host, ...[cid, ...matchPeers().map((p) => p.presence.cid)].filter((x) => x !== me.m.host).sort()];
+  const allReady = () => !!me.s.rdy && matchPeers().every((p) => { const st = peerS(p); return st && st.rdy }) && (matchPeers().length || !opp() || (oppS() && oppS().rdy));
   const isFirst = () => me.m.host === cid;
   const oppName = () => { const n = opp() && opp().n; return !n || n === myName || n === "プレイヤー" ? "あいて" : n };
 
@@ -605,7 +622,8 @@ html.br-portrait .br-ui { display: none }
     const sel = active && active.selectionStart != null ? [active.selectionStart, active.selectionEnd] : null;
 
     const o = opp();
-    $("#opp-name").textContent = o ? (o.n || "あいて") : "まだいません";
+    const nPeers = peers.filter((p) => p.presence && p.presence.cid && p.presence.cid !== cid).length;
+    $("#opp-name").textContent = nPeers > 1 ? `${nPeers}人` : o ? (o.n || "あいて") : "まだいません";
     $("#name-btn").textContent = myName;
     $("#conn").innerHTML = room
       ? `<span class="dot ${connected && o ? "on" : ""}"></span>${cpuActive() ? "CPUと対戦" : o ? "ふたりで接続中" : connected ? "あいて待ち" : "再接続中"}`
@@ -1443,10 +1461,13 @@ html.br-portrait .br-ui { display: none }
       let ph = me.s.res != null ? "done" : "idle", d = me.s.res != null ? RUN_LEN : 0, y = 0, vy = 0, jumps = 0, t = 0, cd = 0;
       const fx = { big: 0, fast: 0, slow: 0, poison: 0, stun: 0 };
       let fallT = 0, fallX = 0;
-      let shell = false, atN = 0, seenAt = null, msg = null, lastSend = "", CR = null;
+      let shell = false, atN = 0, seenAt = null, msg = null, lastSend = "", CR = null, atTg = null; const seenAts = {};
+      // 一緒に走る人：同じ招待コードの全員（ひとりのときはコンピューター）
+      const RUN_COLS = ["#E5413B", "#3DBE5A", "#F2B233", "#A45BE0", "#FF7A2A", "#FF6FB0", "#2EC4C4"];
+      const runners = () => { const mp = matchPeers(); if (mp.length) return mp.map((p, i) => ({ p, x: peerX(p), st: peerS(p), col: RUN_COLS[i % RUN_COLS.length] })); const op = rtOppPeer(); return op ? [{ p: op, x: op.presence.x, st: oppS(), col: RUN_COLS[0] }] : [] };
       const itemBtn = $("#b-item");
       const jump = () => { if (ph === "run" && jumps < 2 && fallT <= 0) { const p = fx.poison > 0 ? 0.8 : 1; vy = (jumps ? 660 : 790) * p; jumps++ } };
-      const throwShell = () => { if (ph === "run" && shell) { shell = false; atN++; say("こうらを投げた！", "#7CF59A") } };
+      const throwShell = () => { if (ph === "run" && shell) { shell = false; atN++; const ah = runners().filter((r) => r.x && r.x.d != null && !(r.st && r.st.res != null)).sort((a, b) => (a.x.d > d) - (b.x.d > d) || Math.abs(a.x.d - d) - Math.abs(b.x.d - d)); const tg = ah.find((r) => r.x.d > d) || ah[0]; atTg = tg ? tg.p.presence.cid : null; say(tg && matchPeers().length > 1 ? `${pName(tg.p)}にこうらを投げた！` : "こうらを投げた！", "#7CF59A") } };
       holdBtn($("#b-jump"), jump); holdBtn(itemBtn, throwShell);
       cv.addEventListener("pointerdown", (e) => { e.preventDefault(); jump() });
       actKey = jump;
@@ -1555,8 +1576,8 @@ html.br-portrait .br-ui { display: none }
           if (bk.x < d - 30 || bk.x > d + 1600) return;
           items.push({ dist: bk.x, f: () => { const m = PJ(0, bk.x); if (!m) return; const sz = 26 * HS * m.p, yy = m.sy - (bk.y + 13) * HS * m.p; c.fillStyle = used.has(i) ? "#9C6B3A" : "#F8B800"; c.fillRect(m.sx - sz / 2, yy - sz / 2, sz, sz); c.strokeStyle = "#7A3E0A"; c.lineWidth = Math.max(1, 2 * m.p); c.strokeRect(m.sx - sz / 2, yy - sz / 2, sz, sz); if (!used.has(i)) bigText(c, "?", m.sx, yy + sz * 0.04, Math.max(9, sz * 0.7), "#fff") } });
         });
-        const op = rtOppPeer(), ox = op ? op.presence.x : null, os = oppS();
-        if (ox && ox.d != null && !(os && os.res != null)) items.push({ dist: ox.d, f: () => { const q = PJ(0.55, ox.d); if (q) drawBack(q.sx, q.sy - (ox.y || 0) * HS * q.p, q.p * HS * (ox.sz || 1), "#E5413B", 0.55, (ox.y || 0) > 0, ox.d / 14) } });
+        const RN = runners();
+        RN.forEach((r, k) => { const ox = r.x; if (ox && ox.d != null && !(r.st && r.st.res != null)) { const lane = RN.length > 1 ? -0.7 + 1.4 * ((k + .5) / RN.length) + (k % 2 ? .1 : -.1) : 0.55; items.push({ dist: ox.d, f: () => { const q = PJ(lane, ox.d); if (q) drawBack(q.sx, q.sy - (ox.y || 0) * HS * q.p, q.p * HS * (ox.sz || 1), r.col, 0.55, (ox.y || 0) > 0, ox.d / 14) } }) } });
         items.sort((a, b) => b.dist - a.dist).forEach((it) => it.f());
         // 自分（後ろすがた）
         const sc = scale(), blink = fx.stun > 0 && Math.floor(t * 12) % 2;
@@ -1567,7 +1588,7 @@ html.br-portrait .br-ui { display: none }
         const HY = top + 48;
         c.fillStyle = "rgba(20,18,42,.7)"; c.fillRect(8, HY, w - 16, 10);
         c.fillStyle = "#46CBF3"; c.fillRect(8, HY, (w - 16) * (d / RUN_LEN), 10);
-        if (ox && ox.d != null) { c.fillStyle = "#F08A3C"; c.fillRect(8 + (w - 16) * clamp(ox.d / RUN_LEN, 0, 1) - 3, HY - 4, 6, 18) }
+        for (const r of RN) if (r.x && r.x.d != null) { c.fillStyle = r.col; c.fillRect(8 + (w - 16) * clamp(r.x.d / RUN_LEN, 0, 1) - 3, HY - 4, 6, 18) }
         c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(8, HY + 14, 118, 20);
         c.font = `14px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#fff"; c.fillText(`${Math.floor(d / 10)}m / ${RUN_LEN / 10}m`, 12, HY + 24);
         const eff = []; if (fx.big > 0) eff.push("でかい"); if (fx.fast > 0) eff.push("はやい"); if (fx.slow > 0) eff.push("おそい"); if (fx.poison > 0) eff.push("毒");
@@ -1577,23 +1598,30 @@ html.br-portrait .br-ui { display: none }
         if (ph === "done") bigText(c, "ゴール！", w / 2, h / 2 - 20, 40, "#FFE14D");
       }
       function frame(dt) {
-        const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
         if (cpuActive()) cpuRun(dt);
-        if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3 }
+        const RN = runners();
+        if (ph === "idle" && allReady()) { ph = "count"; cd = 3 }
         if (ph === "count") { cd -= dt; if (cd <= 0) ph = "run" }
-        if (ox) { const at = ox.at || 0; if (seenAt === null) seenAt = at; else if (at > seenAt) { seenAt = at; if (ph === "run") gotHit() } }
+        // こうら：自分がねらわれたときだけ当たる
+        for (const r of RN) { const ox = r.x; if (!ox) continue; const id = r.p.presence.cid, at = ox.at || 0; if (seenAts[id] == null) seenAts[id] = at; else if (at > seenAts[id]) { seenAts[id] = at; if (ph === "run" && (ox.tg == null || ox.tg === cid)) gotHit() } }
         if (CR && atN > (CR.seenMine || 0)) { CR.seenMine = atN; CR.stun = 1.5 }
         if (ph === "run") { step(dt); if (d >= RUN_LEN) { ph = "done"; setS({ res: Math.round(t * 1000) }) } }
         if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
         itemBtn.disabled = !shell; itemBtn.textContent = shell ? "こうらを投げる" : "アイテムなし";
-        const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN }, js = JSON.stringify(out);
+        const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN, tg: atTg }, js = JSON.stringify(out);
         if (js !== lastSend) { lastSend = js; sendX(out) }
         draw();
         const fmt = (ms) => `${(ms / 1000).toFixed(1)}秒`;
-        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() ? "ふたりとも押すと同時にスタート" : "押すとスタート"}</p>`);
-        else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+        const mp = matchPeers();
+        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${mp.length > 1 ? `${mp.length + 1}人で走ります。全員が押すと同時にスタート` : opp() ? "ふたりとも押すと同時にスタート（同じ招待コードなら何人でも）" : "押すとスタート"}</p>`);
+        else if (ph === "idle") { const wait = mp.length ? mp.filter((p) => !(peerS(p) || {}).rdy).map((p) => esc(pName(p))).join("・") : esc(oppName()); setMsg(`<p class="wait">${wait ? wait + "の準備を待っています" : "まもなくスタート"}</p>`) }
+        else if (ph === "done" && mp.length > 1) {
+          // 3人以上：タイムの順に並べる
+          const rows = [{ n: "あなた", t: me.s.res, me: true }, ...mp.map((p) => ({ n: pName(p), t: (peerS(p) || {}).res }))].sort((a, b) => (a.t ?? 1e12) - (b.t ?? 1e12)), allIn = rows.every((x) => x.t != null), rank = rows.findIndex((x) => x.me) + 1;
+          setMsg(`<p class="verdict ${rank === 1 && allIn ? "good" : ""}">${allIn ? `${rank}位` : "ゴール！"}　${fmt(me.s.res)}</p><ol class="tc-rank">${rows.map((x) => `<li class="${x.me ? "me" : ""}"><b>${esc(x.n)}</b><span>${x.t != null ? fmt(x.t) : "走っています"}</span></li>`).join("")}</ol>${allIn ? againBtns("run") : ""}`);
+        }
         else if (ph === "done") {
-          const mine = me.s.res;
+          const mine = me.s.res, os = mp.length ? peerS(mp[0]) : oppS();
           if (!opp()) setMsg(`<p class="verdict good">ゴール ${fmt(mine)}</p>${againBtns("run")}`);
           else if (os && os.res != null) setMsg(`<p class="verdict ${mine <= os.res ? "good" : "bad"}">${mine < os.res ? "あなたの勝ち！" : mine > os.res ? "あなたの負け…" : "引き分け！"}　${fmt(mine)} 対 ${fmt(os.res)}</p>${againBtns("run")}`);
           else setMsg(`<p class="wait">ゴール ${fmt(mine)}。${esc(oppName())}はまだ走っています</p>`);
@@ -2004,8 +2032,8 @@ html.br-portrait .br-ui { display: none }
     for (const [t, k] of ST.ramps || []) { const ri = Math.floor(t * NS), L = k === "glide" ? Math.round(NS * .045) : 6, hh = k === "glide" ? 5 : .9; for (let a = 0; a <= L; a++) { const u = 1 - a / L, i = (ri - a + NS) % NS; H[i] += hh * (k === "glide" ? u * u * (3 - 2 * u) : u) } }
     return H;
   }
-  const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"]];
-  const KT_DRIVERS = ["ハヤト", "リン", "ゴウ", "ミナ", "ケイ"];
+  const KT_COLORS = [["#2E8BE6", "#1B5FA8"], ["#E5413B", "#A82C25"], ["#3DBE5A", "#26853A"], ["#F2B233", "#B9801A"], ["#A45BE0", "#6F35A3"], ["#FF7A2A", "#B8521A"], ["#FF6FB0", "#B84A80"], ["#2EC4C4", "#1E8A8A"]];
+  const KT_DRIVERS = ["ハヤト", "リン", "ゴウ", "ミナ", "ケイ", "ソラ", "ユイ", "ダイ"];
   const KT_STAGES = [
     { name: "グランプリ", theme: "gp", ground: "grass", pts: [[200, 700], [200, 360], [330, 210], [700, 180], [1050, 200], [1210, 320], [1150, 480], [950, 520], [900, 650], [1100, 770], [1400, 810], [1500, 1000], [1380, 1180], [1000, 1220], [700, 1150], [500, 1210], [300, 1100]], sky: ["#3F8FE0", "#CFE6F6"], fog: "#CFE6F6", wall: "tire", hills: [[.27, .43, 4]], ramps: [[.35, "jump"], [.66, "glide"]], pads: [[.08, 0], [.52, -18], [.52, 18], [.86, 0]] },
     { name: "海岸ハイウェイ", theme: "coast", ground: "grass", pts: [[250, 320], [650, 190], [1100, 230], [1380, 380], [1460, 700], [1340, 1000], [1100, 1150], [800, 1080], [680, 860], [470, 950], [240, 1100], [150, 800], [210, 520]], sky: ["#4FA3E8", "#F6E2C6"], fog: "#EADBC8", wall: "rail", tunnels: [[.72, .8]], hills: [[.48, .66, 6]], ramps: [[.57, "glide"], [.25, "jump"]], pads: [[.1, 0], [.4, 16], [.8, -16]] },
@@ -2035,32 +2063,60 @@ html.br-portrait .br-ui { display: none }
     else if (k === "shield") { c.fillStyle = "rgba(80,220,255,.35)"; c.strokeStyle = "#4DE3FF"; c.lineWidth = Math.max(1.5, r * .12); c.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 - Math.PI / 2; c.lineTo(Math.cos(a) * r * .85, Math.sin(a) * r * .85) } c.closePath(); c.fill(); c.stroke(); c.fillStyle = "#fff"; c.beginPath(); c.arc(-r * .25, -r * .25, r * .14, 0, 7); c.fill() }
     c.restore();
   }
+  // 見た目だけ選べる（性能はみんな同じ）：キャラ10・色10・カート10。すべてオリジナル
+  const KT_CHARS = ["レーサー", "ネコ", "ウサギ", "クマ", "ロボ", "ニンジャ", "かいぞく", "うちゅう", "おひめさま", "ドラゴン"];
+  const KT_PAINT = [["あお", "#2E8BE6", "#1B5FA8"], ["あか", "#E5413B", "#A82C25"], ["みどり", "#3DBE5A", "#26853A"], ["きいろ", "#F2C233", "#B9901A"], ["むらさき", "#A45BE0", "#6F35A3"], ["オレンジ", "#FF7A2A", "#B8521A"], ["ピンク", "#FF7FB8", "#C24E86"], ["みずいろ", "#3EC8E8", "#2486A0"], ["くろ", "#2A2C34", "#111216"], ["しろ", "#F2F3F6", "#B8BCC6"]];
+  const KT_BODIES = ["スタンダード", "フォーミュラ", "バギー", "クラシック", "まるまる", "モンスター", "スポーツ", "ロケット", "アヒル", "ネコカー"];
+  const ktLookCode = (L) => (L.ch % 10) * 100 + (L.co % 10) * 10 + (L.ca % 10), ktLookOf = (n) => ({ ch: Math.floor(n / 100) % 10, co: Math.floor(n / 10) % 10, ca: n % 10 });
+  const ktMyLook = () => { try { const v = JSON.parse(ls.get("ktLook") || "null"); if (v && v.ch != null) return v } catch (_) {} return { ch: 0, co: 0, ca: 0 } };
   // カートと運転する人（オリジナル）。正面は +z。前輪は向きが変わる
-  function ktKartModel(col, suit) {
+  function ktKartModel(look) {
     const T = THREE, mat = brCharMat || (brCharMat = new T.MeshStandardMaterial({ vertexColors: true, roughness: .78 })), g = new T.Group();
-    const part = (build, parent = g) => { const B = phParts(); build(B); const m = new T.Mesh(phMerge(B.L, false), mat); m.castShadow = true; parent.add(m); return m };
-    const [c1, c2] = col;
+    const ca = look.ca, ch = look.ch, [, c1, c2] = KT_PAINT[look.co] || KT_PAINT[0], PI = Math.PI;
+    const lift = ca === 5 ? .32 : 0, up = new T.Group(); up.position.y = lift; g.add(up);
+    const part = (build, parent = up) => { const B = phParts(); build(B); if (!B.L.length) return null; const m = new T.Mesh(phMerge(B.L, false), mat); m.castShadow = true; parent.add(m); return m };
+    const suit = ["#F4F4F4", "#F2A0C0", "#F4F4F4", "#8A5A3A", "#8C94A0", "#2A2A36", "#7A2A2A", "#F4F4F4", "#E86AC0", "#3E9E4A"][ch];
     part((B) => {
-      // 車体：床・横のポッド・前のノーズ・後ろのバンパー・エンジン・シート・ハンドル
-      B.box(.95, .06, 1.7, "#2A2A2E", 0, .13, 0); B.seg(-.46, .16, -.82, -.46, .16, .82, .05, .05, "#555"); B.seg(.46, .16, -.82, .46, .16, .82, .05, .05, "#555");
-      for (const sx of [-1, 1]) { B.box(.22, .2, .95, c1, sx * .56, .24, -.02); B.box(.23, .05, .96, c2, sx * .56, .35, -.02) }
-      B.sph(.34, c1, 0, .26, .78, 1.45, .5, 1.05, 2); B.box(.62, .05, .16, "#F2F2F2", 0, .43, .78); B.box(1.12, .08, .1, "#1C1C1E", 0, .16, 1.08); B.box(1.18, .12, .12, "#1C1C1E", 0, .2, -1.0);
-      B.box(.36, .3, .34, "#6A6E74", .24, .36, -.66); B.cyl(.045, .045, .3, "#333", .42, .42, -.85, 8, Math.PI / 2 - .4); B.box(.16, .2, .2, "#3A3A40", -.18, .34, -.66);
-      B.box(.48, .1, .42, "#1E1E22", 0, .32, -.32); B.box(.48, .48, .1, "#1E1E22", 0, .55, -.52, 0, -.3);
+      // 共通：床・シート・ハンドル・エンジン
+      B.box(.95, .06, 1.7, "#2A2A2E", 0, .13, 0); B.box(.48, .1, .42, "#1E1E22", 0, .32, -.32); B.box(.48, .48, .1, "#1E1E22", 0, .55, -.52, 0, -.3);
       B.seg(0, .3, .62, 0, .62, .32, .04, .04, "#333"); B.tor(.15, .025, "#222", 0, .64, .3, -1.0, 0);
-      // 運転する人：レーシングスーツ・ヘルメット（バイザー）・手と足
+      if (ca !== 7) { B.box(.36, .3, .34, "#6A6E74", .24, .36, -.66); B.cyl(.045, .045, .3, "#333", .42, .42, -.85, 8, PI / 2 - .4) }
+      // 車体（10種類）
+      if (ca === 0) { for (const sx of [-1, 1]) { B.box(.22, .2, .95, c1, sx * .56, .24, -.02); B.box(.23, .05, .96, c2, sx * .56, .35, -.02) } B.sph(.34, c1, 0, .26, .78, 1.45, .5, 1.05, 2); B.box(.62, .05, .16, "#F2F2F2", 0, .43, .78); B.box(1.12, .08, .1, "#1C1C1E", 0, .16, 1.08); B.box(1.18, .12, .12, "#1C1C1E", 0, .2, -1.0) }
+      else if (ca === 1) { B.box(.42, .2, 1.3, c1, 0, .27, .55); B.sph(.21, c1, 0, .27, 1.2, 1, .9, 1.6, 2); B.box(1.35, .04, .3, c2, 0, .12, 1.32); for (const sx of [-1, 1]) { B.box(.04, .16, .34, c2, sx * .67, .17, 1.32); B.box(.26, .22, .7, c1, sx * .42, .27, -.2) } B.box(1.2, .05, .32, c2, 0, .92, -.98); for (const sx of [-1, 1]) B.box(.04, .3, .34, c2, sx * .6, .8, -.98); B.box(.06, .5, .1, "#333", 0, .66, -.9); B.box(.22, .05, .5, "#F2F2F2", 0, .38, .7) }
+      else if (ca === 2) { B.box(.9, .18, 1.4, c1, 0, .25, 0); B.box(1.05, .1, .14, "#333", 0, .3, .85); for (const [x, z] of [[-.42, .55], [.42, .55], [-.42, -.6], [.42, -.6]]) B.seg(x, .3, z, x * .9, 1.3, z * .6, .05, .05, "#333"); B.seg(-.38, 1.3, .33, .38, 1.3, .33, .05, .05, "#333"); B.seg(-.38, 1.3, -.36, .38, 1.3, -.36, .05, .05, "#333"); for (const sx of [-1, 1]) { B.seg(sx * .38, 1.3, .33, sx * .38, 1.3, -.36, .05, .05, "#333"); B.sph(.08, "#FFE9A0", sx * .2, 1.36, .35) } B.box(.7, .06, .5, c2, 0, .36, .45) }
+      else if (ca === 3) { B.box(.8, .28, 1.5, c1, 0, .3, 0); for (const [x, z] of [[-.55, .62], [.55, .62], [-.58, -.62], [.58, -.62]]) B.sph(.24, c1, x, .3, z, .9, .7, 1.4, 1); B.box(.5, .2, .05, "#D8DCE0", 0, .32, .76); for (const sx of [-1, 1]) B.sph(.07, "#FFF6D0", sx * .3, .38, .77); B.box(.82, .04, 1.52, c2, 0, .45, 0); B.box(.9, .06, .08, "#D8DCE0", 0, .2, .8); B.box(.9, .06, .08, "#D8DCE0", 0, .2, -.8) }
+      else if (ca === 4) { B.sph(.62, c1, 0, .38, .08, 1.1, .62, 1.45, 2); for (const [x, y, z] of [[-.45, .48, .5], [.5, .42, .3], [.3, .55, .75], [-.55, .4, -.3], [.55, .5, -.45], [-.2, .62, .9]]) B.sph(.08, "#FFFFFF", x, y, z); for (const sx of [-1, 1]) B.sph(.09, "#FFF6D0", sx * .26, .42, .95) }
+      else if (ca === 5) { B.box(1.0, .3, 1.5, c1, 0, .32, 0); B.box(1.02, .06, 1.52, c2, 0, .5, 0); for (const sx of [-1, 1]) { B.seg(sx * .3, .2, .55, sx * .62, -.15, .62, .06, .06, "#333"); B.seg(sx * .3, .2, -.55, sx * .62, -.15, -.62, .06, .06, "#333") } B.box(1.15, .14, .12, "#333", 0, .28, .82); for (const sx of [-1, 1]) B.box(.14, .1, .04, "#FFE9A0", sx * .3, .38, .77) }
+      else if (ca === 6) { B.box(1.0, .2, 1.7, c1, 0, .26, .05, 0, -.06); B.box(.6, .04, .8, c2, 0, .38, .45, 0, -.06); for (const sx of [-1, 1]) B.box(.06, .12, .4, "#1C1C1E", sx * .5, .28, -.15); B.box(1.1, .05, .3, c2, 0, .78, -.95, 0, .1); for (const sx of [-1, 1]) B.box(.05, .42, .1, "#222", sx * .42, .55, -.9); for (const sx of [-1, 1]) B.box(.16, .05, .03, "#FFFFFF", sx * .32, .3, .9) }
+      else if (ca === 7) { B.cyl(.4, .44, 1.6, c1, 0, .38, -.1, 14, PI / 2); B.sph(.4, c1, 0, .38, .7, 1, 1, 1.4, 2); B.sph(.15, c2, 0, .38, 1.22); for (const a of [0, 1.57, 3.14, 4.71]) B.box(.04, .38, .36, c2, Math.cos(a) * .48, .38 + Math.sin(a) * .48, -.75, 0, 0, a); B.cyl(.3, .36, .2, "#555", 0, .38, -.98, 12, PI / 2); B.box(.5, .05, .5, c2, 0, .78, .1) }
+      else if (ca === 8) { B.sph(.55, c1, 0, .36, -.1, 1.1, .6, 1.5, 2); B.sph(.3, c1, 0, .78, .78); B.box(.22, .06, .18, "#FF9A2A", 0, .74, 1.08); B.box(.2, .04, .16, "#E8801A", 0, .69, 1.06); for (const sx of [-1, 1]) { B.sph(.06, "#FFFFFF", sx * .14, .86, .98); B.sph(.035, "#1A1A1A", sx * .15, .87, 1.03) } B.sph(.2, c1, 0, .62, -.92, 1, 1.2, .8); for (const sx of [-1, 1]) B.sph(.22, c2, sx * .55, .45, -.05, .4, .6, 1.2) }
+      else { B.box(.92, .3, 1.5, c1, 0, .3, 0); B.sph(.3, c1, 0, .42, .72, 1.4, .8, .8); for (const sx of [-1, 1]) { B.cone(.12, .26, c1, sx * .28, .72, .75, 4); B.cone(.06, .14, "#FF9AC0", sx * .28, .69, .8, 4); B.sph(.06, "#FFE14D", sx * .14, .52, .97); B.sph(.03, "#1A1A1A", sx * .14, .52, 1.02); for (const dy of [-.04, .04]) B.seg(sx * .1, .42 + dy, .98, sx * .45, .44 + dy * 2, 1.0, .015, .015, "#222") } B.sph(.045, "#FF7FA8", 0, .45, 1.02); B.seg(0, .4, -.75, 0, .9, -1.0, .06, .06, c1) }
+      // 運転する人：体・手足
       B.sph(.17, suit, 0, .48, -.34, 1.1, .7, .9, 2); B.cyl(.17, .15, .42, suit, 0, .74, -.3, 14); B.sph(.17, suit, 0, .93, -.29, 1.05, .5, .85, 2);
       for (const sx of [-1, 1]) { B.seg(sx * .1, .42, -.24, sx * .14, .5, .2, .12, .12, suit); B.seg(sx * .14, .5, .2, sx * .14, .3, .55, .1, .1, suit); B.box(.1, .1, .2, "#222", sx * .14, .26, .63);
         B.seg(sx * .19, .9, -.28, sx * .2, .76, .02, .09, .09, suit); B.seg(sx * .2, .76, .02, sx * .14, .66, .28, .08, .08, suit); B.sph(.045, "#222", sx * .13, .66, .3) }
-      B.cyl(.05, .055, .08, "#E3B48C", 0, 1.0, -.28, 10); B.sph(.155, c1, 0, 1.13, -.27, 1, 1.05, 1.08, 2); B.sph(.157, "#FFFFFF", 0, 1.17, -.29, .98, .55, 1.06, 2);
-      B.box(.22, .08, .05, "#1A2230", 0, 1.13, -.13); B.box(.08, .22, .02, c2, 0, 1.18, -.43);
+      // 頭（10種類）
+      const hx = 0, hy = 1.13, hz = -.27, SK = "#F1C7A0", eyes = (y = 1.15, col = "#1A1A1A") => { for (const sx of [-1, 1]) B.sph(.024, col, sx * .055, y, -.135) };
+      B.cyl(.05, .055, .08, SK, 0, 1.0, -.28, 10);
+      if (ch === 0) { B.sph(.155, c1, hx, hy, hz, 1, 1.05, 1.08); B.sph(.157, "#FFFFFF", hx, 1.17, -.29, .98, .55, 1.06); B.box(.22, .08, .05, "#1A2230", 0, 1.13, -.13); B.box(.08, .22, .02, c2, 0, 1.18, -.43) }
+      else if (ch === 1) { B.sph(.15, SK, hx, hy, hz); B.sph(.158, "#F4E2C8", hx, 1.17, -.29, 1, .75, 1); for (const sx of [-1, 1]) { B.cone(.065, .13, "#F4E2C8", sx * .09, 1.3, -.28, 4); B.cone(.035, .08, "#FF9AC0", sx * .09, 1.29, -.25, 4) } eyes(1.14, "#2E8B57"); B.sph(.02, "#FF7FA8", 0, 1.1, -.125) }
+      else if (ch === 2) { B.sph(.15, SK, hx, hy, hz); B.sph(.158, "#FFFFFF", hx, 1.17, -.29, 1, .75, 1); for (const sx of [-1, 1]) { B.seg(sx * .06, 1.24, -.3, sx * .1, 1.58, -.34, .075, .035, "#FFFFFF"); B.seg(sx * .06, 1.26, -.29, sx * .1, 1.55, -.32, .035, .02, "#FFB0C8") } eyes(1.14, "#C0304A") }
+      else if (ch === 3) { B.sph(.16, "#8A5A3A", hx, hy, hz); for (const sx of [-1, 1]) { B.sph(.055, "#8A5A3A", sx * .12, 1.27, -.27); B.sph(.03, "#D9A87A", sx * .12, 1.27, -.24) } B.sph(.065, "#D9A87A", 0, 1.09, -.14, 1.2, .85, 1); B.sph(.022, "#1A1A1A", 0, 1.11, -.09); eyes(1.17) }
+      else if (ch === 4) { B.box(.28, .26, .26, "#B8BEC8", hx, hy, hz); B.box(.22, .07, .02, "#33E6FF", 0, 1.15, -.135); B.seg(0, 1.26, -.27, 0, 1.4, -.27, .02, .02, "#555"); B.sph(.035, "#FF3A3A", 0, 1.42, -.27); for (const sx of [-1, 1]) B.cyl(.05, .05, .04, "#8C94A0", sx * .15, 1.13, -.27, 10, 0, PI / 2) }
+      else if (ch === 5) { B.sph(.155, "#1E1E26", hx, hy, hz); B.box(.2, .055, .03, SK, 0, 1.15, -.13); eyes(1.15); B.box(.32, .04, .3, "#C0304A", 0, 1.22, -.27); B.seg(.02, 1.22, -.42, .1, 1.12, -.62, .05, .015, "#C0304A"); B.seg(-.02, 1.22, -.42, -.08, 1.08, -.6, .05, .015, "#C0304A") }
+      else if (ch === 6) { B.sph(.15, SK, hx, hy, hz); eyes(1.14); B.box(.07, .06, .02, "#111", .055, 1.15, -.13); B.seg(-.12, 1.2, -.2, .14, 1.12, -.18, .015, .015, "#111"); B.cyl(.24, .24, .03, "#222", 0, 1.25, -.27, 16); B.cyl(.13, .15, .14, "#222", 0, 1.33, -.27, 14); B.sph(.03, "#FFFFFF", 0, 1.33, -.13) }
+      else if (ch === 7) { B.sph(.13, SK, hx, hy, hz); B.sph(.21, "#F4F4F4", hx, 1.15, -.28, 1, 1, 1); B.sph(.15, "#E8B84A", 0, 1.15, -.17, 1, .8, .55); B.sph(.04, "#3EC8E8", .14, 1.3, -.3); B.box(.3, .3, .2, "#D8DCE0", 0, .85, -.48) }
+      else if (ch === 8) { B.sph(.15, SK, hx, hy, hz); B.sph(.165, "#F7D46A", hx, 1.17, -.31, 1, .8, 1.05); B.seg(0, 1.16, -.42, 0, .86, -.5, .2, .1, "#F7D46A"); for (let k = -2; k <= 2; k++) B.box(.035, k % 2 ? .05 : .08, .02, "#FFD84A", k * .05, 1.3, -.2); B.sph(.025, "#FF4FA0", 0, 1.32, -.19); eyes(1.14, "#2E6FD0"); for (const sx of [-1, 1]) B.sph(.025, "#FFB0C0", sx * .09, 1.09, -.14) }
+      else { B.sph(.16, "#4CB05A", hx, hy, hz); B.sph(.09, "#5CC06A", 0, 1.08, -.13, 1.1, .8, 1.1); for (const sx of [-1, 1]) { B.seg(sx * .08, 1.26, -.3, sx * .14, 1.42, -.4, .04, .04, "#F4E6C0"); B.sph(.015, "#1A1A1A", sx * .04, 1.1, -.05) } for (let k = 0; k < 3; k++) B.cone(.035, .08, "#F2C233", 0, 1.3 - k * .1, -.42 - k * .05, 4); eyes(1.18, "#E8B84A") }
     });
-    const wheel = (r, wd, x, z) => { const p = new T.Group(); p.position.set(x, r, z); g.add(p); const w = part((B) => { B.cyl(r, r, wd, "#151517", 0, 0, 0, 16, 0, Math.PI / 2); B.cyl(r * .55, r * .55, wd + .01, "#C8CCD2", 0, 0, 0, 10, 0, Math.PI / 2) }, p); return { p, w } };
-    const fl = wheel(.14, .15, -.55, .62), fr = wheel(.14, .15, .55, .62), rl = wheel(.16, .22, -.58, -.62), rr = wheel(.16, .22, .58, -.62);
+    const WR = [[.14, .16], [.15, .19], [.2, .24], [.15, .17], [.12, .13], [.3, .34], [.14, .17], [.13, .16], [.14, .16], [.14, .16]][ca], WX = ca === 5 ? .1 : 0;
+    const wheel = (r, wd, x, z) => { const p = new T.Group(); p.position.set(x, r, z); g.add(p); const w = part((B) => { B.cyl(r, r, wd, "#151517", 0, 0, 0, 16, 0, PI / 2); B.cyl(r * .55, r * .55, wd + .01, ca === 3 ? "#E8EAEE" : "#C8CCD2", 0, 0, 0, 10, 0, PI / 2) }, p); return { p, w } };
+    const fl = wheel(WR[0], .15, -.55 - WX, .62), fr = wheel(WR[0], .15, .55 + WX, .62), rl = wheel(WR[1], .22, -.58 - WX, -.62), rr = wheel(WR[1], .22, .58 + WX, -.62);
     // ターボの火・ドリフトの火花・シールド
-    const flame = new T.Mesh(new T.ConeGeometry(.09, .45, 8), new T.MeshBasicMaterial({ color: "#FFA040", transparent: true, opacity: .85 })); flame.rotation.x = -Math.PI / 2; flame.position.set(.42, .42, -1.12); flame.visible = false; g.add(flame);
+    const flame = new T.Mesh(new T.ConeGeometry(.09, .45, 8), new T.MeshBasicMaterial({ color: "#FFA040", transparent: true, opacity: .85 })); flame.rotation.x = -Math.PI / 2; flame.position.set(ca === 7 ? 0 : .42, (ca === 7 ? .38 : .42) + lift, ca === 7 ? -1.2 : -1.12); flame.visible = false; g.add(flame);
     const sparks = [-1, 1].map((sx) => { const s = new T.Mesh(new T.SphereGeometry(.07, 6, 5), new T.MeshBasicMaterial({ color: "#7FD0FF" })); s.position.set(sx * .58, .06, -.85); s.visible = false; g.add(s); return s });
-    const shield = new T.Mesh(new T.SphereGeometry(1.25, 16, 12), new T.MeshBasicMaterial({ color: "#4DE3FF", transparent: true, opacity: .22, depthWrite: false })); shield.position.y = .55; shield.visible = false; g.add(shield);
+    const shield = new T.Mesh(new T.SphereGeometry(1.25, 16, 12), new T.MeshBasicMaterial({ color: "#4DE3FF", transparent: true, opacity: .22, depthWrite: false })); shield.position.y = .55 + lift; shield.visible = false; g.add(shield);
     // グライダー（大ジャンプで開く）とジェットの外がわ（オリジナル）
     const glider = new T.Group(); glider.position.set(0, 1.6, -.15); g.add(glider);
     part((B) => { for (let k = 0; k < 7; k++) B.box(.42, .05, 1.05, k % 2 ? "#F4F4F4" : c1, -1.26 + k * .42, -Math.abs(k - 3) * .07, 0, 0, 0, (k - 3) * .12); B.box(2.9, .06, .12, c2, 0, -.2, .5); for (const sx of [-1, 0, 1]) { B.seg(sx * 1.25, -.2, .3, sx * .4, -1.05, .1, .02, .02, "#333"); B.seg(sx * 1.25, -.2, -.3, sx * .4, -1.05, -.3, .02, .02, "#333") } }, glider); glider.visible = false;
@@ -2260,11 +2316,13 @@ html.br-portrait .br-ui { display: none }
     }
     const BOXES = []; for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0, i: bi }) }
     const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, jet: 0, driftT: 0, item: null, fin: 0, col, prog: 0, wall: 0, h: 0, vh: 0, air: false, glide: false, trick: 0, trickT: 0 });
-    const meSlot = host ? 0 : 1, K = newKart(meSlot, host ? 0 : 1);
-    let cpus = []; const nCpu = () => (realOppPeer() ? 2 : 3);
-    function makeCpus() { cpus = []; const n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(i + (n === 2 ? 2 : 1), i + 2); kk.skill = .86 + Math.random() * .08; kk.useAt = 0; kk.id = i; cpus.push(kk) } }
+    // 人は何人でも（同じ招待コード）。ホストが0番、ほかは cid の順。足りない分はコンピューター
+    let meSlot = host ? 0 : 1; const K = newKart(meSlot, meSlot % KT_COLORS.length); K.look = ktMyLook();
+    const placeMe = () => { const si = Math.max(0, humList().indexOf(cid)); if (si === meSlot) return; meSlot = si; Object.assign(K, slot(si)); K.col = si % KT_COLORS.length };
+    let cpus = []; const nCpu = () => Math.max(1, 4 - humList().length);
+    function makeCpus() { cpus = []; const H = humList().length, n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(H + i, (H + i) % KT_COLORS.length); kk.skill = .86 + Math.random() * .08; kk.useAt = 0; kk.id = i; kk.look = { ch: Math.floor(Math.random() * 10), co: Math.floor(Math.random() * 10), ca: Math.floor(Math.random() * 10) }; cpus.push(kk) } }
     if (host) makeCpus();
-    let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = null, finRank = null;
+    let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = {}, finRank = null, picking = false;
     let myIt = [], itSeq = 0, hits = [], drift = false, msg = null, guestCpus = [], ownCpuIt = [], steerVis = 0;
     const removedByHit = new Set();
     const Lb = holdBtn($("#k-left")), Rb = holdBtn($("#k-right")), Db = holdBtn($("#k-drift")), itemBtn = $("#k-item");
@@ -2350,18 +2408,19 @@ html.br-portrait .br-ui { display: none }
     }
     // ---- 3Dの物
     const models = new Map(), itemMeshes = new Map();
-    const modelFor = (key, col) => { let m = models.get(key); if (!m) { const cc = KT_COLORS[col] || KT_COLORS[0]; m = ktKartModel(cc, ["#F4F4F4", "#2A2A2E", "#F2F2F2", "#1E2A44", "#F4F4F4"][col % 5]); scene.add(m.g); models.set(key, m) } m.seen = true; return m };
+    const lookOf = (kk) => kk.look || { ch: 0, co: (kk.col || 0) % 10, ca: 0 }, paint = (kk) => (KT_PAINT[lookOf(kk).co] || KT_PAINT[0])[1];
+    const modelFor = (key, look) => { const code = ktLookCode(look); let m = models.get(key); if (m && m.code !== code) { scene.remove(m.g); m.g.traverse((o) => { if (o.geometry) o.geometry.dispose() }); m = null } if (!m) { m = ktKartModel(look); m.code = code; scene.add(m.g); models.set(key, m) } m.seen = true; return m };
     const boxMeshes = BOXES.map((b) => { const m = new T.Mesh(new T.BoxGeometry(1.1, 1.1, 1.1), W.boxMat); m.position.set(b.x * KS, .9, b.y * KS); m.castShadow = true; scene.add(m); return m });
     const itemMesh = (p) => { let m = itemMeshes.get(p.id); if (m) return m; const B = phParts(); if (p.k === "b") { B.sph(.22, "#F7D23E", 0, .12, 0, 1.2, .4, .7, 1); for (const a of [0, 2.1, 4.2]) B.seg(0, .12, 0, Math.cos(a) * .35, .02, Math.sin(a) * .35, .1, .04, "#E8C230") } else { B.cyl(.12, .12, .8, "#E23A3A", 0, .45, 0, 12, Math.PI / 2); B.sph(.12, "#F2F2F2", 0, .45, .42, 1, 1, 1.8); for (const a of [0, 1.57, 3.14, 4.71]) B.box(.02, .18, .2, "#555", Math.cos(a) * .14, .45 + Math.sin(a) * .14, -.3); B.cone(.1, .35, "#FFB040", 0, .45, -.6) } m = new T.Mesh(phMerge(B.L, false), brCharMat || new T.MeshStandardMaterial({ vertexColors: true })); m.castShadow = true; scene.add(m); itemMeshes.set(p.id, m); return m };
     // 巨大モニター：順位・ラップ・イコライザー
     let monT = 0;
-    const kName = (kk) => kk === K ? "あなた" : kk.key === "opp" ? oppName() : KT_DRIVERS[kk.col % KT_DRIVERS.length];
+    const kName = (kk) => kk === K ? "あなた" : kk.name || KT_DRIVERS[kk.col % KT_DRIVERS.length];
     function drawMon(allKarts, tt) {
       const M = W.ms.mon, g2 = M.c.getContext("2d"), hue = (tt * 40) % 360, gr = g2.createLinearGradient(0, 0, 256, 144); gr.addColorStop(0, `hsl(${hue},80%,22%)`); gr.addColorStop(1, `hsl(${(hue + 120) % 360},80%,12%)`); g2.fillStyle = gr; g2.fillRect(0, 0, 256, 144);
       for (let b = 0; b < 12; b++) { const hh = 14 + 56 * Math.abs(Math.sin(tt * 6 + b * 1.3) * Math.sin(tt * 2.3 + b)); g2.fillStyle = `hsl(${(hue + b * 22) % 360},100%,62%)`; g2.fillRect(150 + b * 8.5, 138 - hh, 6, hh) }
       g2.textAlign = "left"; g2.textBaseline = "middle";
       if (Math.floor(tt / 5) % 3 === 2) { g2.fillStyle = "#FFFFFF"; g2.font = "900 30px sans-serif"; g2.fillText("NEON", 12, 38); g2.fillText("CLUB", 12, 72); g2.font = "bold 15px sans-serif"; g2.fillStyle = "#FFE14D"; g2.fillText(ph === "race" ? `ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}` : "まもなくスタート", 12, 104) }
-      else { const sorted = [...allKarts].sort((a, b) => rankOf(a, allKarts) - rankOf(b, allKarts)).slice(0, 5); sorted.forEach((kk, i) => { const y = 30 + i * 22; g2.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; g2.fillRect(8, y - 8, 6, 16); g2.fillStyle = kk === K ? "#FFE14D" : "#FFFFFF"; g2.font = "bold 15px sans-serif"; g2.fillText(`${i + 1}  ${kName(kk)}`.slice(0, 12), 20, y + 1) }) }
+      else { const sorted = [...allKarts].sort((a, b) => rankOf(a, allKarts) - rankOf(b, allKarts)).slice(0, 5); sorted.forEach((kk, i) => { const y = 30 + i * 22; g2.fillStyle = [paint(kk)][0]; g2.fillRect(8, y - 8, 6, 16); g2.fillStyle = kk === K ? "#FFE14D" : "#FFFFFF"; g2.font = "bold 15px sans-serif"; g2.fillText(`${i + 1}  ${kName(kk)}`.slice(0, 12), 20, y + 1) }) }
       g2.fillStyle = "#FF3355"; g2.beginPath(); g2.arc(236, 12, 5, 0, 7); g2.fill(); g2.fillStyle = "#FFFFFF"; g2.font = "bold 11px sans-serif"; g2.textAlign = "right"; g2.fillText("LIVE", 228, 13);
       M.t.needsUpdate = true;
     }
@@ -2375,7 +2434,7 @@ html.br-portrait .br-ui { display: none }
     function draw3d(allKarts, items, dt) {
       for (const m of models.values()) m.seen = false;
       allKarts.forEach((kk) => {
-        const key = kk === K ? "me" : kk.key, m = modelFor(key, kk.col);
+        const key = kk === K ? "me" : kk.key, m = modelFor(key, lookOf(kk));
         const ih = kk.idx || 0, hh = kk.h != null ? kk.h : GH(ih), a0 = TR[(ih - 4 + NS) % NS], b0 = TR[(ih + 4) % NS], air = hh - GH(ih) > .25;
         const pt = air ? clamp((kk.vh || 0) * .04, -.35, .35) : Math.atan((GH(ih + 4) - GH(ih - 4)) / (Math.hypot(b0[0] - a0[0], b0[1] - a0[1]) * KS || 1)); m.pv = (m.pv ?? pt) + (pt - (m.pv ?? pt)) * Math.min(1, dt * 8);
         m.g.position.set(kk.x * KS, hh, kk.y * KS); m.g.rotation.y = Math.PI / 2 - kk.ang; m.g.rotation.x = -m.pv;
@@ -2395,8 +2454,10 @@ html.br-portrait .br-ui { display: none }
       boxMeshes.forEach((m, i) => { m.visible = BOXES[i].re <= 0; m.rotation.set(raceT * .7, raceT * 1.1, 0); m.position.y = .95 + GH(BOXES[i].i) + Math.sin(raceT * 2 + i) * .12 });
       // カメラ：カートの後ろから追いかける（ターボで少し広く）
       const fx = Math.cos(K.ang), fz = Math.sin(K.ang), kx = K.x * KS, kz = K.y * KS, kh = K.h || 0, back = (K.spin > 0 ? 5 : 5.6) + (K.glide ? 2 : 0) + (K.jet > 0 ? 1 : 0);
-      const want = new T.Vector3(kx - fx * back - steerVis * fz * .6, kh + 2.5 + (K.glide ? 1.6 : 0), kz - fz * back + steerVis * fx * .6); camPos.lerp(want, Math.min(1, dt * 7)); camera.position.copy(camPos);
-      camLook.set(kx + fx * 5, kh + .9, kz + fz * 5); camera.lookAt(camLook);
+      const pk = picking && ph === "idle", oa = performance.now() / 2600, ox = -Math.sin(oa) * fz + Math.cos(oa) * fx, oz = Math.sin(oa) * fx + Math.cos(oa) * fz;
+      const want = pk ? new T.Vector3(kx + ox * 3.6, kh + 1.4, kz + oz * 3.6) : new T.Vector3(kx - fx * back - steerVis * fz * .6, kh + 2.5 + (K.glide ? 1.6 : 0), kz - fz * back + steerVis * fx * .6); camPos.lerp(want, Math.min(1, dt * (pk ? 4 : 7))); camera.position.copy(camPos);
+      if (pk !== !!camera.view) { if (pk) camera.setViewOffset(VW, VH, VW * .24, 0, VW, VH); else camera.clearViewOffset() }
+      if (pk) camLook.set(kx, kh + .55, kz); else camLook.set(kx + fx * 5, kh + .9, kz + fz * 5); camera.lookAt(camLook);
       const fov = (VW < VH ? 72 : 62) + (K.boost > 0 || K.jet > 0 ? 9 : 0); if (Math.abs(camera.fov - fov) > .05) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 5); camera.updateProjectionMatrix() }
       sun.position.set(kx + 30, 60, kz + 20); sun.target.position.set(kx, 0, kz); sun.target.updateMatrixWorld();
       if (W.ms.water) { const t = W.ms.water.material.map; t.offset.x = (raceT * .01) % 1; t.offset.y = (raceT * .02) % 1 }
@@ -2418,7 +2479,7 @@ html.br-portrait .br-ui { display: none }
       const [bx0, bz0, bx1, bz1] = W.bounds, mw = 130, mh = 110, mx = w - mw - SL, my = T0, ms2 = Math.min((mw - 10) / (bx1 - bx0), (mh - 10) / (bz1 - bz0));
       const MX = (x) => mx + 5 + (x * KS - bx0) * ms2, MY = (y) => my + 5 + (y * KS - bz0) * ms2;
       c.fillStyle = "rgba(20,18,42,.5)"; c.fillRect(mx, my, mw, mh); c.strokeStyle = "#E8E8E8"; c.lineWidth = 3; c.beginPath(); TR.forEach((p, i) => (i ? c.lineTo(MX(p[0]), MY(p[1])) : c.moveTo(MX(p[0]), MY(p[1])))); c.closePath(); c.stroke();
-      for (const kk of allKarts) { c.fillStyle = (KT_COLORS[kk.col] || KT_COLORS[0])[0]; c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4.5 : 3.2, 0, 7); c.fill(); if (kk === K) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.stroke() } }
+      for (const kk of allKarts) { c.fillStyle = paint(kk); c.beginPath(); c.arc(MX(kk.x), MY(kk.y), kk === K ? 4.5 : 3.2, 0, 7); c.fill(); if (kk === K) { c.strokeStyle = "#fff"; c.lineWidth = 1.5; c.stroke() } }
       // 速さ
       const kmh = Math.round(K.v * .36 * 1.1); c.textAlign = "right"; c.font = `26px ${DISP}`; c.fillStyle = "#fff"; c.strokeStyle = "rgba(20,18,42,.8)"; c.lineWidth = 4; c.strokeText(String(kmh), w - SL - 40, my + mh + 22); c.fillText(String(kmh), w - SL - 40, my + mh + 22); c.font = `11px ${DISP}`; c.fillText("km/h", w - SL, my + mh + 26);
       // スタートのライト
@@ -2430,9 +2491,10 @@ html.br-portrait .br-ui { display: none }
     }
     function frame(dt) {
       resize();
-      const op = rtOppPeer(); const ox = op ? op.presence.x : null; const os = oppS();
-      const age = op ? Math.min(.2, Math.max(0, (Date.now() - op.updatedAt) / 1000)) : 0;
-      if (ph === "idle" && me.s.rdy && (!opp() || (os && os.rdy))) { ph = "count"; cd = 3; if (host) makeCpus() }
+      const mps = matchPeers(), hp = host ? null : hostPeer(), hx = peerX(hp), hs = host ? me.s : peerS(hp) || {};
+      const ageOf = (p) => Math.min(.2, Math.max(0, (Date.now() - p.updatedAt) / 1000));
+      if (ph === "idle") placeMe();
+      if (ph === "idle" && allReady()) { ph = "count"; cd = 3; if (host) makeCpus() }
       if (ph === "count") { cd -= dt; if (cd <= 0) ph = "race" }
       if (ph === "race" || ph === "done") raceT += dt; else raceT += 0;
       for (const b of BOXES) b.re = Math.max(0, b.re - dt);
@@ -2442,50 +2504,62 @@ html.br-portrait .br-ui { display: none }
       if (drift && !dPrev && K.air && !K.trick && ph === "race") { K.trick = 1; K.trickT = 0 }
       if (ph === "race" || ph === "done") {
         const r = physics(K, dt, ph === "race" && !K.fin ? steer : 0, drift && !K.fin);
-        if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + (ox ? 1 : 0)); K.roul = 1.1 }
+        if (r === "box") { const all = [K, ...cpus]; K.item = pickItem(K, rankOf(K, all), all.length + mps.length); K.roul = 1.1 }
         if (K.lap > KT_LAPS && !K.fin) { K.fin = raceT; ph = "done" }
       }
-      let oppKart = null;
-      if (ox && ox.k) { const a = ox.k; oppKart = { key: "opp", x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: host ? 1 : 0, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, h: (a[9] || 0) / 10, glide: !!((a[10] || 0) & 1), jet: (a[10] || 0) & 2 ? 1 : 0, item: null } }
-      if (host) { const all = [K, ...cpus, ...(oppKart ? [oppKart] : [])]; for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT } }
-      else if (ox && ox.ck) guestCpus = ox.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { key: "c" + i, x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, v: a[9] || 0, h: (a[10] || 0) / 10, glide: !!((a[11] || 0) & 1), jet: (a[11] || 0) & 2 ? 1 : 0, pa: g.pa }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
+      // ほかの人のカート
+      const others = [];
+      for (const p of mps) { const x = peerX(p); if (!x || !x.k) continue; const a = x.k, age = ageOf(p); others.push({ key: "p" + p.presence.cid, cid: p.presence.cid, name: pName(p), x: a[0] + Math.cos(a[2]) * a[3] * age, y: a[1] + Math.sin(a[2]) * a[3] * age, ang: a[2], v: a[3], col: a[11] ?? 1, lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, h: (a[9] || 0) / 10, glide: !!((a[10] || 0) & 1), jet: (a[10] || 0) & 2 ? 1 : 0, look: a[12] != null ? ktLookOf(a[12]) : null, item: null }) }
+      if (host) { const all = [K, ...cpus, ...others]; for (const kk of cpus) { cpuDrive(kk, dt, all); if (kk.lap > KT_LAPS && !kk.fin) kk.fin = raceT } }
+      else if (hx && hx.ck) guestCpus = hx.ck.map((a, i) => { const g = guestCpus[i] || {}; const t = { key: "c" + i, x: a[0], y: a[1], ang: a[2], col: a[3], lap: a[4], idx: a[5], prog: a[4] * NS + a[5], fin: a[6], star: a[7], boost: a[8] || 0, v: a[9] || 0, h: (a[10] || 0) / 10, glide: !!((a[11] || 0) & 1), jet: (a[11] || 0) & 2 ? 1 : 0, look: a[12] != null ? ktLookOf(a[12]) : null, pa: g.pa }; if (g.x != null) { const al = Math.min(1, dt * 12); t.x = g.x + (a[0] - g.x) * al; t.y = g.y + (a[1] - g.y) * al } return t });
       cpus.forEach((kk, i) => (kk.key = "c" + i));
       myIt = moveIt(myIt, dt); ownCpuIt = moveIt(ownCpuIt, dt);
-      const foreign = foreignItems(ox, age), oppHits = new Set(ox && ox.hit ? ox.hit : []);
+      const foreign = mps.flatMap((p) => foreignItems(peerX(p), ageOf(p))), oppHits = new Set(mps.flatMap((p) => { const x = peerX(p); return x && x.hit ? x.hit : [] }));
       myIt = myIt.filter((p) => !oppHits.has(p.id)); ownCpuIt = ownCpuIt.filter((p) => !oppHits.has(p.id));
       hitTest(K, foreign, false); hitTest(K, myIt, true); hitTest(K, ownCpuIt, true);
       if (host) for (const kk of cpus) { hitTest(kk, foreign, false); hitTest(kk, myIt, true); hitTest(kk, ownCpuIt, true) }
-      const allKarts = [K, ...(host ? cpus : guestCpus), ...(oppKart ? [oppKart] : [])];
+      const allKarts = [K, ...(host ? cpus : guestCpus), ...others];
       if (ph === "race") { jetBump(K, allKarts); if (host) for (const kk of cpus) jetBump(kk, allKarts) }
       if (host) {
-        if (oppKart && oppKart.fin && gFin == null) gFin = raceT - age;
-        const fins = [{ t: K.fin || null }, ...cpus.map((kk) => ({ t: kk.fin || null })), ...(realOppPeer() ? [{ t: gFin }] : [])];
-        const rankAt = (t0) => 1 + fins.filter((f) => f.t != null && f.t < t0).length, patch = {};
-        if (K.fin && me.s.rkH == null) Object.assign(patch, { res: Math.round(K.fin * 1000), rkH: rankAt(K.fin) });
-        if (gFin != null && me.s.rkG == null) patch.rkG = rankAt(gFin);
-        if (Object.keys(patch).length) setS(patch);
-        finRank = me.s.rkH || null;
-      } else { if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) }); finRank = (os && os.rkG) || null }
+        // 順位はホストがゴールした順で決める（全員の画面で同じ結果）
+        for (const o of others) if (o.fin && gFin[o.cid] == null) gFin[o.cid] = raceT;
+        const fins = [K.fin || null, ...cpus.map((kk) => kk.fin || null), ...others.map((o) => gFin[o.cid] ?? null)];
+        const rankAt = (t0) => 1 + fins.filter((t) => t != null && t < t0).length, rk = Object.assign({}, me.s.rk || {}); let ch = false;
+        if (K.fin && rk[cid] == null) { rk[cid] = rankAt(K.fin); ch = true }
+        for (const id in gFin) if (rk[id] == null) { rk[id] = rankAt(gFin[id]); ch = true }
+        if (ch) setS(Object.assign({ rk }, K.fin && me.s.res == null ? { res: Math.round(K.fin * 1000) } : {}));
+        finRank = rk[cid] || null;
+      } else { if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) }); finRank = (hs.rk && hs.rk[cid]) || null }
       if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
       itemBtn.textContent = K.item && !K.roul ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !K.item || K.roul > 0;
-      const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0, Math.round(K.h * 10), (K.glide ? 1 : 0) | (K.jet > 0 ? 2 : 0)], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
-      if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v), Math.round(kk.h * 10), (kk.glide ? 1 : 0) | (kk.jet > 0 ? 2 : 0)]);
+      const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0, Math.round(K.h * 10), (K.glide ? 1 : 0) | (K.jet > 0 ? 2 : 0), K.col, ktLookCode(K.look)], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
+      if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v), Math.round(kk.h * 10), (kk.glide ? 1 : 0) | (kk.jet > 0 ? 2 : 0), ktLookCode(kk.look)]);
       const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       draw3d(allKarts, [...myIt, ...ownCpuIt, ...foreign.filter((p) => !removedByHit.has(p.id))], dt); hud(allKarts);
-      if (ph === "idle" && !me.s.rdy) setMsg(`<p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
-          <button class="btn" data-act="act-ready">準備OK</button><p class="muted">${opp() && realOppPeer() ? "ふたりとも押すと同時にスタート（コースを変えると相手も同じコースになります）" : "押すとスタート"}</p>`);
-      else if (ph === "idle") setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
+      cardEl.classList.toggle("picking", picking && ph === "idle" && !me.s.rdy);
+      if (ph === "idle" && !me.s.rdy && picking) {
+        const L = K.look, grid = (k, names, sw) => `<div class="kt-pick">${names.map((n, i) => `<button class="chipbtn ${L[k] === i ? "on" : ""}" data-kl="${k}" data-i="${i}">${sw ? `<i style="background:${KT_PAINT[i][1]}"></i>` : ""}${n}</button>`).join("")}</div>`;
+        setMsg(`<p class="eyebrow">キャラ</p>${grid("ch", KT_CHARS)}<p class="eyebrow">色</p>${grid("co", KT_PAINT.map((x) => x[0]), true)}<p class="eyebrow">カート</p>${grid("ca", KT_BODIES)}<p class="muted" style="margin:0">見た目だけで、速さや曲がりやすさはみんな同じです</p><button class="btn" data-kl="done">決定</button>`);
+      }
+      else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn ghost" data-kl="open">キャラ・色・カートを選ぶ（${esc(KT_CHARS[K.look.ch])}・${esc(KT_PAINT[K.look.co][0])}・${esc(KT_BODIES[K.look.ca])}）</button><p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
+          <p class="muted" style="margin:0">${mps.length ? `${mps.length + 1}人（${mps.map((p) => esc(pName(p))).join("・")}・あなた）。全員が押すと同時にスタート。コースを変えると全員が同じコースになります` : "押すとスタート。同じ招待コードの人は何人でも一緒に走れます"}</p><button class="btn" data-act="act-ready">準備OK</button>`);
+      else if (ph === "idle") { const wait = mps.filter((p) => !(peerS(p) || {}).rdy).map((p) => esc(pName(p))); setMsg(`<p class="wait">${wait.length ? wait.join("・") + "の準備を待っています" : "まもなくスタート"}</p>`) }
       else if (ph === "done" && me.s.res != null) {
-        const hs = host ? me.s : os || {}, mine = host ? hs.rkH : hs.rkG, theirs = host ? hs.rkG : hs.rkH, t = (me.s.res / 1000).toFixed(1);
-        if (realOppPeer() && mine != null && theirs != null) setMsg(`<p class="verdict ${mine < theirs ? "good" : "bad"}">${mine < theirs ? "あなたの勝ち！" : "あなたの負け…"}　あなた${mine}位・${esc(oppName())}${theirs}位</p>${againBtns("kart")}`);
-        else if (realOppPeer() && mine != null) setMsg(`<p class="wait">${mine}位でゴール（${t}秒）。${esc(oppName())}はまだ走っています</p>`);
-        else if (realOppPeer()) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
+        const rk = hs.rk || {}, mine = rk[cid], t = (me.s.res / 1000).toFixed(1);
+        if (mps.length) {
+          const rows = [[cid, "あなた"], ...mps.map((p) => [p.presence.cid, pName(p)])].map(([id, n]) => ({ n, r: rk[id] })).sort((a, b) => (a.r ?? 99) - (b.r ?? 99)), allIn = rows.every((x) => x.r != null);
+          const list = `<ol class="tc-rank">${rows.map((x) => `<li class="${x.n === "あなた" ? "me" : ""}"><b>${esc(x.n)}</b><span>${x.r != null ? x.r + "位" : "走っています"}</span></li>`).join("")}</ol>`;
+          if (mine == null) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
+          else setMsg(`<p class="verdict ${rows[0].n === "あなた" && allIn ? "good" : ""}">${mine}位でゴール（${t}秒）</p>${list}${allIn ? againBtns("kart") : ""}`);
+        }
         else setMsg(`<p class="verdict ${mine === 1 ? "good" : ""}">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
       } else setMsg("");
     }
+    const onPick = (ev) => { const t = ev.target.closest("[data-kl]"); if (!t) return; const k = t.dataset.kl; if (k === "open") picking = true; else if (k === "done") picking = false; else { K.look = Object.assign({}, K.look, { [k]: Number(t.dataset.i) }); ls.set("ktLook", JSON.stringify(K.look)) } };
+    cardEl.addEventListener("click", onPick);
     const stopLoop = loop(frame);
     return () => {
-      stopLoop(); actKey = null; cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      stopLoop(); actKey = null; cardEl.removeEventListener("pointerdown", onTouchFull); cardEl.removeEventListener("click", onPick); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); if (mm !== brCharMat) mm.dispose() }) });
       scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
     };
@@ -3871,7 +3945,9 @@ html.br-portrait .br-ui { display: none }
   function brRun() {
     const T = THREE, host = isFirst(), cardEl = $(".card.act.br"), cv = $("#cv"), gl = $("#gl"), c = cv.getContext("2d");
     document.documentElement.classList.add("br-on");
-    const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], SZ = BR_SIZES[me.m.size || 0] || BR_SIZES[0], M = brMap((me.m.seed || 1) % 100000, STG, SZ.m), C0 = M.W / 2, ZK = Math.sqrt(M.W / 380), PSP = 20 * Math.max(1, M.W / 380), myIdx = host ? 0 : 1, two = () => !!realOppPeer();
+    const STG = BR_STAGES[me.m.stage || 0] || BR_STAGES[0], SZ = BR_SIZES[me.m.size || 0] || BR_SIZES[0], M = brMap((me.m.seed || 1) % 100000, STG, SZ.m), C0 = M.W / 2, ZK = Math.sqrt(M.W / 380), PSP = 20 * Math.max(1, M.W / 380), two = () => matchPeers().length > 0, nHum = () => 1 + matchPeers().length;
+    // 人どうし：ホストが 0 番、ほかの人は S.hum（cid の並び）の順。試合のとちゅうで来た人は見るだけ
+    let myIdx = host ? 0 : 1, outsider = false;
     const mobile = matchMedia("(pointer: coarse)").matches;
     const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr)); renderer.shadowMap.enabled = Q.sh > 0; renderer.shadowMap.type = T.PCFSoftShadowMap; watchLost(gl, "br");
@@ -3898,15 +3974,17 @@ html.br-portrait .br-ui { display: none }
     function mkE(i) { return { i, x: C0, z: C0, y: 150, vy: 0, yaw: 0, pitch: 0, hp: 100, alive: true, cr: false, ads: false, w: [{ w: 0, lv: 0, ammo: BR_W[0].mag }, null], cur: 0, vest: 0, helm: 0, med: 1, gren: 0, scope: 1, kills: 0, rank: 0, fireCd: 0, rl: 0, healT: 0, para: false, landed: false, tp: 0, think: 0, tg: -1, seen: 0, err: .012 + Math.random() * .03, strafe: 1, strafeT: 0, path: null, pathT: 0, goal: null, lootT: 0, mv: false, hitT: 0, lastHit: -1 } }
     function ensureVis(n) { while (vis.length < n) { const i = vis.length, ch = brChar(BR_PAL[i % BR_PAL.length]); scene.add(ch.g); vis.push(Object.assign(ch, { px: 0, pz: 0, ph: 0 })) } }
     // ---- 当たり判定
-    const blocked = (x, z, rad) => {
+    // 海・池は泳げる（歩く人は入れるが遅い）。弾やコンピューターの道さがしでは今までどおり水は通らない
+    const inWater = (x, z) => M.water.some((b) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1);
+    const blocked = (x, z, rad, wet) => {
       if (x < rad + 1 || z < rad + 1 || x > M.W - rad - 1 || z > M.D - rad - 1) return true;
       for (const b of M.boxes) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
-      for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
+      if (!wet) for (const b of M.water) if (x > b.x0 - rad && x < b.x1 + rad && z > b.z0 - rad && z < b.z1 + rad) return true;
       for (const cc of M.circles) { const dx = cc.x - x, dz = cc.z - z, rr = cc.r + rad; if (dx * dx + dz * dz < rr * rr) return true }
       for (const p of M.props) { const dx = p.x - x, dz = p.z - z, rr = p.cr + rad; if (dx * dx + dz * dz < rr * rr) return true }
       return false;
     };
-    function moveE(e, dx, dz) { if (!blocked(e.x + dx, e.z, .38)) e.x += dx; if (!blocked(e.x, e.z + dz, .38)) e.z += dz }
+    function moveE(e, dx, dz) { const wet = !isHuman(e.i) && !e.sw ? false : true; if (!blocked(e.x + dx, e.z, .38, wet)) e.x += dx; if (!blocked(e.x, e.z + dz, .38, wet)) e.z += dz }
     const eyeOf = (e) => new T.Vector3(e.x, e.y + (e.cr ? 1.05 : 1.55), e.z);
     function castRay(o, d, maxT, skip, worldOnly) {
       let best = maxT, code = -9, head = false;
@@ -3983,7 +4061,9 @@ html.br-portrait .br-ui { display: none }
       if (sl.ammo <= 0) startReload(e);
       return { hits, wk: Wp.n, sr: Wp.k === "sr" };
     }
-    const isHuman = (i) => i === 0 || (i === 1 && S.h1);
+    const isHuman = (i) => i < (S.hum ? S.hum.length : 1);
+    const humPeer = (i) => { const id = S.hum && S.hum[i]; return id ? matchPeers().find((p) => p.presence.cid === id) || null : null };
+    const gst = {}; // ホスト：人ごとに、もう処理した弾・回復の番号
     function applyShot(e, r, tip) {
       r.hits.forEach((h, k) => { if (h.code >= 0) hurt(E[h.code], h.dmg, e.i, h.head, r.wk); if (k < 3) { S.fx = [...S.fx, [++fxId, e.i, ...tip.map(r2), ...h.p.map(r2), h.code >= 0 ? (h.head ? 2 : 1) : 0, r.sr ? 1 : 0]].slice(-14); if (e.i !== myIdx) shotFx(tip, h.p, h.code >= 0, r.sr) } });
     }
@@ -4005,12 +4085,15 @@ html.br-portrait .br-ui { display: none }
       if (!e.landed) {
         let hs; if (!e.para && e.y > 48) { e.vy = -24; hs = 14 } else { e.para = true; e.vy = -6.5; hs = 7.5 }
         e.x = clamp(e.x + mx * hs * dt, 4, M.W - 4); e.z = clamp(e.z + mz * hs * dt, 4, M.D - 4); e.y += e.vy * dt;
-        if (e.y <= 0) { e.y = 0; e.vy = 0; e.landed = true; e.para = false; for (let k = 0; k < 40 && blocked(e.x, e.z, .4); k++) { e.x += Math.cos(k) * k * .3; e.z += Math.sin(k) * k * .3 } e.tp++ }
+        if (e.y <= 0) { e.y = 0; e.vy = 0; e.landed = true; e.para = false; for (let k = 0; k < 40 && blocked(e.x, e.z, .4, true); k++) { e.x += Math.cos(k) * k * .3; e.z += Math.sin(k) * k * .3 } e.tp++ }
         return;
       }
-      const sp = e.healT > 0 ? 1.6 : e.cr ? 2.4 : e.ads ? 3 : sprint ? 7 : 5;
+      // 泳ぐ：水の中は遅く、体は水にしずんで頭だけ出る。しゃがみ・ジャンプはできない
+      e.sw = inWater(e.x, e.z); if (e.sw) { e.cr = false }
+      const sp = e.sw ? (sprint ? 3.6 : 2.8) : e.healT > 0 ? 1.6 : e.cr ? 2.4 : e.ads ? 3 : sprint ? 7 : 5;
       moveE(e, mx * sp * dt, mz * sp * dt); e.mv = Math.hypot(mx, mz) > .1;
-      e.vy -= 18 * dt; e.y = Math.max(0, e.y + e.vy * dt); if (e.y <= 0) e.vy = 0;
+      const floor = e.sw ? -1.0 : 0; e.vy -= 18 * dt; e.y = Math.max(floor, e.y + e.vy * dt); if (e.y <= floor) { e.vy = 0; if (e.sw) e.y += (floor - e.y) * Math.min(1, dt * 4) }
+      if (e.sw && e.y < floor + .05) e.y = floor + Math.sin(tAll * 3 + e.i) * .06;
     }
     // ---- 安全地帯（ホスト）
     function zoneTarget(Z) { const nr = BR_ZONE[Z.k].r * M.W, a = Math.random() * 6.28, d = Math.random() * Math.max(0, Z.r - nr) * .8; Z.tx = clamp(Z.cx + Math.cos(a) * d, nr + 5, M.W - nr - 5); Z.tz = clamp(Z.cz + Math.sin(a) * d, nr + 5, M.D - nr - 5); Z.tr = nr; Z.fx = Z.cx; Z.fz = Z.cz; Z.fr = Z.r }
@@ -4071,8 +4154,9 @@ html.br-portrait .br-ui { display: none }
     function botGren(e, o, vx, vy, vz) { const gid = ++grId; spawnGren(gid, e.i, o.x, o.y, o.z, vx, vy, vz); S.grl = [...S.grl, [gid, e.i, r2(o.x), r2(o.y), r2(o.z), r2(vx), r2(vy), r2(vz)]].slice(-10) }
     // ---- はじめる（ホスト）
     function start() {
-      const n = clamp(S.n, two() ? 2 : 2, 20); S.h1 = two(); E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n);
-      const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i === 1 && S.h1 ? oppName() : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
+      S.hum = humList().slice(0, 20); const n = clamp(Math.max(S.n, S.hum.length), 2, 20); S.n = n; S.h1 = S.hum.length > 1; E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n);
+      for (const k in gst) delete gst[k];
+      const used = new Set(); S.names = E.map((e, i) => (i === 0 ? (myName && myName !== "プレイヤー" ? myName : "ホスト") : i < S.hum.length ? pName(humPeer(i)) : (() => { let k; do k = Math.floor(Math.random() * BR_NAMES.length); while (used.has(k) && used.size < BR_NAMES.length); used.add(k); return BR_NAMES[k] })()));
       const pz = 50 + Math.random() * (M.D - 100), dir = Math.random() < .5 ? 1 : -1; S.plane = { z: pz, dir, t: 0 };
       E.forEach((e) => { e.x = 20 + Math.random() * (M.W - 40); e.z = clamp(pz + (Math.random() - .5) * 100, 10, M.D - 10); e.y = 140 + Math.random() * 15; const tw = M.towns[Math.floor(Math.random() * M.towns.length)]; e.land = Math.random() < .65 ? { x: tw[0] + (Math.random() - .5) * 40, z: tw[1] + (Math.random() - .5) * 40 } : { x: 15 + Math.random() * (M.W - 30), z: 15 + Math.random() * (M.D - 30) }; if (M.water.some((w) => e.land.x > w.x0 - 3 && e.land.x < w.x1 + 3 && e.land.z > w.z0 - 3 && e.land.z < w.z1 + 3)) e.land = { x: C0, z: C0 }; e.yaw = Math.random() * 6.28; e.tp++ });
       const DF = BR_DIFF[S.diff ?? 1]; E.forEach((e) => { e.err = DF.err[0] + Math.random() * DF.err[1]; e.react = DF.react * (.8 + Math.random() * .4); e.turn = DF.turn; e.see = DF.see; e.gren2 = DF.gren });
@@ -4125,12 +4209,12 @@ html.br-portrait .br-ui { display: none }
     const onClick = (ev) => { const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
-    function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.y <= .01) { m.vy = 5.5; crOn = false } }
+    function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false } }
     function swapTo(k) { const m = meE(); if (m && m.w[k] && m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false } }
     function heal() { const m = meE(); if (m && m.alive && m.landed && m.med > 0 && m.hp < 100 && m.healT <= 0) { m.healT = 3; adsOn = false } }
     function throwGren() {
       const m = meE(); if (!m || !m.alive || !m.landed || m.gren <= 0) return; m.gren--; const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = eyeOf(m).addScaledVector(d, .6), v = [d.x * 16, d.y * 16 + 4.5, d.z * 16];
-      if (host) botGren(m, o, ...v); else { const gid = 1e6 + (++shotSeq); spawnGren(gid, myIdx, o.x, o.y, o.z, ...v); myGren = [...myGren, [shotSeq, r2(o.x), r2(o.y), r2(o.z), ...v.map(r2)]].slice(-5) }
+      if (host) botGren(m, o, ...v); else { const gid = 1e6 * myIdx + (++shotSeq); spawnGren(gid, myIdx, o.x, o.y, o.z, ...v); myGren = [...myGren, [shotSeq, r2(o.x), r2(o.y), r2(o.z), ...v.map(r2)]].slice(-5) }
       floats.push({ txt: "手榴弾を投げた！", col: "#FFE14D", t: 0 });
     }
     function tryFire() {
@@ -4246,16 +4330,17 @@ html.br-portrait .br-ui { display: none }
       const usedStep = new Set(); for (const o of steps) { const d = Math.hypot(o.x - m.x, o.z - m.z), sec = Math.round(phAng(Math.atan2(o.x - m.x, o.z - m.z) - camYaw) / .5), lab = !usedStep.has(sec) && !usedDir.has(sec); usedStep.add(sec); c.globalAlpha = .55 + Math.abs(Math.sin(tAll * 6 + o.i)) * .45; ring(o.x, o.z, "#7FD0FF", 4, .09, lab ? `足音 ${Math.round(d)}m` : ""); c.globalAlpha = 1 }
       if (hurtT > 0) { hurtT -= dt; const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, "rgba(255,0,0,0)"); g.addColorStop(1, `rgba(255,30,30,${hurtT * 1.3})`); c.fillStyle = g; c.fillRect(0, 0, w, h) }
       // 相手（人）の名前
-      if (S.h1) { const o = E[1 - myIdx]; if (o && o.alive && m) { const p = project(o.x, o.y + 2.2, o.z); if (p && Math.hypot(o.x - m.x, o.z - m.z) < 80) bigText(c, nm(o.i), p[0], p[1], 12, "#FFE14D") } }
+      if (S.hum && m) for (let i = 0; i < S.hum.length; i++) { const o = E[i]; if (i === myIdx || !o || !o.alive) continue; const p = project(o.x, o.y + 2.2, o.z); if (p && Math.hypot(o.x - m.x, o.z - m.z) < 80) bigText(c, nm(o.i), p[0], p[1], 12, "#FFE14D") }
       if (!m.alive && specI >= 0) bigText(c, `観戦中：${nm(specI)}`, w / 2, 100, 13, "#fff");
     }
     function panel() {
       const m = meE();
       if (S.ph === "lobby") {
-        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">広さ</p><div class="br-stages" style="grid-template-columns:repeat(3,1fr)">${BR_SIZES.map((z, i) => `<button class="chipbtn ${i === (me.m.size || 0) ? "on" : ""}" data-act="br-size" data-i="${i}">${z.n}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">CPUの強さ</p><div class="br-stages" style="grid-template-columns:repeat(4,1fr)">${BR_DIFF.map((d, i) => `<button class="chipbtn ${i === S.diff ? "on" : ""}" data-br="diff" data-v="${i}">${d.n}</button>`).join("")}</div><p><b>人数（あなたもふくめて）</b></p><div class="row" style="justify-content:center;gap:14px;align-items:center"><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= 2 ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:28px">${S.n}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button></div><p class="muted">${two() ? `あなた・${esc(oppName())}・CPU${S.n - 2}人` : `あなた・CPU${S.n - 1}人`}。飛行機から飛び降りてスタート</p><button class="btn" data-br="start">はじめる</button>`);
-        else setMsg(`<p class="wait">${esc(oppName())}がステージと人数をえらんでいます（${STG.name}・${SZ.n}・CPU${BR_DIFF[S.diff ?? 1].n}・${S.n}人）</p>`);
+        if (host) setMsg(`<p class="eyebrow">ステージ</p><div class="br-stages">${BR_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="br-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">広さ</p><div class="br-stages" style="grid-template-columns:repeat(3,1fr)">${BR_SIZES.map((z, i) => `<button class="chipbtn ${i === (me.m.size || 0) ? "on" : ""}" data-act="br-size" data-i="${i}">${z.n}</button>`).join("")}</div><p class="eyebrow" style="margin-top:4px">CPUの強さ</p><div class="br-stages" style="grid-template-columns:repeat(4,1fr)">${BR_DIFF.map((d, i) => `<button class="chipbtn ${i === S.diff ? "on" : ""}" data-br="diff" data-v="${i}">${d.n}</button>`).join("")}</div><p class="muted" style="margin:0">${two() ? `あなた・なかま${nHum() - 1}人（${matchPeers().map((p) => esc(pName(p))).join("・")}）・CPU${Math.max(0, Math.max(S.n, nHum()) - nHum())}人` : `あなた・CPU${S.n - 1}人`}。同じ招待コードの人は何人でも参加できます</p><div class="row" style="justify-content:center;gap:10px;align-items:center;flex-wrap:nowrap"><b>人数</b><button class="btn ghost small" data-br="n" data-d="-2" ${S.n <= Math.max(2, nHum()) ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:24px;white-space:nowrap">${Math.max(S.n, nHum())}人</b><button class="btn ghost small" data-br="n" data-d="2" ${S.n >= 20 ? "disabled" : ""}>＋</button><button class="btn" data-br="start" style="flex:1;min-width:120px">はじめる</button></div>`);
+        else setMsg(`<p class="wait">${esc(pName(hostPeer()))}がステージと人数をえらんでいます（${STG.name}・${SZ.n}・CPU${BR_DIFF[S.diff ?? 1].n}・${S.n}人・人は${nHum()}人）</p>`);
         return;
       }
+      if (outsider) { setMsg(`<p class="wait">試合が始まっています。いまは観戦中です（次の試合から参加できます）</p><button class="btn ghost" data-act="menu">メニュー</button>`); return }
       if (m && (!m.alive || S.ph === "end") && !watching) {
         const won = S.ph === "end" && S.winner === myIdx, rank = won ? 1 : m.rank || E.filter((o) => o.alive).length;
         setMsg(`<p class="verdict ${won ? "good" : "bad"}">${won ? "勝ち残った！ 1位" : `${rank}位`}</p><p>キル ${m.kills}　／　${S.n}人中</p>${S.ph === "end" && !won ? `<p class="muted">優勝：${esc(nm(S.winner))}</p>` : ""}${againBtns("br")}${S.ph !== "end" ? `<button class="btn ghost" data-br="watch">観戦する</button>` : ""}`);
@@ -4264,15 +4349,16 @@ html.br-portrait .br-ui { display: none }
     // ---- 毎フレーム
     const stopLoop = loop((dt) => {
       tAll += dt; resize();
-      const op = rtOppPeer(), ox = op ? op.presence.x : null;
+      const ox = host ? null : peerX(hostPeer());
       if (!host && ox && ox.S) {
         const pS = S.ph; S = Object.assign({}, S, ox.S); const n = S.n;
+        if (S.ph !== "lobby" && S.hum) { const k = S.hum.indexOf(cid); outsider = k < 0; myIdx = k < 0 ? 0 : k } else outsider = false;
         if (S.ph !== "lobby" && E.length !== n) { E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n) }
         if (pS === "lobby" && S.ph === "play") { taken.clear(); seenGr.clear() }
         (ox.tk || []).forEach((id) => taken.add(id));
         if (ox.E) ox.E.forEach((a, i) => {
           const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13]; e.lastHit = a[15];
-          if (i === myIdx) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(C0 - e.x, C0 - e.z) } return }
+          if (i === myIdx && !outsider) { if (a[14] !== e.tp) { e.tp = a[14]; e.x = a[0]; e.z = a[1]; e.y = a[2]; e.landed = !!(a[6] & 32); e.para = !!(a[6] & 16); camYaw = Math.atan2(C0 - e.x, C0 - e.z) } return }
           const al = Math.min(1, dt * 12); e.x += (a[0] - e.x) * al; e.z += (a[1] - e.z) * al; e.y += (a[2] - e.y) * al; e.yaw = a[3]; e.pitch = a[4];
           e.cr = !!(a[6] & 2); e.ads = !!(a[6] & 4); e.para = !!(a[6] & 16); e.landed = !!(a[6] & 32); e.w = [a[7] >= 0 ? { w: a[7], lv: a[8], ammo: 1 } : null, null]; e.cur = 0; e.vest = a[9]; e.helm = a[10];
         });
@@ -4281,7 +4367,7 @@ html.br-portrait .br-ui { display: none }
       }
       const m = meE();
       // 自分を動かす
-      if (m && S.ph !== "lobby") {
+      if (m && S.ph !== "lobby" && !outsider) {
         let ix = stickInp.x, iz = stickInp.y;
         if (keys.has("a") || keys.has("A")) ix = -1; if (keys.has("d") || keys.has("D")) ix = 1; if (keys.has("w") || keys.has("W")) iz = -1; if (keys.has("s") || keys.has("S")) iz = 1;
         if (keys.has("ArrowLeft")) camYaw += dt * 2.2 * SENS.look; if (keys.has("ArrowRight")) camYaw -= dt * 2.2 * SENS.look; if (keys.has("ArrowUp")) camPitch = Math.min(.9, camPitch + dt * 1.5); if (keys.has("ArrowDown")) camPitch = Math.max(-1.2, camPitch - dt * 1.5);
@@ -4301,19 +4387,19 @@ html.br-portrait .br-ui { display: none }
       if (host) {
         if (S.ph === "play") {
           S.plane.t += dt; zoneStep(dt);
-          if (S.h1 && two() && ox && ox.px != null) {
-            const g = E[1]; if (g.alive) { g.x = ox.px; g.z = ox.pz; g.y = ox.y; g.yaw = ox.yaw; g.pitch = ox.pt; g.cr = !!ox.cr; g.ads = !!ox.ads; g.landed = !!ox.ld; g.para = !!ox.pa; g.vest = ox.vs; g.helm = ox.hm; g.w = [ox.wp >= 0 ? { w: ox.wp, lv: ox.wl, ammo: 1 } : null, null]; g.cur = 0 }
-            for (const s of ox.sh || []) if (s[0] > lastGuestShot) { lastGuestShot = s[0]; if (g.alive && s[1] >= 0 && E[s[1]]) hurt(E[s[1]], s[2], 1, !!s[3], s[10]); S.fx = [...S.fx, [++fxId, 1, ...s.slice(4, 10), s[1] >= 0 ? 1 : 0, s[11]]].slice(-14); shotFx(s.slice(4, 7), s.slice(7, 10), s[1] >= 0, s[11]) }
-            for (const gr of ox.gr || []) { const gid = 1e6 + gr[0]; if (!seenGr.has(gid)) { spawnGren(gid, 1, ...gr.slice(1)); S.grl = [...S.grl, [gid, 1, ...gr.slice(1)]].slice(-10) } }
-            if (ox.hl && ox.hl[0] > lastGuestHeal) { lastGuestHeal = ox.hl[0]; if (g.alive) g.hp = Math.min(100, g.hp + ox.hl[1]) }
+          for (let gi = 1; gi < (S.hum ? S.hum.length : 1); gi++) { const ox = peerX(humPeer(gi)); if (!ox || ox.px == null) continue; const gs = gst[gi] || (gst[gi] = { shot: 0, heal: 0 });
+            const g = E[gi]; if (g.alive) { g.x = ox.px; g.z = ox.pz; g.y = ox.y; g.yaw = ox.yaw; g.pitch = ox.pt; g.cr = !!ox.cr; g.ads = !!ox.ads; g.landed = !!ox.ld; g.para = !!ox.pa; g.vest = ox.vs; g.helm = ox.hm; g.w = [ox.wp >= 0 ? { w: ox.wp, lv: ox.wl, ammo: 1 } : null, null]; g.cur = 0 }
+            for (const s of ox.sh || []) if (s[0] > gs.shot) { gs.shot = s[0]; if (g.alive && s[1] >= 0 && E[s[1]]) hurt(E[s[1]], s[2], gi, !!s[3], s[10]); S.fx = [...S.fx, [++fxId, gi, ...s.slice(4, 10), s[1] >= 0 ? 1 : 0, s[11]]].slice(-14); shotFx(s.slice(4, 7), s.slice(7, 10), s[1] >= 0, s[11]) }
+            for (const gr of ox.gr || []) { const gid = 1e6 * gi + gr[0]; if (!seenGr.has(gid)) { spawnGren(gid, gi, ...gr.slice(1)); S.grl = [...S.grl, [gid, gi, ...gr.slice(1)]].slice(-10) } }
+            if (ox.hl && ox.hl[0] > gs.heal) { gs.heal = ox.hl[0]; if (g.alive) g.hp = Math.min(100, g.hp + ox.hl[1]) }
             for (const id of ox.pk || []) taken.add(id);
           }
-          for (const e of E) if (!isHuman(e.i) || (e.i === 1 && !two())) bot(e, dt);
+          for (const e of E) if (!isHuman(e.i) || (e.i > 0 && !humPeer(e.i))) bot(e, dt);
         }
-        const out = { S: { ph: S.ph, diff: S.diff, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1 },
+        const out = { S: { ph: S.ph, diff: S.diff, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1, hum: S.hum },
           E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp, e.lastHit ?? -1] }), fx: S.fx, grl: S.grl, tk: [...taken] };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
-      } else if (m) {
+      } else if (m && !outsider) {
         const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), cr: m.cr ? 1 : 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       }
@@ -4910,7 +4996,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1822";
+  const APP_VER = "1030-1837";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
