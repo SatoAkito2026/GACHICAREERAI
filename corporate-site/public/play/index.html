@@ -282,7 +282,8 @@ html.playing .br.picking #act-msg, html.playing .kt.picking #act-msg { left: aut
 .br-slot { appearance: none; border: 2px solid rgba(255,255,255,.5); background: rgba(20,18,42,.5); color: #fff; border-radius: 10px; padding: 4px 10px; min-width: 110px; display: flex; flex-direction: column; align-items: center; font: 12px var(--body); line-height: 1.3 }
 .br-slot.on { border-color: #FFE14D; background: rgba(20,18,42,.75) }
 .br-pick { left: 50%; transform: translateX(-50%); bottom: 96px; display: none; appearance: none; border: 0; border-radius: 12px; padding: 10px 16px; background: #FFE14D; color: #1F1B3A; font: 900 14px var(--body) }
-.br-pick.on { display: block }
+.br-pick.on, .lay-editing .br-pick { display: block }
+.lay-editing .br-sel { outline: 3px dashed #FFE14D !important; outline-offset: 3px }
 .br-car { bottom: 140px; background: #7FD0FF }
 .br.br-dead .br-ui { display: none }
 .br-rot { position: absolute; inset: 0; z-index: 9; padding: 16px; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
@@ -302,7 +303,7 @@ html.br-on #app > section > .row:first-child { display: none !important }
 .br-editbar { position: absolute; z-index: 7; left: 50%; top: 44px; transform: translateX(-50%); background: var(--surface); color: var(--ink); border-radius: 14px; padding: 8px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 20px); box-shadow: 0 6px 20px rgba(0,0,0,.3); font-size: 13px }
 .br-editbar input { width: 130px; accent-color: var(--pink) }
 .br-ui .br-sel { outline: 3px dashed #FFE14D; outline-offset: 3px }
-.br.br-editing .br-ui > * { outline: 2px dashed rgba(255,255,255,.7); outline-offset: 2px }
+.br.br-editing .br-ui > *, .lay-editing .kpad .kbtn, .lay-editing .kpad .stick { outline: 2px dashed rgba(255,255,255,.7); outline-offset: 2px }
 .br-top .btn { background: rgba(20,18,42,.45); color: #fff; padding: 6px 12px; font-size: 13px; white-space: nowrap }
 html.br-fake #sens { inset: auto; left: 0; top: 0; width: 100vh; height: 100vw; transform-origin: 0 0; transform: translate(100vw, 0) rotate(90deg) }
 html.br-portrait .br-rot { display: flex }
@@ -450,8 +451,11 @@ html.br-portrait .br-ui { display: none }
     if (room) room.presence({ cid, n: myName, m: me.m, s: me.s }).catch(() => {});
   }
   function setS(patch) { me.s = Object.assign({}, me.s, patch); push(); render() }
+  // CPUの数（カート・ジャンプ走・かくれんぼ）。試合の設定に入れるので全員同じ。ゲームごとに端末へ覚える
+  const cpuCount = (def, min, max) => clamp(me.m.cpus ?? def, min, max);
+  const cpuRow = (def, min, max, note) => { const n = cpuCount(def, min, max); return `<p class="eyebrow">CPUの数</p><div class="row" style="justify-content:center;gap:12px;align-items:center;flex-wrap:nowrap"><button class="btn ghost small" data-act="cpu-n" data-v="${n - 1}" ${n <= min ? "disabled" : ""}>−</button><b style="font-family:var(--display);font-size:22px;white-space:nowrap">${n}人</b><button class="btn ghost small" data-act="cpu-n" data-v="${n + 1}" ${n >= max ? "disabled" : ""}>＋</button></div>${note ? `<p class="muted" style="margin:0">${note}</p>` : ""}` };
   function startMatch(g, extra) {
-    const e = Date.now();
+    const e = Date.now(); { const c0 = ls.get("cpus_" + g); if (c0 != null && c0 !== "" && !(extra && extra.cpus != null)) extra = Object.assign({}, extra || {}, { cpus: Number(c0) }) }
     me.m = Object.assign({ g, e, host: cid, seed: Math.floor(Math.random() * 1e9) }, extra || {});
     me.s = { e };
     ui.draft = ""; ui.hbEntry = "";
@@ -1100,6 +1104,30 @@ html.br-portrait .br-ui { display: none }
     stickEl.addEventListener("pointerup", rel); stickEl.addEventListener("pointercancel", rel);
     return inp;
   }
+  // ボタン配置の変更（荒野・カート・かくれんぼで共通）。位置は画面に対する％と大きさで、ゲームごとに端末へ保存する
+  function layoutEditor(cardEl, ids, key) {
+    let lay = {}; try { lay = JSON.parse(ls.get(key) || "{}") || {} } catch (_) {}
+    const el = (id) => cardEl.querySelector("#" + id);
+    function apply() { for (const id of ids) { const e = el(id); if (!e) continue; const v = lay[id]; Object.assign(e.style, v ? { position: "fixed", left: v.x + "%", top: v.y + "%", right: "auto", bottom: "auto", margin: "0", transform: `translate(-50%,-50%) scale(${v.s})` } : { position: "", left: "", top: "", right: "", bottom: "", margin: "", transform: "" }) } }
+    // いまの画面上の中心を、カードの中の％にする（スマホを縦のまま90度まわして表示しているときも）
+    function centerOf(e) { if (lay[e.id]) return lay[e.id]; const r = e.getBoundingClientRect(), cr = cardEl.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2; return ROT90 ? { x: (cy - cr.top) / cr.height * 100, y: (cr.right - cx) / cr.width * 100, s: 1 } : { x: (cx - cr.left) / cr.width * 100, y: (cy - cr.top) / cr.height * 100, s: 1 } }
+    let layer = null, bar = null, sel = null, drag = null;
+    function close(save) { if (save) ls.set(key, JSON.stringify(lay)); if (layer) layer.remove(); if (bar) bar.remove(); layer = bar = null; cardEl.classList.remove("br-editing", "lay-editing"); ids.forEach((id) => el(id) && el(id).classList.remove("br-sel")) }
+    function select(id) { sel = id; ids.forEach((k) => el(k) && el(k).classList.toggle("br-sel", k === id)); if (bar) { const sl = bar.querySelector("input"); sl.disabled = !id; if (id) sl.value = lay[id].s } }
+    function open() {
+      if (layer) return; cardEl.classList.add("br-editing", "lay-editing"); ids.forEach((id) => { const e = el(id); if (e && (lay[id] || e.getClientRects().length)) lay[id] = centerOf(e) }); apply();
+      layer = document.createElement("div"); layer.className = "br-editlayer"; cardEl.appendChild(layer);
+      bar = document.createElement("div"); bar.className = "br-editbar"; bar.innerHTML = `<b>ボタンをドラッグして動かす</b><label>大きさ <input type="range" min="0.6" max="1.8" step="0.05" value="1" disabled></label><button class="btn ghost small" data-lay="reset">もとにもどす</button><button class="btn small" data-lay="done">完了</button>`; cardEl.appendChild(bar);
+      bar.querySelector("input").addEventListener("input", (e) => { if (!sel) return; lay[sel].s = Number(e.target.value); apply() });
+      layer.addEventListener("pointerdown", (e) => { const hit = ids.find((id) => { const b = el(id); if (!b || !lay[id]) return false; const rc = b.getBoundingClientRect(); return e.clientX >= rc.left && e.clientX <= rc.right && e.clientY >= rc.top && e.clientY <= rc.bottom }); select(hit || null); if (hit) { drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { layer.setPointerCapture(e.pointerId) } catch (_) {} } });
+      layer.addEventListener("pointermove", (e) => { if (!drag || e.pointerId !== drag.id || !sel) return; let dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (ROT90) [dx, dy] = [dy, -dx]; drag.x = e.clientX; drag.y = e.clientY; const v = lay[sel], cw = ROT90 ? cardEl.getBoundingClientRect().height : cardEl.getBoundingClientRect().width, ch = ROT90 ? cardEl.getBoundingClientRect().width : cardEl.getBoundingClientRect().height; v.x = clamp(v.x + dx / cw * 100, 3, 97); v.y = clamp(v.y + dy / ch * 100, 4, 96); apply() });
+      const up = (e) => { if (drag && e.pointerId === drag.id) drag = null }; layer.addEventListener("pointerup", up); layer.addEventListener("pointercancel", up);
+      select(null);
+    }
+    const onClick = (ev) => { const t = ev.target.closest("[data-lay]"); if (!t) return; const k = t.dataset.lay; if (k === "toggle") { if (layer) close(true); else open() } else if (k === "done") close(true); else if (k === "reset") { close(false); lay = {}; ls.set(key, "{}"); apply(); open() } };
+    cardEl.addEventListener("click", onClick); apply();
+    return { get lay() { return lay }, apply, open, close, stop() { close(false); cardEl.removeEventListener("click", onClick) } };
+  }
   function holdBtn(el, onDown, onUp) {
     const st = { down: false };
     el.addEventListener("pointerdown", (e) => { e.preventDefault(); st.down = true; try { el.setPointerCapture(e.pointerId) } catch (_) {} onDown && onDown() });
@@ -1465,10 +1493,13 @@ html.br-portrait .br-ui { display: none }
       let ph = me.s.res != null ? "done" : "idle", d = me.s.res != null ? RUN_LEN : 0, y = 0, vy = 0, jumps = 0, t = 0, cd = 0;
       const fx = { big: 0, fast: 0, slow: 0, poison: 0, stun: 0 };
       let fallT = 0, fallX = 0;
-      let shell = false, atN = 0, seenAt = null, msg = null, lastSend = "", CR = null, atTg = null; const seenAts = {};
+      let shell = false, atN = 0, seenAt = null, msg = null, lastSend = "", atTg = null, myAtSeen = 0; const seenAts = {};
+      const CPU_NAMES = ["タロウ", "ハナ", "ケン", "ミク", "ソウタ"], nC = cpuCount(1, 0, 5);
+      const CRS = Array.from({ length: nC }, (_, k) => ({ k, name: CPU_NAMES[k], d: 0, t: 0, stun: 0, fast: 0, slow: 0, shellIn: 3 + Math.random() * 5, hitObs: new Set(), used: new Set(), at: 0, tg: null, fin: false, res: null, y: 0, sk: .93 + Math.random() * .1 }));
       // 一緒に走る人：同じ招待コードの全員（ひとりのときはコンピューター）
       const RUN_COLS = ["#E5413B", "#3DBE5A", "#F2B233", "#A45BE0", "#FF7A2A", "#FF6FB0", "#2EC4C4"];
-      const runners = () => { const mp = matchPeers(); if (mp.length) return mp.map((p, i) => ({ p, x: peerX(p), st: peerS(p), col: RUN_COLS[i % RUN_COLS.length] })); const op = rtOppPeer(); return op ? [{ p: op, x: op.presence.x, st: oppS(), col: RUN_COLS[0] }] : [] };
+      const cpuEntry = (a, k) => ({ p: { presence: { cid: "cpu" + k, n: a.name } }, x: { d: a.d, y: a.y, sz: 1, at: a.at, tg: a.tg }, st: { res: a.res }, col: ["#8A8E96", "#C8A060", "#7FA0C0", "#B07AB0", "#70A070"][k % 5], cpu: true });
+      const runners = () => { const mp = matchPeers(), L = mp.map((p, i) => ({ p, x: peerX(p), st: peerS(p), col: RUN_COLS[i % RUN_COLS.length] })); const hx = isFirst() ? null : peerX(hostPeer()); const cr = isFirst() ? CRS.map((c) => ({ name: c.name, d: Math.round(c.d), y: Math.round(c.y), at: c.at, tg: c.tg, res: c.res })) : ((hx && hx.cr) || []).map((a) => ({ name: a[5], d: a[0], y: a[1], at: a[2], tg: a[3], res: a[4] })); return [...L, ...cr.map(cpuEntry)] };
       const itemBtn = $("#b-item");
       const jump = () => { if (ph === "run" && jumps < 2 && fallT <= 0) { const p = fx.poison > 0 ? 0.8 : 1; vy = (jumps ? 660 : 790) * p; jumps++ } };
       const throwShell = () => { if (ph === "run" && shell) { shell = false; atN++; const ah = runners().filter((r) => r.x && r.x.d != null && !(r.st && r.st.res != null)).sort((a, b) => (a.x.d > d) - (b.x.d > d) || Math.abs(a.x.d - d) - Math.abs(b.x.d - d)); const tg = ah.find((r) => r.x.d > d) || ah[0]; atTg = tg ? tg.p.presence.cid : null; say(tg && matchPeers().length > 1 ? `${pName(tg.p)}にこうらを投げた！` : "こうらを投げた！", "#7CF59A") } };
@@ -1514,20 +1545,21 @@ html.br-portrait .br-ui { display: none }
           }
         }
       }
-      function cpuRun(dt) {
-        if (!CR) CR = { d: 0, t: 0, stun: 0, fast: 0, slow: 0, shellIn: 2 + Math.random() * 4, hitObs: new Set(), used: new Set(), at: 0, fin: cpu.s.res != null, y: 0 };
+      function cpuRun(dt) { for (const CR of CRS) cpuOne(CR, dt) }
+      function cpuOne(CR, dt) {
         if (CR.fin) return;
         if (ph === "run" || ph === "done") CR.go = true;
-        if (!CR.go) { cpuX({ d: 0, y: 0, sz: 1 }); return }
+        if (!CR.go) return;
         CR.t += dt; CR.stun = Math.max(0, CR.stun - dt); CR.fast = Math.max(0, CR.fast - dt); CR.slow = Math.max(0, CR.slow - dt);
         let m = 1; if (CR.fast > 0) m *= 1.45; if (CR.slow > 0) m *= 0.65; if (CR.stun > 0) m *= 0.25;
-        CR.d = Math.min(RUN_LEN, CR.d + RUN_SPD * m * dt);
+        CR.d = Math.min(RUN_LEN, CR.d + RUN_SPD * m * CR.sk * dt);
         let cy = 0;
         C.obs.forEach((o, i) => { const rel = o.x - CR.d; if (rel < 110 && rel > -o.w - 30 && o.k !== "bird") cy = Math.max(cy, 100 * Math.sin(Math.PI * clamp((110 - rel) / (150 + o.w), 0, 1))); if (rel < 0 && !CR.hitObs.has(i)) { CR.hitObs.add(i); if (Math.random() < 0.13) CR.stun = 1 } });
         C.blocks.forEach((b, i) => { if (b.x - CR.d < 0 && !CR.used.has(i)) { CR.used.add(i); if (Math.random() < 0.5) { const it = pickItem()[0]; if (it === "fast") CR.fast = 4; else if (it === "slow") CR.slow = 4; else if (it === "shell") CR.shellIn = Math.min(CR.shellIn, 1 + Math.random() * 2) } } });
-        CR.shellIn -= dt; if (CR.shellIn <= 0) { CR.at++; CR.shellIn = 8 + Math.random() * 8 }
-        if (CR.d >= RUN_LEN) { CR.fin = true; cpuSet({ res: Math.round(CR.t * 1000) }) }
-        cpuX({ d: Math.round(CR.d), y: Math.round(cy), sz: 1, at: CR.at });
+        // こうら：前を走っている人か、いちばん近い人をねらう
+        CR.shellIn -= dt; if (CR.shellIn <= 0) { const ppl = [{ id: cid, d }, ...matchPeers().map((p) => ({ id: p.presence.cid, d: (peerX(p) || {}).d || 0 }))].filter((o) => o.d > CR.d - 40); if (ppl.length) { ppl.sort((a, b) => Math.abs(a.d - CR.d) - Math.abs(b.d - CR.d)); CR.tg = ppl[0].id; CR.at++ } CR.shellIn = 8 + Math.random() * 8 }
+        if (CR.d >= RUN_LEN) { CR.fin = true; CR.res = Math.round(CR.t * 1000) }
+        CR.y = cy;
       }
       // 描画：走っている自分の後ろから見た画面。奥に向かって道がのびて、障害物が向こうから近づいてくる
       const U = 10, HS = 2.2;
@@ -1602,34 +1634,31 @@ html.br-portrait .br-ui { display: none }
         if (ph === "done") bigText(c, "ゴール！", w / 2, h / 2 - 20, 40, "#FFE14D");
       }
       function frame(dt) {
-        if (cpuActive()) cpuRun(dt);
+        if (isFirst()) cpuRun(dt);
         const RN = runners();
         if (ph === "idle" && allReady()) { ph = "count"; cd = 3 }
         if (ph === "count") { cd -= dt; if (cd <= 0) ph = "run" }
         // こうら：自分がねらわれたときだけ当たる
         for (const r of RN) { const ox = r.x; if (!ox) continue; const id = r.p.presence.cid, at = ox.at || 0; if (seenAts[id] == null) seenAts[id] = at; else if (at > seenAts[id]) { seenAts[id] = at; if (ph === "run" && (ox.tg == null || ox.tg === cid)) gotHit() } }
-        if (CR && atN > (CR.seenMine || 0)) { CR.seenMine = atN; CR.stun = 1.5 }
+        // ホスト：だれかがCPUにこうらを当てたら、そのCPUをよろけさせる
+        if (isFirst()) { const hitCpu = (tg) => { if (typeof tg === "string" && tg.startsWith("cpu")) { const c = CRS[Number(tg.slice(3))]; if (c) c.stun = 1.5 } }; if (atN > myAtSeen) { myAtSeen = atN; hitCpu(atTg) } for (const p of matchPeers()) { const x = peerX(p); if (!x) continue; const id = "h" + p.presence.cid; if (seenAts[id] == null) seenAts[id] = x.at || 0; else if ((x.at || 0) > seenAts[id]) { seenAts[id] = x.at; hitCpu(x.tg) } } }
         if (ph === "run") { step(dt); if (d >= RUN_LEN) { ph = "done"; setS({ res: Math.round(t * 1000) }) } }
         if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
         itemBtn.disabled = !shell; itemBtn.textContent = shell ? "こうらを投げる" : "アイテムなし";
-        const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN, tg: atTg }, js = JSON.stringify(out);
+        const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN, tg: atTg }; if (isFirst() && CRS.length) out.cr = CRS.map((c) => [Math.round(c.d), Math.round(c.y), c.at, c.tg, c.res, c.name]); const js = JSON.stringify(out);
         if (js !== lastSend) { lastSend = js; sendX(out) }
         draw();
         const fmt = (ms) => `${(ms / 1000).toFixed(1)}秒`;
         const mp = matchPeers();
-        if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${mp.length > 1 ? `${mp.length + 1}人で走ります。全員が押すと同時にスタート` : opp() ? "ふたりとも押すと同時にスタート（同じ招待コードなら何人でも）" : "押すとスタート"}</p>`);
+        if (ph === "idle" && !me.s.rdy) setMsg(`${isFirst() ? cpuRow(1, 0, 5) : `<p class="muted" style="margin:0">CPU ${nC}人</p>`}<button class="btn" data-act="act-ready">準備OK</button><p class="muted">${mp.length ? `${mp.length + 1}人で走ります。全員が押すと同時にスタート` : "押すとスタート（同じ招待コードなら何人でも）"}</p>`);
         else if (ph === "idle") { const wait = mp.length ? mp.filter((p) => !(peerS(p) || {}).rdy).map((p) => esc(pName(p))).join("・") : esc(oppName()); setMsg(`<p class="wait">${wait ? wait + "の準備を待っています" : "まもなくスタート"}</p>`) }
-        else if (ph === "done" && mp.length > 1) {
-          // 3人以上：タイムの順に並べる
-          const rows = [{ n: "あなた", t: me.s.res, me: true }, ...mp.map((p) => ({ n: pName(p), t: (peerS(p) || {}).res }))].sort((a, b) => (a.t ?? 1e12) - (b.t ?? 1e12)), allIn = rows.every((x) => x.t != null), rank = rows.findIndex((x) => x.me) + 1;
+        else if (ph === "done" && RN.length) {
+          // 一緒に走った人とCPUを、タイムの順に並べる
+          const rows = [{ n: "あなた", t: me.s.res, me: true }, ...RN.map((r) => ({ n: r.cpu ? `${r.p.presence.n}（CPU）` : pName(r.p), t: (r.st || {}).res }))].sort((a, b) => (a.t ?? 1e12) - (b.t ?? 1e12)), allIn = rows.every((x) => x.t != null), rank = rows.findIndex((x) => x.me) + 1;
           setMsg(`<p class="verdict ${rank === 1 && allIn ? "good" : ""}">${allIn ? `${rank}位` : "ゴール！"}　${fmt(me.s.res)}</p><ol class="tc-rank">${rows.map((x) => `<li class="${x.me ? "me" : ""}"><b>${esc(x.n)}</b><span>${x.t != null ? fmt(x.t) : "走っています"}</span></li>`).join("")}</ol>${allIn ? againBtns("run") : ""}`);
         }
-        else if (ph === "done") {
-          const mine = me.s.res, os = mp.length ? peerS(mp[0]) : oppS();
-          if (!opp()) setMsg(`<p class="verdict good">ゴール ${fmt(mine)}</p>${againBtns("run")}`);
-          else if (os && os.res != null) setMsg(`<p class="verdict ${mine <= os.res ? "good" : "bad"}">${mine < os.res ? "あなたの勝ち！" : mine > os.res ? "あなたの負け…" : "引き分け！"}　${fmt(mine)} 対 ${fmt(os.res)}</p>${againBtns("run")}`);
-          else setMsg(`<p class="wait">ゴール ${fmt(mine)}。${esc(oppName())}はまだ走っています</p>`);
-        } else setMsg("");
+        else if (ph === "done") setMsg(`<p class="verdict good">ゴール ${fmt(me.s.res)}</p>${againBtns("run")}`);
+        else setMsg("");
       }
       const stop = loop(frame);
       return () => { stop(); removeEventListener("keydown", kd) };
@@ -2279,7 +2308,7 @@ html.br-portrait .br-ui { display: none }
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("カートレース", `${KT_LAPS}周で先にゴールしたら勝ち`)}
         <section class="card act kt" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="レースのコース"></canvas><div id="act-msg"></div>
-        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="kpad" style="z-index:3"><div class="grp"><button class="kbtn" id="k-left" aria-label="左へ">◀</button><button class="kbtn" id="k-right" aria-label="右へ">▶</button></div>
           <div class="grp col"><button class="kbtn small" id="k-item">アイテム</button><button class="kbtn" id="k-drift" style="font-size:14px">ドリフト</button></div></div>
         <p class="muted">横画面であそびます。コースはスタート前に選べます。アクセルは自動。◀ ▶ で曲がります。「ドリフト」を押しながら曲がるとよく曲がり、長めに曲がってから離すとダッシュ（火花が青→オレンジでもっと長く）。道の青い矢印（ダッシュパネル）にのると加速。黄色と黒のジャンプ台でとんだら、空中で「ドリフト」を押すとトリック（着地でダッシュ）。虹色の大ジャンプ台ではグライダーが開いて遠くまで飛べます（◀ ▶ で向きを変えられる）。虹色の「？」の箱でアイテム：ターボ（加速）・シールド（当たっても平気で少し速い）・バナナ（後ろに置く）・ロケット（コースにそって前へ飛ぶ）・ジェット（自動でコースを猛スピードで進み、ぶつかった相手をはね飛ばす）。芝生や砂は遅く、外側のかべにぶつかると減速します。パソコンは ← → ・Shift（ドリフト）・スペース（アイテム）。</p></section></section>`;
@@ -2323,7 +2352,7 @@ html.br-portrait .br-ui { display: none }
     // 人は何人でも（同じ招待コード）。ホストが0番、ほかは cid の順。足りない分はコンピューター
     let meSlot = host ? 0 : 1; const K = newKart(meSlot, meSlot % KT_COLORS.length); K.look = ktMyLook();
     const placeMe = () => { const si = Math.max(0, humList().indexOf(cid)); if (si === meSlot) return; meSlot = si; Object.assign(K, slot(si)); K.col = si % KT_COLORS.length };
-    let cpus = []; const nCpu = () => Math.max(1, 4 - humList().length);
+    let cpus = []; const nCpu = () => cpuCount(Math.max(1, 4 - humList().length), 0, 7);
     function makeCpus() { cpus = []; const H = humList().length, n = nCpu(); for (let i = 0; i < n; i++) { const kk = newKart(H + i, (H + i) % KT_COLORS.length); kk.skill = .86 + Math.random() * .08; kk.useAt = 0; kk.id = i; kk.look = { ch: Math.floor(Math.random() * 10), co: Math.floor(Math.random() * 10), ca: Math.floor(Math.random() * 10) }; cpus.push(kk) } }
     if (host) makeCpus();
     let ph = me.s.res != null ? "done" : "idle", cd = 0, raceT = 0, lastSend = "", gFin = {}, finRank = null, picking = false; const smooth = {};
@@ -2555,7 +2584,7 @@ html.br-portrait .br-ui { display: none }
         const L = K.look, grid = (k, names, sw) => `<div class="kt-pick">${names.map((n, i) => `<button class="chipbtn ${L[k] === i ? "on" : ""}" data-kl="${k}" data-i="${i}">${sw ? `<i style="background:${KT_PAINT[i][1]}"></i>` : ""}${n}</button>`).join("")}</div>`;
         setMsg(`<p class="eyebrow">キャラ</p>${grid("ch", KT_CHARS)}<p class="eyebrow">色</p>${grid("co", KT_PAINT.map((x) => x[0]), true)}<p class="eyebrow">カート</p>${grid("ca", KT_BODIES)}<p class="muted" style="margin:0">見た目だけで、速さや曲がりやすさはみんな同じです</p><button class="btn" data-kl="done">決定</button>`);
       }
-      else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn ghost" data-kl="open">キャラ・色・カートを選ぶ（${esc(KT_CHARS[K.look.ch])}・${esc(KT_PAINT[K.look.co][0])}・${esc(KT_BODIES[K.look.ca])}）</button><p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow">アイテム</p><div class="stages" style="grid-template-columns:1fr 1fr"><button class="chipbtn ${me.m.noItem ? "" : "on"}" data-act="kart-items" data-v="on">あり</button><button class="chipbtn ${me.m.noItem ? "on" : ""}" data-act="kart-items" data-v="off">なし（運転だけで勝負）</button></div>
+      else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn ghost" data-kl="open">キャラ・色・カートを選ぶ（${esc(KT_CHARS[K.look.ch])}・${esc(KT_PAINT[K.look.co][0])}・${esc(KT_BODIES[K.look.ca])}）</button><p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>${cpuRow(Math.max(1, 4 - humList().length), 0, 7)}<p class="eyebrow">アイテム</p><div class="stages" style="grid-template-columns:1fr 1fr"><button class="chipbtn ${me.m.noItem ? "" : "on"}" data-act="kart-items" data-v="on">あり</button><button class="chipbtn ${me.m.noItem ? "on" : ""}" data-act="kart-items" data-v="off">なし（運転だけで勝負）</button></div>
           <p class="muted" style="margin:0">${mps.length ? `${mps.length + 1}人（${mps.map((p) => esc(pName(p))).join("・")}・あなた）。全員が押すと同時にスタート。コースを変えると全員が同じコースになります` : "押すとスタート。同じ招待コードの人は何人でも一緒に走れます"}</p><button class="btn" data-act="act-ready">準備OK</button>`);
       else if (ph === "idle") { const wait = mps.filter((p) => !(peerS(p) || {}).rdy).map((p) => esc(pName(p))); setMsg(`<p class="wait">${wait.length ? wait.join("・") + "の準備を待っています" : "まもなくスタート"}</p>`) }
       else if (ph === "done" && me.s.res != null) {
@@ -2570,10 +2599,10 @@ html.br-portrait .br-ui { display: none }
       } else setMsg("");
     }
     const onPick = (ev) => { const t = ev.target.closest("[data-kl]"); if (!t) return; const k = t.dataset.kl; if (k === "open") picking = true; else if (k === "done") picking = false; else { K.look = Object.assign({}, K.look, { [k]: Number(t.dataset.i) }); ls.set("ktLook", JSON.stringify(K.look)) } };
-    cardEl.addEventListener("click", onPick);
+    cardEl.addEventListener("click", onPick); const LE = layoutEditor(cardEl, ["k-left", "k-right", "k-item", "k-drift"], "ktLayout");
     const stopLoop = loop(frame);
     return () => {
-      stopLoop(); actKey = null; cardEl.removeEventListener("pointerdown", onTouchFull); cardEl.removeEventListener("click", onPick); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      stopLoop(); actKey = null; LE.stop(); cardEl.removeEventListener("pointerdown", onTouchFull); cardEl.removeEventListener("click", onPick); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); if (mm !== brCharMat) mm.dispose() }) });
       scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
     };
@@ -3383,7 +3412,7 @@ html.br-portrait .br-ui { display: none }
     shell() {
       return `<section style="display:flex;flex-direction:column;gap:12px">${topBar("かくれんぼ", "物に変身して隠れる・撃って探す")}
         <section class="card act hd" style="padding:0;position:relative"><canvas id="gl" style="position:absolute;left:0;top:0;border-radius:0"></canvas><canvas id="cv" style="position:absolute;left:0;top:0;z-index:1;border-radius:0" aria-label="かくれんぼの3Dマップ"></canvas><div id="act-msg"></div>
-        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="kpad" style="z-index:3"><div class="grp"><div class="stick" id="stick"><div class="knob" id="knob"></div></div></div>
           <div class="grp col"><button class="kbtn small" id="b-jump">ジャンプ</button><button class="kbtn small" id="b-dash">ダッシュ</button><button class="kbtn big" id="b-act" style="font-size:17px;line-height:1.15">撃つ</button></div></div>
         <p class="muted">横画面であそびます。左下のスティックで歩き（大きくたおすか「ダッシュ」を押すと走る）、画面をなぞると向きが変わります。2ラウンドで鬼を交代。<b>隠れる番</b>：まん中の点を近くの物（ゴミ箱・ベンチ・たる・ソファなど）に合わせて「へんしん」すると、その物になれます。同じ物のとなりでじっとしていると見つかりにくい。動くとばれやすく、ときどき「ピーッ」と音が出ます。3回撃たれると見つかります。<b>鬼の番</b>：はじめの${PH_HIDE}秒は目かくし。あやしい物をねらって「撃つ」。本物の物を撃つと体力が減り、0になると負け。時間内に全員見つけたら鬼の勝ち。パソコンは WASD で歩く・←→で向き・スペースでへんしん／撃つ・J でジャンプ。</p></section></section>`;
@@ -3403,6 +3432,7 @@ html.br-portrait .br-ui { display: none }
     document.documentElement.classList.add("br-on");
     const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
     lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
+    const LE = layoutEditor(cardEl, ["stick", "b-jump", "b-dash", "b-act"], "hdLayout");
     const mobile = matchMedia("(pointer: coarse)").matches;
     const Q = GFX(), renderer = new T.WebGLRenderer({ canvas: gl, antialias: Q.aa, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, Q.pr));
@@ -3429,7 +3459,7 @@ html.br-portrait .br-ui { display: none }
     scene.add(sun, sun.target);
     const W3 = phBuild(M, scene);
     // ---- 登場人物：0=ホスト、1=あいて（ふたりのとき）かCPU、2・3=CPU
-    const E = [0, 1, 2, 3].map((i) => ({ i, x: M.spawnHide.x + (i - 1.5) * 1.2, z: M.spawnHide.z, y: 0, vy: 0, yaw: Math.PI, form: -1, hp: 100, caught: false, tp: 0, mv: false, taunt: 0, tauntAt: 99, path: null, pathT: 0, goal: null, plan: null, sus: {}, fireCd: 0, decT: 0, inv: null, wander: null, catchT: null, hitT: 0, lastHp: 100 }));
+    const NE = clamp((realOppPeer() ? 2 : 1) + cpuCount(3, 0, 5), 2, 7), E = Array.from({ length: NE }, (_, i) => i).map((i) => ({ i, x: M.spawnHide.x + (i - 1.5) * 1.2, z: M.spawnHide.z, y: 0, vy: 0, yaw: Math.PI, form: -1, hp: 100, caught: false, tp: 0, mv: false, taunt: 0, tauntAt: 99, path: null, pathT: 0, goal: null, plan: null, sus: {}, fireCd: 0, decT: 0, inv: null, wander: null, catchT: null, hitT: 0, lastHp: 100 }));
     const myIdx = host ? 0 : 1, two = () => !!realOppPeer(), isHuman = (i) => i === 0 || (i === 1 && two());
     const nameOf = (i) => (i === myIdx ? "あなた" : isHuman(i) ? oppName() : "CPU");
     let S = { round: 0, ph: "lobby", t: 0, seeker: 0, res: [], msg: "", msgT: 0 }, fxList = [], fxId = 0, lastGuestShot = 0, seenFx = 0, seenTp = -1, lastSend = "";
@@ -3586,7 +3616,7 @@ html.br-portrait .br-ui { display: none }
         if (left === 0 || S.t <= 0 || hn.hp <= 0) {
           const hh = two() ? (S.seeker === 0 ? 1 : 0) : S.seeker === 0 ? null : 0;
           if (hn.hp <= 0) { S.msg = "鬼の体力がなくなった！"; S.msgT = 2.5 }
-          S.res = [...S.res, { seeker: S.seeker, caught: 3 - left, total: 3, hh, hhCaught: hh != null ? E[hh].caught : null, hhT: hh != null ? E[hh].catchT : null, dead: hn.hp <= 0 }];
+          S.res = [...S.res, { seeker: S.seeker, caught: E.length - 1 - left, total: E.length - 1, hh, hhCaught: hh != null ? E[hh].caught : null, hhT: hh != null ? E[hh].catchT : null, dead: hn.hp <= 0 }];
           S.ph = "rres"; S.t = 5;
         }
       }
@@ -3689,7 +3719,7 @@ html.br-portrait .br-ui { display: none }
     }
     function panel() {
       if (S.ph === "lobby") {
-        if (!me.s.rdy) setMsg(`<p class="eyebrow">ステージ</p><div class="stages">${PH_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="hide-stage" data-i="${i}">${st.name}</button>`).join("")}</div><button class="btn" data-act="act-ready">準備OK</button><p class="muted">${two() ? "ふたりとも押すとスタート。1ラウンド目は" + (host ? "あなた" : esc(oppName())) + "が鬼" : "1ラウンド目はあなたが鬼（CPU 3人を探す）、2ラウンド目はあなたが物に変身して隠れる"}</p>`);
+        if (!me.s.rdy) setMsg(`${host ? cpuRow(3, two() ? 0 : 1, 5) : ""}<p class="eyebrow">ステージ</p><div class="stages">${PH_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="hide-stage" data-i="${i}">${st.name}</button>`).join("")}</div><button class="btn" data-act="act-ready">準備OK</button><p class="muted">${two() ? "ふたりとも押すとスタート。1ラウンド目は" + (host ? "あなた" : esc(oppName())) + "が鬼" : "1ラウンド目はあなたが鬼（CPU ${NE - 1}人を探す）、2ラウンド目はあなたが物に変身して隠れる"}</p>`);
         else setMsg(`<p class="wait">${esc(oppName())}の準備を待っています</p>`);
       } else if (S.ph === "rres") { const r = S.res[S.res.length - 1]; setMsg(`<p class="verdict">${roundText(r, S.res.length - 1)}</p><p class="muted">${S.round === 0 ? "まもなく鬼を交代します" : ""}</p>`) }
       else if (S.ph === "end") {
@@ -3752,7 +3782,7 @@ html.br-portrait .br-ui { display: none }
       hud(dt); panel();
     });
     return () => {
-      stopLoop(); removeEventListener("keydown", onKey); cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      stopLoop(); removeEventListener("keydown", onKey); LE.stop(); cardEl.removeEventListener("pointerdown", onTouchFull); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -3987,7 +4017,7 @@ html.br-portrait .br-ui { display: none }
           <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
         <div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
-        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-br="layout">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
+        <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックの上で前・下でバック・左右でハンドル、人をひくとダメージ、運転しながら撃てる、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
     },
@@ -4252,27 +4282,11 @@ html.br-portrait .br-ui { display: none }
     const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
     lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     // ---- ボタンの配置と大きさ（端末に保存）
-    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-med", "br-slots", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
-    const hudBox = (id) => { const el = $("#" + id), v = lay[id]; if (!el) return { x: 0, y: 0, w: 100, h: 20, s: 1 }; if (v) { const bw = el.offsetWidth * v.s, bh = el.offsetHeight * v.s; return { x: v.x / 100 * cardEl.clientWidth - bw / 2, y: v.y / 100 * cardEl.clientHeight - bh / 2, w: bw, h: bh, s: v.s } } return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight, s: 1 } };
-    let lay = {}; try { lay = JSON.parse(ls.get("brLayout") || "{}") || {} } catch (_) {}
-    function applyLay() { for (const id of LAY_IDS) { const el = $("#" + id); if (!el) continue; const v = lay[id]; Object.assign(el.style, v ? { left: v.x + "%", top: v.y + "%", right: "auto", bottom: "auto", transform: `translate(-50%,-50%) scale(${v.s})` } : { left: "", top: "", right: "", bottom: "", transform: "" }) } }
-    function centerOf(el) { if (lay[el.id]) return lay[el.id]; const W2 = cardEl.clientWidth, H2 = cardEl.clientHeight, cx = el.id === "br-slots" ? el.offsetLeft : el.offsetLeft + el.offsetWidth / 2; return { x: cx / W2 * 100, y: (el.offsetTop + el.offsetHeight / 2) / H2 * 100, s: 1 } }
-    applyLay();
-    let editLayer = null, editBar = null, selId = null, drag = null;
-    function closeEdit(save) { if (save) ls.set("brLayout", JSON.stringify(lay)); if (editLayer) editLayer.remove(); if (editBar) editBar.remove(); editLayer = editBar = null; cardEl.classList.remove("br-editing"); LAY_IDS.forEach((id) => $("#" + id) && $("#" + id).classList.remove("br-sel")) }
-    function selectId(id) { selId = id; LAY_IDS.forEach((k) => $("#" + k) && $("#" + k).classList.toggle("br-sel", k === id)); if (editBar) { const sl = editBar.querySelector("input"); sl.disabled = !id; if (id) sl.value = lay[id].s } }
-    function openEdit() {
-      if (editLayer) return; LAY_IDS.forEach((id) => { const el = $("#" + id); if (el) lay[id] = centerOf(el) }); applyLay(); cardEl.classList.add("br-editing");
-      editLayer = document.createElement("div"); editLayer.className = "br-editlayer"; cardEl.appendChild(editLayer);
-      editBar = document.createElement("div"); editBar.className = "br-editbar"; editBar.innerHTML = `<b>ボタンをドラッグして動かす</b><label>大きさ <input type="range" min="0.6" max="1.8" step="0.05" value="1" disabled></label><button class="btn ghost small" data-br="lay-reset">もとにもどす</button><button class="btn small" data-br="lay-done">完了</button>`; cardEl.appendChild(editBar);
-      editBar.querySelector("input").addEventListener("input", (e) => { if (!selId) return; lay[selId].s = Number(e.target.value); applyLay() });
-      editLayer.addEventListener("pointerdown", (e) => { const hit = LAY_IDS.find((id) => { const el = $("#" + id); if (!el) return false; const rc = el.getBoundingClientRect(); return e.clientX >= rc.left && e.clientX <= rc.right && e.clientY >= rc.top && e.clientY <= rc.bottom }); selectId(hit || null); if (hit) { drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; try { editLayer.setPointerCapture(e.pointerId) } catch (_) {} } });
-      editLayer.addEventListener("pointermove", (e) => { if (!drag || e.pointerId !== drag.id || !selId) return; let dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (ROT90) [dx, dy] = [dy, -dx]; drag.x = e.clientX; drag.y = e.clientY; const v = lay[selId]; v.x = clamp(v.x + dx / cardEl.clientWidth * 100, 3, 97); v.y = clamp(v.y + dy / cardEl.clientHeight * 100, 4, 96); applyLay() });
-      const up = (e) => { if (drag && e.pointerId === drag.id) drag = null }; editLayer.addEventListener("pointerup", up); editLayer.addEventListener("pointercancel", up);
-      selectId(null);
-    }
+    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-med", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
+    const LE = layoutEditor(cardEl, LAY_IDS, "brLayout");
+    const hudBox = (id) => { const el = $("#" + id), v = LE.lay[id]; if (!el) return { x: 0, y: 0, w: 100, h: 20, s: 1 }; if (v) { const bw = el.offsetWidth * v.s, bh = el.offsetHeight * v.s; return { x: v.x / 100 * cardEl.clientWidth - bw / 2, y: v.y / 100 * cardEl.clientHeight - bh / 2, w: bw, h: bh, s: v.s } } return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight, s: 1 } };
     const onClick = (ev) => { const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
-      const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "look-open") picking = true; else if (k === "look-done") picking = false; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "start" && host) start(); else if (k === "watch") watching = true };
+      const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "look-open") picking = true; else if (k === "look-done") picking = false; if (k === "land") lockLand(); if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
     // ---- 車（オリジナルのデザイン）。乗っている人の画面が動かし、ホストがまとめて全員に送る
@@ -5063,6 +5077,7 @@ html.br-portrait .br-ui { display: none }
     else if (act === "br-size") { const i = Number(t.dataset.i); ls.set("brSize", i); if (i !== (me.m.size || 0)) startMatch("br", { stage: me.m.stage || 0, size: i }) }
     else if (act === "hide-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("hide", { stage: i }) }
     else if (act === "kart-stage") { const i = Number(t.dataset.i); ls.set("ktStage", i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i, noItem: !!me.m.noItem }) }
+    else if (act === "cpu-n") { const v = Number(t.dataset.v), keep = {}; for (const k of ["stage", "size", "noItem"]) if (me.m[k] != null) keep[k] = me.m[k]; ls.set("cpus_" + me.m.g, v); startMatch(me.m.g, Object.assign(keep, { cpus: v })) }
     else if (act === "kart-items") { const v = t.dataset.v === "off"; ls.set("ktNoItem", v ? "1" : "0"); if (v !== !!me.m.noItem) startMatch("kart", { stage: me.m.stage || 0, noItem: v }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
     else if (act === "code-join") joinCode(ui.codeDraft || ($("#code-input") || {}).value);
@@ -5116,7 +5131,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1945";
+  const APP_VER = "1030-1953";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
