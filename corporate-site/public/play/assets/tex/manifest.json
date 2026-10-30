@@ -1,0 +1,92 @@
+{
+ "grass": {
+  "src": "leafy_grass",
+  "col": "grass_col.webp",
+  "nor": "grass_nor.webp",
+  "rgh": "grass_rgh.webp"
+ },
+ "grass2": {
+  "src": "aerial_grass_rock",
+  "col": "grass2_col.webp",
+  "nor": "grass2_nor.webp",
+  "rgh": "grass2_rgh.webp"
+ },
+ "dirt": {
+  "src": "forest_ground_04",
+  "col": "dirt_col.webp",
+  "nor": "dirt_nor.webp",
+  "rgh": "dirt_rgh.webp"
+ },
+ "rock": {
+  "src": "rock_face_03",
+  "col": "rock_col.webp",
+  "nor": "rock_nor.webp",
+  "rgh": "rock_rgh.webp"
+ },
+ "snow": {
+  "src": "snow_02",
+  "col": "snow_col.webp",
+  "nor": "snow_nor.webp",
+  "rgh": "snow_rgh.webp"
+ },
+ "sand": {
+  "src": "coast_sand_rocks_02",
+  "col": "sand_col.webp",
+  "nor": "sand_nor.webp",
+  "rgh": "sand_rgh.webp"
+ },
+ "asphalt": {
+  "src": "asphalt_02",
+  "col": "asphalt_col.webp",
+  "nor": "asphalt_nor.webp",
+  "rgh": "asphalt_rgh.webp"
+ },
+ "brick": {
+  "src": "red_brick_03",
+  "col": "brick_col.webp",
+  "nor": "brick_nor.webp",
+  "rgh": "brick_rgh.webp"
+ },
+ "plaster": {
+  "src": "painted_plaster_wall",
+  "col": "plaster_col.webp",
+  "nor": "plaster_nor.webp",
+  "rgh": "plaster_rgh.webp"
+ },
+ "concrete": {
+  "src": "concrete_floor_worn_001",
+  "col": "concrete_col.webp",
+  "nor": "concrete_nor.webp",
+  "rgh": "concrete_rgh.webp"
+ },
+ "roof": {
+  "src": "clay_roof_tiles_02",
+  "col": "roof_col.webp",
+  "nor": "roof_nor.webp",
+  "rgh": "roof_rgh.webp"
+ },
+ "roof2": {
+  "src": "grey_roof_tiles",
+  "col": "roof2_col.webp",
+  "nor": "roof2_nor.webp",
+  "rgh": "roof2_rgh.webp"
+ },
+ "wood": {
+  "src": "weathered_brown_planks",
+  "col": "wood_col.webp",
+  "nor": "wood_nor.webp",
+  "rgh": "wood_rgh.webp"
+ },
+ "bark": {
+  "src": "bark_brown_02",
+  "col": "bark_col.webp",
+  "nor": "bark_nor.webp",
+  "rgh": "bark_rgh.webp"
+ },
+ "gravel": {
+  "src": "rocky_trail",
+  "col": "gravel_col.webp",
+  "nor": "gravel_nor.webp",
+  "rgh": "gravel_rgh.webp"
+ }
+}
