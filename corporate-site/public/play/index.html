@@ -618,6 +618,8 @@ html.br-portrait .br-ui { display: none }
   const humList = () => [me.m.host, ...[cid, ...matchPeers().map((p) => p.presence.cid)].filter((x) => x !== me.m.host).sort()];
   const allReady = () => !!me.s.rdy && matchPeers().every((p) => { const st = peerS(p); return st && st.rdy }) && (matchPeers().length || !opp() || (oppS() && oppS().rdy));
   const isFirst = () => me.m.host === cid;
+  // ホストの時計の今の時刻（ミリ秒）。スタートの合図とタイムをこれで計ると、全員の画面で同じになる
+  const hostNow = () => { if (isFirst()) return Date.now(); const hp = hostPeer(); return Date.now() + (hp && typeof hp.off === "number" ? hp.off : 0) };
   const oppName = () => { const n = opp() && opp().n; return !n || n === myName || n === "プレイヤー" ? "あいて" : n };
 
   // ---------- rendering ----------
@@ -1870,13 +1872,15 @@ html.br-portrait .br-ui { display: none }
       function frame(dt) {
         if (isFirst()) cpuRun(dt);
         const RN = runners();
-        if (ph === "idle" && allReady()) { ph = "count"; cd = 3 }
-        if (ph === "count") { cd -= dt; if (cd <= 0) ph = "run" }
+        if (isFirst() && ph === "idle" && allReady() && !me.s.go) setS({ go: Date.now() + 3300 });
+        const goAt = (isFirst() ? me.s : peerS(hostPeer()) || {}).go;
+        if (ph === "idle" && goAt) { ph = "count"; cd = 3 }
+        if (ph === "count") { cd = (goAt - hostNow()) / 1000; if (cd <= 0) ph = "run" }
         // こうら：自分がねらわれたときだけ当たる
         for (const r of RN) { const ox = r.x; if (!ox) continue; const id = r.p.presence.cid, at = ox.at || 0; if (seenAts[id] == null) seenAts[id] = at; else if (at > seenAts[id]) { seenAts[id] = at; if (ph === "run" && (ox.tg == null || ox.tg === cid)) gotHit() } }
         // ホスト：だれかがCPUにこうらを当てたら、そのCPUをよろけさせる
         if (isFirst()) { const hitCpu = (tg) => { if (typeof tg === "string" && tg.startsWith("cpu")) { const c = CRS[Number(tg.slice(3))]; if (c) c.stun = 1.5 } }; if (atN > myAtSeen) { myAtSeen = atN; hitCpu(atTg) } for (const p of matchPeers()) { const x = peerX(p); if (!x) continue; const id = "h" + p.presence.cid; if (seenAts[id] == null) seenAts[id] = x.at || 0; else if ((x.at || 0) > seenAts[id]) { seenAts[id] = x.at; hitCpu(x.tg) } } }
-        if (ph === "run") { step(dt); if (d >= RUN_LEN) { ph = "done"; setS({ res: Math.round(t * 1000) }) } }
+        if (ph === "run") { step(dt); if (d >= RUN_LEN) { ph = "done"; setS({ res: Math.max(1, Math.round(goAt ? hostNow() - goAt : t * 1000)) }) } }
         if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
         itemBtn.disabled = !shell; itemBtn.textContent = shell ? "こうらを投げる" : "アイテムなし";
         const out = { d: Math.round(d), y: Math.round(y), sz: scale(), at: atN, tg: atTg }; if (isFirst() && CRS.length) out.cr = CRS.map((c) => [Math.round(c.d), Math.round(c.y), c.at, c.tg, c.res, c.name]); const js = JSON.stringify(out);
@@ -2768,7 +2772,7 @@ html.br-portrait .br-ui { display: none }
       if (ph === "count") { const lit = Math.min(3, Math.floor(3 - cd) + 1); c.fillStyle = "rgba(20,18,42,.85)"; c.fillRect(w / 2 - 80, h * .22, 160, 52); for (let i = 0; i < 3; i++) { c.fillStyle = i < lit ? "#FF2A2A" : "#3A2A2A"; c.beginPath(); c.arc(w / 2 - 50 + i * 50, h * .22 + 26, 17, 0, 7); c.fill() } }
       if (ph === "race" && raceT < 1.2) bigText(c, "GO!", w / 2, h * .28, 56, "#7CF59A");
       if (msg) bigText(c, msg.text, w / 2, h * .2, 22, msg.col);
-      if (K.fin) bigText(c, finRank ? `${finRank}位でゴール！` : "ゴール！", w / 2, h * .3, 32, "#FFE14D");
+      if (K.fin) bigText(c, finRank ? `${finRank}位でゴール！` : "ゴール！ 全員がゴールしたら順位が決まります", w / 2, h * .3, finRank ? 32 : 20, "#FFE14D");
       if (K.lap === KT_LAPS && !K.fin && ph === "race" && K.idx < 60) bigText(c, "ファイナルラップ！", w / 2, h * .34, 22, "#FFB4A8");
     }
     const engine = SND.loop("engine"), ktSnd = { lap: 0 };
@@ -2777,9 +2781,11 @@ html.br-portrait .br-ui { display: none }
       const mps = matchPeers(), hp = host ? null : hostPeer(), hx = peerX(hp), hs = host ? me.s : peerS(hp) || {};
       const ageOf = (p) => Math.min(.2, Math.max(0, (Date.now() - p.updatedAt) / 1000));
       if (ph === "idle") placeMe();
-      if (ph === "idle" && allReady()) { ph = "count"; cd = 3; if (host) makeCpus() }
-      if (ph === "count") { const c0 = Math.ceil(cd); cd -= dt; if (Math.ceil(cd) !== c0 && cd > 0) SND.play("count"); if (cd <= 0) { ph = "race"; SND.play("go") } }
-      if (ph === "race" || ph === "done") raceT += dt; else raceT += 0;
+      if (host && ph === "idle" && allReady() && !me.s.go) setS({ go: Date.now() + 3300 });
+      const goAt = (host ? me.s : peerS(hostPeer()) || {}).go;
+      if (ph === "idle" && goAt) { ph = "count"; cd = 3; if (host) makeCpus() }
+      if (ph === "count") { const c0 = Math.ceil(cd); cd = (goAt - hostNow()) / 1000; if (Math.ceil(cd) !== c0 && cd > 0 && cd < 3) SND.play("count"); if (cd <= 0) { ph = "race"; SND.play("go") } }
+      if ((ph === "race" || ph === "done") && goAt) raceT = Math.max(raceT, (hostNow() - goAt) / 1000);
       // 音：エンジン（速さで高さが変わる）・ダッシュ・アイテム・スリップ・着地・周回
       { const W = ktSnd; engine.set(ph === "idle" ? .3 : K.fin ? .4 : 1, clamp((K.v || 0) / KT_VMAX, 0, 1.4));
         if ((K.boost > 0 || K.jet > 0) && !W.b) SND.play("boost"); W.b = K.boost > 0 || K.jet > 0;
@@ -2814,7 +2820,7 @@ html.br-portrait .br-ui { display: none }
       // 順位：それぞれが自分のスタートから計ったゴールのタイム（コンピューターはホストが計る）を全員の画面で同じように並べる。通信の遅れで順位がずれない
       if (K.fin && me.s.res == null) setS({ res: Math.round(K.fin * 1000) });
       if (host) { const ckf = cpus.map((kk) => (kk.fin ? Math.round(kk.fin * 1000) : null)); if (JSON.stringify(ckf) !== JSON.stringify(me.s.ckf || [])) setS({ ckf }) }
-      const rk = finalRanks(); finRank = rk[cid] || null;
+      const rk = finalRanks(), hsF = host ? me.s : peerS(hostPeer()) || {}; finRank = rk[cid] && [me.s, ...matchPeers().map((p) => peerS(p) || {})].every((st) => st.res != null) && (hsF.ckf || []).every((t) => t != null) && (hsF.ckf || []).length === (host ? cpus.length : guestCpus.length) ? rk[cid] : null;
       if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
       const canUse = K.item && !(K.roul > 0 && K.roulSlot !== 2); if (me.m.noItem && itemBtn.style.display !== "none") itemBtn.style.display = "none"; itemBtn.textContent = canUse ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !canUse;
       const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0, Math.round(K.h * 10), (K.glide ? 1 : 0) | (K.jet > 0 ? 2 : 0), K.col, ktLookCode(K.look)], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
@@ -2833,9 +2839,9 @@ html.br-portrait .br-ui { display: none }
         const rk = finalRanks(), mine = rk[cid], t = (me.s.res / 1000).toFixed(1);
         if (mps.length) {
           const rows = [[cid, "あなた"], ...mps.map((p) => [p.presence.cid, pName(p)])].map(([id, n]) => ({ n, r: rk[id] })).sort((a, b) => (a.r ?? 99) - (b.r ?? 99)), allIn = rows.every((x) => x.r != null);
-          const list = `<ol class="tc-rank">${rows.map((x) => `<li class="${x.n === "あなた" ? "me" : ""}"><b>${esc(x.n)}</b><span>${x.r != null ? x.r + "位" : "走っています"}</span></li>`).join("")}</ol>`;
+          const list = `<ol class="tc-rank">${rows.map((x) => `<li class="${x.n === "あなた" ? "me" : ""}"><b>${esc(x.n)}</b><span>${x.r != null ? (allIn ? x.r + "位" : "ゴール") : "走っています"}</span></li>`).join("")}</ol>`;
           if (mine == null) setMsg(`<p class="wait">ゴール！ 順位を確かめています</p>`);
-          else setMsg(`<p class="verdict ${rows[0].n === "あなた" && allIn ? "good" : ""}">${mine}位でゴール（${t}秒）</p>${list}${allIn ? againBtns("kart") : ""}`);
+          else setMsg(allIn ? `<p class="verdict ${rows[0].n === "あなた" ? "good" : ""}">${mine}位でゴール（${t}秒）</p>${list}${againBtns("kart")}` : `<p class="wait">ゴール！（${t}秒）全員がゴールしたら順位が決まります</p>${list}`);
         }
         else setMsg(`<p class="verdict ${mine === 1 ? "good" : ""}">${mine}位でゴール！ ${t}秒</p>${againBtns("kart")}`);
       } else setMsg("");
@@ -5512,7 +5518,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0114";
+  const APP_VER = "1031-0128";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
@@ -5532,7 +5538,7 @@ html.br-portrait .br-ui { display: none }
     const setConn = (v) => { if (joined !== v) { joined = v; chs.forEach((h) => { try { h(v) } catch (e) {} }) } };
     const raw = (o) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)) };
     const bc = (event, payload) => { if (joined) raw({ topic, event: "broadcast", payload: { type: "broadcast", event, payload }, ref: String(++ref), join_ref: "1" }) };
-    const flush = () => { timer = null; lastSent = Date.now(); bc("p", { from: me_, st: mine }) };
+    const flush = () => { timer = null; lastSent = Date.now(); bc("p", { from: me_, st: mine, t: lastSent }) };
     // 人数が多いほど送る間隔をあける（全員に届く数が人数の2乗で増え、上限をこえると遅れがたまるため）
     const gap = () => { const n = peerMap.size + 1; return Math.max(66, Math.round(1000 * n * (n - 1) / 300)) };
     const schedule = () => { if (!timer) timer = setTimeout(flush, Math.max(0, gap() - (Date.now() - lastSent))) };
@@ -5550,8 +5556,10 @@ html.br-portrait .br-ui { display: none }
         else if (ev === "bye") { if (peerMap.delete(d.from)) emitPeers() }
         else if (ev === "p" && d.st && typeof d.st === "object") {
           const prev = peerMap.get(d.from), js = JSON.stringify(d.st), now = Date.now();
-          if (prev && prev.js === js) { prev.seen = now; return }
-          peerMap.set(d.from, { js, seen: now, v: { peer: d.from, isMe: false, presence: d.st, updatedAt: now } }); emitPeers();
+          // 時計のずれ：あいての時計 −（受けとった時の自分の時計）。通信の遅れがいちばん小さかった値を、少しずつ新しくしながら使う
+          let off = prev ? prev.v.off : null, offAt = prev ? prev.offAt : 0; if (typeof d.t === "number") { const smp = d.t - now; if (off == null || smp > off || now - offAt > 20000) { off = smp; offAt = now } }
+          if (prev && prev.js === js) { prev.seen = now; prev.v.off = off; prev.offAt = offAt; return }
+          peerMap.set(d.from, { js, seen: now, offAt, v: { peer: d.from, isMe: false, presence: d.st, updatedAt: now, off } }); emitPeers();
         }
       };
       ws.onclose = () => { setConn(false); if (!closed) setTimeout(connect, 1200 + Math.random() * 1500) };
