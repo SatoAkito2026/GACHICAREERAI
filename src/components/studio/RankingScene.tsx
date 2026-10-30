@@ -1,6 +1,7 @@
 /**
  * TikTok 動画「ランキング型（掲示板風）」の画面。面接AIは出さず、就活・転職の役に立つ話題のランキングを見せる。
  * 伸びている掲示板風ランキング動画の型：暗い紫の背景・大きなタイトル → 「第5位」→ 名前 → 書き込み風のひとこと2つ。
+ * 最初の1〜2秒だけは明るい黄色の画面（タイトルと「第1位はまさかの…？」）で、1コマ目から手を止めてもらう。
  * 縦 540×960（2倍で撮って 1080×1920）。大事なものは TikTok のボタン・文に隠れない範囲（上130・下200・右74をあける）に置く。
  * 時間は performance.now()（撮影側が1コマずつ進める）だけを見る。
  */
@@ -138,27 +139,70 @@ export function RankingScene({ job, onReady }: { job: RankingJobData; onReady: (
         color: "#fff",
       }}
     >
+      {/* 最初の1〜2秒：明るい黄色の画面に大きなタイトルと「第1位は…？」を最初のコマから出す
+          （暗い紫にトロフィーだけの1コマ目は、1秒で離れられていたため） */}
       {inHook && (
         <div
           style={{
             position: "absolute",
-            top: 170,
-            left: 20,
-            right: 20,
+            inset: 0,
+            background: "#FFE45C",
+            padding: "150px 76px 0 22px",
             textAlign: "center",
-            transform: `scale(${1.12 - 0.12 * ease(t / 0.25)})`,
           }}
         >
-          <Outlined size={50} color={RED} stroke="#fff">
-            {job.title[0]}
-          </Outlined>
-          <div style={{ height: 8 }} />
-          <Outlined size={58} color="#fff" stroke="#111">
-            {job.title[1]}
-          </Outlined>
-          <div style={{ fontSize: 150, marginTop: 70, lineHeight: 1 }}>🏆</div>
-          <p style={{ marginTop: 26, fontSize: 22, fontWeight: 800, color: "#E9D5FF" }}>
-            第{job.items.length}位から発表
+          <div style={{ transform: `scale(${1.08 - 0.08 * ease(t / 0.2)}) rotate(-2deg)` }}>
+            <Outlined size={44} color={RED} stroke="#fff">
+              {job.title[0]}
+            </Outlined>
+            <div style={{ height: 6 }} />
+            <Outlined size={54} color="#111" stroke="#fff">
+              {job.title[1]}
+            </Outlined>
+          </div>
+          <div
+            style={{
+              marginTop: 40,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              textAlign: "left",
+            }}
+          >
+            {job.items.map((_, k) => {
+              const rank = job.items.length - k;
+              return (
+                <div
+                  key={k}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    background: rank === 1 ? "#111" : "#fff",
+                    color: rank === 1 ? "#FFE45C" : "#111",
+                    border: "3px solid #111",
+                    borderRadius: 12,
+                    padding: "8px 14px",
+                    fontSize: 22,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span style={{ minWidth: 64 }}>第{rank}位</span>
+                  <span
+                    style={{
+                      flex: 1,
+                      letterSpacing: 4,
+                      color: rank === 1 ? "#FFE45C" : "#9CA3AF",
+                    }}
+                  >
+                    {rank === 1 ? "まさかの…？" : "？？？"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ marginTop: 22, fontSize: 22, fontWeight: 900, color: "#111" }}>
+            最後まで見てね ↓
           </p>
         </div>
       )}
