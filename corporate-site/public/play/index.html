@@ -296,6 +296,10 @@ html.playing .sc3 #act-msg { top: 50%; left: 50%; right: auto; width: min(760px,
 .br-spec { position: absolute; z-index: 6; left: 50%; bottom: 14px; transform: translateX(-50%); display: none; gap: 8px; align-items: center; background: rgba(20,18,42,.6); color: #fff; border-radius: 14px; padding: 6px 8px; font: 900 13px var(--body) }
 .br-spec button { appearance: none; border: 0; border-radius: 10px; background: #FFE14D; color: #1F1B3A; font: 900 15px var(--body); padding: 8px 14px }
 .br.br-specon .br-spec { display: flex }
+.br-wpn { position: absolute; z-index: 7; left: 50%; top: 46%; transform: translate(-50%, -50%); width: min(360px, 88%); display: none; background: rgba(20,18,42,.9); color: #fff; border-radius: 16px; padding: 12px 14px; font: 700 13px var(--body) }
+.br.br-wpnon .br-wpn { display: block } .br-wpn p { margin: 0 } .br-wt { font-size: 15px; margin-bottom: 4px !important }
+.br-wl { font-size: 11px; color: #B9B4D8; margin-top: 8px !important } .br-wr { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px } .br-wr .chipbtn { padding: 6px 10px; font-size: 12px }
+.br-wa span { background: rgba(255,255,255,.08); border-radius: 8px; padding: 4px 8px; font-size: 11px; color: #B9B4D8 } .br-wa span.on { color: #7FD0FF; background: rgba(79,163,247,.18) }
 .br-ui .kbtn.small { width: 58px; height: 58px; font-size: 12px }
 .br-ui .kbtn.on { background: rgba(255,225,77,.55); color: #1F1B3A }
 .br-slots { left: 50%; transform: translateX(-50%); bottom: 10px; display: flex; gap: 8px }
@@ -6505,7 +6509,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-sm">スモーク</button><button class="kbtn small br-b" id="b-med">回復</button>
           <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
-        <div class="br-spec"><button data-br="spec" data-d="-1">◀ まえの人</button><span id="br-spec-nm"></span><button data-br="spec" data-d="1">つぎの人 ▶</button></div><div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
+        <div class="br-wpn" id="br-wpn"></div><div class="br-spec"><button data-br="spec" data-d="-1">◀ まえの人</button><span id="br-spec-nm"></span><button data-br="spec" data-d="1">つぎの人 ▶</button></div><div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・回復アイテム・手榴弾・スモーク・スコープ・アタッチメント（拡張マガジン・サプレッサー・グリップ）は近くを通ると拾います（同じ武器の強い物は自動で強化。スコープなどは武器ごとにつく）。着地してから30秒は無敵です。回復ボタンは体力に合わせて救急箱（+75）・包帯（+15、75まで）・スポーツドリンク（10秒かけて+40）を自動でえらびます。今の武器の枠をもう一度押すと単発・連射が切りかわります。スモークの中は見えません。倒した人は持ち物を落とします。ときどき補給物資（赤い煙）が落ちてきて、強い武器と防具が入っています。赤い円（レッドゾーン）は爆撃されるので、建物に入るか外へ逃げます。倒されたあとは「観戦」で、まえの人・つぎの人を切りかえて見られます。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックをたおした方へ車が自分で曲がって進む・真うしろでバック、人をひくとダメージ、運転しながら撃てる、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・T でスモーク・H で回復・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
@@ -6711,7 +6715,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     }
     // 倒れた人の持ち物をまわりに落とす（ホスト）
     function dropLoot(e) {
-      const L = []; for (const sl of e.w) if (sl) L.push({ t: "w", w: sl.w, lv: sl.lv, sc: sl.sc || 1, ex: sl.ex || 0, sup: sl.sup || 0, gr: sl.gr || 0 });
+      const L = []; for (const sl of e.w) if (sl) L.push({ t: "w", w: sl.w, lv: sl.lv, sc: sl.sc || 1, scs: sl.scs || [], ex: sl.ex || 0, sup: sl.sup || 0, gr: sl.gr || 0 });
       if (e.vest) L.push({ t: "vest", lv: e.vest }); if (e.helm) L.push({ t: "helm", lv: e.helm }); if (e.med > 0) L.push({ t: "med" }); if (e.band > 0) L.push({ t: "band" }); if (e.drk > 0) L.push({ t: "drk" }); if (e.gren > 0) L.push({ t: "gren" }); if (e.smk > 0) L.push({ t: "smk" });
       L.forEach((it, k) => { const a = k * 2.1 + e.i, r = .7 + (k % 3) * .35; let x = e.x + Math.cos(a) * r, z = e.z + Math.sin(a) * r; if (blocked(x, z, .3, true)) { x = e.x; z = e.z } putDyn(Object.assign(it, { x: r2(x), z: r2(z) })) });
     }
@@ -6746,16 +6750,16 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     // スコープ・アタッチメントを付けられる武器（今持っている武器を先に）。付けられないときは -1
     function attSlot(e, it) {
       for (const k of [e.cur, 1 - e.cur]) { const sl = e.w[k]; if (!sl) continue;
-        if (it.t === "scope") { const z = Math.min(it.zm, BR_SCMAX[sl.w]); if (z > (sl.sc || 1) && (sl.w !== 4 || it.zm >= 4)) return k }
+        if (it.t === "scope") { const z = Math.min(it.zm, BR_SCMAX[sl.w]), has = sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : []); if (z > 1 && !has.includes(z) && (sl.w !== 4 || it.zm >= 4)) return k }
         else if (it.t === "att" && !sl[it.a] && !(it.a === "sup" && sl.w === 2)) return k }
       return -1;
     }
     function take(e, it, swap) {
       if (it.t === "w") {
-        const old = e.w.find((s) => s && s.w === it.w && s.lv < it.lv), ns = { w: it.w, lv: it.lv, ammo: 0, sc: Math.max(it.sc || 1, old ? old.sc || 1 : 1), ex: it.ex || (old ? old.ex : 0) ? 1 : 0, sup: it.sup || (old ? old.sup : 0) ? 1 : 0, gr: it.gr || (old ? old.gr : 0) ? 1 : 0 }; ns.ammo = brMag(ns); let k = e.w.indexOf(old);
+        const old = e.w.find((s) => s && s.w === it.w && s.lv < it.lv), ns = { w: it.w, lv: it.lv, ammo: 0, scs: [...new Set([...(it.scs || ((it.sc || 1) > 1 ? [it.sc] : [])), ...(old ? old.scs || ((old.sc || 1) > 1 ? [old.sc] : []) : [])])].sort((a, b) => a - b), semi: it.semi || (old ? old.semi : false), sc: Math.max(it.sc || 1, old ? old.sc || 1 : 1), ex: it.ex || (old ? old.ex : 0) ? 1 : 0, sup: it.sup || (old ? old.sup : 0) ? 1 : 0, gr: it.gr || (old ? old.gr : 0) ? 1 : 0 }; ns.ammo = brMag(ns); let k = e.w.indexOf(old);
         if (k < 0) k = e.w.findIndex((s) => !s); if (k < 0) k = swap === "bot" ? (wScore(e.w[0]) < wScore(e.w[1]) ? 0 : 1) : e.cur; e.w[k] = ns; e.cur = k;
       } else if (it.t === "vest") e.vest = it.lv; else if (it.t === "helm") e.helm = it.lv; else if (it.t === "med") e.med++; else if (it.t === "gren") e.gren++; else if (it.t === "band") e.band = Math.min(10, e.band + 3); else if (it.t === "drk") e.drk++; else if (it.t === "smk") e.smk++;
-      else { const k = attSlot(e, it); if (k < 0) return; const sl = e.w[k]; if (it.t === "scope") sl.sc = Math.min(it.zm, BR_SCMAX[sl.w]); else sl[it.a] = 1 }
+      else { const k = attSlot(e, it); if (k < 0) return; const sl = e.w[k]; if (it.t === "scope") { const z = Math.min(it.zm, BR_SCMAX[sl.w]); sl.scs = [...new Set([...(sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : [])), z])].sort((a, b) => a - b); if (!((sl.sc || 1) > 1) || swap === "bot" && z > sl.sc) sl.sc = z } else sl[it.a] = 1 }
     }
     // ---- 体の動き（降下・歩く・ジャンプ）
     function body(e, mx, mz, dt, sprint) {
@@ -6824,7 +6828,9 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     // ---- コンピューター
     function los(e, t) { if (smokeBlocks(e, t)) return false; const o = eyeOf(e), ch = new T.Vector3(t.x, t.y + (t.cr ? .8 : 1.25), t.z), d = ch.clone().sub(o), dist = d.length(); d.normalize(); const h = castRay(o, d, dist + .5, e.i); return h.code === t.i }
     function botMove(e, tx, tz, dt, sprint) {
-      e.pathT -= dt;
+      e.pathT -= dt; e.giveUp = false;
+      // 3.5秒たっても目的地に近づけていなければ、あきらめる（壁の向こうの物などで、同じ所を行ったり来たりしないように）
+      { const dg = Math.hypot(tx - e.x, tz - e.z); if (!e.pg || Math.hypot(e.pg.x - tx, e.pg.z - tz) > 4) e.pg = { x: tx, z: tz, d: dg, t: 0 }; e.pg.t += dt; if (e.pg.t > 3.5) { if (dg > e.pg.d - 1.5 && dg > 1.5) { e.giveUp = true; e.pg = null; e.path = null; return false } e.pg.d = dg; e.pg.t = 0 } }
       if (!e.path || e.pathT <= 0 || !e.goal || Math.hypot(e.goal[0] - tx, e.goal[1] - tz) > 4) { e.path = phPath(M, e.x, e.z, tx, tz); e.goal = [tx, tz]; e.pathT = 3 }
       while (e.path.length && Math.hypot(e.path[0][0] - e.x, e.path[0][1] - e.z) < .6) e.path.shift();
       const [px, pz] = e.path.length ? e.path[0] : [tx, tz], dx = px - e.x, dz = pz - e.z, d = Math.hypot(dx, dz);
@@ -6862,12 +6868,12 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const sl = curW(e); if (sl && sl.ammo < brMag(sl) * .5 && e.rl <= 0) startReload(e);
       // 安全地帯へ
       const zr = Z.st === "wait" ? Z.tr : Z.r, zx = Z.st === "wait" ? Z.tx : Z.cx, zz = Z.st === "wait" ? Z.tz : Z.cz;
-      if (Math.hypot(e.x - zx, e.z - zz) > zr * .8 && (Z.k > 0 || Z.st === "shrink" || Z.t < 20)) { if (!e.zg || Math.hypot(e.zg.x - zx, e.zg.z - zz) > zr) { const a = Math.random() * 6.28, rr = Math.random() * zr * .6; e.zg = { x: zx + Math.cos(a) * rr, z: zz + Math.sin(a) * rr } } botMove(e, e.zg.x, e.zg.z, dt, true); return }
+      if (Math.hypot(e.x - zx, e.z - zz) > zr * .8 && (Z.k > 0 || Z.st === "shrink" || Z.t < 20)) { if (!e.zg || Math.hypot(e.zg.x - zx, e.zg.z - zz) > zr) { const a = Math.random() * 6.28, rr = Math.random() * zr * .6; e.zg = { x: zx + Math.cos(a) * rr, z: zz + Math.sin(a) * rr } } botMove(e, e.zg.x, e.zg.z, dt, true); if (e.giveUp) e.zg = null; return }
       // 物を拾いに行く
-      if (e.lootT <= 0) { e.lootT = 2; let bi = -1, bd = 45; for (const it of allItems()) { if (taken.has(it.id) || !pickMode(e, it)) continue; const d = Math.hypot(it.x - e.x, it.z - e.z); if (d < bd) { bd = d; bi = it.id } } e.loot = bi }
-      if (e.loot >= 0 && !taken.has(e.loot) && itemById(e.loot)) { const it = itemById(e.loot); if (botMove(e, it.x, it.z, dt) || Math.hypot(it.x - e.x, it.z - e.z) < 1.2) { if (pickMode(e, it)) { take(e, it, "bot"); taken.add(it.id) } e.loot = -1; e.lootT = 0 } return }
+      if (e.lootT <= 0) { e.lootT = 2; let bi = -1, bd = 45; for (const it of allItems()) { if (taken.has(it.id) || (e.skip && e.skip.has(it.id)) || !pickMode(e, it)) continue; const d = Math.hypot(it.x - e.x, it.z - e.z); if (d < bd) { bd = d; bi = it.id } } e.loot = bi }
+      if (e.loot >= 0 && !taken.has(e.loot) && itemById(e.loot)) { const it = itemById(e.loot); const arrived = botMove(e, it.x, it.z, dt); if (e.giveUp) { (e.skip = e.skip || new Set()).add(it.id); e.loot = -1; e.lootT = 0; return } if (arrived || Math.hypot(it.x - e.x, it.z - e.z) < 1.2) { if (pickMode(e, it)) { take(e, it, "bot"); taken.add(it.id) } e.loot = -1; e.lootT = 0 } return }
       if (!e.wander || Math.hypot(e.wander.x - e.x, e.wander.z - e.z) < 2) { const a = Math.random() * 6.28, rr = Math.random() * Math.min(60, Z.r * .7); e.wander = { x: clamp(Z.cx + Math.cos(a) * rr, 5, M.W - 5), z: clamp(Z.cz + Math.sin(a) * rr, 5, M.D - 5) } }
-      botMove(e, e.wander.x, e.wander.z, dt);
+      botMove(e, e.wander.x, e.wander.z, dt); if (e.giveUp) e.wander = null;
     }
     function botGren(e, o, vx, vy, vz, kind) { const gid = ++grId; spawnGren(gid, e.i, o.x, o.y, o.z, vx, vy, vz, kind); S.grl = [...S.grl, [gid, e.i, r2(o.x), r2(o.y), r2(o.z), r2(vx), r2(vy), r2(vz), kind || 0]].slice(-10) }
     // ---- はじめる（ホスト）
@@ -6915,7 +6921,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-sm", "b-med", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
     const LE = layoutEditor(cardEl, LAY_IDS, "brLayout");
     const hudBox = (id) => { const el = $("#" + id), v = LE.lay[id]; if (!el) return { x: 0, y: 0, w: 100, h: 20, s: 1 }; if (v) { const bw = el.offsetWidth * v.s, bh = el.offsetHeight * v.s; return { x: v.x / 100 * cardEl.clientWidth - bw / 2, y: v.y / 100 * cardEl.clientHeight - bh / 2, w: bw, h: bh, s: v.s } } return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight, s: 1 } };
-    const onClick = (ev) => { const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
+    const onClick = (ev) => { const wb = ev.target.closest("[data-wp]"); if (wb) { wpnAct(wb.dataset.wp, wb.dataset.v); lastBtn = ""; return } const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
       const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "look-open") picking = true; else if (k === "look-done") picking = false; if (k === "land") lockLand(); if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "tm" && host) { S.tm = clamp(Number(t.dataset.v), 1, 4); ls.set("brTm", S.tm) } else if (k === "start" && host) start(); else if (k === "watch") watching = true; else if (k === "spec") { const al = E.filter((o) => o.alive && o.i !== myIdx); if (al.length) { const cur = al.findIndex((o) => o.i === specI), n = al.length; specSel = al[((cur < 0 ? 0 : cur + Number(t.dataset.d)) % n + n) % n].i } } };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
@@ -6956,7 +6962,23 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     function carHits(dt) { for (const c of cars) { if (c.dr < 0 || Math.abs(c.v) < 5) continue; for (const e of E) { if (!e.alive || e.i === c.dr || e.car != null || !e.landed || mate(c.dr, e.i)) continue; if (Math.hypot(e.x - c.x, e.z - c.z) > 2.1) continue; const k = c.id + ":" + e.i; if (runHit[k] && tAll - runHit[k] < 1) continue; runHit[k] = tAll; hurt(e, Math.abs(c.v) * 5, c.dr, false, "車でひいた") } } }
     function updCars() { cars.forEach((c, i) => { const mm = carMeshes[i]; mm.position.set(c.x, 0, c.z); mm.rotation.y = c.yaw; const m = meE(); mm.visible = !m || Math.hypot(c.x - m.x, c.z - m.z) < 170 }) }
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false; prOn = false } }
-    function swapTo(k) { const m = meE(); if (!m || !m.w[k]) return; if (m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false; return } const sl = m.w[k]; if (BR_W[sl.w].auto) { sl.semi = !sl.semi; floats.push({ txt: sl.semi ? "単発にした（指切り）" : "連射にした（フルオート）", col: "#7FD0FF", t: 0 }) } }
+    // 枠を押す：別の武器なら持ちかえ、今の武器なら銃の画面を開く／閉じる
+    let wpnOpen = -1;
+    function swapTo(k) { const m = meE(); if (!m || !m.w[k]) return; if (m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false; wpnOpen = -1; return } wpnOpen = wpnOpen === k ? -1 : k }
+    // 銃の画面のボタン
+    function wpnAct(k2, v) { const m = meE(); if (!m) return; const sl = m.w[wpnOpen]; if (!sl) { wpnOpen = -1; return }
+      if (k2 === "close") wpnOpen = -1;
+      else if (k2 === "mode") { sl.semi = v === "semi"; floats.push({ txt: sl.semi ? "単発にした（指切り）" : "連射にした（フルオート）", col: "#7FD0FF", t: 0 }) }
+      else if (k2 === "sc") { sl.sc = Number(v) || 1; adsOn = false; floats.push({ txt: sl.sc > 1 ? (sl.sc < 2 ? "ドットサイトを使う" : `${sl.sc}倍スコープを使う`) : "スコープなし（アイアンサイト）", col: "#7FD0FF", t: 0 }) }
+      else if (k2 === "drop") { const k = wpnOpen; dropWeapon(m, Object.assign({}, sl)); m.w[k] = null; if (m.cur === k) m.cur = 1 - k; m.rl = 0; adsOn = false; wpnOpen = -1 } }
+    function wpnHtml(m) {
+      const sl = m.w[wpnOpen]; if (!sl) return ""; const Wp = BR_W[sl.w], scs = sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : []), scN = (z) => (z <= 1 ? "なし" : z < 2 ? "ドットサイト" : `${z}倍`);
+      return `<p class="br-wt"><b style="color:${BR_LV[sl.lv].c}">${Wp.n}</b>（${BR_LV[sl.lv].n}）　弾 ${sl.ammo}/${brMag(sl)}</p>
+        ${Wp.auto ? `<p class="br-wl">撃ち方</p><div class="br-wr">${[["auto", "連射"], ["semi", "単発"]].map(([k, t]) => `<button class="chipbtn ${(sl.semi ? "semi" : "auto") === k ? "on" : ""}" data-wp="mode" data-v="${k}">${t}</button>`).join("")}</div>` : ""}
+        <p class="br-wl">スコープ（拾った物からえらぶ）</p><div class="br-wr">${(sl.w === 4 ? scs : [1, ...scs]).map((z) => `<button class="chipbtn ${(sl.sc || 1) === z ? "on" : ""}" data-wp="sc" data-v="${z}">${scN(z)}</button>`).join("") || `<span class="muted">まだありません</span>`}</div>
+        <p class="br-wl">アタッチメント</p><div class="br-wr br-wa">${[["ex", "拡張マガジン"], ["sup", "サプレッサー"], ["gr", "グリップ"]].map(([k, t]) => `<span class="${sl[k] ? "on" : ""}">${t} ${sl[k] ? "✓" : "—"}</span>`).join("")}</div>
+        <div class="br-wr" style="margin-top:8px"><button class="btn ghost small" data-wp="drop">この武器を捨てる</button><button class="btn small" data-wp="close">とじる</button></div>`;
+    }
     // 回復ボタン：体力が少ないと救急箱、まだあるときは包帯、なければドリンク（自動でえらぶ）
     function heal() { const m = meE(); if (!m || !m.alive || !m.landed || m.healT > 0 || m.hp >= 100) return; const k = m.hp <= 60 && m.med > 0 ? "med" : m.band > 0 && m.hp < 75 ? "band" : m.drk > 0 && !(m.reg > 0) ? "drk" : m.med > 0 ? "med" : null; if (!k) { floats.push({ txt: m.band > 0 ? "包帯は体力75まで" : "回復アイテムがない", col: "#fff", t: 0 }); return } m.healK = k; m.healT = k === "med" ? 4 : k === "band" ? 2 : 1.5; adsOn = false; meSnd("heal") }
     function addHp(m, v) { v = Math.max(0, v); if (v <= 0) return; if (host) m.hp = Math.min(100, m.hp + v); else { m.hp = Math.min(100, m.hp + v); myHeal = [myHeal[0] + 1, r2(myHeal[1] + v)] } }
@@ -6974,7 +6996,10 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       m.recoil = .12;
     }
     let pickTarget = -1;
-    function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; take(m, it); taken.add(it.id); meSnd("pick"); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
+    // 武器を足もとに落とす（ホストが作って全員に送る。あいては頼むだけ）
+    let myDrops = [], dropSeq = 0;
+    function dropWeapon(m, sl) { if (!sl) return; const it = { t: "w", w: sl.w, lv: sl.lv, sc: sl.sc || 1, scs: sl.scs || [], ex: sl.ex || 0, sup: sl.sup || 0, gr: sl.gr || 0, semi: !!sl.semi, x: r2(m.x + Math.sin(m.yaw) * .9), z: r2(m.z + Math.cos(m.yaw) * .9) }; m.dropT = 2.5; if (host) putDyn(it); else myDrops = [...myDrops, [++dropSeq, it]].slice(-8); floats.push({ txt: `${BR_W[sl.w].n}を置いた（拾い直せます）`, col: "#fff", t: 0 }) }
+    function doPick(m, it, manual) { if (taken.has(it.id)) return; const md = pickMode(m, it); if (!md || (md === "swap" && !manual)) return; if (md === "swap" && it.t === "w") { const old = curW(m); if (old) dropWeapon(m, Object.assign({}, old)) } take(m, it); taken.add(it.id); meSnd("pick"); if (!host) myPicks = [...myPicks, it.id].slice(-30); floats.push({ txt: `${brItemName(it)}を拾った`, col: it.t === "w" ? BR_LV[it.lv].c : "#FFFFFF", t: 0 }) }
     // スコープ・ドットサイトはショットガン以外につく（スナイパーは4倍より下にはならない）
     const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; if ((sl.sc || 1) > 1) return Wp.k === "sr" ? Math.max(4, sl.sc) : sl.sc; return Wp.zoom };
     // ---- 表示
@@ -7177,7 +7202,8 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
           const sl = curW(m); if ((fireHeld || fire2Held) && sl && BR_W[sl.w].auto && !sl.semi) tryFire();
           const nc = m.car != null ? cars[m.car] : nearCar(m), cb = $("#b-car"); if (cb) { const on = !!nc && m.landed && !m.sw, tx = m.car != null ? "車から降りる" : "車に乗る"; cb.classList.toggle("on", on); if (cb.textContent !== tx) cb.textContent = tx }
           // 拾う
-          pickTarget = -1; if (m.landed) for (const it of allItems()) { if (taken.has(it.id) || Math.abs(it.x - m.x) > 1.6 || Math.abs(it.z - m.z) > 1.6) continue; const md = pickMode(m, it); if (md === "auto") doPick(m, it, false); else if (md === "swap") pickTarget = it.id }
+          pickTarget = -1; if (m.landed) for (const it of allItems()) { if (taken.has(it.id) || Math.abs(it.x - m.x) > 1.6 || Math.abs(it.z - m.z) > 1.6) continue; const md = pickMode(m, it); if (md === "auto" && !(it.t === "w" && m.dropT > 0)) doPick(m, it, false); else if (md === "swap" || md === "auto") pickTarget = it.id }
+          m.dropT = Math.max(0, (m.dropT || 0) - dt);
         }
       }
       if (host) {
@@ -7190,6 +7216,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
             const myc = ox.car ? cars[ox.car[0]] : null; for (const c of cars) if (c.dr === gi && c !== myc) { c.dr = -1; c.v = 0 } if (myc && g.alive && (myc.dr < 0 || myc.dr === gi)) { myc.dr = gi; myc.x = ox.car[1]; myc.z = ox.car[2]; myc.yaw = ox.car[3]; myc.v = ox.car[4]; g.car = myc.id } else g.car = null;
             if (ox.hl && ox.hl[0] > gs.heal) { gs.heal = ox.hl[0]; const add = ox.hl[1] - (gs.hsum || 0); gs.hsum = ox.hl[1]; if (g.alive && add > 0) g.hp = Math.min(100, g.hp + add) }
             for (const id of ox.pk || []) taken.add(id);
+            for (const dd of ox.dr || []) if (dd[0] > (gs.drop || 0)) { gs.drop = dd[0]; putDyn(Object.assign({}, dd[1])) }
             for (const k of ox.kp || []) if (!knocked.has(k[0])) { knockProp(...k); S.kp = [...(S.kp || []), k].slice(-300) }
           }
           for (const e of E) e.inv = Math.max(0, (e.inv || 0) - dt);
@@ -7200,7 +7227,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
           E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0) | (e.pr ? 64 : 0) | (e.ln === -1 ? 128 : e.ln === 1 ? 256 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp, e.lastHit ?? -1] }), fx: S.fx, grl: S.grl, tk: [...taken] };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else if (m && !outsider) {
-        const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), car: m.car != null && cars[m.car] ? [m.car, r2(cars[m.car].x), r2(cars[m.car].z), r2(cars[m.car].yaw), r2(cars[m.car].v)] : null, cr: m.cr ? 1 : 0, pr: m.pr ? 1 : 0, ln: m.ln || 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks, kp: myKnock };
+        const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), car: m.car != null && cars[m.car] ? [m.car, r2(cars[m.car].x), r2(cars[m.car].z), r2(cars[m.car].yaw), r2(cars[m.car].v)] : null, cr: m.cr ? 1 : 0, pr: m.pr ? 1 : 0, ln: m.ln || 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks, kp: myKnock, dr: myDrops };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       }
       if (m && m.car != null && (!m.alive || S.ph !== "play")) exitCar(m);
@@ -7211,13 +7238,14 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       renderer.render(scene, camera); hud(dt); panel();
       // ボタン
       if (m) {
-        const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${brMag(s)}`}</small><small class="br-att">${[(s.sc || 1) > 1 ? ((s.sc < 2) ? "ドット" : s.sc + "倍") : "", s.ex ? "拡張" : "", s.sup ? "消音" : "", s.gr ? "グリップ" : "", BR_W[s.w].auto ? (s.semi ? "単発" : "連射") : ""].filter(Boolean).join("・")}</small>` : `<small>空き</small>`);
-        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi].join("."), m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
+        const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${brMag(s)}`}</small><small class="br-att">${[(s.sc || 1) > 1 ? ((s.sc < 2) ? "ドット" : s.sc + "倍") : "", s.ex ? "拡張" : "", s.sup ? "消音" : "", s.gr ? "グリップ" : "", BR_W[s.w].auto ? (s.semi ? "単発" : "連射") : ""].filter(Boolean).join("・")}${m.cur === k ? "　⚙" : ""}</small>` : `<small>空き</small>`);
+        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi, s0.scs].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi, s1.scs].join("."), wpnOpen, m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
         if (key !== lastBtn) {
           lastBtn = key; $("#b-s0").innerHTML = lbl(s0, 0); $("#b-s1").innerHTML = lbl(s1, 1); $("#b-s0").classList.toggle("on", m.cur === 0); $("#b-s1").classList.toggle("on", m.cur === 1);
           $("#b-med").innerHTML = `回復<br><small>救${m.med}・包${m.band}・飲${m.drk}</small>`; $("#b-gr").innerHTML = `手榴弾<br><small>${m.gren}</small>`; $("#b-sm").innerHTML = `スモーク<br><small>${m.smk}</small>`; $("#b-ads").classList.toggle("on", adsOn); $("#b-cr").classList.toggle("on", crOn); $("#b-pr").classList.toggle("on", prOn); $("#b-ll").classList.toggle("on", lnOn === -1); $("#b-lr").classList.toggle("on", lnOn === 1);
           const pk = $("#b-pick"); pk.classList.toggle("on", pickTarget >= 0); if (pickTarget >= 0) pk.textContent = `拾う：${brItemName(itemById(pickTarget))}（今の武器と持ちかえ）`;
           cardEl.classList.toggle("br-dead", !m.alive || S.ph !== "play");
+          if (!m.alive || S.ph !== "play" || !m.w[wpnOpen]) wpnOpen = -1; cardEl.classList.toggle("br-wpnon", wpnOpen >= 0); $("#br-wpn").innerHTML = wpnOpen >= 0 ? wpnHtml(m) : "";
         }
       }
     });
@@ -8388,7 +8416,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0324";
+  const APP_VER = "1031-0329";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
