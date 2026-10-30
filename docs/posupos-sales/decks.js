@@ -105,25 +105,21 @@ function priceSlide(pres, ttl, sales) {
   const s = pres.addSlide({ masterName: "LIGHT" });
   title(s, ttl);
   const cols = [
-    { n: "ライト", p: "11,000円", r: "", who: "お会計と売上を、まず楽に", pts: ["注文・会計・伝票", "QR注文・厨房の画面", "ポイント・会員証", "Square・レシート印刷"], ai: false },
-    { n: "スタンダード", p: "昼 22,000円\n夜 33,000円", r: "今申し込んだお店は、ずっとこの価格", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
-    { n: "個別", p: "55,000円〜", r: "", who: "お店のやり方に合わせて", pts: ["ライト＋スタンダードの機能", "お店独自の給料の計算", "データの取り込み・帳票", "AI面接（追加料金なし）"], ai: true },
+    { n: "ライト", who: "お会計と売上を、まず楽に", pts: ["注文・会計・伝票", "QR注文・厨房の画面", "ポイント・会員証", "Square・レシート印刷"], ai: false },
+    { n: "スタンダード", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
+    { n: "個別", who: "お店のやり方に合わせて", pts: ["ライト＋スタンダードの機能", "お店独自の給料の計算", "データの取り込み・帳票", "AI面接（追加料金なし）"], ai: true },
   ];
   const cw = 3.85, gap = 0.28;
   cols.forEach((c, i) => {
     const x = 0.6 + i * (cw + gap), y = 1.55, std = i === 1;
     s.addShape("roundRect", { x, y, w: cw, h: 4.75, rectRadius: 0.15, fill: { color: std ? K.white : K.mist }, line: { color: std ? K.blue : K.mist, width: std ? 2.5 : 1 }, shadow: std ? { type: "outer", color: "1557D6", opacity: 0.25, blur: 12, offset: 4, angle: 90 } : undefined });
-    if (std) pill(s, x + 0.3, y - 0.2, 2.6, "キャンペーン価格・おすすめ", K.blue, K.white, 12);
+    if (std) pill(s, x + 0.3, y - 0.2, 2.6, "おすすめ", K.blue, K.white, 12);
     T(s, c.n + "プラン", { x: x + 0.3, y: y + 0.35, w: cw - 0.6, h: 0.5, bold: true, fontSize: 20 });
     T(s, c.who, { x: x + 0.3, y: y + 0.85, w: cw - 0.6, h: 0.35, fontSize: 13, color: K.ink2 });
-    if (std) {
-      T(s, "月額（税込）", { x: x + 0.3, y: y + 1.2, w: cw - 0.6, h: 0.3, fontSize: 12, color: K.ink2 });
-      T(s, c.p, { x: x + 0.3, y: y + 1.45, w: cw - 0.6, h: 0.75, fontSize: 19, bold: true, color: K.blue, lineSpacingMultiple: 1.0 });
-      T(s, c.r, { x: x + 0.3, y: y + 2.2, w: cw - 0.6, h: 0.3, fontSize: 11, color: K.ink2 });
-    } else T(s, [{ text: "月額 ", options: { fontSize: 13 } }, { text: c.p, options: { fontSize: 24, bold: true } }, { text: "（税込）", options: { fontSize: 11 } }], { x: x + 0.3, y: y + 1.25, w: cw - 0.6, h: 0.6, valign: "middle" });
-    T(s, c.pts.map((p, j) => ({ text: p, options: { bullet: true, breakLine: j < c.pts.length - 1, bold: p.startsWith("AI面接"), color: p.startsWith("AI面接") ? K.blue : K.navy } })), { x: x + 0.3, y: y + 2.6, w: cw - 0.6, h: 2.0, fontSize: 14, paraSpaceAfter: 6 });
+    T(s, "料金：お見積もり（1店舗ごと）", { x: x + 0.3, y: y + 1.35, w: cw - 0.6, h: 0.5, fontSize: 15, bold: true, color: std ? K.blue : K.navy });
+    T(s, c.pts.map((p, j) => ({ text: p, options: { bullet: true, breakLine: j < c.pts.length - 1, bold: p.startsWith("AI面接"), color: p.startsWith("AI面接") ? K.blue : K.navy } })), { x: x + 0.3, y: y + 2.1, w: cw - 0.6, h: 2.4, fontSize: 14, paraSpaceAfter: 6 });
   });
-  foot(s, "料金は1店舗ごと・初期費用0円・1か月無料。キャンペーン期間中のお申し込みは、契約が続くかぎりキャンペーン価格のまま（予告なく終了する場合があります）。");
+  foot(s, "料金は1店舗ごとに、お店に合わせてお見積もりします。0円から始められます（※ プランによって、最初の1か月を無料でお試しいただけます）。");
   return s;
 }
 function closeSlide(pres, big, steps) {
@@ -263,14 +259,15 @@ async function brochure() {
 
   priceSlide(pres, "料金プラン");
 
-  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "グループ店・年間契約・導入の流れ");
-  const stat = [["1か月分", "1年契約"], ["3か月分", "2年契約"], ["5か月分", "3年契約"]];
-  stat.forEach(([b, l], i) => { const x = 0.6 + i * 2.05; card(s, x, 1.65, 1.85, 1.8, "FFF4DB"); T(s, l, { x: x + 0.2, y: 1.8, w: 1.5, h: 0.35, fontSize: 13, color: "6A5530", bold: true }); T(s, b, { x: x + 0.15, y: 2.2, w: 1.6, h: 0.6, fontSize: 24, bold: true, color: "B26B00" }); T(s, "おトク", { x: x + 0.2, y: 2.85, w: 1.5, h: 0.35, fontSize: 13, color: "6A5530" }); });
-  T(s, [{ text: "年間契約（前払い）", options: { bold: true, breakLine: true } }, { text: "自動では更新しません（終わる1か月前にお知らせ）。途中でやめても、残りの期間のお金はお返しできません。", options: { breakLine: true } }, { text: "グループ店", options: { bold: true, breakLine: true } }, { text: "何店舗でも。料金は1店舗ごと（足した日からの日割り）。" }], { x: 0.6, y: 3.7, w: 6.0, h: 2.6, fontSize: 14, paraSpaceAfter: 4, color: K.navy });
-  const fl = [["お問い合わせ", "電話・フォーム"], ["1か月無料でお試し", "カード登録なしなら勝手に請求されません"], ["登録・設定", "ホームページからのお申し込みは登録代行が無料"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
+  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "グループ店・導入の流れ");
+  card(s, 0.6, 1.65, 6.0, 2.05, "FFF4DB");
+  card(s, 0.6, 3.95, 6.0, 2.05, "EEF3FF");
+  T(s, [{ text: "グループ店", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "何店舗でも足せます。料金は1店舗ごと（足した日からの日割り）。スタッフ・キャストのスマホでは、お店を切りかえて使えます。", options: { fontSize: 15 } }], { x: 0.9, y: 1.85, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
+  T(s, [{ text: "料金", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "お店の種類・大きさ・使う機能に合わせて、お見積もりします。0円から始められます（※ プランによって、最初の1か月を無料でお試しいただけます）。", options: { fontSize: 15 } }], { x: 0.9, y: 4.1, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
+  const fl = [["お問い合わせ", "電話・フォーム"], ["無料でお試し", "カード登録なしなら勝手に請求されません"], ["お見積もり・設定", "お店に合わせた料金をご案内して、設定を進めます"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
   fl.forEach(([t, b], i) => { const y = 1.6 + i * 1.2; card(s, 7.0, y, 5.7, 1.0); num(s, 7.25, y + 0.25, i + 1); T(s, t, { x: 7.95, y: y + 0.12, w: 4.5, h: 0.4, bold: true, fontSize: 16 }); T(s, b, { x: 7.95, y: y + 0.52, w: 4.6, h: 0.4, fontSize: 13, color: K.ink2 }); });
 
-  closeSlide(pres, "まずは無料で、1か月。", [["お問い合わせ", "お電話かフォームから。お店の種類と店舗数を教えてください。"], ["無料でお試し", "1か月無料。カードを登録しなければ請求されません。"], ["AI面接を体験", "最初の応募者に、AI面接のURLを送ってみてください。"]]);
+  closeSlide(pres, "0円から、はじめられます。", [["お問い合わせ", "お電話かフォームから。お店の種類と店舗数を教えてください。"], ["無料でお試し", "プランによって1か月無料。カードを登録しなければ請求されません。"], ["AI面接を体験", "最初の応募者に、AI面接のURLを送ってみてください。"]]);
 
   await pres.writeFile({ fileName: path.join(__dirname, "posupos-shiryo.pptx") });
   await applyTheme(path.join(__dirname, "posupos-shiryo.pptx"), THEME);
@@ -335,11 +332,11 @@ async function sales() {
 
   priceSlide(pres, "AI面接は、スタンダードの料金にふくまれています", true);
 
-  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "いま始めると");
-  cardsGrid(s, [["ずっとキャンペーン価格", "キャンペーン期間中のお申し込みは、契約が続くかぎりキャンペーン価格のまま（予告なく終了する場合があります）。"], ["1か月無料", "カードを登録しなければ、お試しのあと勝手に請求されることはありません。"], ["初期費用0円", "ホームページからのお申し込みは、商品・写真・スタッフの登録代行も無料。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
+  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "はじめやすい理由");
+  cardsGrid(s, [["0円から始められる", "プランによって、最初の1か月は無料。カードを登録しなければ、お試しのあと勝手に請求されることはありません。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["グループ店も何店舗でも", "料金は1店舗ごと。お店を足すのもかんたんです。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
   s.addNotes("クロージング。「まず1か月、次の応募者にURLを送ってみませんか？」と提案する。");
 
-  closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["登録はおまかせ", "ホームページからのお申し込みは登録代行が無料。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);
+  closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["料金はお見積もり", "お店の種類と店舗数から、料金をご案内します。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);
 
   await pres.writeFile({ fileName: path.join(__dirname, "posupos-teian.pptx") });
   await applyTheme(path.join(__dirname, "posupos-teian.pptx"), THEME);
