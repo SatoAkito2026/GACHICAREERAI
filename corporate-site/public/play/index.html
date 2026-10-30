@@ -2354,7 +2354,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       const HZR = top + 60 + (h - top - 60) * 0.2, FEET = h - bottom - 40, RWD = w * 0.36;
       const U = 10, HS = clamp((FEET - top) / 125, 1.6, 2.5);
       const curve = (z) => 0.65 * Math.sin(z / 1900) + 0.35 * Math.sin(z / 730 + 2);
-      let CV = 0, camL = 0;
+      let CV = 0, camL = 0, meAlpha = 1;
       const PJ = (x, dist) => { const dz = (dist - d) / U + 4; if (dz < 0.6) return null; const p = 4 / dz, dd = dist - d; return { sx: w / 2 + (x + CV * dd * dd) * RWD * p, sy: HZR + (FEET - HZR) * p, p } };
       function quad(d0, d1, x0, x1, col) {
         const a = PJ(x0, d1), b = PJ(x1, d1), cc = PJ(x1, d0), e = PJ(x0, d0); if (!a || !b || !cc || !e) return;
@@ -2512,12 +2512,16 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         for (const sh of shots) { const q = PJ(0, sh.d); if (!q) continue; const s = HS * q.p; if (sh.k === "shell") { c.fillStyle = "#1FA34A"; c.beginPath(); c.arc(q.sx, q.sy - 9 * s, 10 * s, Math.PI, 0); c.fill(); c.fillStyle = "#fff"; c.fillRect(q.sx - 10 * s, q.sy - 9 * s, 20 * s, 3 * s) } else { c.fillStyle = "#5A5F72"; c.beginPath(); c.arc(q.sx, q.sy - 120 * s, 22 * s, 0, 7); c.arc(q.sx + 20 * s, q.sy - 125 * s, 18 * s, 0, 7); c.arc(q.sx - 20 * s, q.sy - 118 * s, 16 * s, 0, 7); c.fill() } }
         for (const inc of incoming) { const k = 1 - inc.t / inc.max; if (inc.k === "shell") { const yy = h + 20 - (h + 20 - FEET + 12) * k; c.fillStyle = "#1FA34A"; c.beginPath(); c.arc(w / 2 + Math.sin(k * 9) * 30 * (1 - k), yy, 22, Math.PI, 0); c.fill(); c.fillStyle = "#fff"; c.fillRect(w / 2 - 22 + Math.sin(k * 9) * 30 * (1 - k), yy, 44, 5) } else { c.fillStyle = "#4A4F62"; const cy = top + 70 + 40 * k; c.beginPath(); c.arc(w / 2, cy, 34, 0, 7); c.arc(w / 2 + 34, cy + 6, 26, 0, 7); c.arc(w / 2 - 34, cy + 6, 24, 0, 7); c.fill(); if (k > .7) { c.strokeStyle = "#FFE14D"; c.lineWidth = 5; c.beginPath(); c.moveTo(w / 2, cy + 20); c.lineTo(w / 2 - 14, FEET - 90); c.lineTo(w / 2 + 8, FEET - 80); c.lineTo(w / 2 - 6, FEET - 40); c.stroke() } } }
         // 自分（後ろすがた）
-        const sc = scale(), blink = fx.stun <= 0 && fx.inv > 0 && Math.floor(t * 14) % 2, q0 = PJ(0, Math.min(d, RUN_LEN + 400)) || { sx: w / 2, sy: FEET, p: 1 };
+        // 自分は少し小さく描き、目の前に障害物・穴・ほかの人が来ているときは体を半透明にする（前が見えるように）
+        const sc = scale() * .72, blink = fx.stun <= 0 && fx.inv > 0 && Math.floor(t * 14) % 2, q0 = PJ(0, Math.min(d, RUN_LEN + 400)) || { sx: w / 2, sy: FEET, p: 1 };
+        const inFront = (x) => x - d > 10 && x - d < 520, ahead = C.obs.some((o, i) => !gone.has(i) && inFront(o.x)) || C.pits.some((pt) => inFront(pt.x)) || runners().some((r) => r.x && r.x.d != null && !(r.st && r.st.res != null) && inFront(r.x.d));
+        meAlpha += ((ahead && ph === "run" ? .38 : 1) - meAlpha) * .2;
         if (fallT > 0) { c.save(); c.globalAlpha = clamp(fallT / 1.1, 0, 1); runDrawBody(c, q0.sx, q0.sy + (1.1 - fallT) * 120, HS * sc * (0.4 + fallT / 1.1 * .6), { col: ME_COL, air: true, t, spin: fallT * 9 }); c.restore() }
         else {
-          drawShadow(q0, y, HS);
+          drawShadow(q0, y, HS * .72); c.save(); c.globalAlpha = meAlpha;
           if (fx.rocket > 0) { const fy = q0.sy - y * HS; for (let j = 0; j < 3; j++) { c.fillStyle = j ? "rgba(255,220,90,.9)" : "rgba(255,120,40,.85)"; c.beginPath(); c.ellipse(q0.sx, fy + (10 + j * 5) * HS, (8 - j * 2) * HS, (12 + Math.random() * 8 - j * 3) * HS, 0, 0, 7); c.fill() } }
           if (!blink) runDrawBody(c, q0.sx, q0.sy - y * HS, HS * sc, { col: fx.poison > 0 ? "#9B59D0" : ME_COL, ph: stepPh, air: y > 2, sl: slideT > 0, stun: fx.stun > 0, spin, sq, star: fx.star > 0, t, win: ph === "done" && spd < 60 });
+          c.restore();
         }
         // スピード線（ギアが上がる・ダッシュ中ほど多い）
         const sl = (fx.fast > 0 || fx.dash > 0 || fx.rocket > 0 || fx.star > 0 ? 14 : 0) + (ph === "run" ? gear * 4 : 0);
@@ -8278,7 +8282,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0229";
+  const APP_VER = "1031-0237";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
