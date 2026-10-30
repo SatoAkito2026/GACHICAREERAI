@@ -2318,7 +2318,7 @@ html.br-portrait .br-ui { display: none }
       if (guess == null) scan(0, NS - 1); else scan(guess - 25, guess + 45);
       return [best, Math.sqrt(bd)];
     }
-    const BOXES = []; for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0, i: bi }) }
+    const BOXES = []; if (!me.m.noItem) for (const bi of [Math.floor(NS * .12), Math.floor(NS * .45), Math.floor(NS * .75)]) { const [nx, ny] = norm(bi); for (const off of [-30, -10, 10, 30]) BOXES.push({ x: TR[bi][0] + nx * off, y: TR[bi][1] + ny * off, re: 0, i: bi }) }
     const newKart = (n, col) => Object.assign(slot(n), { v: 0, lap: 0, spin: 0, boost: 0, star: 0, jet: 0, driftT: 0, item: null, fin: 0, col, prog: 0, wall: 0, h: 0, vh: 0, air: false, glide: false, trick: 0, trickT: 0 });
     // 人は何人でも（同じ招待コード）。ホストが0番、ほかは cid の順。足りない分はコンピューター
     let meSlot = host ? 0 : 1; const K = newKart(meSlot, meSlot % KT_COLORS.length); K.look = ktMyLook();
@@ -2489,7 +2489,7 @@ html.br-portrait .br-ui { display: none }
       const w = VW, h = VH; c.clearRect(0, 0, w, h);
       const T0 = 8, SL = w > h * 1.9 ? 38 : 8, rk = rankOf(K, allKarts);
       c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(SL, T0, 92, 58); c.font = `30px ${DISP}`; c.textAlign = "left"; c.textBaseline = "middle"; c.fillStyle = "#FFE14D"; c.fillText(`${rk}位`, SL + 6, T0 + 20); c.font = `11px ${DISP}`; c.fillStyle = "#fff"; c.fillText(`/${allKarts.length}`, SL + 64, T0 + 26); c.font = `13px ${DISP}`; c.fillText(`ラップ ${clamp(K.lap, 1, KT_LAPS)}/${KT_LAPS}`, SL + 6, T0 + 45);
-      const ix = SL + 100, iy = T0, isz = 58; c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
+      const ix = SL + 100, iy = me.m.noItem ? -999 : T0, isz = 58; c.fillStyle = "rgba(20,18,42,.6)"; c.fillRect(ix, iy, isz, isz); c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 2; c.strokeRect(ix + 1, iy + 1, isz - 2, isz - 2);
       // アイテムは2個まで（大きい枠＝次に使う物、小さい枠＝その次）
       const spin = ["turbo", "banana", "rocket", "shield", "jet"][Math.floor(performance.now() / 70) % 5], r1 = K.roul > 0 && K.roulSlot !== 2, r2s = K.roul > 0 && K.roulSlot === 2;
       const shown = r1 ? spin : K.item; if (shown) ktIcon(c, shown, ix + isz / 2, iy + isz / 2 + 2, 20);
@@ -2545,7 +2545,7 @@ html.br-portrait .br-ui { display: none }
       if (host) { const ckf = cpus.map((kk) => (kk.fin ? Math.round(kk.fin * 1000) : null)); if (JSON.stringify(ckf) !== JSON.stringify(me.s.ckf || [])) setS({ ckf }) }
       const rk = finalRanks(); finRank = rk[cid] || null;
       if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null }
-      const canUse = K.item && !(K.roul > 0 && K.roulSlot !== 2); itemBtn.textContent = canUse ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !canUse;
+      const canUse = K.item && !(K.roul > 0 && K.roulSlot !== 2); if (me.m.noItem && itemBtn.style.display !== "none") itemBtn.style.display = "none"; itemBtn.textContent = canUse ? KT_ITEMS[K.item] : "アイテム"; itemBtn.disabled = !canUse;
       const out = { k: [Math.round(K.x), Math.round(K.y), r2(K.ang), Math.round(K.v), K.lap, K.idx, K.fin ? 1 : 0, K.star > 0 ? 1 : 0, K.boost > 0 ? 1 : 0, Math.round(K.h * 10), (K.glide ? 1 : 0) | (K.jet > 0 ? 2 : 0), K.col, ktLookCode(K.look)], it: packIt([...myIt, ...ownCpuIt]), hit: hits.slice(-12) };
       if (host) out.ck = cpus.map((kk) => [Math.round(kk.x), Math.round(kk.y), r2(kk.ang), kk.col, kk.lap, kk.idx, kk.fin ? 1 : 0, kk.star > 0 ? 1 : 0, kk.boost > 0 ? 1 : 0, Math.round(kk.v), Math.round(kk.h * 10), (kk.glide ? 1 : 0) | (kk.jet > 0 ? 2 : 0), ktLookCode(kk.look)]);
       const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
@@ -2555,7 +2555,7 @@ html.br-portrait .br-ui { display: none }
         const L = K.look, grid = (k, names, sw) => `<div class="kt-pick">${names.map((n, i) => `<button class="chipbtn ${L[k] === i ? "on" : ""}" data-kl="${k}" data-i="${i}">${sw ? `<i style="background:${KT_PAINT[i][1]}"></i>` : ""}${n}</button>`).join("")}</div>`;
         setMsg(`<p class="eyebrow">キャラ</p>${grid("ch", KT_CHARS)}<p class="eyebrow">色</p>${grid("co", KT_PAINT.map((x) => x[0]), true)}<p class="eyebrow">カート</p>${grid("ca", KT_BODIES)}<p class="muted" style="margin:0">見た目だけで、速さや曲がりやすさはみんな同じです</p><button class="btn" data-kl="done">決定</button>`);
       }
-      else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn ghost" data-kl="open">キャラ・色・カートを選ぶ（${esc(KT_CHARS[K.look.ch])}・${esc(KT_PAINT[K.look.co][0])}・${esc(KT_BODIES[K.look.ca])}）</button><p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div>
+      else if (ph === "idle" && !me.s.rdy) setMsg(`<button class="btn ghost" data-kl="open">キャラ・色・カートを選ぶ（${esc(KT_CHARS[K.look.ch])}・${esc(KT_PAINT[K.look.co][0])}・${esc(KT_BODIES[K.look.ca])}）</button><p class="eyebrow">コース</p><div class="stages">${KT_STAGES.map((st, i) => `<button class="chipbtn ${i === (me.m.stage || 0) ? "on" : ""}" data-act="kart-stage" data-i="${i}">${st.name}</button>`).join("")}</div><p class="eyebrow">アイテム</p><div class="stages" style="grid-template-columns:1fr 1fr"><button class="chipbtn ${me.m.noItem ? "" : "on"}" data-act="kart-items" data-v="on">あり</button><button class="chipbtn ${me.m.noItem ? "on" : ""}" data-act="kart-items" data-v="off">なし（運転だけで勝負）</button></div>
           <p class="muted" style="margin:0">${mps.length ? `${mps.length + 1}人（${mps.map((p) => esc(pName(p))).join("・")}・あなた）。全員が押すと同時にスタート。コースを変えると全員が同じコースになります` : "押すとスタート。同じ招待コードの人は何人でも一緒に走れます"}</p><button class="btn" data-act="act-ready">準備OK</button>`);
       else if (ph === "idle") { const wait = mps.filter((p) => !(peerS(p) || {}).rdy).map((p) => esc(pName(p))); setMsg(`<p class="wait">${wait.length ? wait.join("・") + "の準備を待っています" : "まもなくスタート"}</p>`) }
       else if (ph === "done" && me.s.res != null) {
@@ -3969,7 +3969,7 @@ html.br-portrait .br-ui { display: none }
         <div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-br="layout">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
-        <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックの上で前・下でバック・左右でハンドル、人をひくとダメージ、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
+        <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックの上で前・下でバック・左右でハンドル、人をひくとダメージ、運転しながら撃てる、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
@@ -4276,8 +4276,9 @@ html.br-portrait .br-ui { display: none }
       c.v = clamp(c.v + acc * dt, -6, 18); c.yaw -= st * dt * 1.8 * clamp(c.v / 7, -1, 1);
       const nx = c.x + Math.sin(c.yaw) * c.v * dt, nz = c.z + Math.cos(c.yaw) * c.v * dt;
       if (blocked(nx, nz, 1.3)) { if (Math.abs(c.v) > 9) hurtT = .3; c.v *= -.3 } else { c.x = nx; c.z = nz }
-      m.x = c.x; m.z = c.z; m.y = 0; m.yaw = c.yaw; m.mv = Math.abs(c.v) > .5; m.cr = m.pr = m.ads = false; m.ln = 0;
-      if (Math.abs(c.v) > 2) camYaw += phAng(c.yaw - camYaw) * Math.min(1, dt * 2.2);
+      // 車からも撃てる：撃つ・スコープの間は体を狙う向きに、カメラは車に合わせない
+      const aim = adsOn || fireHeld || fire2Held; m.x = c.x; m.z = c.z; m.y = 0; m.yaw = aim ? camYaw : c.yaw; m.mv = Math.abs(c.v) > .5; m.cr = m.pr = false; m.ads = adsOn; m.ln = 0;
+      if (Math.abs(c.v) > 2 && !aim) camYaw += phAng(c.yaw - camYaw) * Math.min(1, dt * 2.2);
     }
     // ホスト：車でひく（速いほど大きいダメージ）
     const runHit = {};
@@ -4292,7 +4293,7 @@ html.br-portrait .br-ui { display: none }
       floats.push({ txt: "手榴弾を投げた！", col: "#FFE14D", t: 0 });
     }
     function tryFire() {
-      const m = meE(); if (!m || !m.alive || S.ph !== "play" || m.car != null) return;
+      const m = meE(); if (!m || !m.alive || S.ph !== "play") return;
       const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = camera.position.clone().addScaledVector(d, camDist * .9), r = fire(m, o, d); if (!r) return;
       const tp = new T.Vector3(); vis[myIdx].tip.getWorldPosition(tp); const tip = [tp.x, tp.y, tp.z];
       r.hits.forEach((h, k) => { if (k < 3) shotFx(tip, h.p, h.code >= 0, r.sr); if (h.code >= 0) { hitT = .25; sfx("hit", .8) } });
@@ -4313,7 +4314,8 @@ html.br-portrait .br-ui { display: none }
         const sw = Math.sin(v.ph) * .75 * k, air = e.y > .05 && e.landed, fall = !e.landed;
         // 伏せる：体を前にたおして地面にねる
         const inCar = e.car != null || cars.some((c) => c.dr === e.i && Math.hypot(c.x - e.x, c.z - e.z) < 2);
-        if (inCar) { v.body.rotation.set(0, 0, 0); v.body.position.set(-.45, .05, -.2); v.legL.rotation.x = v.legR.rotation.x = -1.5; v.kneeL.rotation.x = v.kneeR.rotation.x = 1.45; v.armL.rotation.set(-1.2, 0, -.2); v.armR.rotation.set(-1.2, 0, .2); v.elbowL.rotation.set(-.3, 0, 0); v.elbowR.rotation.set(-.3, 0, 0); v.guns.forEach((g) => (g.visible = false)); v.para.visible = false; v.vest.visible = e.vest > 0; v.helm.visible = e.helm > 0; v.cap.visible = !e.helm; continue }
+        if (inCar) { const sl = curW(e), pitch = e.i === myIdx ? camPitch : e.pitch; e.recoil = Math.max(0, (e.recoil || 0) - dt); v.body.rotation.set(0, 0, 0); v.body.position.set(-.45, .05, -.2); v.legL.rotation.x = v.legR.rotation.x = -1.5; v.kneeL.rotation.x = v.kneeR.rotation.x = 1.45; v.armL.rotation.set(-1.2, 0, -.2); v.elbowL.rotation.set(-.3, 0, 0);
+          if (sl) { v.armR.rotation.set(-1.35 - pitch - (e.recoil || 0) * 2, 0, .05); v.elbowR.rotation.set(-.2, 0, 0) } else { v.armR.rotation.set(-1.2, 0, .2); v.elbowR.rotation.set(-.3, 0, 0) } v.guns.forEach((g, gi) => (g.visible = !!sl && sl.w === gi)); v.para.visible = false; v.vest.visible = e.vest > 0; v.helm.visible = e.helm > 0; v.cap.visible = !e.helm; continue }
         v.body.rotation.x = e.pr ? 1.45 : 0; v.body.position.y = e.pr ? .14 : e.cr ? -.36 : 0; v.body.position.z = e.pr ? -.95 : 0; v.body.rotation.z = (e.ln || 0) * (e.pr ? .22 : .32); v.body.position.x = -(e.ln || 0) * (e.pr ? .35 : .2);
         v.legL.rotation.x = fall ? .4 : e.cr ? -1.35 : air ? -.6 : sw; v.legR.rotation.x = fall ? -.3 : e.cr ? -1.1 : air ? .2 : -sw;
         v.kneeL.rotation.x = fall ? .5 : e.cr ? 1.95 : air ? 1.1 : Math.max(0, sw) * 1.2 + .08; v.kneeR.rotation.x = fall ? .3 : e.cr ? 1.7 : air ? .7 : Math.max(0, -sw) * 1.2 + .08;
@@ -5011,7 +5013,7 @@ html.br-portrait .br-ui { display: none }
     if (act === "rename") { ui.renaming = true; render(); const i = $("#name-input"); if (i) i.focus() }
     else if (act === "rename-cancel") { ui.renaming = false; render() }
     else if (act === "rename-save") { const v = ($("#name-input").value || "").trim().slice(0, 12); if (v) { myName = v; ls.set("name", v) } ui.renaming = false; push(); render() }
-    else if (act === "start") startMatch(t.dataset.g, t.dataset.g === "br" ? { stage: Number(ls.get("brStage")) || 0, size: Number(ls.get("brSize")) || 0 } : undefined);
+    else if (act === "start") startMatch(t.dataset.g, t.dataset.g === "br" ? { stage: Number(ls.get("brStage")) || 0, size: Number(ls.get("brSize")) || 0 } : t.dataset.g === "kart" ? { stage: Number(ls.get("ktStage")) || 0, noItem: ls.get("ktNoItem") === "1" } : undefined);
     else if (act === "menu") toMenu();
     else if (act === "howto") document.documentElement.classList.toggle("howto");
     else if (act === "sens") sensPanel(!$("#sens"));
@@ -5039,7 +5041,8 @@ html.br-portrait .br-ui { display: none }
     else if (act === "br-stage") { const i = Number(t.dataset.i); ls.set("brStage", i); if (i !== (me.m.stage || 0)) startMatch("br", { stage: i, size: me.m.size || 0 }) }
     else if (act === "br-size") { const i = Number(t.dataset.i); ls.set("brSize", i); if (i !== (me.m.size || 0)) startMatch("br", { stage: me.m.stage || 0, size: i }) }
     else if (act === "hide-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("hide", { stage: i }) }
-    else if (act === "kart-stage") { const i = Number(t.dataset.i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i }) }
+    else if (act === "kart-stage") { const i = Number(t.dataset.i); ls.set("ktStage", i); if (i !== (me.m.stage || 0)) startMatch("kart", { stage: i, noItem: !!me.m.noItem }) }
+    else if (act === "kart-items") { const v = t.dataset.v === "off"; ls.set("ktNoItem", v ? "1" : "0"); if (v !== !!me.m.noItem) startMatch("kart", { stage: me.m.stage || 0, noItem: v }) }
     else if (act === "code-new") { codeErr = ""; useChannel(String(Math.floor(1000 + Math.random() * 9000))) }
     else if (act === "code-join") joinCode(ui.codeDraft || ($("#code-input") || {}).value);
     else if (act === "code-leave") { codeState = ""; useChannel("") }
@@ -5092,7 +5095,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1920";
+  const APP_VER = "1030-1930";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
