@@ -1107,6 +1107,8 @@ html.br-portrait .br-ui { display: none }
   // ボタン配置の変更（荒野・カート・かくれんぼで共通）。位置は画面に対する％と大きさで、ゲームごとに端末へ保存する
   function layoutEditor(cardEl, ids, key) {
     let lay = {}; try { lay = JSON.parse(ls.get(key) || "{}") || {} } catch (_) {}
+    // 保存された位置がこわれている・画面の外なら、画面の中に戻す（ボタンが見えなくならないように）
+    for (const id of Object.keys(lay)) { const v = lay[id]; if (!v || !Number.isFinite(v.x) || !Number.isFinite(v.y) || !Number.isFinite(v.s)) { delete lay[id]; continue } v.x = clamp(v.x, 6, 94); v.y = clamp(v.y, 10, 90); v.s = clamp(v.s, .6, 1.8) }
     const el = (id) => cardEl.querySelector("#" + id);
     function apply() { for (const id of ids) { const e = el(id); if (!e) continue; const v = lay[id]; Object.assign(e.style, v ? { position: "fixed", left: v.x + "%", top: v.y + "%", right: "auto", bottom: "auto", margin: "0", transform: `translate(-50%,-50%) scale(${v.s})` } : { position: "", left: "", top: "", right: "", bottom: "", margin: "", transform: "" }) } }
     // いまの画面上の中心を、カードの中の％にする（スマホを縦のまま90度まわして表示しているときも）
@@ -5175,7 +5177,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-2357";
+  const APP_VER = "1031-0007";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
