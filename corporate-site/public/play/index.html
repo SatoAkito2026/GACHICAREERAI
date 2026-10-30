@@ -296,10 +296,19 @@ html.playing .sc3 #act-msg { top: 50%; left: 50%; right: auto; width: min(760px,
 .br-spec { position: absolute; z-index: 6; left: 50%; bottom: 14px; transform: translateX(-50%); display: none; gap: 8px; align-items: center; background: rgba(20,18,42,.6); color: #fff; border-radius: 14px; padding: 6px 8px; font: 900 13px var(--body) }
 .br-spec button { appearance: none; border: 0; border-radius: 10px; background: #FFE14D; color: #1F1B3A; font: 900 15px var(--body); padding: 8px 14px }
 .br.br-specon .br-spec { display: flex }
-.br-wpn { position: absolute; z-index: 7; left: 50%; top: 46%; transform: translate(-50%, -50%); width: min(360px, 88%); display: none; background: rgba(20,18,42,.9); color: #fff; border-radius: 16px; padding: 12px 14px; font: 700 13px var(--body) }
-.br.br-wpnon .br-wpn { display: block } .br-wpn p { margin: 0 } .br-wt { font-size: 15px; margin-bottom: 4px !important }
-.br-wl { font-size: 11px; color: #B9B4D8; margin-top: 8px !important } .br-wr { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px } .br-wr .chipbtn { padding: 6px 10px; font-size: 12px }
-.br-wa span { background: rgba(255,255,255,.08); border-radius: 8px; padding: 4px 8px; font-size: 11px; color: #B9B4D8 } .br-wa span.on { color: #7FD0FF; background: rgba(79,163,247,.18) }
+#b-bag { left: calc(50% - 184px); bottom: 8px; width: 52px !important; height: 44px !important; border-radius: 10px }
+.br-bag { position: absolute; z-index: 7; inset: 44px 10px 10px; display: none; gap: 10px; background: rgba(20,18,42,.92); color: #fff; border-radius: 16px; padding: 10px; font: 700 12px var(--body); touch-action: none; user-select: none; -webkit-user-select: none }
+.br.br-bagon .br-bag { display: flex } .br-bag p { margin: 0 } .bag-l { flex: 1.1; min-width: 0; overflow: auto } .bag-r { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; overflow: auto }
+.bag-h { font-size: 13px; margin: 2px 0 6px !important } .bag-h small { font-size: 10px; color: #B9B4D8; font-weight: 700 }
+.bag-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px } .bag-it { aspect-ratio: 1.5; border-radius: 9px; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; line-height: 1.15; padding: 2px }
+.bag-it.scope { background: rgba(79,163,247,.28); color: #CDE7FF } .bag-it.att { background: rgba(124,245,154,.2); color: #D6FFE2 } .bag-it.sel, .bag-slot.sel { outline: 2px solid #FFE14D }
+.bag-cons { display: flex; flex-wrap: wrap; gap: 5px } .bag-cons span { background: rgba(255,255,255,.08); border-radius: 8px; padding: 4px 7px; font-size: 11px }
+.bag-w { background: rgba(255,255,255,.06); border-radius: 12px; padding: 6px 8px } .bag-w.cur { box-shadow: inset 0 0 0 2px rgba(255,225,77,.6) } .bag-w.none { color: #8E89B0; text-align: center; padding: 14px }
+.bag-w small { font-size: 10px; color: #B9B4D8 } .bag-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 4px }
+.bag-slot { border-radius: 8px; background: rgba(0,0,0,.25); border: 1px dashed rgba(255,255,255,.25); text-align: center; padding: 3px 2px; font-size: 11px; min-height: 34px; display: flex; flex-direction: column; justify-content: center }
+.bag-slot small { font-size: 9px } .bag-slot.on { border-style: solid; border-color: #7FD0FF; background: rgba(79,163,247,.2) } .bag-slot.ok { border-color: #7CF59A; background: rgba(124,245,154,.22) } .bag-slot.no { opacity: .4 }
+.bag-row { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap } .bag-row .chipbtn { padding: 4px 9px; font-size: 11px }
+.bag-ghost { position: fixed; z-index: 99; pointer-events: none; transform: translate(-50%, -60%); background: #FFE14D; color: #1F1B3A; border-radius: 9px; padding: 6px 10px; font: 900 12px var(--body); box-shadow: 0 6px 18px rgba(0,0,0,.4) }
 .br-ui .kbtn.small { width: 58px; height: 58px; font-size: 12px }
 .br-ui .kbtn.on { background: rgba(255,225,77,.55); color: #1F1B3A }
 .br-slots { left: 50%; transform: translateX(-50%); bottom: 10px; display: flex; gap: 8px }
@@ -6505,11 +6514,11 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         <div class="br-ui">
           <div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
           <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
-          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="br-pick br-car" id="b-car">車に乗る</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
+          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="br-pick br-car" id="b-car">車に乗る</button><button class="kbtn small br-b" id="b-bag">バッグ</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-sm">スモーク</button><button class="kbtn small br-b" id="b-med">回復</button>
           <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
-        <div class="br-wpn" id="br-wpn"></div><div class="br-spec"><button data-br="spec" data-d="-1">◀ まえの人</button><span id="br-spec-nm"></span><button data-br="spec" data-d="1">つぎの人 ▶</button></div><div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
+        <div class="br-bag" id="br-bag"></div><div class="br-spec"><button data-br="spec" data-d="-1">◀ まえの人</button><span id="br-spec-nm"></span><button data-br="spec" data-d="1">つぎの人 ▶</button></div><div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-lay="toggle">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
         <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・回復アイテム・手榴弾・スモーク・スコープ・アタッチメント（拡張マガジン・サプレッサー・グリップ）は近くを通ると拾います（同じ武器の強い物は自動で強化。スコープなどは武器ごとにつく）。着地してから30秒は無敵です。回復ボタンは体力に合わせて救急箱（+75）・包帯（+15、75まで）・スポーツドリンク（10秒かけて+40）を自動でえらびます。今の武器の枠をもう一度押すと単発・連射が切りかわります。スモークの中は見えません。倒した人は持ち物を落とします。ときどき補給物資（赤い煙）が落ちてきて、強い武器と防具が入っています。赤い円（レッドゾーン）は爆撃されるので、建物に入るか外へ逃げます。倒されたあとは「観戦」で、まえの人・つぎの人を切りかえて見られます。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックをたおした方へ車が自分で曲がって進む・真うしろでバック、人をひくとダメージ、運転しながら撃てる、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・T でスモーク・H で回復・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
@@ -6716,6 +6725,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     // 倒れた人の持ち物をまわりに落とす（ホスト）
     function dropLoot(e) {
       const L = []; for (const sl of e.w) if (sl) L.push({ t: "w", w: sl.w, lv: sl.lv, sc: sl.sc || 1, scs: sl.scs || [], ex: sl.ex || 0, sup: sl.sup || 0, gr: sl.gr || 0 });
+      for (const b of e.bag || []) L.push(Object.assign({}, b)); e.bag = [];
       if (e.vest) L.push({ t: "vest", lv: e.vest }); if (e.helm) L.push({ t: "helm", lv: e.helm }); if (e.med > 0) L.push({ t: "med" }); if (e.band > 0) L.push({ t: "band" }); if (e.drk > 0) L.push({ t: "drk" }); if (e.gren > 0) L.push({ t: "gren" }); if (e.smk > 0) L.push({ t: "smk" });
       L.forEach((it, k) => { const a = k * 2.1 + e.i, r = .7 + (k % 3) * .35; let x = e.x + Math.cos(a) * r, z = e.z + Math.sin(a) * r; if (blocked(x, z, .3, true)) { x = e.x; z = e.z } putDyn(Object.assign(it, { x: r2(x), z: r2(z) })) });
     }
@@ -6745,13 +6755,20 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       if (it.t === "vest") return it.lv > e.vest ? "auto" : null; if (it.t === "helm") return it.lv > e.helm ? "auto" : null;
       if (it.t === "med") return e.med < 5 ? "auto" : null; if (it.t === "gren") return e.gren < 3 ? "auto" : null;
       if (it.t === "band") return e.band < 10 ? "auto" : null; if (it.t === "drk") return e.drk < 4 ? "auto" : null; if (it.t === "smk") return e.smk < 3 ? "auto" : null;
-      return attSlot(e, it) >= 0 ? "auto" : null;
+      if (attSlot(e, it) >= 0) return "auto";
+      // 人は、付けられない物もバッグに入れておける（12こまで）
+      return isHuman(e.i) && (e.bag || []).length < BAG_MAX ? "auto" : null;
     }
+    const BAG_MAX = 12;
+    // その物をその武器のその枠に付けられるか（スコープは武器ごとの倍率の上限まで・スナイパーは4倍以上・ショットガンにサプレッサーは付かない）
+    const fits = (it, sl, key) => !!sl && (it.t === "scope" ? key === "sc" && it.zm <= BR_SCMAX[sl.w] && (sl.w !== 4 || it.zm >= 4) : it.t === "att" && key === it.a && !(it.a === "sup" && sl.w === 2));
+    const slotItem = (sl, key) => (!sl ? null : key === "sc" ? ((sl.sc || 1) > 1 ? { t: "scope", zm: sl.sc } : null) : sl[key] ? { t: "att", a: key } : null);
+    function setSlot(sl, key, it) { if (key === "sc") sl.sc = it ? it.zm : 1; else sl[key] = it ? 1 : 0; sl.ammo = Math.min(sl.ammo, brMag(sl)) }
     // スコープ・アタッチメントを付けられる武器（今持っている武器を先に）。付けられないときは -1
+    // 人：枠があいていて付けられる武器（今の武器が先）。コンピューター：今より良いスコープなら付けかえる
     function attSlot(e, it) {
-      for (const k of [e.cur, 1 - e.cur]) { const sl = e.w[k]; if (!sl) continue;
-        if (it.t === "scope") { const z = Math.min(it.zm, BR_SCMAX[sl.w]), has = sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : []); if (z > 1 && !has.includes(z) && (sl.w !== 4 || it.zm >= 4)) return k }
-        else if (it.t === "att" && !sl[it.a] && !(it.a === "sup" && sl.w === 2)) return k }
+      for (const k of [e.cur, 1 - e.cur]) { const sl = e.w[k], key = it.t === "scope" ? "sc" : it.a; if (!sl || !fits(it, sl, key)) continue;
+        if (it.t === "scope" ? !((sl.sc || 1) > 1) || (!isHuman(e.i) && it.zm > sl.sc) : !sl[it.a]) return k }
       return -1;
     }
     function take(e, it, swap) {
@@ -6759,7 +6776,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         const old = e.w.find((s) => s && s.w === it.w && s.lv < it.lv), ns = { w: it.w, lv: it.lv, ammo: 0, scs: [...new Set([...(it.scs || ((it.sc || 1) > 1 ? [it.sc] : [])), ...(old ? old.scs || ((old.sc || 1) > 1 ? [old.sc] : []) : [])])].sort((a, b) => a - b), semi: it.semi || (old ? old.semi : false), sc: Math.max(it.sc || 1, old ? old.sc || 1 : 1), ex: it.ex || (old ? old.ex : 0) ? 1 : 0, sup: it.sup || (old ? old.sup : 0) ? 1 : 0, gr: it.gr || (old ? old.gr : 0) ? 1 : 0 }; ns.ammo = brMag(ns); let k = e.w.indexOf(old);
         if (k < 0) k = e.w.findIndex((s) => !s); if (k < 0) k = swap === "bot" ? (wScore(e.w[0]) < wScore(e.w[1]) ? 0 : 1) : e.cur; e.w[k] = ns; e.cur = k;
       } else if (it.t === "vest") e.vest = it.lv; else if (it.t === "helm") e.helm = it.lv; else if (it.t === "med") e.med++; else if (it.t === "gren") e.gren++; else if (it.t === "band") e.band = Math.min(10, e.band + 3); else if (it.t === "drk") e.drk++; else if (it.t === "smk") e.smk++;
-      else { const k = attSlot(e, it); if (k < 0) return; const sl = e.w[k]; if (it.t === "scope") { const z = Math.min(it.zm, BR_SCMAX[sl.w]); sl.scs = [...new Set([...(sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : [])), z])].sort((a, b) => a - b); if (!((sl.sc || 1) > 1) || swap === "bot" && z > sl.sc) sl.sc = z } else sl[it.a] = 1 }
+      else { const k = attSlot(e, it); if (k >= 0) { setSlot(e.w[k], it.t === "scope" ? "sc" : it.a, it); if (isHuman(e.i) && e.i === myIdx) floats.push({ txt: `${BR_W[e.w[k].w].n}に付けた`, col: "#7FD0FF", t: 0 }) } else if (isHuman(e.i) && (e.bag || []).length < BAG_MAX) { e.bag = [...(e.bag || []), it.t === "scope" ? { t: "scope", zm: it.zm } : { t: "att", a: it.a }]; if (e.i === myIdx) floats.push({ txt: "バッグに入れた（バッグで付けかえ）", col: "#7FD0FF", t: 0 }) } }
     }
     // ---- 体の動き（降下・歩く・ジャンプ）
     function body(e, mx, mz, dt, sprint) {
@@ -6907,9 +6924,9 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     tapBtn("#b-ads", () => (adsOn = !adsOn)); tapBtn("#b-cr", () => { crOn = !crOn; if (crOn) prOn = false }); tapBtn("#b-pr", () => { prOn = !prOn; if (prOn) crOn = false });
     // リーン：かべのかげから頭と銃だけ横に出す。もう一度押すと戻る
     tapBtn("#b-car", () => { const m = meE(); if (!m) return; if (m.car != null) exitCar(m); else enterCar(m) });
-    tapBtn("#b-ll", () => (lnOn = lnOn === -1 ? 0 : -1)); tapBtn("#b-lr", () => (lnOn = lnOn === 1 ? 0 : 1)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-gr", () => throwGren(0)); tapBtn("#b-sm", () => throwGren(1)); tapBtn("#b-med", heal);
+    tapBtn("#b-ll", () => (lnOn = lnOn === -1 ? 0 : -1)); tapBtn("#b-lr", () => (lnOn = lnOn === 1 ? 0 : 1)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-bag", () => { bagOpen = !bagOpen; bagSel = null; lastBtn = "" }); tapBtn("#b-gr", () => throwGren(0)); tapBtn("#b-sm", () => throwGren(1)); tapBtn("#b-med", heal);
     tapBtn("#b-s0", () => swapTo(0)); tapBtn("#b-s1", () => swapTo(1)); tapBtn("#b-pick", () => { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, itemById(pickTarget), true) });
-    const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") { crOn = !crOn; if (crOn) prOn = false } else if (k === "z") { prOn = !prOn; if (prOn) crOn = false } else if (k === "v") { const m = meE(); if (m) { if (m.car != null) exitCar(m); else enterCar(m) } } else if (k === "e") lnOn = lnOn === 1 ? 0 : 1; else if (k === "f") lnOn = lnOn === -1 ? 0 : -1; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(0); else if (k === "t") throwGren(1); else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, itemById(pickTarget), true) } };
+    const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") { crOn = !crOn; if (crOn) prOn = false } else if (k === "z") { prOn = !prOn; if (prOn) crOn = false } else if (k === "v") { const m = meE(); if (m) { if (m.car != null) exitCar(m); else enterCar(m) } } else if (k === "e") lnOn = lnOn === 1 ? 0 : 1; else if (k === "f") lnOn = lnOn === -1 ? 0 : -1; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(0); else if (k === "t") throwGren(1); else if (k === "b") { bagOpen = !bagOpen; bagSel = null; lastBtn = "" } else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, itemById(pickTarget), true) } };
     const onKeyUp = (e) => { if (e.key === " ") fireHeld = false };
     addEventListener("keydown", onKey); addEventListener("keyup", onKeyUp);
     // Android は、ホーム画面に入れたアプリが前の「縦固定」の設定のままのことがあるので、ゲーム中だけ横に固定する
@@ -6918,12 +6935,13 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
     lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     // ---- ボタンの配置と大きさ（端末に保存）
-    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-sm", "b-med", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
+    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-sm", "b-med", "b-bag", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
     const LE = layoutEditor(cardEl, LAY_IDS, "brLayout");
     const hudBox = (id) => { const el = $("#" + id), v = LE.lay[id]; if (!el) return { x: 0, y: 0, w: 100, h: 20, s: 1 }; if (v) { const bw = el.offsetWidth * v.s, bh = el.offsetHeight * v.s; return { x: v.x / 100 * cardEl.clientWidth - bw / 2, y: v.y / 100 * cardEl.clientHeight - bh / 2, w: bw, h: bh, s: v.s } } return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight, s: 1 } };
-    const onClick = (ev) => { const wb = ev.target.closest("[data-wp]"); if (wb) { wpnAct(wb.dataset.wp, wb.dataset.v); lastBtn = ""; return } const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
+    const onClick = (ev) => { const wb = ev.target.closest("[data-bag]"); if (wb) { bagAct(wb.dataset.bag, wb.dataset.k, wb.dataset.v); lastBtn = ""; return } const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
       const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "look-open") picking = true; else if (k === "look-done") picking = false; if (k === "land") lockLand(); if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "tm" && host) { S.tm = clamp(Number(t.dataset.v), 1, 4); ls.set("brTm", S.tm) } else if (k === "start" && host) start(); else if (k === "watch") watching = true; else if (k === "spec") { const al = E.filter((o) => o.alive && o.i !== myIdx); if (al.length) { const cur = al.findIndex((o) => o.i === specI), n = al.length; specSel = al[((cur < 0 ? 0 : cur + Number(t.dataset.d)) % n + n) % n].i } } };
     cardEl.addEventListener("click", onClick);
+    { const bg = $("#br-bag"); bg.addEventListener("pointerdown", bagDown); addEventListener("pointermove", bagMoveEv); addEventListener("pointerup", bagUp); addEventListener("pointercancel", bagUp) }
     const meE = () => E[myIdx];
     // ---- 車（オリジナルのデザイン）。乗っている人の画面が動かし、ホストがまとめて全員に送る
     const CAR_COLS = ["#C0302C", "#2E6FD0", "#F2F2F2", "#2A2C34", "#F2B233", "#3A7A44", "#8A8E96"];
@@ -6962,23 +6980,46 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     function carHits(dt) { for (const c of cars) { if (c.dr < 0 || Math.abs(c.v) < 5) continue; for (const e of E) { if (!e.alive || e.i === c.dr || e.car != null || !e.landed || mate(c.dr, e.i)) continue; if (Math.hypot(e.x - c.x, e.z - c.z) > 2.1) continue; const k = c.id + ":" + e.i; if (runHit[k] && tAll - runHit[k] < 1) continue; runHit[k] = tAll; hurt(e, Math.abs(c.v) * 5, c.dr, false, "車でひいた") } } }
     function updCars() { cars.forEach((c, i) => { const mm = carMeshes[i]; mm.position.set(c.x, 0, c.z); mm.rotation.y = c.yaw; const m = meE(); mm.visible = !m || Math.hypot(c.x - m.x, c.z - m.z) < 170 }) }
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false; prOn = false } }
-    // 枠を押す：別の武器なら持ちかえ、今の武器なら銃の画面を開く／閉じる
-    let wpnOpen = -1;
-    function swapTo(k) { const m = meE(); if (!m || !m.w[k]) return; if (m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false; wpnOpen = -1; return } wpnOpen = wpnOpen === k ? -1 : k }
-    // 銃の画面のボタン
-    function wpnAct(k2, v) { const m = meE(); if (!m) return; const sl = m.w[wpnOpen]; if (!sl) { wpnOpen = -1; return }
-      if (k2 === "close") wpnOpen = -1;
-      else if (k2 === "mode") { sl.semi = v === "semi"; floats.push({ txt: sl.semi ? "単発にした（指切り）" : "連射にした（フルオート）", col: "#7FD0FF", t: 0 }) }
-      else if (k2 === "sc") { sl.sc = Number(v) || 1; adsOn = false; floats.push({ txt: sl.sc > 1 ? (sl.sc < 2 ? "ドットサイトを使う" : `${sl.sc}倍スコープを使う`) : "スコープなし（アイアンサイト）", col: "#7FD0FF", t: 0 }) }
-      else if (k2 === "drop") { const k = wpnOpen; dropWeapon(m, Object.assign({}, sl)); m.w[k] = null; if (m.cur === k) m.cur = 1 - k; m.rl = 0; adsOn = false; wpnOpen = -1 } }
-    function wpnHtml(m) {
-      const sl = m.w[wpnOpen]; if (!sl) return ""; const Wp = BR_W[sl.w], scs = sl.scs || ((sl.sc || 1) > 1 ? [sl.sc] : []), scN = (z) => (z <= 1 ? "なし" : z < 2 ? "ドットサイト" : `${z}倍`);
-      return `<p class="br-wt"><b style="color:${BR_LV[sl.lv].c}">${Wp.n}</b>（${BR_LV[sl.lv].n}）　弾 ${sl.ammo}/${brMag(sl)}</p>
-        ${Wp.auto ? `<p class="br-wl">撃ち方</p><div class="br-wr">${[["auto", "連射"], ["semi", "単発"]].map(([k, t]) => `<button class="chipbtn ${(sl.semi ? "semi" : "auto") === k ? "on" : ""}" data-wp="mode" data-v="${k}">${t}</button>`).join("")}</div>` : ""}
-        <p class="br-wl">スコープ（拾った物からえらぶ）</p><div class="br-wr">${(sl.w === 4 ? scs : [1, ...scs]).map((z) => `<button class="chipbtn ${(sl.sc || 1) === z ? "on" : ""}" data-wp="sc" data-v="${z}">${scN(z)}</button>`).join("") || `<span class="muted">まだありません</span>`}</div>
-        <p class="br-wl">アタッチメント</p><div class="br-wr br-wa">${[["ex", "拡張マガジン"], ["sup", "サプレッサー"], ["gr", "グリップ"]].map(([k, t]) => `<span class="${sl[k] ? "on" : ""}">${t} ${sl[k] ? "✓" : "—"}</span>`).join("")}</div>
-        <div class="br-wr" style="margin-top:8px"><button class="btn ghost small" data-wp="drop">この武器を捨てる</button><button class="btn small" data-wp="close">とじる</button></div>`;
+    // 枠を押す：別の武器なら持ちかえ、今の武器ならバッグを開く／閉じる
+    let bagOpen = false, bagSel = null, bagDrag = null;
+    function swapTo(k) { const m = meE(); if (!m || !m.w[k]) return; if (m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false; return } bagOpen = !bagOpen; bagSel = null }
+    // バッグ：場所の名前 "b3"（バッグの3番目）・"w0:sc"（1つ目の武器のスコープの枠）・"bag"（バッグへもどす）
+    const placeItem = (m, src) => { if (src[0] === "b") return (m.bag || [])[Number(src.slice(1))] || null; const [w, key] = src.slice(1).split(":"); return slotItem(m.w[Number(w)], key) };
+    function bagMove(src, dst) {
+      const m = meE(); if (!m || !src || !dst || src === dst) return; const it = placeItem(m, src); if (!it) return; m.bag = m.bag || [];
+      const take2 = () => { if (src[0] === "b") m.bag.splice(Number(src.slice(1)), 1); else { const [w, key] = src.slice(1).split(":"); setSlot(m.w[Number(w)], key, null) } };
+      if (dst === "bag") { if (src[0] === "b") return; take2(); m.bag.push(it); meSnd("pick"); return }
+      const [w, key] = dst.slice(1).split(":"), sl = m.w[Number(w)]; if (!fits(it, sl, key)) { floats.push({ txt: it.t === "scope" ? (sl && sl.w === 4 ? "スナイパーには4倍以上" : "この武器にはこの倍率は付けられない") : "この武器には付けられない", col: "#FF8A80", t: 0 }); return }
+      const old = slotItem(sl, key); take2(); setSlot(sl, key, it);
+      // 前に付いていた物は、元の場所へ（付けられなければバッグへ）
+      if (old) { if (src[0] === "w") { const [w2, k2] = src.slice(1).split(":"), s2 = m.w[Number(w2)]; if (fits(old, s2, k2)) setSlot(s2, k2, old); else m.bag.push(old) } else m.bag.splice(Number(src.slice(1)), 0, old) }
+      meSnd("magin");
     }
+    const itName = (it) => (it.t === "scope" ? (it.zm < 2 ? "ドット" : `${it.zm}倍`) : { ex: "拡張マガジン", sup: "サプレッサー", gr: "グリップ" }[it.a]);
+    function bagHtml(m) {
+      const bag = m.bag || [], selIt = bagSel ? placeItem(m, bagSel) : null, SL = [["sc", "スコープ"], ["ex", "マガジン"], ["sup", "マズル"], ["gr", "グリップ"]];
+      const cell = (i) => { const it = bag[i]; return it ? `<div class="bag-it ${bagSel === "b" + i ? "sel" : ""} ${it.t}" data-drag="b${i}" data-drop="bag">${itName(it)}</div>` : `<div class="bag-it none" data-drop="bag"></div>` };
+      const wcard = (k) => { const sl = m.w[k]; if (!sl) return `<div class="bag-w none"><b>空き</b></div>`; const Wp = BR_W[sl.w];
+        return `<div class="bag-w ${m.cur === k ? "cur" : ""}"><p><b style="color:${BR_LV[sl.lv].c}">${Wp.n}</b> <small>${BR_LV[sl.lv].n}・弾 ${sl.ammo}/${brMag(sl)}</small></p><div class="bag-slots">${SL.map(([key, t]) => { const it = slotItem(sl, key), ok = selIt && fits(selIt, sl, key), no = key === "sup" && sl.w === 2; return `<div class="bag-slot ${it ? "on" : ""} ${ok ? "ok" : ""} ${no ? "no" : ""} ${bagSel === `w${k}:${key}` ? "sel" : ""}" data-drop="w${k}:${key}" ${it ? `data-drag="w${k}:${key}"` : ""}><small>${t}</small>${it ? itName(it) : no ? "×" : "—"}</div>` }).join("")}</div>
+          <div class="bag-row">${Wp.auto ? [["auto", "連射"], ["semi", "単発"]].map(([v, t]) => `<button class="chipbtn ${(sl.semi ? "semi" : "auto") === v ? "on" : ""}" data-bag="mode" data-k="${k}" data-v="${v}">${t}</button>`).join("") : ""}<button class="chipbtn" data-bag="drop" data-k="${k}">捨てる</button></div></div>` };
+      return `<div class="bag-l" data-drop="bag"><p class="bag-h">バッグ <small>${bag.length}/${BAG_MAX}　なぞって武器へ（タップ→枠をタップでもOK）</small></p><div class="bag-grid">${Array.from({ length: BAG_MAX }, (_, i) => cell(i)).join("")}</div>
+        <p class="bag-h">回復・投げる物</p><div class="bag-cons"><span>救急箱 ${m.med}</span><span>包帯 ${m.band}</span><span>ドリンク ${m.drk}</span><span>手榴弾 ${m.gren}</span><span>スモーク ${m.smk}</span></div></div>
+        <div class="bag-r">${wcard(0)}${wcard(1)}<button class="btn small" data-bag="close">とじる</button></div>`;
+    }
+    // バッグの操作：なぞって運ぶ（指のあとに物がついてくる）・タップで選んで枠をタップ
+    function bagDown(ev) { const t = ev.target.closest("[data-drag]"); if (!t) return; ev.preventDefault(); bagDrag = { src: t.dataset.drag, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, id: ev.pointerId, label: t.textContent } }
+    function bagMoveEv(ev) { if (!bagDrag || ev.pointerId !== bagDrag.id) return; if (!bagDrag.moved && Math.hypot(ev.clientX - bagDrag.x, ev.clientY - bagDrag.y) > 8) { bagDrag.moved = true; bagSel = bagDrag.src; lastBtn = ""; const g = document.createElement("div"); g.className = "bag-ghost"; g.textContent = bagDrag.label; document.body.appendChild(g); bagDrag.ghost = g } if (bagDrag.ghost) Object.assign(bagDrag.ghost.style, { left: ev.clientX + "px", top: ev.clientY + "px" }) }
+    function bagUp(ev) {
+      const el = document.elementFromPoint(ev.clientX, ev.clientY), dz = el && el.closest("[data-drop]"), dg = el && el.closest("[data-drag]");
+      if (bagDrag && ev.pointerId === bagDrag.id) { const d0 = bagDrag; bagDrag = null; if (d0.ghost) d0.ghost.remove();
+        if (d0.moved) { if (dz) bagMove(d0.src, dz.dataset.drop); bagSel = null; lastBtn = ""; return }
+        if (bagSel && bagSel !== d0.src && dz) { bagMove(bagSel, dz.dataset.drop); bagSel = null } else bagSel = bagSel === d0.src ? null : d0.src; lastBtn = ""; return }
+      if (bagSel && dz && !dg) { bagMove(bagSel, dz.dataset.drop); bagSel = null; lastBtn = "" }
+    }
+    function bagAct(k2, kk, v) { const m = meE(); if (!m) return; const sl = m.w[Number(kk)];
+      if (k2 === "close") { bagOpen = false; bagSel = null }
+      else if (k2 === "mode" && sl) { sl.semi = v === "semi"; floats.push({ txt: sl.semi ? "単発にした（指切り）" : "連射にした（フルオート）", col: "#7FD0FF", t: 0 }) }
+      else if (k2 === "drop" && sl) { const k = Number(kk); dropWeapon(m, Object.assign({}, sl)); m.w[k] = null; if (m.cur === k) m.cur = 1 - k; m.rl = 0; adsOn = false } }
     // 回復ボタン：体力が少ないと救急箱、まだあるときは包帯、なければドリンク（自動でえらぶ）
     function heal() { const m = meE(); if (!m || !m.alive || !m.landed || m.healT > 0 || m.hp >= 100) return; const k = m.hp <= 60 && m.med > 0 ? "med" : m.band > 0 && m.hp < 75 ? "band" : m.drk > 0 && !(m.reg > 0) ? "drk" : m.med > 0 ? "med" : null; if (!k) { floats.push({ txt: m.band > 0 ? "包帯は体力75まで" : "回復アイテムがない", col: "#fff", t: 0 }); return } m.healK = k; m.healT = k === "med" ? 4 : k === "band" ? 2 : 1.5; adsOn = false; meSnd("heal") }
     function addHp(m, v) { v = Math.max(0, v); if (v <= 0) return; if (host) m.hp = Math.min(100, m.hp + v); else { m.hp = Math.min(100, m.hp + v); myHeal = [myHeal[0] + 1, r2(myHeal[1] + v)] } }
@@ -7238,19 +7279,19 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       renderer.render(scene, camera); hud(dt); panel();
       // ボタン
       if (m) {
-        const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${brMag(s)}`}</small><small class="br-att">${[(s.sc || 1) > 1 ? ((s.sc < 2) ? "ドット" : s.sc + "倍") : "", s.ex ? "拡張" : "", s.sup ? "消音" : "", s.gr ? "グリップ" : "", BR_W[s.w].auto ? (s.semi ? "単発" : "連射") : ""].filter(Boolean).join("・")}${m.cur === k ? "　⚙" : ""}</small>` : `<small>空き</small>`);
-        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi, s0.scs].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi, s1.scs].join("."), wpnOpen, m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
+        const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${brMag(s)}`}</small><small class="br-att">${[(s.sc || 1) > 1 ? ((s.sc < 2) ? "ドット" : s.sc + "倍") : "", s.ex ? "拡張" : "", s.sup ? "消音" : "", s.gr ? "グリップ" : "", BR_W[s.w].auto ? (s.semi ? "単発" : "連射") : ""].filter(Boolean).join("・")}${m.cur === k ? "　🎒" : ""}</small>` : `<small>空き</small>`);
+        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi].join("."), bagOpen, bagSel, (m.bag || []).map((b) => b.zm || b.a).join("."), m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
         if (key !== lastBtn) {
           lastBtn = key; $("#b-s0").innerHTML = lbl(s0, 0); $("#b-s1").innerHTML = lbl(s1, 1); $("#b-s0").classList.toggle("on", m.cur === 0); $("#b-s1").classList.toggle("on", m.cur === 1);
           $("#b-med").innerHTML = `回復<br><small>救${m.med}・包${m.band}・飲${m.drk}</small>`; $("#b-gr").innerHTML = `手榴弾<br><small>${m.gren}</small>`; $("#b-sm").innerHTML = `スモーク<br><small>${m.smk}</small>`; $("#b-ads").classList.toggle("on", adsOn); $("#b-cr").classList.toggle("on", crOn); $("#b-pr").classList.toggle("on", prOn); $("#b-ll").classList.toggle("on", lnOn === -1); $("#b-lr").classList.toggle("on", lnOn === 1);
           const pk = $("#b-pick"); pk.classList.toggle("on", pickTarget >= 0); if (pickTarget >= 0) pk.textContent = `拾う：${brItemName(itemById(pickTarget))}（今の武器と持ちかえ）`;
           cardEl.classList.toggle("br-dead", !m.alive || S.ph !== "play");
-          if (!m.alive || S.ph !== "play" || !m.w[wpnOpen]) wpnOpen = -1; cardEl.classList.toggle("br-wpnon", wpnOpen >= 0); $("#br-wpn").innerHTML = wpnOpen >= 0 ? wpnHtml(m) : "";
+          if (!m.alive || S.ph !== "play" || !m.landed) bagOpen = false; cardEl.classList.toggle("br-bagon", bagOpen); $("#br-bag").innerHTML = bagOpen ? bagHtml(m) : "";
         }
       }
     });
     return () => {
-      wind.stop(); carEng.stop(); stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
+      wind.stop(); carEng.stop(); stopLoop(); removeEventListener("keydown", onKey); removeEventListener("keyup", onKeyUp); removeEventListener("pointermove", bagMoveEv); removeEventListener("pointerup", bagUp); removeEventListener("pointercancel", bagUp); document.querySelectorAll(".bag-ghost").forEach((g) => g.remove()); try { screen.orientation.unlock() } catch (_) {} try { if (document.fullscreenElement) document.exitFullscreen() } catch (_) {} ROT90 = false; document.documentElement.classList.remove("br-fake", "br-on");
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach((mm) => { if (mm.map) mm.map.dispose(); mm.dispose() }) });
       Object.values(W3.texs).forEach((t) => t.dispose()); scene.background.dispose(); renderer.dispose(); try { renderer.forceContextLoss() } catch (_) {}
       if (actx) try { actx.close() } catch (_) {}
@@ -8416,7 +8457,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0329";
+  const APP_VER = "1031-0345";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
