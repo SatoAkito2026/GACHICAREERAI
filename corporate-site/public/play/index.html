@@ -283,6 +283,7 @@ html.playing .br.picking #act-msg, html.playing .kt.picking #act-msg { left: aut
 .br-slot.on { border-color: #FFE14D; background: rgba(20,18,42,.75) }
 .br-pick { left: 50%; transform: translateX(-50%); bottom: 96px; display: none; appearance: none; border: 0; border-radius: 12px; padding: 10px 16px; background: #FFE14D; color: #1F1B3A; font: 900 14px var(--body) }
 .br-pick.on { display: block }
+.br-car { bottom: 140px; background: #7FD0FF }
 .br.br-dead .br-ui { display: none }
 .br-rot { position: absolute; inset: 0; z-index: 9; padding: 16px; background: #14122A; color: #fff; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font-family: var(--display); font-size: 24px }
 .br-rot small { font-family: var(--body); font-size: 14px; color: #ccc }
@@ -3961,14 +3962,14 @@ html.br-portrait .br-ui { display: none }
         <div class="br-ui">
           <div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
           <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
-          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
+          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="br-pick br-car" id="b-car">車に乗る</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-med">回復</button>
           <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
         <div class="br-hudl"><div id="hud-info" data-n="生存・キル・お知らせ"></div><div id="hud-zone" data-n="安全地帯"></div><div id="hud-map" data-n="地図"></div><div id="hud-hp" data-n="体力"></div></div>
         <div class="br-top"><button class="btn ghost small" data-act="howto">遊び方</button><button class="btn ghost small" data-act="sens">感度</button><button class="btn ghost small" data-br="layout">ボタン配置</button><button class="btn ghost small" data-act="menu">メニュー</button></div>
         <div class="br-rot"><b>スマホを横にしてね</b><small>荒野バトルは横画面であそぶゲームです</small><button class="btn" data-br="land" style="margin-top:10px">横画面にする</button><small>Android で横にならないときは、このボタンを押してください</small></div>
-        <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ・Z で伏せる・F／E で左／右リーン。</p></section></section>`;
+        <p class="muted">飛行機から飛び降りて、スティックで着地する場所をえらびます（ジャンプでパラシュートを早めに開く）。左のスティックで歩き、大きくたおすとダッシュ。右側をなぞると向きが変わります。武器・ベスト・ヘルメット・救急箱・手榴弾・スコープは近くを通ると拾います（同じ武器の強い物は自動で強化）。持ちかえるときは「拾う」。低いかべや木箱のうしろで「しゃがむ」「伏せる」と弾をよけられます。近くの車は「車に乗る」で運転できます（スティックの上で前・下でバック・左右でハンドル、人をひくとダメージ、「車から降りる」で降りる）。かべの横に隠れて「左リーン」「右リーン」を押すと、頭と銃だけを横に出して撃てます（もう一度押すと戻る）。海や池は泳げます。スタート前に「キャラを選ぶ」で服・髪・帽子を選べます（見た目だけ）。白い円（安全地帯）の外にいると体力が減ります。最後のひとりになったら勝ち。パソコンは WASD・マウスでなぞる・スペースで撃つ・右クリックでスコープ・C でしゃがむ・R でリロード・G で手榴弾・Q でジャンプ・Z で伏せる・V で車に乗る／降りる・F／E で左／右リーン。</p></section></section>`;
     },
     mount() {
       let alive = true, stop = null;
@@ -4201,7 +4202,7 @@ html.br-portrait .br-ui { display: none }
       S.lk = E.map((e, i) => (i === 0 ? brLookCode(myLook) : i < S.hum.length ? ((peerS(humPeer(i)) || {}).lk ?? rl()) : rl()));
       const DF = BR_DIFF[S.diff ?? 1]; E.forEach((e) => { e.err = DF.err[0] + Math.random() * DF.err[1]; e.react = DF.react * (.8 + Math.random() * .4); e.turn = DF.turn; e.see = DF.see; e.gren2 = DF.gren });
       S.zone = { k: 0, st: "wait", t: BR_ZONE[0].wait * ZK + 12, cx: C0, cz: C0, r: M.W * .74 }; zoneTarget(S.zone);
-      S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear();
+      S.ph = "play"; S.feed = []; S.fx = []; S.grl = []; S.winner = -1; taken.clear(); resetCars(); E.forEach((e) => (e.car = null));
       const m = E[myIdx]; camYaw = Math.atan2(C0 - m.x, C0 - m.z);
     }
     // ---- 操作
@@ -4218,9 +4219,10 @@ html.br-portrait .br-ui { display: none }
     const tapBtn = (id, fn) => holdBtn($(id), () => { au(); fn() });
     tapBtn("#b-ads", () => (adsOn = !adsOn)); tapBtn("#b-cr", () => { crOn = !crOn; if (crOn) prOn = false }); tapBtn("#b-pr", () => { prOn = !prOn; if (prOn) crOn = false });
     // リーン：かべのかげから頭と銃だけ横に出す。もう一度押すと戻る
+    tapBtn("#b-car", () => { const m = meE(); if (!m) return; if (m.car != null) exitCar(m); else enterCar(m) });
     tapBtn("#b-ll", () => (lnOn = lnOn === -1 ? 0 : -1)); tapBtn("#b-lr", () => (lnOn = lnOn === 1 ? 0 : 1)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-gr", throwGren); tapBtn("#b-med", heal);
     tapBtn("#b-s0", () => swapTo(0)); tapBtn("#b-s1", () => swapTo(1)); tapBtn("#b-pick", () => { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) });
-    const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") { crOn = !crOn; if (crOn) prOn = false } else if (k === "z") { prOn = !prOn; if (prOn) crOn = false } else if (k === "e") lnOn = lnOn === 1 ? 0 : 1; else if (k === "f") lnOn = lnOn === -1 ? 0 : -1; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(); else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) } };
+    const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") { crOn = !crOn; if (crOn) prOn = false } else if (k === "z") { prOn = !prOn; if (prOn) crOn = false } else if (k === "v") { const m = meE(); if (m) { if (m.car != null) exitCar(m); else enterCar(m) } } else if (k === "e") lnOn = lnOn === 1 ? 0 : 1; else if (k === "f") lnOn = lnOn === -1 ? 0 : -1; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(); else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, M.items[pickTarget], true) } };
     const onKeyUp = (e) => { if (e.key === " ") fireHeld = false };
     addEventListener("keydown", onKey); addEventListener("keyup", onKeyUp);
     // Android は、ホーム画面に入れたアプリが前の「縦固定」の設定のままのことがあるので、ゲーム中だけ横に固定する
@@ -4252,6 +4254,35 @@ html.br-portrait .br-ui { display: none }
       const t = ev.target.closest("[data-br]"); if (!t) return; const k = t.dataset.br; if (k === "look-open") picking = true; else if (k === "look-done") picking = false; if (k === "land") lockLand(); else if (k === "layout") { if (editLayer) closeEdit(true); else openEdit() } else if (k === "lay-done") closeEdit(true); else if (k === "lay-reset") { closeEdit(false); lay = {}; ls.set("brLayout", "{}"); applyLay(); openEdit() } if (k === "n") S.n = clamp(S.n + Number(t.dataset.d), 2, 20); else if (k === "diff" && host) { S.diff = Number(t.dataset.v); ls.set("brDiff", S.diff) } else if (k === "start" && host) start(); else if (k === "watch") watching = true };
     cardEl.addEventListener("click", onClick);
     const meE = () => E[myIdx];
+    // ---- 車（オリジナルのデザイン）。乗っている人の画面が動かし、ホストがまとめて全員に送る
+    const CAR_COLS = ["#C0302C", "#2E6FD0", "#F2F2F2", "#2A2C34", "#F2B233", "#3A7A44", "#8A8E96"];
+    const cars = []; { const rc = rng(((me.m.seed || 1) % 100000) + 77), nCar = Math.round(6 * M.W / 380), cand = [...M.towns.map((t) => [t[0], t[1]]), [C0, C0]];
+      for (let k = 0; k < nCar * 30 && cars.length < nCar; k++) { const t = cand[Math.floor(rc() * cand.length)], x = clamp(t[0] + (rc() - .5) * 70, 8, M.W - 8), z = clamp(t[1] + (rc() - .5) * 70, 8, M.D - 8); if (blocked(x, z, 3) || cars.some((c) => Math.hypot(c.x - x, c.z - z) < 25)) continue; cars.push({ id: cars.length, x, z, yaw: rc() * 6.28, v: 0, dr: -1, x0: x, z0: z, y0: 0, col: CAR_COLS[Math.floor(rc() * CAR_COLS.length)], jeep: rc() < .4 }) } cars.forEach((c) => (c.y0 = c.yaw)) }
+    const carMeshes = cars.map((c) => { const B = phParts(), col = c.col, dk = phShade(col, -.25);
+      B.box(1.9, .55, 4.3, col, 0, .62, 0); B.box(1.92, .12, 4.32, dk, 0, .38, 0); B.box(1.85, .08, 1.4, col, 0, .92, 1.35, 0, .06);
+      if (c.jeep) { B.box(1.8, .5, 1.9, col, 0, 1.1, -.55); for (const sx of [-1, 1]) { B.seg(sx * .85, .9, .45, sx * .85, 1.75, .3, .07, .07, "#222"); B.seg(sx * .85, .9, -1.45, sx * .85, 1.75, -1.45, .07, .07, "#222") } B.box(1.8, .06, 2, "#222", 0, 1.78, -.55); B.box(1.75, .55, .05, "#1A2230", 0, 1.45, .32, 0, -.25); B.cyl(.38, .38, .25, "#151517", 0, .95, -2.25, 14, Math.PI / 2) }
+      else { B.box(1.7, .6, 2.1, col, 0, 1.2, -.35); B.box(1.72, .5, .05, "#1A2230", 0, 1.2, .72, 0, -.45); B.box(1.72, .45, .05, "#1A2230", 0, 1.2, -1.42, 0, .4); for (const sx of [-1, 1]) B.box(.05, .42, 1.8, "#1A2230", sx * .86, 1.22, -.35) }
+      for (const sx of [-1, 1]) { B.box(.35, .14, .05, "#FFF6D0", sx * .62, .7, 2.16); B.box(.32, .12, .05, "#E23A3A", sx * .62, .72, -2.16) } B.box(1.0, .15, .05, "#555", 0, .5, 2.17);
+      for (const [x, z] of [[-.9, 1.35], [.9, 1.35], [-.9, -1.35], [.9, -1.35]]) { B.cyl(.38, .38, .3, "#151517", x, .38, z, 16, 0, Math.PI / 2); B.cyl(.2, .2, .32, "#B8BCC6", x, .38, z, 10, 0, Math.PI / 2) }
+      const mm = new T.Mesh(phMerge(B.L, false), W3.mat); mm.castShadow = true; scene.add(mm); return mm });
+    const resetCars = () => cars.forEach((c) => { c.x = c.x0; c.z = c.z0; c.yaw = c.y0; c.v = 0; c.dr = -1 });
+    const nearCar = (m) => { let best = null, bd = 3.2; for (const c of cars) { const d = Math.hypot(c.x - m.x, c.z - m.z); if (d < bd && c.dr < 0) { bd = d; best = c } } return best };
+    function enterCar(m) { const c = nearCar(m); if (!c || !m.alive || !m.landed || m.sw) return; c.dr = m.i; c.v = 0; m.car = c.id; prOn = crOn = adsOn = false; lnOn = 0; camYaw = c.yaw; sfx("hit", .4) }
+    function exitCar(m) { const c = cars[m.car]; m.car = null; if (!c) return; c.dr = -1; c.v = 0; const rx = -Math.cos(c.yaw), rz = Math.sin(c.yaw); for (const sd of [-1, 1, 0]) { const x = c.x + rx * sd * 2.2 + (sd ? 0 : Math.sin(c.yaw) * 3.2), z = c.z + rz * sd * 2.2 + (sd ? 0 : Math.cos(c.yaw) * 3.2); if (!blocked(x, z, .5)) { m.x = x; m.z = z; break } } m.y = 0 }
+    function driveCar(m, ix, iz, dt) {
+      const c = cars[m.car]; if (!c) { m.car = null; return }
+      const th = clamp(-iz, -1, 1), st = clamp(ix, -1, 1);
+      const acc = th > .1 ? (c.v < 0 ? 16 : 7.5 * (1 - c.v / 19)) : th < -.1 ? (c.v > 0 ? -16 : -5) : -Math.sign(c.v) * Math.min(Math.abs(c.v) / Math.max(dt, 1e-3), 3.5);
+      c.v = clamp(c.v + acc * dt, -6, 18); c.yaw -= st * dt * 1.8 * clamp(c.v / 7, -1, 1);
+      const nx = c.x + Math.sin(c.yaw) * c.v * dt, nz = c.z + Math.cos(c.yaw) * c.v * dt;
+      if (blocked(nx, nz, 1.3)) { if (Math.abs(c.v) > 9) hurtT = .3; c.v *= -.3 } else { c.x = nx; c.z = nz }
+      m.x = c.x; m.z = c.z; m.y = 0; m.yaw = c.yaw; m.mv = Math.abs(c.v) > .5; m.cr = m.pr = m.ads = false; m.ln = 0;
+      if (Math.abs(c.v) > 2) camYaw += phAng(c.yaw - camYaw) * Math.min(1, dt * 2.2);
+    }
+    // ホスト：車でひく（速いほど大きいダメージ）
+    const runHit = {};
+    function carHits(dt) { for (const c of cars) { if (c.dr < 0 || Math.abs(c.v) < 5) continue; for (const e of E) { if (!e.alive || e.i === c.dr || e.car != null || !e.landed) continue; if (Math.hypot(e.x - c.x, e.z - c.z) > 2.1) continue; const k = c.id + ":" + e.i; if (runHit[k] && tAll - runHit[k] < 1) continue; runHit[k] = tAll; hurt(e, Math.abs(c.v) * 5, c.dr, false, "車でひいた") } } }
+    function updCars() { cars.forEach((c, i) => { const mm = carMeshes[i]; mm.position.set(c.x, 0, c.z); mm.rotation.y = c.yaw; const m = meE(); mm.visible = !m || Math.hypot(c.x - m.x, c.z - m.z) < 170 }) }
     function jump() { const m = meE(); if (!m || !m.alive) return; if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false; prOn = false } }
     function swapTo(k) { const m = meE(); if (m && m.w[k] && m.cur !== k) { m.cur = k; m.rl = 0; adsOn = false } }
     function heal() { const m = meE(); if (m && m.alive && m.landed && m.med > 0 && m.hp < 100 && m.healT <= 0) { m.healT = 3; adsOn = false } }
@@ -4261,7 +4292,7 @@ html.br-portrait .br-ui { display: none }
       floats.push({ txt: "手榴弾を投げた！", col: "#FFE14D", t: 0 });
     }
     function tryFire() {
-      const m = meE(); if (!m || !m.alive || S.ph !== "play") return;
+      const m = meE(); if (!m || !m.alive || S.ph !== "play" || m.car != null) return;
       const d = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion), o = camera.position.clone().addScaledVector(d, camDist * .9), r = fire(m, o, d); if (!r) return;
       const tp = new T.Vector3(); vis[myIdx].tip.getWorldPosition(tp); const tip = [tp.x, tp.y, tp.z];
       r.hits.forEach((h, k) => { if (k < 3) shotFx(tip, h.p, h.code >= 0, r.sr); if (h.code >= 0) { hitT = .25; sfx("hit", .8) } });
@@ -4274,13 +4305,15 @@ html.br-portrait .br-ui { display: none }
     const zoomOf = (m) => { const sl = m && curW(m); if (!sl) return 1.3; const Wp = BR_W[sl.w]; if (m.scope > 1 && sl.w !== 2) return Wp.k === "sr" ? Math.max(4, m.scope) : m.scope; return Wp.zoom };
     // ---- 表示
     function updVis(dt) {
-      ensureVis(E.length); applyLooks(); const m = meE(), scoped = adsOn && m && zoomOf(m) >= 3.5 && m.alive;
+      ensureVis(E.length); applyLooks(); updCars(); const m = meE(), scoped = adsOn && m && zoomOf(m) >= 3.5 && m.alive;
       for (const e of E) {
         const v = vis[e.i], far = m && Math.hypot(e.x - m.x, e.z - m.z) > 170; v.g.visible = e.alive && !far && !(e.i === myIdx && scoped); if (!v.g.visible) continue;
         v.g.position.set(e.x, e.y, e.z); v.g.rotation.y = e.yaw;
         const sp = Math.hypot(e.x - v.px, e.z - v.pz) / Math.max(dt, 1e-3); v.px = e.x; v.pz = e.z; e.spd = e.spd == null ? sp : e.spd * .85 + Math.min(sp, 12) * .15; const k = clamp(sp / 4, 0, 1); v.ph += sp * dt * 3.2;
         const sw = Math.sin(v.ph) * .75 * k, air = e.y > .05 && e.landed, fall = !e.landed;
         // 伏せる：体を前にたおして地面にねる
+        const inCar = e.car != null || cars.some((c) => c.dr === e.i && Math.hypot(c.x - e.x, c.z - e.z) < 2);
+        if (inCar) { v.body.rotation.set(0, 0, 0); v.body.position.set(-.45, .05, -.2); v.legL.rotation.x = v.legR.rotation.x = -1.5; v.kneeL.rotation.x = v.kneeR.rotation.x = 1.45; v.armL.rotation.set(-1.2, 0, -.2); v.armR.rotation.set(-1.2, 0, .2); v.elbowL.rotation.set(-.3, 0, 0); v.elbowR.rotation.set(-.3, 0, 0); v.guns.forEach((g) => (g.visible = false)); v.para.visible = false; v.vest.visible = e.vest > 0; v.helm.visible = e.helm > 0; v.cap.visible = !e.helm; continue }
         v.body.rotation.x = e.pr ? 1.45 : 0; v.body.position.y = e.pr ? .14 : e.cr ? -.36 : 0; v.body.position.z = e.pr ? -.95 : 0; v.body.rotation.z = (e.ln || 0) * (e.pr ? .22 : .32); v.body.position.x = -(e.ln || 0) * (e.pr ? .35 : .2);
         v.legL.rotation.x = fall ? .4 : e.cr ? -1.35 : air ? -.6 : sw; v.legR.rotation.x = fall ? -.3 : e.cr ? -1.1 : air ? .2 : -sw;
         v.kneeL.rotation.x = fall ? .5 : e.cr ? 1.95 : air ? 1.1 : Math.max(0, sw) * 1.2 + .08; v.kneeR.rotation.x = fall ? .3 : e.cr ? 1.7 : air ? .7 : Math.max(0, -sw) * 1.2 + .08;
@@ -4309,7 +4342,7 @@ html.br-portrait .br-ui { display: none }
       const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw);
       // 家の中では、カメラを近くして肩の横にずらすのを小さくする（かべの向こうに出ないように）
       const inside = !fall && M.houses.find((hs) => f.x > hs.x0 && f.x < hs.x1 && f.z > hs.z0 && f.z < hs.z1);
-      const sh = fall ? 0 : z > 1 ? .4 : inside ? .3 : .75, th = f.y + (fall ? 1 : f.pr ? .7 : f.cr ? 1.2 : 1.65), d0 = fall ? 9 : z > 1 ? 1.1 : inside ? 2.1 : 3.3;
+      const sh = f.car != null ? 0 : fall ? 0 : z > 1 ? .4 : inside ? .3 : .75, th = f.y + (f.car != null ? 2.3 : fall ? 1 : f.pr ? .7 : f.cr ? 1.2 : 1.65), d0 = f.car != null ? 7.5 : fall ? 9 : z > 1 ? 1.1 : inside ? 2.1 : 3.3;
       const ls2 = f.ln ? f.ln * (sh + .6) : sh, tg = new T.Vector3(f.x + rx * ls2, th - Math.abs(f.ln || 0) * .12, f.z + rz * ls2), back = dir.clone().negate();
       // 少しずらした5本の線で、かべ・木に当たらないところまでカメラを近づける
       let dist = d0; for (const [ox, oy] of [[0, 0], [.35, 0], [-.35, 0], [0, .3], [0, -.3]]) { const o2 = new T.Vector3(tg.x + rx * ox, tg.y + oy, tg.z + rz * ox); for (const b of M.boxes) { const t = phRayBox(o2, back, b, dist); if (t >= 0 && t < dist) dist = t } for (const cc of M.circles) { if (Math.abs(cc.x - f.x) > 12 || Math.abs(cc.z - f.z) > 12) continue; const t = phRayCyl(o2, back, cc.x, cc.z, cc.r, 0, cc.h, dist); if (t >= 0 && t < dist) dist = t } }
@@ -4412,7 +4445,8 @@ html.br-portrait .br-ui { display: none }
         const pS = S.ph; S = Object.assign({}, S, ox.S); const n = S.n;
         if (S.ph !== "lobby" && S.hum) { const k = S.hum.indexOf(cid); outsider = k < 0; myIdx = k < 0 ? 0 : k } else outsider = false;
         if (S.ph !== "lobby" && E.length !== n) { E = Array.from({ length: n }, (_, i) => mkE(i)); ensureVis(n) }
-        if (pS === "lobby" && S.ph === "play") { taken.clear(); seenGr.clear() }
+        if (pS === "lobby" && S.ph === "play") { taken.clear(); seenGr.clear(); resetCars() }
+        if (ox.S.cars) ox.S.cars.forEach((a, i) => { const c = cars[i]; if (!c) return; const mine = meE() && meE().car === i; if (mine && a[3] >= 0 && a[3] !== myIdx) { exitCar(meE()); return } if (mine) return; const al = Math.min(1, dt * 10); c.x += (a[0] - c.x) * al; c.z += (a[1] - c.z) * al; c.yaw += phAng(a[2] - c.yaw) * al; c.dr = a[3]; c.v = a[4] });
         (ox.tk || []).forEach((id) => taken.add(id));
         if (ox.E) ox.E.forEach((a, i) => {
           const e = E[i]; if (!e) return; e.hp = a[5]; e.alive = !!(a[6] & 1); e.kills = a[11]; e.rank = a[12]; e.killer = a[13]; e.lastHit = a[15];
@@ -4435,9 +4469,10 @@ html.br-portrait .br-ui { display: none }
           m.pr = prOn && m.landed && !m.sw; m.ln = m.landed && !m.sw ? lnOn : 0; m.cr = crOn && m.landed && !m.pr; m.ads = adsOn && m.landed; m.fireCd -= dt;
           if (m.rl > 0) { m.rl -= dt; if (m.rl <= 0) { const sl = curW(m); if (sl) sl.ammo = BR_W[sl.w].mag } }
           if (m.healT > 0) { m.healT -= dt; if (m.healT <= 0) { m.med--; if (host) m.hp = Math.min(100, m.hp + 50); else myHeal = [myHeal[0] + 1, 50] } }
-          body(m, mg > .1 ? mx : 0, mg > .1 ? mz : 0, dt, mg > .92 && !adsOn && !crOn && !prOn);
-          m.yaw = m.landed && (adsOn || fireHeld || fire2Held || mg < .1) ? camYaw : mg > .1 ? Math.atan2(mx, mz) : m.yaw; if (adsOn || fireHeld || fire2Held) m.yaw = camYaw; m.pitch = camPitch;
+          if (m.car != null) driveCar(m, ix, iz, dt); else body(m, mg > .1 ? mx : 0, mg > .1 ? mz : 0, dt, mg > .92 && !adsOn && !crOn && !prOn);
+          if (m.car == null) m.yaw = m.landed && (adsOn || fireHeld || fire2Held || mg < .1) ? camYaw : mg > .1 ? Math.atan2(mx, mz) : m.yaw; if (adsOn || fireHeld || fire2Held) m.yaw = camYaw; m.pitch = camPitch;
           const sl = curW(m); if ((fireHeld || fire2Held) && sl && BR_W[sl.w].auto) tryFire();
+          const nc = m.car != null ? cars[m.car] : nearCar(m), cb = $("#b-car"); if (cb) { const on = !!nc && m.landed && !m.sw, tx = m.car != null ? "車から降りる" : "車に乗る"; cb.classList.toggle("on", on); if (cb.textContent !== tx) cb.textContent = tx }
           // 拾う
           pickTarget = -1; if (m.landed) for (const it of M.items) { if (taken.has(it.id) || Math.abs(it.x - m.x) > 1.6 || Math.abs(it.z - m.z) > 1.6) continue; const md = pickMode(m, it); if (md === "auto") doPick(m, it, false); else if (md === "swap") pickTarget = it.id }
         }
@@ -4449,18 +4484,21 @@ html.br-portrait .br-ui { display: none }
             const g = E[gi]; if (g.alive) { g.x = ox.px; g.z = ox.pz; g.y = ox.y; g.yaw = ox.yaw; g.pitch = ox.pt; g.cr = !!ox.cr; g.pr = !!ox.pr; g.ln = ox.ln || 0; g.ads = !!ox.ads; g.landed = !!ox.ld; g.para = !!ox.pa; g.vest = ox.vs; g.helm = ox.hm; g.w = [ox.wp >= 0 ? { w: ox.wp, lv: ox.wl, ammo: 1 } : null, null]; g.cur = 0 }
             for (const s of ox.sh || []) if (s[0] > gs.shot) { gs.shot = s[0]; if (g.alive && s[1] >= 0 && E[s[1]]) hurt(E[s[1]], s[2], gi, !!s[3], s[10]); S.fx = [...S.fx, [++fxId, gi, ...s.slice(4, 10), s[1] >= 0 ? 1 : 0, s[11]]].slice(-14); shotFx(s.slice(4, 7), s.slice(7, 10), s[1] >= 0, s[11]) }
             for (const gr of ox.gr || []) { const gid = 1e6 * gi + gr[0]; if (!seenGr.has(gid)) { spawnGren(gid, gi, ...gr.slice(1)); S.grl = [...S.grl, [gid, gi, ...gr.slice(1)]].slice(-10) } }
+            const myc = ox.car ? cars[ox.car[0]] : null; for (const c of cars) if (c.dr === gi && c !== myc) { c.dr = -1; c.v = 0 } if (myc && g.alive && (myc.dr < 0 || myc.dr === gi)) { myc.dr = gi; myc.x = ox.car[1]; myc.z = ox.car[2]; myc.yaw = ox.car[3]; myc.v = ox.car[4]; g.car = myc.id } else g.car = null;
             if (ox.hl && ox.hl[0] > gs.heal) { gs.heal = ox.hl[0]; if (g.alive) g.hp = Math.min(100, g.hp + ox.hl[1]) }
             for (const id of ox.pk || []) taken.add(id);
           }
           for (const e of E) if (!isHuman(e.i) || (e.i > 0 && !humPeer(e.i))) bot(e, dt);
+          for (const c of cars) if (c.dr >= 0 && (!E[c.dr] || !E[c.dr].alive)) { c.dr = -1; c.v = 0 } carHits(dt);
         }
-        const out = { S: { ph: S.ph, diff: S.diff, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1, hum: S.hum, lk: S.lk },
+        const out = { S: { ph: S.ph, diff: S.diff, n: S.n, names: S.names, zone: S.zone && Object.fromEntries(Object.entries(S.zone).map(([k, v]) => [k, typeof v === "number" ? r2(v) : v])), feed: S.feed, plane: S.plane && { z: r2(S.plane.z), dir: S.plane.dir, t: r2(S.plane.t) }, winner: S.winner, h1: S.h1, hum: S.hum, lk: S.lk, cars: cars.map((c) => [r2(c.x), r2(c.z), r2(c.yaw), c.dr, r2(c.v)]) },
           E: E.map((e) => { const sl = curW(e); return [r2(e.x), r2(e.z), r2(e.y), r2(e.yaw), r2(e.pitch), Math.ceil(e.hp), (e.alive ? 1 : 0) | (e.cr ? 2 : 0) | (e.ads ? 4 : 0) | (e.healT > 0 ? 8 : 0) | (e.para ? 16 : 0) | (e.landed ? 32 : 0) | (e.pr ? 64 : 0) | (e.ln === -1 ? 128 : e.ln === 1 ? 256 : 0), sl ? sl.w : -1, sl ? sl.lv : 0, e.vest, e.helm, e.kills, e.rank, e.killer ?? -1, e.tp, e.lastHit ?? -1] }), fx: S.fx, grl: S.grl, tk: [...taken] };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       } else if (m && !outsider) {
-        const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), cr: m.cr ? 1 : 0, pr: m.pr ? 1 : 0, ln: m.ln || 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks };
+        const sl = curW(m), out = { px: r2(m.x), pz: r2(m.z), y: r2(m.y), yaw: r2(m.yaw), pt: r2(m.pitch), car: m.car != null && cars[m.car] ? [m.car, r2(cars[m.car].x), r2(cars[m.car].z), r2(cars[m.car].yaw), r2(cars[m.car].v)] : null, cr: m.cr ? 1 : 0, pr: m.pr ? 1 : 0, ln: m.ln || 0, ads: m.ads ? 1 : 0, ld: m.landed ? 1 : 0, pa: m.para ? 1 : 0, vs: m.vest, hm: m.helm, wp: sl ? sl.w : -1, wl: sl ? sl.lv : 0, sh: myShots, gr: myGren, hl: myHeal, pk: myPicks };
         const js = JSON.stringify(out); if (js !== lastSend) { lastSend = js; sendX(out) }
       }
+      if (m && m.car != null && (!m.alive || S.ph !== "play")) exitCar(m);
       if (m && m.hp < myHpSeen - .5) { hurtT = .45; const at = E[m.lastHit]; hitFrom = at && at !== m ? { x: at.x, z: at.z, t: 0 } : null } if (m) myHpSeen = m.hp;
       stepGren(dt); updVis(dt); updCam(dt); stepFx(dt);
       W3.wmat.map.offset.x = (tAll * .02) % 1;
@@ -5054,7 +5092,7 @@ html.br-portrait .br-ui { display: none }
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1030-1911";
+  const APP_VER = "1030-1920";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
