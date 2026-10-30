@@ -298,6 +298,9 @@ html.playing .sc3 #act-msg { top: 50%; left: 50%; right: auto; width: min(760px,
 .br.br-specon .br-spec { display: flex }
 .br-drop { display: none; left: 50%; transform: translateX(-50%); bottom: 70px; appearance: none; border: 0; border-radius: 16px; padding: 16px 34px; background: #FFE14D; color: #1F1B3A; font: 900 20px var(--body); box-shadow: 0 6px 18px rgba(0,0,0,.35) }
 .br-drop:disabled { opacity: .5 } .br.br-plane .br-ui > * { display: none } .br.br-plane .br-ui > .br-drop, .br.br-plane .br-ui > .br-stick { display: block }
+#b-eye { right: calc(max(26px, env(safe-area-inset-right, 0px)) + 142px); top: 16px } #b-eye.on { background: rgba(255,225,77,.55) }
+.br-open { display: none; left: calc(max(24px, env(safe-area-inset-left, 0px)) + 150px); bottom: 150px; width: 76px !important; height: 76px !important; font-size: 18px !important; background: rgba(20,18,42,.55) !important; border: 3px solid rgba(255,255,255,.8) !important }
+.br.br-ff .br-ui > .br-open { display: block }
 #b-bag { left: calc(50% - 184px); bottom: 8px; width: 52px !important; height: 44px !important; border-radius: 10px }
 .br-bag { position: absolute; z-index: 7; inset: 44px 10px 10px; display: none; gap: 10px; background: rgba(20,18,42,.92); color: #fff; border-radius: 16px; padding: 10px; font: 700 12px var(--body); touch-action: none; user-select: none; -webkit-user-select: none }
 .br.br-bagon .br-bag { display: flex } .br-bag p { margin: 0 } .bag-l { flex: 1.1; min-width: 0; overflow: auto } .bag-r { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; overflow: auto }
@@ -6566,7 +6569,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         <div class="br-ui">
           <div class="stick br-stick" id="stick"><div class="knob" id="knob"></div></div>
           <button class="kbtn br-b" id="b-fire2">撃つ</button><button class="kbtn big br-b" id="b-fire">撃つ</button>
-          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="br-pick br-car" id="b-car">車に乗る</button><button class="kbtn small br-b" id="b-bag">バッグ</button><button class="br-drop" id="b-drop">飛び降りる</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
+          <button class="kbtn small br-b" id="b-ads">スコープ</button><button class="kbtn small br-b" id="b-jump">ジャンプ</button><button class="kbtn small br-b" id="b-cr">しゃがむ</button><button class="kbtn small br-b" id="b-pr">伏せる</button><button class="br-pick br-car" id="b-car">車に乗る</button><button class="kbtn small br-b" id="b-bag">バッグ</button><button class="br-drop" id="b-drop">飛び降りる</button><button class="kbtn br-b br-open" id="b-open">開く</button><button class="kbtn small br-b" id="b-eye">👁</button><button class="kbtn small br-b" id="b-ll">左リーン</button><button class="kbtn small br-b" id="b-lr">右リーン</button>
           <button class="kbtn small br-b" id="b-rl">リロード</button><button class="kbtn small br-b" id="b-gr">手榴弾</button><button class="kbtn small br-b" id="b-sm">スモーク</button><button class="kbtn small br-b" id="b-med">回復</button>
           <div class="br-slots" id="br-slots"><button class="br-slot" id="b-s0"></button><button class="br-slot" id="b-s1"></button></div><button class="br-pick" id="b-pick"></button>
         </div>
@@ -6974,12 +6977,14 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     cv.addEventListener("contextmenu", (e) => { e.preventDefault(); adsOn = !adsOn });
     // 撃つボタンは、押したままなぞると向きも変わる
     const fireBtn = (el, set) => { let id = null, lx = 0, ly = 0; el.addEventListener("pointerdown", (e) => { e.preventDefault(); au(); id = e.pointerId; lx = e.clientX; ly = e.clientY; set(true); tryFire(); try { el.setPointerCapture(id) } catch (_) {} }); el.addEventListener("pointermove", (e) => { if (e.pointerId !== id) return; lookBy(e.clientX - lx, e.clientY - ly); lx = e.clientX; ly = e.clientY }); const up = (e) => { if (e.pointerId === id) { id = null; set(false) } }; el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up) };
+    let eyeHeld = false, eyeYaw = 0, eyePitch = 0;
+    { const el = $("#b-eye"); let id = null, lx = 0, ly = 0; el.addEventListener("pointerdown", (e) => { e.preventDefault(); id = e.pointerId; lx = e.clientX; ly = e.clientY; eyeHeld = true; eyeYaw = camYaw; eyePitch = camPitch; el.classList.add("on"); try { el.setPointerCapture(id) } catch (_) {} }); el.addEventListener("pointermove", (e) => { if (e.pointerId !== id) return; lookBy((e.clientX - lx) * 1.4, (e.clientY - ly) * 1.4); lx = e.clientX; ly = e.clientY }); const up = (e) => { if (e.pointerId !== id) return; id = null; eyeHeld = false; camYaw = eyeYaw; camPitch = eyePitch; el.classList.remove("on") }; el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up) }
     fireBtn($("#b-fire"), (v) => (fireHeld = v)); fireBtn($("#b-fire2"), (v) => (fire2Held = v));
     const tapBtn = (id, fn) => holdBtn($(id), () => { au(); fn() });
     tapBtn("#b-ads", () => (adsOn = !adsOn)); tapBtn("#b-cr", () => { crOn = !crOn; if (crOn) prOn = false }); tapBtn("#b-pr", () => { prOn = !prOn; if (prOn) crOn = false });
     // リーン：かべのかげから頭と銃だけ横に出す。もう一度押すと戻る
     tapBtn("#b-car", () => { const m = meE(); if (!m) return; if (m.car != null) exitCar(m); else enterCar(m) });
-    tapBtn("#b-ll", () => (lnOn = lnOn === -1 ? 0 : -1)); tapBtn("#b-lr", () => (lnOn = lnOn === 1 ? 0 : 1)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-drop", dropNow); tapBtn("#b-bag", () => { bagOpen = !bagOpen; bagSel = null; lastBtn = "" }); tapBtn("#b-gr", () => throwGren(0)); tapBtn("#b-sm", () => throwGren(1)); tapBtn("#b-med", heal);
+    tapBtn("#b-ll", () => (lnOn = lnOn === -1 ? 0 : -1)); tapBtn("#b-lr", () => (lnOn = lnOn === 1 ? 0 : 1)); tapBtn("#b-jump", jump); tapBtn("#b-rl", () => { const m = E[myIdx]; if (m) startReload(m) }); tapBtn("#b-drop", dropNow); tapBtn("#b-open", () => { const m = meE(); if (m && !m.landed && !m.inPlane && !m.para && m.y < 145) { m.para = true; meSnd("pick") } }); tapBtn("#b-bag", () => { bagOpen = !bagOpen; bagSel = null; lastBtn = "" }); tapBtn("#b-gr", () => throwGren(0)); tapBtn("#b-sm", () => throwGren(1)); tapBtn("#b-med", heal);
     tapBtn("#b-s0", () => swapTo(0)); tapBtn("#b-s1", () => swapTo(1)); tapBtn("#b-pick", () => { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, itemById(pickTarget), true) });
     const onKey = (e) => { if (e.target.tagName === "INPUT" || e.repeat) return; const k = e.key.toLowerCase(); if (k === " ") { e.preventDefault(); fireHeld = true; tryFire() } else if (k === "c") { crOn = !crOn; if (crOn) prOn = false } else if (k === "z") { prOn = !prOn; if (prOn) crOn = false } else if (k === "v") { const m = meE(); if (m) { if (m.car != null) exitCar(m); else enterCar(m) } } else if (k === "e") lnOn = lnOn === 1 ? 0 : 1; else if (k === "f") lnOn = lnOn === -1 ? 0 : -1; else if (k === "r") { const m = E[myIdx]; if (m) startReload(m) } else if (k === "g") throwGren(0); else if (k === "t") throwGren(1); else if (k === "b") { bagOpen = !bagOpen; bagSel = null; lastBtn = "" } else if (k === "q") jump(); else if (k === "h") heal(); else if (k === "1") swapTo(0); else if (k === "2") swapTo(1); else if (k === "f") { const m = E[myIdx]; if (m && pickTarget >= 0) doPick(m, itemById(pickTarget), true) } };
     const onKeyUp = (e) => { if (e.key === " ") fireHeld = false };
@@ -6990,7 +6995,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     const lockLand = async () => { try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen({ navigationUI: "hide" }) } catch (_) {} try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape") } catch (_) {} };
     lockLand(); const onTouchFull = () => { if (!document.fullscreenElement) lockLand() }; cardEl.addEventListener("pointerdown", onTouchFull);
     // ---- ボタンの配置と大きさ（端末に保存）
-    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-sm", "b-med", "b-bag", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
+    const LAY_IDS = ["stick", "b-fire", "b-fire2", "b-ads", "b-jump", "b-cr", "b-pr", "b-ll", "b-lr", "b-rl", "b-gr", "b-sm", "b-med", "b-bag", "b-eye", "b-open", "br-slots", "b-car", "b-pick", "hud-info", "hud-zone", "hud-map", "hud-hp"], uiEl = $(".br-ui");
     const LE = layoutEditor(cardEl, LAY_IDS, "brLayout");
     const hudBox = (id) => { const el = $("#" + id), v = LE.lay[id]; if (!el) return { x: 0, y: 0, w: 100, h: 20, s: 1 }; if (v) { const bw = el.offsetWidth * v.s, bh = el.offsetHeight * v.s; return { x: v.x / 100 * cardEl.clientWidth - bw / 2, y: v.y / 100 * cardEl.clientHeight - bh / 2, w: bw, h: bh, s: v.s } } return { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight, s: 1 } };
     const onClick = (ev) => { const wb = ev.target.closest("[data-bag]"); if (wb) { bagAct(wb.dataset.bag, wb.dataset.k, wb.dataset.v); lastBtn = ""; return } const lb = ev.target.closest("[data-bl]"); if (lb) { myLook = Object.assign({}, myLook, { [lb.dataset.bl]: Number(lb.dataset.i) }); ls.set("brLook", JSON.stringify(myLook)); setS({ lk: brLookCode(myLook) }); return }
@@ -7039,7 +7044,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
     const planeIn = () => { const x = planeX(); return x > 8 && x < M.W - 8 };
     const planeOut = () => (S.plane.dir > 0 ? planeX() > M.W - 12 : planeX() < 12);
     function ridePlane(e) { e.x = clamp(planeX(), 4, M.W - 4); e.z = S.plane.z; e.y = 152; e.vy = 0 }
-    function leavePlane(e) { if (!e.inPlane) return; e.inPlane = false; ridePlane(e); e.para = false; if (e.i === myIdx) floats.push({ txt: "飛び降りた！ スティックで着地点へ", col: "#fff", t: 0 }) }
+    function leavePlane(e) { if (!e.inPlane) return; e.inPlane = false; ridePlane(e); e.para = false; if (e.i === myIdx) { e.yaw = camYaw; camPitch = -.75; meSnd("door") } }
     function dropNow() { const m = meE(); if (m && m.inPlane && planeIn()) leavePlane(m) }
     function jump() { const m = meE(); if (!m || !m.alive) return; if (m.inPlane) { dropNow(); return } if (!m.landed) { if (m.y < 130) m.para = true; return } if (m.sw) return; if (m.y <= .01) { m.vy = 5.5; crOn = false; prOn = false } }
     // 枠を押す：別の武器なら持ちかえ、今の武器ならバッグを開く／閉じる
@@ -7117,11 +7122,13 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         const inCar = e.car != null || cars.some((c) => c.dr === e.i && Math.hypot(c.x - e.x, c.z - e.z) < 2);
         if (inCar) { const sl = curW(e), pitch = e.i === myIdx ? camPitch : e.pitch; e.recoil = Math.max(0, (e.recoil || 0) - dt); v.body.rotation.set(0, 0, 0); v.body.position.set(-.45, .05, -.2); v.legL.rotation.x = v.legR.rotation.x = -1.5; v.kneeL.rotation.x = v.kneeR.rotation.x = 1.45; v.armL.rotation.set(-1.2, 0, -.2); v.elbowL.rotation.set(-.3, 0, 0);
           if (sl) { v.armR.rotation.set(-1.35 - pitch - (e.recoil || 0) * 2, 0, .05); v.elbowR.rotation.set(-.2, 0, 0) } else { v.armR.rotation.set(-1.2, 0, .2); v.elbowR.rotation.set(-.3, 0, 0) } v.guns.forEach((g, gi) => (g.visible = !!sl && sl.w === gi)); v.para.visible = false; v.vest.visible = e.vest > 0; v.helm.visible = e.helm > 0; v.cap.visible = !e.helm; continue }
-        v.body.rotation.x = e.pr ? 1.45 : 0; v.body.position.y = e.pr ? .14 : e.cr ? -.36 : 0; v.body.position.z = e.pr ? -.95 : 0; v.body.rotation.z = (e.ln || 0) * (e.pr ? .22 : .32); v.body.position.x = -(e.ln || 0) * (e.pr ? .35 : .2);
+        const ff = fall && !e.para && !e.inPlane;
+        v.body.rotation.x = ff ? 1.35 : e.pr ? 1.45 : 0; v.body.position.y = ff ? .9 : e.pr ? .14 : e.cr ? -.36 : 0; v.body.position.z = ff ? -.85 : e.pr ? -.95 : 0; v.legL.rotation.z = ff ? .3 : 0; v.legR.rotation.z = ff ? -.3 : 0; v.body.rotation.z = (e.ln || 0) * (e.pr ? .22 : .32); v.body.position.x = -(e.ln || 0) * (e.pr ? .35 : .2);
         v.legL.rotation.x = fall ? .4 : e.cr ? -1.35 : air ? -.6 : sw; v.legR.rotation.x = fall ? -.3 : e.cr ? -1.1 : air ? .2 : -sw;
         v.kneeL.rotation.x = fall ? .5 : e.cr ? 1.95 : air ? 1.1 : Math.max(0, sw) * 1.2 + .08; v.kneeR.rotation.x = fall ? .3 : e.cr ? 1.7 : air ? .7 : Math.max(0, -sw) * 1.2 + .08;
         const pitch = e.i === myIdx ? camPitch : e.pitch, rc = e.recoil || 0; e.recoil = Math.max(0, rc - dt);
-        if (fall) { v.armL.rotation.set(0, 0, -2.6); v.armR.rotation.set(0, 0, 2.6); v.elbowL.rotation.set(0, 0, 0); v.elbowR.rotation.set(0, 0, 0) }
+        if (ff) { const fl = Math.sin(tAll * 7 + e.i) * .06; v.armL.rotation.set(-.2, 0, -1.45 + fl); v.armR.rotation.set(-.2, 0, 1.45 - fl); v.elbowL.rotation.set(-.35, 0, 0); v.elbowR.rotation.set(-.35, 0, 0); v.legL.rotation.x = .15; v.legR.rotation.x = .15; v.kneeL.rotation.x = v.kneeR.rotation.x = .5 }
+        else if (fall) { v.armL.rotation.set(0, 0, -2.6); v.armR.rotation.set(0, 0, 2.6); v.elbowL.rotation.set(0, 0, 0); v.elbowR.rotation.set(0, 0, 0) }
         else if (!curW(e)) { v.armL.rotation.set(-sw * .7, 0, -.12); v.armR.rotation.set(sw * .7, 0, .12); v.elbowL.rotation.set(-.3, 0, 0); v.elbowR.rotation.set(-.3, 0, 0) }
         else if (e.pr) { v.armR.rotation.set(-2.85 - pitch * .5 - rc * 2, 0, .1); v.elbowR.rotation.set(-.15, 0, 0); v.armL.rotation.set(-2.6, 0, -.4); v.elbowL.rotation.set(-.5, 0, .3) }
         else { v.armR.rotation.set(-1.35 - pitch - rc * 2, 0, .05); v.elbowR.rotation.set(-.2, 0, 0); v.armL.rotation.set(-1.05 - pitch, 0, -.55); v.elbowL.rotation.set(-.75, 0, .35) }
@@ -7145,6 +7152,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       // 飛行機に乗っている間：飛行機のうしろ上から見る（なぞると見回せる）
       if (f.inPlane && S.plane) { const cp2 = Math.cos(camPitch), dv = new T.Vector3(Math.sin(camYaw) * cp2, Math.sin(camPitch) - .35, Math.cos(camYaw) * cp2).normalize(), tg2 = new T.Vector3(planeX(), 160, S.plane.z); camera.position.copy(tg2).addScaledVector(dv, -30); camera.position.y += 6; camera.lookAt(tg2.clone().addScaledVector(dv, 20)); if (Math.abs(camera.fov - 62) > .01) { camera.fov = 62; camera.updateProjectionMatrix() } sun.position.set(tg2.x + 30, 60, tg2.z + 20); sun.target.position.set(tg2.x, 0, tg2.z); sun.target.updateMatrixWorld(); cullT -= dt; if (cullT <= 0) { cullT = .3; for (const t of W3.cull) t.m.visible = Math.hypot(t.x - tg2.x, t.z - tg2.z) < Q.far + (t.r || 40) } return }
       const z = adsOn && f === meE() ? zoomOf(f) : 1, fall = !f.landed;
+      if (fall && !f.para && f === meE() && camPitch > -.35) camPitch += (-.55 - camPitch) * Math.min(1, dt * 2);
       const cp = Math.cos(camPitch), dir = new T.Vector3(Math.sin(camYaw) * cp, Math.sin(camPitch), Math.cos(camYaw) * cp), rx = -Math.cos(camYaw), rz = Math.sin(camYaw);
       // 家の中では、カメラを近くして肩の横にずらすのを小さくする（かべの向こうに出ないように）
       const inside = !fall && M.houses.find((hs) => f.x > hs.x0 && f.x < hs.x1 && f.z > hs.z0 && f.z < hs.z1);
@@ -7212,7 +7220,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       // 体力
       if (m.alive) { const HB = hudBox("hud-hp"), bw = HB.w, bx = HB.x, by = HB.y + HB.h - 12; c.fillStyle = "rgba(20,18,42,.55)"; c.fillRect(bx, by, bw, 12); c.fillStyle = m.hp > 50 ? "#F2F2F2" : m.hp > 25 ? "#F2C230" : "#E5483B"; c.fillRect(bx + 1, by + 1, (bw - 2) * clamp(m.hp, 0, 100) / 100, 10); c.font = `11px ${DISP}`; c.textAlign = "left"; c.fillStyle = "#fff"; c.fillText(`${Math.ceil(m.hp)}　ベスト${m.vest ? "Lv" + m.vest : "なし"}・ヘルメット${m.helm ? "Lv" + m.helm : "なし"}`, bx, by - 8); if ((m.inv || 0) > 0 && m.landed) bigText(c, `着地して無敵 あと${Math.ceil(m.inv)}秒`, w / 2, by - 30, 14, "#7CF59A") }
       if (m.inPlane && m.alive) { const left = Math.max(0, Math.ceil(((S.plane.dir > 0 ? M.W - 12 - planeX() : planeX() - 12)) / PSP)); bigText(c, planeIn() ? "好きな所で「飛び降りる」を押そう" : "もうすぐ島の上に着きます", w / 2, h * .26, 18, "#fff"); bigText(c, planeIn() ? `自動で降りるまで ${left}秒　地図の白い線が飛行機の道` : "", w / 2, h * .26 + 26, 13, "#E9F7EE") }
-      else if (!m.landed && m.alive) { bigText(c, m.para ? "パラシュートで降下中" : "降下中！（ジャンプでパラシュート）", w / 2, h * .3, 18, "#fff"); bigText(c, `高さ ${Math.round(m.y)}m　スティックで着地点をえらぼう`, w / 2, h * .3 + 26, 13, "#E9F7EE") }
+      else if (!m.landed && m.alive) { bigText(c, m.para ? "パラシュートで降下中" : "スカイダイビング中！", w / 2, h * .3, 18, "#fff"); bigText(c, `高さ ${Math.round(m.y)}m　${Math.round(Math.abs(m.vy || 0) * 3.6)}km/h　${m.para ? "スティックで着地点をえらぼう" : "「開く」でパラシュート（低くなると自動で開く）"}`, w / 2, h * .3 + 26, 13, "#E9F7EE") }
       if (m.rl > 0) bigText(c, "リロード中…", w / 2, h * .62, 15, "#fff");
       if (m.healT > 0) bigText(c, `${{ med: "救急箱", band: "包帯", drk: "ドリンク" }[m.healK] || "回復"}… ${m.healT.toFixed(1)}`, w / 2, h * .62, 15, "#7CF59A"); else if (m.reg > 0) bigText(c, `ドリンクで回復中 ${Math.ceil(m.reg)}秒`, w / 2, h * .62, 13, "#7CF59A");
       floats = floats.filter((f) => (f.t += dt) < 1.6); floats.forEach((f, i) => bigText(c, f.txt, w / 2, h * .42 - f.t * 22 - i * 24, 15, f.col));
@@ -7297,7 +7305,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
         if (keys.has("a") || keys.has("A")) ix = -1; if (keys.has("d") || keys.has("D")) ix = 1; if (keys.has("w") || keys.has("W")) iz = -1; if (keys.has("s") || keys.has("S")) iz = 1;
         if (keys.has("ArrowLeft")) camYaw += dt * 2.2 * SENS.look; if (keys.has("ArrowRight")) camYaw -= dt * 2.2 * SENS.look; if (keys.has("ArrowUp")) camPitch = Math.min(.9, camPitch + dt * 1.5); if (keys.has("ArrowDown")) camPitch = Math.max(-1.2, camPitch - dt * 1.5);
         let mg = Math.hypot(ix, iz); if (mg > 1) { ix /= mg; iz /= mg; mg = 1 }
-        const fx = Math.sin(camYaw), fz = Math.cos(camYaw), rx = -Math.cos(camYaw), rz = Math.sin(camYaw), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
+        const cy = eyeHeld ? eyeYaw : camYaw, fx = Math.sin(cy), fz = Math.cos(cy), rx = -Math.cos(cy), rz = Math.sin(cy), mx = fx * -iz + rx * ix, mz = fz * -iz + rz * ix;
         if (m.alive && S.ph === "play") {
           if (!host) m.inv = Math.max(0, (m.inv || 0) - dt);
           m.pr = prOn && m.landed && !m.sw; m.ln = m.landed && !m.sw ? lnOn : 0; m.cr = crOn && m.landed && !m.pr; m.ads = adsOn && m.landed; m.fireCd -= dt;
@@ -7305,7 +7313,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
           if (m.healT > 0) { m.healT -= dt; if (m.healT <= 0) { const k = m.healK || "med"; if (k === "med" && m.med > 0) { m.med--; addHp(m, 75) } else if (k === "band" && m.band > 0) { m.band--; addHp(m, Math.min(15, 75 - m.hp)) } else if (k === "drk" && m.drk > 0) { m.drk--; m.reg = 10 } } }
           if (m.reg > 0) { m.reg -= dt; m.regAcc = (m.regAcc || 0) + 4 * dt; if (m.regAcc >= 1) { const v = Math.floor(m.regAcc); m.regAcc -= v; addHp(m, v) } }
           if (m.inPlane) { ridePlane(m); if (planeOut()) leavePlane(m) } else if (m.car != null) driveCar(m, ix, iz, dt); else body(m, mg > .1 ? mx : 0, mg > .1 ? mz : 0, dt, mg > .92 && !adsOn && !crOn && !prOn);
-          if (m.car == null) m.yaw = m.landed && (adsOn || fireHeld || fire2Held || mg < .1) ? camYaw : mg > .1 ? Math.atan2(mx, mz) : m.yaw; if (adsOn || fireHeld || fire2Held) m.yaw = camYaw; m.pitch = camPitch;
+          if (m.car == null) m.yaw = m.landed && (adsOn || fireHeld || fire2Held || mg < .1) ? cy : mg > .1 ? Math.atan2(mx, mz) : m.yaw; if (adsOn || fireHeld || fire2Held) m.yaw = camYaw; m.pitch = camPitch;
           const sl = curW(m); if ((fireHeld || fire2Held) && sl && BR_W[sl.w].auto && !sl.semi) tryFire();
           const nc = m.car != null ? cars[m.car] : nearCar(m), cb = $("#b-car"); if (cb) { const on = !!nc && m.landed && !m.sw, tx = m.car != null ? "車から降りる" : "車に乗る"; cb.classList.toggle("on", on); if (cb.textContent !== tx) cb.textContent = tx }
           // 拾う
@@ -7346,13 +7354,13 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
       // ボタン
       if (m) {
         const s0 = m.w[0], s1 = m.w[1], lbl = (s, k) => (s ? `<b style="color:${BR_LV[s.lv].c}">${BR_W[s.w].n}</b><small>${m.cur === k && m.rl > 0 ? "リロード" : `${s.ammo}/${brMag(s)}`}</small><small class="br-att">${[(s.sc || 1) > 1 ? ((s.sc < 2) ? "ドット" : s.sc + "倍") : "", s.ex ? "拡張" : "", s.sup ? "消音" : "", s.gr ? "グリップ" : "", BR_W[s.w].auto ? (s.semi ? "単発" : "連射") : ""].filter(Boolean).join("・")}${m.cur === k ? "　🎒" : ""}</small>` : `<small>空き</small>`);
-        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi].join("."), bagOpen, bagSel, (m.bag || []).map((b) => b.zm || b.a).join("."), m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, !!m.inPlane, planeIn(), adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
+        const key = [S.ph, m.alive, s0 && s0.w, s0 && s0.lv, s0 && s0.ammo, s0 && [s0.sc, s0.ex, s0.sup, s0.gr, s0.semi].join("."), s1 && [s1.sc, s1.ex, s1.sup, s1.gr, s1.semi].join("."), bagOpen, bagSel, (m.bag || []).map((b) => b.zm || b.a).join("."), m.band, m.drk, m.smk, s1 && s1.w, s1 && s1.lv, s1 && s1.ammo, m.cur, m.rl > 0, m.med, m.gren, !!m.inPlane, planeIn(), !!m.para, m.landed, adsOn, crOn, prOn, lnOn, pickTarget, m.landed].join();
         if (key !== lastBtn) {
           lastBtn = key; $("#b-s0").innerHTML = lbl(s0, 0); $("#b-s1").innerHTML = lbl(s1, 1); $("#b-s0").classList.toggle("on", m.cur === 0); $("#b-s1").classList.toggle("on", m.cur === 1);
           $("#b-med").innerHTML = `回復<br><small>救${m.med}・包${m.band}・飲${m.drk}</small>`; $("#b-gr").innerHTML = `手榴弾<br><small>${m.gren}</small>`; $("#b-sm").innerHTML = `スモーク<br><small>${m.smk}</small>`; $("#b-ads").classList.toggle("on", adsOn); $("#b-cr").classList.toggle("on", crOn); $("#b-pr").classList.toggle("on", prOn); $("#b-ll").classList.toggle("on", lnOn === -1); $("#b-lr").classList.toggle("on", lnOn === 1);
           const pk = $("#b-pick"); pk.classList.toggle("on", pickTarget >= 0); if (pickTarget >= 0) pk.textContent = `拾う：${brItemName(itemById(pickTarget))}（今の武器と持ちかえ）`;
           cardEl.classList.toggle("br-dead", !m.alive || S.ph !== "play");
-          cardEl.classList.toggle("br-plane", !!m.inPlane && m.alive && S.ph === "play"); $("#b-drop").disabled = !planeIn();
+          cardEl.classList.toggle("br-plane", !!m.inPlane && m.alive && S.ph === "play"); cardEl.classList.toggle("br-ff", !m.inPlane && !m.landed && !m.para && m.alive && S.ph === "play"); $("#b-drop").disabled = !planeIn();
           if (!m.alive || S.ph !== "play" || !m.landed) bagOpen = false; cardEl.classList.toggle("br-bagon", bagOpen); $("#br-bag").innerHTML = bagOpen ? bagHtml(m) : "";
         }
       }
@@ -8524,7 +8532,7 @@ html.playing .smw #act-msg { top: 50%; left: 50%; right: auto; width: min(460px,
   const SUPA_WS = "wss://lcqpihitxmqaygriuhao.supabase.co/realtime/v1/websocket?vsn=1.0.0&apikey=" + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcXBpaGl0eG1xYXlncml1aGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDQ1ODAsImV4cCI6MjA5NTY4MDU4MH0.vgZf_BwO58wnt5tKJO9jzJhkNarveb9A-_us-dxynVM";
   let SITE = false;
   // ホーム画面のアプリ（とくに iPhone）は前の版を開いたままになりやすいので、新しい版が出ていたらお知らせする
-  const APP_VER = "1031-0354";
+  const APP_VER = "1031-0400";
   async function checkVer() {
     if (!SITE || APP_VER.startsWith("__")) return;
     try { const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text(), m = t.match(/const APP_VER = "([^"]+)"/); if (!m || m[1] === APP_VER || $("#newver")) return;
