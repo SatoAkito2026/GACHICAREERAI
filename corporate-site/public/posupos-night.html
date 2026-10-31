@@ -6,7 +6,7 @@
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 
 <title>ポスポス｜AI面接つき キャバクラ・ホスト・ガールズバーのPOSレジ キャストの給料・バックまで｜0円から始められる</title>
-<meta name="description" content="ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。">
+<meta name="description" content="ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジ・ミックスバーのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。">
 <meta property="og:title" content="ポスポス｜夜のお店のPOSシステム 0円から始められる">
 <meta property="og:url" content="https://akitogroup.jp/posupos-night">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-night.png">
@@ -882,6 +882,7 @@ body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
 body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
 body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
 body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
+body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
@@ -936,8 +937,8 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
         <p class="hero-logo"><img src="assets/img/posupos-lockup-night.webp" alt="ポスポス 面接ができる、最強のPOSレジ" width="557" height="150" fetchpriority="high"><span>for night</span></p>
         <h1><span class="ln">延長も、バックも。</span><span class="ln"><em>ポスポス</em>ひとつで。</span></h1>
         <a class="ai-hero" href="#ai-interview"><img src="assets/img/pos-ai-face.webp" width="96" height="96" alt="" fetchpriority="high"><span class="ah-tx"><span class="ah-top"><b class="ah-1">世界初<sup>※</sup></b><span class="ah-new">NEW</span></span><b class="ah-h">面接を自動化した、POSシステム。</b><span class="ah-sub">応募者に URL を LINE で送るだけ。応募者は条件をボタンで選んで、AI の面接官と1分ほど話します。話している姿の録画と答えがお店に届きます。<small>お店が見るのは1分の録画。URL は1秒で送れて、結果は自動で届きます（スタンダードに追加料金なし）</small></span></span><span class="ah-go" aria-hidden="true">→</span></a>
-        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホストクラブ</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="boysbar" aria-selected="false">ボーイズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンセプトカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button></div></div>
-        <p class="lead">ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
+        <div class="shopbar" role="tablist" aria-label="お店の種類"><span class="lb">お店の種類</span><div class="sb"><button type="button" role="tab" data-shop="cabaret" aria-selected="true">キャバクラ</button><button type="button" role="tab" data-shop="host" aria-selected="false">ホストクラブ</button><button type="button" role="tab" data-shop="girlsbar" aria-selected="false">ガールズバー</button><button type="button" role="tab" data-shop="boysbar" aria-selected="false">ボーイズバー</button><button type="button" role="tab" data-shop="concafe" aria-selected="false">コンセプトカフェ</button><button type="button" role="tab" data-shop="snack" aria-selected="false">スナック</button><button type="button" role="tab" data-shop="lounge" aria-selected="false">ラウンジ</button><button type="button" role="tab" data-shop="mixbar" aria-selected="false">ミックスバー</button></div></div>
+        <p class="lead">ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジ・ミックスバーのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの給料・バックまで、まとめて管理できます。</p>
 
         <div class="btns" style="margin-top:28px">
           <a class="btn btn-blue" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
@@ -1435,6 +1436,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <a href="/posupos-cabaret">キャバクラのPOSシステム</a>
       <a href="/posupos-girlsbar">ガールズバーのPOSシステム</a>
       <a href="/posupos-boysbar">ボーイズバーのPOSシステム</a>
+      <a href="/posupos-mixbar">ミックスバーのPOSシステム</a>
       <a href="/posupos-concafe">コンセプトカフェのPOSシステム</a>
       <a href="/posupos-snack">スナックのPOSシステム</a>
       <a href="/posupos-lounge">ラウンジのPOSシステム</a>
@@ -1446,6 +1448,9 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <a href="/news-lounge-customer">ラウンジの顧客管理</a>
       <a href="/news-night-recruit">夜のお店の求人面接をAIで効率化</a>
       <a href="/news-concafe-back">コンカフェのバック計算</a>
+      <a href="/news-mixbar-sales">ミックスバーの売上管理</a>
+      <a href="/news-host-tsukemawashi">ホストの付け回し</a>
+      <a href="/news-cabaret-pos-cost">キャバクラのPOSの費用</a>
       <a href="/contact#pos">お問い合わせ</a>
       <a href="./">運営会社（合同会社AKITOグループ）</a>
       <a href="/privacy">プライバシーポリシー</a>
@@ -1521,6 +1526,6 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジ・ミックスバーのためのクラウドPOSレジ。セット料金・延長・指名・付け回し・売掛の会計から、キャストの勤怠・給料・バックまでまとめて管理。キャスト・黒服の一次面接も AI におまかせ（スタンダード）。", "url": "https://akitogroup.jp/posupos-night", "image": "https://akitogroup.jp/assets/img/ogp-posupos-night.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": "https://akitogroup.jp/posupos-night#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "料金は1店舗ごとで、お店の大きさや使う機能に合わせて、お問い合わせのときにご案内します。0円から始められます。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "夜のお店", "item": "https://akitogroup.jp/posupos-night"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>

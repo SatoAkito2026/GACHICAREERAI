@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 <title>ポスポス モニター店舗募集｜今のレジはそのままで、2か月無料</title>
-<meta name="description" content="AI面接つきのクラウドPOSレジ「ポスポス」のモニター店舗を募集しています。今お使いのレジ・決済はそのままで、ポスポスを並行して2か月無料でお使いいただけます。飲食店28種類・夜のお店7種類に対応。">
+<meta name="description" content="AI面接つきのクラウドPOSレジ「ポスポス」のモニター店舗を募集しています。今お使いのレジ・決済はそのままで、ポスポスを並行して2か月無料でお使いいただけます。飲食店28種類・夜のお店8種類に対応。">
 <meta property="og:title" content="ポスポス モニター店舗募集｜今のレジはそのままで、2か月無料">
 <meta property="og:url" content="https://akitogroup.jp/posupos-monitor">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="AI面接つきのクラウドPOSレジ「ポスポス」のモニター店舗を募集しています。今お使いのレジ・決済はそのままで、ポスポスを並行して2か月無料でお使いいただけます。飲食店28種類・夜のお店7種類に対応。">
+<meta property="og:description" content="AI面接つきのクラウドPOSレジ「ポスポス」のモニター店舗を募集しています。今お使いのレジ・決済はそのままで、ポスポスを並行して2か月無料でお使いいただけます。飲食店28種類・夜のお店8種類に対応。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -882,6 +882,7 @@ body[data-shop="takeout"] .v[data-v="cafe"]{display:block}
 body[data-shop="buffet"] .v[data-v="yakiniku"]{display:block}
 body[data-shop="other-food"] .v[data-v="izakaya"]{display:block}
 body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
+body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar{margin-top:18px;display:grid;gap:8px}
 .shopbar .lb{font-size:13px;font-weight:900;color:var(--ink-2);display:flex;align-items:center;gap:8px}
 .shopbar .lb::after{content:"選ぶと、下の画面がそのお店の形に変わります";font-weight:500;font-size:12px}
@@ -979,7 +980,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
           <dt>期間</dt><dd>2か月（無料）</dd>
           <dt>使える機能</dt><dd>スタンダードプランの機能すべて（注文・会計、打刻・シフト・給料、顧客・お金・日報、AI面接）</dd>
           <dt>お願い</dt><dd>使ってみた感想をお聞かせください（かんたんなアンケート・お電話など）</dd>
-          <dt>対象</dt><dd>飲食店28種類・夜のお店7種類（<a href="/posupos-day">昼のお店</a>／<a href="/posupos-night">夜のお店</a>）</dd>
+          <dt>対象</dt><dd>飲食店28種類・夜のお店8種類（<a href="/posupos-day">昼のお店</a>／<a href="/posupos-night">夜のお店</a>）</dd>
           <dt>導入</dt><dd>夜のお店2店で使われています</dd>
           <dt>そのあと</dt><dd>続ける・やめるは自由です。続ける場合は、通常のお申し込みに切りかえます</dd>
         </dl>
@@ -993,7 +994,7 @@ body[data-shop="boysbar"] .v[data-v="girlsbar"]{display:block}
       <form class="mo-form" id="mo-form" novalidate>
         <div class="row">
           <label><span>お店の名前<span class="req">必須</span></span><input name="shop_name" maxlength="100" required autocomplete="organization"></label>
-          <label>お店の種類<select name="shop_type"><optgroup label="飲食店：和食"><option>和食レストラン</option><option>寿司</option><option>そば・うどん</option><option>定食・食堂</option><option>丼もの・牛丼</option><option>とんかつ・揚げ物</option></optgroup><optgroup label="飲食店：居酒屋・焼き鳥・お酒"><option selected>居酒屋</option><option>焼き鳥</option><option>バー・バル（キャストなし）</option></optgroup><optgroup label="飲食店：肉・鉄板・鍋"><option>焼肉</option><option>ステーキ・鉄板焼き</option><option>お好み焼き・もんじゃ</option><option>しゃぶしゃぶ・鍋</option></optgroup><optgroup label="飲食店：麺・中華・アジア"><option>ラーメン・つけ麺</option><option>中華料理</option><option>韓国料理</option><option>カレー・インド料理</option><option>エスニック（タイ・ベトナムなど）</option></optgroup><optgroup label="飲食店：洋食"><option>洋食レストラン</option><option>イタリアン</option><option>フレンチ・ビストロ</option><option>ハンバーガー</option></optgroup><optgroup label="飲食店：カフェ・パン・スイーツ"><option>カフェ</option><option>パン屋・ベーカリー</option><option>ケーキ・スイーツ</option></optgroup><optgroup label="飲食店：テイクアウト・食べ放題"><option>お弁当・テイクアウト・キッチンカー</option><option>ビュッフェ・食べ放題</option></optgroup><optgroup label="飲食店：そのほか"><option>そのほかの飲食店</option></optgroup><optgroup label="夜のお店"><option>ホストクラブ</option><option>キャバクラ</option><option>ガールズバー</option><option>ボーイズバー</option><option>コンセプトカフェ</option><option>スナック</option><option>ラウンジ</option></optgroup></select></label>
+          <label>お店の種類<select name="shop_type"><optgroup label="飲食店：和食"><option>和食レストラン</option><option>寿司</option><option>そば・うどん</option><option>定食・食堂</option><option>丼もの・牛丼</option><option>とんかつ・揚げ物</option></optgroup><optgroup label="飲食店：居酒屋・焼き鳥・お酒"><option selected>居酒屋</option><option>焼き鳥</option><option>バー・バル（キャストなし）</option></optgroup><optgroup label="飲食店：肉・鉄板・鍋"><option>焼肉</option><option>ステーキ・鉄板焼き</option><option>お好み焼き・もんじゃ</option><option>しゃぶしゃぶ・鍋</option></optgroup><optgroup label="飲食店：麺・中華・アジア"><option>ラーメン・つけ麺</option><option>中華料理</option><option>韓国料理</option><option>カレー・インド料理</option><option>エスニック（タイ・ベトナムなど）</option></optgroup><optgroup label="飲食店：洋食"><option>洋食レストラン</option><option>イタリアン</option><option>フレンチ・ビストロ</option><option>ハンバーガー</option></optgroup><optgroup label="飲食店：カフェ・パン・スイーツ"><option>カフェ</option><option>パン屋・ベーカリー</option><option>ケーキ・スイーツ</option></optgroup><optgroup label="飲食店：テイクアウト・食べ放題"><option>お弁当・テイクアウト・キッチンカー</option><option>ビュッフェ・食べ放題</option></optgroup><optgroup label="飲食店：そのほか"><option>そのほかの飲食店</option></optgroup><optgroup label="夜のお店"><option>ホストクラブ</option><option>キャバクラ</option><option>ガールズバー</option><option>ボーイズバー</option><option>コンセプトカフェ</option><option>スナック</option><option>ラウンジ</option><option>ミックスバー</option></optgroup></select></label>
         </div>
         <div class="row">
           <label>都道府県<input name="prefecture" maxlength="20" placeholder="例：東京都"></label>

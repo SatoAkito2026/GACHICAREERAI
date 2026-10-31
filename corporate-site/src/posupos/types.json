@@ -243,6 +243,11 @@
     "id": "lounge",
     "label": "ラウンジ",
     "demo": "lounge"
+   },
+   {
+    "id": "mixbar",
+    "label": "ミックスバー",
+    "demo": "girlsbar"
    }
   ]
  }

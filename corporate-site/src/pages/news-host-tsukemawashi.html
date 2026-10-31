@@ -1,0 +1,284 @@
+<!--
+title: ホストクラブの付け回しのやり方｜担当・ヘルプの回し方と、売上・バックの付け方
+description: ホストクラブの付け回しの基本を解説。誰が回すとよいか、担当の卓と初回の卓で気をつけたいこと、ヘルプのホストの売上・手当・バックの付け方、ホストが重なる・交代が延びるなどのトラブルと防ぎ方まで。
+nav: news
+image: ogp-host-tsukemawashi.png
+-->
+<style>
+.page-hero h1{font-size:clamp(26px,4.2vw,46px);line-height:1.4;max-width:24em}
+.toc{border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 48px;background:#fff}
+.toc p{font-weight:700;margin:0 0 8px}
+.toc ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.article h2{font-size:clamp(22px,3.4vw,30px);margin:64px 0 18px;padding-top:4px}
+.article h2:first-child{margin-top:0}
+.article h3{font-size:19px;margin:28px 0 8px}
+.points{list-style:none;padding:0;margin:20px 0;display:grid;gap:12px;counter-reset:pt}
+.points li{counter-increment:pt;border:1px solid var(--line);border-radius:16px;padding:18px 20px 18px 64px;position:relative;background:#fff}
+.points li::before{content:counter(pt);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--ff-latin);font-weight:800}
+.points b{display:block;font-size:16.5px}
+.points span{color:var(--ink-2);font-size:14.5px}
+.rank{border:1px solid var(--line);border-radius:24px;background:#fff;margin:22px 0 0;overflow:hidden}
+.rank-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.rank-no{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;align-content:center;background:var(--paper-2,#F4F2F7);font-family:var(--ff-latin);font-weight:800;font-size:26px;line-height:1}
+.rank-no small{font-size:10.5px;letter-spacing:.1em;font-weight:700;margin-top:2px}
+.rank-head h3{margin:0;font-size:clamp(20px,2.8vw,24px)}
+.rank-head p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.rank-body{padding:20px 22px 24px;display:grid;gap:14px}
+.rank-body ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.rank-body ul.fit{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.fit li+li,.feat-grid li+li,.points li+li{margin-top:0}
+.fit li{font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--paper-2,#F4F2F7)}
+.rank-body .src{font-size:12.5px;color:var(--muted)}
+.rank-body .src a{color:inherit}
+.rank.top{border:2px solid #1E5BD8;box-shadow:0 30px 50px -36px rgba(30,91,216,.6)}
+.rank.top .rank-head{background:linear-gradient(135deg,#F2F6FF,#E3ECFF)}
+.rank.top .rank-no{background:#1E5BD8;color:#fff}
+.rank.top .logo-row{display:flex;align-items:center;gap:12px}
+.rank.top .logo-row img{width:44px;height:44px}
+.rank.top .fit li{background:#E8EFFE;color:#1748B0}
+.rank-body ul.feat-grid{display:grid;padding:0;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;padding:0;list-style:none}
+@media (min-width:640px){.feat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.feat-grid li{font-size:14px;padding:8px 12px;border-radius:10px;background:#F5F8FF;border:1px solid #DCE6FB}
+.btn-blue{background:#1E5BD8;color:#fff}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(30,91,216,.7)}
+.sum{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+.sum table{width:100%;min-width:560px;border-collapse:collapse;font-size:14.5px}
+.sum th,.sum td{padding:13px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum tr:last-child th,.sum tr:last-child td{border-bottom:0}
+.sum thead th{background:var(--paper-2,#F4F2F7);font-size:13px}
+.sum tbody tr:first-child{background:#F5F8FF}
+.cta-box{margin-top:56px;border-radius:24px;padding:clamp(24px,4vw,40px);background:linear-gradient(135deg,#163E9E,#1E5BD8 55%,#3B8CFF);color:#fff;display:grid;gap:14px;justify-items:start}
+.cta-box h2{margin:0;color:#fff;border-left-color:#fff}
+.cta-box .btns{display:flex;flex-wrap:wrap;gap:12px}
+.cta-box .btn-w{background:#fff;color:#1E5BD8}
+.cta-box .btn-o{border:2px solid rgba(255,255,255,.7);color:#fff;background:transparent}
+.note{font-size:12.5px;color:var(--muted);margin-top:28px}
+
+.ti{width:44px;height:44px;border-radius:12px;flex:none;border:1px solid var(--line);background:#fff;object-fit:cover}
+.ti.sm{width:28px;height:28px;border-radius:8px}
+.concl{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.concl>p:first-child{font-weight:900;font-size:17px;margin:0 0 12px}
+.concl ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.concl li{display:grid;grid-template-columns:28px 28px minmax(0,1fr);gap:10px;align-items:center;font-size:14.5px}
+.concl li>b:first-child{font-family:var(--ff-latin);font-size:16px;text-align:center}
+.concl li span b{margin-right:6px}
+.concl li.top{background:#F2F6FF;border-radius:10px;padding:6px 8px;margin:0 -8px}
+.cmpw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:14px}
+.cmp{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px}
+.cmp th,.cmp td{padding:12px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px;white-space:nowrap}
+.cmp tbody th{position:sticky;left:0;background:#fff;min-width:150px;z-index:1;box-shadow:inset 0 -1px 0 var(--line)}
+.cmp tbody th div{display:flex;align-items:center;gap:8px;font-weight:700}
+.cmp tbody tr.us th,.cmp tbody tr.us td{background:#F5F8FF}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.grid2{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);margin:16px 0}
+@media (min-width:640px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.box{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fff}
+.box b{display:block;font-size:15.5px;margin-bottom:4px}
+.box span{font-size:14px;color:var(--ink-2)}
+.box.warn{border-color:#F0D89A;background:#FFFBF0}
+.rank-head .ttl{display:flex;align-items:center;gap:12px}
+.rank-body h4{margin:4px 0 0;font-size:15px}
+.flowx{list-style:none;padding:0;margin:16px 0;display:grid;gap:10px;counter-reset:f}
+.flowx li{counter-increment:f;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.flowx li::before{content:counter(f);width:40px;height:40px;border-radius:12px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--ff-latin);font-weight:800}
+.flowx b{display:block}
+.flowx span{font-size:14px;color:var(--ink-2)}
+.faqx{display:grid;gap:10px;margin-top:14px}
+.faqx details{border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 18px}
+.faqx summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none}
+.faqx summary::-webkit-details-marker{display:none}
+.faqx summary::before{content:"Q.";color:#1E5BD8;font-family:var(--ff-latin);font-weight:800;margin-right:8px}
+.faqx details p{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+.type{display:grid;gap:10px;margin:14px 0}
+.type a{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;text-decoration:none;transition:border-color .3s}
+.type a:hover{border-color:#1E5BD8}
+.type a b{font-size:16px}
+.type a span{font-size:14px;color:var(--ink-2)}
+.type a em{font-style:normal;font-size:12.5px;font-weight:700;color:#1E5BD8;white-space:nowrap}
+@media (max-width:639px){.type a{grid-template-columns:minmax(0,1fr)}.type a em{justify-self:start}}
+
+.midcta{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:14px;align-items:center;border:2px solid #1E5BD8;border-radius:18px;padding:16px 18px;margin:28px 0;background:linear-gradient(135deg,#F5F8FF,#fff)}
+.midcta img{width:52px;height:52px;border-radius:12px;border:1px solid var(--line)}
+.midcta b{display:block;font-size:15.5px}
+.midcta span{font-size:13px;color:var(--ink-2)}
+.midcta .lk{font-size:13.5px;font-weight:700;color:#1E5BD8}
+.midcta span em{font-style:normal;font-weight:900;color:#D92D20}
+.ofr{margin:0;border:2px dashed rgba(255,255,255,.75);border-radius:14px;padding:10px 16px;background:rgba(255,255,255,.12);font-weight:700}
+.ofr b{display:block;font-size:12.5px;letter-spacing:.06em;color:#FFD27A}
+.sdl small{display:block;font-size:11px;font-weight:700;opacity:.9}
+.sdl.gc{background:#0B0B0B;color:#C8FF00}
+.spop em.ca{background:#0B0B0B;color:#C8FF00}
+@media (max-width:719px){.midcta{grid-template-columns:52px minmax(0,1fr)}.midcta .btn{grid-column:1/-1}.midcta .lk{grid-column:1/-1;justify-self:center}}
+
+.two-col{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.two-col{grid-template-columns:minmax(0,1fr) 300px;gap:48px;align-items:start}}
+.side-in{display:grid;gap:16px}
+/* ガチキャリAIの広告（300×600）。PCでは右の欄のいちばん上、スマホでは右の欄のいちばん下 */
+.side{display:flex;flex-direction:column;gap:16px}
+.side-ad{order:2;display:flex;justify-content:center}
+.side-ad iframe{display:block;max-width:100%}
+@media (min-width:1080px){.side{align-self:stretch}.side-ad{order:0}.side-in{position:sticky;top:96px;max-height:calc(100vh - 116px);overflow-y:auto;padding-bottom:8px;scrollbar-width:thin}}
+.sbn{display:grid;gap:8px;text-decoration:none;border-radius:18px;padding:16px;border:2px solid #1E5BD8;background:#fff;text-align:center;transition:transform .3s,box-shadow .3s}
+.sbn:hover{transform:translateY(-3px);box-shadow:0 20px 34px -24px rgba(30,91,216,.7)}
+.sbn img{width:140px;height:auto;margin:0 auto}
+.sbn b{font-size:16px}
+.sbn small{display:block;font-size:12px;color:var(--ink-2);line-height:1.6}
+.sbn em{font-style:normal;background:#1E5BD8;color:#fff;border-radius:999px;padding:9px 0;font-weight:700;font-size:14px}
+.sbn2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbn2 a{text-decoration:none;border-radius:14px;padding:12px;display:grid;gap:2px;transition:transform .3s}
+.sbn2 a:hover{transform:translateY(-2px)}
+.sbn2 small{font-size:9.5px;letter-spacing:.08em;font-weight:700}
+.sbn2 b{font-size:16px}
+.sbn2 span{font-size:11px;line-height:1.5}
+.sbn2 .d{background:linear-gradient(140deg,#fff,#E6F0FF);border:1px solid var(--line)}
+.sbn2 .d small{color:#1557D6}.sbn2 .d span{color:var(--ink-2)}
+.sbn2 .n{background:#0B1330;color:#ECF0FF}
+.sbn2 .n small{color:#FFB547}.sbn2 .n span{color:#A9B4D6}
+.stoc,.skw,.spop{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px}
+.stoc p,.skw p,.spop p{margin:0 0 8px;font-weight:900;font-size:13px;letter-spacing:.06em}
+.stoc ol{margin:0;padding:0;list-style:none;display:grid;gap:2px;counter-reset:s}
+.stoc li{counter-increment:s}
+.stoc a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;text-decoration:none;font-size:13px;line-height:1.5;padding:5px 6px;border-radius:8px;color:var(--ink-2)}
+.stoc a::before{content:counter(s);font-family:var(--ff-latin);font-weight:800;color:#A3AEC6}
+.stoc a:hover{background:#F5F8FF;color:var(--ink)}
+.stoc a.on{background:#EAF1FF;color:#1E5BD8;font-weight:700}
+.stoc a.on::before{color:#1E5BD8}
+.skw ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.skw a{display:block;text-decoration:none;font-size:12.5px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.skw a::before{content:"#";color:#1E5BD8;margin-right:2px}
+.skw a:hover{border-color:#1E5BD8;color:#1E5BD8}
+.sdl{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:12px;background:#3FAE3A;color:#fff;transition:transform .3s}
+.sdl:hover{transform:translateY(-2px)}
+.spop ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.spop a{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;text-decoration:none;font-size:12.5px;line-height:1.55;font-weight:700}
+.spop img{width:64px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff}
+.spop em{display:inline-block;font-style:normal;font-size:10px;background:#EAF1FF;color:#1E5BD8;border-radius:4px;padding:0 6px;margin-right:6px}
+.spop em.nt{background:#0B1330;color:#FFB547}.spop em.ot{background:#F4F2F7;color:var(--ink-2)}
+.spop a:hover span{text-decoration:underline}
+.prose .side p{margin:0}
+.prose .side ul,.prose .side ol{padding-left:0}
+
+.calc{width:100%;border-collapse:collapse;font-size:14px}
+.calc th,.calc td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.calc td.n{text-align:right;white-space:nowrap;font-family:var(--ff-latin);font-weight:700}
+.calc thead th{background:var(--paper-2,#F4F2F7);font-size:12.5px}
+.calc tr.sum th,.calc tr.sum td{background:#F5F8FF;font-weight:900}
+.calc tr.minus td.n{color:#C2410C}
+.calc tr:last-child th,.calc tr:last-child td{border-bottom:0}
+.calcw{border:1px solid var(--line);border-radius:18px;background:#fff;overflow-x:auto;margin-top:14px}
+.calc th small{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.calc thead th small{display:inline;margin:0 0 0 6px}
+.calc th.n{text-align:right}
+.formula{border:2px solid var(--ink);border-radius:16px;padding:16px 18px;background:#fff;font-weight:700;text-align:center;margin:16px 0}
+.formula small{display:block;font-weight:400;font-size:13px;color:var(--ink-2);margin-top:4px}
+.learn{border:2px solid var(--ink);border-radius:20px;padding:22px 24px;margin:8px 0 40px;background:#fff}
+.learn>p:first-child{font-weight:900;font-size:17px;margin:0 0 10px}
+.learn ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+</style>
+
+<section class="page-hero">
+  <svg class="ribbon" viewBox="0 0 520 140" aria-hidden="true"><path class="r1" pathLength="100" d="M10 40 C 140 0, 260 120, 510 50"/><path class="r2" pathLength="100" d="M10 70 C 140 30, 260 150, 510 80"/><path class="r3" pathLength="100" d="M10 100 C 140 60, 260 180, 510 110"/></svg>
+  <div class="wrap">
+    <nav class="crumbs" aria-label="現在地"><a href="./">トップ</a> / <a href="news.html">お知らせ</a> / ホストクラブの付け回しのやり方</nav>
+    <p class="eyebrow"><time datetime="2026-10-31">2026.10.31</time>　コラム</p>
+    <h1>ホストクラブの付け回しのやり方｜担当・ヘルプの回し方と、売上・バックの付け方</h1>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="two-col">
+    <div class="maincol">
+    <article class="prose article">
+
+      <p>「今どの卓に誰が付いているか」「次は誰を回すか」。ホストクラブの営業中、内勤がいちばん頭を使うのが付け回しです。うまく回せば初回のお客さまが担当を選びやすくなり、担当のお客さまの満足度も上がります。反対に、回し方がばらばらだと、席のかたよりや、ヘルプの手当でのもめごとにつながります。</p>
+      <p>この記事では、ホストクラブの<b>付け回しの基本</b>、<b>ヘルプの売上・バックの付け方</b>、<b>よくあるトラブルと防ぎ方</b>をまとめました。</p>
+
+      <div class="learn"><p>この記事でわかること</p><ul><li>付け回しの意味と、誰が回すとよいか</li><li>担当の卓・初回の卓で気をつけたいこと</li><li>ヘルプのホストの売上・手当・バックの付け方</li><li>付け回しで起きやすいトラブルと、記録で防ぐ方法</li></ul></div>
+
+      <nav class="toc" aria-label="目次"><p>目次</p><ol><li><a href="#what">付け回しとは</a></li><li><a href="#who">誰が回すか</a></li><li><a href="#rule">付け回しの基本</a></li><li><a href="#sales">ヘルプの売上・バックの付け方</a></li><li><a href="#trouble">よくあるトラブルと防ぎ方</a></li><li><a href="#pos">付け回しをアプリで回す</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+
+      <h2 id="what">付け回しとは</h2>
+      <p>付け回しは、お客さまの卓に、どのホストを・どのくらいの時間付けるかを決めて、順番に回していくことです。ホストクラブでは、担当（本指名）のホストがほかの卓にいる間、<b>ヘルプ</b>のホストが席を盛り上げます。初回のお客さまには、何人かのホストを順番に付けて、担当を選んでもらいます。</p>
+
+      <h2 id="who">誰が回すか</h2>
+      <div class="grid2"><div class="box "><b>内勤（幹部・主任など）</b><span>店内全体を見て、卓の状況とホストの空きを見ながら回します。多くのお店がこの形です。</span></div><div class="box "><b>担当のホスト</b><span>自分の卓のヘルプを、担当が自分で選ぶ形。担当の意向は通りやすいものの、全体が見えにくくなります。</span></div></div>
+      <p>どちらの場合も、<b>今の付け回しが全員に見える</b>ことが大切です。ホール全体が見えていれば、手の空いているホストや、長く同じ卓にいるホストにすぐ気づけます。</p>
+
+      <h2 id="rule">付け回しの基本</h2>
+      <ul class="points"><li><b>担当の卓を守る</b><span>担当がほかの卓にいる間も、ヘルプを切らさないようにします。担当が戻る時間の目安も伝えておくと、お客さまが安心します。</span></li><li><b>初回は時間を決めて順番に</b><span>初回のお客さまには、1人あたりの時間を決めて、何人かを順番に付けます。誰がどのくらい付いたかを記録しておくと、送り指名の判断にも使えます。</span></li><li><b>ヘルプの組み合わせを考える</b><span>お客さまの好みや、担当との相性を考えて付けます。同じホストばかりにならないよう、新人にも機会をつくります。</span></li><li><b>時間を見える形にする</b><span>「あと何分で交代」がわかると、ホストも席を離れるタイミングをつかみやすくなります。</span></li></ul>
+
+      <div class="midcta"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600"><div><b>付け回しは、4つ押すだけ</b><span><em>0円から始められます<sup>※</sup>。</em>料金はお問い合わせのときにご案内します。</span></div><a class="btn btn-blue" href="contact.html#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a><a class="lk" href="posupos-host.html">画面を見る</a></div>
+
+      <h2 id="sales">ヘルプの売上・バックの付け方</h2>
+      <p>付け回しでもめやすいのが、ヘルプのホストに<b>何を付けるか</b>です。よくある決め方は次のとおりです（お店によってちがいます）。</p>
+      <div class="grid2"><div class="box "><b>売上は担当に</b><span>お客さまの売上（指名料・ボトル・シャンパンなど）は、担当のホストに付けるお店が多いです。</span></div><div class="box "><b>ヘルプには手当</b><span>ヘルプに付いた時間や回数に応じて、ヘルプの手当を付けます。</span></div><div class="box "><b>ドリンクのバック</b><span>ヘルプのホストがいただいたドリンクのバックは、そのホストに付けるお店が多いです。</span></div><div class="box "><b>シャンパンを分ける</b><span>シャンパンのバックを、担当とヘルプで分けるお店もあります。分ける割合を決めておきます。</span></div></div>
+      <p>どの決め方でも、<b>誰が・どの卓に・何分付いたか</b>の記録が残っていれば、閉店後の計算で迷いません。記録がないと、ヘルプの手当やバックが「付いた・付いていない」の言い合いになりがちです。</p>
+      <p>売上の付け方や売掛（ツケ）の管理は、<a href="news-host-sales.html">ホストクラブの売上管理のやり方</a>でくわしく紹介しています。</p>
+
+      <h2 id="trouble">よくあるトラブルと防ぎ方</h2>
+      <ul class="points"><li><b>同じホストが重なる</b><span>1人のホストを2つの卓に付けてしまう。今の付け回しが一覧で見えていれば防げます。</span></li><li><b>交代の時間が延びる</b><span>盛り上がって交代が遅れ、次の卓が待たされる。交代の時間を全員が見られるようにします。</span></li><li><b>ヘルプが切れる</b><span>担当が戻る前にヘルプがいなくなり、お客さまが1人になる。空いているホストがすぐわかるようにします。</span></li><li><b>手当・バックでもめる</b><span>付いた・付いていないで言い分が分かれる。付けた記録をそのまま給料の計算に使えば、もめごとが減ります。</span></li></ul>
+
+      <h2 id="pos">付け回しをアプリで回す</h2>
+      <p>付け回しをホワイトボードや紙で管理していると、営業中に書き直す手間がかかり、記録も残りにくくなります。<a href="posupos-host.html">ポスポス</a>なら、付け回しはスマホやタブレットで次の4つを押すだけです。</p>
+      <ol class="flowx"><li><div><b>卓を選ぶ</b><span>付け回しをする卓を選びます。</span></div></li><li><div><b>ホストを選ぶ</b><span>付けるホストを選びます。空いているホストがすぐわかります。</span></div></li><li><div><b>付け方を選ぶ</b><span>ヘルプ・場内指名など、付け方を選びます。</span></div></li><li><div><b>何分かを選ぶ</b><span>付ける時間を選ぶと、ホストのスマホに「今の席・あと何分」が出ます。</span></div></li></ol>
+      <p>付いた記録はそのまま残り、ヘルプの手当やドリンクのバックの計算にもつながります。売掛の一覧と回収、ボトルキープ、コールのオークション、ホストの給料まで、ポスポスひとつで管理できます。</p>
+      <p>料金は1店舗ごとで、お問い合わせのときにご案内します。0円から始められます。</p>
+
+      <h2 id="taiiri">採用：体入の前にAI面接で、体入費のむだを減らす</h2>
+      <p>体入（体験入店）の時給や日払いは、合わなかった人にも払うお金です。たとえば体入の時給3,000円×4時間なら1人12,000円。合わなかった体入が月に5人いれば、それだけで<b>毎月60,000円</b>が出ていきます（架空の例）。</p>
+      <div class="grid2">
+        <div class="box"><b>体入の前に一次面接</b><span>応募が来たら URL を LINE で送るだけ。応募者は出勤できる日・時間や経験をボタンで選び、AI の面接官と1分ほど話します。</span></div>
+        <div class="box"><b>体入してもらう人をしぼれる</b><span>話している姿の録画・写真・選んだ答えを見てから決められるので、合わない人の体入が減り、そのぶんの体入費を減らせます。</span></div>
+      </div>
+      <p><a href="posupos-night-ai-interview.html">ポスポスのAI面接</a>は、スタンダードプランの料金の中で使えます（追加料金なし）。合否は AI ではなく、お店が決めます。年齢・本人の確認は、必ずお店で身分証を見て行ってください。くわしくは「<a href="news-night-recruit.html">キャバクラ・ホストの求人面接を効率化</a>」もご覧ください。</p>
+
+      <h2 id="faq">よくある質問</h2>
+      <div class="faqx"><details><summary>付け回しは誰がするのがいいですか？</summary><p>多くのお店では、内勤（幹部・主任など）が店内全体を見ながら回します。担当のホストが自分で回すと、席がかたよったり、ほかの卓が手うすになったりしやすいので、全体を見る役を1人決めておくのがおすすめです。</p></details><details><summary>ヘルプに付いたホストの売上はどうなりますか？</summary><p>多くのお店では、売上はお客さまの担当（本指名）のホストに付き、ヘルプのホストにはヘルプの手当やドリンクのバックが付きます。決め方はお店によってちがうので、はじめにルールを決めて、全員に伝えておきましょう。</p></details><details><summary>初回のお客さまの付け回しのコツは？</summary><p>初回は、お客さまが担当を選ぶための時間です。何人かのホストを、決めた時間で順番に付け、誰がどのくらい付いたかを記録しておくと、送り指名や次の来店につながりやすくなります。</p></details><details><summary>ポスポスで付け回しはできますか？</summary><p>できます。卓・ホスト・付け方・何分を選ぶだけで付け回しができ、ホストのスマホに今の席とあと何分かが表示されます。付いた記録はそのまま残り、ヘルプのバックの計算にも使えます。</p></details></div>
+
+      <div class="cta-box">
+        <h2>付け回しから給料まで。ホストクラブの仕事をポスポスひとつで。</h2>
+        <p class="ofr"><b>0円から始められる<sup>※</sup></b>料金はお問い合わせのときにご案内します</p>
+        <div class="btns"><a class="btn btn-w" href="posupos-host.html">ホストクラブのポスポスを見る <span class="arr" aria-hidden="true">→</span></a><a class="btn btn-o" href="contact.html#pos-offer">無料でためす</a></div>
+      </div>
+
+      <p class="note">※ 記事中の計算例・お店の例は説明のための架空のものです。機能や料金は2026年10月時点の内容です。</p>
+      <p class="note" id="zero-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
+    </article>
+    <a class="btn btn-line" href="news.html" style="margin-top:48px">← お知らせ一覧へ</a>
+    </div>
+    <aside class="side" aria-label="サイドメニュー">
+      <div class="side-ad"><iframe src="https://gachicareer-ai.akitogroup.jp/embed/ad" width="300" height="600" style="border:0;border-radius:12px" loading="lazy" title="ガチキャリAIの広告"></iframe></div>
+      <div class="side-in">
+        <a class="sbn main" href="posupos-night.html"><img src="assets/img/posupos-logo.webp" alt="ポスポス" width="800" height="800" loading="lazy"><span><b>0円から始められる</b><small>面接ができる、最強のPOSレジ。アルバイトの一次面接も AI におまかせ。伝票・会計・打刻・シフト・給料・顧客もまとめて管理</small></span><em>夜のお店のポスポスを見る →</em></a>
+        <div class="sbn2"><a class="d" href="posupos-day.html#izakaya"><small>FOR RESTAURANTS</small><b>昼のお店</b><span>居酒屋・ラーメン・カフェなど</span></a><a class="n" href="posupos-night.html#cabaret"><small>FOR NIGHT</small><b>夜のお店</b><span>キャバクラ・ホストなど</span></a></div>
+        <nav class="stoc" aria-label="この記事の目次"><p>目次</p><ol><li><a href="#what">付け回しとは</a></li><li><a href="#who">誰が回すか</a></li><li><a href="#rule">付け回しの基本</a></li><li><a href="#sales">ヘルプの売上・バックの付け方</a></li><li><a href="#trouble">よくあるトラブルと防ぎ方</a></li><li><a href="#pos">付け回しをアプリで回す</a></li><li><a href="#faq">よくある質問</a></li></ol></nav>
+        <div class="skw"><p>KEYWORDS</p><ul><li><a href="news-pos-ranking.html#func">付け回し</a></li><li><a href="news-pos-ranking.html#func">バック計算</a></li><li><a href="news-pos-ranking.html#func">日払い</a></li><li><a href="news-pos-ranking.html#func">売掛</a></li><li><a href="news-pos-ranking.html#ranking">キャストモード</a></li><li><a href="news-pos-ranking.html#func">指名・同伴</a></li></ul></div>
+        <a class="sdl" href="contact.html#pos-offer"><small>0円から始められる</small>無料でためす → 申し込む</a>
+        <div class="spop"><p>よく読まれる記事</p><ul>
+          <li><a href="news-host-sales.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>ホストクラブの売上管理</span></a></li>
+          <li><a href="news-girlsbar-back.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>ガールズバー・コンカフェのバック計算</span></a></li>
+          <li><a href="news-snack-sales.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>スナックの売上管理</span></a></li>
+          <li><a href="news-lounge-customer.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>ラウンジの顧客管理</span></a></li>
+          <li><a href="news-night-recruit.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>夜のお店の求人面接をAIで効率化</span></a></li>
+          <li><a href="news-concafe-back.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>コンカフェのバック計算</span></a></li>
+          <li><a href="news-pos-ranking-day.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em>飲食店</em>飲食店のPOSレジおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-pos-ranking.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>夜のお店のPOSシステムおすすめ5選｜選び方と比較表</span></a></li>
+          <li><a href="news-cabaret-payroll.html"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600" loading="lazy"><span><em class="nt">夜のお店</em>キャバクラの売上集計と給料計算のやり方</span></a></li>
+        </ul></div>
+      </div>
+    </aside>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "ホストクラブの付け回しのやり方｜担当・ヘルプの回し方と、売上・バックの付け方", "description": "ホストクラブの付け回しの基本を解説。誰が回すとよいか、担当の卓と初回の卓で気をつけたいこと、ヘルプのホストの売上・手当・バックの付け方、ホストが重なる・交代が延びるなどのトラブルと防ぎ方まで。", "image": "https://akitogroup.jp/assets/img/ogp-host-tsukemawashi.png", "datePublished": "2026-10-31", "dateModified": "2026-10-31", "author": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/", "logo": "https://akitogroup.jp/icon-512.png"}, "mainEntityOfPage": "https://akitogroup.jp/news-host-tsukemawashi"}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "トップ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "お知らせ", "item": "https://akitogroup.jp/news"}, {"@type": "ListItem", "position": 3, "name": "ホストクラブの付け回しのやり方｜担当・ヘルプの回し方と、売上・バックの付け方", "item": "https://akitogroup.jp/news-host-tsukemawashi"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "付け回しは誰がするのがいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "多くのお店では、内勤（幹部・主任など）が店内全体を見ながら回します。担当のホストが自分で回すと、席がかたよったり、ほかの卓が手うすになったりしやすいので、全体を見る役を1人決めておくのがおすすめです。"}}, {"@type": "Question", "name": "ヘルプに付いたホストの売上はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "多くのお店では、売上はお客さまの担当（本指名）のホストに付き、ヘルプのホストにはヘルプの手当やドリンクのバックが付きます。決め方はお店によってちがうので、はじめにルールを決めて、全員に伝えておきましょう。"}}, {"@type": "Question", "name": "初回のお客さまの付け回しのコツは？", "acceptedAnswer": {"@type": "Answer", "text": "初回は、お客さまが担当を選ぶための時間です。何人かのホストを、決めた時間で順番に付け、誰がどのくらい付いたかを記録しておくと、送り指名や次の来店につながりやすくなります。"}}, {"@type": "Question", "name": "ポスポスで付け回しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "できます。卓・ホスト・付け方・何分を選ぶだけで付け回しができ、ホストのスマホに今の席とあと何分かが表示されます。付いた記録はそのまま残り、ヘルプのバックの計算にも使えます。"}}]}</script>
+<script>
+(function(){var links=[].slice.call(document.querySelectorAll('.stoc a'));if(!links.length||!('IntersectionObserver' in window))return;
+var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-20% 0px -70% 0px'});
+Object.keys(map).forEach(function(id){var h=document.getElementById(id);if(h)io.observe(h)})})();
+</script>
