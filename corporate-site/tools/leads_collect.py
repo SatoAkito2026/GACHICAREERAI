@@ -145,10 +145,21 @@ TOKYO = ("千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 
          "武蔵村山市 多摩市 稲城市 羽村市 あきる野市 西東京市 瑞穂町 日の出町 檜原村 奥多摩町 大島町 利島村 新島村 神津島村 三宅村 御蔵島村 八丈町 青ヶ島村 小笠原村").split()
 
 
+SAITAMA = ("越谷市 さいたま市 川口市 草加市 春日部市 川越市 所沢市 上尾市 熊谷市 戸田市 蕨市 八潮市 三郷市 吉川市 朝霞市 和光市 志木市 新座市 富士見市 ふじみ野市 "
+           "狭山市 入間市 飯能市 日高市 坂戸市 鶴ヶ島市 東松山市 桶川市 北本市 鴻巣市 久喜市 蓮田市 白岡市 幸手市 加須市 羽生市 行田市 深谷市 本庄市 秩父市 "
+           "伊奈町 三芳町 毛呂山町 越生町 滑川町 嵐山町 小川町 川島町 吉見町 鳩山町 ときがわ町 横瀬町 皆野町 長瀞町 小鹿野町 東秩父村 美里町 神川町 上里町 寄居町 "
+           "宮代町 杉戸町 松伏町").split()
+KANAGAWA = ("横浜市 川崎市 相模原市 横須賀市 藤沢市 平塚市 茅ヶ崎市 大和市 厚木市 小田原市 鎌倉市 海老名市 座間市 秦野市 伊勢原市 綾瀬市 逗子市 三浦市 南足柄市 "
+            "葉山町 寒川町 大磯町 二宮町 中井町 大井町 松田町 山北町 開成町 箱根町 真鶴町 湯河原町 愛川町 清川村").split()
+PREF_LISTS = {"東京都": None, "埼玉県": SAITAMA, "神奈川県": KANAGAWA}
+
+
 def municipalities(pref):
     """都道府県の中の区市町村の名前の一覧。となりの県の市（境目を共有している）は、役所の場所で見分けて外す"""
     if pref == "東京都":
-        return list(TOKYO)  # 東京都は一覧を持っている（地図のサーバーに聞かない）
+        return list(TOKYO)  # 一覧を持っている都県は、地図のサーバーに聞かない
+    if PREF_LISTS.get(pref):
+        return list(PREF_LISTS[pref])
     base = f'rel["name"="{pref}"]["admin_level"="4"];map_to_area->.p;rel(area.p)["boundary"="administrative"]["admin_level"="7"]->.c;'
     for q in (base + 'node(r.c:"admin_centre")(area.p)->.n;rel.c(bn.n:"admin_centre");out tags;', base + '.c out tags;'):
         data = urllib.parse.urlencode({"data": "[out:json][timeout:120];" + q}).encode()
