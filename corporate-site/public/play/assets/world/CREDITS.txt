@@ -1,0 +1,13 @@
+All models: CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) — simplified / textures resized (modified).
+house_a.glb   "Abandoned building" by Federico Paredes — https://sketchfab.com/3d-models/abandoned-building-1aa481727ca54c59834a4f311b43e0cd
+house_b.glb   "Abandoned House" by AspectStudios — https://sketchfab.com/3d-models/abandoned-house-c876fa6c530f4946a5234666752803ce
+house_c.glb   "Abandoned House" by Sengchor — https://sketchfab.com/3d-models/abandoned-house-a0c01ce35a474545b805c0739806aace
+building.glb  "Building 02" by Shalmon — https://sketchfab.com/3d-models/building-02-e22ece3fd35c4bd4a3d90321c1b2a806
+warehouse.glb "Warehoue" by VertexForge — https://sketchfab.com/3d-models/warehoue-d3c20802712547cdaaeace7e3e3eeb6d
+factory.glb   "background factory" by spicybamer — https://sketchfab.com/3d-models/background-factory-ff12e33d1dc844c8ae03c37259b12e94
+bridge.glb    "Railway Stone Bridge" by xplanepilot — https://sketchfab.com/3d-models/railway-stone-bridge-00df164503d14ef6ba42b39dc827dd33
+tree.glb      "Maple tree" by atrodler — https://sketchfab.com/3d-models/maple-tree-4b27adcf92f644bdabf8ecc6c5bef399
+grass.glb     "Grass etaria_viridis" by Tarunmakwana — https://sketchfab.com/3d-models/grass-etaria-viridis-935ea4999b5847c39dd4c20f9c251af8
+rock.glb      "Rock terrain" by Lassi Kaukonen — https://sketchfab.com/3d-models/rock-terrain-fa015203576b44dd9743d24d6c34b5e1
+cars.glb      "Generic passenger car pack" by Comrade1280 — https://sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5
+people/Remy.glb "Remy" (Mixamo character) uploaded by belenic7 — https://sketchfab.com/3d-models/remy-692984e4011248a7ac8ef3d31305a8e2
