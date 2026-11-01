@@ -101,13 +101,25 @@ function fitSlide(pres, ttl) {
   foot(s, "AIは合否を決めません。見た目についてもAIは何も言いません。録画と写真を見て、お店が決めます。");
   return s;
 }
+function caseSlide(pres) {
+  const s = pres.addSlide({ masterName: "LIGHT" });
+  title(s, "導入店の例（ミックスバー）");
+  pill(s, 0.6, 1.4, 3.6, "夜のお店2店で使われています", K.blue, K.white, 12);
+  card(s, 0.6, 2.0, 5.9, 2.4, K.mist);
+  card(s, 6.8, 2.0, 5.9, 2.4, "EEF3FF");
+  T(s, [{ text: "給料の計算  ", options: { fontSize: 18, color: K.ink2 } }, { text: "月50時間 → 月30分", options: { fontSize: 34, bold: true, color: K.blue } }], { x: 0.6, y: 4.75, w: 12.1, h: 0.8, align: "center", valign: "middle" });
+  T(s, [{ text: "使う前", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "閉店後に伝票を見て、バックを手で数えていた\n給料の計算に、月50時間ほど\n給料の内わけを聞かれるたびに調べ直していた", options: { fontSize: 15 } }], { x: 0.9, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
+  T(s, [{ text: "ポスポスを使ってから", options: { bold: true, breakLine: true, fontSize: 20, color: K.blue } }, { text: "伝票を入れた時点で、誰にいくらのバックか決まる\n給料の計算は、月30分ほどの確認だけ\nスタッフは自分のスマホで給料と明細を見られる", options: { fontSize: 15 } }], { x: 7.1, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
+  foot(s, "※ 導入店1店舗の、お店の方への聞き取りです。かかる時間は、お店の大きさや給料の決め方によってちがいます。");
+  return s;
+}
 function priceSlide(pres, ttl, sales) {
   const s = pres.addSlide({ masterName: "LIGHT" });
   title(s, ttl);
   const cols = [
-    { n: "ライト", who: "お会計と売上を、まず楽に", pts: ["注文・会計・伝票", "QR注文・厨房の画面", "ポイント・会員証", "Square・レシート印刷"], ai: false },
-    { n: "スタンダード", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
-    { n: "個別", who: "お店のやり方に合わせて", pts: ["ライト＋スタンダードの機能", "お店独自の給料の計算", "データの取り込み・帳票", "AI面接（追加料金なし）"], ai: true },
+    { n: "ライト", price: "月額11,000円（税込）", who: "お会計と売上を、まず楽に", pts: ["注文・会計・伝票", "QR注文・厨房の画面", "ポイント・会員証", "Square・レシート印刷"], ai: false },
+    { n: "スタンダード", price: "夜 月額33,000円（税込）", who: "お店の運営を、まるごと", pts: ["ライトの機能すべて", "打刻・シフト・給料", "顧客・クーポン・お金・日報", "AI面接（追加料金なし）"], ai: true },
+    { n: "個別", price: "月額55,000円〜（税込）", who: "お店のやり方に合わせて", pts: ["ライト＋スタンダードの機能", "お店独自の給料の計算", "データの取り込み・帳票", "AI面接（追加料金なし）"], ai: true },
   ];
   const cw = 3.85, gap = 0.28;
   cols.forEach((c, i) => {
@@ -116,10 +128,11 @@ function priceSlide(pres, ttl, sales) {
     if (std) pill(s, x + 0.3, y - 0.2, 2.6, "おすすめ", K.blue, K.white, 12);
     T(s, c.n + "プラン", { x: x + 0.3, y: y + 0.35, w: cw - 0.6, h: 0.5, bold: true, fontSize: 20 });
     T(s, c.who, { x: x + 0.3, y: y + 0.85, w: cw - 0.6, h: 0.35, fontSize: 13, color: K.ink2 });
-    T(s, "料金：お見積もり（1店舗ごと）", { x: x + 0.3, y: y + 1.35, w: cw - 0.6, h: 0.5, fontSize: 15, bold: true, color: std ? K.blue : K.navy });
+    T(s, c.price, { x: x + 0.3, y: y + 1.25, w: cw - 0.6, h: 0.5, fontSize: 18, bold: true, color: std ? K.blue : K.navy });
+    if (std) T(s, [{ text: "44,000円", options: { strike: "sngStrike" } }, { text: " → 先着30店はこの価格のまま", options: { breakLine: true } }, { text: "昼のお店は 月額22,000円（税込）", options: { bold: true, color: K.blue } }], { x: x + 0.3, y: y + 1.65, w: cw - 0.6, h: 0.45, fontSize: 11.5, color: K.ink2 });
     T(s, c.pts.map((p, j) => ({ text: p, options: { bullet: true, breakLine: j < c.pts.length - 1, bold: p.startsWith("AI面接"), color: p.startsWith("AI面接") ? K.blue : K.navy } })), { x: x + 0.3, y: y + 2.1, w: cw - 0.6, h: 2.4, fontSize: 14, paraSpaceAfter: 6 });
   });
-  foot(s, "料金は1店舗ごとに、お店に合わせてお見積もりします。0円から始められます（※ プランによって、最初の1か月を無料でお試しいただけます）。");
+  foot(s, "料金は1店舗ごと・税込。導入設定（通常55,000円）は先着30店まで0円。ライト・スタンダードは1か月無料でお試しできます。");
   return s;
 }
 function closeSlide(pres, big, steps) {
@@ -211,7 +224,7 @@ async function brochure() {
   cardsGrid(s, [["レジ・注文・会計", "配置図で卓を開いて注文から会計まで。QR注文・厨房の画面・券売機・Square。夜はセット・延長・指名・付け回し・売掛も。"],
     ["打刻・シフト・給料", "ICカードで打刻。シフトの希望集めから、深夜時給・交通費・前借り、夜はバック・歩合・源泉徴収まで自動で計算。"],
     ["AI面接（世界初※）", "URLを送るだけ。応募者は条件をボタンで選んで、AIの面接官と1分ほど話します。録画と答えがお店に届きます。"]], { y: 1.65, h: 3.0, numbered: true, shadow: true });
-  T(s, "パソコン・タブレット・スマホのブラウザで動くので、インストールはいりません。飲食店28種類・夜のお店7種類で使えます。", { x: 0.6, y: 5.0, w: 12.1, h: 0.6, fontSize: 15, color: K.ink2 });
+  T(s, "パソコン・タブレット・スマホのブラウザで動くので、インストールはいりません。飲食店28種類・夜のお店8種類で使えます。", { x: 0.6, y: 5.0, w: 12.1, h: 0.6, fontSize: 15, color: K.ink2 });
   foot(s, NOTE_FIRST);
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "AI面接：ボタンで選んで、1分話す");
@@ -251,23 +264,24 @@ async function brochure() {
   T(s, bl(ngt), { x: 7.1, y: 2.5, w: 5.3, h: 3.8, fontSize: 14.5, paraSpaceAfter: 8 });
   posDetail(pres, ["order", "checkout", "kitchen", "night", "pay", "money", "phone"]);
 
-  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "対応しているお店（飲食店28種類・夜のお店7種類）");
+  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "対応しているお店（飲食店28種類・夜のお店8種類）");
   const groups = [["和食", "和食レストラン・寿司・そば・うどん・定食・食堂・丼もの・牛丼・とんかつ・揚げ物"], ["居酒屋・焼き鳥・お酒", "居酒屋・焼き鳥・バー・バル（キャストなし）"], ["肉・鉄板・鍋", "焼肉・ステーキ・鉄板焼き・お好み焼き・もんじゃ・しゃぶしゃぶ・鍋"], ["麺・中華・アジア", "ラーメン・つけ麺・中華料理・韓国料理・カレー・インド料理・エスニック"],
-    ["洋食", "洋食レストラン・イタリアン・フレンチ・ビストロ・ハンバーガー"], ["カフェ・パン・スイーツ", "カフェ・パン屋・ベーカリー・ケーキ・スイーツ"], ["テイクアウト・食べ放題", "お弁当・テイクアウト・キッチンカー・ビュッフェ・食べ放題"], ["夜のお店", "ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジ"]];
+    ["洋食", "洋食レストラン・イタリアン・フレンチ・ビストロ・ハンバーガー"], ["カフェ・パン・スイーツ", "カフェ・パン屋・ベーカリー・ケーキ・スイーツ"], ["テイクアウト・食べ放題", "お弁当・テイクアウト・キッチンカー・ビュッフェ・食べ放題"], ["夜のお店", "ホストクラブ・キャバクラ・ガールズバー・ボーイズバー・コンセプトカフェ・スナック・ラウンジ・ミックスバー"]];
   cardsGrid(s, groups, { y: 1.6, cols: 4, h: 2.3, gap: 0.22, titleSize: 15.5, bodySize: 13 });
   foot(s, "このほかの飲食店も、お気軽にご相談ください。");
 
+  caseSlide(pres);
   priceSlide(pres, "料金プラン");
 
-  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "グループ店・導入の流れ");
+  s = pres.addSlide({ masterName: "LIGHT" }); title(s, "グループ店・年間契約・導入の流れ");
   card(s, 0.6, 1.65, 6.0, 2.05, "FFF4DB");
   card(s, 0.6, 3.95, 6.0, 2.05, "EEF3FF");
   T(s, [{ text: "グループ店", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "何店舗でも足せます。料金は1店舗ごと（足した日からの日割り）。スタッフ・キャストのスマホでは、お店を切りかえて使えます。", options: { fontSize: 15 } }], { x: 0.9, y: 1.85, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
-  T(s, [{ text: "料金", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "お店の種類・大きさ・使う機能に合わせて、お見積もりします。0円から始められます（※ プランによって、最初の1か月を無料でお試しいただけます）。", options: { fontSize: 15 } }], { x: 0.9, y: 4.1, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
-  const fl = [["お問い合わせ", "電話・フォーム"], ["無料でお試し", "カード登録なしなら勝手に請求されません"], ["お見積もり・設定", "お店に合わせた料金をご案内して、設定を進めます"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
+  T(s, [{ text: "年間契約の特典（前払い）", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "1年：導入設定0円（先着30店のあとも）\n2年：＋料金を変えない・お店で使い方の説明1回\n3年：＋お店独自の作り込み1つ無料・優先対応", options: { fontSize: 14 } }], { x: 0.9, y: 4.1, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
+  const fl = [["お問い合わせ", "LINE（10:00〜翌2:00）・電話・フォーム"], ["お店の画面ができる", "最短で翌営業日。メニュー・キャストの登録はこちらで"], ["今のレジと並べて試す", "給料の締めを1回いっしょに。今の計算と合うか確認"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
   fl.forEach(([t, b], i) => { const y = 1.6 + i * 1.2; card(s, 7.0, y, 5.7, 1.0); num(s, 7.25, y + 0.25, i + 1); T(s, t, { x: 7.95, y: y + 0.12, w: 4.5, h: 0.4, bold: true, fontSize: 16 }); T(s, b, { x: 7.95, y: y + 0.52, w: 4.6, h: 0.4, fontSize: 13, color: K.ink2 }); });
 
-  closeSlide(pres, "0円から、はじめられます。", [["お問い合わせ", "お電話かフォームから。お店の種類と店舗数を教えてください。"], ["無料でお試し", "プランによって1か月無料。カードを登録しなければ請求されません。"], ["AI面接を体験", "最初の応募者に、AI面接のURLを送ってみてください。"]]);
+  closeSlide(pres, "月額11,000円から・導入設定0円で、はじめられます。", [["お問い合わせ", "LINE（10:00〜翌2:00）・お電話・フォームから。"], ["無料でお試し", "ライト・スタンダードは1か月無料。カードを登録しなければ請求されません。"], ["AI面接を体験", "最初の応募者に、AI面接のURLを送ってみてください。"]]);
 
   await pres.writeFile({ fileName: path.join(__dirname, "posupos-shiryo.pptx") });
   await applyTheme(path.join(__dirname, "posupos-shiryo.pptx"), THEME);
@@ -330,13 +344,14 @@ async function sales() {
   T(s, "採用から給料まで、同じアプリで。いくつものアプリに同じことを入れる手間もなくなります。", { x: 0.6, y: 4.7, w: 12.1, h: 0.6, fontSize: 18, bold: true, color: K.blue });
   posDetail(pres, ["order", "checkout", "night", "pay", "money", "phone"]);
 
+  caseSlide(pres);
   priceSlide(pres, "AI面接は、スタンダードの料金にふくまれています", true);
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "はじめやすい理由");
-  cardsGrid(s, [["0円から始められる", "プランによって、最初の1か月は無料。カードを登録しなければ、お試しのあと勝手に請求されることはありません。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["グループ店も何店舗でも", "料金は1店舗ごと。お店を足すのもかんたんです。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
+  cardsGrid(s, [["導入設定 0円（先着30店）", "通常55,000円の設定作業が、今は0円。ライト・スタンダードは1か月無料でお試しできます。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["導入店の例（ミックスバー）", "給料の計算が、月50時間から月30分に（お店の方への聞き取り）。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
   s.addNotes("クロージング。「まず1か月、次の応募者にURLを送ってみませんか？」と提案する。");
 
-  closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["料金はお見積もり", "お店の種類と店舗数から、料金をご案内します。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);
+  closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["料金は1店舗ごと", "ライト11,000円・スタンダード 夜33,000円／昼22,000円（税込）。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);
 
   await pres.writeFile({ fileName: path.join(__dirname, "posupos-teian.pptx") });
   await applyTheme(path.join(__dirname, "posupos-teian.pptx"), THEME);
