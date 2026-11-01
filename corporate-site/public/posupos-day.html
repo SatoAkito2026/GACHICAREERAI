@@ -332,6 +332,7 @@ p{margin:0}
 .annual .disc div{border-radius:16px;background:var(--mist);padding:14px 10px;text-align:center}
 .annual .disc small{display:block;font-size:13px;font-weight:700;color:var(--ink-2)}
 .annual .disc b{display:block;font-size:clamp(18px,3vw,24px);font-weight:900;color:var(--blue)}
+@media (max-width:599px){.annual .disc{grid-template-columns:1fr}}
 .annual ul{margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
 
 /* ===== 8. よくある質問 ===== */
@@ -973,7 +974,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
 
         <div class="btns" style="margin-top:28px">
           <a class="btn btn-blue" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
-          <a class="btn btn-line" href="/contact#pos">お問い合わせ</a>
+          <a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談（10:00〜翌2:00）</a>
         </div>
         <p class="used-in" style="display:inline-flex;align-items:center;gap:8px;margin:18px 0 0;padding:6px 14px;border-radius:999px;background:rgba(20,108,67,.1);color:#146C43;font-weight:800;font-size:14.5px"><span aria-hidden="true">●</span>夜のお店2店で使われています（昼のお店はモニター募集中）</p>
         <ul class="hero-pts">
@@ -1365,13 +1366,13 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
       <div class="sec-head rv">
         <p class="eyebrow">Plans</p>
         <h2>料金・プラン</h2>
-        <p>料金は1店舗ごと・税込です。初期費用は0円、端末を買う必要もありません（今のスマホ・タブレット・パソコンで動きます）。ライトとスタンダードは1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
+        <p>料金は1店舗ごと・税込です。導入設定は先着30店まで0円（通常55,000円）、端末を買う必要もありません（今のスマホ・タブレット・パソコンで動きます）。ライトとスタンダードは1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
       </div>
       <div class="plans stagger">
         <article class="plan rv">
           <h3>ライトプラン</h3>
           <p class="who">お会計と売上を、まず楽にしたいお店に。</p>
-          <p class="price"><span class="py">月額 <b class="n">11,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・初期費用 0円</span></p>
+          <p class="price"><span class="py">月額 <b class="n">11,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・導入設定 <s>55,000円</s> → <b>0円</b></span></p>
           <ul>
             <li><span>ホーム<small>今日・今月の売上、客数、売上のグラフ</small></span></li>
             <li><span>店内<small>卓の配置図、受付・注文・会計（フロアも分けられる）</small></span></li>
@@ -1391,7 +1392,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
           <span class="badge">おすすめ</span>
           <h3>スタンダードプラン</h3>
           <p class="who">お店の運営を、まるごとアプリにしたいお店に。</p>
-          <p class="price"><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・初期費用 0円</span></p>
+          <p class="price"><span class="py">月額 <b class="n">22,000</b>円<small>（税込）</small></span><span class="pn">1店舗ごと・導入設定 <s>55,000円</s> → <b>0円</b></span></p>
           <p class="plus">ライトプランの機能 ＋</p>
           <ul>
             <li class="ai-li"><span>AI面接<span class="nw">NEW</span><small>選ぶ質問＋1分の録画面接。追加料金なし</small></span></li>
@@ -1441,6 +1442,16 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
           <a class="toggle" href="/posupos-day-pricing#plan-cus">すべての例を見る →</a>
         </article>
       </div>
+<p class="plan-note rv">※ 導入設定は、メニュー・スタッフ・給料の決まりなどを、こちらで入れておく作業です（通常55,000円）。今は先着30店まで0円です。</p>
+      <div class="annual rv" id="annual">
+        <h3>年間契約の特典</h3>
+        <p class="lead2">1年・2年・3年の前払いでお申し込みいただくと、次の特典がつきます。</p>
+        <div class="disc"><div><small>1年</small><b>導入設定 0円</b><span style="font-size:12px;color:var(--ink-2)">先着30店が終わったあとも</span></div><div><small>2年</small><b>料金を変えない</b><span style="font-size:12px;color:var(--ink-2)">＋お店に伺って使い方の説明（1回）</span></div><div><small>3年</small><b>作り込み1つ無料</b><span style="font-size:12px;color:var(--ink-2)">＋困ったときの優先対応</span></div></div>
+        <ul>
+          <li>2年は1年の特典も、3年は2年までの特典もつきます。作り込みは、お店独自の給料の計算や帳票などを1つお作りします。</li>
+          <li>お支払いは前払いです。自動では更新しません（終わる1か月前にお知らせします）。途中でおやめになっても、残りの期間のお金はお返ししません。</li>
+        </ul>
+      </div>
       <p class="plan-note rv">※ どのプランも、パソコン・タブレット・スマホのブラウザで動きます（アプリのインストールは不要。ホーム画面に追加もできます）。</p>
       <div class="ai-more rv"><a class="btn btn-blue" href="/posupos-day-pricing">プランの違いをくわしく見る <span class="arr" aria-hidden="true">→</span></a><span>すべての機能の比べ方・グループ店（何店舗でも）</span></div>
     </div>
@@ -1468,7 +1479,8 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
         <h2>よくある質問</h2>
       </div>
       <div class="faq rv">
-        <details><summary>料金はいくらですか？</summary><p>1店舗ごとに、ライトプラン 月額11,000円、スタンダードプラン 月額22,000円、個別プラン 月額55,000円〜です（すべて税込）。初期費用は0円で、端末を買う必要もありません。</p></details>
+        <details><summary>料金はいくらですか？</summary><p>1店舗ごとに、ライトプラン 月額11,000円、スタンダードプラン 月額22,000円、個別プラン 月額55,000円〜です（すべて税込）。導入設定（通常55,000円）は先着30店まで0円で、端末を買う必要もありません。</p></details>
+        <details><summary>年間契約はありますか？</summary><p>はい。1年・2年・3年の前払いの契約があります。1年は導入設定0円（先着30店が終わったあとも）、2年は契約の間は料金を変えないお約束とお店での使い方の説明1回、3年はお店独自の作り込みを1つ無料と優先対応がつきます。自動では更新しません。</p></details>
         <details><summary>今のレジと並行して使えますか？</summary><p>はい。今のレジはそのままで、ポスポスを並べて試せます。使い勝手やお店の流れに合うかを確かめてから決められます。</p></details>
         <details><summary>メニューやスタッフのデータは、誰が入れますか？</summary><p>お店で入れられます。最初の登録は、こちらでお手伝いすることもできます（モニターのお店は無料）。メニュー表の写真を送っていただければ大丈夫です。</p></details>
         <details><summary>お試しはできますか？</summary><p>はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。</p></details>
@@ -1489,9 +1501,9 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
       <p>1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
       <div class="btns">
         <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
-        <a class="btn btn-o" href="/contact#pos">お問い合わせ</a>
+        <a class="btn btn-o" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a>
       </div>
-      <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
+      <p class="tel">LINE 10:00〜翌2:00 ／ TEL 080-2420-4900（年中無休・24時間受付）</p>
     </div>
   </section>
 </main>
@@ -1534,7 +1546,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="/contact#pos">お問い合わせ</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a></div>
 
 <script>
 (function(){
@@ -1601,6 +1613,6 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   });
 })();
 </script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "AggregateOffer", "lowPrice": "11000", "highPrice": "55000", "priceCurrency": "JPY", "offerCount": "3", "url": "https://akitogroup.jp/posupos-day#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "1店舗ごとに、ライトプラン 月額11,000円、スタンダードプラン 月額22,000円、個別プラン 月額55,000円〜です（すべて税込）。初期費用は0円で、端末を買う必要もありません。"}}, {"@type": "Question", "name": "今のレジと並行して使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。今のレジはそのままで、ポスポスを並べて試せます。使い勝手やお店の流れに合うかを確かめてから決められます。"}}, {"@type": "Question", "name": "メニューやスタッフのデータは、誰が入れますか？", "acceptedAnswer": {"@type": "Answer", "text": "お店で入れられます。最初の登録は、こちらでお手伝いすることもできます（モニターのお店は無料）。メニュー表の写真を送っていただければ大丈夫です。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "やめるとき、データはどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "売上・帳簿などのデータは、CSV で書き出して持ち出せます。やめたあとも、書き出したデータはお手元に残ります。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ポスポス（POSPOS）", "alternateName": "POSPOS", "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）", "description": "ポスポス（POSPOS）は、和食・居酒屋・焼肉・ラーメン・洋食・カフェ・テイクアウトなど28種類の飲食店のためのクラウドPOSレジ。注文・会計・厨房・QR注文・券売機に、打刻・シフト・給料・顧客の管理までひとつになった店舗管理アプリです。アルバイトの一次面接も AI におまかせ（スタンダード）。ブラウザで動くのでインストール不要。", "url": "https://akitogroup.jp/posupos-day", "image": "https://akitogroup.jp/assets/img/ogp-posupos-day.png", "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": "https://akitogroup.jp/"}, "offers": {"@type": "AggregateOffer", "lowPrice": "11000", "highPrice": "55000", "priceCurrency": "JPY", "offerCount": "3", "url": "https://akitogroup.jp/posupos-day#plans"}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "料金はいくらですか？", "acceptedAnswer": {"@type": "Answer", "text": "1店舗ごとに、ライトプラン 月額11,000円、スタンダードプラン 月額22,000円、個別プラン 月額55,000円〜です（すべて税込）。導入設定（通常55,000円）は先着30店まで0円で、端末を買う必要もありません。"}}, {"@type": "Question", "name": "年間契約はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。1年・2年・3年の前払いの契約があります。1年は導入設定0円（先着30店が終わったあとも）、2年は契約の間は料金を変えないお約束とお店での使い方の説明1回、3年はお店独自の作り込みを1つ無料と優先対応がつきます。自動では更新しません。"}}, {"@type": "Question", "name": "今のレジと並行して使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。今のレジはそのままで、ポスポスを並べて試せます。使い勝手やお店の流れに合うかを確かめてから決められます。"}}, {"@type": "Question", "name": "メニューやスタッフのデータは、誰が入れますか？", "acceptedAnswer": {"@type": "Answer", "text": "お店で入れられます。最初の登録は、こちらでお手伝いすることもできます（モニターのお店は無料）。メニュー表の写真を送っていただければ大丈夫です。"}}, {"@type": "Question", "name": "お試しはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、無料でお試しいただけます（プランによります）。お試しの間にカードを登録すると、そのまま続けて使えます。カードを登録しなければ、お試しのあとは「見るだけ」のモードになり、勝手に請求されることはありません（データは消えません）。"}}, {"@type": "Question", "name": "AI が合否を決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。AI は話し方の雰囲気をまとめるだけで、見た目や合否については何も言いません。録画と写真を見て、お店の方が決めてください。"}}, {"@type": "Question", "name": "面接は何分くらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "かんたんな質問をボタンで選ぶのに1分ほど、AI の面接官と話すのが1分ほどです。"}}, {"@type": "Question", "name": "古い iPad でも使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "ポスポスはブラウザで動くので、アプリのインストールはいりません。パソコン・タブレット・スマホで使えます。お使いの端末で動くか心配なときは、お試しの前にお問い合わせください。"}}, {"@type": "Question", "name": "やめるとき、データはどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "売上・帳簿などのデータは、CSV で書き出して持ち出せます。やめたあとも、書き出したデータはお手元に残ります。"}}, {"@type": "Question", "name": "今使っている Excel やレジのデータは引っ越せますか？", "acceptedAnswer": {"@type": "Answer", "text": "今までの Excel の実績は、取り込みの画面から取り込めます。ほかのレジのデータの取り込みや、お店独自の形に合わせた取り込みは、個別プランでご相談ください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": "https://akitogroup.jp/"}, {"@type": "ListItem", "position": 2, "name": "ポスポス", "item": "https://akitogroup.jp/posupos"}, {"@type": "ListItem", "position": 3, "name": "昼のお店", "item": "https://akitogroup.jp/posupos-day"}]}</script><script src="assets/posupos-voice.js" defer></script>
 </body>
 </html>
