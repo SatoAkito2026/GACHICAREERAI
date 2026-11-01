@@ -134,7 +134,7 @@ def posupos_ld(html, mode):
          "applicationCategory": "BusinessApplication", "operatingSystem": "Web（パソコン・タブレット・スマホのブラウザ）",
          "description": desc, "url": url, "image": f"{SITE}/assets/img/ogp-posupos-{mode}.png",
          "publisher": {"@type": "Organization", "name": "合同会社AKITOグループ", "url": f"{SITE}/"},
-         "offers": {"@type": "Offer", "name": "1か月無料のお試し", "price": "0", "priceCurrency": "JPY", "url": url + "#plans"}},
+         "offers": {"@type": "AggregateOffer", "lowPrice": "11000", "highPrice": "55000", "priceCurrency": "JPY", "offerCount": "3", "url": url + "#plans"}},
         {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]},
         {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "AKITOグループ", "item": f"{SITE}/"},

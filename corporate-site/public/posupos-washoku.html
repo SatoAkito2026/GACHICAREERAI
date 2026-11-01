@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 <title>和食のお店のPOSレジ｜寿司・そば・うどん・定食・丼・とんかつ ポスポス（AI面接つき）</title>
-<meta name="description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。0円から始められます。">
+<meta name="description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から始められます。">
 <meta property="og:title" content="和食のお店のPOSレジ｜寿司・そば・うどん・定食・丼・とんかつ ポスポス（AI面接つき）">
 <meta property="og:url" content="https://akitogroup.jp/posupos-washoku">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。0円から始められます。">
+<meta property="og:description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から始められます。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -903,6 +903,37 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
 .shopbar button:hover{border-color:var(--blue)}
 .shopbar button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
 @media (max-width:479px){.shopbar button{padding:0 14px;font-size:14px}}
+.hero-sub{margin-top:14px;font-size:clamp(16px,2vw,18px);font-weight:700;color:var(--navy);max-width:32em}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px;max-width:640px}
+.res div{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.res small{display:block;font-size:12px;color:var(--ink-2);font-weight:700}
+.res b{display:block;font-size:clamp(15px,2vw,19px);font-weight:900;color:var(--navy);line-height:1.4;margin-top:2px}
+.res b em{font-style:normal;color:var(--blue);white-space:nowrap}
+.res-h{margin-top:22px;font-size:13px;font-weight:800;color:var(--ink-2)}
+.res-n{font-size:11.5px;color:var(--ink-2);margin-top:6px;max-width:640px}
+.ai-mini{display:inline-block;line-height:1.7;margin-top:14px;font-size:14px;font-weight:700;color:var(--navy);text-decoration:none;border-bottom:1px dashed var(--line)}
+.ai-mini b{color:var(--blue)}
+@media (max-width:599px){.res{grid-template-columns:1fr}}
+.cmpw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp3{width:100%;min-width:600px;border-collapse:separate;border-spacing:0;background:var(--white);border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:14px}
+.cmp3 th,.cmp3 td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;line-height:1.6}
+.cmp3 thead th{background:var(--mist);font-size:13px}
+.cmp3 .us{background:rgba(21,87,214,.07);font-weight:800}
+.cmp3 tr:last-child th,.cmp3 tr:last-child td{border-bottom:0}
+.cmp-n{font-size:12px;color:var(--ink-2);margin-top:10px}
+.flow3{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:f}
+.flow3 li{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px;counter-increment:f}
+.flow3 li::before{content:counter(f);display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--on-blue);font-weight:900;margin-bottom:10px}
+.flow3 small{display:block;font-size:12.5px;font-weight:800;color:var(--blue)}
+.flow3 b{display:block;font-size:17px;margin:2px 0 6px}
+.flow3 span{font-size:14px;color:var(--ink-2)}
+@media (max-width:759px){.flow3{grid-template-columns:1fr}}
+.case{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.case div{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px}
+.case .af{border-color:var(--blue)}
+.case p{font-weight:900;margin:0 0 8px}
+.case ul{margin:0;padding-left:1.2em;color:var(--ink-2);font-size:14.5px;line-height:1.9}
+@media (max-width:599px){.case{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="day" data-shop="sushi">
@@ -948,7 +979,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
           <a class="btn btn-blue" href="/contact?shop=washoku#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="/posupos-day#sushi">和食のお店の画面をもっと見る</a>
         </div>
-        <p class="shop-note">0円から始められます。※ プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。 ※「世界初」は2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
+        <p class="shop-note">料金は1店舗ごとに月額11,000円（税込）から、初期費用0円。ライトとスタンダードは1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。 ※「世界初」は2026年10月 当社調べ。POSレジに、AI による応募者の一次面接の機能を標準でつけたサービスとして。</p>
       </div>
       <figure class="shot " data-shot="home"><div class="v" data-v="izakaya"><div class="ap ap-day"><div class="ap-top"><span class="lg"><img src="assets/img/posupos-mark.webp" alt="" width="600" height="600">ポスポス</span><span class="st">居酒屋 とりまる ▾</span><span class="rt"><span>画面を開く</span><span>店内モード</span>ログアウト</span></div><div class="ap-body"><div class="ap-side"><span class="on">ホーム</span><span>店内</span><span>伝票</span><span>チャット</span><span>カレンダー</span><span>お金</span><span>経費</span><span>日報・月報</span><span>クーポン</span><span>出数・在庫</span><span>顧客</span><span>勤怠</span><span>給料</span><span>シフト</span></div><div class="ap-main">
 <div class="ap-h">今日　10/23（金）</div>
@@ -1054,14 +1085,13 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
 
   <section class="sec final">
     <div class="wrap rv">
-      <h2>0円から、はじめられます。</h2>
-      <p>料金は、お店に合わせてお問い合わせのときにご案内します。お試しのお申し込みは、お問い合わせフォームから。</p>
+      <h2>月額11,000円から・初期費用0円で、はじめられます。</h2>
+      <p>1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
       <div class="btns">
         <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="/contact#pos">お問い合わせ</a>
       </div>
       <p class="tel">TEL 080-2420-4900（年中無休・24時間受付）</p>
-      <p class="zero-note" id="zero-note">※ 0円から：プランによって、最初の1か月を無料でお試しいただけます（カードを登録しなければ、勝手に請求されることはありません）。料金は、お問い合わせのときにご案内します。</p>
     </div>
   </section>
 
