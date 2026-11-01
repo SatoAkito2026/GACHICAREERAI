@@ -968,7 +968,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
 {{#night}}          <a class="btn btn-blue" href="posupos-monitor.html">今のレジのまま2か月無料で試す <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談（10:00〜翌2:00）</a>
           <a class="btn btn-line" href="https://pospos.akitogroup.jp/demo/cabaret" target="_blank" rel="noopener">ログインなしでデモを触る <span class="arr" aria-hidden="true">→</span></a>{{/night}}{{#day}}          <a class="btn btn-blue" href="contact.html#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
-          <a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談（10:00〜翌2:00）</a>{{/day}}
+          <a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談（10:00〜翌2:00）</a>
+          <a class="btn btn-line" href="https://pospos.akitogroup.jp/demo/izakaya" target="_blank" rel="noopener">ログインなしでデモを触る <span class="arr" aria-hidden="true">→</span></a>{{/day}}
         </div>
         <p class="used-in" style="display:inline-flex;align-items:center;gap:8px;margin:18px 0 0;padding:6px 14px;border-radius:999px;background:rgba(20,108,67,.1);color:#146C43;font-weight:800;font-size:14.5px"><span aria-hidden="true">●</span>夜のお店2店で使われています{{#day}}（昼のお店はモニター募集中）{{/day}}</p>
         <ul class="hero-pts">
@@ -1132,7 +1133,18 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
     </div>
   </section>
 
-{{/night}}  <section class="sec tint" id="can">
+{{/night}}{{#day}}  <section class="sec" id="demo">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">Demo</p>
+        <h2>ログインなしで、画面を触ってみる。</h2>
+        <p>見本の居酒屋「まるよし」の画面です。店内の卓・注文・伝票・厨房の画面・卓のQR注文・給料まで、ふだんの画面をそのまま触れます。</p>
+      </div>
+      <p class="rv"><a class="btn btn-blue" href="https://pospos.akitogroup.jp/demo/izakaya" target="_blank" rel="noopener">居酒屋のデモを触ってみる <span class="arr" aria-hidden="true">→</span></a><span style="display:block;font-size:12.5px;color:var(--ink-2);margin-top:8px">お店・人の名前・数字は架空です。触った内容は毎朝もとに戻ります。</span></p>
+    </div>
+  </section>
+
+{{/day}}  <section class="sec tint" id="can">
     <div class="wrap">
       <div class="sec-head rv">
         <p class="eyebrow">What you can do</p>
@@ -1745,7 +1757,8 @@ body[data-shop="lounge"] .v[data-v="lounge"]{display:block}
         <a class="btn btn-w" href="contact.html#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a>
 {{#night}}        <a class="btn btn-o" href="https://pospos.akitogroup.jp/demo/cabaret" target="_blank" rel="noopener">デモを触る</a>
-{{/night}}      </div>
+{{/night}}{{#day}}        <a class="btn btn-o" href="https://pospos.akitogroup.jp/demo/izakaya" target="_blank" rel="noopener">デモを触る</a>
+{{/day}}      </div>
       <p class="tel">LINE 10:00〜翌2:00 ／ TEL 080-2420-4900（年中無休・24時間受付）</p>
     </div>
   </section>
