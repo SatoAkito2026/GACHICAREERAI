@@ -1,0 +1,11 @@
+All models: CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) — simplified / textures resized (modified).
+vest.glb     "Plate Carrier" by jujumaster3000 — https://sketchfab.com/3d-models/plate-carrier-bda67a9932cb4b7cb562f3c1a8937426
+helmet1.glb  "M35 Stahlhelm german helmet" by oyez — https://sketchfab.com/3d-models/m35-stahlhelm-german-helmet-f99b9c47667b4d16bd8c55cc01bcb09a
+helmet2.glb  "Military Helmet" by ED BOX — https://sketchfab.com/3d-models/military-helmet-7b344fdb2ce846539cb420fe4d37fc13
+helmet3.glb  "Tactical Helmet with Headset (Game-Ready)" by Exactly — https://sketchfab.com/3d-models/tactical-helmet-with-headset-game-ready-82adf376164f4d99a4e0b2949930e2ad
+grenade.glb  "Frag Grenade M67" by ForevereQ — https://sketchfab.com/3d-models/frag-grenade-m67-0a248ad637794f378797e7e2a2325839
+smoke.glb    "M18 Smoke Grenade" by Vanillatography — https://sketchfab.com/3d-models/m18-smoke-grenade-46343925ad0e47cf927e66da7953c372
+bandage.glb  "Bandage Roll" by Tactical_Gamer — https://sketchfab.com/3d-models/bandage-roll-dd33fad87aec468daeb0398ea4a6389f
+bottle.glb   "Cycling water bottle" by Wittybacon — https://sketchfab.com/3d-models/cycling-water-bottle-ce6d8b73eb614700bb2f35a62a8f04da
+plane.glb    "Airplane Bomber" by new gmod player — https://sketchfab.com/3d-models/airplane-bomber-db8e189fa5db455bb6f1431679ba6c42
+parachute.glb "Parachute Simple" by sxnneh — https://sketchfab.com/3d-models/parachute-simple-030a235d6f314a86bebc33f322c0e71c
