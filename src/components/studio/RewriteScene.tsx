@@ -255,36 +255,48 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
         )}
       </div>
 
-      {/* 最初の1〜2秒：明るい画面に強い一言と、1つ目の「落ちる言い方」と低い点数を最初のコマから見せる
-          （暗い画面だと一覧で真っ黒に見え、2秒で離れられていたため） */}
+      {/* 最初の1〜2秒：AI面接官の顔を見せたまま、顔の上に強い一言、下に1つ目の「落ちる言い方」と低い点数を
+          最初のコマから出す（暗い画面・黄色だけの画面では1秒で離れられていた。人の顔があると手が止まりやすい） */}
       {inHook && hookLine && (
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 176,
-            bottom: 0,
-            background: "#FFE45C",
-            padding: "34px 64px 0 22px",
-          }}
-        >
-          <p
+        <>
+          <div
             style={{
+              position: "absolute",
+              top: 300,
+              left: 24,
+              right: 24,
               textAlign: "center",
-              fontSize: 40,
-              fontWeight: 900,
-              lineHeight: 1.25,
-              color: "#111",
-              transform: `scale(${1.08 - 0.08 * ease((t - hookLine.start) / 0.18)}) rotate(-2deg)`,
-              wordBreak: "keep-all",
-              overflowWrap: "anywhere",
+              transform: `scale(${1.15 - 0.15 * ease((t - hookLine.start) / 0.18)}) rotate(-2deg)`,
             }}
           >
-            {job.hook}
-          </p>
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 42,
+                fontWeight: 900,
+                lineHeight: 1.25,
+                color: "#FFE45C",
+                WebkitTextStroke: "8px #000",
+                paintOrder: "stroke fill",
+                wordBreak: "keep-all",
+                overflowWrap: "anywhere",
+              }}
+            >
+              {job.hook}
+            </span>
+          </div>
           {job.items[0] && (
-            <div style={{ marginTop: 26 }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 456,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "#0F1216",
+                padding: "0 64px 0 18px",
+              }}
+            >
               <AnswerCard
                 kind="ng"
                 text={job.items[0].ng}
@@ -296,16 +308,16 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
                 style={{
                   marginTop: 16,
                   textAlign: "center",
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: 900,
-                  color: "#111",
+                  color: "#FFE45C",
                 }}
               >
                 どう言えば受かる？ ↓
               </p>
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* オファー：練習の結果を公開しておくと、企業から面談の申し込みが届く */}
