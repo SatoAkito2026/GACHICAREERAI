@@ -230,6 +230,7 @@ function campaignMail(lead) {
   const stopUrl = `${SITE}/api/lead/stop?t=${lead.stop_token}`;
   const type = lead.shop_type || "";
   const night = NIGHT_TYPE.test(type);
+  const demoUrl = `${SITE}/go/demo?d=${night ? "cabaret" : "izakaya"}&l=${lead.stop_token}`;
   const typeLine = (TYPE_LINES.find(([re]) => re.test(type)) || [])[1];
   // 件名は短く、お店の名前を入れる（一目で営業の一斉メールとわかる件名は開かれにくく、迷惑メールにも入りやすい）
   const name = (lead.shop_name || "").trim();
@@ -248,6 +249,11 @@ function campaignMail(lead) {
 
 ${night ? "ポスポスは、夜のお店のためのレジです。" : "ポスポスは、注文・会計から打刻・シフト・給料まで、ひとつでできるレジです。"}
 ${typeLine ? typeLine + "\n" : ""}${night ? "キャストや黒服の一次面接をAIにまかせる機能もついています。" : "アルバイトの一次面接をAIにまかせる機能もついています。"}
+
+まず画面を見てみたい場合は、ログインなしで触れる見本のお店（${night ? "キャバクラ" : "居酒屋"}）をご用意しています。登録はいりません：
+${demoUrl}
+
+料金は月額11,000円（税込）から、導入設定は先着30店まで0円です。
 
 少しでも気になったら、このメールに「くわしく」とだけ返信してください。資料をお送りします。
 そのまま申し込む場合はこちら（1分）：
@@ -417,6 +423,14 @@ export default {
     const lt = url.searchParams.get("l");
     if (url.pathname.replace(/\.html$/, "") === "/posupos-monitor" && lt && /^[0-9a-f-]{36}$/.test(lt) && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY && ctx) {
       ctx.waitUntil(sb(env, `posupos_leads?stop_token=eq.${lt}&clicked_at=is.null`, { method: "PATCH", body: JSON.stringify({ clicked_at: new Date().toISOString() }) }));
+    }
+    // メールの「見本のお店」のリンク：開いたことを記録して、デモの画面へ
+    if (url.pathname === "/go/demo") {
+      const d = url.searchParams.get("d") === "izakaya" ? "izakaya" : "cabaret";
+      if (lt && /^[0-9a-f-]{36}$/.test(lt) && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY && ctx) {
+        ctx.waitUntil(sb(env, `posupos_leads?stop_token=eq.${lt}&clicked_at=is.null`, { method: "PATCH", body: JSON.stringify({ clicked_at: new Date().toISOString() }) }));
+      }
+      return Response.redirect(`https://pospos.akitogroup.jp/demo/${d}`, 302);
     }
     const moved = oldUrlRedirect(url);
     if (moved) return moved;
