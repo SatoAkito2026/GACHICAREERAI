@@ -40,7 +40,7 @@ const SCENES = [
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
-  { kind: "big", who: "narr", say: "実際に、毎日の給料計算が、1時間半から1分になったお店も。" },
+  { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけの1分に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
 ];
@@ -97,7 +97,7 @@ function frame(sc, ctx) {
   }
   if (sc.kind === "big") {
     return page0(`<div style="position:absolute;top:340px;left:60px;right:120px;text-align:center"><div style="font-size:46px;opacity:.8">導入店の例（ミックスバー）</div><div style="font-size:64px;font-weight:900;margin-top:40px">毎日の給料の計算</div>
-      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">約1分</span></div>
+      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">約1分</span><div style="font-size:52px;margin-top:10px;color:${GOLD}">（確認するだけ）</div></div>
       <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 導入店1店舗の聞き取り（月50時間 → 月30分）を、<br>1か月30日で割った目安です。お店によってちがいます。</div></div>${cap(sc.who, sc.say)}`);
   }
   if (sc.kind === "relief") {
