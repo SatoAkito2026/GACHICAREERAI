@@ -163,18 +163,60 @@ let list = only ? VIDEOS.filter((v) => v.id === only) : VIDEOS;
 if (process.env.ONLY_MISSING) list = list.filter((v) => !fs.existsSync(path.join(OUT, `${v.id}.mp4`)));
 if (!list.length && process.env.ONLY_MISSING) console.log("新しく作る動画はありません");
 if (!list.length && !process.env.ONLY_MISSING) { console.error("その id の動画はありません"); process.exit(1); }
-const browser = await chromium.launch();
-for (const v of list) await render(v, browser);
-await browser.close();
+if (!process.env.HTML_ONLY) {
+  const browser = await chromium.launch();
+  for (const v of list) await render(v, browser);
+  await browser.close();
+}
 
 // 投稿するときの説明文（そのままコピーして使う）
 const TAGS = { night: "#ポスポス #POSレジ #キャバクラ #ホストクラブ #ガールズバー #コンカフェ #夜職 #水商売 #店舗経営", day: "#ポスポス #POSレジ #飲食店 #居酒屋 #飲食店経営 #セルフオーダー #シフト管理" };
 const postText = (v) => `${v.hook}\n${v.title}。ポスポスなら、画面を押すだけ。\n\n今なら0円で始められる（初期導入費用0円・端末不要）\nログインなしで触れるデモは、プロフィールのリンクから。\n\n${TAGS[v.mode]}`;
-// 一覧のページ（スマホで開いて保存する用。検索には出さない）
+// 一覧のページ（スマホで開いて保存する用。検索には出さない）。小さな表紙を並べて、押すと大きく再生
 const items = VIDEOS.filter((v) => fs.existsSync(path.join(OUT, `${v.id}.mp4`)));
+const card = (v, i) => `<li class="it">
+  <button class="th" type="button" data-src="pospos-videos/${v.id}.mp4" aria-label="${esc(v.title)}を再生"><img src="pospos-videos/${v.id}.png" alt="" loading="lazy"><span class="pl">▶</span></button>
+  <div class="tx">
+    <p class="no">${i + 1}本目・${v.mode === "night" ? "夜のお店" : "飲食店"}</p>
+    <b>${esc(v.title)}</b>
+    <div class="bt">
+      <button type="button" class="b1" data-src="pospos-videos/${v.id}.mp4">▶ 見る</button>
+      <a class="b2" href="pospos-videos/${v.id}.mp4" download="${v.id}.mp4">保存</a>
+      <button type="button" class="b2 cp" data-text="${esc(postText(v))}">説明文をコピー</button>
+    </div>
+  </div>
+</li>`;
 fs.writeFileSync(path.resolve(OUT, "../pospos-videos.html"), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>ポスポスの動画（投稿用）</title>
-<style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#f5f6fa;color:#13234a}h1{font-size:20px}.v{background:#fff;border-radius:14px;padding:14px;margin:0 0 16px}.v video{width:100%;max-width:360px;border-radius:10px;display:block}.v a{display:inline-block;margin-top:10px;font-weight:700}</style></head><body>
-<h1>ポスポスの動画（TikTok・Instagram 投稿用）</h1><p>動画を長押し、または「保存する」から端末に保存して投稿してください。</p>
-${items.map((v) => `<div class="v"><b>${esc(v.title)}</b><p>${esc(v.hook)}</p><video src="pospos-videos/${v.id}.mp4" poster="pospos-videos/${v.id}.png" controls playsinline preload="none"></video><a href="pospos-videos/${v.id}.mp4" download>保存する（${v.id}.mp4）</a><p style="font-size:13px;margin:12px 0 4px;color:#4a5878">投稿の説明文（押すとコピー）</p><textarea readonly onclick="this.select();navigator.clipboard&&navigator.clipboard.writeText(this.value)" style="width:100%;max-width:360px;height:150px;font:inherit;font-size:13px;border:1px solid #dce4f2;border-radius:8px;padding:8px">${esc(postText(v))}</textarea></div>`).join("\n")}
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Hiragino Sans",sans-serif;margin:0;background:#f2f4f9;color:#13234a}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:19px;margin:4px 0 6px}.lead{font-size:13px;color:#4a5878;margin:0 0 14px;line-height:1.7}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.it{display:flex;gap:12px;background:#fff;border-radius:14px;padding:10px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.th{position:relative;flex:0 0 72px;height:128px;border:0;padding:0;border-radius:10px;overflow:hidden;background:#0e1733;cursor:pointer}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.pl{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:22px;background:rgba(0,0,0,.25)}
+.tx{min-width:0;flex:1}.no{margin:0;font-size:11.5px;color:#8a94ad}.tx b{display:block;font-size:15px;margin:2px 0 8px;line-height:1.4}
+.bt{display:flex;flex-wrap:wrap;gap:6px}
+.bt button,.bt a{font:inherit;font-size:12.5px;font-weight:700;border-radius:999px;padding:7px 12px;text-decoration:none;cursor:pointer;border:1px solid #d6deef;background:#fff;color:#13234a}
+.bt .b1{background:#13234a;color:#fff;border-color:#13234a}
+.cp.ok{background:#22a06b;color:#fff;border-color:#22a06b}
+.mo{position:fixed;inset:0;background:rgba(5,8,20,.88);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+.mo.on{display:flex}.mo video{height:86vh;max-width:100%;aspect-ratio:9/16;border-radius:12px;background:#000}
+.mo .x{position:absolute;top:12px;right:14px;background:#fff;color:#13234a;border:0;border-radius:999px;width:40px;height:40px;font-size:20px;cursor:pointer}
+</style></head><body><div class="wrap">
+<h1>ポスポスの動画（TikTok・Instagram 投稿用）</h1>
+<p class="lead">表紙か「▶ 見る」で再生。「保存」でスマホに保存して、「説明文をコピー」を投稿の説明に貼ってください。全${items.length}本</p>
+<ol>
+${items.map(card).join("\n")}
+</ol></div>
+<div class="mo" id="mo"><button class="x" type="button" aria-label="閉じる">×</button><video id="mv" controls playsinline></video></div>
+<script>
+var mo=document.getElementById('mo'),mv=document.getElementById('mv');
+document.querySelectorAll('[data-src]').forEach(function(b){b.addEventListener('click',function(){mv.src=b.dataset.src;mo.classList.add('on');mv.play().catch(function(){})})});
+function close(){mv.pause();mv.removeAttribute('src');mv.load();mo.classList.remove('on')}
+mo.addEventListener('click',function(e){if(e.target===mo||e.target.classList.contains('x'))close()});
+document.querySelectorAll('.cp').forEach(function(b){b.addEventListener('click',function(){var t=b.dataset.text;var done=function(){b.textContent='コピーしました';b.classList.add('ok');setTimeout(function(){b.textContent='説明文をコピー';b.classList.remove('ok')},1800)};if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,function(){prompt('コピーしてください',t)});else prompt('コピーしてください',t)})});
+</script>
 </body></html>
 `);
