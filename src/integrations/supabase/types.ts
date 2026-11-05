@@ -430,6 +430,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      school_knowledge: {
+        Row: {
+          key: string;
+          school_name: string;
+          faculty: string;
+          school_type: string;
+          found: boolean;
+          content: string;
+          sources: Json;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          school_name: string;
+          faculty?: string;
+          school_type?: string;
+          found?: boolean;
+          content?: string;
+          sources?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          key?: string;
+          school_name?: string;
+          faculty?: string;
+          school_type?: string;
+          found?: boolean;
+          content?: string;
+          sources?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       sales_knowledge: {
         Row: {
           scenario: string;

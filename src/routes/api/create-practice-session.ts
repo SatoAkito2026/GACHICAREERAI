@@ -13,6 +13,8 @@
 import { getBonusBalance } from "@/lib/referral";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { guessSchoolType, isExamSchoolType } from "@/lib/exam-schools";
+import { getSchoolInfo } from "@/lib/school-research";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseUrl, getServiceRoleKey, verifyApiUser } from "@/lib/api-auth";
 import {
@@ -122,6 +124,7 @@ export const Route = createFileRoute("/api/create-practice-session")({
             desired_company_name?: string;
             desired_school?: string;
             desired_faculty?: string;
+            school_type?: string;
             custom_questions?: string;
             prioritize_profile?: boolean;
           };
@@ -196,10 +199,9 @@ export const Route = createFileRoute("/api/create-practice-session")({
         const basicInfo = (careerProfile?.basic_info ?? {}) as Record<string, string>;
         const candidateName = basicInfo.name || "practice_user";
 
-        // 職種（学校）の選択は全プラン。それ以外の任意設定（会社名・学部・聞いてほしい質問・プロフィール優先）はプロだけ
+        // 職種（学校・学部・学校の種類）の選択は全プラン。それ以外の任意設定（会社名・聞いてほしい質問・プロフィール優先）はプロだけ
         if (!isPro) {
           preferences.desired_company_name = undefined;
-          preferences.desired_faculty = undefined;
           preferences.custom_questions = undefined;
           preferences.prioritize_profile = false;
         }
@@ -234,6 +236,38 @@ export const Route = createFileRoute("/api/create-practice-session")({
               screeningData.practice_desired_school = preferences.desired_school;
             if (preferences.desired_faculty)
               screeningData.practice_desired_faculty = preferences.desired_faculty;
+          }
+        }
+        // 受験生：学校の種類（面接官の立場・聞くこと・評価の観点が変わる）。選ばれていなければ学校名から推測する
+        if (dbMode === "student") {
+          const schoolName =
+            preferences.desired_school ||
+            ((careerProfile?.desired_schools as { school_name?: string }[] | null)?.[0]
+              ?.school_name ??
+              "");
+          const profileSchool = (
+            careerProfile?.desired_schools as
+              { school_name?: string; school_type?: string }[] | null
+          )?.find((d) => d?.school_name === schoolName);
+          const type = isExamSchoolType(preferences.school_type)
+            ? preferences.school_type
+            : isExamSchoolType(profileSchool?.school_type)
+              ? profileSchool.school_type
+              : (guessSchoolType(schoolName) ?? "other");
+          screeningData.practice_school_type = type;
+          // 志望校について調べてある内容（特色・求める生徒像など）を面接官に渡す。まだ調べていなければなし
+          if (schoolName) {
+            const faculty =
+              preferences.desired_faculty ||
+              (
+                careerProfile?.desired_schools as
+                  { school_name?: string; faculty?: string }[] | null
+              )?.find((d) => d?.school_name === schoolName)?.faculty ||
+              "";
+            const info =
+              (await getSchoolInfo(supabase, schoolName, faculty)) ??
+              (faculty ? await getSchoolInfo(supabase, schoolName, "") : null);
+            if (info?.found) screeningData.practice_school_info = info.text;
           }
         }
         // 聞いてほしい質問は「プロフィール優先」の設定に関わらず常に反映する

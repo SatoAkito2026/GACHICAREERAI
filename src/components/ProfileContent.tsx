@@ -10,6 +10,13 @@ import {
   GRADE_OPTIONS,
   SUBJECT_OPTIONS,
 } from "@/lib/career-options";
+import { SchoolPicker } from "@/components/SchoolPicker";
+import {
+  EXAM_SCHOOL_GROUPS,
+  EXAM_SCHOOL_TYPES,
+  guessSchoolType,
+  type ExamSchoolType,
+} from "@/lib/exam-schools";
 import { MyDocumentsSection } from "@/components/MyDocumentsSection";
 
 const INPUT_STYLE = {
@@ -83,7 +90,15 @@ function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
 type Education = { school_name: string; degree: string; status: string };
 type Certification = { name: string; acquired_on: string };
 type WorkHistory = { company_name: string; position: string; period: string; description: string };
-type DesiredSchool = { school_name: string; faculty: string; priority: number };
+type DesiredSchool = {
+  school_name: string;
+  faculty: string;
+  priority: number;
+  /** 学校の種類（面接の種類。src/lib/exam-schools.ts） */
+  school_type?: string;
+};
+/** 志望校は3つまで */
+const MAX_DESIRED_SCHOOLS = 3;
 type MockExam = {
   exam_name: string;
   taken_on: string;
@@ -186,7 +201,9 @@ export function ProfileContent({
         setEducation((data.education_history as Education[]) ?? []);
         setCertifications((data.certifications as Certification[]) ?? []);
         setWorkHistory((data.work_history as WorkHistory[]) ?? []);
-        setDesiredSchools((data.desired_schools as DesiredSchool[]) ?? []);
+        setDesiredSchools(
+          ((data.desired_schools as DesiredSchool[]) ?? []).slice(0, MAX_DESIRED_SCHOOLS),
+        );
         setActivities(
           ((data.extracurricular_activities as { text: string }[]) ?? []).map((a) => a.text),
         );
@@ -567,27 +584,67 @@ export function ProfileContent({
           </SectionCard>
 
           {isStudent ? (
-            <SectionCard title="志望校">
+            <SectionCard title={`志望校（${MAX_DESIRED_SCHOOLS}つまで）`}>
+              <p style={{ color: "#888888", fontSize: 12, lineHeight: 1.7, marginBottom: 8 }}>
+                学校名を入れると全国の学校から候補が出ます。練習のときに、どの志望校の面接にするか選べます。
+              </p>
               {desiredSchools.map((s, i) => (
                 <RemovableRow
                   key={i}
-                  onRemove={() => setDesiredSchools((prev) => prev.filter((_, idx) => idx !== i))}
+                  onRemove={() =>
+                    setDesiredSchools((prev) =>
+                      prev
+                        .filter((_, idx) => idx !== i)
+                        .map((row, idx) => ({ ...row, priority: idx + 1 })),
+                    )
+                  }
                 >
-                  <input
+                  <p style={{ color: "#C8FF00", fontSize: 12, fontWeight: 700 }}>第{i + 1}志望</p>
+                  <SchoolPicker
                     style={INPUT_STYLE}
-                    placeholder="学校名"
+                    placeholder="学校名（例：〇〇高校・〇〇大学・〇〇県警察学校）"
                     value={s.school_name}
-                    onChange={(e) =>
+                    onChange={(name, type) =>
                       setDesiredSchools((prev) =>
                         prev.map((row, idx) =>
-                          idx === i ? { ...row, school_name: e.target.value } : row,
+                          idx === i
+                            ? {
+                                ...row,
+                                school_name: name,
+                                school_type: type ?? row.school_type ?? guessSchoolType(name) ?? "",
+                              }
+                            : row,
                         ),
                       )
                     }
                   />
+                  <select
+                    style={INPUT_STYLE}
+                    value={s.school_type ?? ""}
+                    onChange={(e) =>
+                      setDesiredSchools((prev) =>
+                        prev.map((row, idx) =>
+                          idx === i ? { ...row, school_type: e.target.value } : row,
+                        ),
+                      )
+                    }
+                  >
+                    <option value="">学校の種類を選ぶ</option>
+                    {EXAM_SCHOOL_GROUPS.map((g) => (
+                      <optgroup key={g} label={g}>
+                        {(Object.keys(EXAM_SCHOOL_TYPES) as ExamSchoolType[])
+                          .filter((k) => EXAM_SCHOOL_TYPES[k].group === g)
+                          .map((k) => (
+                            <option key={k} value={k}>
+                              {EXAM_SCHOOL_TYPES[k].label}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))}
+                  </select>
                   <input
                     style={INPUT_STYLE}
-                    placeholder="学部・学科"
+                    placeholder="学部・学科・コース（あれば）"
                     value={s.faculty}
                     onChange={(e) =>
                       setDesiredSchools((prev) =>
@@ -599,15 +656,26 @@ export function ProfileContent({
                   />
                 </RemovableRow>
               ))}
-              <AddButton
-                label="志望校を追加"
-                onClick={() =>
-                  setDesiredSchools((prev) => [
-                    ...prev,
-                    { school_name: "", faculty: "", priority: prev.length + 1 },
-                  ])
-                }
-              />
+              {desiredSchools.length < MAX_DESIRED_SCHOOLS && (
+                <AddButton
+                  label="志望校を追加"
+                  onClick={() =>
+                    setDesiredSchools((prev) =>
+                      prev.length >= MAX_DESIRED_SCHOOLS
+                        ? prev
+                        : [
+                            ...prev,
+                            {
+                              school_name: "",
+                              faculty: "",
+                              priority: prev.length + 1,
+                              school_type: "",
+                            },
+                          ],
+                    )
+                  }
+                />
+              )}
             </SectionCard>
           ) : (
             <SectionCard title="希望条件">

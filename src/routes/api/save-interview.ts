@@ -8,11 +8,14 @@ import {
   COMPETENCY_PROMPT,
   RECRUITER_PROMPT,
   sanitizeCompetencies,
+  quoteAppearsIn,
   sanitizeRecruiterView,
   autoShowNewInterview,
   recomputeSummaryScores,
 } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
+import { EXAM_SCHOOL_TYPES, isExamSchoolType } from "@/lib/exam-schools";
+import { getSchoolInfo } from "@/lib/school-research";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
 
 const corsHeaders = {
@@ -103,6 +106,17 @@ export const Route = createFileRoute("/api/save-interview")({
                 typeof invSd.practice_desired_company_name === "string"
                   ? invSd.practice_desired_company_name
                   : null,
+              ...(practiceMode === "student"
+                ? {
+                    school_type: isExamSchoolType(invSd.practice_school_type)
+                      ? invSd.practice_school_type
+                      : null,
+                    faculty:
+                      typeof invSd.practice_desired_faculty === "string"
+                        ? invSd.practice_desired_faculty
+                        : null,
+                  }
+                : {}),
               custom_questions:
                 typeof invSd.practice_custom_questions === "string"
                   ? invSd.practice_custom_questions
@@ -175,8 +189,117 @@ export const Route = createFileRoute("/api/save-interview")({
           )
           .join("\n");
 
-        const summaryPrompt = practiceMode
-          ? `以下は${practiceMode === "student" ? "入試の模擬面接" : "就職・転職の模擬面接"}の会話記録です。
+        // 受験生：学校の種類ごとの観点・志望校について調べた内容・前回の練習の結果を使って、生徒のためのフィードバックにする
+        let studentPrompt: string | null = null;
+        let studentAxes: string[] = [];
+        let previousScore: number | null = null;
+        if (practiceMode === "student") {
+          const schoolType = isExamSchoolType(invSd.practice_school_type)
+            ? invSd.practice_school_type
+            : "other";
+          const def = EXAM_SCHOOL_TYPES[schoolType];
+          studentAxes = def.axes;
+          const schoolName =
+            (invFull as { job_type?: string | null } | null)?.job_type ?? body.jobType ?? "志望校";
+          // 面接を始めたあとに調べ終わった場合もあるので、なければもう一度見る
+          let schoolInfo =
+            typeof invSd.practice_school_info === "string" ? invSd.practice_school_info : "";
+          if (!schoolInfo && schoolName && schoolName !== "志望校") {
+            const faculty =
+              typeof invSd.practice_desired_faculty === "string"
+                ? invSd.practice_desired_faculty
+                : "";
+            const info =
+              (await getSchoolInfo(supabase, schoolName, faculty)) ??
+              (faculty ? await getSchoolInfo(supabase, schoolName, "") : null);
+            if (info?.found) schoolInfo = info.text;
+          }
+          // 前回の練習（同じ人の受験生モードの、いちばん新しいもの）
+          const { data: prevInterview } = await supabase
+            .from("interviews")
+            .select("id, job_type, created_at")
+            .eq("user_id", invitation.user_id)
+            .eq("mode", "student")
+            .neq("id", interviewId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          let previousText = "（今回がはじめての練習）";
+          if (prevInterview) {
+            const { data: prevSummary } = await supabase
+              .from("interview_summaries")
+              .select("practice_feedback")
+              .eq("interview_id", prevInterview.id)
+              .maybeSingle();
+            const pf = (prevSummary as { practice_feedback?: unknown } | null)
+              ?.practice_feedback as
+              | {
+                  readiness_score?: number;
+                  score_breakdown?: { category: string; score: number }[];
+                  improvement_points?: string[];
+                }
+              | null
+              | undefined;
+            if (pf) {
+              previousScore = typeof pf.readiness_score === "number" ? pf.readiness_score : null;
+              previousText = `前回（${new Date(prevInterview.created_at).toLocaleDateString("ja-JP")}・${prevInterview.job_type ?? ""}）：${previousScore ?? "-"}点
+観点ごと：${(pf.score_breakdown ?? []).map((b) => `${b.category} ${b.score}点`).join("、") || "なし"}
+前回「次にやること」として伝えたこと：${(pf.improvement_points ?? []).join("／") || "なし"}`;
+            }
+          }
+          studentPrompt = `あなたは${def.label}の入試面接を知りつくした、受験生思いの面接指導の先生です。
+以下は「${schoolName}」${typeof invSd.practice_desired_faculty === "string" && invSd.practice_desired_faculty ? `（${invSd.practice_desired_faculty}）` : ""}の模擬面接（練習）の会話記録です。合否を判定するのではなく、この受験生が本番で力を出せるよう、具体的で、すぐに直せるフィードバックをしてください。
+
+【この種類の面接で見られていること】
+${def.focus}
+
+${
+  schoolInfo
+    ? `【この学校について調べたこと（求める生徒像に合った答えかを見る）】
+${schoolInfo}
+`
+    : ""
+}
+【前回の練習】
+${previousText}
+
+【面接会話】
+${conversationText}
+
+【フィードバックのルール】
+- 受験生は${def.stage === "中学" ? "中学生" : def.stage === "高校" ? "高校生" : "学生"}。やさしく、前向きに、でも具体的に。ほめるところは本人の言葉を引用してほめる
+- score_breakdown の観点は次の${def.axes.length}つ（この名前のまま）：${def.axes.join("／")}。各0〜100点
+- 各観点の quote は、根拠になった受験生の発言をそのまま短く引用（なければ null。そのときは点数を低めに）。言っていないことで評価しない
+- improvement_points は「次の練習でやること」を3つ。「〜を意識する」ではなく、何をどう言えばよいかまで具体的に（例：「志望理由に、説明会で聞いた〇〇の話を1文入れる」）
+- sample_better_answers は、うまく答えられなかった質問を2〜3個。your_answer は本人の答えの要約、better_answer は本人の経験・言葉をいかして直した答え（作り話の経験を足さない）、point は直したポイント1文
+- school_fit は、志望校の求める生徒像・特色に答えがどれくらい合っていたか、足りないところ（学校の情報がなければ種類の観点で）。2〜3文
+- progress は、前回と比べて伸びたところ・まだのところ（はじめての練習なら空の文字）。2文以内
+- readiness_score は score_breakdown の平均（勘で別の数字にしない）
+
+以下のJSON形式のみで返してください（前置き・説明不要）：
+{
+  "overall_impression": "全体の総評（200文字程度）",
+  "score_breakdown": [{"category": "観点名", "score": 70, "comment": "理由（1文）", "quote": "引用 または null"}],
+  "school_fit": "…",
+  "good_points": ["良かった点（具体的に）", "…", "…"],
+  "improvement_points": ["次の練習でやること1", "…", "…"],
+  "sample_better_answers": [{"question": "会話中の質問", "your_answer": "本人の答えの要約", "better_answer": "直した答え", "point": "直したポイント"}],
+  "progress": "…",
+  "readiness_score": 72${
+    isPro
+      ? `,
+  "personality_traits": [{"trait": "特性名", "description": "会話から読み取れた根拠と説明(1〜2文)"}],
+  "detailed_analysis": "話し方の癖・考え方の傾向などをふまえた深い分析(400字程度)"`
+      : ""
+  }
+}
+${COMPETENCY_PROMPT}`;
+        }
+
+        const summaryPrompt = studentPrompt
+          ? studentPrompt
+          : practiceMode
+            ? `以下は${practiceMode === "student" ? "入試の模擬面接" : "就職・転職の模擬面接"}の会話記録です。
 これは採用選考ではなく練習であるため、「採用可否」「離職リスク」「企業フィット度」等の評価は一切行わず、
 本人の練習に役立つ具体的なフィードバックのみを行ってください。
 
@@ -208,12 +331,12 @@ ${conversationText}
   }
 }
 score_breakdownの各scoreは0-100。readiness_scoreはscore_breakdownの平均値と一致させること(勘や印象だけで別の数字を出さない)。sample_better_answersは2〜3個程度。${
-              isPro
-                ? "personality_traitsは3〜4個、その人の会話の端々から読み取れる性格的特徴を具体的根拠とともに示すこと。"
-                : ""
-            }
+                isPro
+                  ? "personality_traitsは3〜4個、その人の会話の端々から読み取れる性格的特徴を具体的根拠とともに示すこと。"
+                  : ""
+              }
 ${COMPETENCY_PROMPT}${practiceMode === "individual" ? RECRUITER_PROMPT : ""}`
-          : `以下は採用面接の会話記録です。候補者を詳細に評価してJSONで返してください。
+            : `以下は採用面接の会話記録です。候補者を詳細に評価してJSONで返してください。
 
 【面接会話】
 ${conversationText}
@@ -322,11 +445,42 @@ ${conversationText}
                 interview_id: interviewId,
                 practice_feedback: {
                   overall_impression: summaryData.overall_impression ?? "",
-                  score_breakdown: summaryData.score_breakdown ?? [],
+                  score_breakdown:
+                    practiceMode === "student"
+                      ? sanitizeStudentBreakdown(
+                          summaryData.score_breakdown,
+                          studentAxes,
+                          spokenText,
+                        )
+                      : (summaryData.score_breakdown ?? []),
+                  ...(practiceMode === "student"
+                    ? {
+                        school_fit:
+                          typeof summaryData.school_fit === "string"
+                            ? summaryData.school_fit.slice(0, 600)
+                            : "",
+                        progress:
+                          typeof summaryData.progress === "string"
+                            ? summaryData.progress.slice(0, 400)
+                            : "",
+                        previous_score: previousScore,
+                      }
+                    : {}),
                   good_points: summaryData.good_points ?? [],
                   improvement_points: summaryData.improvement_points ?? [],
                   sample_better_answers: summaryData.sample_better_answers ?? [],
-                  readiness_score: summaryData.readiness_score ?? null,
+                  readiness_score:
+                    practiceMode === "student"
+                      ? (studentReadiness(
+                          sanitizeStudentBreakdown(
+                            summaryData.score_breakdown,
+                            studentAxes,
+                            spokenText,
+                          ),
+                        ) ??
+                        summaryData.readiness_score ??
+                        null)
+                      : (summaryData.readiness_score ?? null),
                   personality_traits: summaryData.personality_traits ?? null,
                   detailed_analysis: summaryData.detailed_analysis ?? null,
                   // 根拠の引用が本人の発言に実際にあるものだけを残す
@@ -716,3 +870,29 @@ ${conversationText}
     },
   },
 });
+
+/** 受験生の観点ごとの点数：決めた観点だけを残し、引用が本人の発言にないものは捨てる */
+function sanitizeStudentBreakdown(
+  raw: unknown,
+  axes: string[],
+  spoken: string,
+): { category: string; score: number; comment: string; quote: string | null }[] {
+  const list = Array.isArray(raw) ? (raw as Record<string, unknown>[]) : [];
+  return axes.map((axis) => {
+    const f = list.find((x) => x?.category === axis) ?? {};
+    const n = Math.round(Number(f.score));
+    let quote = typeof f.quote === "string" && f.quote.trim() ? f.quote.trim().slice(0, 120) : null;
+    if (quote && !quoteAppearsIn(quote, spoken)) quote = null;
+    return {
+      category: axis,
+      score: Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0,
+      comment: String(f.comment ?? "").slice(0, 200),
+      quote,
+    };
+  });
+}
+
+function studentReadiness(b: { score: number }[]): number | null {
+  if (!b.length) return null;
+  return Math.round(b.reduce((a, x) => a + x.score, 0) / b.length);
+}

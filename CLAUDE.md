@@ -57,6 +57,17 @@ POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が
 - 営業の知識は `src/lib/sales-knowledge.ts`：場面ごとの型（流れ・技・NG・断り文句・特定商取引法など）を組み込み、毎時の Cron の `runSalesKnowledgeJob` が週に1回、場面ごとに AI のウェブ検索で最新のコツを調べて `sales_knowledge` に入れる
 - API：`src/routes/api/sales/*`（join・company・roleplay・result・transcribe）
 
+## 受験モード（受験生の面接練習）
+
+どんな学校でも、その学校に合った面接で練習でき、生徒のためのフィードバックを返す。
+
+- 学校の種類（20種類：高校公立／私立・高専・大学推薦／総合型／一般・医歯・短大・専門・看護・助産・医療系・警察・消防・高等工科学校・防衛大・自衛官・編入・大学院など）ごとに、面接官の立場・面接の形式・必ず聞くこと・見ているところ・評価の観点を `src/lib/exam-schools.ts`（`EXAM_SCHOOL_TYPES`）に持つ。面接官の指示は `examInterviewerPrompt`（`interview-turn.ts` の受験生の分岐）。学校の種類は練習の画面で選ぶか、学校名から推測（`guessSchoolType`）し、`screening_data.practice_school_type` に入れる
+- 全国の学校一覧：`public/data/schools.json`（文部科学省の学校コード一覧の CSV から `scripts/schools/build_schools.py` で作る。高校・中等・専門学校・大学・短大・高専と、警察学校・消防学校・防衛や省庁の学校を足して約9,200校）。入力すると候補が出る（`SchoolPicker`、入力しはじめたときに1回だけ読み込む）。一覧にない学校も手で入れられる
+- 志望校はプロフィールに3つまで（`user_career_profiles.desired_schools` に school_type も入れる）。練習の画面で志望校を選ぶか、別の学校を入れる。学校名・学部・学校の種類の選択は全プラン
+- 志望校の情報：AI がウェブで特色・教育方針・求める生徒像・面接の形式とよく聞かれることを調べ（`src/lib/school-research.ts`、`/api/school-info`）、学校＋学部ごとに `school_knowledge` に保存してほかの生徒も使い回す（180日で調べ直す。見つからなければ30日は調べない）。全プラン、新しく調べるのは1人1日5校まで。一覧・志望校から選ぶと自動で調べ、手で入れた学校はボタンで調べる。面接を作るときに `screening_data.practice_school_info` として面接官に渡し、フィードバックでも使う
+- フィードバック（`save-interview.ts` の受験生の分岐）：学校の種類の観点ごとに0〜100点と根拠の引用（本人の発言にない引用は捨てる `sanitizeStudentBreakdown`）、志望校の求める生徒像と比べて（`school_fit`）、次の練習でやること3つ、本人の答え→直した答え→ポイント、前回からの伸び（`progress`・`previous_score`）。画面は `PracticeHistoryContent`
+- 先生の画面（学校・塾の生徒管理）は今後強くする
+
 ## 個人プランの上限
 
 - 数字はすべて `src/lib/plan-rules.ts`（`PRACTICE_RULES`）。無料 ¥0（月5回）／ライト ¥980（月15回）／プロ ¥2,980（月30回）。評価の中身・公開・オファーは全プラン同じで、変わるのは回数・時間・職種・結果の数だけ
