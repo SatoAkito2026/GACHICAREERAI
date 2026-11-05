@@ -21,6 +21,7 @@ import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TiktokRouteImport } from './routes/tiktok'
 import { Route as TokushoRouteImport } from './routes/tokusho'
+import { Route as ZzTestTourRouteImport } from './routes/zz-test-tour'
 import { Route as ActorInterviewTokenRouteImport } from './routes/actor-interview/$token'
 import { Route as ApiActorInterviewTurnRouteImport } from './routes/api/actor-interview-turn'
 import { Route as ApiAdminDashboardDataRouteImport } from './routes/api/admin-dashboard-data'
@@ -201,6 +202,11 @@ const TiktokRoute = TiktokRouteImport.update({
 const TokushoRoute = TokushoRouteImport.update({
   id: '/tokusho',
   path: '/tokusho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZzTestTourRoute = ZzTestTourRouteImport.update({
+  id: '/zz-test-tour',
+  path: '/zz-test-tour',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActorInterviewTokenRoute = ActorInterviewTokenRouteImport.update({
@@ -848,6 +854,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-tour': typeof ZzTestTourRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -983,6 +990,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-tour': typeof ZzTestTourRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -1119,6 +1127,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-tour': typeof ZzTestTourRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -1256,6 +1265,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-tour'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1391,6 +1401,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-tour'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1526,6 +1537,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-tour'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1662,6 +1674,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TiktokRoute: typeof TiktokRoute
   TokushoRoute: typeof TokushoRoute
+  ZzTestTourRoute: typeof ZzTestTourRoute
   ActorInterviewTokenRoute: typeof ActorInterviewTokenRoute
   ApiActorInterviewTurnRoute: typeof ApiActorInterviewTurnRoute
   ApiAdminDashboardDataRoute: typeof ApiAdminDashboardDataRoute
@@ -1868,6 +1881,13 @@ declare module '@tanstack/react-router' {
       path: '/tokusho'
       fullPath: '/tokusho'
       preLoaderRoute: typeof TokushoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zz-test-tour': {
+      id: '/zz-test-tour'
+      path: '/zz-test-tour'
+      fullPath: '/zz-test-tour'
+      preLoaderRoute: typeof ZzTestTourRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actor-interview/$token': {
@@ -2748,6 +2768,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TiktokRoute: TiktokRoute,
   TokushoRoute: TokushoRoute,
+  ZzTestTourRoute: ZzTestTourRoute,
   ActorInterviewTokenRoute: ActorInterviewTokenRoute,
   ApiActorInterviewTurnRoute: ApiActorInterviewTurnRoute,
   ApiAdminDashboardDataRoute: ApiAdminDashboardDataRoute,

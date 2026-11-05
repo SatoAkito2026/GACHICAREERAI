@@ -7,10 +7,12 @@
 文科省の一覧にない警察学校・消防学校・防衛や省庁の学校は、下の表で足す。
 
 使い方：python3 scripts/schools/build_schools.py <CSVを置いたフォルダ>
-出力：public/data/schools.json  [[学校名, 都道府県番号(1-47 / 0=全国), 種類], ...]
+出力：public/data/schools.json  [[学校名, 都道府県番号(1-47 / 0=全国), 種類, 市区町村], ...]
+（市区町村は、同じ名前の学校を見分けるためと、AI に学校を調べてもらうときに確かめるため）
 種類：hs_public / hs_private / kosen / univ / jc / vocational / nursing / midwife / police / fire / jsdf_high / defense_univ / jsdf_other / other
 """
 import csv
+import re
 import io
 import json
 import os
@@ -23,6 +25,14 @@ PREFS = [
     "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県", "香川県", "愛媛県", "高知県", "福岡県",
     "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
 ]
+
+
+CITY_RE = re.compile(r"^(?:東京都|北海道|(?:京都|大阪)府|.{2,3}県)?((?:[^市区町村]+?郡)?[^市区町村]+?[市区町村])")
+
+
+def city_of(address: str) -> str:
+    m = CITY_RE.match(address.strip())
+    return m.group(1) if m else ""
 
 
 def kind_of(school_kind: str, setter: str, name: str):
@@ -97,19 +107,19 @@ def main(src: str):
             if not name or key in seen:
                 continue
             seen.add(key)
-            out.append([name, pref, kind])
+            out.append([name, pref, kind, city_of(r[6]) if len(r) > 6 else ""])
     for row in extra_schools():
         key = (row[0], row[1])
         if key not in seen:
             seen.add(key)
-            out.append(row)
+            out.append(row + [""])
     out.sort(key=lambda x: (x[1], x[0]))
     dest = os.path.join(os.path.dirname(__file__), "..", "..", "public", "data", "schools.json")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with open(dest, "w", encoding="utf-8") as fp:
         json.dump(out, fp, ensure_ascii=False, separators=(",", ":"))
     counts = {}
-    for _, _, k in out:
+    for _, _, k, _ in out:
         counts[k] = counts.get(k, 0) + 1
     print(len(out), counts)
 

@@ -15,7 +15,7 @@ import {
 } from "@/lib/talent";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
 import { EXAM_SCHOOL_TYPES, isExamSchoolType } from "@/lib/exam-schools";
-import { getSchoolInfo } from "@/lib/school-research";
+import { findSchoolInfo } from "@/lib/school-research";
 import { extractJson, lastTextBlock } from "@/lib/ai-json";
 
 const corsHeaders = {
@@ -209,9 +209,12 @@ export const Route = createFileRoute("/api/save-interview")({
               typeof invSd.practice_desired_faculty === "string"
                 ? invSd.practice_desired_faculty
                 : "";
-            const info =
-              (await getSchoolInfo(supabase, schoolName, faculty)) ??
-              (faculty ? await getSchoolInfo(supabase, schoolName, "") : null);
+            const info = await findSchoolInfo(supabase, {
+              name: schoolName,
+              faculty,
+              pref:
+                typeof invSd.practice_school_pref === "string" ? invSd.practice_school_pref : "",
+            });
             if (info?.found) schoolInfo = info.text;
           }
           // 前回の練習（同じ人の受験生モードの、いちばん新しいもの）

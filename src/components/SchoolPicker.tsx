@@ -6,7 +6,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ExamSchoolType } from "@/lib/exam-schools";
 
-type Row = [name: string, pref: number, kind: string];
+type Row = [name: string, pref: number, kind: string, city?: string];
+
+/** 一覧から選んだ学校の場所（同じ名前の別の学校と取り違えないよう、調べるときに使う） */
+export type SchoolPlace = { pref: string; city: string };
 
 const PREFS = [
   "全国",
@@ -94,6 +97,15 @@ const KIND_LABEL: Record<string, string> = {
   other: "そのほか",
 };
 
+/** 都道府県の正式な名前（東京→東京都・大阪→大阪府） */
+function fullPref(n: number): string {
+  const p = PREFS[n] ?? "";
+  if (!p || p === "全国" || p === "北海道") return p === "全国" ? "" : p;
+  if (p === "東京") return "東京都";
+  if (p === "京都" || p === "大阪") return `${p}府`;
+  return `${p}県`;
+}
+
 let cache: Promise<Row[]> | null = null;
 function loadSchools(): Promise<Row[]> {
   if (!cache)
@@ -121,8 +133,8 @@ export function SchoolPicker({
   style,
 }: {
   value: string;
-  /** type は一覧から選んだときだけ入る（手で入力したときは undefined） */
-  onChange: (name: string, type?: ExamSchoolType) => void;
+  /** type・place は一覧から選んだときだけ入る（手で入力したときは undefined） */
+  onChange: (name: string, type?: ExamSchoolType, place?: SchoolPlace) => void;
   placeholder?: string;
   style?: React.CSSProperties;
 }) {
@@ -192,7 +204,10 @@ export function SchoolPicker({
               key={`${row[0]}-${row[1]}`}
               type="button"
               onClick={() => {
-                onChange(row[0], KIND_TO_TYPE[row[2]] ?? "other");
+                onChange(row[0], KIND_TO_TYPE[row[2]] ?? "other", {
+                  pref: row[1] ? fullPref(row[1]) : "",
+                  city: row[3] ?? "",
+                });
                 setOpen(false);
               }}
               className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
@@ -200,7 +215,8 @@ export function SchoolPicker({
             >
               <span className="min-w-0 truncate">{row[0]}</span>
               <span className="shrink-0" style={{ color: "#888", fontSize: 11 }}>
-                {PREFS[row[1]] ?? ""}・{KIND_LABEL[row[2]] ?? ""}
+                {PREFS[row[1]] ?? ""}
+                {row[3] ? `・${row[3]}` : ""}・{KIND_LABEL[row[2]] ?? ""}
               </span>
             </button>
           ))}
