@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**返事・報告はいつも日本語で書く（英語にしない）。**
+
 Interview Copilot AI（ガチキャリアAI）— AI面接練習・面接支援・書類選考の Web アプリ。
 本番: https://gachicareer.akitogroup.jp（旧URL interview-copilot-ai.akitogroup.jp は `src/server.ts` で新URLへ転送。`/api/` は転送せず旧URLでも動く）
 
