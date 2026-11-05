@@ -228,7 +228,7 @@ def write_posupos_shops(lp_html, mode, other, word):
             chips = "".join(f'<li>{x}</li>' for x in d["types"])
             tb = f'''  <section class="sec" id="types">
     <div class="wrap">
-      <div class="sec-head rv"><p class="eyebrow">Shop types</p><h2>{d["name"]}で使えるお店</h2></div>
+      <div class="sec-head rv"><p class="eyebrow">Shop types</p><h2>同じように使えるお店</h2></div>
       <ul class="sp-chips rv">{chips}</ul>
       {d.get("more", "")}
     </div>
