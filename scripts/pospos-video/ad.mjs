@@ -25,7 +25,7 @@ const BGM = path.join(HERE, "assets/bgm-night.mp3");
 // 声の決まり
 const VOICE = {
   owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。締め作業で疲れていて、ため息まじりに、ぼやくように話す。" },
-  narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+  narr: { voice: "shimmer", model: "tts-1-hd", tempo: 1.3, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 
 // 場面（上から順に）。kind：logo／clock／list／demo／big／relief／cta
@@ -67,7 +67,8 @@ async function tts(text, who, file, tempo) {
   const r = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: v.voice, input: text, response_format: "mp3", instructions: v.how }),
+    // ナレーションは、せりふごとに声がぶれない tts-1-hd（演技の指示は使えない）
+    body: JSON.stringify(v.model ? { model: v.model, voice: v.voice, input: text, response_format: "mp3" } : { model: "gpt-4o-mini-tts", voice: v.voice, input: text, response_format: "mp3", instructions: v.how }),
   });
   if (!r.ok) throw new Error(`TTS ${r.status} ${await r.text()}`);
   const raw = file.replace(/\.mp3$/, ".raw.mp3");
