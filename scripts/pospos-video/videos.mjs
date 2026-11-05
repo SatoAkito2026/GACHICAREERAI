@@ -68,6 +68,11 @@ export const VIDEOS = [
   },
 ];
 
+// 広告（ad.mjs で作る。一覧のページではいちばん上に出す）
+export const ADS = [
+  { id: "ad-night-40", mode: "night", title: "広告：夜のこと、全部ポスポス。（40秒）", hook: "閉店後、まだ電卓でバック計算していませんか？" },
+];
+
 export const DEMO = {
   night: "https://pospos.akitogroup.jp/demo/cabaret",
   day: "https://pospos.akitogroup.jp/demo/izakaya",

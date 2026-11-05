@@ -9,7 +9,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { VIDEOS, DEMO } from "./videos.mjs";
+import { VIDEOS, ADS, DEMO } from "./videos.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(HERE, "../../corporate-site/public/pospos-videos");
@@ -171,14 +171,14 @@ if (!process.env.HTML_ONLY) {
 
 // 投稿するときの説明文（そのままコピーして使う）
 const TAGS = { night: "#ポスポス #POSレジ #キャバクラ #ホストクラブ #ガールズバー #コンカフェ #夜職 #水商売 #店舗経営", day: "#ポスポス #POSレジ #飲食店 #居酒屋 #飲食店経営 #セルフオーダー #シフト管理" };
-const postText = (v) => `${v.hook}\n${v.title}。ポスポスなら、画面を押すだけ。\n\n今なら0円で始められる（初期導入費用0円・端末不要）\nログインなしで触れるデモは、プロフィールのリンクから。\n\n${TAGS[v.mode]}`;
+const postText = (v) => v.id.startsWith("ad-") ? `${v.hook}\n夜のこと、全部ポスポス。\nバックも給料も付け回しも、ポスポスひとつで。\n\n今なら0円で始められる（初期導入費用0円・端末不要）\nログインなしで触れるデモは、プロフィールのリンクから。\n\n${TAGS[v.mode]}` : `${v.hook}\n${v.title}。ポスポスなら、画面を押すだけ。\n\n今なら0円で始められる（初期導入費用0円・端末不要）\nログインなしで触れるデモは、プロフィールのリンクから。\n\n${TAGS[v.mode]}`;
 // 一覧のページ（スマホで開いて保存する用。検索には出さない）。ガチキャリの管理画面の「SNS動画」と同じ形：
 // 1本1行（小さな表紙・番号・見出し・投稿待ち／投稿済み）、押すと開いて動画・投稿の文・ボタン
-const items = VIDEOS.filter((v) => fs.existsSync(path.join(OUT, `${v.id}.mp4`)));
+const items = [...ADS, ...VIDEOS].filter((v) => fs.existsSync(path.join(OUT, `${v.id}.mp4`)));
 const row = (v, i) => `<li class="it" data-id="${v.id}">
   <button class="hd" type="button" aria-expanded="false">
     <img class="th" src="pospos-videos/${v.id}.png" alt="" loading="lazy">
-    <span class="tx"><span class="mt">${i + 1}本目・${v.mode === "night" ? "夜のお店" : "飲食店"}</span><b>${esc(v.title)}</b></span>
+    <span class="tx"><span class="mt">${v.id.startsWith("ad-") ? "広告" : (i + 1 - items.filter((x) => x.id.startsWith("ad-")).length) + "本目"}・${v.mode === "night" ? "夜のお店" : "飲食店"}</span><b>${esc(v.title)}</b></span>
     <span class="st">投稿待ち</span><span class="ar" aria-hidden="true">▼</span>
   </button>
   <div class="bd" hidden>

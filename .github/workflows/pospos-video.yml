@@ -37,6 +37,7 @@ jobs:
         run: |
           npm init -y >/dev/null
           npm install playwright@1.49.1
+          pip install numpy >/dev/null 2>&1 || true
           npx playwright install --with-deps chromium
       - name: 動画を作る
         working-directory: scripts/pospos-video
@@ -44,6 +45,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then echo "::error::OPENAI_API_KEY が設定されていません（声が作れません）"; exit 1; fi
+          if [ ! -f ../../corporate-site/public/pospos-videos/ad-night-40.mp4 ]; then node ad.mjs; fi
           ONLY_MISSING=1 node render.mjs
       - name: サイトに置く（コミットして push → Cloudflare が自動で公開）
         run: |
