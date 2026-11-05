@@ -201,7 +201,7 @@ async function sendContractReminders(env) {
     const sent = await sendMail(env, {
       to: [m.email], reply_to: POS_TO,
       subject: `【ポスポス】今のレジの契約（${ym}）が近づいてきました`,
-      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・料金は1店舗ごとに月額11,000円（税込）から\n・導入設定（通常55,000円）は先着30店まで0円。1年の年間契約なら、そのあとも0円\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
+      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・料金は1店舗ごとに月額11,000円（税込）から\n・導入設定（初期費用）55,000円は、1年以上の年間契約なら0円（先着30店）\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
     });
     if (sent) await sb(env, `posupos_monitors?id=eq.${m.id}`, { method: "PATCH", body: JSON.stringify({ reminded_at: new Date().toISOString() }) });
   }
@@ -254,7 +254,7 @@ ${typeLine ? typeLine + "\n" : ""}${night ? "キャストや黒服の一次面�
 まず画面を見てみたい場合は、ログインなしで触れる見本のお店（${night ? "キャバクラ" : "居酒屋"}）をご用意しています。登録はいりません：
 ${demoUrl}
 
-料金は月額11,000円（税込）から、導入設定は先着30店まで0円です。
+料金は月額11,000円（税込）から。1年以上の年間契約なら、導入設定（初期費用）55,000円が0円です（先着30店）。
 
 少しでも気になったら、このメールに「くわしく」とだけ返信してください。資料をお送りします。
 そのまま申し込む場合はこちら（1分）：
