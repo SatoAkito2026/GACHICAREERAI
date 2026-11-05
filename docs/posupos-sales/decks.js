@@ -132,7 +132,7 @@ function priceSlide(pres, ttl, sales) {
     if (std) T(s, [{ text: "44,000円", options: { strike: "sngStrike" } }, { text: " → 先着30店はこの価格のまま", options: { breakLine: true } }, { text: "昼のお店は 月額22,000円（税込）", options: { bold: true, color: K.blue } }], { x: x + 0.3, y: y + 1.65, w: cw - 0.6, h: 0.45, fontSize: 11.5, color: K.ink2 });
     T(s, c.pts.map((p, j) => ({ text: p, options: { bullet: true, breakLine: j < c.pts.length - 1, bold: p.startsWith("AI面接"), color: p.startsWith("AI面接") ? K.blue : K.navy } })), { x: x + 0.3, y: y + 2.1, w: cw - 0.6, h: 2.4, fontSize: 14, paraSpaceAfter: 6 });
   });
-  foot(s, "料金は1店舗ごと・税込。導入設定（初期費用）55,000円は、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。");
+  foot(s, "料金は1店舗ごと・税込。初期導入費用55,000円は、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。");
   return s;
 }
 function closeSlide(pres, big, steps) {
@@ -277,7 +277,7 @@ async function brochure() {
   card(s, 0.6, 1.65, 6.0, 2.05, "FFF4DB");
   card(s, 0.6, 3.95, 6.0, 2.05, "EEF3FF");
   T(s, [{ text: "グループ店", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "何店舗でも足せます。料金は1店舗ごと（足した日からの日割り）。スタッフ・キャストのスマホでは、お店を切りかえて使えます。", options: { fontSize: 15 } }], { x: 0.9, y: 1.85, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
-  T(s, [{ text: "年間契約の特典（前払い）", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "1年：導入設定（初期費用）0円（先着30店）\n2年：＋料金を変えない・お店で使い方の説明1回\n3年：＋お店独自の作り込み1つ無料・優先対応", options: { fontSize: 14 } }], { x: 0.9, y: 4.1, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
+  T(s, [{ text: "年間契約の特典（前払い）", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "1年：初期導入費用0円（先着30店）\n2年：＋料金を変えない・お店で使い方の説明1回\n3年：＋お店独自の作り込み1つ無料・優先対応", options: { fontSize: 14 } }], { x: 0.9, y: 4.1, w: 5.4, h: 1.8, color: K.navy, paraSpaceAfter: 6 });
   const fl = [["お問い合わせ", "LINE（24時間）・電話・フォーム"], ["お店の画面ができる", "最短で翌営業日。メニュー・キャストの登録はこちらで"], ["今のレジと並べて試す", "給料の締めを1回いっしょに。今の計算と合うか確認"], ["本番スタート", "AI面接のURLもすぐ送れます"]];
   fl.forEach(([t, b], i) => { const y = 1.6 + i * 1.2; card(s, 7.0, y, 5.7, 1.0); num(s, 7.25, y + 0.25, i + 1); T(s, t, { x: 7.95, y: y + 0.12, w: 4.5, h: 0.4, bold: true, fontSize: 16 }); T(s, b, { x: 7.95, y: y + 0.52, w: 4.6, h: 0.4, fontSize: 13, color: K.ink2 }); });
 
@@ -348,7 +348,7 @@ async function sales() {
   priceSlide(pres, "AI面接は、スタンダードの料金にふくまれています", true);
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "はじめやすい理由");
-  cardsGrid(s, [["1年契約なら初期費用0円", "導入設定55,000円が、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["導入店の例（ミックスバー）", "給料の計算が、月50時間から月30分に（お店の方への聞き取り）。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
+  cardsGrid(s, [["1年契約なら初期導入費用0円", "初期導入費用55,000円が、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["導入店の例（ミックスバー）", "給料の計算が、月50時間から月30分に（お店の方への聞き取り）。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
   s.addNotes("クロージング。「まず1か月、次の応募者にURLを送ってみませんか？」と提案する。");
 
   closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["料金は1店舗ごと", "ライト11,000円・スタンダード 夜 先着30店33,000円／昼22,000円（税込）。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);
