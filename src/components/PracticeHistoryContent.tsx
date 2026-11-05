@@ -29,10 +29,20 @@ import {
 
 type PracticeFeedback = {
   overall_impression?: string;
-  score_breakdown?: { category: string; score: number; comment: string }[];
+  score_breakdown?: { category: string; score: number; comment: string; quote?: string | null }[];
   good_points?: string[];
   improvement_points?: string[];
-  sample_better_answers?: { question: string; better_answer: string }[];
+  sample_better_answers?: {
+    question: string;
+    better_answer: string;
+    your_answer?: string;
+    point?: string;
+  }[];
+  /** 受験生：志望校の求める生徒像にどれくらい合っていたか */
+  school_fit?: string;
+  /** 受験生：前回の練習と比べて */
+  progress?: string;
+  previous_score?: number | null;
   readiness_score?: number;
   personality_traits?: { trait: string; description: string }[] | null;
   detailed_analysis?: string | null;
@@ -282,6 +292,52 @@ export function PracticeHistoryContent({
                       </ol>
                     </div>
                   )}
+                  {mode === "student" &&
+                    (r.feedback.progress || r.feedback.previous_score != null) && (
+                      <div
+                        className="rounded-2xl p-4"
+                        style={{ background: "#0F1A20", border: "1px solid #1F3A4A" }}
+                      >
+                        <p style={{ color: "#7FD3FF", fontSize: 13, fontWeight: 800 }}>
+                          前回からの伸び
+                          {r.feedback.previous_score != null &&
+                            r.feedback.readiness_score != null && (
+                              <span style={{ marginLeft: 8, fontSize: 12 }}>
+                                {r.feedback.previous_score}点 → {r.feedback.readiness_score}点（
+                                {r.feedback.readiness_score - r.feedback.previous_score >= 0
+                                  ? "+"
+                                  : ""}
+                                {r.feedback.readiness_score - r.feedback.previous_score}）
+                              </span>
+                            )}
+                        </p>
+                        {r.feedback.progress && (
+                          <p
+                            style={{
+                              color: "#CFE6F2",
+                              fontSize: 13,
+                              lineHeight: 1.75,
+                              marginTop: 4,
+                            }}
+                          >
+                            {r.feedback.progress}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  {mode === "student" && r.feedback.school_fit && (
+                    <div
+                      className="rounded-2xl p-4"
+                      style={{ background: "#141414", border: "1px solid #2A2A2A" }}
+                    >
+                      <p style={{ color: "#C8FF00", fontSize: 13, fontWeight: 800 }}>
+                        志望校の求める生徒像と比べて
+                      </p>
+                      <p style={{ color: "#CCCCCC", fontSize: 13, lineHeight: 1.75, marginTop: 4 }}>
+                        {r.feedback.school_fit}
+                      </p>
+                    </div>
+                  )}
                   {r.feedback.overall_impression && (
                     <div>
                       <p
@@ -341,6 +397,11 @@ export function PracticeHistoryContent({
                             <p style={{ color: "#999999", fontSize: 11, marginTop: 3 }}>
                               {s.comment}
                             </p>
+                            {s.quote && (
+                              <p style={{ color: "#777777", fontSize: 11, marginTop: 3 }}>
+                                根拠：「{s.quote}」
+                              </p>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -483,9 +544,20 @@ export function PracticeHistoryContent({
                               style={{ background: "#0F0F0F", border: "1px solid #2A2A2A" }}
                             >
                               <p style={{ color: "#888888", fontSize: 11 }}>Q. {qa.question}</p>
+                              {qa.your_answer && (
+                                <p style={{ color: "#999999", fontSize: 12, marginTop: 4 }}>
+                                  あなたの答え：{qa.your_answer}
+                                </p>
+                              )}
                               <p style={{ color: "#CCCCCC", fontSize: 12, marginTop: 4 }}>
+                                {qa.your_answer ? "こう言うともっと良い：" : ""}
                                 {qa.better_answer}
                               </p>
+                              {qa.point && (
+                                <p style={{ color: "#C8FF00", fontSize: 11, marginTop: 4 }}>
+                                  ポイント：{qa.point}
+                                </p>
+                              )}
                             </div>
                           ))}
                         </div>

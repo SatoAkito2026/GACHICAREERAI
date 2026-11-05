@@ -450,7 +450,7 @@ export async function writeRewriteScript(history: StudioHistory[]): Promise<Rewr
 - AI面接官の点数：ng は15〜45点、ok は78〜95点（100点満点）
 - 言い換えのポイント（point：20文字以内。例「不満ではなく、これからやりたいことを話す」）
 - オファーの演出（offer）：最後に「練習した結果を公開しておくと、企業から面談の申し込みが届く」ことを見せる。申し込んできた架空の会社の種類（companyType：例「IT企業」15文字以内）と、企業からのひとこと（message：30文字以内。この質問への受かる言い方を評価した内容）
-- 締め（cta）：保存をうながす一言（25文字以内。例「保存して、面接の前に見返してね」）
+- 締め（cta）：フォローと保存をうながす一言（25文字以内。例「フォローして、面接の前に見返してね」）
 - 投稿の文：中身が分かる1文＋「あなたならどう答える？コメントで教えて」＋ハッシュタグ4〜6個（#ガチキャリAI #面接対策 を必ず入れる）
 
 【ルール】
@@ -493,7 +493,7 @@ ${learnedExamples(history)}
       rawOffer?.message ?? "あなたの考え方に共感しました。ぜひ一度お話ししませんか？",
     ).slice(0, 50),
   };
-  const cta = String(raw?.cta ?? "保存して、面接の前に見返してね").slice(0, 30);
+  const cta = String(raw?.cta ?? "フォローして、面接の前に見返してね").slice(0, 30);
   let caption = String(raw?.caption ?? "").slice(0, 300);
   for (const tag of ["#ガチキャリAI", "#面接対策"])
     if (!caption.includes(tag)) caption += ` ${tag}`;
@@ -631,7 +631,7 @@ export type RankingScript = {
 
 const RANKING_SIZE = 5;
 /** 締めのひとこと（さりげなく。約束になる言い方はしない） */
-const RANKING_CTA = "面接の練習は、ガチキャリAIで。";
+const RANKING_CTA = "フォローしてね。面接の練習は、ガチキャリAIで。";
 
 export async function writeRankingScript(history: StudioHistory[]): Promise<RankingScript> {
   const apiKey = process.env.ANTHROPIC_API_KEY;

@@ -1,4 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { SchoolPicker } from "@/components/SchoolPicker";
+import {
+  EXAM_SCHOOL_GROUPS,
+  EXAM_SCHOOL_TYPES,
+  guessSchoolType,
+  type ExamSchoolType,
+} from "@/lib/exam-schools";
 import { SafeNavigate } from "@/components/SafeNavigate";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -20,11 +27,14 @@ const STYLE_OPTIONS: { value: "friendly" | "neutral" | "strict"; label: string; 
   { value: "strict", label: "厳しめ", desc: "本番同様の緊張感で練習したい人向け" },
 ];
 
+type ProfileSchool = { school_name: string; faculty?: string; school_type?: string };
+
 type Preferences = {
   desired_job_type: string;
   desired_company_name: string;
   desired_school: string;
   desired_faculty: string;
+  school_type: string;
   custom_questions: string;
   prioritize_profile: boolean;
 };
@@ -34,6 +44,7 @@ const EMPTY_PREFS: Preferences = {
   desired_company_name: "",
   desired_school: "",
   desired_faculty: "",
+  school_type: "",
   custom_questions: "",
   prioritize_profile: false,
 };
@@ -89,6 +100,8 @@ export function PracticeContent({
   const [starting, setStarting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(EMPTY_PREFS);
+  // プロフィールに登録した志望校（3つまで）。練習のときに選ぶ
+  const [desiredSchools, setDesiredSchools] = useState<ProfileSchool[]>([]);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   // 聞いてほしい質問は1行に1つ（保存するときは改行でつなぐ）
   const questions = prefs.custom_questions ? prefs.custom_questions.split("\n") : [];
@@ -104,6 +117,38 @@ export function PracticeContent({
   const [extracting, setExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [usage, setUsage] = useState<PracticeUsage | null>(null);
+  // 志望校について AI が調べた内容（特色・求める生徒像など）。面接官とフィードバックに使われる
+  const [schoolInfo, setSchoolInfo] = useState<{
+    status: "idle" | "checking" | "ready" | "none" | "missing" | "researching" | "error";
+    text?: string;
+    message?: string;
+  }>({ status: "idle" });
+  // 一覧・志望校から選んだ学校は、まだ調べていなければ自動で調べる（手で入れた名前はボタンで）
+  const autoResearchRef = useRef("");
+
+  const researchSchool = async (name: string, faculty: string, type: string) => {
+    if (!session || name.trim().length < 2) return;
+    setSchoolInfo({ status: "researching" });
+    try {
+      const res = await fetch("/api/school-info", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: name.trim(), faculty: faculty.trim(), type }),
+      });
+      const d = (await res.json().catch(() => ({}))) as {
+        status?: "ready" | "none";
+        text?: string;
+        error?: string;
+      };
+      if (!res.ok) setSchoolInfo({ status: "error", message: d.error ?? "調べられませんでした" });
+      else setSchoolInfo({ status: d.status ?? "none", text: d.text });
+    } catch {
+      setSchoolInfo({ status: "error", message: "通信に失敗しました" });
+    }
+  };
 
   useEffect(() => {
     if (!session) return;
@@ -116,17 +161,57 @@ export function PracticeContent({
       .catch(() => {});
   }, [session]);
 
+  // 選んだ志望校が、もう調べてあるかを見る（入力が止まってから）
+  useEffect(() => {
+    if (!session || mode !== "student") return;
+    const name = prefs.desired_school.trim();
+    const faculty = prefs.desired_faculty.trim();
+    if (name.length < 2) {
+      setSchoolInfo({ status: "idle" });
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      setSchoolInfo({ status: "checking" });
+      void fetch(
+        `/api/school-info?name=${encodeURIComponent(name)}&faculty=${encodeURIComponent(faculty)}`,
+        { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" },
+      )
+        .then((r) => (r.ok ? r.json() : { status: "missing" }))
+        .then((d: { status: "ready" | "none" | "missing"; text?: string }) => {
+          if (cancelled) return;
+          if (d.status === "missing" && autoResearchRef.current === name) {
+            autoResearchRef.current = "";
+            void researchSchool(name, faculty, prefs.school_type);
+            return;
+          }
+          setSchoolInfo({ status: d.status, text: d.text });
+        })
+        .catch(() => !cancelled && setSchoolInfo({ status: "idle" }));
+    }, 700);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, mode, prefs.desired_school, prefs.desired_faculty]);
+
   useEffect(() => {
     if (!session) return;
     (async () => {
       const { data } = await (supabase
         .from("user_career_profiles")
-        .select("practice_preferences")
+        .select("practice_preferences, desired_schools")
         .eq("user_id", session.user.id)
         .eq("mode", mode)
         .maybeSingle() as any);
       if (data?.practice_preferences) {
         setPrefs({ ...EMPTY_PREFS, ...data.practice_preferences });
+      }
+      if (Array.isArray(data?.desired_schools)) {
+        setDesiredSchools(
+          (data.desired_schools as ProfileSchool[]).filter((d) => d?.school_name).slice(0, 3),
+        );
       }
       setPrefsLoaded(true);
     })();
@@ -335,11 +420,124 @@ export function PracticeContent({
               <label style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600 }}>
                 どの学校の面接を練習しますか？
               </label>
+              {desiredSchools.length > 0 && (
+                <div className="mt-2 flex flex-col gap-2">
+                  {desiredSchools.map((d, i) => {
+                    const active = prefs.desired_school === d.school_name;
+                    return (
+                      <button
+                        key={`${d.school_name}-${i}`}
+                        type="button"
+                        onClick={() => {
+                          autoResearchRef.current = d.school_name;
+                          setPrefs((p) => ({
+                            ...p,
+                            desired_school: d.school_name,
+                            desired_faculty: d.faculty ?? "",
+                            school_type: d.school_type || guessSchoolType(d.school_name) || "",
+                          }));
+                        }}
+                        className="rounded-xl px-3 py-2.5 text-left"
+                        style={{
+                          background: active ? "rgba(200,255,0,0.08)" : "#0F0F0F",
+                          border: `1px solid ${active ? "#C8FF00" : "#333"}`,
+                          color: "#F0F0F0",
+                          fontSize: 14,
+                        }}
+                      >
+                        <span style={{ color: "#C8FF00", fontSize: 11, fontWeight: 700 }}>
+                          第{i + 1}志望
+                        </span>
+                        <span className="ml-2" style={{ fontWeight: 700 }}>
+                          {d.school_name}
+                        </span>
+                        {d.faculty && (
+                          <span className="ml-1" style={{ color: "#888", fontSize: 12 }}>
+                            {d.faculty}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  <p style={{ color: "#888888", fontSize: 11 }}>
+                    ほかの学校で練習するときは、下に学校名を入れてください。
+                  </p>
+                </div>
+              )}
+              <div style={{ marginTop: 8 }}>
+                <SchoolPicker
+                  style={inputStyle}
+                  value={prefs.desired_school}
+                  onChange={(name, type) => {
+                    // 一覧から選んだ学校は自動で調べる
+                    if (type) autoResearchRef.current = name;
+                    setPrefs((p) => ({
+                      ...p,
+                      desired_school: name,
+                      // 一覧から選んだらその種類、手で入れたら学校名から当てる（あとで選び直せる）
+                      school_type: type ?? (guessSchoolType(name) || p.school_type),
+                    }));
+                  }}
+                  placeholder={
+                    desiredSchools.length > 0
+                      ? "学校名（全国の学校から候補が出ます）"
+                      : "学校名（例：〇〇高校・〇〇大学・〇〇県警察学校）"
+                  }
+                />
+              </div>
+              {desiredSchools.length === 0 && (
+                <p className="mt-2 text-[11px]" style={{ color: "#888888", lineHeight: 1.6 }}>
+                  プロフィールに志望校を3つまで登録しておくと、ここで選ぶだけで練習できます。
+                </p>
+              )}
+              <label
+                className="mt-4 block"
+                style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600 }}
+              >
+                学校の種類
+              </label>
+              <select
+                style={{ ...inputStyle, marginTop: 8 }}
+                value={prefs.school_type}
+                onChange={(e) => setPrefs((p) => ({ ...p, school_type: e.target.value }))}
+              >
+                <option value="">学校名から自動で選ぶ</option>
+                {EXAM_SCHOOL_GROUPS.map((g) => (
+                  <optgroup key={g} label={g}>
+                    {(Object.keys(EXAM_SCHOOL_TYPES) as ExamSchoolType[])
+                      .filter((k) => EXAM_SCHOOL_TYPES[k].group === g)
+                      .map((k) => (
+                        <option key={k} value={k}>
+                          {EXAM_SCHOOL_TYPES[k].label}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+              <p className="mt-2 text-[11px]" style={{ color: "#888888", lineHeight: 1.6 }}>
+                種類によって、面接官の立場・聞かれること・評価のしかたが変わります（例：警察官なら規律や使命感、高専ならものづくりへの興味）。
+              </p>
+              <label
+                className="mt-4 block"
+                style={{ color: "#AAAAAA", fontSize: 13, fontWeight: 600 }}
+              >
+                学部・学科・コース（あれば）
+              </label>
               <input
                 style={{ ...inputStyle, marginTop: 8 }}
-                value={prefs.desired_school}
-                onChange={(e) => setPrefs((p) => ({ ...p, desired_school: e.target.value }))}
-                placeholder="例：〇〇大学（空欄ならプロフィールの志望校）"
+                value={prefs.desired_faculty}
+                onChange={(e) => setPrefs((p) => ({ ...p, desired_faculty: e.target.value }))}
+                placeholder="例：経済学部／看護学科／普通科 特進コース"
+              />
+              <SchoolInfoBox
+                info={schoolInfo}
+                onResearch={() =>
+                  void researchSchool(
+                    prefs.desired_school,
+                    prefs.desired_faculty,
+                    prefs.school_type,
+                  )
+                }
               />
             </>
           )}
@@ -361,8 +559,8 @@ export function PracticeContent({
                 lineHeight: 1.7,
               }}
             >
-              プロプランでは、応募先の{mode === "individual" ? "会社" : "学部"}
-              ・聞いてほしい質問・書類のアップロードを設定して、本番に近い練習ができます。
+              プロプランでは、{mode === "individual" ? "応募先の会社・" : ""}
+              聞いてほしい質問・書類のアップロードを設定して、本番に近い練習ができます。
               <Link to="/pricing" className="ml-1 underline" style={{ color: "#C8FF00" }}>
                 プランを見る
               </Link>
@@ -398,17 +596,7 @@ export function PracticeContent({
                     placeholder="例：株式会社〇〇"
                   />
                 </div>
-              ) : (
-                <div className="mt-4">
-                  <label style={{ color: "#AAAAAA", fontSize: 12 }}>志望学部・学科</label>
-                  <input
-                    style={{ ...inputStyle, marginTop: 4 }}
-                    value={prefs.desired_faculty}
-                    onChange={(e) => setPrefs((p) => ({ ...p, desired_faculty: e.target.value }))}
-                    placeholder="例：経済学部"
-                  />
-                </div>
-              )}
+              ) : null}
 
               <div className="mt-4">
                 <label style={{ color: "#AAAAAA", fontSize: 12 }}>聞いてほしい質問</label>
@@ -557,6 +745,84 @@ function UsageCard({ data, mode }: { data: PracticeUsage; mode: "individual" | "
           </Link>
         </p>
       )}
+    </div>
+  );
+}
+
+/** 志望校について AI が調べた内容の表示（面接官とフィードバックがこれを使う） */
+function SchoolInfoBox({
+  info,
+  onResearch,
+}: {
+  info: {
+    status: "idle" | "checking" | "ready" | "none" | "missing" | "researching" | "error";
+    text?: string;
+    message?: string;
+  };
+  onResearch: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  if (info.status === "idle") return null;
+  const box: React.CSSProperties = {
+    marginTop: 12,
+    background: "#0F0F0F",
+    border: "1px solid #2A2A2A",
+    borderRadius: 12,
+    padding: "10px 12px",
+    fontSize: 12,
+    lineHeight: 1.7,
+    color: "#AAAAAA",
+  };
+  if (info.status === "checking") return <div style={box}>志望校の情報を確認しています…</div>;
+  if (info.status === "researching")
+    return (
+      <div style={box}>
+        AIがこの学校の特色・求める生徒像・面接でよく聞かれることを調べています（30秒〜1分ほど）。調べ終わる前に始めても練習できます。
+      </div>
+    );
+  if (info.status === "ready")
+    return (
+      <div style={{ ...box, borderColor: "#3A4A10" }}>
+        <p style={{ color: "#C8FF00", fontWeight: 700 }}>
+          ✓ この学校について調べた内容で、面接と評価を行います
+        </p>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          style={{ color: "#888888", textDecoration: "underline", marginTop: 4 }}
+        >
+          {open ? "閉じる" : "調べた内容を見る"}
+        </button>
+        {open && (
+          <p style={{ marginTop: 8, whiteSpace: "pre-wrap", color: "#CCCCCC" }}>{info.text}</p>
+        )}
+        <p style={{ marginTop: 6, fontSize: 11, color: "#666666" }}>
+          ※ AIがウェブで調べた内容です。最新の募集要項・公式サイトも必ず確認してください。
+        </p>
+      </div>
+    );
+  if (info.status === "none")
+    return (
+      <div style={box}>
+        この学校の情報は見つかりませんでした。学校の種類に合わせた面接で練習します（学校名の書き方を変えると見つかることがあります）。
+      </div>
+    );
+  return (
+    <div style={box}>
+      {info.status === "error" && (
+        <p style={{ color: "#FF6B6B", marginBottom: 6 }}>{info.message}</p>
+      )}
+      <p>
+        この学校はまだ調べていません。調べると、その学校の面接官として質問し、求める生徒像に合わせて評価します。
+      </p>
+      <button
+        type="button"
+        onClick={onResearch}
+        className="mt-2 rounded-lg px-3 py-2"
+        style={{ background: "#C8FF00", color: "#0F0F0F", fontWeight: 700, fontSize: 13 }}
+      >
+        AIにこの学校を調べてもらう
+      </button>
     </div>
   );
 }

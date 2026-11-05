@@ -21,6 +21,7 @@ import { Route as ScreeningRouteImport } from './routes/screening'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TiktokRouteImport } from './routes/tiktok'
 import { Route as TokushoRouteImport } from './routes/tokusho'
+import { Route as ZzTestPickerRouteImport } from './routes/zz-test-picker'
 import { Route as ActorInterviewTokenRouteImport } from './routes/actor-interview/$token'
 import { Route as ApiActorInterviewTurnRouteImport } from './routes/api/actor-interview-turn'
 import { Route as ApiAdminDashboardDataRouteImport } from './routes/api/admin-dashboard-data'
@@ -50,6 +51,7 @@ import { Route as ApiResearchTargetRouteImport } from './routes/api/research-tar
 import { Route as ApiSaveActorInterviewRouteImport } from './routes/api/save-actor-interview'
 import { Route as ApiSaveInterviewRouteImport } from './routes/api/save-interview'
 import { Route as ApiSaveInterviewRecordingRouteImport } from './routes/api/save-interview-recording'
+import { Route as ApiSchoolInfoRouteImport } from './routes/api/school-info'
 import { Route as ApiScreenActorsBatchRouteImport } from './routes/api/screen-actors-batch'
 import { Route as ApiSendInterviewEmailRouteImport } from './routes/api/send-interview-email'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
@@ -202,6 +204,11 @@ const TokushoRoute = TokushoRouteImport.update({
   path: '/tokusho',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZzTestPickerRoute = ZzTestPickerRouteImport.update({
+  id: '/zz-test-picker',
+  path: '/zz-test-picker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ActorInterviewTokenRoute = ActorInterviewTokenRouteImport.update({
   id: '/actor-interview/$token',
   path: '/actor-interview/$token',
@@ -351,6 +358,11 @@ const ApiSaveInterviewRecordingRoute =
     path: '/api/save-interview-recording',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiSchoolInfoRoute = ApiSchoolInfoRouteImport.update({
+  id: '/api/school-info',
+  path: '/api/school-info',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiScreenActorsBatchRoute = ApiScreenActorsBatchRouteImport.update({
   id: '/api/screen-actors-batch',
   path: '/api/screen-actors-batch',
@@ -842,6 +854,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-picker': typeof ZzTestPickerRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -871,6 +884,7 @@ export interface FileRoutesByFullPath {
   '/api/save-actor-interview': typeof ApiSaveActorInterviewRoute
   '/api/save-interview': typeof ApiSaveInterviewRoute
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
+  '/api/school-info': typeof ApiSchoolInfoRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
@@ -976,6 +990,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-picker': typeof ZzTestPickerRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -1005,6 +1020,7 @@ export interface FileRoutesByTo {
   '/api/save-actor-interview': typeof ApiSaveActorInterviewRoute
   '/api/save-interview': typeof ApiSaveInterviewRoute
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
+  '/api/school-info': typeof ApiSchoolInfoRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
@@ -1111,6 +1127,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tiktok': typeof TiktokRoute
   '/tokusho': typeof TokushoRoute
+  '/zz-test-picker': typeof ZzTestPickerRoute
   '/actor-interview/$token': typeof ActorInterviewTokenRoute
   '/api/actor-interview-turn': typeof ApiActorInterviewTurnRoute
   '/api/admin-dashboard-data': typeof ApiAdminDashboardDataRoute
@@ -1140,6 +1157,7 @@ export interface FileRoutesById {
   '/api/save-actor-interview': typeof ApiSaveActorInterviewRoute
   '/api/save-interview': typeof ApiSaveInterviewRoute
   '/api/save-interview-recording': typeof ApiSaveInterviewRecordingRoute
+  '/api/school-info': typeof ApiSchoolInfoRoute
   '/api/screen-actors-batch': typeof ApiScreenActorsBatchRoute
   '/api/send-interview-email': typeof ApiSendInterviewEmailRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
@@ -1247,6 +1265,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-picker'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1276,6 +1295,7 @@ export interface FileRouteTypes {
     | '/api/save-actor-interview'
     | '/api/save-interview'
     | '/api/save-interview-recording'
+    | '/api/school-info'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
@@ -1381,6 +1401,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-picker'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1410,6 +1431,7 @@ export interface FileRouteTypes {
     | '/api/save-actor-interview'
     | '/api/save-interview'
     | '/api/save-interview-recording'
+    | '/api/school-info'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
@@ -1515,6 +1537,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tiktok'
     | '/tokusho'
+    | '/zz-test-picker'
     | '/actor-interview/$token'
     | '/api/actor-interview-turn'
     | '/api/admin-dashboard-data'
@@ -1544,6 +1567,7 @@ export interface FileRouteTypes {
     | '/api/save-actor-interview'
     | '/api/save-interview'
     | '/api/save-interview-recording'
+    | '/api/school-info'
     | '/api/screen-actors-batch'
     | '/api/send-interview-email'
     | '/api/stripe-webhook'
@@ -1650,6 +1674,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TiktokRoute: typeof TiktokRoute
   TokushoRoute: typeof TokushoRoute
+  ZzTestPickerRoute: typeof ZzTestPickerRoute
   ActorInterviewTokenRoute: typeof ActorInterviewTokenRoute
   ApiActorInterviewTurnRoute: typeof ApiActorInterviewTurnRoute
   ApiAdminDashboardDataRoute: typeof ApiAdminDashboardDataRoute
@@ -1679,6 +1704,7 @@ export interface RootRouteChildren {
   ApiSaveActorInterviewRoute: typeof ApiSaveActorInterviewRoute
   ApiSaveInterviewRoute: typeof ApiSaveInterviewRoute
   ApiSaveInterviewRecordingRoute: typeof ApiSaveInterviewRecordingRoute
+  ApiSchoolInfoRoute: typeof ApiSchoolInfoRoute
   ApiScreenActorsBatchRoute: typeof ApiScreenActorsBatchRoute
   ApiSendInterviewEmailRoute: typeof ApiSendInterviewEmailRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
@@ -1855,6 +1881,13 @@ declare module '@tanstack/react-router' {
       path: '/tokusho'
       fullPath: '/tokusho'
       preLoaderRoute: typeof TokushoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zz-test-picker': {
+      id: '/zz-test-picker'
+      path: '/zz-test-picker'
+      fullPath: '/zz-test-picker'
+      preLoaderRoute: typeof ZzTestPickerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actor-interview/$token': {
@@ -2058,6 +2091,13 @@ declare module '@tanstack/react-router' {
       path: '/api/save-interview-recording'
       fullPath: '/api/save-interview-recording'
       preLoaderRoute: typeof ApiSaveInterviewRecordingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/school-info': {
+      id: '/api/school-info'
+      path: '/api/school-info'
+      fullPath: '/api/school-info'
+      preLoaderRoute: typeof ApiSchoolInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/screen-actors-batch': {
@@ -2728,6 +2768,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TiktokRoute: TiktokRoute,
   TokushoRoute: TokushoRoute,
+  ZzTestPickerRoute: ZzTestPickerRoute,
   ActorInterviewTokenRoute: ActorInterviewTokenRoute,
   ApiActorInterviewTurnRoute: ApiActorInterviewTurnRoute,
   ApiAdminDashboardDataRoute: ApiAdminDashboardDataRoute,
@@ -2757,6 +2798,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSaveActorInterviewRoute: ApiSaveActorInterviewRoute,
   ApiSaveInterviewRoute: ApiSaveInterviewRoute,
   ApiSaveInterviewRecordingRoute: ApiSaveInterviewRecordingRoute,
+  ApiSchoolInfoRoute: ApiSchoolInfoRoute,
   ApiScreenActorsBatchRoute: ApiScreenActorsBatchRoute,
   ApiSendInterviewEmailRoute: ApiSendInterviewEmailRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,

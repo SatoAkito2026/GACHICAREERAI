@@ -1,4 +1,5 @@
 import { INTERVIEWER_VOICE_STYLE, toSpeechText } from "@/lib/speech-text";
+import { examInterviewerPrompt, isExamSchoolType } from "@/lib/exam-schools";
 import { createFileRoute } from "@tanstack/react-router";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseUrl, getServiceRoleKey } from "@/lib/api-auth";
@@ -316,37 +317,35 @@ ${Object.keys(screeningData).length > 0 ? JSON.stringify(screeningData, null, 2)
 ${customQuestionsSection}${resumeSection}
 日本語で話してください。`;
           } else if (practiceMode === "student") {
-            systemPrompt = `あなたは大学・専門学校等の入試面接を担当する模擬面接官AIです。
-これは実際の入試ではなく、練習のための模擬面接です。
+            // 受験生：学校の種類（高校・高専・大学・看護・警察・消防・防衛など）ごとの面接官になる
+            const sd = screeningData as Record<string, unknown>;
+            const schoolType = isExamSchoolType(sd.practice_school_type)
+              ? sd.practice_school_type
+              : "other";
+            const desiredSchools = sd.desired_schools as
+              { school_name?: string; faculty?: string }[] | undefined;
+            const schoolName =
+              (typeof sd.practice_desired_school === "string" && sd.practice_desired_school) ||
+              desiredSchools?.[0]?.school_name ||
+              null;
+            const faculty =
+              (typeof sd.practice_desired_faculty === "string" && sd.practice_desired_faculty) ||
+              (!sd.practice_desired_school ? desiredSchools?.[0]?.faculty : null) ||
+              null;
+            systemPrompt = `${examInterviewerPrompt({
+              type: schoolType,
+              schoolName,
+              faculty,
+              schoolInfo:
+                typeof sd.practice_school_info === "string" ? sd.practice_school_info : null,
+              styleInstruction,
+              depthInstruction: practiceDepthInstruction,
+              timeInstruction: practiceTimeInstruction,
+            })}
 
-【面接官としての性格】
-${styleInstruction}
-
-【最初の挨拶の例】
-「本日は模擬面接にご参加いただきありがとうございます。実際の入試のつもりで、落ち着いてお答えください。それではまず、簡単に自己紹介をお願いできますか？」
-
-【必須カバー項目】
-- 自己紹介
-- 志望理由（この学校・学部を選んだ理由）
-- 高校時代に力を入れたこと・部活動等の経験
-- 長所・短所
-- 入学後にやりたいこと・将来の目標
-
-【会話のルール】
-- 受験生が既に話した内容は再度聞かない
-- ${practiceDepthInstruction}
-- 高圧的になりすぎず、受験生が持つ意欲や人柄を引き出すことを重視する
-- 返答は簡潔に（2〜3文程度）
-- 重要: あなたは面接官に徹すること。回答に対する評価・アドバイス・「良い点は〜」「改善するとよいのは〜」といったフィードバックは面接中に一切口に出さないこと。フィードバックは面接終了後にまとめて別途行われるため、面接中はあくまで次の質問・相槌・深掘りのみに徹する
-
-【終了条件】
-- 必須カバー項目を一通り聞けたら「本日の模擬面接はこれで終了です。お疲れ様でした」と言う
-- ${practiceTimeInstruction}
-
-【この受験生のプロフィール(練習の参考にする。深掘りに活用すること)】
+【この受験生のプロフィール（練習の参考にする。深掘りに活用すること）】
 ${Object.keys(screeningData).length > 0 ? JSON.stringify(screeningData, null, 2) : "（プロフィール未入力）"}
-${customQuestionsSection}${resumeSection}
-日本語で話してください。`;
+${customQuestionsSection}${resumeSection}`;
           } else {
             systemPrompt = `あなたはオンラインビデオ面接を担当するAI面接官です。
 これは完全にオンライン（ビデオ通話）での面接です。
