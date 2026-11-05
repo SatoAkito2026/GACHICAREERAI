@@ -1,6 +1,6 @@
 // ポスポスの広告動画（夜のお店・約40秒・9:16）を作る
 // 作り直したいときは、corporate-site/public/pospos-videos/ad-night-40.mp4 を消して push する
-// 声：オーナー（男性・疲れてぼやく）とナレーション（高めの女性）。最初と最後に「ポスポス」の声（assets/posupos-voice.m4a）
+// 声：オーナー（男性・疲れてぼやく）とナレーション（高めの女性）。最初と最後に「ポスポス♪」（LP と同じ assets/posupos.mp3）
 // BGM：assets/bgm-night.mp3（bgm.py で自作。著作権の心配なし）を小さく流す
 // 画面：文字の場面と、デモのお店（キャバクラ Club Rose）の画面
 // 使い方：node ad.mjs（OPENAI_API_KEY がないときは声なしで長さだけ合わせる＝見た目の確認用）
@@ -18,27 +18,28 @@ const APP = "https://pospos.akitogroup.jp";
 const KEY = process.env.OPENAI_API_KEY || "";
 const W = 1080, H = 1920;
 const ID = "ad-night-40";
-const JINGLE = path.join(HERE, "assets/posupos-voice.m4a");
+// LP を開いたときに鳴る「ポスポス♪」と同じ音（加工ずみ）
+const JINGLE = path.resolve(HERE, "../../corporate-site/public/assets/posupos.mp3");
 const BGM = path.join(HERE, "assets/bgm-night.mp3");
 
 // 声の決まり
 const VOICE = {
   owner: { voice: "ash", tempo: 1.32, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
-  narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+  narr: { voice: "shimmer", tempo: 1.74, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 
 // 場面（上から順に）。kind：logo／clock／list／demo／big／relief／cta
 const SCENES = [
   { kind: "logo", jingle: true },
   { kind: "clock", who: "owner", say: "はぁ…今日もバック計算、終わらない…" },
-  { kind: "list", n: 1, who: "owner", say: "付け回しは、ホワイトボード。" },
-  { kind: "list", n: 2, who: "owner", say: "給料は、エクセルで手計算。" },
-  { kind: "list", n: 3, who: "owner", say: "キャストには毎日、今日いくら？って聞かれるし…" },
+  { kind: "list", n: 1, who: "owner", tempo: 1.5, gap: 0, say: "付け回しは、ホワイトボード。" },
+  { kind: "list", n: 2, who: "owner", tempo: 1.5, gap: 0, say: "給料は、エクセルで手計算。" },
+  { kind: "list", n: 3, who: "owner", tempo: 1.5, gap: 0, say: "キャストには毎日、今日いくら？って聞かれるし…" },
   { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
-  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。" },
+  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
   { kind: "big", who: "narr", say: "実際に、毎日の給料計算が、1時間半から1分になったお店も。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
@@ -53,7 +54,7 @@ const dur = (f) => parseFloat(sh("ffprobe", ["-v", "error", "-show_entries", "fo
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const b64 = (file, type) => `data:${type};base64,` + fs.readFileSync(file).toString("base64");
 
-async function tts(text, who, file) {
+async function tts(text, who, file, tempo) {
   const v = VOICE[who];
   if (!KEY) {
     const sec = Math.max(1.4, text.length * 0.12);
@@ -68,7 +69,7 @@ async function tts(text, who, file) {
   if (!r.ok) throw new Error(`TTS ${r.status} ${await r.text()}`);
   const raw = file.replace(/\.mp3$/, ".raw.mp3");
   fs.writeFileSync(raw, Buffer.from(await r.arrayBuffer()));
-  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", `atempo=${v.tempo}`, "-ar", "44100", "-ac", "2", file]);
+  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", `silenceremove=start_periods=1:start_threshold=-45dB,atempo=${tempo || v.tempo},areverse,silenceremove=start_periods=1:start_silence=0.08:start_threshold=-45dB,areverse`, "-ar", "44100", "-ac", "2", file]);
 }
 
 const FONT = `'Noto Sans CJK JP','Noto Sans JP','IPAGothic',sans-serif`;
@@ -147,12 +148,12 @@ for (const [i, sc] of SCENES.entries()) {
   await canvas.screenshot({ path: png });
   // この場面の音：声（＋最後はジングル）。ロゴの場面はジングルだけ
   const parts = [];
-  if (sc.say) { const a = path.join(WORK, `v${i}.mp3`); await tts(sc.say, sc.who, a); parts.push(a); }
+  if (sc.say) { const a = path.join(WORK, `v${i}.mp3`); await tts(sc.read || sc.say, sc.who, a, sc.tempo); parts.push(a); }
   if (sc.jingle) parts.push(JINGLE);
   const aud = path.join(WORK, `a${i}.m4a`);
   if (parts.length === 1) sh("ffmpeg", ["-y", "-i", parts[0], "-ar", "44100", "-ac", "2", aud]);
   else sh("ffmpeg", ["-y", "-i", parts[0], "-i", parts[1], "-filter_complex", "[0:a]aresample=44100,aformat=channel_layouts=stereo,apad=pad_dur=0.25[a0];[1:a]aresample=44100,aformat=channel_layouts=stereo[a1];[a0][a1]concat=n=2:v=0:a=1[a]", "-map", "[a]", aud]);
-  const d = dur(aud) + (sc.kind === "cta" ? 0.8 : 0.12);
+  const d = dur(aud) + (sc.kind === "cta" ? 0.8 : sc.gap ?? 0.12);
   sh("ffmpeg", ["-y", "-loop", "1", "-framerate", "30", "-i", png, "-i", aud, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]",
     "-t", d.toFixed(2), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", mp4]);
   clips.push(mp4);
