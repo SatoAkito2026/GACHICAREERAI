@@ -8,15 +8,16 @@ export const VIDEOS = [
   {
     id: "night-01-tsukemawashi",
     mode: "night",
-    title: "付け回しは4つ押すだけ",
+    title: "付け回しは4つ選んで押すだけ",
     hook: "キャバクラやホストの付け回し、まだホワイトボードで回していませんか？",
     steps: [
-      { go: "/admin/seating", say: "ポスポスなら、付け回しは4つ押すだけです。" },
+      { go: "/admin/seating", say: "ポスポスなら、付け回しは4つ選んで押すだけです。" },
       { click: { has: "button", text: "2名" }, say: "まず、付ける卓を選んで、" },
-      { click: { has: "button", text: "みゆ" }, say: "付けるキャストを選んで、" },
+      { click: { has: "button", text: "あいり" }, say: "付けるキャストを選んで、" },
       { click: { has: "button", text: "場内指名" }, say: "付け方を選んで、" },
       { click: { has: "button", text: "15分" }, say: "何分付けるかを選ぶだけ。" },
-      { say: "付けたキャストのスマホには、今の席とあと何分かが出ます。" },
+      { click: { has: "button", text: "に付ける", before: true }, say: "あとは「付ける」を押せば完了です。" },
+      { go: "/me", say: "付けたキャストのスマホには、今の席とあと何分かが、すぐに出ます。" },
     ],
   },
   {
@@ -33,13 +34,13 @@ export const VIDEOS = [
   {
     id: "night-03-shukei",
     mode: "night",
-    title: "閉店後の集計がいらない",
+    title: "閉店後の集計は確認だけ",
     hook: "閉店後の売上の集計に、毎日何十分もかかっていませんか？",
     steps: [
-      { go: "/admin/slips", say: "ポスポスなら、伝票を入れるだけで、その日の売上が出ます。" },
+      { go: "/admin/slips", say: "ポスポスは、お会計をすると伝票が自動でできるので、その日の売上も自動で集計されます。" },
       { scroll: 300, say: "キャストのバックを入れた人件費も、" },
-      { scroll: 220, say: "経費を引いた利益まで、自動で計算します。" },
-      { say: "支払い方法ごとの集計も、もう手で数えなくて大丈夫です。" },
+      { scroll: 220, say: "経費を引いた利益まで、自動で出ます。" },
+      { say: "閉店後は、合っているか確かめるだけ。毎日1分もかかりません。" },
     ],
   },
   {
@@ -50,7 +51,7 @@ export const VIDEOS = [
     steps: [
       { go: "/admin/ranking", prev: true, say: "ポスポスは、伝票からランキングを自動で出します。" },
       { scroll: 360, say: "売上・本指名・ドリンクなど、項目ごとに見られます。" },
-      { say: "キャストも、自分のスマホで成績を見られます。" },
+      { go: "/me", scrollTo: "今月のランキング", say: "キャストも、自分のスマホで今の順位を見られます。" },
     ],
   },
   {

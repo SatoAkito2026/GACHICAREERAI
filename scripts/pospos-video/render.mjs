@@ -48,8 +48,8 @@ async function tts(text, file) {
   if (!r.ok) throw new Error(`TTS ${r.status} ${await r.text()}`);
   const raw = file.replace(/\.mp3$/, ".raw.mp3");
   fs.writeFileSync(raw, Buffer.from(await r.arrayBuffer()));
-  // 少しだけ速く（声の高さは変えない）
-  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", "atempo=1.15", "-ar", "44100", "-ac", "2", file]);
+  // 速めに（声の高さは変えない）
+  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", "atempo=1.35", "-ar", "44100", "-ac", "2", file]);
 }
 
 // 1コマの画像（HTMLで組んで撮る）
@@ -126,12 +126,16 @@ async function render(video, browser) {
     if (i > 0 && st.go) { await page.goto(APP + st.go, { waitUntil: "networkidle", timeout: 90000 }); await settle(); }
     if (i > 0 && st.prev) { await page.getByText("← 前月", { exact: true }).first().click(); await settle(); }
     if (st.scroll) { await page.mouse.wheel(0, st.scroll); await page.waitForTimeout(700); }
-    let tap = null;
+    if (st.scrollTo) { await page.getByText(st.scrollTo, { exact: true }).first().evaluate((el) => el.scrollIntoView({ block: "start" })); await page.mouse.wheel(0, -150); await page.waitForTimeout(700); }
+    let tap = null, beforeShot = null;
     if (st.click) {
       let loc = page.locator(st.click.has).filter({ hasText: st.click.text });
       loc = st.click.last ? loc.last() : loc.first();
-      await loc.scrollIntoViewIfNeeded().catch(() => {});
+      await loc.evaluate((el) => el.scrollIntoView({ block: "center" })).catch(() => {});
+      await page.waitForTimeout(400);
       const box = await loc.boundingBox();
+      // before: 押す前の画面を撮る（押すと画面が変わるボタン用）
+      if (st.click.before) beforeShot = await shotData();
       await loc.click({ timeout: 10000 });
       await settle();
       if (box) {
@@ -139,7 +143,7 @@ async function render(video, browser) {
         if (box.y >= 0 && box.y < vp.height) tap = { x: Math.round((box.x + box.width / 2) * (840 / 390)), y: Math.round((box.y + box.height / 2) * (840 / 390)) };
       }
     }
-    await addClip(frameHtml({ title: video.title, shot: await shotData(), caption: st.say, tap, mode: video.mode }), st.say);
+    await addClip(frameHtml({ title: video.title, shot: beforeShot || (await shotData()), caption: st.say, tap, mode: video.mode }), st.say);
   }
   await addClip(frameHtml({ shot: logo, kind: "cta", mode: video.mode }), CTA.say);
 
