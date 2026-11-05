@@ -27,7 +27,13 @@ const STYLE_OPTIONS: { value: "friendly" | "neutral" | "strict"; label: string; 
   { value: "strict", label: "厳しめ", desc: "本番同様の緊張感で練習したい人向け" },
 ];
 
-type ProfileSchool = { school_name: string; faculty?: string; school_type?: string };
+type ProfileSchool = {
+  school_name: string;
+  faculty?: string;
+  school_type?: string;
+  school_pref?: string;
+  school_city?: string;
+};
 
 type Preferences = {
   desired_job_type: string;
@@ -35,6 +41,9 @@ type Preferences = {
   desired_school: string;
   desired_faculty: string;
   school_type: string;
+  /** 一覧から選んだ学校の都道府県・市区町村（同じ名前の別の学校と取り違えないため） */
+  school_pref: string;
+  school_city: string;
   custom_questions: string;
   prioritize_profile: boolean;
 };
@@ -45,6 +54,8 @@ const EMPTY_PREFS: Preferences = {
   desired_school: "",
   desired_faculty: "",
   school_type: "",
+  school_pref: "",
+  school_city: "",
   custom_questions: "",
   prioritize_profile: false,
 };
@@ -126,7 +137,13 @@ export function PracticeContent({
   // 一覧・志望校から選んだ学校は、まだ調べていなければ自動で調べる（手で入れた名前はボタンで）
   const autoResearchRef = useRef("");
 
-  const researchSchool = async (name: string, faculty: string, type: string) => {
+  const researchSchool = async (
+    name: string,
+    faculty: string,
+    type: string,
+    place: { pref: string; city: string },
+    wrong = false,
+  ) => {
     if (!session || name.trim().length < 2) return;
     setSchoolInfo({ status: "researching" });
     try {
@@ -136,7 +153,14 @@ export function PracticeContent({
           Authorization: `Bearer ${session.access_token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name: name.trim(), faculty: faculty.trim(), type }),
+        body: JSON.stringify({
+          name: name.trim(),
+          faculty: faculty.trim(),
+          type,
+          pref: place.pref,
+          city: place.city,
+          wrong,
+        }),
       });
       const d = (await res.json().catch(() => ({}))) as {
         status?: "ready" | "none";
@@ -174,7 +198,7 @@ export function PracticeContent({
     const timer = setTimeout(() => {
       setSchoolInfo({ status: "checking" });
       void fetch(
-        `/api/school-info?name=${encodeURIComponent(name)}&faculty=${encodeURIComponent(faculty)}`,
+        `/api/school-info?name=${encodeURIComponent(name)}&faculty=${encodeURIComponent(faculty)}&pref=${encodeURIComponent(prefs.school_pref)}`,
         { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" },
       )
         .then((r) => (r.ok ? r.json() : { status: "missing" }))
@@ -182,7 +206,10 @@ export function PracticeContent({
           if (cancelled) return;
           if (d.status === "missing" && autoResearchRef.current === name) {
             autoResearchRef.current = "";
-            void researchSchool(name, faculty, prefs.school_type);
+            void researchSchool(name, faculty, prefs.school_type, {
+              pref: prefs.school_pref,
+              city: prefs.school_city,
+            });
             return;
           }
           setSchoolInfo({ status: d.status, text: d.text });
@@ -194,7 +221,7 @@ export function PracticeContent({
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, mode, prefs.desired_school, prefs.desired_faculty]);
+  }, [session, mode, prefs.desired_school, prefs.desired_faculty, prefs.school_pref]);
 
   useEffect(() => {
     if (!session) return;
@@ -435,6 +462,8 @@ export function PracticeContent({
                             desired_school: d.school_name,
                             desired_faculty: d.faculty ?? "",
                             school_type: d.school_type || guessSchoolType(d.school_name) || "",
+                            school_pref: d.school_pref ?? "",
+                            school_city: d.school_city ?? "",
                           }));
                         }}
                         className="rounded-xl px-3 py-2.5 text-left"
@@ -468,12 +497,15 @@ export function PracticeContent({
                 <SchoolPicker
                   style={inputStyle}
                   value={prefs.desired_school}
-                  onChange={(name, type) => {
+                  onChange={(name, type, place) => {
                     // 一覧から選んだ学校は自動で調べる
                     if (type) autoResearchRef.current = name;
                     setPrefs((p) => ({
                       ...p,
                       desired_school: name,
+                      // 一覧から選んだら場所も覚える。手で書きかえたら場所は分からなくする
+                      school_pref: place?.pref ?? "",
+                      school_city: place?.city ?? "",
                       // 一覧から選んだらその種類、手で入れたら学校名から当てる（あとで選び直せる）
                       school_type: type ?? (guessSchoolType(name) || p.school_type),
                     }));
@@ -529,6 +561,16 @@ export function PracticeContent({
                 onChange={(e) => setPrefs((p) => ({ ...p, desired_faculty: e.target.value }))}
                 placeholder="例：経済学部／看護学科／普通科 特進コース"
               />
+              {prefs.desired_school.trim() && (
+                <p
+                  className="mt-2 text-[11px]"
+                  style={{ color: prefs.school_pref ? "#888888" : "#FFB84D", lineHeight: 1.6 }}
+                >
+                  {prefs.school_pref
+                    ? `所在地：${prefs.school_pref}${prefs.school_city}`
+                    : "候補の一覧から選ぶと、同じ名前の別の学校と取り違えず、正確に調べられます"}
+                </p>
+              )}
               <SchoolInfoBox
                 info={schoolInfo}
                 onResearch={() =>
@@ -536,8 +578,27 @@ export function PracticeContent({
                     prefs.desired_school,
                     prefs.desired_faculty,
                     prefs.school_type,
+                    {
+                      pref: prefs.school_pref,
+                      city: prefs.school_city,
+                    },
                   )
                 }
+                onWrong={() => {
+                  if (
+                    !window.confirm(
+                      "調べた内容を消して、もう一度調べ直します（違う学校の情報は使わないようにします）。",
+                    )
+                  )
+                    return;
+                  void researchSchool(
+                    prefs.desired_school,
+                    prefs.desired_faculty,
+                    prefs.school_type,
+                    { pref: prefs.school_pref, city: prefs.school_city },
+                    true,
+                  );
+                }}
               />
             </>
           )}
@@ -753,6 +814,7 @@ function UsageCard({ data, mode }: { data: PracticeUsage; mode: "individual" | "
 function SchoolInfoBox({
   info,
   onResearch,
+  onWrong,
 }: {
   info: {
     status: "idle" | "checking" | "ready" | "none" | "missing" | "researching" | "error";
@@ -760,6 +822,7 @@ function SchoolInfoBox({
     message?: string;
   };
   onResearch: () => void;
+  onWrong: () => void;
 }) {
   const [open, setOpen] = useState(false);
   if (info.status === "idle") return null;
@@ -799,6 +862,13 @@ function SchoolInfoBox({
         <p style={{ marginTop: 6, fontSize: 11, color: "#666666" }}>
           ※ AIがウェブで調べた内容です。最新の募集要項・公式サイトも必ず確認してください。
         </p>
+        <button
+          type="button"
+          onClick={onWrong}
+          style={{ marginTop: 6, fontSize: 11, color: "#FF8A8A", textDecoration: "underline" }}
+        >
+          違う学校の情報だった（調べ直す）
+        </button>
       </div>
     );
   if (info.status === "none")

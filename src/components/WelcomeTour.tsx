@@ -1,37 +1,59 @@
 /**
- * はじめてホームを開いた人に見せる「使い方」のスライド（4〜5枚）。
+ * はじめてホームを開いた人に見せる「使い方」のスライド（モードごとに7枚。就職・転職と受験で中身を分ける）。
  * 見終わったら（またはスキップしたら）その端末では出さない。ホームの「使い方を見る」からいつでも見直せる
  */
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BarChart3, Building2, FileText, Mic, Rocket, ShieldCheck, X } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  ClipboardList,
+  FileText,
+  GraduationCap,
+  Mic,
+  Rocket,
+  Search,
+  UserRound,
+  X,
+} from "lucide-react";
 
 type Variant = "individual" | "student";
 
 type Slide = { icon: ReactNode; title: string; body: string; image?: string };
 
+// モードごとに、そのモードの使い方だけを説明する（就職・転職と受験は混ぜない）
 const SLIDES: Record<Variant, Slide[]> = {
   individual: [
     {
       icon: <Mic size={30} />,
       image: "/avatar/base.webp",
-      title: "AIの面接官と、本番さながらに練習",
-      body: "マイクで話すだけ。面接官が質問を深掘りしてくれます。職種や時間も選べます。",
+      title: "AIの面接官と、就職・転職の面接練習",
+      body: "AIの面接官が声で質問し、あなたの答えに合わせて深掘りします。本番のつもりで、マイクで話すだけです。",
+    },
+    {
+      icon: <UserRound size={30} />,
+      title: "① まずプロフィールを入れる",
+      body: "ホームの「経歴・希望条件」に経歴・自己PR・希望の職種を入れておくと、面接官がその内容をもとに質問します。",
+    },
+    {
+      icon: <ClipboardList size={30} />,
+      title: "② 練習の設定をして、はじめる",
+      body: "「練習」で面接官のスタイル（やさしい・ふつう・厳しめ）と職種を選んで「はじめる」。話し終わったら少し待つと、次の質問に進みます。",
     },
     {
       icon: <BarChart3 size={30} />,
-      title: "あなたの発言を根拠に評価",
-      body: "7つの力を5段階で評価。答えの長さや「えー」の回数、よりよい答え方の例も分かります。",
+      title: "③ 結果は「評価」で見る",
+      body: "7つの力（5段階）と一次面接の目安、次の練習で直すこと、よりよい答え方の例、話し方（答えの長さ・「えー」の回数）が分かります。",
     },
     {
       icon: <Building2 size={30} />,
-      title: "評価が上がるほど、企業の目に留まる",
-      body: "結果を公開すると、企業から面談の申し込みが届くことがあります。企業は評価で絞り込んで探すので、練習するほど見つけてもらいやすくなります。",
+      title: "④ 結果を公開すると、企業から申し込みが届く",
+      body: "「公開」で結果を公開すると、企業から面談の申し込みが届くことがあります。名前は伏せて公開され、企業に見せる結果も自分で選べます。",
     },
     {
-      icon: <ShieldCheck size={30} />,
-      title: "名前は伏せて公開。見せる結果も自分で選べる",
-      body: "公開・非公開はいつでも切り替えられます。名前が見えるのは、企業があなたの結果を見る手続きをしたときだけです。",
+      icon: <FileText size={30} />,
+      title: "書類づくり・自己分析・求人も",
+      body: "履歴書・職務経歴書をAIで作ったり、練習をもとに自己分析をしたり。求人を見て応募することもできます。",
     },
     {
       icon: <Rocket size={30} />,
@@ -44,27 +66,43 @@ const SLIDES: Record<Variant, Slide[]> = {
       icon: <Mic size={30} />,
       image: "/avatar/base.webp",
       title: "AIの面接官と、入試面接の練習",
-      body: "マイクで話すだけ。志望校に合わせて、面接官が質問を深掘りしてくれます。",
+      body: "あなたの志望校の面接官になりきって、AIが声で質問します。高校・高専・大学・専門・看護・警察・消防・自衛隊など、どんな学校の面接にも対応しています。",
+    },
+    {
+      icon: <GraduationCap size={30} />,
+      title: "① 志望校を登録する（3校まで）",
+      body: "ホームの「プロフィール」で志望校に学校名を入れると、全国の学校から候補が出ます。候補から選ぶと、同じ名前の別の学校と間違えずに練習できます。",
+    },
+    {
+      icon: <Search size={30} />,
+      title: "② 練習する志望校を選ぶ",
+      body: "「練習」で志望校を選ぶと、AIがその学校の特色・求める生徒像・よく聞かれることを調べます（30秒〜1分）。学校の種類によって、聞かれることも変わります。",
+    },
+    {
+      icon: <ClipboardList size={30} />,
+      title: "③ 本番のつもりで答える",
+      body: "面接官のスタイルを選んで「はじめる」。マイクで答えて、話し終わったら少し待つと次の質問に進みます。",
     },
     {
       icon: <BarChart3 size={30} />,
-      title: "あなたの発言を根拠に評価",
-      body: "良かった点・直すとよい点・よりよい答え方の例が、練習のたびに分かります。",
+      title: "④ 結果は「履歴」で見る",
+      body: "観点ごとの点数と、その根拠になったあなたの発言。志望校の求める生徒像と比べてどうだったか、次の練習でやること3つ、答えの直し方、前回からの伸びが分かります。",
     },
     {
       icon: <FileText size={30} />,
-      title: "志望理由書や想定質問もAIで",
-      body: "書類生成AIで志望理由書を作ったり添削したり。自己分析レポートで強みも分かります。",
+      title: "志望理由書・自己分析も",
+      body: "志望理由書をAIで作ったり添削したり。「マイページ」で学校・塾の招待コードを入れると、先生があなたの練習の結果を見てアドバイスできます。",
     },
     {
       icon: <Rocket size={30} />,
       title: "まずは1回、練習してみよう",
-      body: "10分ほどで終わります。終わるとすぐに評価が見られます。",
+      body: "10分ほどで終わります。何度でも練習して、本番までに伸ばしていきましょう。",
     },
   ],
 };
 
-const storageKey = (variant: Variant) => `gc_tour_done_${variant}_v1`;
+// 中身を新しくしたら番号を上げて、もう一度見てもらう
+const storageKey = (variant: Variant) => `gc_tour_done_${variant}_v2`;
 
 /** まだ見ていなければ true（保存できない端末では毎回は出さない） */
 export function shouldShowTour(variant: Variant): boolean {
@@ -170,7 +208,7 @@ export function WelcomeTour({ variant, onClose }: { variant: Variant; onClose: (
             {slide.title}
           </h2>
           <p
-            className="mt-2.5 min-h-[72px] text-[14px] leading-relaxed"
+            className="mt-2.5 min-h-[96px] text-[14px] leading-relaxed"
             style={{ color: "#BBBBBB" }}
           >
             {slide.body}

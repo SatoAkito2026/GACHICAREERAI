@@ -14,7 +14,7 @@ import { getBonusBalance } from "@/lib/referral";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { guessSchoolType, isExamSchoolType } from "@/lib/exam-schools";
-import { getSchoolInfo } from "@/lib/school-research";
+import { findSchoolInfo } from "@/lib/school-research";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseUrl, getServiceRoleKey, verifyApiUser } from "@/lib/api-auth";
 import {
@@ -125,6 +125,9 @@ export const Route = createFileRoute("/api/create-practice-session")({
             desired_school?: string;
             desired_faculty?: string;
             school_type?: string;
+            /** 一覧から選んだ学校の都道府県・市区町村（同じ名前の別の学校と取り違えないため） */
+            school_pref?: string;
+            school_city?: string;
             custom_questions?: string;
             prioritize_profile?: boolean;
           };
@@ -247,7 +250,14 @@ export const Route = createFileRoute("/api/create-practice-session")({
               "");
           const profileSchool = (
             careerProfile?.desired_schools as
-              { school_name?: string; school_type?: string }[] | null
+              | {
+                  school_name?: string;
+                  school_type?: string;
+                  faculty?: string;
+                  school_pref?: string;
+                  school_city?: string;
+                }[]
+              | null
           )?.find((d) => d?.school_name === schoolName);
           const type = isExamSchoolType(preferences.school_type)
             ? preferences.school_type
@@ -257,16 +267,12 @@ export const Route = createFileRoute("/api/create-practice-session")({
           screeningData.practice_school_type = type;
           // 志望校について調べてある内容（特色・求める生徒像など）を面接官に渡す。まだ調べていなければなし
           if (schoolName) {
-            const faculty =
-              preferences.desired_faculty ||
-              (
-                careerProfile?.desired_schools as
-                  { school_name?: string; faculty?: string }[] | null
-              )?.find((d) => d?.school_name === schoolName)?.faculty ||
-              "";
-            const info =
-              (await getSchoolInfo(supabase, schoolName, faculty)) ??
-              (faculty ? await getSchoolInfo(supabase, schoolName, "") : null);
+            const faculty = preferences.desired_faculty || profileSchool?.faculty || "";
+            const pref = (preferences.school_pref || profileSchool?.school_pref || "").slice(0, 10);
+            const city = (preferences.school_city || profileSchool?.school_city || "").slice(0, 30);
+            if (pref) screeningData.practice_school_pref = pref;
+            if (city) screeningData.practice_school_city = city;
+            const info = await findSchoolInfo(supabase, { name: schoolName, faculty, pref });
             if (info?.found) screeningData.practice_school_info = info.text;
           }
         }

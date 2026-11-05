@@ -96,6 +96,9 @@ type DesiredSchool = {
   priority: number;
   /** 学校の種類（面接の種類。src/lib/exam-schools.ts） */
   school_type?: string;
+  /** 一覧から選んだ学校の都道府県・市区町村（同じ名前の別の学校と取り違えないため） */
+  school_pref?: string;
+  school_city?: string;
 };
 /** 志望校は3つまで */
 const MAX_DESIRED_SCHOOLS = 3;
@@ -604,7 +607,7 @@ export function ProfileContent({
                     style={INPUT_STYLE}
                     placeholder="学校名（例：〇〇高校・〇〇大学・〇〇県警察学校）"
                     value={s.school_name}
-                    onChange={(name, type) =>
+                    onChange={(name, type, place) =>
                       setDesiredSchools((prev) =>
                         prev.map((row, idx) =>
                           idx === i
@@ -612,12 +615,22 @@ export function ProfileContent({
                                 ...row,
                                 school_name: name,
                                 school_type: type ?? row.school_type ?? guessSchoolType(name) ?? "",
+                                // 一覧から選んだら場所も覚える。手で書きかえたら場所は分からなくする
+                                school_pref: place?.pref ?? "",
+                                school_city: place?.city ?? "",
                               }
                             : row,
                         ),
                       )
                     }
                   />
+                  {s.school_name.trim() && (
+                    <p style={{ color: s.school_pref ? "#888888" : "#FFB84D", fontSize: 11 }}>
+                      {s.school_pref
+                        ? `所在地：${s.school_pref}${s.school_city ?? ""}`
+                        : "候補の一覧から選ぶと、同じ名前の別の学校と取り違えず、正確に調べられます"}
+                    </p>
+                  )}
                   <select
                     style={INPUT_STYLE}
                     value={s.school_type ?? ""}
