@@ -1,4 +1,4 @@
-// ポスポスの説明動画の台本（TikTok・Instagram のリール用。9:16）
+// ポスポスの説明動画の台本（TikTok・Instagram のリール用。9:16）。動画を作り直すときは、その mp4 を消して push する
 // 画面はデモのお店（キャバクラ Club Rose・居酒屋 まるよし）をそのまま撮る。お店・人の名前・数字は架空。
 // 1本ずつ：id（ファイル名）・mode（night/day）・title（上に出す見出し）・hook（最初の一言）・steps（話す言葉と画面の動き）
 // steps の動き：go（開くページ）・click（押す文字。{ text, exact } か { role, name }）・scroll（下へ何px）・prev（「← 前月」を押す）
