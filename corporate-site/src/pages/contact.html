@@ -94,10 +94,11 @@ cta: no
             <button type="button" data-v="無料で1か月ためしたい" aria-pressed="false">無料で1か月ためしたい</button>
             <button type="button" data-v="料金を知りたい" aria-pressed="false">料金を知りたい</button>
             <button type="button" data-v="画面を見ながら相談したい" aria-pressed="false">画面を見ながら相談したい</button>
+            <button type="button" data-v="モニター（今のレジのまま2か月無料）" aria-pressed="false">モニター（今のレジのまま2か月無料）</button>
           </div></div>
         <div class="field"><label for="f-shop">お店の種類</label>
           <select id="f-shop">
-            {{shopoptions}}
+            <option value="">選んでください</option>{{shopoptions}}
           </select></div>
         <div class="field"><label for="f-stores">店舗数</label>
           <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
@@ -166,8 +167,9 @@ cta: no
   document.querySelectorAll('#topics button').forEach(function(b){b.addEventListener('click',syncPos)});
   var from=(function(){try{var r=new URL(document.referrer);return r.host===location.host?r.pathname:''}catch(e){return ''}})();
   var h=(location.hash||'').slice(1);
-  // LP・記事の「無料で1か月ためす」（#pos-offer・#pos-trial）からは、お試しの申し込みを選んでおく
+  // LP・記事の「1か月無料でためす」（#pos-offer・#pos-trial）からは、お試しの申し込みを選んでおく
   if(h==='pos-trial'||h==='pos-offer'){pick('pos',true);setWant('無料で1か月ためしたい')}
+  else if(h==='pos-monitor'){pick('pos',true);setWant('モニター（今のレジのまま2か月無料）')}
   else if(h==='pos-price'){pick('pos',true);setWant('料金を知りたい')}
   else if(h)pick(h,true);
   // ポスポスのページで見ていたお店の種類を、最初から選んでおく（?shop=host など。なければ見ていたページで決める）

@@ -114,7 +114,7 @@ def shop_fill(html, mode=None):
         for g in groups:
             lab = g["name"] if g["mode"] == "night" else "飲食店：" + g["name"]
             opts += f'<optgroup label="{lab}">' + "".join(
-                f'<option{" selected" if t["id"] == "izakaya" else ""}>{t["label"]}</option>' for t in g["types"]) + "</optgroup>"
+                f'<option>{t["label"]}</option>' for t in g["types"]) + "</optgroup>"
         html = html.replace("{{shopoptions}}", opts)
     if "{{shopmap}}" in html:
         html = html.replace("{{shopmap}}", json.dumps({t["id"]: t["label"] for g in groups for t in g["types"]}, ensure_ascii=False))
@@ -202,6 +202,10 @@ def main():
             mon = SRC / "posupos" / "monitor.html"
             if mode == "day" and mon.exists():
                 wrap_posupos(mon.read_text(encoding="utf-8"), html, mode, other, word, "posupos-monitor")
+                # モニターのページでは、スマホ下のボタンを「モニターに申し込む」に
+                mp = OUT / "posupos-monitor.html"
+                mt = re.sub(r'<div class="dock" id="dock"><a class="btn btn-blue" href="[^"]*">[^<]*</a>', '<div class="dock" id="dock"><a class="btn btn-blue" href="#apply">モニターに申し込む</a>', mp.read_text(encoding="utf-8"), count=1)
+                mp.write_text(mt, encoding="utf-8")
 
 
 def write_posupos_shops(lp_html, mode, other, word):

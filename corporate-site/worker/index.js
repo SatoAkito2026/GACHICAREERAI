@@ -201,7 +201,7 @@ async function sendContractReminders(env) {
     const sent = await sendMail(env, {
       to: [m.email], reply_to: POS_TO,
       subject: `【ポスポス】今のレジの契約（${ym}）が近づいてきました`,
-      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・料金は1店舗ごとに月額11,000円（税込）から、初期費用0円\n・最初の1か月は無料でお試しできます\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
+      text: `${m.name} 様（${m.shop_name}）\n\n以前ポスポスのモニターにお申し込みいただいた際に、今のレジ${m.current_pos ? `（${m.current_pos}）` : ""}の契約が ${ym} に切れるとうかがっていました。\n\n切りかえを考える時期になりましたら、ポスポスもぜひご検討ください。\n・注文・会計から、打刻・シフト・給料、AI面接まで、ひとつのアプリで\n・料金は1店舗ごとに月額11,000円（税込）から\n・導入設定（通常55,000円）は先着30店まで0円。1年の年間契約なら、そのあとも0円\n\nくわしくはこちら：${SITE}/posupos\nご相談はこのメールへの返信か、お電話でどうぞ。` + footerText(`${SITE}/api/monitor/stop?t=${m.stop_token}`),
     });
     if (sent) await sb(env, `posupos_monitors?id=eq.${m.id}`, { method: "PATCH", body: JSON.stringify({ reminded_at: new Date().toISOString() }) });
   }
@@ -212,8 +212,9 @@ async function sendContractReminders(env) {
 // CAMPAIGN_DAILY が 0 のあいだは送らない。送り先は tools/leads_import.py で入れる（公開されている仕事用のアドレスだけ）
 // 特定電子メール法の表示：差出人・住所・連絡先・配信停止の窓口をメールに必ず入れる
 // お店の種類ごとに、いちばん役に立ちそうなことを1文で添える
-const NIGHT_TYPE = /キャバ|ホスト|スナック|ラウンジ|ガールズ|ボーイズ|コンセプト|夜のお店/;
+const NIGHT_TYPE = /キャバ|ホスト|スナック|ラウンジ|ガールズ|ボーイズ|コンセプト|ミックス|夜のお店/;
 const TYPE_LINES = [
+  [/ミックス/, "チャージ・セット料金の会計、スタッフドリンクやボトルのバック、スタッフの給料まで、ひとつでできます。"],
   [/キャバ|ラウンジ/, "セット料金・延長・本指名・場内指名の会計から、キャストのバック・スライド時給・源泉徴収の計算まで、ひとつでできます。"],
   [/ホスト/, "担当・指名・ヘルプの付け回し、ランキング、ホストの給料の計算まで、ひとつでできます。"],
   [/ガールズ|ボーイズ|コンセプト/, "セット料金・延長の会計、ドリンクやチェキなど商品ごとのバック、日払い・前借りまで、ひとつでできます。"],

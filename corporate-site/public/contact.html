@@ -152,10 +152,11 @@
             <button type="button" data-v="無料で1か月ためしたい" aria-pressed="false">無料で1か月ためしたい</button>
             <button type="button" data-v="料金を知りたい" aria-pressed="false">料金を知りたい</button>
             <button type="button" data-v="画面を見ながら相談したい" aria-pressed="false">画面を見ながら相談したい</button>
+            <button type="button" data-v="モニター（今のレジのまま2か月無料）" aria-pressed="false">モニター（今のレジのまま2か月無料）</button>
           </div></div>
         <div class="field"><label for="f-shop">お店の種類</label>
           <select id="f-shop">
-            <optgroup label="飲食店：和食"><option>和食レストラン</option><option>寿司</option><option>そば・うどん</option><option>定食・食堂</option><option>丼もの・牛丼</option><option>とんかつ・揚げ物</option></optgroup><optgroup label="飲食店：居酒屋・焼き鳥・お酒"><option selected>居酒屋</option><option>焼き鳥</option><option>バー・バル（キャストなし）</option></optgroup><optgroup label="飲食店：肉・鉄板・鍋"><option>焼肉</option><option>ステーキ・鉄板焼き</option><option>お好み焼き・もんじゃ</option><option>しゃぶしゃぶ・鍋</option></optgroup><optgroup label="飲食店：麺・中華・アジア"><option>ラーメン・つけ麺</option><option>中華料理</option><option>韓国料理</option><option>カレー・インド料理</option><option>エスニック（タイ・ベトナムなど）</option></optgroup><optgroup label="飲食店：洋食"><option>洋食レストラン</option><option>イタリアン</option><option>フレンチ・ビストロ</option><option>ハンバーガー</option></optgroup><optgroup label="飲食店：カフェ・パン・スイーツ"><option>カフェ</option><option>パン屋・ベーカリー</option><option>ケーキ・スイーツ</option></optgroup><optgroup label="飲食店：テイクアウト・食べ放題"><option>お弁当・テイクアウト・キッチンカー</option><option>ビュッフェ・食べ放題</option></optgroup><optgroup label="飲食店：そのほか"><option>そのほかの飲食店</option></optgroup><optgroup label="夜のお店"><option>ホストクラブ</option><option>キャバクラ</option><option>ガールズバー</option><option>ボーイズバー</option><option>コンセプトカフェ</option><option>スナック</option><option>ラウンジ</option><option>ミックスバー</option></optgroup>
+            <option value="">選んでください</option><optgroup label="飲食店：和食"><option>和食レストラン</option><option>寿司</option><option>そば・うどん</option><option>定食・食堂</option><option>丼もの・牛丼</option><option>とんかつ・揚げ物</option></optgroup><optgroup label="飲食店：居酒屋・焼き鳥・お酒"><option>居酒屋</option><option>焼き鳥</option><option>バー・バル（キャストなし）</option></optgroup><optgroup label="飲食店：肉・鉄板・鍋"><option>焼肉</option><option>ステーキ・鉄板焼き</option><option>お好み焼き・もんじゃ</option><option>しゃぶしゃぶ・鍋</option></optgroup><optgroup label="飲食店：麺・中華・アジア"><option>ラーメン・つけ麺</option><option>中華料理</option><option>韓国料理</option><option>カレー・インド料理</option><option>エスニック（タイ・ベトナムなど）</option></optgroup><optgroup label="飲食店：洋食"><option>洋食レストラン</option><option>イタリアン</option><option>フレンチ・ビストロ</option><option>ハンバーガー</option></optgroup><optgroup label="飲食店：カフェ・パン・スイーツ"><option>カフェ</option><option>パン屋・ベーカリー</option><option>ケーキ・スイーツ</option></optgroup><optgroup label="飲食店：テイクアウト・食べ放題"><option>お弁当・テイクアウト・キッチンカー</option><option>ビュッフェ・食べ放題</option></optgroup><optgroup label="飲食店：そのほか"><option>そのほかの飲食店</option></optgroup><optgroup label="夜のお店"><option>ホストクラブ</option><option>キャバクラ</option><option>ガールズバー</option><option>ボーイズバー</option><option>コンセプトカフェ</option><option>スナック</option><option>ラウンジ</option><option>ミックスバー</option></optgroup>
           </select></div>
         <div class="field"><label for="f-stores">店舗数</label>
           <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
@@ -224,8 +225,9 @@
   document.querySelectorAll('#topics button').forEach(function(b){b.addEventListener('click',syncPos)});
   var from=(function(){try{var r=new URL(document.referrer);return r.host===location.host?r.pathname:''}catch(e){return ''}})();
   var h=(location.hash||'').slice(1);
-  // LP・記事の「無料で1か月ためす」（#pos-offer・#pos-trial）からは、お試しの申し込みを選んでおく
+  // LP・記事の「1か月無料でためす」（#pos-offer・#pos-trial）からは、お試しの申し込みを選んでおく
   if(h==='pos-trial'||h==='pos-offer'){pick('pos',true);setWant('無料で1か月ためしたい')}
+  else if(h==='pos-monitor'){pick('pos',true);setWant('モニター（今のレジのまま2か月無料）')}
   else if(h==='pos-price'){pick('pos',true);setWant('料金を知りたい')}
   else if(h)pick(h,true);
   // ポスポスのページで見ていたお店の種類を、最初から選んでおく（?shop=host など。なければ見ていたページで決める）

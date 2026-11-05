@@ -70,7 +70,7 @@ crumb: モニター募集
       <form class="mo-form" id="mo-form" novalidate>
         <div class="row">
           <label><span>お店の名前<span class="req">必須</span></span><input name="shop_name" maxlength="100" required autocomplete="organization"></label>
-          <label>お店の種類<select name="shop_type">{{shopoptions}}</select></label>
+          <label>お店の種類<select name="shop_type" required><option value="">選んでください</option>{{shopoptions}}</select></label>
         </div>
         <div class="row">
           <label>都道府県<input name="prefecture" maxlength="20" placeholder="例：東京都"></label>

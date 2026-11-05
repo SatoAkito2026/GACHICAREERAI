@@ -1012,9 +1012,9 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   <section class="sec final">
     <div class="wrap rv">
       <h2>月額11,000円から・初期費用0円で、はじめられます。</h2>
-      <p>1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
+      <p>ライト・スタンダードは1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。給料の計算・AI面接まで使えるスタンダードは、月額22,000円です。</p>
       <div class="btns">
-        <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="/contact#pos-offer">1か月無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a>
         <a class="btn btn-o" href="https://pospos.akitogroup.jp/demo/izakaya" target="_blank" rel="noopener">デモを触る</a>
       </div>
@@ -1062,7 +1062,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">1か月無料でためす</a><a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a></div>
 
 <script>
 (function(){
@@ -1115,7 +1115,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
     var m=Math.max(1,document.documentElement.scrollHeight-innerHeight);
     bar.style.setProperty('--p',Math.min(1,scrollY/m).toFixed(4));
     head.classList.toggle('scrolled',scrollY>8);
-    dock.classList.toggle('show',hero.getBoundingClientRect().bottom<0&&fin.getBoundingClientRect().top>innerHeight);
+    dock.classList.toggle('show',hero.getBoundingClientRect().bottom<0&&(!fin||fin.getBoundingClientRect().top>innerHeight));
   };
   addEventListener('scroll',onScroll,{passive:true});onScroll();
 

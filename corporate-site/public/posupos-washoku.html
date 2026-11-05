@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- このファイルはひな形。build.py が public/posupos-day.html と public/posupos-night.html を作る -->
 <title>和食のお店のPOSレジ｜寿司・そば・うどん・定食・丼・とんかつ ポスポス（AI面接つき）</title>
-<meta name="description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から始められます。">
+<meta name="description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から。給料の計算・AI面接はスタンダードプランで。">
 <meta property="og:title" content="和食のお店のPOSレジ｜寿司・そば・うどん・定食・丼・とんかつ ポスポス（AI面接つき）">
 <meta property="og:url" content="https://akitogroup.jp/posupos-washoku">
 <meta property="og:image" content="https://akitogroup.jp/assets/img/ogp-posupos-day.png">
@@ -17,7 +17,7 @@
 <meta property="og:site_name" content="ポスポス">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="max-image-preview:large">
-<meta property="og:description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から始められます。">
+<meta property="og:description" content="和食レストラン・寿司・そば・うどん・定食・丼もの・とんかつのお店向けのクラウドPOSレジ「ポスポス」。注文・会計・厨房の画面・QR注文・券売機・お持ち帰りの軽減税率から、アルバイトの給料まで。一次面接もAIにおまかせ。月額11,000円（税込）から。給料の計算・AI面接はスタンダードプランで。">
 <link rel="icon" href="assets/img/posupos-mark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1087,9 +1087,9 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   <section class="sec final">
     <div class="wrap rv">
       <h2>月額11,000円から・初期費用0円で、はじめられます。</h2>
-      <p>1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。</p>
+      <p>ライト・スタンダードは1か月無料でお試しできます（カードを登録しなければ、勝手に請求されることはありません）。給料の計算・AI面接まで使えるスタンダードは、月額22,000円です。</p>
       <div class="btns">
-        <a class="btn btn-w" href="/contact#pos-offer">無料でためす <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-w" href="/contact#pos-offer">1か月無料でためす <span class="arr" aria-hidden="true">→</span></a>
         <a class="btn btn-o" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a>
         <a class="btn btn-o" href="https://pospos.akitogroup.jp/demo/izakaya" target="_blank" rel="noopener">デモを触る</a>
       </div>
@@ -1137,7 +1137,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
   </div>
 </footer>
 
-<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">無料でためす</a><a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a></div>
+<div class="dock" id="dock"><a class="btn btn-blue" href="/contact#pos-offer">1か月無料でためす</a><a class="btn btn-line" href="https://line.me/ti/p/kNdWwmhLHp" target="_blank" rel="noopener">LINEで相談</a></div>
 
 <script>
 (function(){
@@ -1190,7 +1190,7 @@ body[data-shop="mixbar"] .v[data-v="girlsbar"]{display:block}
     var m=Math.max(1,document.documentElement.scrollHeight-innerHeight);
     bar.style.setProperty('--p',Math.min(1,scrollY/m).toFixed(4));
     head.classList.toggle('scrolled',scrollY>8);
-    dock.classList.toggle('show',hero.getBoundingClientRect().bottom<0&&fin.getBoundingClientRect().top>innerHeight);
+    dock.classList.toggle('show',hero.getBoundingClientRect().bottom<0&&(!fin||fin.getBoundingClientRect().top>innerHeight));
   };
   addEventListener('scroll',onScroll,{passive:true});onScroll();
 
