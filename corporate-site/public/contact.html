@@ -163,9 +163,9 @@
           <select id="f-stores"><option value="">選んでください</option><option>1店舗</option><option>2〜5店舗</option><option>6店舗以上</option><option>これから開業</option></select></div>
         <div class="field"><label for="f-shopname">店舗名 <span class="req">必須</span></label>
           <input id="f-shopname" type="text" maxlength="100" autocomplete="organization"></div>
-        <div class="field"><label for="f-addr">店舗の住所 <span class="req">必須</span></label>
-          <input id="f-addr" type="text" maxlength="200" autocomplete="street-address" placeholder="例：東京都豊島区東池袋2-62-8"></div>
-        <div class="field"><label for="f-role">お立場（役職） <span class="req">必須</span></label>
+        <div class="field"><label for="f-addr">お店の地域（都道府県・市区町村） <span class="req">必須</span></label>
+          <input id="f-addr" type="text" maxlength="200" autocomplete="address-level2" placeholder="例：東京都豊島区"></div>
+        <div class="field"><label for="f-role">お立場（役職）</label>
           <select id="f-role"><option value="">選んでください</option><option>オーナー・代表</option><option>店長</option><option>マネージャー・幹部</option><option>本部・経理</option><option>スタッフ</option><option>その他</option></select></div>
         <p class="hint">ポスポスのお問い合わせは、電話番号も必須です。担当者からお電話かメールでご連絡します。お問い合わせ内容は空欄でも送れます。</p>
       </div>
@@ -258,8 +258,8 @@
     if(topic==='pos'){
       var shop=document.getElementById('f-shop').value,st=document.getElementById('f-stores').value;
       var sn=document.getElementById('f-shopname').value.trim(),ad=document.getElementById('f-addr').value.trim(),rl=document.getElementById('f-role').value;
-      if(!sn||!ad||!rl||!data.tel){show(false,'ポスポスのお問い合わせは、店舗名・店舗の住所・お立場・電話番号を入力してください。');return}
-      var head=['ご希望：'+(want||'（未選択）'),'お店の種類：'+(shop||'（未選択）'),'店舗数：'+(st||'（未選択）'),'店舗名：'+sn,'店舗の住所：'+ad,'お立場：'+rl];
+      if(!sn||!ad||!data.tel){show(false,'ポスポスのお問い合わせは、店舗名・お店の地域・電話番号を入力してください。');return}
+      var head=['ご希望：'+(want||'（未選択）'),'お店の種類：'+(shop||'（未選択）'),'店舗数：'+(st||'（未選択）'),'店舗名：'+sn,'お店の地域：'+ad,'お立場：'+(rl||'（未選択）')];
       if(from)head.push('見ていたページ：'+from);
       data.message=head.join('\n')+'\n\n'+(data.message||'（お問い合わせ内容なし）');
       if(want&&data.subject===LABELS.pos)data.subject='ポスポス：'+want;
