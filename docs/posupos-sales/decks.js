@@ -103,7 +103,7 @@ function fitSlide(pres, ttl) {
 }
 function caseSlide(pres) {
   const s = pres.addSlide({ masterName: "LIGHT" });
-  title(s, "導入店の例（ミックスバー）");
+  title(s, "導入店の例（ミックスバー・個別プラン）");
   pill(s, 0.6, 1.4, 3.6, "夜のお店2店で使われています", K.blue, K.white, 12);
   card(s, 0.6, 2.0, 5.9, 2.4, K.mist);
   card(s, 6.8, 2.0, 5.9, 2.4, "EEF3FF");
