@@ -108,7 +108,7 @@ function caseSlide(pres) {
   card(s, 0.6, 2.0, 5.9, 2.4, K.mist);
   card(s, 6.8, 2.0, 5.9, 2.4, "EEF3FF");
   T(s, [{ text: "毎日の給料の計算  ", options: { fontSize: 18, color: K.ink2 } }, { text: "約1時間半 → 約1分", options: { fontSize: 34, bold: true, color: K.blue } }], { x: 0.6, y: 4.75, w: 12.1, h: 0.8, align: "center", valign: "middle" });
-  T(s, [{ text: "使う前", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "閉店後に伝票を見て、バックを手で数えていた\n給料の計算に、毎日1時間半ほど（月50時間）\n給料の内わけを聞かれるたびに調べ直していた", options: { fontSize: 15 } }], { x: 0.9, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
+  T(s, [{ text: "使う前", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "締め作業で伝票を見て、バックを手で数えていた\n給料の計算に、毎日1時間半ほど（月50時間）\n給料の内わけを聞かれるたびに調べ直していた", options: { fontSize: 15 } }], { x: 0.9, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
   T(s, [{ text: "ポスポスを使ってから", options: { bold: true, breakLine: true, fontSize: 20, color: K.blue } }, { text: "伝票を入れた時点で、誰にいくらのバックか決まる\n給料の計算は、毎日1分ほどの確認だけ（月30分）\nスタッフは自分のスマホで給料と明細を見られる", options: { fontSize: 15 } }], { x: 7.1, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
   foot(s, "※ 導入店1店舗の、お店の方への聞き取り（月50時間 → 月30分）を、1か月30日で割った目安です。お店によってちがいます。");
   return s;
