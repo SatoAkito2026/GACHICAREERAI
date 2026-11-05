@@ -308,10 +308,23 @@ export function RankingScene({ job, onReady }: { job: RankingJobData; onReady: (
           <Outlined size={30} color="#fff" stroke="#111">
             保存して見返してね
           </Outlined>
+          {/* フォローしてもらう一言（見られても、フォロワーが増えていなかったため） */}
+          <p
+            style={{
+              background: "#FE2C55",
+              color: "#fff",
+              fontWeight: 900,
+              fontSize: 24,
+              borderRadius: 999,
+              padding: "8px 22px",
+            }}
+          >
+            ＋ フォローで毎日、面接のコツが届く
+          </p>
           <img
             src="/brand/logo.webp"
             alt="ガチキャリAI"
-            style={{ width: 220, height: 220, borderRadius: 22 }}
+            style={{ width: 200, height: 200, borderRadius: 22 }}
           />
           <p style={{ fontSize: 21, fontWeight: 800, textAlign: "center", lineHeight: 1.6 }}>
             面接の練習は

@@ -353,10 +353,23 @@ export function RewriteScene({ job, onReady }: { job: RewriteJobData; onReady: (
           >
             {job.cta}
           </p>
+          {/* フォローしてもらう一言（見られても、フォロワーが増えていなかったため） */}
+          <p
+            style={{
+              background: "#FE2C55",
+              color: "#fff",
+              fontWeight: 900,
+              fontSize: 24,
+              borderRadius: 999,
+              padding: "8px 22px",
+            }}
+          >
+            ＋ フォローで毎日、面接のコツが届く
+          </p>
           <img
             src="/brand/logo.webp"
             alt="ガチキャリAI"
-            style={{ width: 260, height: 260, borderRadius: 22 }}
+            style={{ width: 220, height: 220, borderRadius: 22 }}
           />
           <p style={{ fontSize: 20, fontWeight: 800, textAlign: "center", lineHeight: 1.6 }}>
             AIの面接官と、無料で
