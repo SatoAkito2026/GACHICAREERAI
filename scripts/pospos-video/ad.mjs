@@ -1,4 +1,5 @@
 // ポスポスの広告動画（夜のお店・約40秒・9:16）を作る
+// 作り直したいときは、corporate-site/public/pospos-videos/ad-night-40.mp4 を消して push する
 // 声：オーナー（男性・疲れてぼやく）とナレーション（高めの女性）。最初と最後に「ポスポス」の声（assets/posupos-voice.m4a）
 // BGM：assets/bgm-night.mp3（bgm.py で自作。著作権の心配なし）を小さく流す
 // 画面：文字の場面と、デモのお店（キャバクラ Club Rose）の画面
