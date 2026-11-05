@@ -60,6 +60,7 @@ async function handleContact(request, env) {
     return json({ error: "メールアドレスの形をご確認ください（例：name@example.com）。" }, 400);
   }
   const topic = Object.hasOwn(TOPICS, data.topic) ? TOPICS[data.topic] : "未選択";
+  if (data.topic === "pos" && !f.tel) return json({ error: "ポスポスのお問い合わせは、電話番号を入力してください。" }, 400);
 
   if (!env.RESEND_API_KEY) return json({ error: "ただいま送信できません。info@akitogroup.jp へメールでご連絡ください。" }, 500);
 
