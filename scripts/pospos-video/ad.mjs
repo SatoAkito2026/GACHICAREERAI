@@ -39,6 +39,7 @@ const SCENES = [
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
   { kind: "demo", go: "/admin/ranking", prev: true, who: "narr", say: "売上や指名のランキングも、伝票から自動で。" },
+  { kind: "demo", go: "/admin", who: "narr", say: "お店の売上や出勤も、スマホでどこからでも確認。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
   { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけの1分に。" },
