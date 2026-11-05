@@ -9,7 +9,7 @@ export const VIDEOS = [
     id: "night-01-tsukemawashi",
     mode: "night",
     title: "付け回しは4つ選んで押すだけ",
-    hook: "キャバクラやホストの付け回し、まだホワイトボードで回していませんか？",
+    hook: "はぁ…今日も付け回し、ホワイトボードで回すの、めんどくさい…",
     steps: [
       { go: "/admin/seating", say: "ポスポスなら、付け回しは4つ選んで押すだけです。" },
       { click: { has: "button", text: "2名" }, say: "まず、付ける卓を選んで、" },
@@ -24,7 +24,7 @@ export const VIDEOS = [
     id: "night-02-encho",
     mode: "night",
     title: "セットの終わりを見のがさない",
-    hook: "セットの時間、うっかり過ぎてしまうことはありませんか？",
+    hook: "やばい、またセットの時間、過ぎてた…",
     steps: [
       { go: "/admin/floor", say: "ポスポスは、もうすぐセットが終わる卓を、赤で知らせます。" },
       { scroll: 420, say: "卓ごとの残り時間と金額も、ひと目でわかります。" },
@@ -35,7 +35,7 @@ export const VIDEOS = [
     id: "night-03-shukei",
     mode: "night",
     title: "閉店後の集計は確認だけ",
-    hook: "閉店後の売上の集計に、毎日何十分もかかっていませんか？",
+    hook: "閉店後の売上の集計、今日も終わらない…",
     steps: [
       { go: "/admin/slips", say: "ポスポスは、お会計をすると伝票が自動でできるので、その日の売上も自動で集計されます。" },
       { scroll: 300, say: "キャストのバックを入れた人件費も、" },
@@ -47,7 +47,7 @@ export const VIDEOS = [
     id: "night-04-ranking",
     mode: "night",
     title: "ランキングも自動で出る",
-    hook: "キャストのランキング、毎月手で集計していませんか？",
+    hook: "今月のランキング、また手で集計か…",
     steps: [
       { go: "/admin/ranking", prev: true, say: "ポスポスは、伝票からランキングを自動で出します。" },
       { scroll: 360, say: "売上・本指名・ドリンクなど、項目ごとに見られます。" },
@@ -58,7 +58,7 @@ export const VIDEOS = [
     id: "night-05-cast",
     mode: "night",
     title: "キャストはスマホで給料を確認",
-    hook: "「今月いくらもらえる？」って、毎回キャストに聞かれていませんか？",
+    hook: "キャストに「今月いくら？」って毎回聞かれるの、しんどい…",
     steps: [
       { go: "/me", say: "ポスポスなら、キャストは自分のスマホで確認できます。" },
       { scroll: 520, say: "今月の稼ぎや、もらえる金額の予定も、いつでも見られます。" },

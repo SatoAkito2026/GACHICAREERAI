@@ -24,17 +24,17 @@ const BGM = path.join(HERE, "assets/bgm-night.mp3");
 
 // 声の決まり
 const VOICE = {
-  owner: { voice: "ash", tempo: 1.32, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
-  narr: { voice: "shimmer", tempo: 1.74, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
+  narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 
 // 場面（上から順に）。kind：logo／clock／list／demo／big／relief／cta
 const SCENES = [
   { kind: "logo", jingle: true },
   { kind: "clock", who: "owner", say: "はぁ…今日もバック計算、終わらない…" },
-  { kind: "list", n: 1, who: "owner", tempo: 1.5, gap: 0, say: "付け回しは、ホワイトボード。" },
-  { kind: "list", n: 2, who: "owner", tempo: 1.5, gap: 0, say: "給料は、エクセルで手計算。" },
-  { kind: "list", n: 3, who: "owner", tempo: 1.5, gap: 0, say: "キャストには毎日、今日いくら？って聞かれるし…" },
+  { kind: "list", n: 1, who: "owner", tempo: 1.75, gap: 0, say: "付け回しは、ホワイトボード。" },
+  { kind: "list", n: 2, who: "owner", tempo: 1.75, gap: 0, say: "給料は、エクセルで手計算。" },
+  { kind: "list", n: 3, who: "owner", tempo: 1.75, gap: 0, say: "キャストには毎日、今日いくら？って聞かれるし…" },
   { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },

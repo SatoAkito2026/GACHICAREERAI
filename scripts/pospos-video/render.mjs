@@ -16,10 +16,18 @@ const OUT = path.resolve(HERE, "../../corporate-site/public/pospos-videos");
 const WORK = path.join(HERE, ".work");
 const APP = "https://pospos.akitogroup.jp";
 const KEY = process.env.OPENAI_API_KEY || "";
-const VOICE = process.env.TTS_VOICE || "coral";
+// 声：オーナー（男性・ぼやく）とナレーション（高めの女性）。広告（ad.mjs）と同じ
+const VOICE = {
+  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
+  narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+};
+// 最初と最後の「ポスポス♪」（LP を開いたときに鳴る音と同じ）と、BGM（bgm.py で自作）
+const JINGLE = path.resolve(HERE, "../../corporate-site/public/assets/posupos.mp3");
+const BGM = path.join(HERE, "assets/bgm-night.mp3");
 const W = 1080, H = 1920;
 const CTA = {
-  say: "今なら0円で始められます。初期導入費用0円、端末もいりません。ログインなしで触れるデモは、プロフィールのリンクから。",
+  say: { night: "今なら0円で始められます。夜のこと、全部ポスポス。", day: "今なら0円で始められます。お店のこと、全部ポスポス。" },
+  tag: { night: "夜のこと、全部ポスポス。", day: "お店のこと、全部ポスポス。" },
   big: "今なら0円で始められる",
   sub: "初期導入費用0円・端末不要",
 };
@@ -30,7 +38,8 @@ const sh = (cmd, args) => execFileSync(cmd, args, { stdio: ["ignore", "pipe", "p
 const dur = (f) => parseFloat(sh("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]));
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-async function tts(text, file) {
+async function tts(text, who, file) {
+  const v = VOICE[who];
   if (!KEY) {
     // 声なし：文字数から長さを決めて無音を作る
     const sec = Math.max(1.8, text.length * 0.13);
@@ -41,29 +50,33 @@ async function tts(text, file) {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4o-mini-tts", voice: VOICE, input: text, response_format: "mp3",
-      instructions: "日本語。明るく、はっきり、聞き取りやすく。お店のオーナーに話しかけるように、少しテンポよく。",
+      model: "gpt-4o-mini-tts", voice: v.voice, input: text, response_format: "mp3", instructions: v.how,
     }),
   });
   if (!r.ok) throw new Error(`TTS ${r.status} ${await r.text()}`);
   const raw = file.replace(/\.mp3$/, ".raw.mp3");
   fs.writeFileSync(raw, Buffer.from(await r.arrayBuffer()));
   // 速めに（声の高さは変えない）
-  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", "atempo=1.35", "-ar", "44100", "-ac", "2", file]);
+  // 前後の無音を切って、速めに（声の高さは変えない）
+  sh("ffmpeg", ["-y", "-i", raw, "-filter:a", `silenceremove=start_periods=1:start_threshold=-45dB,atempo=${v.tempo},areverse,silenceremove=start_periods=1:start_silence=0.08:start_threshold=-45dB,areverse`, "-ar", "44100", "-ac", "2", file]);
 }
 
 // 1コマの画像（HTMLで組んで撮る）
-function frameHtml({ title, shot, caption, tap, kind, mode }) {
+function frameHtml({ title, shot, caption, tap, kind, mode, who }) {
   const accent = mode === "night" ? "#FFB547" : "#3B82F6";
   const bg = mode === "night" ? "linear-gradient(160deg,#0E1733,#1A2550 60%,#3A1C4F)" : "linear-gradient(160deg,#0F2A5C,#1557D6)";
   const font = `'Noto Sans CJK JP','Noto Sans JP','IPAGothic',sans-serif`;
+  if (kind === "logo") {
+    return `<!doctype html><html><body style="margin:0;width:${W}px;height:${H}px;background:${bg};font-family:${font};color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="${shot}" style="width:300px;height:300px;border-radius:64px"><div style="font-size:84px;font-weight:900;margin-top:40px;letter-spacing:.06em">ポスポス</div><div style="font-size:36px;opacity:.75;margin-top:12px">${mode === "night" ? "夜のお店" : "飲食店"}のPOSレジ</div></body></html>`;
+  }
   if (kind === "cta") {
     return `<!doctype html><html><body style="margin:0;width:${W}px;height:${H}px;background:${bg};font-family:${font};color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-      <img src="${shot}" style="width:260px;height:260px;border-radius:56px;margin-bottom:60px">
-      <div style="font-size:80px;font-weight:900;line-height:1.3;padding:0 60px;white-space:nowrap">${esc(CTA.big)}</div>
-      <div style="font-size:54px;font-weight:800;margin-top:36px;color:${accent}">${esc(CTA.sub)}</div>
-      <div style="font-size:44px;font-weight:700;margin-top:90px;padding:22px 44px;border:4px solid #fff;border-radius:999px">ログインなしで触れるデモは<br>プロフィールのリンクから</div>
-      <div style="position:absolute;bottom:250px;font-size:34px;opacity:.75">ポスポス｜${mode === "night" ? "夜のお店" : "飲食店"}のPOSレジ</div>
+      <img src="${shot}" style="width:220px;height:220px;border-radius:48px;margin-bottom:40px">
+      <div style="font-size:72px;font-weight:900;line-height:1.35;margin-bottom:50px">${esc(CTA.tag[mode])}</div>
+      <div style="font-size:66px;font-weight:900;line-height:1.3;padding:0 60px;white-space:nowrap;color:${accent}">${esc(CTA.big)}<span style="font-size:26px;vertical-align:super">※</span></div>
+      <div style="font-size:46px;font-weight:800;margin-top:20px">${esc(CTA.sub)}<span style="font-size:20px;vertical-align:super">※</span></div>
+      <div style="font-size:40px;font-weight:700;margin-top:70px;padding:20px 40px;border:4px solid #fff;border-radius:999px">ログインなしで触れるデモは<br>プロフィールのリンクから</div>
+      <div style="position:absolute;bottom:230px;left:70px;right:130px;font-size:22px;opacity:.6;line-height:1.6">※ 0円で始められる：ライト・スタンダードプランは最初の1か月無料。※ 初期導入費用0円：1年以上の年間契約のとき（先着30店まで）。月ごとの契約は55,000円（税込）。</div>
     </body></html>`;
   }
   const tapDot = tap ? `<div style="position:absolute;left:${tap.x - 55}px;top:${tap.y - 55}px;width:110px;height:110px;border-radius:50%;background:rgba(255,181,71,.35);border:8px solid ${accent};box-sizing:border-box"></div>` : "";
@@ -75,8 +88,8 @@ function frameHtml({ title, shot, caption, tap, kind, mode }) {
       ${tapDot}
     </div>
     ${hook
-      ? `<div style="position:absolute;top:760px;left:110px;right:150px;font-size:76px;font-weight:900;line-height:1.4;text-shadow:0 6px 20px rgba(0,0,0,.6)">${esc(caption)}</div>`
-      : `<div style="position:absolute;left:60px;right:120px;bottom:240px;font-size:50px;font-weight:800;line-height:1.45;background:rgba(10,14,35,.86);border-left:12px solid ${accent};padding:26px 34px;border-radius:20px">${esc(caption)}</div>`}
+      ? `<div style="position:absolute;top:700px;left:100px;right:140px;font-size:66px;font-weight:900;line-height:1.4;background:rgba(5,8,20,.82);padding:30px 36px;border-radius:26px;border-left:12px solid #8FA3C8"><span style="display:block;font-size:30px;opacity:.75;margin-bottom:10px">オーナー</span>${esc(caption)}</div>`
+      : `<div style="position:absolute;left:60px;right:120px;bottom:240px;font-size:50px;font-weight:800;line-height:1.45;background:rgba(10,14,35,.86);border-left:12px solid ${accent};padding:22px 34px;border-radius:20px"><span style="display:block;font-size:26px;opacity:.7;margin-bottom:4px">ポスポス</span>${esc(caption)}</div>`}
     <div style="position:absolute;top:1675px;left:90px;font-size:26px;opacity:.7">画面はデモのお店です（お店・人の名前・数字は架空）</div>
   </body></html>`;
 }
@@ -103,24 +116,31 @@ async function render(video, browser) {
 
   const clips = [];
   let n = 0;
-  const addClip = async (html, say) => {
+  // 1場面：画像＋音（声、またはジングル、または声のあとにジングル）
+  const addClip = async (html, say, who, { jingle = false, gap = 0.15 } = {}) => {
     n++;
-    const png = path.join(dir, `f${n}.png`), mp3 = path.join(dir, `a${n}.mp3`), mp4 = path.join(dir, `c${n}.mp4`);
+    const png = path.join(dir, `f${n}.png`), mp3 = path.join(dir, `a${n}.m4a`), mp4 = path.join(dir, `c${n}.mp4`);
     await canvas.setContent(html, { waitUntil: "load" });
     await canvas.waitForTimeout(150);
     await canvas.screenshot({ path: png });
-    await tts(say, mp3);
-    const d = dur(mp3) + 0.35;
+    const parts = [];
+    if (say) { const v = path.join(dir, `v${n}.mp3`); await tts(say, who, v); parts.push(v); }
+    if (jingle) parts.push(JINGLE);
+    if (parts.length === 1) sh("ffmpeg", ["-y", "-i", parts[0], "-ar", "44100", "-ac", "2", mp3]);
+    else sh("ffmpeg", ["-y", "-i", parts[0], "-i", parts[1], "-filter_complex", "[0:a]aresample=44100,aformat=channel_layouts=stereo,apad=pad_dur=0.25[a0];[1:a]aresample=44100,aformat=channel_layouts=stereo[a1];[a0][a1]concat=n=2:v=0:a=1[a]", "-map", "[a]", mp3]);
+    const d = dur(mp3) + gap;
     sh("ffmpeg", ["-y", "-loop", "1", "-framerate", "30", "-i", png, "-i", mp3, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]",
       "-t", d.toFixed(2), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", mp4]);
     clips.push(mp4);
   };
 
-  // 最初のひと言（最初の画面を暗くして、上に大きく）
+  // ロゴと「ポスポス♪」
+  await addClip(frameHtml({ shot: logo, kind: "logo", mode: video.mode }), "", "", { jingle: true, gap: 0.1 });
+  // オーナーのぼやき（最初の画面を暗くして、上に大きく）
   const first = video.steps[0];
   if (first.go) { await page.goto(APP + first.go, { waitUntil: "networkidle", timeout: 90000 }); await settle(); }
   if (first.prev) { await page.getByText("← 前月", { exact: true }).first().click(); await settle(); }
-  await addClip(frameHtml({ title: video.title, shot: await shotData(), caption: video.hook, kind: "hook", mode: video.mode }), video.hook);
+  await addClip(frameHtml({ title: video.title, shot: await shotData(), caption: video.hook, kind: "hook", mode: video.mode }), video.hook, "owner");
 
   for (const [i, st] of video.steps.entries()) {
     if (i > 0 && st.go) { await page.goto(APP + st.go, { waitUntil: "networkidle", timeout: 90000 }); await settle(); }
@@ -143,15 +163,21 @@ async function render(video, browser) {
         if (box.y >= 0 && box.y < vp.height) tap = { x: Math.round((box.x + box.width / 2) * (840 / 390)), y: Math.round((box.y + box.height / 2) * (840 / 390)) };
       }
     }
-    await addClip(frameHtml({ title: video.title, shot: beforeShot || (await shotData()), caption: st.say, tap, mode: video.mode }), st.say);
+    await addClip(frameHtml({ title: video.title, shot: beforeShot || (await shotData()), caption: st.say, tap, mode: video.mode }), st.read || st.say, "narr");
   }
-  await addClip(frameHtml({ shot: logo, kind: "cta", mode: video.mode }), CTA.say);
+  await addClip(frameHtml({ shot: logo, kind: "cta", mode: video.mode }), CTA.say[video.mode], "narr", { jingle: true, gap: 0.8 });
 
   const list = path.join(dir, "list.txt");
   fs.writeFileSync(list, clips.map((c) => `file '${c}'`).join("\n"));
   const out = path.join(OUT, `${video.id}.mp4`);
-  sh("ffmpeg", ["-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", "-movflags", "+faststart", out]);
-  // 表紙（2コマ目）
+  const voiceOnly = path.join(dir, "voice.mp4");
+  sh("ffmpeg", ["-y", "-f", "concat", "-safe", "0", "-i", list, "-c", "copy", voiceOnly]);
+  const total = dur(voiceOnly);
+  // BGM を小さく重ねる（最後はフェードアウト）
+  sh("ffmpeg", ["-y", "-i", voiceOnly, "-stream_loop", "-1", "-i", BGM, "-filter_complex",
+    `[1:a]volume=0.16,atrim=0:${total.toFixed(2)},afade=t=out:st=${(total - 2).toFixed(2)}:d=2[b];[0:a][b]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[a]`,
+    "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out]);
+  // 表紙（オーナーのぼやきのコマ）
   fs.copyFileSync(path.join(dir, "f2.png"), path.join(OUT, `${video.id}.png`));
   await app.close();
   console.log(`作りました: ${path.relative(process.cwd(), out)}（${dur(out).toFixed(1)}秒${KEY ? "" : "・声なし"}）`);
