@@ -34,13 +34,13 @@ export const VIDEOS = [
   {
     id: "night-03-shukei",
     mode: "night",
-    title: "閉店後の集計は確認だけ",
-    hook: "閉店後の売上の集計、今日も終わらない…",
+    title: "締め作業は確認だけ",
+    hook: "今日も締め作業、終わらない…",
     steps: [
       { go: "/admin/slips", say: "ポスポスは、お会計をすると伝票が自動でできるので、その日の売上も自動で集計されます。" },
       { scroll: 300, say: "キャストのバックを入れた人件費も、" },
       { scroll: 220, say: "経費を引いた利益まで、自動で出ます。" },
-      { say: "閉店後は、合っているか確かめるだけ。毎日1分もかかりません。" },
+      { say: "締め作業は、合っているか確かめるだけ。毎日1分もかかりません。" },
     ],
   },
   {
@@ -70,7 +70,7 @@ export const VIDEOS = [
 
 // 広告（ad.mjs で作る。一覧のページではいちばん上に出す）
 export const ADS = [
-  { id: "ad-night-40", mode: "night", title: "広告：夜のこと、全部ポスポス。（40秒）", hook: "閉店後、まだ電卓でバック計算していませんか？" },
+  { id: "ad-night-40", mode: "night", title: "広告：夜のこと、全部ポスポス。（40秒）", hook: "締め作業、まだ電卓でバック計算していませんか？" },
 ];
 
 export const DEMO = {

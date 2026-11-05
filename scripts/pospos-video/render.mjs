@@ -18,7 +18,7 @@ const APP = "https://pospos.akitogroup.jp";
 const KEY = process.env.OPENAI_API_KEY || "";
 // 声：オーナー（男性・ぼやく）とナレーション（高めの女性）。広告（ad.mjs）と同じ
 const VOICE = {
-  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
+  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。締め作業で疲れていて、ため息まじりに、ぼやくように話す。" },
   narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 // 最初と最後の「ポスポス♪」（LP を開いたときに鳴る音と同じ）と、BGM（bgm.py で自作）

@@ -24,7 +24,7 @@ const BGM = path.join(HERE, "assets/bgm-night.mp3");
 
 // 声の決まり
 const VOICE = {
-  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
+  owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。締め作業で疲れていて、ため息まじりに、ぼやくように話す。" },
   narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 
@@ -86,7 +86,7 @@ function frame(sc, ctx) {
     return page0(`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="${ctx.logo}" style="width:300px;height:300px;border-radius:64px"><div style="font-size:84px;font-weight:900;margin-top:40px;letter-spacing:.06em">ポスポス</div><div style="font-size:36px;opacity:.75;margin-top:12px">夜のお店のPOSレジ</div></div>`);
   }
   if (sc.kind === "clock") {
-    return page0(`<div style="position:absolute;top:330px;left:0;right:60px;text-align:center"><div style="font-size:40px;opacity:.65">閉店後</div><div style="font-size:220px;font-weight:900;letter-spacing:.04em;color:#E6ECFF;text-shadow:0 0 40px rgba(120,150,255,.35)">3:12</div><div style="font-size:44px;opacity:.75;margin-top:10px">伝票の山と、電卓と、Excel</div></div>
+    return page0(`<div style="position:absolute;top:330px;left:0;right:60px;text-align:center"><div style="font-size:40px;opacity:.65">締め作業</div><div style="font-size:220px;font-weight:900;letter-spacing:.04em;color:#E6ECFF;text-shadow:0 0 40px rgba(120,150,255,.35)">3:12</div><div style="font-size:44px;opacity:.75;margin-top:10px">伝票の山と、電卓と、Excel</div></div>
       <div style="position:absolute;top:900px;left:120px;right:180px;display:flex;gap:18px;justify-content:center">${["伝票", "電卓", "Excel"].map((t) => `<div style="flex:1;height:200px;border-radius:24px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:40px;font-weight:800;opacity:.85">${t}</div>`).join("")}</div>${cap(sc.who, sc.say)}`, "linear-gradient(160deg,#05070F,#0E1430 60%,#1B1236)");
   }
   if (sc.kind === "list") {
@@ -107,7 +107,7 @@ function frame(sc, ctx) {
     return page0(`<div style="position:absolute;top:520px;left:60px;right:120px;text-align:center"><div style="font-size:100px;font-weight:900;line-height:1.35">${sc.big}</div><div style="font-size:40px;opacity:.75;margin-top:40px">入れかえずに、くらべてから決められます</div></div>${cap(sc.who, sc.say)}`);
   }
   if (sc.kind === "relief") {
-    return page0(`<div style="position:absolute;top:420px;left:60px;right:120px;text-align:center"><div style="font-size:40px;opacity:.7">閉店後</div><div style="font-size:110px;font-weight:900;margin-top:20px;line-height:1.3">確認する<br>だけ</div></div>${cap(sc.who, sc.say)}`, "linear-gradient(160deg,#1E3A8A,#3B5BDB 55%,#F59F00)");
+    return page0(`<div style="position:absolute;top:420px;left:60px;right:120px;text-align:center"><div style="font-size:40px;opacity:.7">締め作業は</div><div style="font-size:110px;font-weight:900;margin-top:20px;line-height:1.3">確認する<br>だけ</div></div>${cap(sc.who, sc.say)}`, "linear-gradient(160deg,#1E3A8A,#3B5BDB 55%,#F59F00)");
   }
   // cta
   return page0(`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:120px">
