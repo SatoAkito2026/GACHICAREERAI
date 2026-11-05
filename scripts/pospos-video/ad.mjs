@@ -38,10 +38,12 @@ const SCENES = [
   { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
+  { kind: "demo", go: "/admin/ranking", prev: true, who: "narr", say: "売上や指名のランキングも、伝票から自動で。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
   { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけの1分に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
+  { kind: "point", who: "narr", say: "今のレジはそのままで、並べて試せます。", big: "今のレジのまま<br>並べて試せる" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
 ];
 const LIST = ["付け回しは、ホワイトボード", "給料は、Excelで手計算", "「今日いくら？」と毎日聞かれる"];
@@ -100,6 +102,9 @@ function frame(sc, ctx) {
       <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">約1分</span><div style="font-size:52px;margin-top:10px;color:${GOLD}">（確認するだけ）</div></div>
       <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 導入店1店舗の聞き取り（月50時間 → 月30分）を、<br>1か月30日で割った目安です。お店によってちがいます。</div></div>${cap(sc.who, sc.say)}`);
   }
+  if (sc.kind === "point") {
+    return page0(`<div style="position:absolute;top:520px;left:60px;right:120px;text-align:center"><div style="font-size:100px;font-weight:900;line-height:1.35">${sc.big}</div><div style="font-size:40px;opacity:.75;margin-top:40px">入れかえずに、くらべてから決められます</div></div>${cap(sc.who, sc.say)}`);
+  }
   if (sc.kind === "relief") {
     return page0(`<div style="position:absolute;top:420px;left:60px;right:120px;text-align:center"><div style="font-size:40px;opacity:.7">閉店後</div><div style="font-size:110px;font-weight:900;margin-top:20px;line-height:1.3">確認する<br>だけ</div></div>${cap(sc.who, sc.say)}`, "linear-gradient(160deg,#1E3A8A,#3B5BDB 55%,#F59F00)");
   }
@@ -138,6 +143,7 @@ for (const [i, sc] of SCENES.entries()) {
         await settle();
       }
       await pg.goto(APP + sc.go, { waitUntil: "networkidle", timeout: 90000 }); await settle();
+      if (sc.prev) { await pg.getByText("← 前月", { exact: true }).first().click().catch(() => {}); await settle(); }
       if (sc.scroll) { await pg.mouse.wheel(0, sc.scroll); await pg.waitForTimeout(700); }
       ctx.shot = "data:image/png;base64," + (await pg.screenshot()).toString("base64");
     }
@@ -153,7 +159,7 @@ for (const [i, sc] of SCENES.entries()) {
   const aud = path.join(WORK, `a${i}.m4a`);
   if (parts.length === 1) sh("ffmpeg", ["-y", "-i", parts[0], "-ar", "44100", "-ac", "2", aud]);
   else sh("ffmpeg", ["-y", "-i", parts[0], "-i", parts[1], "-filter_complex", "[0:a]aresample=44100,aformat=channel_layouts=stereo,apad=pad_dur=0.25[a0];[1:a]aresample=44100,aformat=channel_layouts=stereo[a1];[a0][a1]concat=n=2:v=0:a=1[a]", "-map", "[a]", aud]);
-  const d = dur(aud) + (sc.kind === "cta" ? 0.8 : sc.gap ?? 0.12);
+  const d = dur(aud) + (sc.kind === "cta" ? 1.6 : sc.gap ?? 0.2);
   sh("ffmpeg", ["-y", "-loop", "1", "-framerate", "30", "-i", png, "-i", aud, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]",
     "-t", d.toFixed(2), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", mp4]);
   clips.push(mp4);
