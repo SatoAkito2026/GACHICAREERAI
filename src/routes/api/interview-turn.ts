@@ -392,6 +392,8 @@ ${companyContext || "（企業情報未設定）"}
 日本語で話してください。`;
           }
 
+          // その回だけの指示（時間切れなど）。長い指示（systemPrompt）は使い回しにするので別に置く
+          let turnNote = "";
           // 練習の時間上限（プランで決まる）。過ぎたら締めてもらい、さらに過ぎたらAIを呼ばずに終える
           if (practiceMode && practiceMaxMinutes && practiceStartedAt) {
             const elapsedMin = (Date.now() - new Date(practiceStartedAt).getTime()) / 60000;
@@ -408,21 +410,40 @@ ${companyContext || "（企業情報未設定）"}
               });
             }
             if (elapsedMin >= practiceMaxMinutes) {
-              systemPrompt += `\n\n【重要】制限時間（${practiceMaxMinutes}分）になりました。今回の返答で、相手の回答に一言お礼を述べてから「以上で面接を終了させていただきます」と言って締めてください。新しい質問はしないでください。`;
+              turnNote = `【重要】制限時間（${practiceMaxMinutes}分）になりました。今回の返答で、相手の回答に一言お礼を述べてから「以上で面接を終了させていただきます」と言って締めてください。新しい質問はしないでください。`;
             }
           }
 
-          const messages = [
+          // 面接官への長い指示と、前回までの会話は毎回同じなので「使い回し」（プロンプトキャッシュ）にして安くする。
+          // 使い回しは5分ほどで消える一時的なもので、学校の情報などが新しくなれば次の面接から自動で新しい内容になる
+          const history = [
             ...body.conversationHistory,
             { role: "user" as const, content: body.candidateText },
           ];
+          const messages: Anthropic.MessageParam[] = history.map((m, i) =>
+            i === history.length - 1
+              ? {
+                  role: m.role,
+                  content: [
+                    {
+                      type: "text" as const,
+                      text: m.content,
+                      cache_control: { type: "ephemeral" as const },
+                    },
+                  ],
+                }
+              : m,
+          );
 
           // 時間がかかりすぎると面接画面が「処理中」のまま止まるので、待つ時間に上限をつける
           const aiResponse = await anthropic.messages.create(
             {
               model: "claude-sonnet-4-6",
               max_tokens: 300,
-              system: systemPrompt,
+              system: [
+                { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
+                ...(turnNote ? [{ type: "text" as const, text: turnNote }] : []),
+              ],
               messages,
             },
             { timeout: 25000, maxRetries: 1 },
@@ -441,6 +462,8 @@ ${companyContext || "（企業情報未設定）"}
             aiText.includes("面接は以上") ||
             aiText.includes("ありがとうございました。以上") ||
             aiText.includes("お疲れ様でした") ||
+            aiText.includes("お疲れさまでした") ||
+            aiText.includes("面接を終わります") ||
             aiText.includes("終了とさせていただきます") ||
             aiText.includes("面接を終わらせていただきます");
 
