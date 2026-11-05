@@ -66,6 +66,7 @@ POSPOS（別アプリ・飲食店／夜のお店向け POS レジ）のお店が
 - 志望校はプロフィールに3つまで（`user_career_profiles.desired_schools` に school_type も入れる）。練習の画面で志望校を選ぶか、別の学校を入れる。学校名・学部・学校の種類の選択は全プラン
 - 志望校の情報：AI がウェブで特色・教育方針・求める生徒像・面接の形式とよく聞かれることを調べ（`src/lib/school-research.ts`、`/api/school-info`）、学校＋学部ごとに `school_knowledge` に保存してほかの生徒も使い回す（180日で調べ直す。見つからなければ30日は調べない）。全プラン、新しく調べるのは1人1日5校まで。一覧・志望校から選ぶと自動で調べ、手で入れた学校はボタンで調べる。面接を作るときに `screening_data.practice_school_info` として面接官に渡し、フィードバックでも使う
 - フィードバック（`save-interview.ts` の受験生の分岐）：学校の種類の観点ごとに0〜100点と根拠の引用（本人の発言にない引用は捨てる `sanitizeStudentBreakdown`）、志望校の求める生徒像と比べて（`school_fit`）、次の練習でやること3つ、本人の答え→直した答え→ポイント、前回からの伸び（`progress`・`previous_score`）。画面は `PracticeHistoryContent`
+- 面接（`interview-turn.ts`、練習・企業の面接とも）の長い指示と前回までの会話はプロンプトキャッシュで使い回す（5分で消える一時的なもの。時間切れの指示は別の段 `turnNote`）
 - 先生の画面（学校・塾の生徒管理）は今後強くする
 
 ## 個人プランの上限
