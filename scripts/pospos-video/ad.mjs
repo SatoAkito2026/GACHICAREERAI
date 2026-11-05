@@ -23,23 +23,23 @@ const BGM = path.join(HERE, "assets/bgm-night.mp3");
 
 // 声の決まり
 const VOICE = {
-  owner: { voice: "ash", tempo: 1.12, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
-  narr: { voice: "shimmer", tempo: 1.25, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+  owner: { voice: "ash", tempo: 1.32, how: "30代の日本人男性。夜のお店のオーナー。閉店後で疲れていて、ため息まじりに、ぼやくように話す。" },
+  narr: { voice: "shimmer", tempo: 1.45, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
 };
 
 // 場面（上から順に）。kind：logo／clock／list／demo／big／relief／cta
 const SCENES = [
   { kind: "logo", jingle: true },
-  { kind: "clock", who: "owner", say: "はぁ……今日も、バックの計算が終わらない……" },
+  { kind: "clock", who: "owner", say: "はぁ…今日もバック計算、終わらない…" },
   { kind: "list", n: 1, who: "owner", say: "付け回しは、ホワイトボード。" },
   { kind: "list", n: 2, who: "owner", say: "給料は、エクセルで手計算。" },
-  { kind: "list", n: 3, who: "owner", say: "キャストには毎日、今日いくら？って聞かれるし……" },
+  { kind: "list", n: 3, who: "owner", say: "キャストには毎日、今日いくら？って聞かれるし…" },
   { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
-  { kind: "demo", go: "/me", who: "narr", say: "キャストは自分のスマホで、給料も今の席も確認できます。" },
+  { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。" },
-  { kind: "big", who: "narr", say: "実際に、毎日の給料の計算が、1時間半ほどから、1分ほどになったお店も。" },
+  { kind: "big", who: "narr", say: "実際に、毎日の給料計算が、1時間半から1分になったお店も。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
 ];
@@ -131,6 +131,11 @@ for (const [i, sc] of SCENES.entries()) {
     if (sc.img) {
       ctx.shot = b64(path.resolve(HERE, "../../corporate-site/public", sc.img), "image/webp");
     } else {
+      if (sc.prep) {
+        await pg.goto(APP + "/admin/seating", { waitUntil: "networkidle", timeout: 90000 }); await settle();
+        for (const txt of ["2名", "あいり", "場内指名", "30分", "に付ける"]) { await pg.locator("button").filter({ hasText: txt }).first().click({ timeout: 10000 }).catch(() => {}); await pg.waitForTimeout(500); }
+        await settle();
+      }
       await pg.goto(APP + sc.go, { waitUntil: "networkidle", timeout: 90000 }); await settle();
       if (sc.scroll) { await pg.mouse.wheel(0, sc.scroll); await pg.waitForTimeout(700); }
       ctx.shot = "data:image/png;base64," + (await pg.screenshot()).toString("base64");
@@ -147,7 +152,7 @@ for (const [i, sc] of SCENES.entries()) {
   const aud = path.join(WORK, `a${i}.m4a`);
   if (parts.length === 1) sh("ffmpeg", ["-y", "-i", parts[0], "-ar", "44100", "-ac", "2", aud]);
   else sh("ffmpeg", ["-y", "-i", parts[0], "-i", parts[1], "-filter_complex", "[0:a]aresample=44100,aformat=channel_layouts=stereo,apad=pad_dur=0.25[a0];[1:a]aresample=44100,aformat=channel_layouts=stereo[a1];[a0][a1]concat=n=2:v=0:a=1[a]", "-map", "[a]", aud]);
-  const d = dur(aud) + (sc.kind === "cta" ? 1.2 : 0.3);
+  const d = dur(aud) + (sc.kind === "cta" ? 0.8 : 0.12);
   sh("ffmpeg", ["-y", "-loop", "1", "-framerate", "30", "-i", png, "-i", aud, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]",
     "-t", d.toFixed(2), "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-ac", "2", mp4]);
   clips.push(mp4);
