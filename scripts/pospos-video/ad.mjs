@@ -38,7 +38,7 @@ const SCENES = [
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
   { kind: "demo", go: "/me", who: "narr", say: "キャストは自分のスマホで、給料も今の席も確認できます。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。" },
-  { kind: "big", who: "narr", say: "実際に、給料の計算が、月50時間から30分になったお店も。" },
+  { kind: "big", who: "narr", say: "実際に、毎日の給料の計算が、1時間半ほどから、1分ほどになったお店も。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
 ];
@@ -94,9 +94,9 @@ function frame(sc, ctx) {
       ${cap(sc.who, sc.say)}<div style="position:absolute;top:1678px;left:90px;font-size:26px;opacity:.7">画面はデモ・見本です（お店・人の名前・数字は架空）</div>`);
   }
   if (sc.kind === "big") {
-    return page0(`<div style="position:absolute;top:360px;left:60px;right:120px;text-align:center"><div style="font-size:46px;opacity:.8">導入店の例（ミックスバー）</div><div style="font-size:64px;font-weight:900;margin-top:40px">給料の計算</div>
-      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">月50時間<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">月30分</span></div>
-      <div style="font-size:28px;opacity:.65;margin-top:40px">※ 導入店1店舗の、お店の方への聞き取りです。お店によってちがいます。</div></div>${cap(sc.who, sc.say)}`);
+    return page0(`<div style="position:absolute;top:340px;left:60px;right:120px;text-align:center"><div style="font-size:46px;opacity:.8">導入店の例（ミックスバー）</div><div style="font-size:64px;font-weight:900;margin-top:40px">毎日の給料の計算</div>
+      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">約1分</span></div>
+      <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 導入店1店舗の聞き取り（月50時間 → 月30分）を、<br>1か月30日で割った目安です。お店によってちがいます。</div></div>${cap(sc.who, sc.say)}`);
   }
   if (sc.kind === "relief") {
     return page0(`<div style="position:absolute;top:420px;left:60px;right:120px;text-align:center"><div style="font-size:40px;opacity:.7">閉店後</div><div style="font-size:110px;font-weight:900;margin-top:20px;line-height:1.3">確認する<br>だけ</div></div>${cap(sc.who, sc.say)}`, "linear-gradient(160deg,#1E3A8A,#3B5BDB 55%,#F59F00)");
