@@ -107,10 +107,10 @@ function caseSlide(pres) {
   pill(s, 0.6, 1.4, 3.6, "夜のお店2店で使われています", K.blue, K.white, 12);
   card(s, 0.6, 2.0, 5.9, 2.4, K.mist);
   card(s, 6.8, 2.0, 5.9, 2.4, "EEF3FF");
-  T(s, [{ text: "毎日の給料の計算  ", options: { fontSize: 18, color: K.ink2 } }, { text: "約1時間半 → 約1分", options: { fontSize: 34, bold: true, color: K.blue } }], { x: 0.6, y: 4.75, w: 12.1, h: 0.8, align: "center", valign: "middle" });
+  T(s, [{ text: "毎日の給料の計算  ", options: { fontSize: 18, color: K.ink2 } }, { text: "約1時間半 → 一瞬", options: { fontSize: 34, bold: true, color: K.blue } }], { x: 0.6, y: 4.75, w: 12.1, h: 0.8, align: "center", valign: "middle" });
   T(s, [{ text: "使う前", options: { bold: true, breakLine: true, fontSize: 20 } }, { text: "締め作業で伝票を見て、バックを手で数えていた\n給料の計算に、毎日1時間半ほど（月50時間）\n給料の内わけを聞かれるたびに調べ直していた", options: { fontSize: 15 } }], { x: 0.9, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
-  T(s, [{ text: "ポスポスを使ってから", options: { bold: true, breakLine: true, fontSize: 20, color: K.blue } }, { text: "伝票を入れた時点で、誰にいくらのバックか決まる\n給料の計算は、毎日1分ほどの確認だけ（月30分）\nスタッフは自分のスマホで給料と明細を見られる", options: { fontSize: 15 } }], { x: 7.1, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
-  foot(s, "※ 導入店1店舗の、お店の方への聞き取り（月50時間 → 月30分）を、1か月30日で割った目安です。お店によってちがいます。");
+  T(s, [{ text: "ポスポスを使ってから", options: { bold: true, breakLine: true, fontSize: 20, color: K.blue } }, { text: "伝票を入れた時点で、誰にいくらのバックか決まる\n給料の計算は、確認するだけで一瞬\nスタッフは自分のスマホで給料と明細を見られる", options: { fontSize: 15 } }], { x: 7.1, y: 2.2, w: 5.3, h: 3.2, color: K.navy, paraSpaceAfter: 8, valign: "top" });
+  foot(s, "※ 使う前の時間は、導入店1店舗の、お店の方への聞き取り（月50時間）を1か月30日で割った目安です。使ったあとは、合っているか確認するだけです。");
   return s;
 }
 function priceSlide(pres, ttl, sales) {
@@ -348,7 +348,7 @@ async function sales() {
   priceSlide(pres, "AI面接は、スタンダードの料金にふくまれています", true);
 
   s = pres.addSlide({ masterName: "LIGHT" }); title(s, "はじめやすい理由");
-  cardsGrid(s, [["1年契約なら初期導入費用0円", "初期導入費用55,000円が、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["導入店の例（ミックスバー）", "毎日の給料の計算が、約1時間半から約1分に（お店の方への聞き取り）。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
+  cardsGrid(s, [["1年契約なら初期導入費用0円", "初期導入費用55,000円が、1年契約なら0円（先着30店）。ライト・スタンダードは1か月無料でお試しできます。"], ["今のレジと並行して使える", "入れかえずに、くらべてから決められます。"], ["AI面接は追加料金なし", "スタンダードプランなら、次の応募からすぐAI面接を使えます。"], ["導入店の例（ミックスバー）", "毎日1時間半かかっていた給料の計算が、確認するだけで一瞬に。"]], { y: 1.65, cols: 2, h: 2.15, shadow: true });
   s.addNotes("クロージング。「まず1か月、次の応募者にURLを送ってみませんか？」と提案する。");
 
   closeSlide(pres, "まず1か月、次の応募者にURLを送ってみませんか？", [["今日、お申し込み", "お電話かフォームから。お店の種類と店舗数だけでOK。"], ["料金は1店舗ごと", "ライト11,000円・スタンダード 夜 先着30店33,000円／昼22,000円（税込）。"], ["次の応募でAI面接", "URLを1秒で送って、届いた結果を見てみてください。"]]);

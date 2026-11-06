@@ -42,7 +42,7 @@ const SCENES = [
   { kind: "demo", go: "/admin/ranking", prev: true, who: "narr", say: "売上や指名のランキングも、伝票から自動で。" },
   { kind: "demo", go: "/admin", who: "narr", say: "お店の売上や出勤も、スマホでどこからでも確認。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
-  { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけの1分に。" },
+  { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけで一瞬に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "point", who: "narr", say: "今のレジはそのままで、並べて試せます。", big: "今のレジのまま<br>並べて試せる" },
   { kind: "cta", who: "narr", say: "今なら0円で始められます。夜のこと、全部ポスポス。", jingle: true },
@@ -100,8 +100,8 @@ function frame(sc, ctx) {
   }
   if (sc.kind === "big") {
     return page0(`<div style="position:absolute;top:340px;left:60px;right:120px;text-align:center"><div style="font-size:46px;opacity:.8">導入店の例（ミックスバー）</div><div style="font-size:64px;font-weight:900;margin-top:40px">毎日の給料の計算</div>
-      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">約1分</span><div style="font-size:52px;margin-top:10px;color:${GOLD}">（確認するだけ）</div></div>
-      <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 導入店1店舗の聞き取り（月50時間 → 月30分）を、<br>1か月30日で割った目安です。お店によってちがいます。</div></div>${cap(sc.who, sc.say)}`);
+      <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">一瞬</span><div style="font-size:52px;margin-top:10px;color:${GOLD}">（確認するだけ）</div></div>
+      <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 使う前の時間は、導入店1店舗の聞き取り（月50時間）を<br>1か月30日で割った目安です。</div></div>${cap(sc.who, sc.say)}`);
   }
   if (sc.kind === "point") {
     return page0(`<div style="position:absolute;top:520px;left:60px;right:120px;text-align:center"><div style="font-size:100px;font-weight:900;line-height:1.35">${sc.big}</div><div style="font-size:40px;opacity:.75;margin-top:40px">入れかえずに、くらべてから決められます</div></div>${cap(sc.who, sc.say)}`);
