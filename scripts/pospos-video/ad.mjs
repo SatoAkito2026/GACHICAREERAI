@@ -35,13 +35,12 @@ const SCENES = [
   { kind: "list", n: 1, who: "owner", tempo: 1.75, gap: 0, say: "付け回しは、ホワイトボード。" },
   { kind: "list", n: 2, who: "owner", tempo: 1.75, gap: 0, say: "給料は、エクセルで手計算。" },
   { kind: "list", n: 3, who: "owner", tempo: 1.75, gap: 0, say: "キャストには毎日、今日いくら？って聞かれるし…" },
-  { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
-  { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
-  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
-  { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
-  { kind: "demo", go: "/admin/ranking", prev: true, who: "narr", say: "売上や指名のランキングも、伝票から自動で。" },
-  { kind: "demo", go: "/admin", who: "narr", say: "お店の売上や出勤も、スマホでどこからでも確認。" },
-  { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
+  // ほかの POS にない2つ（AI面接・キャストのスマホ画面）を主役に。基本の機能は1場面でまとめて
+  { kind: "demo", img: "assets/img/pos-ai-choose.webp", who: "narr", say: "ポスポスは、面接ができるPOSレジ。" },
+  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接は、AIにおまかせ。応募者にURLを送るだけ。", read: "体験入店の前の一次面接は、エーアイにおまかせ。応募者にユーアールエルを送るだけ。" },
+  { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは自分のスマホで、給料も今の席も確認。" },
+  { kind: "demo", go: "/me", scroll: 520, who: "narr", say: "今月いくらもらえるかも、いつでも見られます。" },
+  { kind: "features", who: "narr", say: "もちろん、会計・給料計算・シフト・勤怠など、基本の機能も100以上。お店ごとに機能を足せます。" },
   { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけで一瞬に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "point", who: "narr", say: "今のレジはそのままで、並べて試せます。", big: "今のレジのまま<br>並べて試せる" },
@@ -102,6 +101,12 @@ function frame(sc, ctx) {
     return page0(`<div style="position:absolute;top:340px;left:60px;right:120px;text-align:center"><div style="font-size:46px;opacity:.8">導入店の例（ミックスバー）</div><div style="font-size:64px;font-weight:900;margin-top:40px">毎日の給料の計算</div>
       <div style="font-size:120px;font-weight:900;margin-top:30px;line-height:1.2">約1時間半<br><span style="font-size:80px;opacity:.7">↓</span><br><span style="color:${GOLD}">一瞬</span><div style="font-size:52px;margin-top:10px;color:${GOLD}">（確認するだけ）</div></div>
       <div style="font-size:28px;opacity:.65;margin-top:40px;line-height:1.6">※ 使う前の時間は、導入店1店舗の聞き取り（月50時間）を<br>1か月30日で割った目安です。</div></div>${cap(sc.who, sc.say)}`);
+  }
+  if (sc.kind === "features") {
+    const f = ["会計・伝票", "セット・延長", "バック計算", "給料計算", "源泉徴収", "シフト", "勤怠・打刻", "付け回し", "ランキング", "顧客・ボトル", "日報・売上", "確定申告の準備"];
+    return page0(`<div style="position:absolute;top:240px;left:60px;right:120px;text-align:center"><div style="font-size:44px;opacity:.8">基本の機能も、全部そろってる</div><div style="font-size:110px;font-weight:900;margin-top:16px;color:${GOLD}">100以上</div><div style="font-size:44px;font-weight:800">の機能</div></div>
+      <div style="position:absolute;top:720px;left:70px;right:130px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center">${f.map((x) => `<span style="font-size:36px;font-weight:800;padding:14px 26px;border-radius:999px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22)">${x}</span>`).join("")}</div>
+      <div style="position:absolute;top:1180px;left:60px;right:120px;text-align:center;font-size:44px;font-weight:900">お店ごとに、機能を足せる</div>${cap(sc.who, sc.say)}`);
   }
   if (sc.kind === "point") {
     return page0(`<div style="position:absolute;top:520px;left:60px;right:120px;text-align:center"><div style="font-size:100px;font-weight:900;line-height:1.35">${sc.big}</div><div style="font-size:40px;opacity:.75;margin-top:40px">入れかえずに、くらべてから決められます</div></div>${cap(sc.who, sc.say)}`);
