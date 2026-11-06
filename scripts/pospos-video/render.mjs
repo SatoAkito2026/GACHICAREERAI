@@ -19,7 +19,7 @@ const KEY = process.env.OPENAI_API_KEY || "";
 // 声：オーナー（男性・ぼやく）とナレーション（高めの女性）。広告（ad.mjs）と同じ
 const VOICE = {
   owner: { voice: "ash", tempo: 1.58, how: "30代の日本人男性。夜のお店のオーナー。締め作業で疲れていて、ため息まじりに、ぼやくように話す。" },
-  narr: { voice: "shimmer", model: "tts-1-hd", tempo: 1.3, how: "明るく、少し高めの声の日本人女性のナレーション。はっきり、テンポよく、やさしく。" },
+  narr: { voice: "coral", tempo: 1.45, how: "日本語が母語の、日本人の女性ナレーター。標準語のきれいな発音で、英語なまりは出さない。毎回まったく同じ声の高さ・同じ明るさ・同じ話し方で読む（せりふごとに声を変えない）。少し高めの声で、明るく、はっきり、テンポよく。" },
 };
 // 最初と最後の「ポスポス♪」（LP を開いたときに鳴る音と同じ）と、BGM（bgm.py で自作）
 const JINGLE = path.resolve(HERE, "../../corporate-site/public/assets/posupos.mp3");
@@ -49,8 +49,7 @@ async function tts(text, who, file) {
   const r = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
-    // ナレーションは、せりふごとに声がぶれない tts-1-hd（演技の指示は使えない）
-    body: JSON.stringify(v.model ? { model: v.model, voice: v.voice, input: text, response_format: "mp3" } : { model: "gpt-4o-mini-tts", voice: v.voice, input: text, response_format: "mp3", instructions: v.how }),
+        body: JSON.stringify(v.model ? { model: v.model, voice: v.voice, input: text, response_format: "mp3" } : { model: "gpt-4o-mini-tts", voice: v.voice, input: text, response_format: "mp3", instructions: v.how }),
   });
   if (!r.ok) throw new Error(`TTS ${r.status} ${await r.text()}`);
   const raw = file.replace(/\.mp3$/, ".raw.mp3");
