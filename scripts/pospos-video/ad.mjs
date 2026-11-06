@@ -39,7 +39,7 @@ const SCENES = [
   { kind: "demo", img: "assets/img/pos-ai-choose.webp", who: "narr", say: "ポスポスは、面接ができるPOSレジ。" },
   { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接は、AIにおまかせ。応募者にURLを送るだけ。", read: "体験入店の前の一次面接は、エーアイにおまかせ。応募者にユーアールエルを送るだけ。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは自分のスマホで、給料も今の席も確認。" },
-  { kind: "demo", go: "/me", scroll: 520, who: "narr", say: "今月いくらもらえるかも、いつでも見られます。" },
+  { kind: "demo", go: "/me", scrollTo: "今月の稼ぎ", who: "narr", say: "今月いくらもらえるかも、いつでも見られます。" },
   { kind: "features", who: "narr", say: "もちろん、会計・給料計算・シフト・勤怠など、基本の機能も100以上。お店ごとに機能を足せます。" },
   { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけで一瞬に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
@@ -150,6 +150,7 @@ for (const [i, sc] of SCENES.entries()) {
       await pg.goto(APP + sc.go, { waitUntil: "networkidle", timeout: 90000 }); await settle();
       if (sc.prev) { await pg.getByText("← 前月", { exact: true }).first().click().catch(() => {}); await settle(); }
       if (sc.scroll) { await pg.mouse.wheel(0, sc.scroll); await pg.waitForTimeout(700); }
+      if (sc.scrollTo) { await pg.getByText(sc.scrollTo, { exact: true }).first().evaluate((el) => el.scrollIntoView({ block: "start" })).catch(() => {}); await pg.mouse.wheel(0, -120); await pg.waitForTimeout(700); }
       ctx.shot = "data:image/png;base64," + (await pg.screenshot()).toString("base64");
     }
   }
