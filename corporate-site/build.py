@@ -178,7 +178,7 @@ def main():
     # 検索エンジン向けの sitemap.xml と robots.txt
     import datetime
     today = datetime.date.today().isoformat()
-    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html"))] + ["posupos-day", "posupos-night"] + posupos_sub_names() + posupos_shop_names() + ["posupos-monitor"]
+    names = [p.stem for p in sorted((SRC / "pages").glob("*.html")) if p.stem != "404"] + [p.stem for p in sorted((SRC / "standalone").glob("*.html")) if p.stem != "posupos-demo"] + ["posupos-day", "posupos-night"] + posupos_sub_names() + posupos_shop_names() + ["posupos-monitor"]
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index' else n}</loc><lastmod>{today}</lastmod></url>" for n in names)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n", encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")

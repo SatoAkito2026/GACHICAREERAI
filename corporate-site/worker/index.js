@@ -98,7 +98,7 @@ async function handleContact(request, env) {
   try {
     const pos = data.topic === "pos";
     const lines = pos
-      ? `担当者から、お電話またはメールでご連絡します（通常1営業日以内）。\n\nお急ぎの場合は、LINE（24時間受付）からもご相談いただけます。\nhttps://line.me/ti/p/kNdWwmhLHp\n\nログインなしで触れる見本のお店もご用意しています。\n・夜のお店（キャバクラ）：https://pospos.akitogroup.jp/demo/cabaret\n・飲食店（居酒屋）：https://pospos.akitogroup.jp/demo/izakaya`
+      ? `担当者から、お電話またはメールでご連絡します（通常1営業日以内）。\n\nお急ぎの場合は、LINE（24時間受付）からもご相談いただけます。\nhttps://line.me/ti/p/kNdWwmhLHp\n\nログインなしで触れる見本のお店もご用意しています。\n・夜のお店（キャバクラ）：${SITE}/posupos-demo?d=cabaret\n・飲食店（居酒屋）：${SITE}/posupos-demo?d=izakaya`
       : `内容を確認のうえ、担当者からご連絡します（通常1営業日以内）。`;
     const body = `${f.name} 様\n\nお問い合わせありがとうございます。合同会社AKITOグループです。\n次の内容で受け付けました。\n\n${lines}\n\n――――――――\nご用件：${topic}\n件名：${f.subject}\n\n${f.message}\n――――――――\n\nこのメールは送信専用ではありません。ご返信いただければ担当者に届きます。\nお心当たりがない場合は、このメールを破棄してください。\n\n合同会社AKITOグループ${pos ? "（ポスポス）" : ""}\n${SENDER_ADDR}\nTEL 080-2420-4900（年中無休・24時間受付）／ ${pos ? POS_TO : TO}\n${SITE}`;
     const r2 = await fetch("https://api.resend.com/emails", {
@@ -454,7 +454,7 @@ export default {
       if (lt && /^[0-9a-f-]{36}$/.test(lt) && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY && ctx) {
         ctx.waitUntil(sb(env, `posupos_leads?stop_token=eq.${lt}&clicked_at=is.null`, { method: "PATCH", body: JSON.stringify({ clicked_at: new Date().toISOString() }) }));
       }
-      return Response.redirect(`https://pospos.akitogroup.jp/demo/${d}`, 302);
+      return Response.redirect(new URL(`/posupos-demo?d=${d}`, url).toString(), 302);
     }
     const moved = oldUrlRedirect(url);
     if (moved) return moved;
