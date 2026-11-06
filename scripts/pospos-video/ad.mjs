@@ -37,11 +37,11 @@ const SCENES = [
   { kind: "list", n: 3, who: "owner", tempo: 1.75, gap: 0, say: "キャストには毎日、今日いくら？って聞かれるし…" },
   { kind: "demo", go: "/admin/slips", who: "narr", say: "ポスポスなら、お会計するだけで、" },
   { kind: "demo", go: "/admin/slips", scroll: 300, who: "narr", say: "バックも給料も、自動で計算。" },
+  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
   { kind: "demo", go: "/admin/seating", scroll: 380, who: "narr", say: "付け回しは、選んで押すだけ。" },
   { kind: "demo", go: "/admin/ranking", prev: true, who: "narr", say: "売上や指名のランキングも、伝票から自動で。" },
   { kind: "demo", go: "/admin", who: "narr", say: "お店の売上や出勤も、スマホでどこからでも確認。" },
   { kind: "demo", go: "/me", prep: true, who: "narr", say: "キャストは、給料も今の席もスマホで確認。" },
-  { kind: "demo", img: "assets/img/pos-ai-talk-night.webp", who: "narr", say: "体入の前の一次面接も、AIにおまかせ。", read: "体験入店の前の一次面接も、エーアイにおまかせ。" },
   { kind: "big", who: "narr", say: "毎日1時間半かかっていた給料計算が、確認するだけの1分に。" },
   { kind: "relief", who: "owner", say: "え、もう終わり？" },
   { kind: "point", who: "narr", say: "今のレジはそのままで、並べて試せます。", big: "今のレジのまま<br>並べて試せる" },
@@ -113,10 +113,9 @@ function frame(sc, ctx) {
   return page0(`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:120px">
     <img src="${ctx.logo}" style="width:220px;height:220px;border-radius:48px">
     <div style="font-size:78px;font-weight:900;margin-top:46px;line-height:1.35">夜のこと、<br>全部ポスポス。</div>
-    <div style="margin-top:60px;font-size:54px;font-weight:900;color:${GOLD}">今なら0円で始められる<span style="font-size:24px;vertical-align:super">※</span></div>
-    <div style="font-size:40px;font-weight:800;margin-top:14px">初期導入費用0円<span style="font-size:20px;vertical-align:super">※</span>・端末不要</div>
-    <div style="font-size:36px;font-weight:700;margin-top:56px;padding:18px 40px;border:4px solid #fff;border-radius:999px">ログインなしで触れるデモは<br>プロフィールのリンクから</div>
-    <div style="position:absolute;bottom:230px;left:70px;right:130px;font-size:22px;opacity:.6;line-height:1.6">※ 0円で始められる：ライト・スタンダードプランは最初の1か月無料。※ 初期導入費用0円：1年以上の年間契約のとき（先着30店まで）。月ごとの契約は55,000円（税込）。</div></div>`);
+    <div style="margin-top:60px;font-size:54px;font-weight:900;color:${GOLD}">今なら0円で始められる</div>
+    <div style="font-size:40px;font-weight:800;margin-top:14px">初期導入費用0円・端末不要</div>
+    <div style="font-size:36px;font-weight:700;margin-top:56px;padding:18px 40px;border:4px solid #fff;border-radius:999px">ログインなしで触れるデモは<br>プロフィールのリンクから</div>`);
 }
 
 const browser = await chromium.launch();

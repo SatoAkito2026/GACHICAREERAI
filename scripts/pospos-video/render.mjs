@@ -71,10 +71,9 @@ function frameHtml({ title, shot, caption, tap, kind, mode, who }) {
     return `<!doctype html><html><body style="margin:0;width:${W}px;height:${H}px;background:${bg};font-family:${font};color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
       <img src="${shot}" style="width:220px;height:220px;border-radius:48px;margin-bottom:40px">
       <div style="font-size:72px;font-weight:900;line-height:1.35;margin-bottom:50px">${esc(CTA.tag[mode])}</div>
-      <div style="font-size:66px;font-weight:900;line-height:1.3;padding:0 60px;white-space:nowrap;color:${accent}">${esc(CTA.big)}<span style="font-size:26px;vertical-align:super">※</span></div>
-      <div style="font-size:46px;font-weight:800;margin-top:20px">${esc(CTA.sub)}<span style="font-size:20px;vertical-align:super">※</span></div>
+      <div style="font-size:66px;font-weight:900;line-height:1.3;padding:0 60px;white-space:nowrap;color:${accent}">${esc(CTA.big)}</div>
+      <div style="font-size:46px;font-weight:800;margin-top:20px">${esc(CTA.sub)}</div>
       <div style="font-size:40px;font-weight:700;margin-top:70px;padding:20px 40px;border:4px solid #fff;border-radius:999px">ログインなしで触れるデモは<br>プロフィールのリンクから</div>
-      <div style="position:absolute;bottom:230px;left:70px;right:130px;font-size:22px;opacity:.6;line-height:1.6">※ 0円で始められる：ライト・スタンダードプランは最初の1か月無料。※ 初期導入費用0円：1年以上の年間契約のとき（先着30店まで）。月ごとの契約は55,000円（税込）。</div>
     </body></html>`;
   }
   const tapDot = tap ? `<div style="position:absolute;left:${tap.x - 55}px;top:${tap.y - 55}px;width:110px;height:110px;border-radius:50%;background:rgba(255,181,71,.35);border:8px solid ${accent};box-sizing:border-box"></div>` : "";
