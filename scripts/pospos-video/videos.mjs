@@ -75,6 +75,6 @@ export const ADS = [
 ];
 
 export const DEMO = {
-  night: "https://pospos.akitogroup.jp/demo/cabaret",
-  day: "https://pospos.akitogroup.jp/demo/izakaya",
+  night: "https://pospos.akitogroup.jp/demo/cabaret?agree=1",
+  day: "https://pospos.akitogroup.jp/demo/izakaya?agree=1",
 };
